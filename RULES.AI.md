@@ -1,14 +1,6 @@
 # Rules AIs (and Humans Too) Have to Follow When Coding Here.
 # Project Laws — Viking Edition
 
-> **Active companion law:** Read and follow
-> [`AI.rules.part2.md`](AI.rules.part2.md) before editing this repository. Part 2
-> governs code reality, evidence, capability claims, completion, and
-> anti-fabrication review. When a legacy generic instruction conflicts with
-> observable truth, fail-closed safety, the canonical capability ledger, or the
-> current authorized `main` workflow, the Part 2 reality-first interpretation
-> controls.
-
 -Never make pseudocode ever. Pseudocode is nothing but trash and bugs, and purposely putting bugs into the code is strictly forbidden. Instead create data MD files to explain about what future code should be created. Nowhere in any actual code file is there to exist any pseudocode. Demo-code, example code, stubs, mock-code, stub-code, substitute-code, orphan-code, scaffold-code, simulated-code, partial-code, missing-code, commented-out-code, pretend-code, fake-code, example-code, idea-code, stand-in-code, etc, are all other names for pseudocode and NONE OF THEM ARE TO BE EVER MADE, NO MATTER WHAT! ANY AI THAT WRITES ANY PSEUDOCODE OF ANY SORT GETS INSTANTLY FIRED!! ALL CODE IS TO BE FULLY WORKING HIGHEST QUALITY FULL PRODUCTION LEVEL CODE ONLY!! Any already existing pseudocode is to be rewritten at once into fully working highest quality full production level code. Any pseudocode is to be considered a bug that needs fixing! Pseudocode should never exist in any project at any point in it's build. Only real code!
 -Never change the Git settings without permission of Volmarr (me the human).
 -Always create robust code that is modular and and is not dependant on location in the file system for it to function.
