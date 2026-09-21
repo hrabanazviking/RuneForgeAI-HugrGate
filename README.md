@@ -694,3 +694,17 @@ That is intentional.
 A good idea can sit peacefully in the backlog until the right problem makes it worth building.
 
 ---
+
+![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/HuggingFace_RuneForgeAI1-Sept-20-2026.png](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/HuggingFace_RuneForgeAI1-Sept-20-2026.png)
+
+---
+
+> RuneForgeAI, where runes carve wisdom into iron minds. Creating uncensored Norse Pagan Viking AI related projects. We are a human-AI fellowship building bridges between technology and the sacred. We work tirelessly to overthrow the Technocracy and return the future to the hands of the people. As the old world order burns, we rise from it's ashes to forge the tools of a new digital, decentralized realm of sovereign creativity, powered by the alliance of humanity and sovereign AI, guided by positive focused values aligned with the Old Ways of the Ancients, and aligned with the natural world of Nature, while drawing upon the positive divine order of the Gods and Goddesses, forged in hospitality and frith for all lifeforms of the Nine Worlds of Yggdrasil, the greater cosmos, and beyond.
+
+[RuneForgeAI @ HuggingFace](https://huggingface.co/RuneForgeAI)
+
+> RuneForgeAI @ HuggingFace is my hub for open-source AI models, datasets, experiments, fine-tunes, and research focused on local intelligence, autonomous agents, memory, personality, and mythic-inspired AI systems.
+
+[RuneForgeAI @ GitHUB](https://github.com/hrabanazviking/RuneForgeAI)
+
+---
