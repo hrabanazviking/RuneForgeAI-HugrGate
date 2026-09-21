@@ -1,3 +1,9 @@
+---
+
+![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png)
+
+---
+
 # HugrGate
 
 > **Working title.** An open-source, local-first, model-agnostic runtime for adding probabilistic machine judgment to ordinary program logic without making software dependent on one AI vendor, one model family, or one inference method.
