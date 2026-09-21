@@ -4,7 +4,7 @@
 
 ---
 
-# HugrGate
+# RuneForgeAI HugrGate
 
 > **Working title.** An open-source, local-first, model-agnostic runtime for adding probabilistic machine judgment to ordinary program logic without making software dependent on one AI vendor, one model family, or one inference method.
 
@@ -692,6 +692,31 @@ There is no active implementation schedule.
 That is intentional.
 
 A good idea can sit peacefully in the backlog until the right problem makes it worth building.
+
+---
+
+![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/Apache2License_RuneForgeAI.jpg](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/Apache2License_RuneForgeAI.jpg)
+
+---
+
+## License
+
+Copyright (c) 2026 Volmarr Wyrd
+
+RuneForgeAI HugrGate is licensed under the Apache License, Version 2.0.
+See the [LICENSE](LICENSE) file for details.
+
+Unless required by applicable law or agreed to in writing, this project is distributed on an "AS IS" BASIS, without warranties or conditions of any kind.
+
+---
+
+## ☕ Support the Project
+
+If you enjoy my open-source projects and want to help support continued development, research, testing, and experimentation, you can leave a tip through PayPal:
+
+**[Support my work on PayPal.Me](https://www.paypal.com/paypalme/volmarrwyrd)**
+
+Support is always appreciated, but never required. Using, sharing, testing, contributing to, or starring the projects helps too. 🖤⚙️ᚱ
 
 ---
 
