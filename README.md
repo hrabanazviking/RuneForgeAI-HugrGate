@@ -1,4 +1,3 @@
----
 
 ![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png)
 
