@@ -14,6 +14,7 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.gate
 ROOT = Path(__file__).resolve().parent.parent
 
 MYPY_ARGS = [

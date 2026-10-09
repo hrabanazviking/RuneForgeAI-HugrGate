@@ -13,6 +13,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.gate
 ROOT = Path(__file__).resolve().parent.parent
 MAP = ROOT / "docs" / "campaign-i" / "architecture-map.md"
 GEN = ROOT / "tools" / "gen_arch_map.py"

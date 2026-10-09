@@ -11,6 +11,9 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.gate
 PKG = Path(__file__).resolve().parent.parent / "hugrgate"
 
 

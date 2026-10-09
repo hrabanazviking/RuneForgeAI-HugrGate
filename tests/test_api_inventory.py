@@ -13,8 +13,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 import hugrgate
 
+pytestmark = pytest.mark.gate
 ROOT = Path(__file__).resolve().parent.parent
 INV = ROOT / "docs" / "campaign-i" / "003-public-api-inventory.md"
 GEN = ROOT / "tools" / "gen_api_inventory.py"

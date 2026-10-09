@@ -18,6 +18,7 @@ from hugrgate import DecisionPolicy
 from hugrgate.bench import BenchmarkConfig, run_benchmark
 from hugrgate.server import ModelInfo, list_models, register_model
 
+pytestmark = pytest.mark.gate
 ROOT = Path(__file__).resolve().parent.parent
 
 

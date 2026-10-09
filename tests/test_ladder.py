@@ -29,6 +29,8 @@ from hugrgate.negotiate import select_backend
 from hugrgate.privacy import PrivacyGuard
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 
+pytestmark = pytest.mark.integration
+
 # --------------------------------------------------------------------------
 # Test doubles
 

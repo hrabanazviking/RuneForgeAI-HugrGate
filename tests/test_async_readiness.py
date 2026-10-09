@@ -17,6 +17,7 @@ from hugrgate.daemon import BatchingQueue
 from hugrgate.errors import QueueFull
 from hugrgate.result import DecisionResult
 
+pytestmark = pytest.mark.slow
 SPEC = DecisionSpec(type="categorical", options=["a", "b"])
 POLICY = DecisionPolicy(minimum_probability=0.0)
 

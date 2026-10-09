@@ -14,6 +14,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.gate
 PKG = Path(__file__).resolve().parent.parent / "hugrgate"
 ROOT_EXPORTS = {
     "DecisionSpec", "DecisionResult", "DecisionPolicy",

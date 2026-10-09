@@ -10,6 +10,8 @@ from hugrgate.client import HugrGateClient, policy_from_dict
 from hugrgate.drift import DriftMonitor
 from hugrgate.server import build_gate, create_app
 
+pytestmark = pytest.mark.slow
+
 
 @pytest.fixture
 def client():

@@ -38,6 +38,8 @@ from hugrgate.timeout import (
     run_with_deadline,
 )
 
+pytestmark = pytest.mark.integration
+
 # --------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------

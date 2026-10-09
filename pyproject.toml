@@ -55,6 +55,12 @@ ignore = ["E402"]
 "tests/*" = ["B017"]  # pytest.raises(Exception) is intentional in tests
 
 [tool.pytest.ini_options]
+markers = [
+    "unit: fast single-component tests (default category)",
+    "integration: multi-component behavior tests",
+    "slow: spawns servers/threads or sleeps; deselect with -m 'not slow'",
+    "gate: meta-tests that shell out to tools (mypy, ruff, generators)",
+]
 testpaths = ["tests"]
 
 [tool.mypy]

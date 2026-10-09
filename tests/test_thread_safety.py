@@ -10,12 +10,15 @@ from __future__ import annotations
 
 import threading
 
+import pytest
+
 from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.cache import DecisionCache
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 from hugrgate.result import DecisionResult
 
+pytestmark = pytest.mark.slow
 SPEC = DecisionSpec(type="categorical", options=["a", "b"])
 POLICY = DecisionPolicy(minimum_probability=0.0)
 N_THREADS = 16

@@ -40,6 +40,8 @@ from hugrgate.features import (
 from hugrgate.models import ModelManifest, ModelStore
 from hugrgate.spec import DecisionSpec
 
+pytestmark = pytest.mark.integration
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
