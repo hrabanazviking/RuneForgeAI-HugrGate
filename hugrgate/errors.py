@@ -47,6 +47,7 @@ __all__ = [
     "SerdeError",
     "SpecError",
     "StorageError",
+    "SupervisionError",
     "TelemetryError",
     "TimeoutError",
     "WatchdogError",
@@ -323,4 +324,15 @@ class MultiprocError(HugrGateError):
     the gate.
     """
     code = "multiproc_error"
+    recoverable = True
+
+
+class SupervisionError(HugrGateError):
+    """A supervised worker could not be kept alive.
+
+    Slice 295.  Raised for supervisor misuse (unknown worker, double
+    start); worker *failures* are handled by restart/escalation, not
+    exceptions.  Recoverable — the supervisor itself keeps running.
+    """
+    code = "supervision_error"
     recoverable = True
