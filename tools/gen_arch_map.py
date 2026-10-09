@@ -38,6 +38,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.contracts.crossfield",
         "hugrgate.contracts.ordinal",
         "hugrgate.contracts.uncertainty",
+        "hugrgate.contracts.distributions",
     ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",

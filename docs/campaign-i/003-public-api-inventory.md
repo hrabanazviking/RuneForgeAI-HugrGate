@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 52 · **public names:** 229
+**Modules:** 53 · **public names:** 235
 
 ## API stability policy
 
@@ -244,6 +244,7 @@ that this document never drifts from the code.
 | `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/hatch/wo` |
 | `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/hatch/works` |
 | `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/hatch/w` |
+| `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/hatch` |
 
 ### `hugrgate.contracts.composite`
 
@@ -267,6 +268,16 @@ that this document never drifts from the code.
 | `CONSTRAINT_OPS` | constant | `('lt', 'le', 'eq', 'ne', 'gt', 'ge', 'sum_lt', 'sum_le', 'su` |
 | `FieldConstraint` | class | `(fields: 'Tuple[str, ...]', op: 'str', target: 'Any' = None, description: 'str' = '') -> None` |
 | `ConstrainedCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, constraints: 'List[FieldConstraint]' = <factory>) -> None` |
+
+### `hugrgate.contracts.distributions`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DISTRIBUTION_CONSTRAINT_OPS` | constant | `('min_top1', 'max_top1', 'min_margin', 'min_entropy', 'max_e` |
+| `SUPPORT_EPSILON` | constant | `1e-09` |
+| `DistributionConstraint` | class | `(op: 'str', threshold: 'float' = 0.0, labels: 'Tuple[str, ...]' = (), description: 'str' = '') -> None` |
+| `DistributionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, constraints: 'List[DistributionConstraint]' = <factory>) -> None` |
+| `shannon_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
 
 ### `hugrgate.contracts.hierarchy`
 

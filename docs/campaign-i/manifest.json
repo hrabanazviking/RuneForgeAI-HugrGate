@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:21:54.422900+00:00",
-  "module_count": 52,
+  "generated_utc": "2026-10-09T11:23:52.928024+00:00",
+  "module_count": 53,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 50,
+      "loc": 52,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -594,6 +594,32 @@
         "from_dict",
         "violations",
         "validate_value",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.distributions": {
+      "docstring": "Distribution constraints \u2014 what a healthy distribution looks like.\n\nGjallarbr\u00fa slice 035.\n\n``validate_result`` (and slice 033's ordinal check) verify that a\ndistribution is *well-formed*: keys in the outcome space, values in\n[0,1], sum \u2248 1. They say nothing about whether it is *sane*: a backend\nthat always emits ``{\"a\": 1.0}`` is well-formed and useless. This module\nadds declarative, serializable constraints over distributions:\n\n- ``min_top1`` / ``max_top1`` \u2014 decisiveness floor / overconfidence cap;\n- ``min_margin`` \u2014 gap between the top two probabilities;\n- ``min_entropy`` / ``max_entropy`` \u2014 Shannon entropy bounds (nats);\n- ``max_support`` \u2014 at most *k* outcomes with mass above \u03b5;\n- ``min_mass`` \u2014 a label set must carry at least *p* combined mass.\n\n:class:`DistributionContract` (kind ``\"distribution\"``) binds an outcome\nspace to a constraint list: values validate against the outcomes,\ndistributions validate against the constraints.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 320,
+      "path": "hugrgate/contracts/distributions.py",
+      "public_defs": [
+        "shannon_entropy",
+        "DistributionConstraint",
+        "DistributionContract",
+        "check",
+        "describe",
+        "to_dict",
+        "from_dict",
+        "validate_value",
+        "distribution_violations",
+        "validate_distribution",
+        "check_distribution",
         "describe"
       ]
     },
@@ -1206,6 +1232,7 @@
     "test_contracts_032.py",
     "test_contracts_033.py",
     "test_contracts_034.py",
+    "test_contracts_035.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1216,5 +1243,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 9411
+  "total_loc": 9733
 }
