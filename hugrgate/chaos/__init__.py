@@ -25,6 +25,7 @@ from hugrgate.chaos.backend_faults import (
     FaultSpec,
     FaultyBackend,
 )
+from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.framework import (
     BlastRadius,
     ChaosExperiment,
@@ -50,6 +51,7 @@ __all__ = [
     "MALFORMED",
     "MUST_REJECT_KINDS",
     "BlastRadius",
+    "CacheCorruptor",
     "ChaosExperiment",
     "ExperimentReport",
     "ExperimentRunner",
