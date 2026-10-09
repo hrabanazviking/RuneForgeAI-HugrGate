@@ -166,6 +166,14 @@ class SchedulerConfig:
     adaptive: bool = False
     min_batch_size: int = 1
     target_batch_latency_s: float = 0.05
+    # Slice 287 — priority scheduling: when True, each batch is chosen
+    # by effective priority = priority + wait_time / starvation_horizon_s
+    # (higher served first; ties break by earliest submission).  The
+    # wait-time term is an aging guard: a priority-0 task waiting
+    # ``starvation_horizon_s`` outranks a fresh priority-1 task, so no
+    # lane starves no matter how much high-priority pressure arrives.
+    priority_enabled: bool = False
+    starvation_horizon_s: float = 30.0
 
     def __post_init__(self) -> None:
         if not isinstance(self.max_batch_size, int) or \
@@ -208,6 +216,15 @@ class SchedulerConfig:
             raise SchedulerError(
                 f"target_batch_latency_s must be > 0, got "
                 f"{self.target_batch_latency_s!r}")
+        if not isinstance(self.priority_enabled, bool):
+            raise SchedulerError(
+                f"priority_enabled must be a bool, got "
+                f"{self.priority_enabled!r}")
+        if not isinstance(self.starvation_horizon_s, (int, float)) or \
+                self.starvation_horizon_s <= 0:
+            raise SchedulerError(
+                f"starvation_horizon_s must be > 0, got "
+                f"{self.starvation_horizon_s!r}")
 
 
 @dataclass
@@ -275,6 +292,10 @@ class BatchScheduler:
         self._cond = threading.Condition()
         self._accepting = True
         self._flush_requested = False
+        # Tasks pulled from the queue into the in-progress batch assembly.
+        # Backpressure counts queue + assembly together so a long window
+        # can never hide unbounded work from max_queue_depth.
+        self._assembly_held = 0
         self._worker = threading.Thread(
             target=self._worker_loop, name="batch-scheduler",
             daemon=True)
@@ -313,6 +334,9 @@ class BatchScheduler:
         if not callable(fn):
             raise SchedulerError(
                 f"submit() needs a callable, got {type(fn).__name__}")
+        if not isinstance(priority, int):
+            raise SchedulerError(
+                f"priority must be an int, got {type(priority).__name__}")
         if deadline is not None and deadline <= time.monotonic():
             raise SchedulerError(
                 "deadline is already in the past; refusing to schedule "
@@ -320,7 +344,8 @@ class BatchScheduler:
         with self._cond:
             if not self._accepting:
                 raise SchedulerError("scheduler is shut down")
-            if len(self._queue) >= self.config.max_queue_depth:
+            if len(self._queue) + self._assembly_held > \
+                    self.config.max_queue_depth:
                 raise SchedulerError(
                     f"queue full ({self.config.max_queue_depth}); "
                     f"shed load and retry")
@@ -352,27 +377,59 @@ class BatchScheduler:
                     self._cond.notify_all()
 
     def _collect_batch(self) -> list[_Task] | None:
-        """Gather up to max_batch_size tasks or until the window expires."""
+        """Gather a batch: windowed collection, then priority selection."""
         with self._cond:
             while self._accepting and not self._queue:
                 self._cond.wait()
             if not self._queue:
                 return None  # shut down while idle
-            batch = [self._queue.popleft()]
-            window_end = time.monotonic() + self.config.batch_window_s
             cap = self._effective_max_batch()
-            while len(batch) < cap:
+            held = [self._queue.popleft()]
+            self._assembly_held = 1
+            window_end = time.monotonic() + self.config.batch_window_s
+            while True:
                 remaining = window_end - time.monotonic()
                 if (remaining <= 0 or not self._accepting
                         or self._flush_requested):
                     break
+                if not self.config.priority_enabled and len(held) >= cap:
+                    break  # FIFO fast path: cap already reached
+                # Priority mode keeps collecting through the window: choosing
+                # the best tasks needs the full candidate set.
                 self._cond.wait(timeout=remaining)
-                while self._queue and len(batch) < cap:
-                    batch.append(self._queue.popleft())
+                while self._queue and (self.config.priority_enabled
+                                       or len(held) < cap):
+                    held.append(self._queue.popleft())
+                    self._assembly_held = len(held)
+            batch = self._select_batch(held, cap)
+            self._assembly_held = 0
             # The queue -> in-flight transition is atomic under the lock:
             # drain() can never observe "empty and idle" mid-handoff.
             self._in_flight += 1
             return batch
+
+    def _select_batch(self, held: list[_Task], cap: int) -> list[_Task]:
+        """Choose up to ``cap`` tasks from the held candidates (lock held).
+
+        FIFO when priority is disabled (slice-285 behavior preserved):
+        ``held`` never exceeds ``cap`` in that mode.  With priority
+        enabled, the top-``cap`` by effective priority win and the rest
+        go back to the *front* of the queue in arrival order.
+        """
+        if not self.config.priority_enabled:
+            return held
+        now = time.monotonic()
+        horizon = self.config.starvation_horizon_s
+        ranked = sorted(
+            held,
+            key=lambda t: (-(t.priority + (now - t.submitted_at) / horizon),
+                           t.submitted_at))
+        chosen = ranked[:cap]
+        chosen_ids = {id(task) for task in chosen}
+        rest = [task for task in held if id(task) not in chosen_ids]
+        for task in reversed(rest):
+            self._queue.appendleft(task)
+        return chosen
 
     def _run_batch(self, batch: list[_Task]) -> None:
         now = time.monotonic()
@@ -457,6 +514,7 @@ class BatchScheduler:
                 "accepting": self._accepting,
                 "adaptive": self._adaptive is not None,
                 "effective_max_batch": self._effective_max_batch(),
+                "priority_enabled": self.config.priority_enabled,
             }
             if self._adaptive is not None:
                 stats["adaptive_controller"] = self._adaptive.snapshot()
