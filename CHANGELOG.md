@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 227)
+- Field-level sensitivity labels (`hugrgate.privacy_labels`):
+  `Sensitivity` ladder, `FieldLabels` with dotted-path nested support
+  and `local_only` marking, `filter_by_clearance` for
+  clearance-based field filtering.
+
 ### Added (slice 226)
 - Privacy classification v2: `public < standard < sensitive < strict <
   forbidden` ladder (`hugrgate.policy.DecisionPolicy.PRIVACY_CLASSES`,
