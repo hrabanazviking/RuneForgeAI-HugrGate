@@ -418,7 +418,11 @@ class Tracer:
         try:
             yield span
         except Exception as exc:
-            span.set_error(f"{type(exc).__name__}: {exc}")
+            # First error wins: a nested context manager (e.g. the
+            # backend-span builder) may already have recorded a more
+            # specific taxonomy code.
+            if span.status == "ok":
+                span.set_error(f"{type(exc).__name__}: {exc}")
             raise
         finally:
             self._local.span = previous
