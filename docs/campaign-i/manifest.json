@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T16:18:54.392461+00:00",
-  "module_count": 289,
+  "generated_utc": "2026-10-09T17:21:07.102432+00:00",
+  "module_count": 313,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -960,7 +960,7 @@
         "time",
         "typing"
       ],
-      "loc": 292,
+      "loc": 300,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -4691,7 +4691,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 489,
+      "loc": 526,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4741,10 +4741,667 @@
         "NumaError",
         "GpuschedError",
         "PerfGateError",
+        "DatasetError",
+        "EvalError",
+        "EvalGateError",
         "to_dict",
         "from_dict",
         "to_dict",
         "from_dict"
+      ]
+    },
+    "hugrgate.evlab.__init__": {
+      "docstring": "Evaluation Laboratory \u2014 Gjallarbr\u00fa Campaign XV (slices 351-375).\n\nA rigorous, reproducible evaluation system for decision quality and\nsystem behavior, built on top of the existing benchmark machinery\n(:mod:`hugrgate.bench`, :mod:`hugrgate.perfgate`,\n:mod:`hugrgate.millionbench`, :mod:`hugrgate.calibration.bench`) rather\nthan duplicating it:\n\n- :mod:`hugrgate.evlab.api` \u2014 Evaluation API v2: experiments, runs,\n  run records (slice 351).\n- :mod:`hugrgate.evlab.dataset` \u2014 dataset manifests, versioning,\n  provenance (slices 352-354).\n- :mod:`hugrgate.evlab.splits` \u2014 dataset split tooling (slice 355).\n- :mod:`hugrgate.evlab.stratified` \u2014 stratified evaluation (slice 356).\n- :mod:`hugrgate.evlab.crossval` \u2014 cross-validation harness (357).\n- :mod:`hugrgate.evlab.bootstrap` \u2014 bootstrap confidence intervals (358).\n- :mod:`hugrgate.evlab.significance` \u2014 significance testing (359).\n- :mod:`hugrgate.evlab.compare` \u2014 paired backend comparisons (360).\n- :mod:`hugrgate.evlab.calibration` \u2014 calibration-method comparisons (361).\n- :mod:`hugrgate.evlab.selective` \u2014 selective-risk evaluation (362).\n- :mod:`hugrgate.evlab.costaware` \u2014 cost-aware evaluation (363).\n- :mod:`hugrgate.evlab.latency` \u2014 latency-aware evaluation (364).\n- :mod:`hugrgate.evlab.energy` \u2014 energy-aware evaluation (365).\n- :mod:`hugrgate.evlab.privacy` \u2014 privacy-aware evaluation (366).\n- :mod:`hugrgate.evlab.robustness` \u2014 robustness evaluation (367).\n- :mod:`hugrgate.evlab.shift` \u2014 shift evaluation (368).\n- :mod:`hugrgate.evlab.fairness` \u2014 fairness measurement hooks (369).\n- :mod:`hugrgate.evlab.history` \u2014 regression benchmark history (370).\n- :mod:`hugrgate.evlab.artifacts` \u2014 benchmark artifact bundles (371).\n- :mod:`hugrgate.evlab.repro` \u2014 reproducibility manifests (372).\n- :mod:`hugrgate.evlab.gates` \u2014 evaluation CI gates (373).\n- :mod:`hugrgate.evlab.report` \u2014 public benchmark report generator (374).\n- :mod:`hugrgate.evlab.release` \u2014 evaluation lab release gate (375).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 276,
+      "path": "hugrgate/evlab/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.evlab.api": {
+      "docstring": "Evaluation API v2 \u2014 experiments, runs, and run records. Slice 351.\n\nWhat exists (inspected before writing a line):\n\n- :mod:`hugrgate.bench` (v1, slice 45): ``run_benchmark`` sweeps a\n  dataset over backends and returns a raw report dict.  No notion of a\n  named, repeatable experiment; no run identity; no seed discipline;\n  no metric selection.\n- :mod:`hugrgate.perfgate` (slice 298): regression gates over latency\n  baselines \u2014 a different axis (performance, not decision quality).\n- :mod:`hugrgate.millionbench` (slice 299): throughput soak harness.\n- :mod:`hugrgate.calibration.bench` : calibration-specific comparisons.\n\nv2 adds the laboratory frame around the v1 engine:\n\n- :class:`Experiment` \u2014 a named, seeded, JSON-serializable evaluation\n  plan: dataset, backends, policy, metric set, tags.\n- :class:`EvaluationLab` \u2014 registers experiments, executes them, and\n  returns :class:`RunRecord` objects.  Runs are deterministic for a\n  fixed seed (the lab seeds the stdlib RNG; backend determinism remains\n  the backend's own contract, documented here rather than assumed).\n- :class:`RunRecord` \u2014 an immutable, serializable record of one run:\n  identity, timestamps, dataset fingerprint + version, policy, metrics\n  per backend, provenance (hugrgate version, platform, best-effort git\n  SHA), and privacy annotations.\n- :class:`MetricSet` \u2014 selects which v1 metrics a run reports and\n  admits post-hoc derived metrics over the per-backend metric dict.\n\nIntegration:\n\n- Policy/validation flow through :meth:`HugrGate.decide` exactly as in\n  v1; the dataset spec is parsed eagerly so a bad spec fails fast with\n  :class:`SpecError` before any backend runs.\n- Privacy: a dataset may declare ``\"sensitivity\": \"restricted\"`` (or\n  ``\"contains_pii\": true``).  Restricted data refuses to run unless the\n  policy's ``privacy_class`` is ``\"sensitive\"`` or ``\"strict\"``; the\n  record always carries the effective privacy class.\n- Provenance: every record carries the dataset fingerprint\n  (:func:`hugrgate.bench.dataset_fingerprint`), the dataset version,\n  the hugrgate version, platform data, seed, and a best-effort git SHA.\n- Errors: misconfiguration and empty runs raise :class:`EvalError`\n  (deliberately not recoverable \u2014 fix the experiment, then re-run);\n  malformed datasets raise :class:`DatasetError`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "pathlib",
+        "platform",
+        "random",
+        "subprocess",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "loc": 485,
+      "path": "hugrgate/evlab/api.py",
+      "public_defs": [
+        "MetricSet",
+        "Experiment",
+        "RunRecord",
+        "EvaluationLab",
+        "validate",
+        "select",
+        "to_dict",
+        "from_dict",
+        "validate",
+        "effective_policy",
+        "effective_metrics",
+        "plan",
+        "to_dict",
+        "from_dict",
+        "best",
+        "to_dict",
+        "from_dict",
+        "gate",
+        "register_experiment",
+        "get_experiment",
+        "list_experiments",
+        "run"
+      ]
+    },
+    "hugrgate.evlab.artifacts": {
+      "docstring": "Artifact bundles \u2014 portable evaluation packages. Slice 371.\n\nA lab result that only exists in memory is a rumor.  This module\npacks an evaluation's outputs \u2014 dataset manifest, run record,\nreport dicts, arbitrary files \u2014 into a directory (or zip) with a\nsha256-indexed ``bundle.json``.  :func:`verify_bundle` rehashes\nevery entry and fails loudly on tampering or missing files, so a\nbundle can be handed to another machine (or the future) and trusted.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "shutil",
+        "tempfile",
+        "typing",
+        "zipfile"
+      ],
+      "loc": 249,
+      "path": "hugrgate/evlab/artifacts.py",
+      "public_defs": [
+        "BundleReport",
+        "write_bundle",
+        "verify_bundle",
+        "read_bundle",
+        "zip_bundle",
+        "assert_ok",
+        "to_dict"
+      ]
+    },
+    "hugrgate.evlab.bootstrap": {
+      "docstring": "Bootstrap confidence intervals for evaluation metrics. Slice 358.\n\nPoint estimates lie by omission: an accuracy of 0.83 on 40 items is a\ndifferent claim than on 40,000.  This module adds percentile bootstrap\nCIs over per-item outcomes, reusing the v1 metric functions from\n:mod:`hugrgate.bench`:\n\n - :func:`bootstrap_metric_ci` \u2014 CI for any metric computed from\n  ``(expected, DecisionResult)`` pairs;\n- :func:`bootstrap_backend_ci` \u2014 lab-friendly: evaluates one backend\n  over a dataset once, then bootstraps the named metric;\n- :func:`bootstrap_mean_ci` \u2014 CI for the mean of plain per-item\n  scores (e.g. paired differences).\n\nResampling uses a dedicated ``random.Random(seed)`` \u2014 deterministic\nfor a fixed seed, invisible to the global RNG.  The percentile method\nis used (simple, honest, distribution-free); BCa bias correction is\ndeliberately out of scope for this slice.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "random",
+        "typing"
+      ],
+      "loc": 305,
+      "path": "hugrgate/evlab/bootstrap.py",
+      "public_defs": [
+        "BootstrapCI",
+        "bootstrap_metric_ci",
+        "bootstrap_mean_ci",
+        "bootstrap_backend_ci",
+        "width",
+        "contains",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.calibration": {
+      "docstring": "Calibration-method comparisons \u2014 which calibrator helps, where. Slice 361.\n\nThe calibration package (:mod:`hugrgate.calibration`) owns the\ncalibration *algorithms* (temperature, Platt, isotonic \u2014 numpy-based,\n``ml`` extra).  This module owns the *comparison*: given a held-out\nsplit, which method actually reduces ECE, and by how much?\n\n- :class:`LabCalibrator` \u2014 the tiny protocol compared here:\n  ``fit(confidences, correct)`` / ``calibrate(confidence)``.\n- Pure-Python, base-install implementations:\n  :class:`IdentityCalibrator` (the honest baseline),\n  :class:`TemperatureCalibrator` (golden-section NLL fit),\n  :class:`HistogramBinningCalibrator`.\n- :class:`PackageCalibrator` \u2014 adapter wrapping any\n  :class:`hugrgate.calibration.Calibrator`; requires numpy (the ``ml``\n  extra), exactly like the package itself.\n- :func:`compare_calibrators` \u2014 fit-each-on-calib, score-each-on-eval,\n  rank by ECE (NLL alongside).\n- :func:`compare_backend_calibration` \u2014 lab integration: evaluates\n  backends once, splits pairs into calib/eval under a seed, and\n  compares per backend.",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "random",
+        "typing"
+      ],
+      "loc": 429,
+      "path": "hugrgate/evlab/calibration.py",
+      "public_defs": [
+        "LabCalibrator",
+        "IdentityCalibrator",
+        "TemperatureCalibrator",
+        "HistogramBinningCalibrator",
+        "PackageCalibrator",
+        "expected_calibration_error",
+        "CalibrationComparison",
+        "compare_calibrators",
+        "compare_backend_calibration",
+        "fit",
+        "calibrate",
+        "fit",
+        "calibrate",
+        "fit",
+        "calibrate",
+        "fit",
+        "calibrate",
+        "fit",
+        "calibrate",
+        "best",
+        "ranking",
+        "improvement_over_identity",
+        "to_dict",
+        "from_dict",
+        "nll"
+      ]
+    },
+    "hugrgate.evlab.compare": {
+      "docstring": "Paired backend comparisons \u2014 A vs B on identical items. Slice 360.\n\nThe lab's head-to-head workhorse, composing slice 358 (bootstrap)\nand slice 359 (significance) into one verdict:\n\n- both backends evaluate the *same* items through the same gate;\n- per-item scores (correctness for ``\"accuracy\"``, per-item squared\n  error for ``\"brier_score\"``) feed a bootstrap CI on the *paired\n  mean difference* and a paired permutation test;\n- win/tie/loss counts say how often A outright beats B per item;\n- the verdict is ``\"a_better\"`` / ``\"b_better\"`` / ``\"tie\"`` /\n  ``\"inconclusive\"`` \u2014 never a bare p-value.\n\nOnly metrics with honest per-item decompositions are supported\n(``\"accuracy\"``, ``\"brier_score\"``); anything else raises\n:class:`EvalError` rather than pretending a paired test applies.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 248,
+      "path": "hugrgate/evlab/compare.py",
+      "public_defs": [
+        "BackendComparison",
+        "compare_backends",
+        "significant",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.costaware": {
+      "docstring": "Cost-aware evaluation \u2014 decision quality per unit spend. Slice 363.\n\nThe cost cascade per backend mirrors :mod:`hugrgate.routing.cost`'s\nactuals-first rule:\n\n1. ``result.metadata[\"cost\"]`` summed over decisions (true spend\n   reported by the backend itself);\n2. ``backend.estimated_cost()`` * n_decisions (declared estimate);\n3. :class:`CostModel` per-backend rates (lab fallback).\n\nThe :class:`CostReport` carries per-backend efficiency metrics\n(accuracy per cost, cost per correct decision), the Pareto frontier\n(max accuracy at min cost \u2014 no backend on it is strictly worse on\nboth axes), and budget-constrained queries\n(:meth:`CostReport.best_under_budget`,\n:meth:`CostReport.cheapest_at_accuracy`).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 247,
+      "path": "hugrgate/evlab/costaware.py",
+      "public_defs": [
+        "CostModel",
+        "pareto_frontier",
+        "CostReport",
+        "cost_aware_evaluate",
+        "rate_for",
+        "to_dict",
+        "from_dict",
+        "best_under_budget",
+        "cheapest_at_accuracy",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.crossval": {
+      "docstring": "Cross-validation harness \u2014 k-fold evaluation over backends. Slice 357.\n\nFolds come from :func:`hugrgate.evlab.splits.kfold_indices` (each item\ntests exactly once); each fold's test items run through the v1 bench\nengine (:func:`hugrgate.bench.run_benchmark`), so abstention, latency,\nand calibration accounting stay identical to single-shot runs.  The\n:class:`CVReport` aggregates each metric across folds as\nmean/sample-std/min/max \u2014 the honest spread of a backend's quality,\nnot just its headline.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "typing"
+      ],
+      "loc": 201,
+      "path": "hugrgate/evlab/crossval.py",
+      "public_defs": [
+        "FoldResult",
+        "CVReport",
+        "cross_validate",
+        "to_dict",
+        "from_dict",
+        "summarize",
+        "rank",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.dataset": {
+      "docstring": "Dataset manifests, versioning, and provenance. Slices 352-354.\n\nWhat exists (inspected): :func:`hugrgate.bench.dataset_fingerprint`\ngives a bare sha16 over items.  There is no manifest standard \u2014 no\nschema declaration, no license/size metadata, no item validation, no\nversioning, no provenance chain.  This module is the lab's dataset\ncontract:\n\n- Slice 352 (this slice): :class:`DatasetManifest` \u2014 the manifest\n  standard: name, version, column schema, license, fingerprint, item\n  validation against the schema, and a bridge\n  (:meth:`DatasetManifest.to_bench_dataset`) into the v1 bench dataset\n  shape consumed by :class:`hugrgate.evlab.api.Experiment`.\n- Slice 353: :class:`DatasetVersion` + :class:`DatasetRegistry` \u2014\n  version parsing, bumping, compatibility, registry resolution.\n- Slice 354: :class:`DatasetProvenance` \u2014 source, acquisition, and\n  transform-chain provenance.\n\nItem validation is strict and loud: :meth:`DatasetManifest.validate`\nraises :class:`DatasetError` with the full issue list in\n``details[\"issues\"]``.  A non-raising :meth:`DatasetManifest.check`\nexists for tooling that wants to render issues itself.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "functools",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "re",
+        "time",
+        "typing"
+      ],
+      "loc": 795,
+      "path": "hugrgate/evlab/dataset.py",
+      "public_defs": [
+        "ColumnSpec",
+        "fingerprint_items",
+        "DatasetManifest",
+        "DatasetVersion",
+        "DatasetRegistry",
+        "TransformStep",
+        "DatasetProvenance",
+        "validate_decl",
+        "check_value",
+        "to_dict",
+        "from_dict",
+        "validate_decl",
+        "check",
+        "validate",
+        "seal",
+        "verify",
+        "bumped",
+        "to_bench_dataset",
+        "from_bench_dataset",
+        "to_dict",
+        "from_dict",
+        "parse",
+        "parse_partial",
+        "bump_major",
+        "bump_minor",
+        "bump_patch",
+        "is_prerelease",
+        "is_compatible_with",
+        "register",
+        "versions",
+        "get",
+        "latest",
+        "resolve",
+        "diff",
+        "check_compatible",
+        "to_dict",
+        "from_dict",
+        "validate",
+        "add_step",
+        "chain_hash",
+        "tip_fingerprint",
+        "verify",
+        "summary",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.energy": {
+      "docstring": "Energy-aware evaluation \u2014 decision quality per joule. Slice 365.\n\nTwo energy paths, honest about which is in play:\n\n- *Measured*: when a :class:`hugrgate.edge.power.PowerSource` is\n  supplied, power is sampled around every decision and per-decision\n  energy is ``avg_mw * latency_s`` (millijoules).  On this VM there is\n  no real power sensor \u2014 :class:`MockPowerSource` stands in, and the\n  report marks the path ``\"measured\"`` only when every sample\n  succeeded.  Real-hardware validation is still needed for the\n  measured path (Yrsa Execution Law 13).\n- *Model*: :class:`EnergyModel` per-backend millijoule rates, the lab\n  fallback (mirrors :class:`CostModel`).\n\nThe :class:`EnergyReport` carries accuracy-per-joule, the Pareto\nfrontier over (energy, accuracy) \u2014 reusing\n:func:`hugrgate.evlab.costaware.pareto_frontier`, not duplicating it \u2014\nand budget queries, plus a documented CO2e estimate helper.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 233,
+      "path": "hugrgate/evlab/energy.py",
+      "public_defs": [
+        "EnergyModel",
+        "co2e_grams",
+        "EnergyReport",
+        "energy_aware_evaluate",
+        "rate_for",
+        "to_dict",
+        "from_dict",
+        "most_efficient",
+        "best_under_energy_budget",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.fairness": {
+      "docstring": "Fairness hooks \u2014 disparity measurement across groups. Slice 369.\n\nThis module is measurement, not policy: the lab does not decide what\nis fair.  It hooks into the stratified machinery (slice 356) and adds\nthe two classic lenses:\n\n- **parity gaps**: max-minus-min of any metric across groups, plus\n  the worst-off group and a ``flagged()`` query;\n- **disparate impact** (categorical specs): per-option selection\n  rates per group and the min/max ratio behind the four-fifths rule.\n\nGroups smaller than ``min_group_size`` raise instead of producing\nnoise dressed as evidence \u2014 lower the bound explicitly if you know\nwhat you are doing.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 234,
+      "path": "hugrgate/evlab/fairness.py",
+      "public_defs": [
+        "FairnessReport",
+        "fairness_evaluate",
+        "backends",
+        "gap",
+        "worst_group",
+        "flagged",
+        "disparate_impact_ratio",
+        "passes_four_fifths",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.gates": {
+      "docstring": "CI quality gates \u2014 declarative pass/fail over results. Slice 373.\n\nGates turn \"the numbers look fine\" into a checkable contract: a\n:class:`Gate` names a metric, a comparison, and a threshold, applied\nto one backend, several, or all.  :func:`check_gates` evaluates a\n:class:`GateSuite` against a results mapping (or a\n:class:`RunRecord`); :func:`assert_gates` raises\n:class:`EvalGateError` naming every failure \u2014 the CI-red path.\n\nFail-closed by design: a gate on an unscored metric, or on a\nbackend absent from the results, *fails* with ``actual=None``\nrather than passing silently.  A gate that cannot see its evidence\nis not a gate.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "operator",
+        "typing"
+      ],
+      "loc": 211,
+      "path": "hugrgate/evlab/gates.py",
+      "public_defs": [
+        "Gate",
+        "GateResult",
+        "GateSuite",
+        "check_gates",
+        "assert_gates",
+        "gates_from_config",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.history": {
+      "docstring": "Regression history \u2014 run records over time. Slice 370.\n\nThe lab writes one :class:`RunRecord` per evaluation; this module\nkeeps them in an append-only JSONL store and answers the question\nevery lab eventually faces: *did we get worse?*\n\n- :class:`HistoryStore` \u2014 append/query/prune a JSONL run history.\n  Writes are atomic (temp file + rename); a corrupt line raises\n  :class:`EvalError` naming the line instead of being silently\n  skipped.\n- :func:`detect_regression` \u2014 compares the latest value of a metric\n  against the best (or median) of the trailing window and reports a\n  :class:`RegressionFinding` when the drop exceeds ``min_drop``.\n  Only flags *strict* worsening; improvement and noise return None.\n- :func:`series_summary` \u2014 first/last/min/max/delta for report\n  tables (slice 374 consumes this).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "os",
+        "pathlib",
+        "statistics",
+        "tempfile",
+        "typing"
+      ],
+      "loc": 307,
+      "path": "hugrgate/evlab/history.py",
+      "public_defs": [
+        "RegressionFinding",
+        "HistoryStore",
+        "detect_regression",
+        "series_summary",
+        "to_dict",
+        "from_dict",
+        "append",
+        "records",
+        "latest",
+        "series",
+        "prune"
+      ]
+    },
+    "hugrgate.evlab.latency": {
+      "docstring": "Latency-aware evaluation \u2014 quality under time pressure. Slice 364.\n\n:mod:`hugrgate.perfgate` gates latency *regressions* against committed\nbaselines; this module evaluates latency *quality tradeoffs*: which\nbackend stays useful when the clock is the constraint?\n\n- :func:`latency_aware_evaluate` \u2014 evaluates backends once, collecting\n  per-item ``(latency_ms, correct)`` pairs, and reports per backend:\n  p50/p99/mean latency, SLO compliance (fraction of decisions within\n  ``slo_ms``), budgeted accuracy (accuracy over in-SLO decisions\n  only), and tail heaviness (p99/p50).\n- :class:`LatencyReport` \u2014 per-backend results plus queries:\n  :meth:`LatencyReport.meets_slo`, :meth:`LatencyReport.fastest`,\n  :meth:`LatencyReport.best_budgeted_accuracy`.\n\nA backend that is accurate but always late scores badly here *by\ndesign*: budgeted accuracy is the honest number for SLO-bound\ndeployments.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 182,
+      "path": "hugrgate/evlab/latency.py",
+      "public_defs": [
+        "LatencyReport",
+        "latency_aware_evaluate",
+        "meets_slo",
+        "fastest",
+        "best_budgeted_accuracy",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.privacy": {
+      "docstring": "Privacy-aware evaluation \u2014 the utility cost of privacy. Slice 366.\n\nThree honest instruments, each labeled with its limits:\n\n1. **PII pre-screen** (:func:`scan_dataset_pii`): runs\n   :class:`hugrgate.privacy_pii.RegexPIIDetector` over item states\n   *before* any evaluation.  Findings produce a :class:`PIIReport`\n   with ``requires_restricted=True``; :meth:`PIIReport.assert_privacy`\n   raises :class:`EvalError` telling the operator to flag the dataset\n   ``sensitivity=\"restricted\"`` \u2014 which the lab's\n   :class:`~hugrgate.evlab.api.Experiment` gate then enforces against\n   the policy's privacy class.\n2. **Privacy-utility curves** (:func:`privacy_utility_curve`):\n   randomized-response simulation \u2014 each decision is flipped to a\n   random alternative with probability ``q(epsilon) =\n   1/(1+e^epsilon)``.  This traces the *shape* of the privacy/utility\n   tradeoff.  It is **not** a differential-privacy guarantee: no\n   budget is tracked, no mechanism is certified, and every report\n   carries that disclaimer.\n3. **Flip-probability math** (:func:`randomized_response_q`): the\n   closed form, validated.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "random",
+        "typing"
+      ],
+      "loc": 281,
+      "path": "hugrgate/evlab/privacy.py",
+      "public_defs": [
+        "randomized_response_q",
+        "PIIReport",
+        "scan_dataset_pii",
+        "PrivacyUtilityPoint",
+        "PrivacyUtilityCurve",
+        "privacy_utility_curve",
+        "total_findings",
+        "requires_restricted",
+        "assert_privacy",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "epsilon_for_accuracy",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.release": {
+      "docstring": "Release gate \u2014 the lab's final verdict. Slice 375.\n\nCampaign XV's capstone: :func:`release_gate` ties the lab together\ninto one go/no-go decision over a finished run.  It runs, in order:\n\n1. the CI :class:`GateSuite` (slice 373) \u2014 any failure holds;\n2. regression checks against the :class:`HistoryStore` (slice 370)\n   for the declared metrics \u2014 any regression holds;\n3. the reproducibility manifest (slice 372) \u2014 mismatches hold, and\n   a missing manifest holds when ``require_repro`` is set;\n4. git-SHA provenance \u2014 a run with no recorded SHA holds when\n   ``require_git_sha`` is set (an unattributable result cannot\n   ship).\n\nThe outcome is a :class:`ReleaseVerdict` (``\"release\"`` or\n``\"hold\"`` with every reason named); :func:`assert_release` turns a\nhold into :class:`EvalGateError` for CI.  A release with zero gates\nis a rubber stamp and is refused outright.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 219,
+      "path": "hugrgate/evlab/release.py",
+      "public_defs": [
+        "ReleaseVerdict",
+        "release_gate",
+        "assert_release",
+        "released",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.report": {
+      "docstring": "Public report generator \u2014 the lab's story in Markdown. Slice 374.\n\n:func:`render_lab_markdown` assembles a public-facing evaluation\nreport from lab artifacts: the run record (dataset identity,\nmetric tables), head-to-head comparisons, CI gate outcomes,\nregression findings, and the reproducibility manifest.  When a v1\nbench JSON is supplied, its full rendering (via\n:mod:`hugrgate.bench_report`, slice 47) is embedded as the\nbenchmark-detail section \u2014 reuse, not duplication.\n\nEvery section degrades gracefully: missing pieces render as\nexplicit \"not evaluated\" lines, never as silent gaps.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hugrgate",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 288,
+      "path": "hugrgate/evlab/report.py",
+      "public_defs": [
+        "LabReport",
+        "lab_report_from_run",
+        "render_lab_markdown",
+        "write_lab_report",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.repro": {
+      "docstring": "Reproducibility manifests \u2014 replay recipes. Slice 372.\n\nA result without a recipe is an anecdote.  A :class:`ReproManifest`\ncaptures everything needed to replay an evaluation: dataset\nidentity + fingerprint, backends, policy, seed, the exact\nhugrgate/python versions, platform, best-effort git SHA, and the\ncommand that produced it.  :func:`check_reproducibility` compares a\nmanifest against the *current* environment and names every\nmismatch, so \"works on my machine\" becomes a checkable claim.\nManifests ride inside artifact bundles as ``repro_manifest.json``.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "datetime",
+        "hugrgate",
+        "platform",
+        "subprocess",
+        "typing"
+      ],
+      "loc": 225,
+      "path": "hugrgate/evlab/repro.py",
+      "public_defs": [
+        "ReproManifest",
+        "ReproCheck",
+        "build_repro_manifest",
+        "manifest_for_run",
+        "check_reproducibility",
+        "to_dict",
+        "from_dict",
+        "assert_ok",
+        "to_dict"
+      ]
+    },
+    "hugrgate.evlab.robustness": {
+      "docstring": "Robustness evaluation \u2014 quality under perturbation. Slice 367.\n\nA backend's clean-dataset accuracy is a fair-weather number.  This\nmodule stresses it with seeded, reproducible perturbations applied to\nthe *inputs* before evaluation:\n\n- :class:`LabelNoise` \u2014 flips each expected label with probability\n  ``p`` (categorical options / binary booleans);\n- :class:`StateDropout` \u2014 drops each state key independently with\n  probability ``p`` (at least one key is always kept: this measures\n  graceful degradation, not crash behavior \u2014 crashes belong to the\n  chaos campaign).\n\n:func:`robustness_evaluate` scores every backend on the clean baseline\nplus each perturbation and reports per-perturbation accuracy,\nrelative retention (perturbed / baseline), and the worst-case\n``robustness_score`` (min retention).  All randomness flows through\n``random.Random(seed)`` \u2014 the same seed replays the same storm.",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "typing"
+      ],
+      "loc": 266,
+      "path": "hugrgate/evlab/robustness.py",
+      "public_defs": [
+        "Perturbation",
+        "LabelNoise",
+        "StateDropout",
+        "RobustnessReport",
+        "robustness_evaluate",
+        "apply",
+        "apply",
+        "apply",
+        "most_robust",
+        "fragile",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.selective": {
+      "docstring": "Selective-risk evaluation \u2014 risk-coverage curves per backend. Slice 362.\n\nA backend that *knows when it is wrong* is safer than one that is\nmerely accurate: selective prediction keeps the most confident\ndecisions and abstains on the rest.  This module scores that ability:\n\n- :func:`risk_coverage_curve` \u2014 pure-Python RC curve from per-item\n  ``(correct, confidence)``: risk (mean 0/1 loss) vs coverage as the\n  confidence threshold sweeps down.  (The numpy sibling lives in\n  :mod:`hugrgate.calibration.risk_coverage`; this is the base-install\n  lab version.)\n- :func:`aurc` / :func:`oracle_aurc` \u2014 area under the curve; the\n  oracle (sorted by true loss) bounds what confidence ranking can\n  achieve, so ``excess = aurc - oracle`` measures ranking quality.\n- :func:`selective_evaluate` \u2014 lab integration: evaluates backends\n  once, builds a :class:`SelectiveReport` per backend, and anchors\n  the gate's *own* abstention threshold\n  (``policy.minimum_probability``) on the curve \u2014 is the configured\n  threshold sitting at a sensible point, or is it leaving coverage\n  (or safety) on the table?",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "itertools",
+        "typing"
+      ],
+      "loc": 333,
+      "path": "hugrgate/evlab/selective.py",
+      "public_defs": [
+        "SelectivePoint",
+        "risk_coverage_curve",
+        "aurc",
+        "oracle_aurc",
+        "coverage_at_risk",
+        "risk_at_coverage",
+        "SelectiveReport",
+        "selective_evaluate",
+        "to_dict",
+        "excess_aurc",
+        "best_ranking",
+        "coverage_at_risk",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.shift": {
+      "docstring": "Shift evaluation \u2014 quality under distribution shift. Slice 368.\n\nDeploys drift: the data moves, the backend doesn't.  This module\npartitions a dataset by a shift variable (time period, domain, data\nsource) into source/target cohorts and reports, per backend, the\nmetric *degradation* (target minus source) alongside a pure-Python PSI\n(population stability index) on the *label* distributions \u2014 how far\nthe data moved, next to how much the quality moved.  (The numpy\nsibling with density-ratio weights lives in\n:mod:`hugrgate.calibration.shift`; this is the base-install lab\nversion.)\n\nBoth cohorts run through the v1 bench engine\n(:func:`hugrgate.bench.run_benchmark`), so the numbers are directly\ncomparable with single-shot runs.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 274,
+      "path": "hugrgate/evlab/shift.py",
+      "public_defs": [
+        "label_psi",
+        "ShiftReport",
+        "shift_evaluate",
+        "degradation",
+        "degraded",
+        "to_dict",
+        "from_dict",
+        "bin_of"
+      ]
+    },
+    "hugrgate.evlab.significance": {
+      "docstring": "Significance testing for paired evaluation outcomes. Slice 359.\n\nWhen backend A scores 0.83 and B scores 0.81 on the same items, is\nthat signal or noise?  This module answers with paired,\ndistribution-free tests over per-item scores \u2014 no normality\nassumptions, no opaque tables:\n\n- :func:`paired_permutation_test` \u2014 the workhorse: randomly flips the\n  sign of per-item differences (Monte Carlo, seeded) and counts how\n  often the reshuffled mean beats the observed one.  Valid p-values\n  via the ``(count + 1) / (n_perm + 1)`` form.\n- :func:`mcnemar_test` \u2014 for paired binary correctness (A-right/B-\n  wrong vs A-wrong/B-right discordant pairs); exact two-sided binomial\n  p-value in pure stdlib, plus the chi-square statistic with\n  continuity correction for reference.\n- :func:`compare_paired_correctness` \u2014 lab convenience: takes two\n  ``(expected, DecisionResult)`` pair lists, derives per-item\n  correctness, and runs both tests.\n\nEffect sizes ride along descriptively (mean difference, Cohen's\n``dz``); they are not p-values and are labeled as such.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "random",
+        "typing"
+      ],
+      "loc": 281,
+      "path": "hugrgate/evlab/significance.py",
+      "public_defs": [
+        "SignificanceResult",
+        "paired_permutation_test",
+        "mcnemar_test",
+        "compare_paired_correctness",
+        "significant",
+        "verdict",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.splits": {
+      "docstring": "Dataset split tooling \u2014 train/val/test, stratified, k-fold. Slice 355.\n\nAll splitting is deterministic for a fixed seed via a dedicated\n``random.Random`` instance (never the global RNG, so lab runs do not\nperturb each other).  :class:`SplitPlan` records exactly how a split\nwas produced and serializes to JSON \u2014 the reproducibility manifest\n(slice 372) embeds it so a split can be re-derived bit-for-bit.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "time",
+        "typing"
+      ],
+      "loc": 241,
+      "path": "hugrgate/evlab/splits.py",
+      "public_defs": [
+        "SplitPlan",
+        "make_splits",
+        "kfold_indices",
+        "manifest_splits",
+        "validate",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.evlab.stratified": {
+      "docstring": "Stratified evaluation \u2014 per-stratum metrics + aggregates. Slice 356.\n\nA single headline metric hides *where* a backend fails.  This module\nruns the v1 bench engine once per stratum (full reuse of\n:func:`hugrgate.bench.run_benchmark`, including its abstention and\nlatency accounting) and aggregates:\n\n- ``macro`` \u2014 unweighted mean across strata (every stratum counts the\n  same, so a tiny failing stratum cannot hide behind a huge easy one);\n- ``micro`` \u2014 ``n_decided``-weighted mean (the pooled headline);\n- count metrics (``n_decided``/``n_abstained``/``n_errors``) are summed\n  for ``micro`` and averaged for ``macro``.\n\n:func:`StratifiedReport.worst_stratum` names the weakest stratum per\nbackend and metric \u2014 the lab's primary \"where does it hurt\" query.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 242,
+      "path": "hugrgate/evlab/stratified.py",
+      "public_defs": [
+        "StratifiedReport",
+        "stratified_evaluate",
+        "worst_stratum",
+        "disparity",
+        "to_dict",
+        "from_dict",
+        "label_of"
       ]
     },
     "hugrgate.fallback": {
@@ -7405,6 +8062,31 @@
     "test_ensemble_124_benchmarks.py",
     "test_ensemble_125_release.py",
     "test_errors.py",
+    "test_evlab_351_api.py",
+    "test_evlab_352_manifest.py",
+    "test_evlab_353_versioning.py",
+    "test_evlab_354_provenance.py",
+    "test_evlab_355_splits.py",
+    "test_evlab_356_stratified.py",
+    "test_evlab_357_crossval.py",
+    "test_evlab_358_bootstrap.py",
+    "test_evlab_359_significance.py",
+    "test_evlab_360_compare.py",
+    "test_evlab_361_calibration.py",
+    "test_evlab_362_selective.py",
+    "test_evlab_363_costaware.py",
+    "test_evlab_364_latency.py",
+    "test_evlab_365_energy.py",
+    "test_evlab_366_privacy.py",
+    "test_evlab_367_robustness.py",
+    "test_evlab_368_shift.py",
+    "test_evlab_369_fairness.py",
+    "test_evlab_370_history.py",
+    "test_evlab_371_artifacts.py",
+    "test_evlab_372_repro.py",
+    "test_evlab_373_gates.py",
+    "test_evlab_374_report.py",
+    "test_evlab_375_release.py",
     "test_foundation.py",
     "test_import_cycles.py",
     "test_ladder.py",
@@ -7522,5 +8204,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 63711
+  "total_loc": 70808
 }

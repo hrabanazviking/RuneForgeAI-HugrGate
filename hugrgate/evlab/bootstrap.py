@@ -26,7 +26,15 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate import bench as _bench
+from hugrgate.bench import (
+    accuracy as _bench_accuracy,
+)
+from hugrgate.bench import (
+    brier_score as _bench_brier_score,
+)
+from hugrgate.bench import (
+    expected_calibration_error as _bench_ece,
+)
 from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, EvalError
 from hugrgate.policy import DecisionPolicy
@@ -55,9 +63,9 @@ _MIN_BOOT = 100
 
 def _builtin_metrics() -> dict[str, MetricFn]:
     return {
-        "accuracy": lambda pairs, spec: _bench.accuracy(pairs),
-        "brier_score": _bench.brier_score,
-        "ece": lambda pairs, spec: _bench.expected_calibration_error(pairs),
+        "accuracy": lambda pairs, spec: _bench_accuracy(pairs),
+        "brier_score": _bench_brier_score,
+        "ece": lambda pairs, spec: _bench_ece(pairs),
     }
 
 

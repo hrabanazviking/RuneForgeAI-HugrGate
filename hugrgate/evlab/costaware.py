@@ -22,7 +22,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from hugrgate import bench as _bench
+from hugrgate.bench import accuracy as _bench_accuracy
 from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, EvalError
 from hugrgate.policy import DecisionPolicy
@@ -95,7 +95,7 @@ def _evaluate_costs(
         reported = result.metadata.get("cost")
         if isinstance(reported, (int, float)) and reported >= 0:
             actual_costs.append(float(reported))
-    accuracy = _bench.accuracy(pairs)
+    accuracy = _bench_accuracy(pairs)
     n = len(pairs)
     backend_obj = gate.registry.get(backend_name)
     if actual_costs and len(actual_costs) == n:

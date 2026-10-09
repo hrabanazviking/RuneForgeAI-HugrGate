@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from hugrgate import bench_report as _bench_report
+from hugrgate.bench_report import render_markdown as _render_bench_markdown
 from hugrgate.errors import EvalError
 from hugrgate.evlab.api import RunRecord
 
@@ -268,7 +268,7 @@ def render_lab_markdown(report: LabReport) -> str:
     lines += _repro_section(report.repro)
     if report.bench_json is not None:
         lines += ["## Benchmark detail", "",
-                  _bench_report.render_markdown(report.bench_json), ""]
+                  _render_bench_markdown(report.bench_json), ""]
     if report.notes:
         lines += ["## Notes", ""]
         lines += [f"- {note}" for note in report.notes] + [""]

@@ -24,7 +24,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from hugrgate import bench as _bench
+from hugrgate.bench import accuracy as _bench_accuracy
 from hugrgate.core import HugrGate
 from hugrgate.edge.power import PowerSource
 from hugrgate.errors import Abstention, EvalError
@@ -203,7 +203,7 @@ def energy_aware_evaluate(
                 n_measured += 1
             else:
                 energies.append(model.rate_for(backend))
-        accuracy = _bench.accuracy(pairs)
+        accuracy = _bench_accuracy(pairs)
         n = len(pairs)
         total_mj = sum(energies)
         if n_measured == n and n > 0:

@@ -26,7 +26,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate import bench as _bench
+from hugrgate.bench import accuracy as _bench_accuracy
 from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, EvalError
 from hugrgate.policy import DecisionPolicy
@@ -140,7 +140,7 @@ def _evaluate_accuracy(
         except Abstention:
             continue
         pairs.append((item.get("expected"), result))
-    return _bench.accuracy(pairs), len(pairs)
+    return _bench_accuracy(pairs), len(pairs)
 
 
 @dataclass

@@ -1191,7 +1191,7 @@ flowchart TD
     evlab_artifacts --> evlab_api
     evlab_artifacts --> evlab_dataset
     evlab_artifacts --> evlab_repro
-    evlab_bootstrap --> hugrgate
+    evlab_bootstrap --> bench
     evlab_bootstrap --> core
     evlab_bootstrap --> errors
     evlab_bootstrap --> policy
@@ -1209,7 +1209,7 @@ flowchart TD
     evlab_compare --> policy
     evlab_compare --> result
     evlab_compare --> spec
-    evlab_costaware --> hugrgate
+    evlab_costaware --> bench
     evlab_costaware --> core
     evlab_costaware --> errors
     evlab_costaware --> policy
@@ -1222,7 +1222,7 @@ flowchart TD
     evlab_crossval --> evlab_splits
     evlab_crossval --> policy
     evlab_dataset --> errors
-    evlab_energy --> hugrgate
+    evlab_energy --> bench
     evlab_energy --> core
     evlab_energy --> edge_power
     evlab_energy --> errors
@@ -1245,7 +1245,7 @@ flowchart TD
     evlab_latency --> policy
     evlab_latency --> result
     evlab_latency --> spec
-    evlab_privacy --> hugrgate
+    evlab_privacy --> bench
     evlab_privacy --> core
     evlab_privacy --> errors
     evlab_privacy --> policy
@@ -1257,7 +1257,7 @@ flowchart TD
     evlab_release --> evlab_gates
     evlab_release --> evlab_history
     evlab_release --> evlab_repro
-    evlab_report --> hugrgate
+    evlab_report --> bench_report
     evlab_report --> errors
     evlab_report --> evlab_api
     evlab_repro --> hugrgate
@@ -1265,7 +1265,7 @@ flowchart TD
     evlab_repro --> evlab_api
     evlab_repro --> evlab_dataset
     evlab_repro --> policy
-    evlab_robustness --> hugrgate
+    evlab_robustness --> bench
     evlab_robustness --> core
     evlab_robustness --> errors
     evlab_robustness --> policy
@@ -2475,7 +2475,7 @@ flowchart TD
 | `evlab.artifacts` | `evlab.api` | no |
 | `evlab.artifacts` | `evlab.dataset` | no |
 | `evlab.artifacts` | `evlab.repro` | no |
-| `evlab.bootstrap` | `hugrgate` | no |
+| `evlab.bootstrap` | `bench` | no |
 | `evlab.bootstrap` | `core` | no |
 | `evlab.bootstrap` | `errors` | no |
 | `evlab.bootstrap` | `policy` | no |
@@ -2493,7 +2493,7 @@ flowchart TD
 | `evlab.compare` | `policy` | no |
 | `evlab.compare` | `result` | no |
 | `evlab.compare` | `spec` | no |
-| `evlab.costaware` | `hugrgate` | no |
+| `evlab.costaware` | `bench` | no |
 | `evlab.costaware` | `core` | no |
 | `evlab.costaware` | `errors` | no |
 | `evlab.costaware` | `policy` | no |
@@ -2506,7 +2506,7 @@ flowchart TD
 | `evlab.crossval` | `evlab.splits` | no |
 | `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
-| `evlab.energy` | `hugrgate` | no |
+| `evlab.energy` | `bench` | no |
 | `evlab.energy` | `core` | no |
 | `evlab.energy` | `edge.power` | no |
 | `evlab.energy` | `errors` | no |
@@ -2529,7 +2529,7 @@ flowchart TD
 | `evlab.latency` | `policy` | no |
 | `evlab.latency` | `result` | no |
 | `evlab.latency` | `spec` | no |
-| `evlab.privacy` | `hugrgate` | no |
+| `evlab.privacy` | `bench` | no |
 | `evlab.privacy` | `core` | no |
 | `evlab.privacy` | `errors` | no |
 | `evlab.privacy` | `policy` | no |
@@ -2541,7 +2541,7 @@ flowchart TD
 | `evlab.release` | `evlab.gates` | no |
 | `evlab.release` | `evlab.history` | no |
 | `evlab.release` | `evlab.repro` | no |
-| `evlab.report` | `hugrgate` | no |
+| `evlab.report` | `bench_report` | no |
 | `evlab.report` | `errors` | no |
 | `evlab.report` | `evlab.api` | no |
 | `evlab.repro` | `hugrgate` | no |
@@ -2549,7 +2549,7 @@ flowchart TD
 | `evlab.repro` | `evlab.api` | no |
 | `evlab.repro` | `evlab.dataset` | no |
 | `evlab.repro` | `policy` | no |
-| `evlab.robustness` | `hugrgate` | no |
+| `evlab.robustness` | `bench` | no |
 | `evlab.robustness` | `core` | no |
 | `evlab.robustness` | `errors` | no |
 | `evlab.robustness` | `policy` | no |

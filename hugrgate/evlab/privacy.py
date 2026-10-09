@@ -29,7 +29,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate import bench as _bench
+from hugrgate.bench import accuracy as _bench_accuracy
 from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, EvalError
 from hugrgate.policy import DecisionPolicy
@@ -248,7 +248,7 @@ def privacy_utility_curve(
         raise EvalError(
             f"backend {backend!r} produced no scored decisions"
         )
-    baseline = _bench.accuracy(pairs)
+    baseline = _bench_accuracy(pairs)
     try:
         options = list(spec.value_space())
     except Exception:  # noqa: BLE001 - fall back to observed values
