@@ -13,6 +13,11 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 233)
+- Tokenization / pseudonymization (`hugrgate.privacy_tokens`):
+  `TokenVault` with opaque CSPRNG tokens, namespace isolation,
+  revoke/clear, and export/import for encrypted persistence.
+
 ### Added (slice 232)
 - Redaction pipeline v2 (`hugrgate.privacy_redact`): composable
   `Redactor` strategies (mask/pattern/hash/drop/token),
