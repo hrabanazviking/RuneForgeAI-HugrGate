@@ -26,6 +26,7 @@ from hugrgate.chaos.backend_faults import (
     FaultyBackend,
 )
 from hugrgate.chaos.cache_faults import CacheCorruptor
+from hugrgate.chaos.filesystem import disk_full, read_only
 from hugrgate.chaos.framework import (
     BlastRadius,
     ChaosExperiment,
@@ -62,4 +63,6 @@ __all__ = [
     "ModelCorruptor",
     "ProbeOutcome",
     "SteadyStateProbe",
+    "disk_full",
+    "read_only",
 ]
