@@ -21,6 +21,7 @@ from hugrgate.errors import (
     ChaosError,
     ClusterAuthError,
     ContractError,
+    DataFlowDenied,
     EdgeAffinityError,
     EdgeCacheError,
     EdgeMemoryError,
@@ -56,6 +57,7 @@ ALL_ERRORS = [
     QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
     WatchdogError,
     ClusterAuthError,
+    DataFlowDenied,
 ]
 
 EXPECTED_CODES = {
@@ -87,6 +89,7 @@ EXPECTED_CODES = {
     TelemetryError: "edge_telemetry_error",
     WatchdogError: "edge_watchdog_error",
     ClusterAuthError: "cluster_auth_error",
+    DataFlowDenied: "data_flow_denied",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -122,6 +125,7 @@ EXPECTED_RECOVERABLE = {
     TelemetryError: False,
     WatchdogError: False,
     ClusterAuthError: False,
+    DataFlowDenied: False,
 }
 
 

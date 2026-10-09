@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 228)
+- Data-flow policy engine (`hugrgate.privacy_flow`): `FlowRequest` /
+  `DataFlowPolicy` / `FlowDecision` with ordered deterministic rules
+  (class eligibility, trust floor, jurisdiction, field levels,
+  local-only stripping) and `DataFlowDenied` error
+  (`hugrgate.errors`, code `data_flow_denied`, not recoverable).
+
 ### Added (slice 227)
 - Field-level sensitivity labels (`hugrgate.privacy_labels`):
   `Sensitivity` ladder, `FieldLabels` with dotted-path nested support

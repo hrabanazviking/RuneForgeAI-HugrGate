@@ -24,6 +24,7 @@ __all__ = [
     "ChaosError",
     "ClusterAuthError",
     "ContractError",
+    "DataFlowDenied",
     "EdgeAffinityError",
     "EdgeCacheError",
     "EdgeMemoryError",
@@ -123,6 +124,20 @@ class TimeoutError(BackendError):
 
 class PrivacyViolation(HugrGateError):
     code = "privacy_violation"
+    recoverable = False
+
+
+class DataFlowDenied(PrivacyViolation):
+    """Raised when a planned data flow violates the data-flow policy.
+
+    Subclass of :class:`PrivacyViolation`: a denied flow is a privacy
+    violation, so existing ``except PrivacyViolation`` handlers keep
+    working. Not recoverable by blind retry — the caller must change
+    the flow (different backend, redaction, lower classification) or
+    the policy.
+    """
+
+    code = "data_flow_denied"
     recoverable = False
 
 
