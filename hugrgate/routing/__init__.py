@@ -23,6 +23,11 @@ from hugrgate.routing.capability import (
     CapabilityScorer,
     WEIGHTS as CAPABILITY_WEIGHTS,
 )
+from hugrgate.routing.confidence import (
+    CalibrationTracker,
+    ConfidenceAwarePlanner,
+    adjusted_gate,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
@@ -37,9 +42,12 @@ from hugrgate.routing.synthesis import (
 
 __all__ = [
     "CAPABILITY_WEIGHTS",
+    "CalibrationTracker",
     "CapabilityScore",
     "CapabilityScorer",
+    "ConfidenceAwarePlanner",
     "DynamicRungPlanner",
+    "adjusted_gate",
     "LadderRouterV2",
     "LadderSynthesizer",
     "QOS_DEPTH_CAPS",
