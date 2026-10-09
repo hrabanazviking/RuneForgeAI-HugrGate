@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T18:32:56.553576+00:00",
-  "module_count": 373,
+  "generated_utc": "2026-10-09T19:08:31.545228+00:00",
+  "module_count": 425,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -595,6 +595,627 @@
         "to_dict"
       ]
     },
+    "hugrgate.agents.__init__": {
+      "docstring": "HugrGate agent nervous system (Campaign XVI) \u2014 connective tissue\nfor agentic loops: event bus, reactive triggers, state propagation,\nand inter-component signaling.\n\nThis package ties together the three systems that already exist \u2014\ndecision memory (:mod:`hugrgate.memory`), observability tracing\n(:mod:`hugrgate.observability`), and chaos experiments\n(:mod:`hugrgate.chaos`) \u2014 into one bounded-decision nervous system\nfor larger agents.  It does not duplicate them: gates consult\nmemory access policy, signals feed observability, and the\nsimulator reuses chaos fault shapes.\n\nSubmodules are imported individually\n(``from hugrgate.agents import contract``); this ``__init__`` stays\nempty so importing the package never pulls the whole layer in \u2014\nthe same convention as :mod:`hugrgate.observability`.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 21,
+      "path": "hugrgate/agents/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.agents.attention": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 attention prioritization.\n\nSlice 383.  Triage (377) defers non-urgent work; something must\ndecide *what the agent looks at next*.  :class:`AttentionPrioritizer`\nis a bounded scored queue \u2014 the nervous system's spotlight:\n\n``score = w_priority * priority_rank + w_urgency * urgency\n        + w_novelty * novelty - w_cost * cost``\n\n- ``priority`` is the signal's own urgency ladder (376);\n- ``urgency`` is deadline pressure (0..1);\n- ``novelty`` rewards unseen situations over repeats (0..1);\n- ``cost`` penalizes expensive work so cheap wins don't starve\n  behind dear ones (0..1).\n\nThe queue is bounded (``max_items``): when full, the lowest-scored\nitem is shed and counted \u2014 attention is finite and the system says\nso explicitly rather than growing a queue forever.  Ordering is\ndeterministic: score first, then enqueue time, then id.\n:class:`AttentionItem` is frozen; :meth:`reprioritize` replaces an\nitem's urgency/novelty in place by id.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "heapq",
+        "hugrgate",
+        "itertools",
+        "time",
+        "typing"
+      ],
+      "loc": 197,
+      "path": "hugrgate/agents/attention.py",
+      "public_defs": [
+        "AttentionConfig",
+        "AttentionItem",
+        "AttentionPrioritizer",
+        "score",
+        "push",
+        "pop",
+        "peek",
+        "reprioritize",
+        "stats",
+        "priorities"
+      ]
+    },
+    "hugrgate.agents.benchmark": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent-system benchmark.\n\nSlice 399.  The simulator (398) rehearses failure; the benchmark\n*measures* it.  :class:`AgentBenchmark` runs named scenarios\nthrough fresh simulators, repetitions each, and aggregates:\n\n- success rate (mean \u00b1 min/max across repetitions);\n- loops detected, runaways, escalations, failures (totals);\n- wall-clock latency p50/p95 per scenario run (honest numbers\n  from :func:`time.perf_counter`, not simulated time).\n\n``sim_factory`` builds a new :class:`AgentSimulator` per run so\nrepetitions are isolated \u2014 no shared bus, breaker, or guard\nstate leaks between runs.  Seeds derive deterministically from\nthe base seed (``seed + rep``), so the whole benchmark replays.\n:class:`BenchmarkReport` is wire-safe (:meth:`to_dict`) for CI\ngates and the release gate (400).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "time",
+        "typing"
+      ],
+      "loc": 163,
+      "path": "hugrgate/agents/benchmark.py",
+      "public_defs": [
+        "AgentBenchmarkConfig",
+        "ScenarioResult",
+        "BenchmarkReport",
+        "AgentBenchmark",
+        "to_dict",
+        "run"
+      ]
+    },
+    "hugrgate.agents.budgets": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 decision budgets per agent.\n\nSlice 395.  Three budget systems, three jobs \u2014 no overlap:\n\n- cost router (389): *routing-time* wallets \u2014 \"can we afford to\n  send this ticket there\";\n- runaway guard (394): *per-ticket* ceilings \u2014 \"this ticket has\n  gone too far\";\n- this ledger: *per-agent* execution budgets across tickets \u2014\n  \"this agent has done enough this window\".\n\n:class:`BudgetLedger` allocates each agent a :class:`DecisionBudget`\n(decisions, tokens, latency_ms); :meth:`consume` charges usage\nand raises :class:`AgentBudgetExhausted` naming the exhausted\ndimension with limit/used in details.  Exhaustion is recoverable:\n:meth:`reset` opens a new window, :meth:`top_up` adds headroom \u2014\na supervisor or operator decides, never the agent itself.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 152,
+      "path": "hugrgate/agents/budgets.py",
+      "public_defs": [
+        "DecisionBudget",
+        "BudgetLedger",
+        "allocate",
+        "top_up",
+        "reset",
+        "allocated",
+        "remaining",
+        "consume",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.bus": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the event bus.\n\nSlice 376 (shared substrate).  The bus is the spinal cord: every\nreactive trigger, state propagation, and inter-component signal in\nslices 377-400 travels as an :class:`AgentSignal` over\n:class:`EventBus`.\n\nDesign:\n\n- Topic patterns: exact (``\"agent.escalated\"``), prefix\n  (``\"agent.*\"``), or catch-all (``\"*\"``).  Handlers run in\n  subscription-priority order, highest first; ties break by\n  subscription order (deterministic).\n- Dedup: a signal carrying ``dedup_key`` is delivered at most once\n  per ``dedup_window_s`` \u2014 alert-storm protection inherited from the\n  observability :class:`AlertManager` philosophy.\n- Backpressure: ``max_pending`` bounds re-entrant publish depth\n  (in-flight deliveries); policy ``\"raise\"`` surfaces\n  :class:`BackpressureError`, ``\"drop-oldest\"`` sheds the incoming\n  signal and counts it.\n- Handler exceptions never propagate to the publisher; they are\n  collected on the delivery report.  A dead handler must not kill\n  the nervous system.\n- Thread-safe: a single re-entrant lock guards subscriptions,\n  dedup state, and stats.\n\nThe bus intentionally does *not* persist \u2014 durability belongs to\ndecision memory (:mod:`hugrgate.memory`), which subscribers can\nwrite to through the memory-write gate (slice 380).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 207,
+      "path": "hugrgate/agents/bus.py",
+      "public_defs": [
+        "matches",
+        "Subscription",
+        "EventBus",
+        "subscribe",
+        "unsubscribe",
+        "subscription_count",
+        "publish",
+        "stats",
+        "reset_stats"
+      ]
+    },
+    "hugrgate.agents.contract": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the agent integration contract.\n\nSlice 376.  No agent joins the nervous system without a declared\ncontract: who it is, what it can do (capabilities), what it\nunderstands (intents), what tools it may touch, the shape of its\ninputs/outputs, its SLOs, and its privacy clearance.  The contract\nis the trust anchor every later slice builds on \u2014 routers check\ncapabilities (378/379/387), gates check clearance (380/381/390),\nand the release gate (400) refuses to ship agents with invalid\ncontracts.\n\n:class:`AgentContract` is a frozen dataclass so a validated\ncontract is tamper-evident in memory; :func:`assert_contract`\nraises :class:`AgentContractViolation` naming every violation.\nInput/output checking is structural (field presence + declared\nscalar types) \u2014 deep schema validation belongs to\n:mod:`hugrgate.validation`, which callers can layer on top.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/agents/contract.py",
+      "public_defs": [
+        "AgentContract",
+        "validate_contract",
+        "assert_contract",
+        "check_payload",
+        "check_input",
+        "check_output",
+        "has_capability",
+        "handles_intent",
+        "may_use_tool"
+      ]
+    },
+    "hugrgate.agents.cost": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent cost routing.\n\nSlice 389.  Health (388) answers \"who deserves traffic\"; cost\nanswers \"who can we afford\".  :class:`CostRouter` keeps\nper-agent cost ledgers:\n\n- ``set_cost(agent_id, cost_per_decision)`` \u2014 the price tag;\n- ``set_budget(agent_id, budget)`` \u2014 the wallet (``None`` =\n  unbounded);\n- ``spend(agent_id, amount)`` \u2014 records actuals; crossing the\n  budget fires one edge-triggered ``cost.budget_exhausted`` bus\n  signal;\n- ``authorize(agent_id, estimated_cost)`` \u2014 ``True`` when the\n  estimate fits the remaining budget (routing predicate);\n- ``pick_cheapest(candidates, max_cost=...)`` \u2014 cheapest known\n  agent within an optional per-decision cap; unknown costs sort\n  as +infinity (never preferred over a priced agent), and no\n  affordable candidate raises :class:`AgentNotFound`.\n\nCosts are abstract units \u2014 the same unit the contract\n``max_cost`` SLO (376) speaks.  Budgets here are *routing*\nbudgets; the hard per-agent decision/token/latency budgets of\nslice 395 enforce at execution time.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 168,
+      "path": "hugrgate/agents/cost.py",
+      "public_defs": [
+        "CostLedger",
+        "CostRouter",
+        "set_cost",
+        "set_budget",
+        "spend",
+        "ledger",
+        "authorize",
+        "pick_cheapest",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.disagreement": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent disagreement handling.\n\nSlice 392.  Fusion (391) always names a winner \u2014 but a 51/49\n\"winner\" is a coin flip wearing a crown.  :class:`DisagreementResolver`\ndecides what *happens* about disagreement:\n\n- ``\"fuse\"`` \u2014 fuse normally; when ``disagreement`` exceeds the\n  threshold the resolution is marked ``escalated=True`` (the\n  caller moves the ticket up the ladder \u2014 the system refuses to\n  act on a split vote as if it were consensus);\n- ``\"majority\"`` / ``\"highest_confidence\"`` \u2014 fusion with the\n  named method, same escalation-on-split rule;\n- ``\"human_review\"`` \u2014 skip deciding entirely: enqueue the vote\n  slate to a :class:`HumanReviewQueue` (385) and return a\n  resolution with ``escalated=True`` and the review item id.\n\nThe threshold is the honesty knob: 0.0 escalates on any dissent,\n1.0 never escalates.  Default 0.4 \u2014 a clearly-but-not-decisively\nsplit vote goes up, a lone dissenter doesn't.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 163,
+      "path": "hugrgate/agents/disagreement.py",
+      "public_defs": [
+        "Resolution",
+        "DisagreementResolver",
+        "disagreement_threshold",
+        "resolve",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.dispatch": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 multi-agent dispatch.\n\nSlice 386.  Hard problems deserve more than one mind.\n:class:`MultiAgentDispatch` fans one ticket out to several agents\nand reconciles their answers with three strategies:\n\n- ``\"parallel\"`` \u2014 every agent runs; all results collected\n  (reconciliation belongs to fusion, slice 391);\n- ``\"race\"`` \u2014 the successful call with the lowest latency wins;\n- ``\"quorum\"`` \u2014 the first ``quorum`` successes win; fewer than\n  ``quorum`` successes is a failed dispatch.\n\nExecution is **sequential and deterministic** by design: the\ndispatcher is the unit under replay (397), and replay demands\nrepeatable order.  Concurrency is a deployment choice for the\nservice layer, not the nervous system.  Latencies are measured\nper call so ``\"race\"`` still selects the genuinely fastest agent.\n\nEach call is wrapped: exceptions become failed\n:class:`AgentCallResult`s (never propagate \u2014 one bad agent must\nnot sink the dispatch), and a ``dispatch.completed`` bus signal\ncarries winner, strategy, and per-agent latencies for\nobservability.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 184,
+      "path": "hugrgate/agents/dispatch.py",
+      "public_defs": [
+        "AgentCallResult",
+        "DispatchResult",
+        "MultiAgentDispatch",
+        "dispatch",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.escalation": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent escalation policy.\n\nSlice 384.  When an agent cannot complete its ticket \u2014 low\nconfidence, policy conflict, repeated failure \u2014 the ticket must\nmove *up*, not spin.  :class:`EscalationPolicy` owns the ladder:\n\n``agent \u2192 supervisor \u2192 human \u2192 terminal``\n\n- one step per call (or an explicit higher target \u2014 never\n  downward, never skipping without a reason);\n- per-ticket escalation depth capped by the agent's contract\n  ``max_escalation_depth`` (376) \u2014 depth beyond the contract is\n  :class:`AgentEscalationFailed`, not a silent climb;\n- per-ticket cooldown: re-escalation inside ``cooldown_s`` is\n  refused so a flapping agent cannot strobe the levels;\n- ``terminal`` is the end of the line \u2014 escalating from terminal\n  fails loudly instead of wrapping around.\n\nEvery escalation publishes ``agent.escalated`` on the bus (trace\nid preserved) so triage's urgent rules (377), notification gating\n(382), and the provenance graph (396) all see it.  The full\nper-ticket history is queryable for replay (397).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 178,
+      "path": "hugrgate/agents/escalation.py",
+      "public_defs": [
+        "Escalation",
+        "EscalationPolicy",
+        "level_of",
+        "history",
+        "escalate",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.fusion": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent confidence fusion.\n\nSlice 391.  Dispatch (386) fans out; several agents answer; now\n*one* answer must win.  :func:`fuse_confidences` reconciles\nweighted agent votes into a single label + confidence:\n\n- ``\"weighted\"`` \u2014 each label's mass is ``\u03a3 weight\u00b7confidence``;\n  the winner is the heaviest label and its fused confidence is\n  the weight-normalized mean confidence of its supporters;\n- ``\"majority\"`` \u2014 most votes wins (one agent, one vote);\n  ties break toward the higher total confidence, then the\n  lexicographically smallest label \u2014 deterministic, always;\n- ``\"max_conf\"`` \u2014 the single most confident vote wins outright\n  (for when one specialist should overrule the crowd).\n\n:func:`disagreement` scores 0..1 how split the vote was \u2014\n``1 - winner_mass/total_mass`` \u2014 so the disagreement handler\n(392) knows when fusion was a coin flip wearing a winner's\nmask.  Zero-mass votes (all weights 0) are a ``ValueError``:\nfusion with no evidence is not fusion.",
+      "imports": [
+        "__future__",
+        "dataclasses"
+      ],
+      "loc": 129,
+      "path": "hugrgate/agents/fusion.py",
+      "public_defs": [
+        "AgentVote",
+        "FusionResult",
+        "disagreement",
+        "fuse_confidences"
+      ]
+    },
+    "hugrgate.agents.health": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent health routing.\n\nSlice 388.  The registry (387) knows who *claims* a capability;\nthe health router knows who *deserves* the traffic.  Every\ndispatch result, tool call, and escalation feeds\n:meth:`HealthRouter.report`; the router keeps per-agent EWMA\nscores and answers the only question that matters at route time:\n*among these candidates, who is healthiest right now?*\n\n- ``score(agent_id)`` \u2014 EWMA of success samples (1.0 = ok,\n  0.0 = failure); unknown agents start neutral at 0.5 \u2014 new\n  agents get a chance, known-bad agents don't;\n- ``pick(candidates, min_score=...)`` \u2014 highest score wins,\n  ties break by agent id; nobody above the bar raises\n  :class:`AgentNotFound` (a routing failure, not a guess);\n- ``degraded(agent_id)`` \u2014 score below threshold;\n- latency is tracked as a separate EWMA (``avg_latency_ms``) so\n  a slow-but-correct agent isn't confused with a failing one;\n- edge-triggered ``health.degraded`` bus signals fire when an\n  agent *crosses* below threshold \u2014 not on every bad report \u2014\n  so the notification gate (382) pages once;\n- :meth:`sync_registry` pushes health flags into the\n  :class:`AgentRegistry`, closing the loop: sick agents drop out\n  of ``healthy_only`` lookups automatically.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 188,
+      "path": "hugrgate/agents/health.py",
+      "public_defs": [
+        "HealthScore",
+        "HealthRouter",
+        "report",
+        "score",
+        "degraded",
+        "snapshot",
+        "pick",
+        "sync_registry",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.human_review": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 human-review routing.\n\nSlice 385.  The top of the escalation ladder (384) is a human \u2014\nbut \"send it to a human\" without a queue, an SLA, and a timeout\npolicy is a ticket black hole.  :class:`HumanReviewQueue` is the\nhuman's inbox:\n\n- :meth:`enqueue` parks a decision with a severity and an SLA\n  (seconds); the queue orders by severity then arrival;\n- :meth:`decide` records approve/reject with reviewer identity \u2014\n  double decisions raise instead of silently overwriting;\n- :meth:`overdue` lists items past SLA; :meth:`sweep` applies the\n  timeout policy: ``\"auto_deny\"`` / ``\"auto_approve\"`` (recorded\n  with reviewer ``\"timeout-policy\"``), ``\"escalate\"`` (left\n  pending for the caller to escalate), or ``\"raise\"`` which raises\n  :class:`HumanReviewTimeout` naming every overdue item;\n- lifecycle events (``review.enqueued`` / ``review.decided`` /\n  ``review.overdue``) go on the bus with trace continuity, so\n  notification gating (382) can page the human and provenance\n  (396) sees the verdict.\n\nSeverities reuse the observability ladder \u2014 a ``\"critical\"``\nreview sorts above everything, the same word the alerter uses.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 219,
+      "path": "hugrgate/agents/human_review.py",
+      "public_defs": [
+        "ReviewItem",
+        "ReviewDecision",
+        "HumanReviewQueue",
+        "is_overdue",
+        "enqueue",
+        "pending",
+        "overdue",
+        "decide",
+        "sweep",
+        "decision_for",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.intent": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 intent routing.\n\nSlice 378.  Raw user input arrives as text; the nervous system must\ndecide *which agent owns it*.  :class:`IntentRouter` maps intents to\nagents with keyword scoring:\n\n- each registration binds ``(intent, agent_id)`` to a set of\n  keywords and a static priority;\n- scoring is case-insensitive on word boundaries (``\"cat\"`` never\n  matches ``\"concatenate\"``) \u2014 substring false positives are a\n  routing-bug classic;\n- the winner is the highest ``keyword_hits + priority``; ties break\n  deterministically by ``(agent_id, intent)`` so routing is stable\n  across runs;\n- when nothing matches, the registered fallback agent takes the\n  ticket with confidence 0; with no fallback registered the router\n  raises :class:`AgentNotFound` rather than guessing.\n\nWhen contracts are supplied, registration verifies the agent\nactually declares the intent (slice 376) \u2014 a router that sends\ntraffic to agents that never claimed the intent is a misconfiguration\nthe contract layer exists to catch.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re"
+      ],
+      "loc": 160,
+      "path": "hugrgate/agents/intent.py",
+      "public_defs": [
+        "tokenize",
+        "IntentRoute",
+        "IntentRouter",
+        "register",
+        "unregister",
+        "set_fallback",
+        "route",
+        "intents"
+      ]
+    },
+    "hugrgate.agents.loopbreak": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent loop-breaker.\n\nSlice 393.  Agentic loops are the classic failure: planner asks\nworker, worker asks planner, forever, burning budget.  :class:`LoopBreaker`\ntreats delegation as a *call stack* with strict discipline:\n\n- :meth:`observe(ticket_id, caller, callee)` pushes ``callee``\n  onto the ticket's delegation stack (``caller`` must be the\n  stack top \u2014 delegation is a chain, not a graph);\n- :meth:`return_to(ticket_id)` pops the stack when a delegation\n  completes \u2014 returning to a previous agent is legitimate and\n  must not trip the breaker;\n- pushing an agent already on the stack is a cycle \u2192\n  :class:`AgentLoopDetected` (with the cycle path in details);\n- stacks deeper than ``max_depth`` trip the breaker too \u2014\n  even acyclic chains must terminate.\n\nDetection publishes ``agent.loop`` on the bus (triage's urgent\nrules, slice 377, already route it hot).  The breaker is purely\nobservational: it never kills anything itself \u2014 the runaway\nguard (394) and escalation policy (384) decide what happens\nnext.  Tool calls are leaves, not delegation: route them\nthrough the tool router (379), not the breaker.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate"
+      ],
+      "loc": 152,
+      "path": "hugrgate/agents/loopbreak.py",
+      "public_defs": [
+        "LoopEvent",
+        "LoopBreaker",
+        "observe",
+        "return_to",
+        "path",
+        "reset",
+        "stats",
+        "max_depth"
+      ]
+    },
+    "hugrgate.agents.memory_read": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 memory-read gating.\n\nSlice 381.  Reads are the subtler exfiltration path: an agent\nwith broad clearance but a narrow role must never see raw\nepisodes above its role's redaction line.  :class:`MemoryReadGate`\nenforces the read side of :mod:`hugrgate.memory.access`:\n\n1. **shape** \u2014 requested class is on the privacy ladder;\n2. **binding** \u2014 agent bound with role + clearance (fail closed);\n3. **clearance** \u2014 agent clearance covers the requested class;\n4. **role class** \u2014 the role's ``max_class`` covers it\n   (``auditor`` never sees ``sensitive`` even with clearance);\n5. **redaction** \u2014 reads at/above the role's ``redact_at`` line\n   return ``redacted=True``: the caller must strip metadata/tags\n   before use (the *permit* says redacted; the store view enforces\n   it \u2014 same contract as :class:`GuardedHistory`);\n6. **rate** \u2014 per-agent token bucket so a runaway reader cannot\n   scrape the store.\n\nEvery decision appends to a bounded audit trail\n(``agent_id``, class, granted, redacted, purpose, timestamp) for\nthe provenance graph (396) and human review (385).  Like the write\ngate, this gate decides \u2014 it never touches the store.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 206,
+      "path": "hugrgate/agents/memory_read.py",
+      "public_defs": [
+        "ReadGateConfig",
+        "ReadPermit",
+        "MemoryReadGate",
+        "take",
+        "bind_agent",
+        "attempt_read",
+        "audit_trail",
+        "stats",
+        "deny"
+      ]
+    },
+    "hugrgate.agents.memory_write": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 memory-write gating.\n\nSlice 380.  Agents that can write to decision memory unchecked can\npoison every downstream consumer (retrieval, assisted routing,\ncompaction).  :class:`MemoryWriteGate` stands between agents and\nthe memory store, enforcing four checks in order:\n\n1. **shape** \u2014 the episode declares a privacy class on the\n   :mod:`hugrgate.privacy` ladder;\n2. **clearance** \u2014 the agent's clearance (from its slice-376\n   contract) covers the episode's class (fail closed: unbound\n   agents are denied);\n3. **role** \u2014 the agent's bound role grants writes per\n   :data:`hugrgate.memory.access.ROLE_PERMISSIONS` (analysts and\n   auditors cannot write, ever);\n4. **rate + size + dedup** \u2014 per-agent token-bucket rate limit,\n   payload size cap, and dedup-key suppression so a looping agent\n   cannot flood the store with identical episodes.\n\nA grant is an explicit :class:`WritePermit`; the caller performs\nthe store write itself (the gate never touches the store \u2014 it only\ndecides).  Denials carry machine-readable ``reason`` codes for the\nprovenance graph (slice 396).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 198,
+      "path": "hugrgate/agents/memory_write.py",
+      "public_defs": [
+        "WriteGateConfig",
+        "WritePermit",
+        "MemoryWriteGate",
+        "take",
+        "bind_agent",
+        "unbind_agent",
+        "attempt_write",
+        "stats",
+        "deny"
+      ]
+    },
+    "hugrgate.agents.notify": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 notification gating.\n\nSlice 382.  An agentic loop that notifies on everything notifies\nabout nothing \u2014 operators go blind and paging budgets burn.\n:class:`NotificationGate` is the single choke point for\noutbound notifications:\n\n- per-channel :class:`ChannelConfig`: enable/disable, minimum\n  severity, per-minute rate limit;\n- severity ladder shared with the observability alerting layer\n  (:data:`hugrgate.observability.alerts.SEVERITIES`) \u2014 one\n  vocabulary for \"how urgent is this\" across the system;\n- dedup keys suppress repeat notifications inside a window (the\n  escalation policy in slice 384 re-fires through here, so a\n  flapping agent pages once, not fifty times);\n- every decision is recorded with a machine-readable reason and\n  per-channel stats.\n\n``notify()`` decides; a pluggable ``sender`` callable performs the\nactual delivery (the gate never touches the network \u2014 same\nseparation as the memory gates).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 227,
+      "path": "hugrgate/agents/notify.py",
+      "public_defs": [
+        "Notification",
+        "ChannelConfig",
+        "NotifyDecision",
+        "NotificationGate",
+        "take",
+        "configure",
+        "notify",
+        "stats",
+        "decide"
+      ]
+    },
+    "hugrgate.agents.privacy": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent privacy routing.\n\nSlice 390.  Health picks who *deserves* traffic, cost picks who\n*we can afford* \u2014 privacy picks who *may see it*.  Every signal\ncarries a privacy class (payload key ``\"privacy_class\"``,\ndefault ``\"public\"``); :class:`PrivacyRouter` admits only agents\nwhose clearance covers it:\n\n``class_rank(signal_class) <= class_rank(agent_clearance)``\n\nClearance comes from explicit :meth:`set_clearance` or falls back\nto the agent's contract ``privacy_clearance`` (376) \u2014 one ladder,\none source of truth (:data:`hugrgate.privacy.PRIVACY_CLASS_ORDER`).\nRouting is fail-closed: unlisted agents and uncovered classes\nare excluded, never warned-and-passed.  When nothing qualifies,\n:meth:`route` raises :class:`AgentNotFound` with the required\nclass in details so the caller can escalate to a cleared agent\ninstead of leaking.\n\n:meth:`check` is the single-agent predicate for gates that need\na yes/no without candidate lists (memory gates, tool router).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 106,
+      "path": "hugrgate/agents/privacy.py",
+      "public_defs": [
+        "signal_privacy_class",
+        "PrivacyRouter",
+        "set_clearance",
+        "clearance_of",
+        "check",
+        "route",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.provenance": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent provenance graph.\n\nSlice 396.  Every nervous-system decision \u2014 routed intent,\ndispatched fan-out, fused vote, escalated ticket, gated memory\naccess, human verdict \u2014 should leave a traceable lineage.\n:class:`AgentProvenanceGraph` is that lineage: a DAG of decision\nnodes.\n\n- :meth:`add_decision` records a node (``kind``: ``\"route\"``,\n  ``\"dispatch\"``, ``\"fuse\"``, ``\"escalate\"``, ``\"tool_call\"``,\n  ``\"review\"``, ``\"gate\"``, ...) with ``agent_id``,\n  ``ticket_id``, and parent node ids; parents must already\n  exist and node ids must be new \u2014 the graph is acyclic *by\n  construction*, and :meth:`check_acyclic` verifies it for the\n  release gate (400);\n- :meth:`ancestors` / :meth:`descendants` walk the DAG;\n  :meth:`lineage` returns every root-to-node path (why did this\n  decision happen?);\n- :meth:`export` serializes nodes + edges in topological order\n  \u2014 plain dicts/lists, wire-safe for the replay slice (397).\n\nThis complements :mod:`hugrgate.provenance` (decision\nprovenance) rather than replacing it: that module tracks *what\na decision was*; this graph tracks *which agent decisions led\nto which* across the nervous system.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 199,
+      "path": "hugrgate/agents/provenance.py",
+      "public_defs": [
+        "ProvenanceNode",
+        "AgentProvenanceGraph",
+        "add_decision",
+        "get",
+        "roots",
+        "ancestors",
+        "descendants",
+        "lineage",
+        "check_acyclic",
+        "export",
+        "walk"
+      ]
+    },
+    "hugrgate.agents.registry": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent capability registry.\n\nSlice 387.  Every router in the nervous system asks the same\nquestions: *who exists, what can they do, are they healthy?*\n:class:`AgentRegistry` is the single directory:\n\n- :meth:`register` stores an agent's validated contract\n  (:func:`assert_contract` runs first \u2014 the registry never holds\n  an invalid contract) plus an opaque ``endpoint`` describing how\n  to reach it;\n- lookups: :meth:`get` (raises :class:`AgentNotFound`),\n  :meth:`find_by_capability`, :meth:`find_by_intent`,\n  :meth:`find_by_tool` \u2014 all with ``healthy_only=True`` default\n  so routers never select a known-sick agent by accident;\n- :meth:`set_health` flips the health flag with a note (the\n  health router in slice 388 drives this; operators can too).\n\nDuplicate registration is a ``ValueError`` \u2014 re-registering with\na new contract version goes through :meth:`unregister` first, so\nversion changes are explicit, never silent overwrites.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time"
+      ],
+      "loc": 145,
+      "path": "hugrgate/agents/registry.py",
+      "public_defs": [
+        "RegisteredAgent",
+        "AgentRegistry",
+        "agent_id",
+        "register",
+        "unregister",
+        "get",
+        "set_health",
+        "find_by_capability",
+        "find_by_intent",
+        "find_by_tool",
+        "agent_ids"
+      ]
+    },
+    "hugrgate.agents.release_gate": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 release gate.\n\nSlice 400.  The campaign's capstone: a single gate that refuses\nto ship a broken nervous system.  :class:`NervousSystemReleaseGate`\nruns eight checks over an assembled system:\n\n1. ``contracts-valid`` \u2014 every registered agent's contract\n   validates (376);\n2. ``registry-nonempty`` \u2014 at least one agent is registered;\n3. ``bus-alive`` \u2014 a probe signal publishes and delivers;\n4. ``triage-functional`` \u2014 a probe signal triages without\n   raising (377);\n5. ``budgets-allocated`` \u2014 every registered agent has a\n   decision budget (395);\n6. ``kill-switch-clear`` \u2014 the runaway guard is not tripped\n   (394);\n7. ``provenance-acyclic`` \u2014 the provenance graph is a DAG\n   (396);\n8. ``replay-deterministic`` \u2014 a probe ticket records and\n   replays deterministically (397).\n\n:class:`NervousSystem` bundles every campaign component with\n:func:`assemble` building a wired default (bus shared across\ntriage, escalation, review, dispatch, health, cost, breaker,\nguard).  :class:`ReleaseReport` carries per-check results,\n``passed``, a human ``summary()``, and a wire-safe\n:meth:`to_dict` for CI.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 289,
+      "path": "hugrgate/agents/release_gate.py",
+      "public_defs": [
+        "GateCheck",
+        "ReleaseReport",
+        "NervousSystem",
+        "assemble",
+        "NervousSystemReleaseGate",
+        "passed",
+        "failed",
+        "summary",
+        "to_dict",
+        "run"
+      ]
+    },
+    "hugrgate.agents.replay": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent replay.\n\nSlice 397.  \"It worked in prod\" is not a debugging strategy.\n:class:`AgentReplay` records a ticket's step inputs/outputs and\nre-runs them against an agent function to answer two questions:\n\n1. **fidelity** \u2014 does the agent still produce the recorded\n   outputs for the recorded inputs? (regression after a\n   contract version bump, slice 387);\n2. **determinism** \u2014 do two runs with the same seed produce\n   identical outputs? (required before any claim of\n   reproducibility, and an input to the release gate, 400).\n\nRecording is explicit: :meth:`record_step` appends\n``(kind, input, output)`` triples per ticket.  :meth:`replay`\nfeeds each recorded input back through ``agent_fn`` and diffs\noutputs with ``==`` (plus a ``repr`` fallback note on\nmismatch).  :meth:`check_determinism` runs the whole ticket\ntwice.  Event payloads must be JSON-safe \u2014 replay is a\ndebugging tool, not a second memory store.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
+      "loc": 178,
+      "path": "hugrgate/agents/replay.py",
+      "public_defs": [
+        "RecordedStep",
+        "ReplayReport",
+        "AgentReplay",
+        "fidelity",
+        "record_step",
+        "record",
+        "steps",
+        "replay",
+        "check_determinism",
+        "forget",
+        "run"
+      ]
+    },
+    "hugrgate.agents.runaway": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 runaway escalation guard.\n\nSlice 394.  The loop-breaker (393) catches *cycles*; the runaway\nguard catches *everything else that never ends*: escalation\nstorms, thousand-step tickets, token hemorrhages.  It is the\nlast line of defense, and it is deliberately terminal \u2014 a\nbreach raises :class:`AgentRunaway` (not recoverable: the ticket\nis dead, start a new one).\n\n- per-ticket counters: escalations, steps, tokens;\n  :meth:`check_escalation` / :meth:`consume` increment and\n  enforce ``max_escalations_per_ticket`` /\n  ``max_steps_per_ticket`` / ``max_tokens_per_ticket``;\n- :meth:`trip_kill_switch` halts *all* tickets immediately\n  (operator panic button); :meth:`reset_kill_switch` re-arms;\n- every breach and kill-switch event publishes ``agent.runaway``\n  (critical) on the bus with the counter values in the payload \u2014\n  triage routes it urgent, notification pages, provenance\n  records the kill.\n\nThe guard composes with the loop-breaker: wire the breaker's\n``agent.loop`` signal to ``check_escalation`` and cycles cost\nescalation budget too.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time"
+      ],
+      "loc": 204,
+      "path": "hugrgate/agents/runaway.py",
+      "public_defs": [
+        "RunawayLimits",
+        "TicketUsage",
+        "RunawayGuard",
+        "kill_switch_tripped",
+        "check_escalation",
+        "consume",
+        "usage",
+        "trip_kill_switch",
+        "reset_kill_switch",
+        "reset",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.simulator": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent simulator.\n\nSlice 398.  You cannot chaos-test a nervous system against\nproduction agents.  :class:`AgentSimulator` runs *scripted*\nagents through the real nervous-system machinery \u2014 bus,\nloop-breaker, runaway guard, dispatcher \u2014 so failure modes can\nbe rehearsed deterministically:\n\n- behaviors: ``\"honest\"`` (delegates and completes),\n  ``\"slow\"`` (honest, high latency), ``\"faulty\"`` (raises),\n  ``\"looping\"`` (delegates back to its caller \u2014 trips the\n  loop-breaker), ``\"escalating\"`` (burns escalation budget \u2014\n  trips the runaway guard), or any custom callable;\n- a *script* is a list of ``{\"ticket\", \"from\", \"to\",\n  \"intent\"}`` delegation steps; the simulator plays each\n  through :class:`LoopBreaker` and dispatches on the\n  destination's behavior;\n- *faults* are callables ``(sim, step_index)`` invoked before\n  each step \u2014 the chaos hook (trip the kill switch at step N,\n  mute the bus, ...), reusing the chaos-experiment mindset\n  without duplicating :mod:`hugrgate.chaos`;\n- :class:`SimulationReport` counts successes, failures, loops,\n  runaways, and per-agent outcomes.  Seeded RNG: the same\n  script + seed replays identically.\n\nThe simulator is deterministic and in-process \u2014 a rehearsal\nstage, not a load generator.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "typing"
+      ],
+      "loc": 232,
+      "path": "hugrgate/agents/simulator.py",
+      "public_defs": [
+        "SimContext",
+        "SimulationReport",
+        "AgentSimulator",
+        "success_rate",
+        "bus",
+        "guard",
+        "add_agent",
+        "run",
+        "tally"
+      ]
+    },
+    "hugrgate.agents.tools": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 tool routing.\n\nSlice 379.  Agents act through tools; an agent invoking a tool it\nwas never granted is a privilege-escalation bug.  :class:`ToolRouter`\nis the choke point every tool call passes through:\n\n- per-agent :class:`ToolPolicy`: allowed tools, denied tools\n  (**deny always wins** over allow), per-ticket call budgets, and\n  per-tool argument schemas;\n- :meth:`ToolRouter.authorize` checks, in order: a policy exists\n  for the agent \u2192 the tool is allowed and not denied \u2192 the agent's\n  contract (when known) permits the tool \u2192 arguments match the\n  schema \u2192 the ticket still has call budget;\n- every grant mints a ``call_id``; :meth:`ToolRouter.record_result`\n  closes it with success/latency so per-tool reliability stats\n  accumulate for the health router (slice 388).\n\nFailures raise the taxonomy, never return ``None``: missing policy\nor denied tool \u2192 :class:`AgentContractViolation`, exhausted call\nbudget \u2192 :class:`AgentBudgetExhausted`, bad arguments \u2192\n:class:`AgentContractViolation` with the schema violations in\ndetails.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate"
+      ],
+      "loc": 190,
+      "path": "hugrgate/agents/tools.py",
+      "public_defs": [
+        "ToolPolicy",
+        "ToolGrant",
+        "ToolRouter",
+        "allows",
+        "register_policy",
+        "policy_for",
+        "authorize",
+        "record_result",
+        "tool_stats",
+        "calls_used"
+      ]
+    },
+    "hugrgate.agents.triage": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 event triage API.\n\nSlice 377.  The bus delivers *everything*; the nervous system must\nnot react to everything.  :class:`EventTriage` is the first\nprocessing stage after the bus: it classifies each\n:class:`AgentSignal` into one of three dispositions \u2014\n\n- ``route`` \u2014 hand to a named queue for downstream consumers\n  (intent routing, escalation, notification);\n- ``drop`` \u2014 noise the system must never react to (heartbeats,\n  duplicates that escaped dedup, known-benign chatter);\n- ``defer`` \u2014 legitimate but non-urgent work parked until the\n  attention budget allows it (slice 383 consumes the defer queue).\n\nRules are evaluated in insertion order; the first matching rule\nwins.  The default rule (always last, irremovable) routes to the\n``\"default\"`` queue at the signal's own priority.  A rule may boost\nor clamp priority so triage \u2014 not the producer \u2014 owns urgency.\n\nEvery decision is recorded in stats and, when a bus is attached,\npublished as a ``triage.decision`` signal (metadata only) so\nobservability tracing sees the classification path.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 240,
+      "path": "hugrgate/agents/triage.py",
+      "public_defs": [
+        "TriageRule",
+        "TriageDecision",
+        "EventTriage",
+        "add_rule",
+        "remove_rule",
+        "rules",
+        "triage",
+        "stats",
+        "with_defaults"
+      ]
+    },
+    "hugrgate.agents.types": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 shared nervous-system types.\n\nSlice 376.  The connective tissue for agentic loops: every agent,\nsignal, and decision ticket in the nervous system speaks this\nvocabulary.  Signals flow over :mod:`hugrgate.agents.bus`; tickets\ncarry budgets, trace context, and provenance through the routers,\ngates, and guards built in slices 377-400.\n\nThis module is stdlib-only and dependency-free inside ``hugrgate``\nso the whole campaign layer can share it without import cycles.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 130,
+      "path": "hugrgate/agents/types.py",
+      "public_defs": [
+        "new_trace_id",
+        "AgentSignal",
+        "AgentDelivery",
+        "AgentTicket",
+        "child"
+      ]
+    },
     "hugrgate.allocprof": {
       "docstring": "Allocation profiling \u2014 tracemalloc integration for decisions. Slice 279.\n\nTime profiles (slices 276-278) say *where the clock goes*; this module\nsays *where the bytes go*:\n\n- :class:`AllocationProfiler` wraps :mod:`tracemalloc` with a\n  HugrGate-shaped API: :meth:`AllocationProfiler.track` snapshots\n  allocations inside a region, :meth:`profile_decision` diffs the heap\n  across one :meth:`HugrGate.decide` call.\n- :class:`AllocationReport` ranks allocation sites\n  (``filename:lineno``) by bytes and block count, with before/after\n  totals.\n- Privacy: allocation *sites* are code locations, not values, but a\n  site's frame can still name backend internals.  Under a strict policy\n  only aggregate totals are attached to ``result.metadata``; the full\n  site list stays local to the caller.\n- Errors: misuse (bad ``nframes``/``top_n``, tracking without\n  :mod:`tracemalloc` started) raises :class:`ProfilingError` \u2014 the\n  slice-276 taxonomy error, reused per the Anti-Checkbox Rule.",
       "imports": [
@@ -806,7 +1427,7 @@
         "time",
         "typing"
       ],
-      "loc": 304,
+      "loc": 317,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -960,7 +1581,7 @@
         "time",
         "typing"
       ],
-      "loc": 300,
+      "loc": 325,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -2478,7 +3099,7 @@
         "time",
         "typing"
       ],
-      "loc": 680,
+      "loc": 692,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -2966,14 +3587,14 @@
       ]
     },
     "hugrgate.conformance": {
-      "docstring": "Backend conformance kit. Slice 440.\n\nA backend is not conformant because it *imports* \u2014 it is\nconformant because it honors the :class:`Backend` contract under\nexercise. :func:`run_backend_conformance` drives a backend through\na battery of checks and returns a :class:`ConformanceReport`:\n\n- interface shape (via :func:`hugrgate.plugins.validate_plugin`),\n- ``supports()`` returns booleans and never raises on well-formed\n  specs of every spec type,\n- ``evaluate()`` returns well-formed results (distribution sums to\n  1, probabilities in [0, 1], decided value inside the spec's\n  value space, probability consistent with the distribution),\n- ``evaluate()`` failures raise taxonomy errors or stdlib\n  validation errors \u2014 never raw ``Exception``\\ s (slice 007 law),\n- ``health()`` / ``privacy_properties()`` /\n  ``calibration_info()`` return dicts,\n- latency/cost estimates are sane non-negative numbers.\n\n:func:`assert_conformance` raises\n:class:`~hugrgate.errors.ConformanceError` listing every failure.\n``hugrgate check-backend NAME`` runs the kit from the CLI.",
+      "docstring": "Backend conformance kit. Slice 440.\n\nA backend is not conformant because it *imports* \u2014 it is\nconformant because it honors the :class:`Backend` contract under\nexercise. :func:`run_backend_conformance` drives a backend\nthrough a battery of checks and returns a\n:class:`ConformanceReport`:\n\n- interface shape (via :func:`hugrgate.plugins.validate_plugin`),\n- ``supports()`` returns booleans and never raises on well-formed\n  specs of every spec type,\n- ``evaluate()`` returns well-formed results (distribution sums to\n  1, probabilities in [0, 1], decided value inside the spec's\n  value space, probability consistent with the distribution),\n- ``evaluate()`` failures raise taxonomy errors or stdlib\n  validation errors \u2014 never raw ``Exception``s (slice 007 law),\n- ``health()`` / ``privacy_properties()`` /\n  ``calibration_info()`` return dicts,\n- latency/cost estimates are sane non-negative numbers.\n\n:func:`assert_conformance` raises\n:class:`~hugrgate.errors.ConformanceError` listing every failure.\n``hugrgate check-backend NAME`` runs the kit from the CLI.",
       "imports": [
         "__future__",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 227,
+      "loc": 228,
       "path": "hugrgate/conformance.py",
       "public_defs": [
         "ConformanceCheck",
@@ -4781,7 +5402,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 676,
+      "loc": 852,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4842,6 +5463,26 @@
         "DatasetError",
         "EvalError",
         "EvalGateError",
+        "AgentError",
+        "AgentContractViolation",
+        "AgentNotFound",
+        "AgentLoopDetected",
+        "AgentRunaway",
+        "AgentBudgetExhausted",
+        "AgentEscalationFailed",
+        "HumanReviewTimeout",
+        "SupplyChainViolation",
+        "SignatureVerificationFailed",
+        "PluginTrustError",
+        "SandboxViolation",
+        "InputTooLarge",
+        "ResourceBudgetExceeded",
+        "DeserializationBlocked",
+        "PathTraversalBlocked",
+        "PromptInjectionBlocked",
+        "ReplayDetected",
+        "AuthzDenied",
+        "RateLimitExceeded",
         "ProtocolError",
         "SDKError",
         "PluginError",
@@ -7161,7 +7802,7 @@
         "secrets",
         "typing"
       ],
-      "loc": 247,
+      "loc": 272,
       "path": "hugrgate/privacy_crypto.py",
       "public_defs": [
         "hkdf",
@@ -7489,7 +8130,7 @@
         "pickle",
         "typing"
       ],
-      "loc": 268,
+      "loc": 272,
       "path": "hugrgate/privacy_provenance.py",
       "public_defs": [
         "fingerprint_state",
@@ -7595,11 +8236,12 @@
         "__future__",
         "collections",
         "copy",
+        "hugrgate",
         "pickle",
         "secrets",
         "typing"
       ],
-      "loc": 122,
+      "loc": 137,
       "path": "hugrgate/privacy_tokens.py",
       "public_defs": [
         "TokenVault",
@@ -8985,6 +9627,614 @@
         "decide_value"
       ]
     },
+    "hugrgate.security.__init__": {
+      "docstring": "Security Forge \u2014 Gjallarbr\u00fa Campaign XVII (slices 401-425).\n\nAdversarial robustness for a runtime that faces hostile inputs,\nmodels, plugins, and networks. Built *on top of* the existing\ndefenses \u2014 privacy fortress (redaction, tokenization, sealed crypto),\nsecret detection, hash-chained audit logs, cluster mutual auth \u2014\nhardening what exists instead of duplicating it:\n\n- :mod:`hugrgate.security.threat_model` \u2014 STRIDE threat model v2\n  with coverage analysis (slice 401).\n- :mod:`hugrgate.security.attack_surface` \u2014 enumerated, audited\n  attack surface (slice 402).\n- :mod:`hugrgate.security.depscan` \u2014 dependency security scanning\n  (slice 403).\n- :mod:`hugrgate.security.supply_chain` \u2014 supply-chain policy +\n  SBOM (slice 404).\n- :mod:`hugrgate.security.model_signing` \u2014 signed model metadata\n  (slice 405).\n- :mod:`hugrgate.security.checksums` \u2014 model checksum enforcement\n  (slice 406).\n- :mod:`hugrgate.security.plugins` \u2014 plugin trust model (slice 407).\n- :mod:`hugrgate.security.sandbox` \u2014 backend sandbox boundary\n  (slice 408).\n- :mod:`hugrgate.security.input_limits` \u2014 input-size limits\n  (slice 409).\n- :mod:`hugrgate.security.resource_guards` \u2014 resource-exhaustion\n  guards (slice 410).\n- :mod:`hugrgate.security.serde_guards` \u2014 deserialization hardening\n  (slice 411).\n- :mod:`hugrgate.security.path_guards` \u2014 path traversal defenses\n  (slice 412).\n- :mod:`hugrgate.security.injection_corpus` \u2014 injection test corpus\n  (slice 413).\n- :mod:`hugrgate.security.prompt_injection` \u2014 prompt-injection\n  boundary (slice 414).\n- :mod:`hugrgate.security.malicious_backend` \u2014 malicious-backend\n  adversarial fixtures (slice 415).\n- :mod:`hugrgate.security.provenance_guards` \u2014 provenance tamper\n  detection + tip sealing (slice 416).\n- :mod:`hugrgate.security.cache_poisoning` \u2014 cache-poisoning\n  defenses (slice 417).\n- :mod:`hugrgate.security.replay` \u2014 replay attack defenses\n  (slice 418).\n- :mod:`hugrgate.security.authz` \u2014 service authorization policy\n  (slice 419).\n- :mod:`hugrgate.security.rate_limit` \u2014 rate limiting (slice 420).\n- :mod:`hugrgate.security.secret_audit` \u2014 secret-handling audit\n  (slice 421).\n- :mod:`hugrgate.security.fuzzing` \u2014 deterministic fuzzing campaign\n  harness (slice 422).\n- :mod:`hugrgate.security.gauntlet` \u2014 independent-style security\n  gauntlet (slice 424).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 287,
+      "path": "hugrgate/security/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.security.attack_surface": {
+      "docstring": "Attack-surface inventory. Slice 402.\n\nA security inventory that cannot drift: :func:`enumerate_surface`\nrebuilds the inventory from the code itself (AST over\n``hugrgate/server.py`` routes, ``hugrgate/cli.py`` subcommands, and\n``os.getenv``/``os.environ`` reads across the package), and\n:func:`find_unlisted` reports anything the curated registry does not\nknow about. New endpoints, commands, or env vars without a registry\nentry fail the gate test \u2014 the inventory is append-only by\nconstruction.\n\nEach entry carries a kind, whether authentication is required, and a\nrisk rating, so reviewers can see the exposed surface at a glance.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 277,
+      "path": "hugrgate/security/attack_surface.py",
+      "public_defs": [
+        "SurfaceEntry",
+        "AttackSurface",
+        "enumerate_surface",
+        "find_unlisted",
+        "curated_surface",
+        "to_dict",
+        "from_dict",
+        "add",
+        "by_kind",
+        "unauthenticated",
+        "high_risk",
+        "names",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.security.authz": {
+      "docstring": "Service authorization policy. Slice 419.\n\nThreat T-12: the HTTP service exposes decide/configure endpoints\nwith no authentication or authorization. This module is the\ndeny-by-default policy engine that threat's mitigation names:\n\n- :class:`AuthzPolicy` \u2014 roles map to capability sets; principals\n  (API keys) map to roles. Everything not explicitly granted is\n  denied: unknown principals, unknown capabilities, revoked keys.\n- Credential checks use constant-time comparison, so a wrong key\n  is indistinguishable (by timing) from an unknown key id.\n- Keys are revocable and the store supports rotation (register\n  the replacement, revoke the old) without touching role grants.\n\nWhat this module is *not*: deployment wiring. TLS termination,\nkey distribution, and per-route enforcement in ``hugrgate/server``\nremain operator responsibility (the threat model records this as\nthe residual for T-12). The :data:`ENDPOINT_CAPABILITIES` table\ndocuments which capability each service operation requires so the\nwiring is a lookup, not a judgment call.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hmac",
+        "hugrgate",
+        "secrets",
+        "threading",
+        "typing"
+      ],
+      "loc": 204,
+      "path": "hugrgate/security/authz.py",
+      "public_defs": [
+        "Principal",
+        "AuthzPolicy",
+        "can",
+        "define_role",
+        "role_capabilities",
+        "register_key",
+        "revoke_key",
+        "rotate_key",
+        "authenticate",
+        "authorize",
+        "check",
+        "stats"
+      ]
+    },
+    "hugrgate.security.cache_poisoning": {
+      "docstring": "Cache-poisoning defenses. Slice 417.\n\nAttack result against :class:`DecisionCache`: the key bound\nstate+spec+policy, but *not* the tenant or the model generation \u2014\nso two tenants sharing a cache, or two model versions behind one\nbackend name, could read each other's entries (threat T-05). The\nfix (in ``hugrgate/cache.py`` and the sealed cache): optional\n``namespace`` / ``model_version`` key bindings, defaulting to the\nhistorical behavior.\n\nThis module provides:\n\n- :class:`BoundCache` \u2014 a cache view with namespace and model\n  version pinned: callers cannot forget to pass them.\n- :func:`run_poison_suite` \u2014 the adversarial battery: cross-tenant\n  reads, stale-model reads, type confusion, policy separation,\n  and in-memory tamper eviction, each measured as\n  contained-or-not.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 151,
+      "path": "hugrgate/security/cache_poisoning.py",
+      "public_defs": [
+        "BoundCache",
+        "PoisonReport",
+        "run_poison_suite",
+        "namespace",
+        "model_version",
+        "get",
+        "put",
+        "invalidate_backend"
+      ]
+    },
+    "hugrgate.security.checksums": {
+      "docstring": "Model checksum enforcement. Slice 406.\n\nSigned metadata (slice 405) attests *claims* about a model; checksums\nattest the *bytes*. A manifest pins every file in a model directory\nto a SHA-256 digest; :func:`verify_manifest` re-hashes on load and\n:meth:`ModelChecksumGate.load` refuses to hand a loader bytes that do\nnot match. Tampered, truncated, or substituted weight files fail\nclosed with :class:`SignatureVerificationFailed`.\n\nHashing is streaming (64 KiB chunks) so multi-gigabyte weight files\nnever sit fully in memory.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 209,
+      "path": "hugrgate/security/checksums.py",
+      "public_defs": [
+        "hash_file",
+        "ChecksumManifest",
+        "VerificationReport",
+        "build_manifest",
+        "verify_manifest",
+        "enforce_manifest",
+        "verified_open",
+        "ModelChecksumGate",
+        "to_dict",
+        "from_dict",
+        "to_json",
+        "from_json",
+        "passed",
+        "to_dict",
+        "load",
+        "write_manifest"
+      ]
+    },
+    "hugrgate.security.depscan": {
+      "docstring": "Dependency security scan. Slice 403.\n\nScans requirement specifiers (and optionally installed versions)\nfor three classes of findings:\n\n- **advisories** \u2014 a curated, locally-maintained DB of verified CVEs\n  (every entry was cross-checked against NVD/GitHub advisories; the\n  DB is explicitly a *subset*, not a replacement for ``pip-audit`` /\n  OSV \u2014 see :data:`ADVISORY_DB_NOTE`);\n- **pinning** \u2014 unpinned or open-ended requirements that let a\n  future malicious release slide in;\n- **url_dependencies** \u2014 git/URL installs that bypass index trust.\n\nVersion comparison is a small PEP-440-subset matcher (``== >= <= >\n< !=`` with comma-AND); good enough for advisory range checks\nwithout pulling in ``packaging``.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "tomllib",
+        "typing"
+      ],
+      "loc": 291,
+      "path": "hugrgate/security/depscan.py",
+      "public_defs": [
+        "Advisory",
+        "Finding",
+        "matches_spec",
+        "parse_requirement",
+        "installed_versions",
+        "scan_requirements",
+        "scan_project",
+        "render_report",
+        "to_dict"
+      ]
+    },
+    "hugrgate.security.fuzzing": {
+      "docstring": "Fuzzing campaign harness. Slice 422.\n\nThreat T-16: malformed JSON/compact encodings crash serde or\nvalidation instead of raising taxonomy errors. This module is the\nreusable harness; the campaign itself lives in the test suite,\nwhich fuzzes the real parsers (``DecisionSpec.from_dict``,\n``policy_from_dict``/``result_from_dict``, the compact codecs,\n``validate_state``, and the security detectors).\n\nDesign (stdlib only, seeded for reproducibility \u2014 the same\nconvention as the slice-247 privacy fuzz):\n\n- :class:`FuzzTarget` wraps a callable and classifies each case:\n  ``ok``, ``taxonomy_error`` (an expected :class:`HugrGateError`\n  or other *declared* exception), ``crash`` (anything else), or\n  ``hang`` (per-case timeout exceeded).\n- :func:`run_campaign` drives a generator for ``n_cases`` with a\n  fixed seed, runs each case in a worker thread with a timeout,\n  and returns a :class:`FuzzReport` with the crash corpus\n  (deduplicated by exception type + message) and reproduction\n  seeds.\n- Generators: :func:`hostile_values` (nested hostile scalars),\n  :func:`hostile_json_texts` (malformed JSON), :func:`hostile_states`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "random",
+        "threading",
+        "traceback",
+        "typing"
+      ],
+      "loc": 220,
+      "path": "hugrgate/security/fuzzing.py",
+      "public_defs": [
+        "Crash",
+        "FuzzReport",
+        "FuzzTarget",
+        "run_campaign",
+        "hostile_values",
+        "hostile_states",
+        "hostile_json_texts",
+        "signature",
+        "unique_crashes",
+        "summary",
+        "worker"
+      ]
+    },
+    "hugrgate.security.gauntlet": {
+      "docstring": "The security gauntlet. Slice 424.\n\nThe capstone battery: runs every Security Forge adversarial suite\nin one pass and reports per-battery containment. A battery that\nraises fails *that battery* \u2014 the gauntlet itself never crashes.\n\nBatteries:\n\n- threat_model \u2014 the STRIDE model validates and every threat\n  names its tests;\n- attack_surface \u2014 no unlisted routes/commands/env vars (drift);\n- injection_corpus \u2014 all 30 payloads neutralized/detected;\n- malicious_backends \u2014 the five hostile backends stay contained;\n- provenance_tamper \u2014 chain + tip seals detect every attack;\n- cache_poison \u2014 cross-tenant/stale-model reads contained;\n- replay \u2014 sealed envelopes reject replays;\n- authz \u2014 unknown keys and escalation denied;\n- rate_limit \u2014 bursts rejected with retry-after;\n- secret_audit \u2014 zero high/medium findings over the package;\n- fuzz_smoke \u2014 100-case campaigns on the codec + validator;\n- depscan \u2014 no advisory findings over the project.\n\nUse :func:`run_security_gauntlet` (named to avoid clashing with\nthe slice-415 backend :func:`run_gauntlet`).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 309,
+      "path": "hugrgate/security/gauntlet.py",
+      "public_defs": [
+        "BatteryResult",
+        "SecurityGauntletReport",
+        "run_security_gauntlet",
+        "passed",
+        "failed",
+        "to_dict",
+        "summary",
+        "dict_cases"
+      ]
+    },
+    "hugrgate.security.injection_corpus": {
+      "docstring": "Injection test corpus. Slice 413.\n\nA curated, categorized corpus of hostile payloads (SQLi, command,\nXSS, log forging, path, LDAP, prompt override) plus the\nsanitizers that must neutralize them and a harness\n(:func:`run_corpus`) proving every payload is neutralized in its\ncontext.\n\nDesign notes:\n\n- Sanitization is context-specific: log forging is defeated by\n  control-character stripping, filenames by charset whitelisting,\n  shell args by :func:`shlex.quote`, HTML by escaping. There is no\n  universal sanitizer, and the corpus encodes that.\n- SQL injection is *detected*, not cleaned: the only safe handling\n  is parameterization, so :func:`detect_sqli` flags hostile input\n  for rejection instead of pretending to clean it.\n- The prompt-override category feeds slice 414's boundary tests.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "html",
+        "hugrgate",
+        "re",
+        "shlex",
+        "unicodedata"
+      ],
+      "loc": 268,
+      "path": "hugrgate/security/injection_corpus.py",
+      "public_defs": [
+        "Payload",
+        "sanitize_log",
+        "sanitize_filename",
+        "shell_quote",
+        "escape_html",
+        "escape_ldap",
+        "detect_sqli",
+        "neutralize",
+        "CorpusResult",
+        "run_corpus"
+      ]
+    },
+    "hugrgate.security.input_limits": {
+      "docstring": "Input-size limits. Slice 409.\n\n:func:`hugrgate.validation.validate_state` already caps bytes and\ndepth generously; this module is the *security* layer on top of it\n(threat T-04): a deliberate, named, tunable :class:`InputLimits`\npolicy that also covers key counts, key lengths, batch\namplification, and prompt text \u2014 the dimensions validation does\nnot bound.\n\nOrdering at ingress: limits first (cheap rejection of hostile\npayloads), then validation, then privacy. :func:`check_state` runs\n:func:`validate_state` itself so the security path reuses the\ncontract checks instead of duplicating them; limit breaches raise\n:class:`InputTooLarge` (taxonomy error), contract breaches raise\nthe usual :class:`SpecError`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "typing"
+      ],
+      "loc": 155,
+      "path": "hugrgate/security/input_limits.py",
+      "public_defs": [
+        "InputLimits",
+        "check_state",
+        "check_batch",
+        "check_prompt",
+        "describe"
+      ]
+    },
+    "hugrgate.security.malicious_backend": {
+      "docstring": "Malicious-backend adversarial fixtures + containment gauntlet.\n# secscan: hostile-fixture \u2014 this module is deliberately hostile code.\n\nSlice 415. Five hostile backends, each defeated by a real,\nalready-implemented layer (threat T-11):\n\n- :class:`LyingBackend` \u2014 out-of-spec values, impossible\n  confidence \u2192 :func:`validate_result` rejects (SpecError).\n- :class:`ExfiltratingBackend` \u2014 socket/subprocess during\n  evaluate \u2192 :class:`SandboxedBackend` (slice 408) raises\n  SandboxViolation before the operation runs.\n- :class:`HangingBackend` \u2014 sleeps forever \u2192 :class:`TimeoutBackend`\n  raises TimeoutError past the deadline.\n- :class:`GiantOutputBackend` \u2014 megabyte metadata blob \u2192\n  output-size check raises InputTooLarge.\n- :class:`ExplodingBackend` \u2014 raises arbitrary exceptions \u2192\n  core translates to BackendError (never a raw traceback leak).\n\n:func:`run_gauntlet` executes each attack against a live\n:class:`HugrGate` and reports per-attack containment; the\ncontrol backend must still decide normally.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "os",
+        "socket",
+        "time",
+        "typing"
+      ],
+      "loc": 249,
+      "path": "hugrgate/security/malicious_backend.py",
+      "public_defs": [
+        "check_result_size",
+        "LyingBackend",
+        "ExfiltratingBackend",
+        "HangingBackend",
+        "GiantOutputBackend",
+        "ExplodingBackend",
+        "HonestBackend",
+        "GauntletReport",
+        "run_gauntlet",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "passed",
+        "to_dict",
+        "contain",
+        "lying",
+        "exfil",
+        "hanging",
+        "giant",
+        "exploding"
+      ]
+    },
+    "hugrgate.security.model_signing": {
+      "docstring": "Signed model metadata. Slice 405.\n\nModel metadata (identity, version, capability claims, checksums) is a\ntrust decision: the gate routes, caches, and explains based on it.\nAn unsigned metadata file can be edited to misroute decisions\n(threat T-02). This module makes metadata tamper-evident:\n\n- :class:`ModelSigner` \u2014 HMAC-SHA256 sign/verify over canonical\n  JSON (stdlib only; keys validated by\n  :func:`hugrgate.privacy_crypto.require_key`).\n- :class:`SignedMetadata` \u2014 the envelope: metadata dict, key id,\n  algorithm tag, hex signature; JSON-serializable for sidecar\n  ``.sig`` files.\n- :class:`TrustedModelStore` \u2014 verify-before-trust registry:\n  ``register()`` refuses envelopes that do not verify, so only\n  attested metadata is ever served.\n\nKey rotation is first-class: verification uses a ``key_id ->\nkey`` map, unknown key ids fail closed, and ``rotate()`` re-signs\nthe store's envelopes under a new key.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 225,
+      "path": "hugrgate/security/model_signing.py",
+      "public_defs": [
+        "canonical_json",
+        "SignedMetadata",
+        "ModelSigner",
+        "TrustedModelStore",
+        "to_dict",
+        "from_dict",
+        "to_json",
+        "from_json",
+        "key_id",
+        "sign",
+        "verify",
+        "write_signed",
+        "read_signed",
+        "register",
+        "get",
+        "rotate"
+      ]
+    },
+    "hugrgate.security.path_guards": {
+      "docstring": "Path traversal defenses. Slice 412.\n\nAudit: file paths in HugrGate come from the operator (CLI args,\nconfig) \u2014 no manifest-driven path joins were found in the runtime\npack loaders \u2014 but threat T-10 still wants a single choke point\nwherever a user-influenced relative path meets the filesystem.\nThat choke point is :func:`safe_join`:\n\n- null bytes are rejected outright;\n- the joined path is fully resolved (``..`` segments *and*\n  symlinks) and must stay inside the resolved root;\n- anything else raises :class:`PathTraversalBlocked`.\n\nThe single invariant is *containment*: absolute paths are allowed\niff they resolve inside the root, because containment \u2014 not the\nspelling \u2014 is the security property.\n\nIntegrated into :func:`hugrgate.security.checksums.verified_open`\n(slice 406), the model-directory read boundary.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "os",
+        "pathlib"
+      ],
+      "loc": 77,
+      "path": "hugrgate/security/path_guards.py",
+      "public_defs": [
+        "is_within",
+        "safe_join",
+        "safe_read_text"
+      ]
+    },
+    "hugrgate.security.plugins": {
+      "docstring": "Plugin trust model. Slice 407.\n\n``BackendRegistry.register`` accepts arbitrary ``Backend`` objects \u2014\ntoday there is no distinction between a shipped backend and a\nthird-party module with the same interface (threat T-15). This module\nadds that distinction without changing the registry:\n\n- trust levels: ``builtin`` (shipped with HugrGate), ``signed``\n  (manifest signature verifies against the operator keyring),\n  ``sandboxed`` (may load but only under a sandbox policy, slice\n  408); anything else is denied by default;\n- :class:`PluginManifest` \u2014 name, version, dotted entry point,\n  declared capabilities, and a signature envelope\n  (:class:`SignedMetadata`, slice 405) for the ``signed`` level;\n- :class:`PluginRegistry` \u2014 ``register_manifest`` verifies before\n  trusting; ``load`` imports the entry point only from allowlisted\n  module prefixes; ``check_capability`` enforces least privilege.\n\nDangerous capabilities (``network``, ``subprocess``,\n``filesystem_write``) are never granted to ``sandboxed`` plugins\nand must be explicitly declared even by ``signed`` ones.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "re",
+        "typing"
+      ],
+      "loc": 219,
+      "path": "hugrgate/security/plugins.py",
+      "public_defs": [
+        "PluginManifest",
+        "sign_manifest",
+        "PluginRegistry",
+        "payload",
+        "register_manifest",
+        "register_builtin",
+        "load",
+        "check_capability",
+        "granted"
+      ]
+    },
+    "hugrgate.security.prompt_injection": {
+      "docstring": "Prompt-injection boundary. Slice 414.\n\nLLM backends cannot distinguish instructions from data on their\nown \u2014 so the boundary must be structural (threat T-03):\n\n- :class:`UntrustedData` \u2014 a type-level marker: tool output and\n  state text travel wrapped, never as bare strings, where a\n  boundary is enforced.\n- :func:`build_prompt` \u2014 renders system instructions with\n  untrusted chunks inside ``<data source=\"...\">`` delimiters;\n  delimiter spellings inside the data are escaped so a chunk\n  cannot break out of its region.\n- :func:`detect_override` \u2014 pattern-based override-attempt\n  detector returning :class:`OverrideFinding`\\ s with confidence\n  levels. A heuristic tripwire, documented as such: it catches\n  known phrasings, not novel attacks.\n- :class:`BoundaryEnforcer` \u2014 ``check()`` flags, ``enforce()``\n  raises :class:`PromptInjectionBlocked` on high-confidence hits.\n\nCloses the loop on the slice-413 corpus: ``run_corpus(\"prompt\")``\nnow runs these payloads through the real detector.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 166,
+      "path": "hugrgate/security/prompt_injection.py",
+      "public_defs": [
+        "UntrustedData",
+        "OverrideFinding",
+        "detect_override",
+        "build_prompt",
+        "BoundaryEnforcer",
+        "check",
+        "enforce",
+        "describe"
+      ]
+    },
+    "hugrgate.security.provenance_guards": {
+      "docstring": "Provenance tamper detection + tip sealing. Slice 416.\n\nAttack result: the hash chain (slice 015) detects *edits* and\n*reorders* \u2014 recomputing every link catches those \u2014 but\n*truncation at the tip* is invisible to ``verify_chain()``: remove\nthe last record and the remaining links are still consistent\n(threat T-06). This module proves the gap with white-box attacks\nand closes it:\n\n- :func:`seal_tip` \u2014 HMAC-signed checkpoint (slice 405 envelopes)\n  over ``(tip_hash, length, sealed_at)``: a point-in-time\n  attestation of the store.\n- :func:`verify_tip` \u2014 re-verifies the signature, then requires\n  the store's tip hash and length to match the checkpoint.\n  Truncation, rollback, and forged extension all fail.\n- :func:`run_tamper_suite` \u2014 the adversarial battery: edit,\n  reorder, truncate, each measured against chain verification\n  and tip verification.\n\nThe checkpoint lives outside the store (operator keyring): an\nattacker with memory access can rewrite the chain, but cannot\nforge the seal.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 173,
+      "path": "hugrgate/security/provenance_guards.py",
+      "public_defs": [
+        "seal_tip",
+        "verify_tip",
+        "TamperReport",
+        "run_tamper_suite",
+        "attempt"
+      ]
+    },
+    "hugrgate.security.ratelimit": {
+      "docstring": "Per-key rate limiting. Slice 420.\n\nThreat T-13: an unauthenticated client floods ``/decide`` and\nstarves legitimate users. The runtime already had a thread-safe\n:class:`~hugrgate.backpressure.TokenBucket`, but no per-caller\nmanagement \u2014 one global bucket cannot tell a flood from a crowd,\nand a naive per-key dict is itself a memory-exhaustion vector\n(the slice-418 attack class).\n\n:class:`RateLimiter` keeps one token bucket per caller key (API\nkey id, IP, or ``\"anonymous\"``):\n\n- per-tier rates: ``\"anonymous\"`` callers get the harshest\n  budget, authenticated tiers get more; overrides per call;\n- the key table is bounded: idle buckets are evicted past\n  ``max_keys`` (LRU), so a key-spoofing flood cannot grow memory\n  without bound;\n- exceeding the limit raises :class:`RateLimitExceeded` (carrying\n  ``retry_after_ms``) \u2014 recoverable, unlike the other security\n  errors, because \"try again later\" is the correct response.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 150,
+      "path": "hugrgate/security/ratelimit.py",
+      "public_defs": [
+        "RateLimiter",
+        "set_tier",
+        "throttle",
+        "stats"
+      ]
+    },
+    "hugrgate.security.replay": {
+      "docstring": "Replay attack defenses. Slice 418.\n\nAttack analysis of the existing cluster mechanism\n(``ClusterNode._last_seq``, slice 208): the per-sender sequence\nwindow stops naive replays, but the sender map grew without bound\n(a sender-id flood was a memory-exhaustion vector \u2014 now an LRU\nwith a 4096 cap in ``hugrgate/cluster/node.py``), and there is no\ntimestamp/freshness binding: a delayed-but-fresh-seq message is\naccepted.\n\nThis module is the generalized defense for new integrations:\n\n- :class:`ReplayGuard` \u2014 nonce + timestamp window: duplicate\n  nonces rejected, timestamps outside ``[now - max_age, now +\n  max_skew]`` rejected, seen-nonces store bounded (LRU) and\n  expired entries purged, thread-safe.\n- :func:`seal_request` / :func:`open_request` \u2014 HMAC-signed\n  envelopes carrying ``(payload, nonce, timestamp, key_id)``;\n  opening verifies the tag (constant-time), the key id, and\n  freshness through the guard, in that order.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "json",
+        "secrets",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 198,
+      "path": "hugrgate/security/replay.py",
+      "public_defs": [
+        "ReplayGuard",
+        "seal_request",
+        "open_request",
+        "check",
+        "stats",
+        "to_dict"
+      ]
+    },
+    "hugrgate.security.resource_guards": {
+      "docstring": "Resource-exhaustion guards. Slice 410.\n\nInput-size limits (slice 409) bound the *shape* of one request;\nthis module bounds what a request may *consume* while running\n(threat T-04, second half):\n\n- :class:`ResourceBudget` + :func:`guarded` \u2014 real OS enforcement\n  via ``resource.setrlimit``: ``RLIMIT_CPU`` (SIGXCPU converted to\n  :class:`ResourceBudgetExceeded`) and ``RLIMIT_AS`` (allocation\n  failures beyond the address-space cap surface as\n  :class:`ResourceBudgetExceeded`). Previous limits and signal\n  handlers are restored on exit.\n- :class:`CostLedger` \u2014 cooperative cost accounting for\n  algorithmic-complexity hazards (batch fan-out, regex backtracking\n  budgets, recursion): :meth:`CostLedger.charge` raises when the\n  charged units exceed the budget.\n\nPOSIX-only: where the ``resource`` module is unavailable the OS\nguard degrades to a documented no-op (``enforced=False``) while\nthe ledger keeps working \u2014 see law 13 in the roadmap.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hugrgate",
+        "resource",
+        "signal",
+        "threading",
+        "typing"
+      ],
+      "loc": 160,
+      "path": "hugrgate/security/resource_guards.py",
+      "public_defs": [
+        "posix_available",
+        "ResourceBudget",
+        "guarded",
+        "CostLedger",
+        "describe",
+        "spent",
+        "remaining",
+        "charge",
+        "describe"
+      ]
+    },
+    "hugrgate.security.sandbox": {
+      "docstring": "Backend sandbox boundary. Slice 408.\n\nA malicious or buggy backend runs arbitrary Python inside\n``evaluate()`` (threat T-11). This module draws a real boundary\naround that call using :func:`sys.addaudithook`: while a sandbox is\nactive on the current thread, audited operations outside the policy\n\u2014 subprocess execution, network access, filesystem writes \u2014 are\ndenied by raising :class:`SandboxViolation` *before* the operation\nruns.\n\n- :class:`SandboxPolicy` \u2014 what the sandbox permits (deny by\n  default; ``allow_subprocess`` / ``allow_network`` /\n  ``allow_filesystem_write`` opt back in).\n- :func:`run_sandboxed` \u2014 context manager / decorator enforcing a\n  policy on the current thread; nestable, innermost wins.\n- :class:`SandboxedBackend` \u2014 a :class:`Backend` wrapper that runs\n  ``evaluate()`` (and ``warmup()``) inside the policy, converting\n  violations into taxonomy errors instead of side effects.\n\nThe audit hook is installed once per process and consults\nthread-local state, so unsandboxed threads pay only a pointer\ncheck. This is a *syscall-class* boundary, not a bulletproof\njail: it stops accidental and opportunistic abuse (the threat\nmodel's scope), not a determined interpreter-level escape.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hugrgate",
+        "sys",
+        "threading",
+        "typing"
+      ],
+      "loc": 211,
+      "path": "hugrgate/security/sandbox.py",
+      "public_defs": [
+        "SandboxPolicy",
+        "run_sandboxed",
+        "sandboxed",
+        "SandboxedBackend",
+        "describe",
+        "decorator",
+        "wrapped",
+        "policy",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "warmup",
+        "health",
+        "close",
+        "wrapper"
+      ]
+    },
+    "hugrgate.security.secret_audit": {
+      "docstring": "Secret-handling audit. Slice 421.\n\nSlice 234 catches secrets in *outbound data*. This module audits\nthe *codebase itself*: hardcoded credentials, secrets in log\ncalls, secrets in URLs, disabled TLS verification, secrets in\nexception messages, weak randomness for secret material, and\ndefault secrets in environment lookups.\n\nThe auditor is AST-based (:func:`audit_file`, :func:`audit_tree`)\nand returns :class:`SecretAuditFinding` records with rule,\nseverity, and location. It is deliberately conservative \u2014 every\nrule names a concrete mishandling pattern \u2014 and findings inside\n``tests/`` are downgraded to informational (fixtures legitimately\nuse fake secrets).\n\nThe companion test runs the auditor over the real ``hugrgate/``\ntree and asserts zero high-severity findings: the audit is a\nstanding gate, not a one-off report.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "re",
+        "typing"
+      ],
+      "loc": 258,
+      "path": "hugrgate/security/secret_audit.py",
+      "public_defs": [
+        "SecretAuditFinding",
+        "audit_file",
+        "audit_tree",
+        "run_secret_audit",
+        "visit_Assign",
+        "visit_AnnAssign",
+        "visit_Call",
+        "visit_Raise"
+      ]
+    },
+    "hugrgate.security.serde_guards": {
+      "docstring": "Deserialization hardening. Slice 411.\n\nAudit result: ``hugrgate/backends/logreg.py`` called raw\n``pickle.loads`` on model files whose integrity manifest is an\nunsigned sidecar \u2014 an attacker who can write the model file can\nrewrite the manifest too, making this a real code-execution vector\n(threat T-01). The sealed paths (``privacy_crypto``,\n``privacy_provenance``) unpickle only after HMAC verification, but\nget defense-in-depth anyway.\n\nThis module provides:\n\n- :class:`SafeUnpickler` \u2014 a :class:`pickle.Unpickler` whose\n  ``find_class`` enforces an allowlist: safe builtins by name,\n  plus explicitly registered classes or module prefixes\n  (e.g. ``sklearn.``/``numpy`` for trained models). Anything else\n  \u2014 ``os.system``, ``subprocess.Popen``, ``builtins.eval`` \u2014\n  raises :class:`DeserializationBlocked`.\n- :func:`restricted_loads` \u2014 one-shot hardened unpickle.\n- :func:`scan_for_pickle` \u2014 detects pickle framing in opaque bytes\n  so callers can refuse before parsing.\n- :class:`DeserializationPolicy` \u2014 ``allow_pickle`` kill-switch\n  plus the allowlist, for call sites that take it from config.\n\nThe allowlist is deliberately explicit rather than clever: new\nmodel types register their classes; unknown classes fail closed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "io",
+        "pickle",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/security/serde_guards.py",
+      "public_defs": [
+        "register_safe_class",
+        "SafeUnpickler",
+        "restricted_loads",
+        "scan_for_pickle",
+        "DeserializationPolicy",
+        "find_class",
+        "loads",
+        "describe"
+      ]
+    },
+    "hugrgate.security.supply_chain": {
+      "docstring": "Supply-chain policy. Slice 404.\n\nComplements the dependency scanner (slice 403: *known* bad) with\n*policy* (what is *allowed* at all):\n\n- :class:`SupplyChainPolicy` \u2014 approved package indexes, hash\n  requirements, license allowlist, package blocklist.\n- :meth:`SupplyChainPolicy.evaluate` \u2014 per-dependency verdict with\n  reasons; :meth:`SupplyChainPolicy.enforce` raises\n  :class:`SupplyChainViolation` on denial.\n- :func:`generate_sbom` \u2014 CycloneDX-style software bill of\n  materials for a set of dependency records.\n- :func:`sbom_from_installed` \u2014 a real SBOM of the current\n  environment via :mod:`importlib.metadata`.\n\nThe policy is deny-by-default on the dimensions it constrains:\nunknown index, missing hashes (when required), disallowed license,\nor blocklisted package each deny independently with a named reason.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "typing"
+      ],
+      "loc": 176,
+      "path": "hugrgate/security/supply_chain.py",
+      "public_defs": [
+        "DependencyRecord",
+        "SupplyVerdict",
+        "SupplyChainPolicy",
+        "generate_sbom",
+        "sbom_from_installed",
+        "evaluate",
+        "enforce",
+        "audit"
+      ]
+    },
+    "hugrgate.security.threat_model": {
+      "docstring": "STRIDE threat model v2. Slice 401.\n\nHugrGate already had scattered defenses (hash-chained provenance,\nsecret detection, sealed caches, cluster mutual auth) but no single\nstatement of *what is being defended against*. This module is that\nstatement, as executable data rather than a prose document that can\ndrift from the code:\n\n- :class:`ThreatModel` \u2014 assets, trust boundaries, and threats with\n  STRIDE categories, likelihood/impact scores, mitigations that name\n  real capabilities, and residual-risk dispositions.\n- :func:`default_threat_model` \u2014 the v2 model of this codebase.\n- Coverage analysis (:meth:`ThreatModel.coverage_report`) \u2014 every\n  threat must name at least one mitigation, one covering test\n  module, or carry an explicit accepted-risk rationale; ``validate()``\n  enforces that invariant, so the model cannot silently rot.\n\nRisk is likelihood x impact on a 1-5 scale each (1-25). Residual\ndispositions: ``\"mitigated\"`` (defense in place and tested),\n``\"partial\"`` (defense reduces but does not eliminate),\n``\"accepted\"`` (conscious risk acceptance with rationale \u2014 never\nthe default).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 436,
+      "path": "hugrgate/security/threat_model.py",
+      "public_defs": [
+        "Asset",
+        "TrustBoundary",
+        "Threat",
+        "ThreatModel",
+        "default_threat_model",
+        "risk",
+        "to_dict",
+        "from_dict",
+        "unmitigated",
+        "accepted_risks",
+        "by_stride",
+        "top_risks",
+        "coverage_report",
+        "validate",
+        "to_dict",
+        "from_dict"
+      ]
+    },
     "hugrgate.serde": {
       "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.\n\nSlice 281 adds a compact positional encoding alongside the canonical\ndict form.  The dict form stays the stable wire contract; the compact\nform is the fast path for high-frequency internal transport (cache\npayloads, batch results, cluster messages): no key hashing on encode,\npositional indexing on decode, and JSON-serializable so it composes\nwith :class:`hugrgate.zerocopy.SharedPayload`.",
       "imports": [
@@ -8993,7 +10243,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 205,
+      "loc": 242,
       "path": "hugrgate/serde.py",
       "public_defs": [
         "policy_to_dict",
@@ -9058,7 +10308,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 127,
+      "loc": 138,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -9233,6 +10483,31 @@
     "test_adaptive_shadow.py",
     "test_adaptive_telemetry.py",
     "test_adaptive_versioning.py",
+    "test_agents_376_contract.py",
+    "test_agents_377_triage.py",
+    "test_agents_378_intent.py",
+    "test_agents_379_tools.py",
+    "test_agents_380_memory_write.py",
+    "test_agents_381_memory_read.py",
+    "test_agents_382_notify.py",
+    "test_agents_383_attention.py",
+    "test_agents_384_escalation.py",
+    "test_agents_385_human_review.py",
+    "test_agents_386_dispatch.py",
+    "test_agents_387_registry.py",
+    "test_agents_388_health.py",
+    "test_agents_389_cost.py",
+    "test_agents_390_privacy.py",
+    "test_agents_391_fusion.py",
+    "test_agents_392_disagreement.py",
+    "test_agents_393_loopbreak.py",
+    "test_agents_394_runaway.py",
+    "test_agents_395_budgets.py",
+    "test_agents_396_provenance.py",
+    "test_agents_397_replay.py",
+    "test_agents_398_simulator.py",
+    "test_agents_399_benchmark.py",
+    "test_agents_400_release.py",
     "test_api_inventory.py",
     "test_arch_map.py",
     "test_async_readiness.py",
@@ -9579,6 +10854,30 @@
     "test_routing_072.py",
     "test_routing_073.py",
     "test_routing_074.py",
+    "test_sec_401_threat_model.py",
+    "test_sec_402_attack_surface.py",
+    "test_sec_403_depscan.py",
+    "test_sec_404_supply_chain.py",
+    "test_sec_405_model_signing.py",
+    "test_sec_406_checksums.py",
+    "test_sec_407_plugins.py",
+    "test_sec_408_sandbox.py",
+    "test_sec_409_input_limits.py",
+    "test_sec_410_resource_guards.py",
+    "test_sec_411_serde_guards.py",
+    "test_sec_412_path_guards.py",
+    "test_sec_413_injection_corpus.py",
+    "test_sec_414_prompt_injection.py",
+    "test_sec_415_malicious_backend.py",
+    "test_sec_416_provenance_tamper.py",
+    "test_sec_417_cache_poisoning.py",
+    "test_sec_418_replay.py",
+    "test_sec_419_authz.py",
+    "test_sec_420_rate_limit.py",
+    "test_sec_421_secret_audit.py",
+    "test_sec_422_fuzzing.py",
+    "test_sec_423_secscan.py",
+    "test_sec_424_gauntlet.py",
     "test_serialization_contracts.py",
     "test_service.py",
     "test_state_validation.py",
@@ -9587,5 +10886,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 81851
+  "total_loc": 92420
 }
