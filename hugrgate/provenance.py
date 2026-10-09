@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional
@@ -134,6 +135,7 @@ class ProvenanceStore:
 
     def __init__(self):
         self._records: List[DecisionRecord] = []
+        self._lock = threading.RLock()
 
     @staticmethod
     def _canonical(record: DecisionRecord) -> str:
@@ -147,15 +149,18 @@ class ProvenanceStore:
                 f"ProvenanceStore only stores DecisionRecord, got "
                 f"{type(record).__name__}")
         stored = copy.deepcopy(record)
-        stored.prev_hash = (self._records[-1].record_hash
-                            if self._records else "")
-        stored.record_hash = hashlib.sha256(
-            (stored.prev_hash + self._canonical(stored)).encode()
-        ).hexdigest()
-        self._records.append(stored)
+        with self._lock:
+            stored.prev_hash = (self._records[-1].record_hash
+                                if self._records else "")
+            stored.record_hash = hashlib.sha256(
+                (stored.prev_hash + self._canonical(stored)).encode()
+            ).hexdigest()
+            self._records.append(stored)
 
     def by_hash(self, request_hash: str) -> Optional[DecisionRecord]:
-        for r in reversed(self._records):
+        with self._lock:
+            records = list(self._records)
+        for r in reversed(records):
             if r.request_hash == request_hash:
                 return copy.deepcopy(r)
         return None
@@ -165,15 +170,19 @@ class ProvenanceStore:
             raise ValueError(f"recent(n) needs n >= 0, got {n}")
         if n == 0:
             return []
-        return copy.deepcopy(self._records[-n:])
+        with self._lock:
+            return copy.deepcopy(self._records[-n:])
 
     def count(self) -> int:
-        return len(self._records)
+        with self._lock:
+            return len(self._records)
 
     def verify_chain(self) -> bool:
         """Recompute every link. True iff the stored history is intact."""
+        with self._lock:
+            records = list(self._records)
         prev = ""
-        for r in self._records:
+        for r in records:
             if r.prev_hash != prev:
                 return False
             body = self._canonical(r)

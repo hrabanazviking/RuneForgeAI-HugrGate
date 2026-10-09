@@ -20,6 +20,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import threading
 import time
 from collections import OrderedDict
 from dataclasses import dataclass
@@ -86,12 +87,19 @@ class DecisionCache:
         self._entries: "OrderedDict[str, _Entry]" = OrderedDict()
         self.hits = 0
         self.misses = 0
+        # RLock: stats() calls len(self), which also takes the lock.
+        self._lock = threading.RLock()
 
     # -- core API ----------------------------------------------------------
 
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy) -> Optional[DecisionResult]:
         """Return the cached result, or None on miss/expiry/privacy."""
+        with self._lock:
+            return self._get_locked(state, spec, policy)
+
+    def _get_locked(self, state: Mapping[str, Any], spec: DecisionSpec,
+                    policy: DecisionPolicy) -> Optional[DecisionResult]:
         if not PrivacyGuard.cache_allowed(policy):
             return None
         key = cache_key(state, spec, policy)
@@ -113,28 +121,30 @@ class DecisionCache:
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy, result: DecisionResult) -> bool:
         """Store ``result``. Returns False when privacy forbids caching."""
-        if not PrivacyGuard.cache_allowed(policy):
-            return False
-        key = cache_key(state, spec, policy)
-        now = time.monotonic()
-        self._entries[key] = _Entry(
-            result=copy.deepcopy(result),
-            expires_at=now + self.ttl_seconds,
-            backend=result.backend)
-        self._entries.move_to_end(key)
-        while len(self._entries) > self.max_size:
-            self._entries.popitem(last=False)  # evict least-recently-used
-        return True
+        with self._lock:
+            if not PrivacyGuard.cache_allowed(policy):
+                return False
+            key = cache_key(state, spec, policy)
+            now = time.monotonic()
+            self._entries[key] = _Entry(
+                result=copy.deepcopy(result),
+                expires_at=now + self.ttl_seconds,
+                backend=result.backend)
+            self._entries.move_to_end(key)
+            while len(self._entries) > self.max_size:
+                self._entries.popitem(last=False)  # evict least-recently-used
+            return True
 
     # -- invalidation ------------------------------------------------------
 
     def invalidate_backend(self, backend_name: str) -> int:
         """Drop every entry produced by ``backend_name`` (model changed)."""
-        doomed = [k for k, e in self._entries.items()
-                  if e.backend == backend_name]
-        for k in doomed:
-            del self._entries[k]
-        return len(doomed)
+        with self._lock:
+            doomed = [k for k, e in self._entries.items()
+                      if e.backend == backend_name]
+            for k in doomed:
+                del self._entries[k]
+            return len(doomed)
 
     def invalidate_model(self, backend_name: str,
                          model_version: Optional[str] = None) -> int:
@@ -142,26 +152,29 @@ class DecisionCache:
         return self.invalidate_backend(backend_name)
 
     def clear(self) -> None:
-        self._entries.clear()
+        with self._lock:
+            self._entries.clear()
 
     # -- introspection -----------------------------------------------------
 
     def __len__(self) -> int:
         # Opportunistically sweep expired entries on size checks.
-        now = time.monotonic()
-        expired = [k for k, e in self._entries.items()
-                   if e.expires_at <= now]
-        for k in expired:
-            del self._entries[k]
-        return len(self._entries)
+        with self._lock:
+            now = time.monotonic()
+            expired = [k for k, e in self._entries.items()
+                       if e.expires_at <= now]
+            for k in expired:
+                del self._entries[k]
+            return len(self._entries)
 
     def stats(self) -> Dict[str, Any]:
-        total = self.hits + self.misses
-        return {
-            "size": len(self),
-            "max_size": self.max_size,
-            "ttl_seconds": self.ttl_seconds,
-            "hits": self.hits,
-            "misses": self.misses,
-            "hit_rate": self.hits / total if total else 0.0,
-        }
+        with self._lock:
+            total = self.hits + self.misses
+            return {
+                "size": len(self._entries),
+                "max_size": self.max_size,
+                "ttl_seconds": self.ttl_seconds,
+                "hits": self.hits,
+                "misses": self.misses,
+                "hit_rate": self.hits / total if total else 0.0,
+            }
