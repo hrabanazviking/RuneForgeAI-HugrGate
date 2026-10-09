@@ -31,6 +31,7 @@ from hugrgate.ensemble.base import (
     collect_votes,
     normalize_weights,
 )
+from hugrgate.ensemble.batch import batch_collect_votes
 from hugrgate.ensemble.blending import blending_combine
 from hugrgate.ensemble.consensus import maybe_apply_consensus
 from hugrgate.ensemble.moe import moe_combine
@@ -222,8 +223,37 @@ class Ensemble(Backend):
                      spec: DecisionSpec,
                      context: Optional[Mapping[str, Any]] = None
                      ) -> List[DecisionResult]:
-        """Evaluate a batch of states (slice 122 optimizes this path)."""
-        return [self.evaluate(s, spec, context) for s in states]
+        """Decide a batch of states via members' batch fast paths.
+
+        Ballots are collected with :func:`batch_collect_votes` — one
+        ``member.batch()`` call per member with the same fault
+        isolation as :meth:`evaluate` — then each state's ballots are
+        combined exactly as in :meth:`evaluate`, including the
+        consensus option.
+        """
+        votes_by_state = batch_collect_votes(
+            self.members, states, spec, context,
+            weights=self.config.weights,
+            min_members=self.config.min_members,
+            ensemble_name=self.name)
+        combiner = get_strategy(self.strategy)
+        results = []
+        for state, votes in zip(states, votes_by_state):
+            start = time.perf_counter()
+            ctx = StrategyContext(
+                spec=spec,
+                options=dict(self.config.strategy_options),
+                fitted=self.fitted,
+                state=state)
+            result = combiner(votes, ctx)
+            result = maybe_apply_consensus(
+                result, spec,
+                self.config.strategy_options.get("consensus"))
+            result.backend = self.name
+            result.latency_ms = (time.perf_counter() - start) * 1000.0
+            validate_result(result, spec)
+            results.append(result)
+        return results
 
     def member_votes(self, state: Mapping[str, Any],
                      spec: DecisionSpec,

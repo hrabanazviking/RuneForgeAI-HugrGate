@@ -38,13 +38,14 @@ from hugrgate.ensemble.base import (
     require_discrete_spec,
     shannon_entropy,
 )
+from hugrgate.ensemble.batch import batch_collect_votes
 from hugrgate.ensemble.blending import (
     Blender,
     blending_combine,
     log_loss,
     project_simplex,
 )
-from hugrgate.ensemble.caching import CachedEnsemble, EnsembleCache
+from hugrgate.ensemble.cache import CachedEnsemble, EnsembleCache
 from hugrgate.ensemble.calibration import (
     EnsembleCalibrator,
     expected_calibration_error,
@@ -122,6 +123,7 @@ __all__ = [
     "complete_distribution",
     "collect_votes",
     "finalize_result",
+    "batch_collect_votes",
     "soft_voting",
     "hard_voting",
     "weighted_voting",

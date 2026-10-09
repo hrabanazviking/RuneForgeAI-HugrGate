@@ -1,4 +1,4 @@
-"""Ensemble caching — don't re-ask the council. Slice 121.
+"""Ensemble cache — don't re-ask the council. Slice 121.
 
 Member backends can be expensive; repeated identical states should
 not re-pay the full vote. :class:`EnsembleCache` is a TTL + LRU
