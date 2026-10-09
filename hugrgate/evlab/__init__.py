@@ -78,6 +78,12 @@ from hugrgate.evlab.dataset import (
     TransformStep,
     fingerprint_items,
 )
+from hugrgate.evlab.energy import (
+    EnergyModel,
+    EnergyReport,
+    co2e_grams,
+    energy_aware_evaluate,
+)
 from hugrgate.evlab.latency import LatencyReport, latency_aware_evaluate
 from hugrgate.evlab.selective import (
     SelectivePoint,
@@ -118,6 +124,8 @@ __all__ = [
     "DatasetProvenance",
     "DatasetRegistry",
     "DatasetVersion",
+    "EnergyModel",
+    "EnergyReport",
     "EvaluationLab",
     "Experiment",
     "FoldResult",
@@ -139,6 +147,7 @@ __all__ = [
     "bootstrap_backend_ci",
     "bootstrap_mean_ci",
     "bootstrap_metric_ci",
+    "co2e_grams",
     "compare_backend_calibration",
     "compare_backends",
     "compare_calibrators",
@@ -146,6 +155,7 @@ __all__ = [
     "cost_aware_evaluate",
     "coverage_at_risk",
     "cross_validate",
+    "energy_aware_evaluate",
     "expected_calibration_error",
     "fingerprint_items",
     "kfold_indices",

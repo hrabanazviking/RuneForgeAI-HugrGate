@@ -1163,6 +1163,7 @@ flowchart TD
     evlab --> evlab_costaware
     evlab --> evlab_crossval
     evlab --> evlab_dataset
+    evlab --> evlab_energy
     evlab --> evlab_latency
     evlab --> evlab_selective
     evlab --> evlab_significance
@@ -1206,6 +1207,14 @@ flowchart TD
     evlab_crossval --> evlab_splits
     evlab_crossval --> policy
     evlab_dataset --> errors
+    evlab_energy --> hugrgate
+    evlab_energy --> core
+    evlab_energy --> edge_power
+    evlab_energy --> errors
+    evlab_energy --> evlab_costaware
+    evlab_energy --> policy
+    evlab_energy --> result
+    evlab_energy --> spec
     evlab_latency --> core
     evlab_latency --> errors
     evlab_latency --> policy
@@ -2382,6 +2391,7 @@ flowchart TD
 | `evlab` | `evlab.costaware` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.energy` | no |
 | `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.significance` | no |
@@ -2425,6 +2435,14 @@ flowchart TD
 | `evlab.crossval` | `evlab.splits` | no |
 | `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
+| `evlab.energy` | `hugrgate` | no |
+| `evlab.energy` | `core` | no |
+| `evlab.energy` | `edge.power` | no |
+| `evlab.energy` | `errors` | no |
+| `evlab.energy` | `evlab.costaware` | no |
+| `evlab.energy` | `policy` | no |
+| `evlab.energy` | `result` | no |
+| `evlab.energy` | `spec` | no |
 | `evlab.latency` | `core` | no |
 | `evlab.latency` | `errors` | no |
 | `evlab.latency` | `policy` | no |

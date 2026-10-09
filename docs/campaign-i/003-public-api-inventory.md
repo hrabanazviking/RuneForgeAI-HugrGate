@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 302 · **public names:** 1853
+**Modules:** 303 · **public names:** 1861
 
 ## API stability policy
 
@@ -2268,6 +2268,8 @@ that this document never drifts from the code.
 | `DatasetProvenance` | class | `(source_uri: 'str' = '', acquisition: 'str' = 'manual', creator: 'str' = '', created_at: 'str' = '', license: 'str' = 'unknown', parents: 'list[dict[str, str]]' = <factory>, steps: 'list[TransformStep]' = <factory>) -> None` |
 | `DatasetRegistry` | class | `() -> 'None'` |
 | `DatasetVersion` | class | `(major: 'int', minor: 'int', patch: 'int', prerelease: 'str' = '', build: 'str' = '') -> None` |
+| `EnergyModel` | class | `(rates_mj: 'dict[str, float]' = <factory>, default_rate_mj: 'float' = 0.0) -> None` |
+| `EnergyReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', n_items: 'int') -> None` |
 | `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
@@ -2289,6 +2291,7 @@ that this document never drifts from the code.
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+| `co2e_grams` | function | `(energy_mj: 'float', grid_intensity_g_per_kwh: 'float' = 400.0) -> 'float'` |
 | `compare_backend_calibration` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str]', calibrator_factories: 'Sequence[Callable[[], LabCalibrator]]', *, calib_frac: 'float' = 0.5, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, n_bins: 'int' = 10, max_items: 'int | None' = None) -> 'dict[str, CalibrationComparison]'` |
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
 | `compare_calibrators` | function | `(calib_confidences: 'Sequence[float]', calib_correct: 'Sequence[int]', eval_confidences: 'Sequence[float]', eval_correct: 'Sequence[int]', calibrators: 'Sequence[LabCalibrator]', n_bins: 'int' = 10) -> 'CalibrationComparison'` |
@@ -2296,6 +2299,7 @@ that this document never drifts from the code.
 | `cost_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, cost_model: 'CostModel | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'CostReport'` |
 | `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
+| `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
@@ -2380,6 +2384,15 @@ that this document never drifts from the code.
 | `DatasetRegistry` | class | `() -> 'None'` |
 | `DatasetVersion` | class | `(major: 'int', minor: 'int', patch: 'int', prerelease: 'str' = '', build: 'str' = '') -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+
+### `hugrgate.evlab.energy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnergyModel` | class | `(rates_mj: 'dict[str, float]' = <factory>, default_rate_mj: 'float' = 0.0) -> None` |
+| `EnergyReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', n_items: 'int') -> None` |
+| `co2e_grams` | function | `(energy_mj: 'float', grid_intensity_g_per_kwh: 'float' = 400.0) -> 'float'` |
+| `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
 
 ### `hugrgate.evlab.latency`
 
