@@ -42,6 +42,7 @@ from hugrgate.errors import (
     TelemetryError,
     TimeoutError,
     WatchdogError,
+    ZeroCopyError,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -54,7 +55,7 @@ ALL_ERRORS = [
     # Campaign VIII edge-intelligence errors (slice 200 taxonomy promotion).
     EdgeAffinityError, BenchmarkError, OfflineBootstrapError, EdgeCacheError,
     # Campaign XII performance-forge errors (slice 276+).
-    ProfilingError,
+    ProfilingError, ZeroCopyError,
     ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
     QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
     WatchdogError,
@@ -84,6 +85,7 @@ EXPECTED_CODES = {
     NPUError: "edge_npu_error",
     PowerBudgetError: "edge_power_budget_error",
     ProfilingError: "profiling_error",
+    ZeroCopyError: "zerocopy_error",
     QuantError: "edge_quant_error",
     RecoveryError: "edge_recovery_error",
     ResidencyError: "edge_residency_error",
@@ -120,6 +122,7 @@ EXPECTED_RECOVERABLE = {
     NPUError: True,
     PowerBudgetError: True,
     ProfilingError: True,
+    ZeroCopyError: True,
     QuantError: False,
     RecoveryError: True,
     ResidencyError: True,

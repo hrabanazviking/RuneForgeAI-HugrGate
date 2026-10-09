@@ -45,6 +45,7 @@ __all__ = [
     "TelemetryError",
     "TimeoutError",
     "WatchdogError",
+    "ZeroCopyError",
 ]
 
 
@@ -255,4 +256,14 @@ class ProfilingError(HugrGateError):
     code = "profiling_error"
     # A failed profile never invalidates the decision itself; retrying
     # without (or with fixed) profiler settings can plausibly succeed.
+    recoverable = True
+
+
+class ZeroCopyError(HugrGateError):
+    """A zero-copy invariant was violated (mutation of frozen data).
+
+    Slice 280.  Raised at the mutation site, never silently downstream;
+    retrying with an unfrozen path can succeed.
+    """
+    code = "zerocopy_error"
     recoverable = True
