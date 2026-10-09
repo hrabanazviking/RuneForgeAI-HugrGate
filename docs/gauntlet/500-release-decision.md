@@ -14,8 +14,16 @@ re-verified at 1.0.0 (`tools/rc_build.py`: 5/5 checks).
 ## Full-suite verification
 
 Final full run (`pytest -q -p no:cacheprovider`, this machine):
-**5277 passed, 3 failed, 1 skipped** — then every failure was
-triaged and fixed:
+**5279 passed, 1 failed, 1 skipped**. The single failure is
+`test_observability_load.py::test_load_run_measures_real_overhead`,
+a pre-existing load-sensitive timing assertion from Campaign XIV
+(`instrumented_p50_us > baseline_p50_us` inverts under CPU
+contention): it fails ~1/6 of the time even in isolation on a
+loaded host and passes on an idle one. Unrelated to Campaign XX
+changes; documented as a known issue rather than weakened.
+
+Every other failure across the verification runs was triaged and
+fixed:
 
 | Failure | Cause | Fix |
 |---|---|---|
