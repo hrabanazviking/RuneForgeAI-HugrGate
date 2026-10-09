@@ -271,3 +271,13 @@ it into an opaque agent.
   0.724] vs truth [0.34, 0.42, 0.50, 0.58, 0.66]. Assumptions
   documented in the module docstring.
 - Tests: `tests/test_memory_assisted_calibration.py` (8 tests).
+
+### Slice 323 — Memory adversarial tests
+- `hugrgate/memory/adversarial.py`: `scan()` runs five detectors —
+  outcome flooding (critical), chronology violations (critical),
+  duplicate floods (warn), timestamp anomalies future/ancient (warn),
+  ground-truth-vs-outcome label conflicts (warn) — returning an
+  `AdversarialReport` with severity and `has_critical`. Detection
+  only; the operator decides the response. Thresholds are parameters.
+- Tests: `tests/test_memory_adversarial.py` (10 tests, each crafting
+  the attack it asserts is caught).

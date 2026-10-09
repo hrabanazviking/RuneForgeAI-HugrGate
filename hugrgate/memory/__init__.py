@@ -24,6 +24,7 @@ from hugrgate.memory.access import (
     MemoryAccessPolicy,
     RolePermission,
 )
+from hugrgate.memory.adversarial import AdversarialReport, Finding, scan
 from hugrgate.memory.assisted_calibration import (
     CalibrationMap,
     CalibrationValidation,
@@ -107,6 +108,7 @@ __all__ = [
     "DEFAULT_DOMAIN",
     "OUTCOME_KINDS",
     "ROLE_PERMISSIONS",
+    "AdversarialReport",
     "BackendCounterfactual",
     "BackendHistory",
     "CalibrationMap",
@@ -117,6 +119,7 @@ __all__ = [
     "DomainProfile",
     "Episode",
     "ExportReport",
+    "Finding",
     "FrequencyEntry",
     "FrequencyTable",
     "GroundTruth",
@@ -182,5 +185,6 @@ __all__ = [
     "replay",
     "retrieve",
     "retrieve_conditioned",
+    "scan",
     "wilson_interval",
 ]
