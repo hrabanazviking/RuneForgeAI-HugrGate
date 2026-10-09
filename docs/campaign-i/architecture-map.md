@@ -1821,6 +1821,7 @@ flowchart TD
     security --> security_input_limits
     security --> security_model_signing
     security --> security_plugins
+    security --> security_resource_guards
     security --> security_sandbox
     security --> security_supply_chain
     security --> security_threat_model
@@ -1831,6 +1832,7 @@ flowchart TD
     security_model_signing --> privacy_crypto
     security_plugins --> errors
     security_plugins --> security_model_signing
+    security_resource_guards --> errors
     security_sandbox --> backend
     security_sandbox --> errors
     security_sandbox --> result
@@ -3284,6 +3286,7 @@ flowchart TD
 | `security` | `security.input_limits` | no |
 | `security` | `security.model_signing` | no |
 | `security` | `security.plugins` | no |
+| `security` | `security.resource_guards` | no |
 | `security` | `security.sandbox` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
@@ -3294,6 +3297,7 @@ flowchart TD
 | `security.model_signing` | `privacy_crypto` | no |
 | `security.plugins` | `errors` | no |
 | `security.plugins` | `security.model_signing` | no |
+| `security.resource_guards` | `errors` | no |
 | `security.sandbox` | `backend` | no |
 | `security.sandbox` | `errors` | no |
 | `security.sandbox` | `result` | no |

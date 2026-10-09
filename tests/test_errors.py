@@ -59,6 +59,7 @@ from hugrgate.errors import (
     QueueFull,
     RecoveryError,
     ResidencyError,
+    ResourceBudgetExceeded,
     RetryBudgetExhausted,
     SandboxViolation,
     SchedulerError,
@@ -115,6 +116,7 @@ ALL_ERRORS = [
     # Campaign XVII security-forge errors (slice 404+).
     PluginTrustError,
     InputTooLarge,
+    ResourceBudgetExceeded,
     SandboxViolation,
     SignatureVerificationFailed,
     SupplyChainViolation,

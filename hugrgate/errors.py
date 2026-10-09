@@ -666,3 +666,14 @@ class InputTooLarge(HugrGateError):
     """
     code = "input_too_large"
     recoverable = False
+
+
+class ResourceBudgetExceeded(HugrGateError):
+    """A resource budget was exhausted inside a guarded region.
+    Slice 410.  Raised by :mod:`hugrgate.security.resource_guards`
+    when CPU time, address-space, or charged cost units exceed the
+    declared budget.  Not recoverable: the same work will exceed
+    the same budget again — shrink the work or raise the budget.
+    """
+    code = "resource_budget_exceeded"
+    recoverable = False

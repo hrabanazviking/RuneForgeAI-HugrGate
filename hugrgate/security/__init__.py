@@ -94,6 +94,11 @@ from hugrgate.security.plugins import (
     PluginRegistry,
     sign_manifest,
 )
+from hugrgate.security.resource_guards import (
+    CostLedger,
+    ResourceBudget,
+    guarded,
+)
 from hugrgate.security.sandbox import (
     SandboxedBackend,
     SandboxPolicy,
@@ -122,6 +127,7 @@ __all__ = [
     "Asset",
     "AttackSurface",
     "ChecksumManifest",
+    "CostLedger",
     "DependencyFinding",
     "DependencyRecord",
     "InputLimits",
@@ -129,6 +135,7 @@ __all__ = [
     "ModelSigner",
     "PluginManifest",
     "PluginRegistry",
+    "ResourceBudget",
     "SandboxPolicy",
     "SandboxedBackend",
     "SignedMetadata",
@@ -149,6 +156,7 @@ __all__ = [
     "enumerate_surface",
     "find_unlisted",
     "generate_sbom",
+    "guarded",
     "run_sandboxed",
     "sbom_from_installed",
     "scan_project",
