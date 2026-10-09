@@ -40,6 +40,11 @@ from hugrgate.routing.energy import (
     EnergyLedger,
     EnergyModel,
 )
+from hugrgate.routing.hardware import (
+    HardwareAwarePlanner,
+    HostProfile,
+    hardware_compatible,
+)
 from hugrgate.routing.latency import (
     LatencyAwarePlanner,
     LatencyTracker,
@@ -82,8 +87,11 @@ __all__ = [
     "EnergyAwarePlanner",
     "EnergyLedger",
     "EnergyModel",
+    "HardwareAwarePlanner",
+    "HostProfile",
     "adjusted_gate",
     "budget_for",
+    "hardware_compatible",
     "LadderRouterV2",
     "LadderSynthesizer",
     "LatencyAwarePlanner",
