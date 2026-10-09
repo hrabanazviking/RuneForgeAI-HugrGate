@@ -15,6 +15,11 @@ from hugrgate.ensemble.api import (
     get_strategy,
     register_strategy,
 )
+from hugrgate.ensemble.averaging import (
+    BayesianModelAverager,
+    bma_combine,
+    predictive_log_likelihood,
+)
 from hugrgate.ensemble.base import (
     DISCRETE_SPEC_TYPES,
     Combiner,
@@ -22,6 +27,7 @@ from hugrgate.ensemble.base import (
     StrategyContext,
     break_tie,
     collect_votes,
+    complete_distribution,
     finalize_result,
     normalize_weights,
     normalized_entropy,
@@ -50,10 +56,14 @@ __all__ = [
     "normalized_entropy",
     "break_tie",
     "require_discrete_spec",
+    "complete_distribution",
     "collect_votes",
     "finalize_result",
     "soft_voting",
     "hard_voting",
     "weighted_voting",
     "confidence_weighted_voting",
+    "BayesianModelAverager",
+    "bma_combine",
+    "predictive_log_likelihood",
 ]

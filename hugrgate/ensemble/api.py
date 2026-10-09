@@ -23,6 +23,7 @@ import time
 from typing import Any, Dict, List, Mapping, Optional
 
 from hugrgate.backend import Backend
+from hugrgate.ensemble.averaging import bma_combine
 from hugrgate.ensemble.base import (
     Combiner,
     MemberVote,
@@ -85,6 +86,7 @@ register_strategy("soft", soft_voting)
 register_strategy("hard", hard_voting)
 register_strategy("weighted", weighted_voting)
 register_strategy("confidence", confidence_weighted_voting)
+register_strategy("bma", bma_combine)
 
 
 class EnsembleConfig:
@@ -122,7 +124,8 @@ class Ensemble(Backend):
                  config: Optional[EnsembleConfig] = None,
                  weights: Optional[Mapping[str, float]] = None,
                  min_members: Optional[int] = None,
-                 strategy_options: Optional[Dict[str, Any]] = None):
+                 strategy_options: Optional[Dict[str, Any]] = None,
+                 fitted: Any = None):
         if not members:
             raise PolicyError("Ensemble needs at least one member backend")
         for m in members:
@@ -159,6 +162,17 @@ class Ensemble(Backend):
         if self.config.weights:
             self.config.weights = normalize_weights(
                 self.config.weights, names)
+        #: Learned meta-model for fitted strategies (BMA, stacking,
+        #: blending, mixture-of-experts); rides into StrategyContext.
+        self.fitted = fitted
+
+    def attach(self, fitted: Any) -> "Ensemble":
+        """Attach a fitted meta-model (BMA/stacking/blending/MoE).
+
+        Returns self for fluent chaining.
+        """
+        self.fitted = fitted
+        return self
 
     def capabilities(self) -> Dict[str, Any]:
         return {
@@ -186,7 +200,7 @@ class Ensemble(Backend):
         ctx = StrategyContext(
             spec=spec,
             options=dict(self.config.strategy_options),
-            fitted=None)
+            fitted=self.fitted)
         result = combiner(votes, ctx)
         result.backend = self.name
         result.latency_ms = (time.perf_counter() - start) * 1000.0

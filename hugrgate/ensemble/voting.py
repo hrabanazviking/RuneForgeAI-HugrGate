@@ -30,6 +30,7 @@ from hugrgate.ensemble.base import (
     MemberVote,
     StrategyContext,
     break_tie,
+    complete_distribution,
     finalize_result,
     normalized_entropy,
     require_discrete_spec,
@@ -43,31 +44,6 @@ __all__ = [
     "weighted_voting",
     "confidence_weighted_voting",
 ]
-
-
-def _complete_distribution(vote: MemberVote,
-                           space: List[str]) -> Dict[str, float]:
-    """Complete an empty member distribution.
-
-    The member's reported probability goes on the voted value; the
-    remainder is split uniformly across the other options (mirrors the
-    rules backend, slice 13). A non-empty distribution is returned
-    unchanged — its missing keys are genuine zeros, since a valid
-    distribution always sums to 1.
-    """
-    if vote.distribution:
-        return dict(vote.distribution)
-    if vote.value is None or vote.value not in space:
-        raise BackendError(
-            f"soft voting: cannot complete an empty distribution for "
-            f"member {vote.backend!r} with value {vote.value!r}")
-    others = [o for o in space if o != vote.value]
-    if not others:
-        return {str(vote.value): 1.0}
-    rest = (1.0 - vote.probability) / len(others)
-    completed = {o: rest for o in others}
-    completed[str(vote.value)] = vote.probability
-    return completed
 
 
 def soft_voting(votes: List[MemberVote],
@@ -93,7 +69,7 @@ def soft_voting(votes: List[MemberVote],
     averaged: Dict[str, float] = {}
     completed: List[str] = []
     for v in usable:
-        dist = _complete_distribution(v, space)
+        dist = complete_distribution(v, space)
         if not v.distribution:
             completed.append(v.backend)
         w = v.weight / total_w
