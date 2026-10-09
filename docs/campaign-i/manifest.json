@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:32:31.084153+00:00",
-  "module_count": 57,
+  "generated_utc": "2026-10-09T11:34:10.795761+00:00",
+  "module_count": 58,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 57,
+      "loc": 58,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -621,6 +621,27 @@
         "from_dict",
         "violations",
         "validate_value",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.deadlines": {
+      "docstring": "Decision deadlines \u2014 temporal bounds on decisions. Gjallarbr\u00fa slice 040.\n\nBackend latency has a policy knob (`maximum_latency_ms`), but the\n*decision itself* carries no temporal contract: nothing says \"decide\nwithin 500 ms of the request\" or \"this decision is only valid during the\ntrading window\". :class:`TimedContract` (kind ``\"timed\"``) wraps any\ninner contract with:\n\n- ``budget_ms`` \u2014 the decision must be produced within this many\n  milliseconds of the request;\n- ``not_before`` / ``not_after`` \u2014 absolute unix-timestamp window in\n  which the decision may be made (and remains valid).\n\nValue validation delegates to the inner contract; temporal validation is\nexplicit and clock-injectable (``now`` parameters default to\n``time.time()``), so every rule is deterministically testable.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 208,
+      "path": "hugrgate/contracts/deadlines.py",
+      "public_defs": [
+        "TimedContract",
+        "validate_value",
+        "timing_violations",
+        "check_timing",
+        "is_valid_at",
+        "remaining_budget_ms",
         "describe"
       ]
     },
@@ -1335,6 +1356,7 @@
     "test_contracts_037.py",
     "test_contracts_038.py",
     "test_contracts_039.py",
+    "test_contracts_040.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1345,5 +1367,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10777
+  "total_loc": 10986
 }

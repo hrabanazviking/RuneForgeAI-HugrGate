@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 57 · **public names:** 255
+**Modules:** 58 · **public names:** 257
 
 ## API stability policy
 
@@ -249,6 +249,7 @@ that this document never drifts from the code.
 | `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/hatch/workspac` |
 | `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/hatch/works` |
 | `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/hatch/workspac` |
+| `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/hatch/wor` |
 
 ### `hugrgate.contracts.composite`
 
@@ -281,6 +282,12 @@ that this document never drifts from the code.
 | `CONSTRAINT_OPS` | constant | `('lt', 'le', 'eq', 'ne', 'gt', 'ge', 'sum_lt', 'sum_le', 'su` |
 | `FieldConstraint` | class | `(fields: 'Tuple[str, ...]', op: 'str', target: 'Any' = None, description: 'str' = '') -> None` |
 | `ConstrainedCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, constraints: 'List[FieldConstraint]' = <factory>) -> None` |
+
+### `hugrgate.contracts.deadlines`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TimedContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, inner: 'InnerContract' = None, budget_ms: 'Optional[float]' = None, not_before: 'Optional[float]' = None, not_after: 'Optional[float]' = None) -> None` |
 
 ### `hugrgate.contracts.distributions`
 
