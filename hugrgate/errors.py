@@ -32,6 +32,7 @@ __all__ = [
     "GateError",
     "HugrGateError",
     "JurisdictionViolation",
+    "KeyProviderError",
     "LocalOnlyViolation",
     "NPUError",
     "OfflineBootstrapError",
@@ -199,6 +200,18 @@ class SealError(HugrGateError):
                  **details: Any):
         super().__init__(message, reason=reason, **details)
         self.reason = reason
+
+
+class KeyProviderError(HugrGateError):
+    """Raised when a key provider cannot supply a key (slice 243).
+
+    Missing environment variable, unreadable key file, unknown key
+    id, or malformed key material. Not recoverable by blind retry:
+    the operator must fix the key configuration.
+    """
+
+    code = "key_provider_error"
+    recoverable = False
 
 
 class ClusterAuthError(HugrGateError):

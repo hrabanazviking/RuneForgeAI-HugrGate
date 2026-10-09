@@ -29,6 +29,7 @@ from hugrgate.errors import (
     GGUFError,
     HugrGateError,
     JurisdictionViolation,
+    KeyProviderError,
     LocalOnlyViolation,
     NPUError,
     OfflineBootstrapError,
@@ -66,6 +67,7 @@ ALL_ERRORS = [
     LocalOnlyViolation,
     SecretDetected,
     SealError,
+    KeyProviderError,
 ]
 
 EXPECTED_CODES = {
@@ -102,6 +104,7 @@ EXPECTED_CODES = {
     LocalOnlyViolation: "local_only_violation",
     SecretDetected: "secret_detected",
     SealError: "seal_error",
+    KeyProviderError: "key_provider_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -142,6 +145,7 @@ EXPECTED_RECOVERABLE = {
     LocalOnlyViolation: False,
     SecretDetected: False,
     SealError: False,
+    KeyProviderError: False,
 }
 
 

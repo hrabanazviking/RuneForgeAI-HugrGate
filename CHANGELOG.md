@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 243)
+- Key-provider abstraction (`hugrgate.privacy_keys`):
+  `KeyProvider` interface, env/file/ephemeral/rotating
+  providers, HKDF `derive_key`, provider-built cache/store
+  constructors. New `KeyProviderError` error (code
+  `key_provider_error`).
+
 ### Added (slice 242)
 - Encrypted provenance option: `SealedProvenanceStore`
   (`hugrgate.privacy_provenance`) — sealed record bodies, plaintext

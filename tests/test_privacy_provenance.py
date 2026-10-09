@@ -115,13 +115,12 @@ def test_store_rejects_wrong_type():
         store.append("not a record")
 
 
-def test_core_integration():
+def test_core_integration(stub_backend):
     from hugrgate.backend import BackendRegistry
     from hugrgate.core import HugrGate
-    from tests.conftest import StubBackend
 
     reg = BackendRegistry()
-    reg.register(StubBackend())
+    reg.register(stub_backend)
     gate = HugrGate(registry=reg)
     gate.decide({"secret": "s3cr3t"}, make_spec(),
                 DecisionPolicy(privacy_class="strict"))
@@ -131,13 +130,11 @@ def test_core_integration():
     assert "s3cr3t" not in repr(record.metadata)
 
 
-def test_ladder_integration():
+def test_ladder_integration(stub_backend):
     from hugrgate.backend import BackendRegistry
     from hugrgate.ladder import LadderRouter, LadderRung
-    from tests.conftest import StubBackend
-    backend = StubBackend()
     reg = BackendRegistry()
-    reg.register(backend)
+    reg.register(stub_backend)
     store = ProvenanceStore()
     router = LadderRouter(
         rungs=[LadderRung("stub", 0.0)], registry=reg,
