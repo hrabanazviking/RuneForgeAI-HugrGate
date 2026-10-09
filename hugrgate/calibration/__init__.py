@@ -33,20 +33,23 @@ from hugrgate.calibration.temperature import (                 # noqa: E402
 from hugrgate.calibration.online import OnlineCalibrator       # noqa: E402
 from hugrgate.calibration.window import SlidingWindowCalibrator  # noqa: E402
 from hugrgate.calibration.bayes import BetaBinomialCalibrator   # noqa: E402
-from . import (  # noqa: E402
-    conformal, conformal_regression, coverage, drift, group, imbalance,
-    metrics, perclass, pipeline, profiles, registry, risk_coverage,
-    selective, sets, shift,
-)
+from hugrgate.calibration.perclass import _ConstantCalibrator   # noqa: E402
 
+# Registrations run BEFORE the submodule imports below: several submodules
+# (autoselect, registry) read the registry at import time (slice 092).
 CalibratorRegistry.register("platt", PlattCalibrator)
 CalibratorRegistry.register("isotonic", IsotonicCalibrator)
 CalibratorRegistry.register("temperature", TemperatureCalibrator)
 CalibratorRegistry.register("online", OnlineCalibrator)
 CalibratorRegistry.register("sliding-window", SlidingWindowCalibrator)
 CalibratorRegistry.register("beta-binomial", BetaBinomialCalibrator)
-CalibratorRegistry.register("constant-prior",
-                             perclass._ConstantCalibrator)
+CalibratorRegistry.register("constant-prior", _ConstantCalibrator)
+
+from . import (  # noqa: E402
+    autoselect, conformal, conformal_regression, coverage, drift, group,
+    imbalance, metrics, perclass, pipeline, profiles, registry,
+    risk_coverage, selective, sets, shift,
+)
 
 __all__ = [
     "Calibrator",
@@ -57,6 +60,7 @@ __all__ = [
     "OnlineCalibrator",
     "SlidingWindowCalibrator",
     "BetaBinomialCalibrator",
+    "autoselect",
     "conformal",
     "conformal_regression",
     "coverage",
