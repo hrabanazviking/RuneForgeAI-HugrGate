@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T12:15:20.974687+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T12:17:49.993461+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
 - **Modules:** 67 Python files under `hugrgate/`
-- **Total LOC:** 13594
+- **Total LOC:** 13636
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_contracts_048.py, test_contracts_049.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_contracts_048.py, test_contracts_049.py, test_contracts_050.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -61,7 +61,7 @@
 | `hugrgate.contracts.templates` | 330 | Contract templates — reusable parameterized contracts. | hugrgate |
 | `hugrgate.contracts.uncertainty` | 232 | Numeric uncertainty intervals. Gjallarbrú slice 034. | hugrgate |
 | `hugrgate.contracts.utility` | 273 | Utility matrices — decisions as gains, not just losses. | hugrgate |
-| `hugrgate.core` | 111 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
+| `hugrgate.core` | 153 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
 | `hugrgate.daemon` | 394 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |
 | `hugrgate.errors` | 83 | Error taxonomy for HugrGate. Slice 10. | — |

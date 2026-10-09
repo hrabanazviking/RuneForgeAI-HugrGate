@@ -288,6 +288,8 @@ flowchart TD
     contracts_utility --> contracts_schema
     contracts_utility --> errors
     core --> backend
+    core -.-> contracts_migration
+    core -.-> contracts_schema
     core --> errors
     core --> policy
     core --> provenance
@@ -557,6 +559,8 @@ flowchart TD
 | `contracts.utility` | `contracts.schema` | no |
 | `contracts.utility` | `errors` | no |
 | `core` | `backend` | no |
+| `core` | `contracts.migration` | yes |
+| `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |
 | `core` | `policy` | no |
 | `core` | `provenance` | no |

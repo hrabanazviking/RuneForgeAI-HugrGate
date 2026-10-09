@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-09T12:15:20.974687+00:00",
+  "generated_utc": "2026-10-09T12:17:49.993461+00:00",
   "module_count": 67,
   "modules": {
     "hugrgate.__init__": {
@@ -1116,7 +1116,7 @@
         "time",
         "typing"
       ],
-      "loc": 111,
+      "loc": 153,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -1572,6 +1572,7 @@
     "test_contracts_047.py",
     "test_contracts_048.py",
     "test_contracts_049.py",
+    "test_contracts_050.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1582,5 +1583,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 13594
+  "total_loc": 13636
 }
