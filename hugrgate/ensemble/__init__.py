@@ -83,6 +83,7 @@ from hugrgate.ensemble.diversity import (
     winner_margin,
 )
 from hugrgate.ensemble.moe import ExpertRouter, moe_combine
+from hugrgate.ensemble.explanations import explain_ensemble
 from hugrgate.ensemble.membership import (
     STATUS_ACTIVE,
     STATUS_RETIRED,
@@ -129,6 +130,7 @@ __all__ = [
     "predictive_log_likelihood",
     "record_ensemble_decision",
     "find_ensemble_records",
+    "explain_ensemble",
     "SoftmaxRegression",
     "StackingEngine",
     "stacking_combine",
