@@ -78,6 +78,7 @@ flowchart TD
         cluster_node[cluster.node]
         cluster_routes[cluster.routes]
         cluster_auth[cluster.auth]
+        cluster_transport[cluster.transport]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -178,6 +179,7 @@ flowchart TD
     cluster --> cluster_protocol
     cluster --> cluster_rpc
     cluster --> cluster_static_config
+    cluster --> cluster_transport
     cluster_auth --> cluster_node
     cluster_auth --> errors
     cluster_capabilities --> hugrgate
@@ -220,6 +222,7 @@ flowchart TD
     cluster_rpc --> spec
     cluster_static_config --> cluster_discovery
     cluster_static_config --> errors
+    cluster_transport --> errors
     core --> backend
     core --> errors
     core --> log
@@ -309,7 +312,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -411,6 +414,7 @@ flowchart TD
 | `cluster` | `cluster.protocol` | no |
 | `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
+| `cluster` | `cluster.transport` | no |
 | `cluster.auth` | `cluster.node` | no |
 | `cluster.auth` | `errors` | no |
 | `cluster.capabilities` | `hugrgate` | no |
@@ -453,6 +457,7 @@ flowchart TD
 | `cluster.rpc` | `spec` | no |
 | `cluster.static_config` | `cluster.discovery` | no |
 | `cluster.static_config` | `errors` | no |
+| `cluster.transport` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `log` | no |

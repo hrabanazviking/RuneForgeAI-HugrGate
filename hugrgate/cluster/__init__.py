@@ -54,6 +54,14 @@ from hugrgate.cluster.static_config import (
     example_config,
     load_static_config,
 )
+from hugrgate.cluster.transport import (
+    TLSServer,
+    cert_fingerprint,
+    fetch_server_fingerprint,
+    make_self_signed_cert,
+    trusted_context_for,
+    verify_cert_fingerprint,
+)
 
 __all__ = [
     "AUTH_HEADER",
@@ -83,11 +91,17 @@ __all__ = [
     "RemoteBackend",
     "StaticDiscovery",
     "StaticPeerConfig",
+    "TLSServer",
+    "cert_fingerprint",
     "decode_message",
     "enable_mutual_auth",
     "encode_message",
     "error_envelope",
     "example_config",
+    "fetch_server_fingerprint",
     "load_static_config",
+    "make_self_signed_cert",
     "new_trace_id",
+    "trusted_context_for",
+    "verify_cert_fingerprint",
 ]

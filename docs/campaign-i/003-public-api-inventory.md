@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 55 · **public names:** 254
+**Modules:** 56 · **public names:** 266
 
 ## API stability policy
 
@@ -257,13 +257,19 @@ that this document never drifts from the code.
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
+| `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
 | `example_config` | function | `() -> 'dict[str, Any]'` |
+| `fetch_server_fingerprint` | function | `(host: 'str', port: 'int', timeout: 'float' = 5.0) -> 'str'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
+| `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
 | `new_trace_id` | function | `() -> 'str'` |
+| `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
+| `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
 
 ### `hugrgate.cluster.auth`
 
@@ -349,6 +355,17 @@ that this document never drifts from the code.
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `example_config` | function | `() -> 'dict[str, Any]'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
+
+### `hugrgate.cluster.transport`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
+| `fetch_server_fingerprint` | function | `(host: 'str', port: 'int', timeout: 'float' = 5.0) -> 'str'` |
+| `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
+| `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
+| `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
 
 ### `hugrgate.core`
 
