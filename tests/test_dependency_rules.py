@@ -62,7 +62,22 @@ CONTRACTS = {
     "hugrgate.errors", "hugrgate.spec", "hugrgate.result",
     "hugrgate.backend", "hugrgate.policy", "hugrgate.validation",
 }
-SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client"}
+SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client",
+           # Campaign XVIII (slice 428): the v2 SDK is client-side
+           # service-layer code — it builds on hugrgate.client.
+           "hugrgate.sdk",
+           # Campaign XVIII (slice 436): the interactive inspector
+           # drives the client like the CLI does.
+           "hugrgate.inspect",
+           # Campaign XVIII (slice 439): the plugin SDK loads
+           # backends into the service-layer registry.
+           "hugrgate.plugins",
+           # Campaign XVIII (slice 440): the conformance kit
+           # exercises backends through the service layer.
+           "hugrgate.conformance",
+           # Campaign XVIII (slice 444): the compat helpers rebuild
+           # v1 clients as SDK v2s through hugrgate.client.
+           "hugrgate.compat"}
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
@@ -147,6 +162,9 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "fastapi": {"server"},
     "uvicorn": {"server"},
     "httpx": {"server"},
+    # Campaign XVIII (slice 427): the documented OpenAPI contract
+    # models import pydantic directly; provided by the server extra.
+    "pydantic": {"server"},
     "pytest": {"test"},
     "mypy": {"typecheck"},
     "ruff": {"lint"},
@@ -195,6 +213,12 @@ _STDLIB = {
     "multiprocessing",
     # Campaign XVI (slice 383): attention priority queue.
     "heapq",
+    # Campaign XVIII (slices 435/436/438): CLI did-you-mean, the
+    # inspector REPL, and the scaffolder's stdlib.
+    "difflib", "shlex", "readline", "keyword", "py_compile",
+    # Campaign XVIII (slices 447/449): packaging tests parse the
+    # systemd unit and the launchd plist with the stdlib.
+    "configparser", "plistlib",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

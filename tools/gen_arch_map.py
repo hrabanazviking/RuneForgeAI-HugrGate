@@ -53,6 +53,9 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.contracts.migration",
         "hugrgate.contracts.lint",
         "hugrgate.contracts.fuzz",
+        # Campaign XVIII (slice 441): the contract conformance kit
+        # exercises templates/instances within the contracts layer.
+        "hugrgate.contracts.conformance",
     ],
     "local-runtimes": [
         "hugrgate.runtimes", "hugrgate.runtimes.bench_matrix",
@@ -176,6 +179,20 @@ LAYERS: dict[str, list[str]] = {
     "service": [
         "hugrgate.server", "hugrgate.daemon", "hugrgate.client",
         "hugrgate.cli",
+        # Campaign XVIII: the wire protocol (426), the SDKs and
+        # inspector (428/436), the plugin SDK (439), the
+        # conformance kits (440), the CLI tooling (435/437/438),
+        # and the compat/loaders helpers (444) are all
+        # service-layer developer tooling.
+        "hugrgate.protocol",
+        "hugrgate.sdk",
+        "hugrgate.inspect",
+        "hugrgate.plugins",
+        "hugrgate.conformance",
+        "hugrgate.compat",
+        "hugrgate.configgen",
+        "hugrgate.scaffold",
+        "hugrgate.loaders",
     ],
     "adaptive": [
         "hugrgate.adaptive",

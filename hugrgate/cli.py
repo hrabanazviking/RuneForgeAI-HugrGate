@@ -18,18 +18,31 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Any
 
-from hugrgate.policy import DecisionPolicy
+from hugrgate.loaders import (
+    load_policy,
+    load_spec,
+    load_state,
+)
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "build_parser",
     "cmd_backends",
     "cmd_bench",
+    "cmd_completion",
     "cmd_decide",
+    "cmd_doctor",
+    "cmd_gen",
     "cmd_health",
+    "cmd_init",
+    "cmd_inspect",
     "cmd_models",
+    "cmd_new",
+    "cmd_openapi",
+    "cmd_plugins",
     "cmd_report",
     "cmd_serve",
     "load_policy",
@@ -39,37 +52,57 @@ __all__ = [
 ]
 
 
-def _load_doc(path: str) -> Any:
-    """Load a JSON or YAML document (YAML is a superset of JSON)."""
-    import yaml
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
-def load_spec(path: str) -> DecisionSpec:
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"spec file {path} must contain a mapping")
-    return DecisionSpec.from_dict(doc)
-
-
-def load_state(path: str) -> dict[str, Any]:
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"state file {path} must contain a mapping")
-    return doc
-
-
-def load_policy(path: str) -> DecisionPolicy:
-    from hugrgate.serde import policy_from_dict
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"policy file {path} must contain a mapping")
-    return policy_from_dict(doc)
-
-
 def _print_json(payload: Any) -> None:
     print(json.dumps(payload, indent=2, default=str))
+
+
+# --- output formatting (slice 435) -------------------------------------------
+
+
+def _flatten(value: Any) -> str:
+    """Render a value as a single table cell."""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, default=str)
+    return str(value)
+
+
+def _render_table(rows: list[dict[str, Any]],
+                  columns: list[str]) -> str:
+    """Render rows as an aligned plain-text table (no dependencies)."""
+    widths = [len(c) for c in columns]
+    cells = [[_flatten(r.get(c, "")) for c in columns] for r in rows]
+    for row in cells:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(cell))
+    lines = ["  ".join(c.ljust(widths[i])
+                       for i, c in enumerate(columns))]
+    lines.append("  ".join("-" * w for w in widths))
+    for row in cells:
+        lines.append("  ".join(cell.ljust(widths[i])
+                               for i, cell in enumerate(row)))
+    return "\n".join(lines)
+
+
+def _emit(args: argparse.Namespace, payload: Any,
+          table: tuple[list[dict[str, Any]], list[str]] | None = None
+          ) -> None:
+    """Print ``payload`` as JSON (default) or as a table.
+
+    ``table`` is ``(rows, columns)`` used when ``--format table`` is
+    given; commands without a tabular form fall back to JSON.
+    """
+    fmt = getattr(args, "format", "json")
+    if fmt == "table" and table is not None:
+        rows, columns = table
+        print(_render_table(rows, columns))
+    elif fmt == "yaml":
+        import yaml
+        print(yaml.safe_dump(json.loads(json.dumps(payload,
+                                                   default=str)),
+                             default_flow_style=False,
+                             sort_keys=False).rstrip("\n"))
+    else:
+        _print_json(payload)
 
 
 def cmd_decide(args: argparse.Namespace) -> int:
@@ -99,7 +132,12 @@ def cmd_decide(args: argparse.Namespace) -> int:
             _print_json({"abstained": True, "reason": e.reason,
                          "message": e.message})
             return 0
-    _print_json({"abstained": False, "decision": result.to_dict()})
+    _emit(args, {"abstained": False, "decision": result.to_dict()},
+          ([{k: result.to_dict().get(k) for k in
+             ("value", "probability", "backend", "model",
+              "latency_ms")}],
+           ["value", "probability", "backend", "model",
+            "latency_ms"]))
     return 0
 
 
@@ -123,7 +161,9 @@ def cmd_backends(args: argparse.Namespace) -> int:
                 "name": n,
                 "capabilities": backend.capabilities(),
                 "is_remote": backend.is_remote})
-    _print_json({"backends": infos})
+    _emit(args, {"backends": infos},
+          (infos, ["name", "is_remote", "estimated_latency_ms",
+                   "estimated_cost"]))
     return 0
 
 
@@ -136,12 +176,18 @@ def cmd_models(args: argparse.Namespace) -> int:
             response = handle.resource.get(
                 f"{args.url.rstrip('/')}/models", timeout=10.0)
         response.raise_for_status()
-        _print_json(response.json())
+        payload = response.json()
+        rows = payload if isinstance(payload, list) else payload.get(
+            "models", [])
+        _emit(args, payload, (rows, ["name", "backend", "spec_types",
+                                    "description"]))
     else:
         from dataclasses import asdict
 
         from hugrgate.server import list_models
-        _print_json({"models": [asdict(m) for m in list_models()]})
+        models = [asdict(m) for m in list_models()]
+        _emit(args, {"models": models},
+              (models, ["name", "backend", "spec_types", "description"]))
     return 0
 
 
@@ -149,7 +195,10 @@ def cmd_health(args: argparse.Namespace) -> int:
     from hugrgate.client import HugrGateClient
     client = HugrGateClient(url=args.url or "http://127.0.0.1:8377")
     try:
-        _print_json(client.health())
+        health = client.health()
+        _emit(args, health,
+              ([health], ["status", "version", "reachable",
+                          "uptime_s", "decisions_served"]))
         return 0
     finally:
         client.close()
@@ -157,14 +206,44 @@ def cmd_health(args: argparse.Namespace) -> int:
 
 def cmd_serve(args: argparse.Namespace) -> int:
     from hugrgate.daemon import main as daemon_main
-    daemon_argv = ["--host", args.host, "--port", str(args.port),
-                   "--batch-window-ms", str(args.batch_window_ms),
-                   "--max-batch", str(args.max_batch),
-                   "--max-queue", str(args.max_queue)]
-    if args.unix_socket:
-        daemon_argv += ["--unix-socket", args.unix_socket]
-    if args.client_policies:
-        daemon_argv += ["--client-policies", args.client_policies]
+    host, port = args.host, args.port
+    batch_window_ms = args.batch_window_ms
+    max_batch, max_queue = args.max_batch, args.max_queue
+    unix_socket, client_policies = args.unix_socket, args.client_policies
+    if args.config:
+        # Slice 437: a config file supplies values for flags left at
+        # their defaults; explicit flags always win.
+        from hugrgate.configgen import load_daemon_config
+        from hugrgate.daemon import DaemonConfig
+        from hugrgate.errors import ConfigError
+        try:
+            cfg = load_daemon_config(args.config)
+        except ConfigError as e:
+            print(f"hugrgate: {e}", file=sys.stderr)
+            return 2
+        defaults = DaemonConfig()
+        if host == defaults.host:
+            host = cfg.host
+        if port == defaults.port:
+            port = cfg.port
+        if batch_window_ms == defaults.batch_window_ms:
+            batch_window_ms = cfg.batch_window_ms
+        if max_batch == defaults.max_batch:
+            max_batch = cfg.max_batch
+        if max_queue == defaults.max_queue:
+            max_queue = cfg.max_queue
+        if unix_socket is None:
+            unix_socket = cfg.unix_socket
+        if client_policies is None:
+            client_policies = cfg.client_policies_path
+    daemon_argv = ["--host", host, "--port", str(port),
+                   "--batch-window-ms", str(batch_window_ms),
+                   "--max-batch", str(max_batch),
+                   "--max-queue", str(max_queue)]
+    if unix_socket:
+        daemon_argv += ["--unix-socket", unix_socket]
+    if client_policies:
+        daemon_argv += ["--client-policies", client_policies]
     return daemon_main(daemon_argv)
 
 
@@ -205,10 +284,354 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_openapi(args: argparse.Namespace) -> int:
+    """Dump the stabilized OpenAPI schema (slice 427)."""
+    from hugrgate.server import dump_openapi_schema
+    schema = dump_openapi_schema()
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(schema, f, indent=2)
+            f.write("\n")
+        print(f"wrote OpenAPI schema: {args.out}")
+    else:
+        _print_json(schema)
+    return 0
+
+
+def cmd_doctor(args: argparse.Namespace) -> int:
+    """Check that a HugrGate service is reachable and coherent.
+
+    Slice 435: runs the checks an operator needs before trusting a
+    deployment — reachability, protocol version agreement, backend
+    inventory, and a live end-to-end decision. Prints one line per
+    check and exits non-zero when anything fails.
+    """
+    from hugrgate.client import HugrGateClient
+    from hugrgate.protocol import PROTOCOL_VERSION
+
+    url = args.url or "http://127.0.0.1:8377"
+    checks: list[tuple[str, bool, str]] = []
+
+    def check(name: str, ok: bool, detail: str = "") -> None:
+        checks.append((name, ok, detail))
+        print(f"[{'ok' if ok else 'FAIL'}] {name}"
+              + (f" — {detail}" if detail else ""))
+
+    client = HugrGateClient(url=url, fallback_inprocess=False)
+    try:
+        health = client.health()
+        reachable = bool(health.get("reachable"))
+        check("service reachable", reachable,
+              url if not reachable else
+              f"version {health.get('version', '?')}")
+        if reachable:
+            try:
+                proto = client.protocol()
+                agreed = (proto.get("protocol_version")
+                          == PROTOCOL_VERSION)
+                check("protocol version agreement", agreed,
+                      f"service={proto.get('protocol_version')} "
+                      f"client={PROTOCOL_VERSION}")
+            except Exception as e:  # noqa: BLE001 - probe must not crash
+                check("protocol version agreement", False, str(e))
+            try:
+                backends = client.backends()
+                check("backend inventory", len(backends) > 0,
+                      f"{len(backends)} backend(s): "
+                      + ", ".join(b.get("name", "?")
+                                   for b in backends))
+            except Exception as e:  # noqa: BLE001 - probe must not crash
+                check("backend inventory", False, str(e))
+            try:
+                spec = DecisionSpec.from_dict(
+                    {"type": "categorical", "options": ["a", "b"]})
+                result = client.decide({"doctor": 1.0}, spec)
+                check("end-to-end decision", True,
+                      f"value={result.value} "
+                      f"backend={result.backend}")
+            except Exception as e:  # noqa: BLE001 - probe must not crash
+                check("end-to-end decision", False, str(e))
+    finally:
+        client.close()
+    failed = [name for name, ok, _ in checks if not ok]
+    if failed:
+        print(f"\ndoctor: {len(failed)} check(s) failed: "
+              + ", ".join(failed))
+        return 1
+    print("\ndoctor: all checks passed")
+    return 0
+
+
+_COMPLETION_SCRIPTS = {
+    "bash": """\
+# hugrgate bash completion (generated by `hugrgate completion bash`)
+# Install: save as /etc/bash_completion.d/hugrgate or source from ~/.bashrc
+_hugrgate_complete() {
+    local cur prev cmds
+    cmds="{commands}"
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        COMPREPLY=( $(compgen -W "$cmds" -- "$cur") )
+        return 0
+    fi
+    case "$prev" in
+        --format) COMPREPLY=( $(compgen -W "json table yaml" -- "$cur") );;
+        --backend) COMPREPLY=( $(hugrgate backends 2>/dev/null | grep -o '"name": "[^"]*"' | cut -d'"' -f4) );;
+        --url) COMPREPLY=();;
+        *) COMPREPLY=( $(compgen -f -- "$cur") );;
+    esac
+}
+complete -F _hugrgate_complete hugrgate
+""",
+    "zsh": """\
+# hugrgate zsh completion (generated by `hugrgate completion zsh`)
+# Install: save as _hugrgate somewhere on your $fpath
+#compdef hugrgate
+_hugrgate() {
+    local -a commands
+    commands=({commands_quoted})
+    _arguments -C \\
+        '--format[output format]:format:(json table yaml)' \\
+        '--url[service URL]:url:' \\
+        '1: :->command' \\
+        '*:: :->args'
+    case $state in
+        command) _describe 'command' commands ;;
+    esac
+}
+_hugrgate
+""",
+    "fish": """\
+# hugrgate fish completion (generated by `hugrgate completion fish`)
+# Install: save as ~/.config/fish/completions/hugrgate.fish
+for cmd in {commands}; complete -c hugrgate -n '__fish_use_subcommand' -f -a $cmd; end
+complete -c hugrgate -n '__fish_seen_subcommand_from decide backends models health' -l format -f -a "json table yaml"
+complete -c hugrgate -l url -f -r
+""",
+}
+
+
+def cmd_completion(args: argparse.Namespace) -> int:
+    """Print a shell completion script (slice 435)."""
+    commands = _command_names(build_parser())
+    # Plain .replace(), not .format(): the scripts contain shell
+    # braces that must not be interpreted as format fields.
+    script = _COMPLETION_SCRIPTS[args.shell]
+    script = script.replace("{commands}",
+                            " ".join(commands))
+    script = script.replace("{commands_quoted}",
+                            " ".join(f'"{c}"' for c in commands))
+    print(script, end="")
+    return 0
+
+
+def cmd_new(args: argparse.Namespace) -> int:
+    """Scaffold a new HugrGate project (slice 438)."""
+    from hugrgate.errors import ScaffoldError
+    from hugrgate.scaffold import scaffold_project
+    try:
+        written = scaffold_project(args.name, args.dir, force=args.force)
+    except ScaffoldError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    print(f"scaffolded project '{args.name}':")
+    for path in written:
+        print(f"  {path}")
+    print("next: cd", args.name, "&& pytest")
+    return 0
+
+
+def cmd_plugins(args: argparse.Namespace) -> int:
+    """List discovered backend plugins (slice 439)."""
+    from hugrgate.plugins import discover_plugins
+    loaded, failed = discover_plugins()
+    rows = [{"name": i.name,
+             "status": "ok",
+             "backend": i.backend.name if i.backend else "-"}
+            for i in loaded]
+    rows += [{"name": i.name, "status": "FAILED",
+              "backend": str(i.error) if i.error else "-"}
+             for i in failed]
+    _emit(args, {"plugins": rows}, (rows, ["name", "status",
+                                           "backend"]))
+    return 1 if failed else 0
+
+
+def cmd_check_backend(args: argparse.Namespace) -> int:
+    """Run the backend conformance battery (slice 440)."""
+    from hugrgate.conformance import (
+        assert_conformance,
+        run_backend_conformance,
+    )
+    from hugrgate.errors import ConformanceError
+    from hugrgate.server import build_gate
+    gate = build_gate()
+    backend = gate.registry.get(args.name)
+    if backend is None:
+        # Fall back to the plugin loader: maybe it is installed
+        # but not registered.
+        from hugrgate.errors import PluginError
+        from hugrgate.plugins import load_plugin
+        try:
+            backend = load_plugin(args.name)
+        except PluginError as e:
+            print(f"hugrgate: {e}", file=sys.stderr)
+            return 2
+    report = run_backend_conformance(backend)
+    _emit(args, report.to_dict(),
+          ([{"check": c.name,
+             "passed": "ok" if c.passed else "FAIL",
+             "detail": c.detail} for c in report.checks],
+           ["check", "passed", "detail"]))
+    if report.passed:
+        print(f"backend {args.name!r} is conformant "
+              f"({len(report.checks)} checks)")
+        return 0
+    try:
+        assert_conformance(report)
+    except ConformanceError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+    return 1
+
+
+def cmd_check_contract(args: argparse.Namespace) -> int:
+    """Run the contract conformance battery (slice 441)."""
+    import json
+
+    from hugrgate.contracts.conformance import (
+        assert_conformance,
+        run_contract_conformance,
+        run_template_conformance,
+    )
+    from hugrgate.contracts.schema import contract_from_dict
+    from hugrgate.contracts.templates import ContractTemplate
+    from hugrgate.errors import ConformanceError, ContractError
+    try:
+        data = json.loads(Path(args.file).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        print(f"hugrgate: cannot read template file: {e}",
+              file=sys.stderr)
+        return 2
+    try:
+        if args.instance:
+            target = contract_from_dict(data)
+            report = run_contract_conformance(target)
+        else:
+            report = run_template_conformance(
+                ContractTemplate.from_dict(data))
+    except ContractError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    _emit(args, report.to_dict(),
+          ([{"check": c.name,
+             "passed": "ok" if c.passed else "FAIL",
+             "detail": c.detail} for c in report.checks],
+           ["check", "passed", "detail"]))
+    if report.passed:
+        print(f"{args.file} is conformant "
+              f"({len(report.checks)} checks)")
+        return 0
+    try:
+        assert_conformance(report)
+    except ConformanceError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+    return 1
+
+
+def cmd_inspect(args: argparse.Namespace) -> int:
+    """Drop into the interactive inspector REPL (slice 436)."""
+    from hugrgate.inspect import run_inspect
+    return run_inspect(args.url)
+
+
+def cmd_init(args: argparse.Namespace) -> int:
+    """Write a starter HugrGate working directory (slice 437)."""
+    from hugrgate.configgen import init_project
+    from hugrgate.errors import ConfigError
+    try:
+        written = init_project(args.dir, force=args.force)
+    except ConfigError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    for p in written:
+        print(f"wrote {p}")
+    print("next: edit spec.yaml/state, then "
+          "`hugrgate decide --spec spec.yaml --state state.example.yaml`")
+    return 0
+
+
+def cmd_gen(args: argparse.Namespace) -> int:
+    """Generate one config file (slice 437)."""
+    from hugrgate.configgen import (
+        generate_daemon_config,
+        generate_policy,
+        generate_spec,
+        write_new,
+    )
+    from hugrgate.errors import ConfigError
+    try:
+        if args.kind == "daemon":
+            content = generate_daemon_config()
+            default = "hugrgate.yaml"
+        elif args.kind == "spec":
+            fields: dict[str, Any] = {}
+            if args.options:
+                fields["options"] = args.options.split(",")
+            if args.statement:
+                fields["statement"] = args.statement
+            if args.levels:
+                fields["levels"] = args.levels.split(",")
+            content = generate_spec(args.type, **fields)
+            default = "spec.yaml"
+        else:  # policy
+            overrides: dict[str, Any] = {}
+            if args.min_probability is not None:
+                overrides["minimum_probability"] = args.min_probability
+            if args.max_latency_ms is not None:
+                overrides["maximum_latency_ms"] = args.max_latency_ms
+            content = generate_policy(**overrides)
+            default = "policy.yaml"
+        path = write_new(args.out or default, content, force=args.force)
+    except ConfigError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    print(f"wrote {path}")
+    return 0
+
+
+def _command_names(parser: argparse.ArgumentParser) -> list[str]:
+    """Sorted subcommand names (for completion and did-you-mean)."""
+    for action in parser._actions:
+        if isinstance(action, argparse._SubParsersAction):
+            return sorted(action.choices)
+    return []
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    import difflib
+    from typing import NoReturn
+
+    class _Parser(argparse.ArgumentParser):
+        """argparse with did-you-mean for mistyped subcommands."""
+
+        def error(self, message: str) -> NoReturn:
+            import re
+            m = re.search(r"invalid choice: '([^']+)'", message)
+            if m:
+                near = difflib.get_close_matches(
+                    m.group(1), _command_names(self), n=1)
+                if near:
+                    message += f"\ndid you mean '{near[0]}'?"
+            super().error(message)
+
+    parser = _Parser(
         prog="hugrgate",
         description="HugrGate — local-first probabilistic decision runtime.")
+    parser.add_argument("--format", default="json",
+                        choices=["json", "table", "yaml"],
+                        help="output format (default: json)")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("decide", help="make one decision")
@@ -240,6 +663,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-batch", type=int, default=32)
     p.add_argument("--max-queue", type=int, default=1024)
     p.add_argument("--client-policies", default=None)
+    p.add_argument("--config", default=None,
+                   help="daemon config file (hugrgate.yaml); explicit "
+                        "flags override it")
     p.set_defaults(func=cmd_serve)
 
     p = sub.add_parser("bench", help="run a benchmark")
@@ -255,6 +681,83 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--report", required=True)
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("openapi", help="dump the stabilized OpenAPI schema")
+    p.add_argument("--out", default=None,
+                   help="write schema JSON to a file (default: stdout)")
+    p.set_defaults(func=cmd_openapi)
+
+    p = sub.add_parser("doctor",
+                       help="check service reachability and coherence")
+    p.add_argument("--url", default=None,
+                   help="service URL (default: http://127.0.0.1:8377)")
+    p.set_defaults(func=cmd_doctor)
+
+    p = sub.add_parser("completion",
+                       help="print a shell completion script")
+    p.add_argument("shell", choices=["bash", "zsh", "fish"])
+    p.set_defaults(func=cmd_completion)
+
+    p = sub.add_parser("plugins",
+                       help="list discovered backend plugins")
+    p.set_defaults(func=cmd_plugins)
+
+    p = sub.add_parser("check-backend",
+                       help="run the backend conformance battery")
+    p.add_argument("name", help="backend name (registry or plugin)")
+    p.set_defaults(func=cmd_check_backend)
+
+    p = sub.add_parser("check-contract",
+                       help="run the contract conformance battery")
+    p.add_argument("file", help="template JSON file")
+    p.add_argument("--instance", action="store_true",
+                   help="check a serialized contract instead of a template")
+    p.set_defaults(func=cmd_check_contract)
+
+    p = sub.add_parser("new", help="scaffold a new HugrGate project")
+    p.add_argument("name", help="project name (lowercase, valid package)")
+    p.add_argument("--dir", default=".",
+                   help="parent directory (default: .)")
+    p.add_argument("--force", action="store_true",
+                   help="scaffold into a non-empty directory")
+    p.set_defaults(func=cmd_new)
+
+    p = sub.add_parser("inspect",
+                       help="interactive inspector REPL")
+    p.add_argument("--url", default=None,
+                   help="service URL (default: http://127.0.0.1:8377)")
+    p.set_defaults(func=cmd_inspect)
+
+    p = sub.add_parser("init",
+                       help="write a starter HugrGate working directory")
+    p.add_argument("--dir", default=".",
+                   help="target directory (default: .)")
+    p.add_argument("--force", action="store_true",
+                   help="overwrite existing files")
+    p.set_defaults(func=cmd_init)
+
+    p = sub.add_parser("gen", help="generate one config file")
+    p.add_argument("kind", choices=["daemon", "spec", "policy"])
+    p.add_argument("--out", default=None,
+                   help="output file (default: hugrgate.yaml / "
+                        "spec.yaml / policy.yaml)")
+    p.add_argument("--force", action="store_true",
+                   help="overwrite an existing file")
+    p.add_argument("--type", default="categorical",
+                   choices=["categorical", "binary", "ordinal",
+                            "numeric"],
+                   help="spec type (gen spec)")
+    p.add_argument("--options", default=None,
+                   help="comma-separated options (gen spec categorical)")
+    p.add_argument("--statement", default=None,
+                   help="statement (gen spec binary)")
+    p.add_argument("--levels", default=None,
+                   help="comma-separated levels (gen spec ordinal)")
+    p.add_argument("--min-probability", type=float, default=None,
+                   help="minimum probability (gen policy)")
+    p.add_argument("--max-latency-ms", type=float, default=None,
+                   help="maximum latency ms (gen policy)")
+    p.set_defaults(func=cmd_gen)
 
     return parser
 

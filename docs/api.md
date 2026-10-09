@@ -29,6 +29,14 @@ available.
 
 Liveness probe: status, version, backends, uptime, decisions served.
 
+### GET /protocol
+
+Wire-protocol advertisement (stable protocol v1): canonical
+`protocol_version`, every `supported_versions` this service
+accepts, and the `service_version`. Clients call this first and
+fail fast on version skew; requests without a version are
+treated as 1.0.
+
 ### GET /backends
 
 List of registered backends: name, capabilities, latency/cost

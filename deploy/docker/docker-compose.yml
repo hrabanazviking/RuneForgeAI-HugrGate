@@ -1,0 +1,27 @@
+# HugrGate service. Gjallarbrú slice 446.
+#
+#   docker compose -f deploy/docker/docker-compose.yml up -d --build
+#   curl localhost:8377/health
+
+services:
+  hugrgate:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    image: hugrgate:latest
+    container_name: hugrgate
+    ports:
+      - "8377:8377"
+    volumes:
+      # mount your own config to override the container default
+      - ./hugrgate.yaml:/etc/hugrgate/hugrgate.yaml:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8377/health', timeout=4).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    # never run as root, even if the image default changes
+    user: "hugr"

@@ -31,6 +31,8 @@ from hugrgate.errors import (
     CalibrationError,
     ChaosError,
     ClusterAuthError,
+    ConfigError,
+    ConformanceError,
     ContractError,
     DataFlowDenied,
     DatasetError,
@@ -60,6 +62,7 @@ from hugrgate.errors import (
     OfflineBootstrapError,
     PathTraversalBlocked,
     PerfGateError,
+    PluginError,
     PluginTrustError,
     PolicyError,
     PoolError,
@@ -67,6 +70,7 @@ from hugrgate.errors import (
     PrivacyViolation,
     ProfilingError,
     PromptInjectionBlocked,
+    ProtocolError,
     QuantError,
     QueueFull,
     RateLimitExceeded,
@@ -75,7 +79,9 @@ from hugrgate.errors import (
     ResidencyError,
     ResourceBudgetExceeded,
     RetryBudgetExhausted,
+    SDKError,
     SandboxViolation,
+    ScaffoldError,
     SchedulerError,
     SealError,
     SecretDetected,
@@ -144,6 +150,12 @@ ALL_ERRORS = [
     SandboxViolation,
     SignatureVerificationFailed,
     SupplyChainViolation,
+    ConfigError,
+    ConformanceError,
+    PluginError,
+    ProtocolError,
+    ScaffoldError,
+    SDKError,
 ]
 
 EXPECTED_CODES = {
@@ -217,6 +229,12 @@ EXPECTED_CODES = {
     EvalGateError: "eval_gate_error",
     SignatureVerificationFailed: "signature_verification_failed",
     SupplyChainViolation: "supply_chain_violation",
+    ProtocolError: "protocol_error",
+    SDKError: "sdk_error",
+    PluginError: "plugin_error",
+    ConformanceError: "conformance_error",
+    ConfigError: "config_error",
+    ScaffoldError: "scaffold_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -300,6 +318,12 @@ EXPECTED_RECOVERABLE = {
     ReplayDetected: False,
     ResourceBudgetExceeded: False,
     SandboxViolation: False,
+    ProtocolError: False,
+    SDKError: True,
+    PluginError: True,
+    ConformanceError: False,
+    ConfigError: False,
+    ScaffoldError: False,
 }
 
 

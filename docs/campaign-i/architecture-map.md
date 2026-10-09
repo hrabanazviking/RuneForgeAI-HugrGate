@@ -46,6 +46,7 @@ flowchart TD
         contracts_migration[contracts.migration]
         contracts_lint[contracts.lint]
         contracts_fuzz[contracts.fuzz]
+        contracts_conformance[contracts.conformance]
     end
     subgraph local-runtimes[local-runtimes]
         runtimes[runtimes]
@@ -241,6 +242,15 @@ flowchart TD
         daemon[daemon]
         client[client]
         cli[cli]
+        protocol[protocol]
+        sdk[sdk]
+        inspect[inspect]
+        plugins[plugins]
+        conformance[conformance]
+        compat[compat]
+        configgen[configgen]
+        scaffold[scaffold]
+        loaders[loaders]
     end
     subgraph adaptive[adaptive]
         adaptive[adaptive]
@@ -414,62 +424,6 @@ flowchart TD
         evlab_report[evlab.report]
         evlab_release[evlab.release]
     end
-    subgraph agents[agents]
-        agents[agents]
-        agents_types[agents.types]
-        agents_bus[agents.bus]
-        agents_contract[agents.contract]
-        agents_triage[agents.triage]
-        agents_intent[agents.intent]
-        agents_tools[agents.tools]
-        agents_memory_write[agents.memory_write]
-        agents_memory_read[agents.memory_read]
-        agents_notify[agents.notify]
-        agents_attention[agents.attention]
-        agents_escalation[agents.escalation]
-        agents_human_review[agents.human_review]
-        agents_dispatch[agents.dispatch]
-        agents_registry[agents.registry]
-        agents_health[agents.health]
-        agents_cost[agents.cost]
-        agents_privacy[agents.privacy]
-        agents_fusion[agents.fusion]
-        agents_disagreement[agents.disagreement]
-        agents_loopbreak[agents.loopbreak]
-        agents_runaway[agents.runaway]
-        agents_budgets[agents.budgets]
-        agents_provenance[agents.provenance]
-        agents_replay[agents.replay]
-        agents_simulator[agents.simulator]
-        agents_benchmark[agents.benchmark]
-        agents_release_gate[agents.release_gate]
-    end
-    subgraph security-forge[security-forge]
-        security[security]
-        security_threat_model[security.threat_model]
-        security_attack_surface[security.attack_surface]
-        security_depscan[security.depscan]
-        security_supply_chain[security.supply_chain]
-        security_model_signing[security.model_signing]
-        security_checksums[security.checksums]
-        security_plugins[security.plugins]
-        security_sandbox[security.sandbox]
-        security_input_limits[security.input_limits]
-        security_resource_guards[security.resource_guards]
-        security_serde_guards[security.serde_guards]
-        security_path_guards[security.path_guards]
-        security_injection_corpus[security.injection_corpus]
-        security_prompt_injection[security.prompt_injection]
-        security_malicious_backend[security.malicious_backend]
-        security_provenance_guards[security.provenance_guards]
-        security_cache_poisoning[security.cache_poisoning]
-        security_replay[security.replay]
-        security_authz[security.authz]
-        security_ratelimit[security.ratelimit]
-        security_secret_audit[security.secret_audit]
-        security_fuzzing[security.fuzzing]
-        security_gauntlet[security.gauntlet]
-    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -565,84 +519,6 @@ flowchart TD
     adaptive_shadow --> errors
     adaptive_telemetry --> errors
     adaptive_versioning --> errors
-    agents_attention --> agents_types
-    agents_benchmark --> agents_simulator
-    agents_budgets --> errors
-    agents_bus --> agents_types
-    agents_bus --> errors
-    agents_contract --> errors
-    agents_contract --> privacy
-    agents_cost --> agents_bus
-    agents_cost --> agents_types
-    agents_cost --> errors
-    agents_disagreement --> agents_fusion
-    agents_disagreement --> agents_human_review
-    agents_dispatch --> agents_bus
-    agents_dispatch --> agents_types
-    agents_escalation --> agents_bus
-    agents_escalation --> agents_contract
-    agents_escalation --> agents_types
-    agents_escalation --> errors
-    agents_health --> agents_bus
-    agents_health --> agents_registry
-    agents_health --> agents_types
-    agents_health --> errors
-    agents_human_review --> agents_bus
-    agents_human_review --> agents_types
-    agents_human_review --> errors
-    agents_human_review --> observability_alerts
-    agents_intent --> agents_contract
-    agents_intent --> errors
-    agents_loopbreak --> agents_bus
-    agents_loopbreak --> agents_types
-    agents_loopbreak --> errors
-    agents_memory_read --> memory_access
-    agents_memory_read --> privacy
-    agents_memory_write --> memory_access
-    agents_memory_write --> privacy
-    agents_notify --> agents_types
-    agents_notify --> observability_alerts
-    agents_privacy --> agents_contract
-    agents_privacy --> agents_types
-    agents_privacy --> errors
-    agents_privacy --> privacy
-    agents_registry --> agents_contract
-    agents_registry --> errors
-    agents_release_gate --> agents_attention
-    agents_release_gate --> agents_budgets
-    agents_release_gate --> agents_bus
-    agents_release_gate --> agents_contract
-    agents_release_gate --> agents_cost
-    agents_release_gate --> agents_dispatch
-    agents_release_gate --> agents_escalation
-    agents_release_gate --> agents_health
-    agents_release_gate --> agents_human_review
-    agents_release_gate --> agents_intent
-    agents_release_gate --> agents_loopbreak
-    agents_release_gate --> agents_memory_read
-    agents_release_gate --> agents_memory_write
-    agents_release_gate --> agents_notify
-    agents_release_gate --> agents_privacy
-    agents_release_gate --> agents_provenance
-    agents_release_gate --> agents_registry
-    agents_release_gate --> agents_replay
-    agents_release_gate --> agents_runaway
-    agents_release_gate --> agents_tools
-    agents_release_gate --> agents_triage
-    agents_release_gate --> agents_types
-    agents_runaway --> agents_bus
-    agents_runaway --> agents_types
-    agents_runaway --> errors
-    agents_simulator --> agents_bus
-    agents_simulator --> agents_dispatch
-    agents_simulator --> agents_loopbreak
-    agents_simulator --> agents_runaway
-    agents_simulator --> agents_types
-    agents_simulator --> errors
-    agents_tools --> agents_contract
-    agents_tools --> errors
-    agents_triage --> agents_bus
-    agents_triage -.-> agents_types
     allocprof --> errors
     allocprof --> log
     allocprof --> policy
@@ -679,7 +555,6 @@ flowchart TD
     backends_logreg --> features
     backends_logreg --> models
     backends_logreg --> result
-    backends_logreg --> security_serde_guards
     backends_logreg --> spec
     backends_nli --> backend
     backends_nli --> errors
@@ -852,17 +727,26 @@ flowchart TD
     cli -.-> bench
     cli -.-> bench_report
     cli -.-> client
+    cli -.-> configgen
+    cli -.-> conformance
+    cli -.-> contracts_conformance
+    cli -.-> contracts_schema
+    cli -.-> contracts_templates
     cli -.-> daemon
     cli -.-> errors
-    cli --> policy
+    cli -.-> inspect
+    cli --> loaders
+    cli -.-> plugins
     cli -.-> pool
-    cli -.-> serde
+    cli -.-> protocol
+    cli -.-> scaffold
     cli -.-> server
     cli --> spec
     client --> backend
     client --> core
     client --> errors
     client --> policy
+    client --> protocol
     client --> result
     client --> serde
     client -.-> server
@@ -1008,6 +892,20 @@ flowchart TD
     cluster_transport --> errors
     cluster_work_stealing --> cluster_privacy_boundary
     cluster_work_stealing --> errors
+    compat --> client
+    compat --> contracts_migration
+    compat --> contracts_schema
+    compat --> errors
+    compat -.-> sdk
+    configgen -.-> daemon
+    configgen --> errors
+    configgen -.-> serde
+    configgen -.-> spec
+    conformance --> backend
+    conformance --> errors
+    conformance -.-> plugins
+    conformance --> result
+    conformance --> spec
     contracts --> contracts_composite
     contracts --> contracts_composition
     contracts --> contracts_conditional
@@ -1045,6 +943,10 @@ flowchart TD
     contracts_conditional --> contracts_composite
     contracts_conditional --> contracts_schema
     contracts_conditional --> errors
+    contracts_conformance --> contracts_lint
+    contracts_conformance --> contracts_schema
+    contracts_conformance --> contracts_templates
+    contracts_conformance --> errors
     contracts_context --> contracts_schema
     contracts_context --> errors
     contracts_cost --> contracts_schema
@@ -1494,6 +1396,10 @@ flowchart TD
     hotpaths --> errors
     hotpaths --> log
     hotpaths --> profiling
+    inspect -.-> client
+    inspect -.-> errors
+    inspect -.-> loaders
+    inspect -.-> pool
     ladder --> backend
     ladder --> errors
     ladder --> policy
@@ -1503,6 +1409,9 @@ flowchart TD
     ladder --> result
     ladder --> spec
     ladder --> validation
+    loaders --> policy
+    loaders -.-> serde
+    loaders --> spec
     lockaudit --> log
     memory --> memory_access
     memory --> memory_adversarial
@@ -1680,6 +1589,9 @@ flowchart TD
     perfgate -.-> policy
     perfgate -.-> result
     perfgate -.-> spec
+    plugins --> backend
+    plugins --> errors
+    plugins --> spec
     policy --> errors
     policy --> result
     pool --> errors
@@ -1703,7 +1615,6 @@ flowchart TD
     privacy_crypto --> privacy
     privacy_crypto --> privacy_retention
     privacy_crypto --> result
-    privacy_crypto --> security_serde_guards
     privacy_crypto --> spec
     privacy_deletion --> provenance
     privacy_dryrun --> backend
@@ -1749,20 +1660,19 @@ flowchart TD
     privacy_provenance --> privacy_redact
     privacy_provenance --> provenance
     privacy_provenance --> result
-    privacy_provenance --> security_serde_guards
     privacy_provenance --> spec
     privacy_redact --> privacy_labels
     privacy_redact --> provenance
     privacy_retention --> policy
     privacy_retention --> provenance
     privacy_secrets --> errors
-    privacy_tokens --> errors
-    privacy_tokens --> security_serde_guards
     privacy_trust --> backend
     privacy_trust --> log
     profiling --> errors
     profiling --> log
     profiling --> policy
+    protocol -.-> hugrgate
+    protocol --> errors
     provenance -.-> errors
     provenance --> result
     provenance --> spec
@@ -1925,89 +1835,19 @@ flowchart TD
     runtimes_warmup --> backend
     runtimes_warmup --> errors
     runtimes_warmup --> runtimes
+    scaffold -.-> configgen
+    scaffold --> errors
     scheduler --> backpressure
     scheduler --> errors
     scheduler --> log
-    security --> security_attack_surface
-    security --> security_authz
-    security --> security_cache_poisoning
-    security --> security_checksums
-    security --> security_depscan
-    security --> security_fuzzing
-    security --> security_gauntlet
-    security --> security_injection_corpus
-    security --> security_input_limits
-    security --> security_malicious_backend
-    security --> security_model_signing
-    security --> security_path_guards
-    security --> security_plugins
-    security --> security_prompt_injection
-    security --> security_provenance_guards
-    security --> security_ratelimit
-    security --> security_replay
-    security --> security_resource_guards
-    security --> security_sandbox
-    security --> security_secret_audit
-    security --> security_serde_guards
-    security --> security_supply_chain
-    security --> security_threat_model
-    security_authz --> errors
-    security_cache_poisoning --> cache
-    security_cache_poisoning --> policy
-    security_cache_poisoning --> result
-    security_cache_poisoning --> spec
-    security_checksums --> errors
-    security_checksums --> security_path_guards
-    security_fuzzing --> errors
-    security_gauntlet -.-> errors
-    security_gauntlet -.-> provenance
-    security_gauntlet -.-> security_attack_surface
-    security_gauntlet -.-> security_authz
-    security_gauntlet -.-> security_cache_poisoning
-    security_gauntlet -.-> security_depscan
-    security_gauntlet -.-> security_fuzzing
-    security_gauntlet -.-> security_injection_corpus
-    security_gauntlet -.-> security_malicious_backend
-    security_gauntlet -.-> security_model_signing
-    security_gauntlet -.-> security_provenance_guards
-    security_gauntlet -.-> security_ratelimit
-    security_gauntlet -.-> security_replay
-    security_gauntlet -.-> security_secret_audit
-    security_gauntlet -.-> security_threat_model
-    security_gauntlet -.-> spec
-    security_gauntlet -.-> validation
-    security_injection_corpus -.-> security_prompt_injection
-    security_input_limits --> errors
-    security_input_limits --> validation
-    security_malicious_backend --> backend
-    security_malicious_backend -.-> core
-    security_malicious_backend --> errors
-    security_malicious_backend -.-> policy
-    security_malicious_backend --> result
-    security_malicious_backend --> security_sandbox
-    security_malicious_backend --> spec
-    security_malicious_backend --> timeout
-    security_malicious_backend --> validation
-    security_model_signing --> errors
-    security_model_signing -.-> privacy_crypto
-    security_path_guards --> errors
-    security_plugins --> errors
-    security_plugins --> security_model_signing
-    security_prompt_injection --> errors
-    security_provenance_guards --> errors
-    security_provenance_guards --> provenance
-    security_provenance_guards --> security_model_signing
-    security_ratelimit --> backpressure
-    security_ratelimit --> errors
-    security_replay --> errors
-    security_replay -.-> privacy_crypto
-    security_resource_guards --> errors
-    security_sandbox --> backend
-    security_sandbox --> errors
-    security_sandbox --> result
-    security_sandbox --> spec
-    security_serde_guards --> errors
-    security_supply_chain --> errors
+    sdk --> backend
+    sdk --> client
+    sdk --> core
+    sdk --> errors
+    sdk --> policy
+    sdk --> result
+    sdk -.-> serde
+    sdk --> spec
     serde --> errors
     serde --> policy
     serde --> result
@@ -2017,6 +1857,7 @@ flowchart TD
     server -.-> cluster_routes
     server --> core
     server --> errors
+    server --> protocol
     server --> result
     server --> serde
     server --> spec
@@ -2051,7 +1892,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz`, `contracts.conformance` |
 | local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup`, `runtimes.session_pool` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
@@ -2061,7 +1902,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
-| service | `server`, `daemon`, `client`, `cli` |
+| service | `server`, `daemon`, `client`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
@@ -2070,8 +1911,6 @@ flowchart TD
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 | observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
 | evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
-| agents | `agents`, `agents.types`, `agents.bus`, `agents.contract`, `agents.triage`, `agents.intent`, `agents.tools`, `agents.memory_write`, `agents.memory_read`, `agents.notify`, `agents.attention`, `agents.escalation`, `agents.human_review`, `agents.dispatch`, `agents.registry`, `agents.health`, `agents.cost`, `agents.privacy`, `agents.fusion`, `agents.disagreement`, `agents.loopbreak`, `agents.runaway`, `agents.budgets`, `agents.provenance`, `agents.replay`, `agents.simulator`, `agents.benchmark`, `agents.release_gate` |
-| security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.ratelimit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
 
 ## Internal dependency edges
 
@@ -2171,84 +2010,6 @@ flowchart TD
 | `adaptive.shadow` | `errors` | no |
 | `adaptive.telemetry` | `errors` | no |
 | `adaptive.versioning` | `errors` | no |
-| `agents.attention` | `agents.types` | no |
-| `agents.benchmark` | `agents.simulator` | no |
-| `agents.budgets` | `errors` | no |
-| `agents.bus` | `agents.types` | no |
-| `agents.bus` | `errors` | no |
-| `agents.contract` | `errors` | no |
-| `agents.contract` | `privacy` | no |
-| `agents.cost` | `agents.bus` | no |
-| `agents.cost` | `agents.types` | no |
-| `agents.cost` | `errors` | no |
-| `agents.disagreement` | `agents.fusion` | no |
-| `agents.disagreement` | `agents.human_review` | no |
-| `agents.dispatch` | `agents.bus` | no |
-| `agents.dispatch` | `agents.types` | no |
-| `agents.escalation` | `agents.bus` | no |
-| `agents.escalation` | `agents.contract` | no |
-| `agents.escalation` | `agents.types` | no |
-| `agents.escalation` | `errors` | no |
-| `agents.health` | `agents.bus` | no |
-| `agents.health` | `agents.registry` | no |
-| `agents.health` | `agents.types` | no |
-| `agents.health` | `errors` | no |
-| `agents.human_review` | `agents.bus` | no |
-| `agents.human_review` | `agents.types` | no |
-| `agents.human_review` | `errors` | no |
-| `agents.human_review` | `observability.alerts` | no |
-| `agents.intent` | `agents.contract` | no |
-| `agents.intent` | `errors` | no |
-| `agents.loopbreak` | `agents.bus` | no |
-| `agents.loopbreak` | `agents.types` | no |
-| `agents.loopbreak` | `errors` | no |
-| `agents.memory_read` | `memory.access` | no |
-| `agents.memory_read` | `privacy` | no |
-| `agents.memory_write` | `memory.access` | no |
-| `agents.memory_write` | `privacy` | no |
-| `agents.notify` | `agents.types` | no |
-| `agents.notify` | `observability.alerts` | no |
-| `agents.privacy` | `agents.contract` | no |
-| `agents.privacy` | `agents.types` | no |
-| `agents.privacy` | `errors` | no |
-| `agents.privacy` | `privacy` | no |
-| `agents.registry` | `agents.contract` | no |
-| `agents.registry` | `errors` | no |
-| `agents.release_gate` | `agents.attention` | no |
-| `agents.release_gate` | `agents.budgets` | no |
-| `agents.release_gate` | `agents.bus` | no |
-| `agents.release_gate` | `agents.contract` | no |
-| `agents.release_gate` | `agents.cost` | no |
-| `agents.release_gate` | `agents.dispatch` | no |
-| `agents.release_gate` | `agents.escalation` | no |
-| `agents.release_gate` | `agents.health` | no |
-| `agents.release_gate` | `agents.human_review` | no |
-| `agents.release_gate` | `agents.intent` | no |
-| `agents.release_gate` | `agents.loopbreak` | no |
-| `agents.release_gate` | `agents.memory_read` | no |
-| `agents.release_gate` | `agents.memory_write` | no |
-| `agents.release_gate` | `agents.notify` | no |
-| `agents.release_gate` | `agents.privacy` | no |
-| `agents.release_gate` | `agents.provenance` | no |
-| `agents.release_gate` | `agents.registry` | no |
-| `agents.release_gate` | `agents.replay` | no |
-| `agents.release_gate` | `agents.runaway` | no |
-| `agents.release_gate` | `agents.tools` | no |
-| `agents.release_gate` | `agents.triage` | no |
-| `agents.release_gate` | `agents.types` | no |
-| `agents.runaway` | `agents.bus` | no |
-| `agents.runaway` | `agents.types` | no |
-| `agents.runaway` | `errors` | no |
-| `agents.simulator` | `agents.bus` | no |
-| `agents.simulator` | `agents.dispatch` | no |
-| `agents.simulator` | `agents.loopbreak` | no |
-| `agents.simulator` | `agents.runaway` | no |
-| `agents.simulator` | `agents.types` | no |
-| `agents.simulator` | `errors` | no |
-| `agents.tools` | `agents.contract` | no |
-| `agents.tools` | `errors` | no |
-| `agents.triage` | `agents.bus` | no |
-| `agents.triage` | `agents.types` | yes |
 | `allocprof` | `errors` | no |
 | `allocprof` | `log` | no |
 | `allocprof` | `policy` | no |
@@ -2285,7 +2046,6 @@ flowchart TD
 | `backends.logreg` | `features` | no |
 | `backends.logreg` | `models` | no |
 | `backends.logreg` | `result` | no |
-| `backends.logreg` | `security.serde_guards` | no |
 | `backends.logreg` | `spec` | no |
 | `backends.nli` | `backend` | no |
 | `backends.nli` | `errors` | no |
@@ -2458,17 +2218,26 @@ flowchart TD
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
 | `cli` | `client` | yes |
+| `cli` | `configgen` | yes |
+| `cli` | `conformance` | yes |
+| `cli` | `contracts.conformance` | yes |
+| `cli` | `contracts.schema` | yes |
+| `cli` | `contracts.templates` | yes |
 | `cli` | `daemon` | yes |
 | `cli` | `errors` | yes |
-| `cli` | `policy` | no |
+| `cli` | `inspect` | yes |
+| `cli` | `loaders` | no |
+| `cli` | `plugins` | yes |
 | `cli` | `pool` | yes |
-| `cli` | `serde` | yes |
+| `cli` | `protocol` | yes |
+| `cli` | `scaffold` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
 | `client` | `backend` | no |
 | `client` | `core` | no |
 | `client` | `errors` | no |
 | `client` | `policy` | no |
+| `client` | `protocol` | no |
 | `client` | `result` | no |
 | `client` | `serde` | no |
 | `client` | `server` | yes |
@@ -2614,6 +2383,20 @@ flowchart TD
 | `cluster.transport` | `errors` | no |
 | `cluster.work_stealing` | `cluster.privacy_boundary` | no |
 | `cluster.work_stealing` | `errors` | no |
+| `compat` | `client` | no |
+| `compat` | `contracts.migration` | no |
+| `compat` | `contracts.schema` | no |
+| `compat` | `errors` | no |
+| `compat` | `sdk` | yes |
+| `configgen` | `daemon` | yes |
+| `configgen` | `errors` | no |
+| `configgen` | `serde` | yes |
+| `configgen` | `spec` | yes |
+| `conformance` | `backend` | no |
+| `conformance` | `errors` | no |
+| `conformance` | `plugins` | yes |
+| `conformance` | `result` | no |
+| `conformance` | `spec` | no |
 | `contracts` | `contracts.composite` | no |
 | `contracts` | `contracts.composition` | no |
 | `contracts` | `contracts.conditional` | no |
@@ -2651,6 +2434,10 @@ flowchart TD
 | `contracts.conditional` | `contracts.composite` | no |
 | `contracts.conditional` | `contracts.schema` | no |
 | `contracts.conditional` | `errors` | no |
+| `contracts.conformance` | `contracts.lint` | no |
+| `contracts.conformance` | `contracts.schema` | no |
+| `contracts.conformance` | `contracts.templates` | no |
+| `contracts.conformance` | `errors` | no |
 | `contracts.context` | `contracts.schema` | no |
 | `contracts.context` | `errors` | no |
 | `contracts.cost` | `contracts.schema` | no |
@@ -3100,6 +2887,10 @@ flowchart TD
 | `hotpaths` | `errors` | no |
 | `hotpaths` | `log` | no |
 | `hotpaths` | `profiling` | no |
+| `inspect` | `client` | yes |
+| `inspect` | `errors` | yes |
+| `inspect` | `loaders` | yes |
+| `inspect` | `pool` | yes |
 | `ladder` | `backend` | no |
 | `ladder` | `errors` | no |
 | `ladder` | `policy` | no |
@@ -3109,6 +2900,9 @@ flowchart TD
 | `ladder` | `result` | no |
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
+| `loaders` | `policy` | no |
+| `loaders` | `serde` | yes |
+| `loaders` | `spec` | no |
 | `lockaudit` | `log` | no |
 | `memory` | `memory.access` | no |
 | `memory` | `memory.adversarial` | no |
@@ -3286,6 +3080,9 @@ flowchart TD
 | `perfgate` | `policy` | yes |
 | `perfgate` | `result` | yes |
 | `perfgate` | `spec` | yes |
+| `plugins` | `backend` | no |
+| `plugins` | `errors` | no |
+| `plugins` | `spec` | no |
 | `policy` | `errors` | no |
 | `policy` | `result` | no |
 | `pool` | `errors` | no |
@@ -3309,7 +3106,6 @@ flowchart TD
 | `privacy_crypto` | `privacy` | no |
 | `privacy_crypto` | `privacy_retention` | no |
 | `privacy_crypto` | `result` | no |
-| `privacy_crypto` | `security.serde_guards` | no |
 | `privacy_crypto` | `spec` | no |
 | `privacy_deletion` | `provenance` | no |
 | `privacy_dryrun` | `backend` | no |
@@ -3355,20 +3151,19 @@ flowchart TD
 | `privacy_provenance` | `privacy_redact` | no |
 | `privacy_provenance` | `provenance` | no |
 | `privacy_provenance` | `result` | no |
-| `privacy_provenance` | `security.serde_guards` | no |
 | `privacy_provenance` | `spec` | no |
 | `privacy_redact` | `privacy_labels` | no |
 | `privacy_redact` | `provenance` | no |
 | `privacy_retention` | `policy` | no |
 | `privacy_retention` | `provenance` | no |
 | `privacy_secrets` | `errors` | no |
-| `privacy_tokens` | `errors` | no |
-| `privacy_tokens` | `security.serde_guards` | no |
 | `privacy_trust` | `backend` | no |
 | `privacy_trust` | `log` | no |
 | `profiling` | `errors` | no |
 | `profiling` | `log` | no |
 | `profiling` | `policy` | no |
+| `protocol` | `hugrgate` | yes |
+| `protocol` | `errors` | no |
 | `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
@@ -3531,89 +3326,19 @@ flowchart TD
 | `runtimes.warmup` | `backend` | no |
 | `runtimes.warmup` | `errors` | no |
 | `runtimes.warmup` | `runtimes` | no |
+| `scaffold` | `configgen` | yes |
+| `scaffold` | `errors` | no |
 | `scheduler` | `backpressure` | no |
 | `scheduler` | `errors` | no |
 | `scheduler` | `log` | no |
-| `security` | `security.attack_surface` | no |
-| `security` | `security.authz` | no |
-| `security` | `security.cache_poisoning` | no |
-| `security` | `security.checksums` | no |
-| `security` | `security.depscan` | no |
-| `security` | `security.fuzzing` | no |
-| `security` | `security.gauntlet` | no |
-| `security` | `security.injection_corpus` | no |
-| `security` | `security.input_limits` | no |
-| `security` | `security.malicious_backend` | no |
-| `security` | `security.model_signing` | no |
-| `security` | `security.path_guards` | no |
-| `security` | `security.plugins` | no |
-| `security` | `security.prompt_injection` | no |
-| `security` | `security.provenance_guards` | no |
-| `security` | `security.ratelimit` | no |
-| `security` | `security.replay` | no |
-| `security` | `security.resource_guards` | no |
-| `security` | `security.sandbox` | no |
-| `security` | `security.secret_audit` | no |
-| `security` | `security.serde_guards` | no |
-| `security` | `security.supply_chain` | no |
-| `security` | `security.threat_model` | no |
-| `security.authz` | `errors` | no |
-| `security.cache_poisoning` | `cache` | no |
-| `security.cache_poisoning` | `policy` | no |
-| `security.cache_poisoning` | `result` | no |
-| `security.cache_poisoning` | `spec` | no |
-| `security.checksums` | `errors` | no |
-| `security.checksums` | `security.path_guards` | no |
-| `security.fuzzing` | `errors` | no |
-| `security.gauntlet` | `errors` | yes |
-| `security.gauntlet` | `provenance` | yes |
-| `security.gauntlet` | `security.attack_surface` | yes |
-| `security.gauntlet` | `security.authz` | yes |
-| `security.gauntlet` | `security.cache_poisoning` | yes |
-| `security.gauntlet` | `security.depscan` | yes |
-| `security.gauntlet` | `security.fuzzing` | yes |
-| `security.gauntlet` | `security.injection_corpus` | yes |
-| `security.gauntlet` | `security.malicious_backend` | yes |
-| `security.gauntlet` | `security.model_signing` | yes |
-| `security.gauntlet` | `security.provenance_guards` | yes |
-| `security.gauntlet` | `security.ratelimit` | yes |
-| `security.gauntlet` | `security.replay` | yes |
-| `security.gauntlet` | `security.secret_audit` | yes |
-| `security.gauntlet` | `security.threat_model` | yes |
-| `security.gauntlet` | `spec` | yes |
-| `security.gauntlet` | `validation` | yes |
-| `security.injection_corpus` | `security.prompt_injection` | yes |
-| `security.input_limits` | `errors` | no |
-| `security.input_limits` | `validation` | no |
-| `security.malicious_backend` | `backend` | no |
-| `security.malicious_backend` | `core` | yes |
-| `security.malicious_backend` | `errors` | no |
-| `security.malicious_backend` | `policy` | yes |
-| `security.malicious_backend` | `result` | no |
-| `security.malicious_backend` | `security.sandbox` | no |
-| `security.malicious_backend` | `spec` | no |
-| `security.malicious_backend` | `timeout` | no |
-| `security.malicious_backend` | `validation` | no |
-| `security.model_signing` | `errors` | no |
-| `security.model_signing` | `privacy_crypto` | yes |
-| `security.path_guards` | `errors` | no |
-| `security.plugins` | `errors` | no |
-| `security.plugins` | `security.model_signing` | no |
-| `security.prompt_injection` | `errors` | no |
-| `security.provenance_guards` | `errors` | no |
-| `security.provenance_guards` | `provenance` | no |
-| `security.provenance_guards` | `security.model_signing` | no |
-| `security.ratelimit` | `backpressure` | no |
-| `security.ratelimit` | `errors` | no |
-| `security.replay` | `errors` | no |
-| `security.replay` | `privacy_crypto` | yes |
-| `security.resource_guards` | `errors` | no |
-| `security.sandbox` | `backend` | no |
-| `security.sandbox` | `errors` | no |
-| `security.sandbox` | `result` | no |
-| `security.sandbox` | `spec` | no |
-| `security.serde_guards` | `errors` | no |
-| `security.supply_chain` | `errors` | no |
+| `sdk` | `backend` | no |
+| `sdk` | `client` | no |
+| `sdk` | `core` | no |
+| `sdk` | `errors` | no |
+| `sdk` | `policy` | no |
+| `sdk` | `result` | no |
+| `sdk` | `serde` | yes |
+| `sdk` | `spec` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
@@ -3623,6 +3348,7 @@ flowchart TD
 | `server` | `cluster.routes` | yes |
 | `server` | `core` | no |
 | `server` | `errors` | no |
+| `server` | `protocol` | no |
 | `server` | `result` | no |
 | `server` | `serde` | no |
 | `server` | `spec` | no |

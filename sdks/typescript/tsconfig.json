@@ -1,0 +1,1 @@
+{"compilerOptions":{"declaration":true,"esModuleInterop":true,"exactOptionalPropertyTypes":true,"forceConsistentCasingInFileNames":true,"lib":["ES2022","DOM"],"module":"CommonJS","moduleResolution":"Node","noUncheckedIndexedAccess":true,"outDir":"dist","rootDir":"src","skipLibCheck":true,"sourceMap":false,"strict":true,"target":"ES2022"},"include":["src"]}

@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from hugrgate import __version__ as HUGRGATE_VERSION
 from hugrgate.backend import Backend
@@ -38,7 +39,13 @@ from hugrgate.errors import (
     BackendUnavailable,
     HugrGateError,
     PolicyError,
+    ProtocolError,
     SpecError,
+)
+from hugrgate.protocol import (
+    PROTOCOL_VERSION,
+    SUPPORTED_PROTOCOL_VERSIONS,
+    negotiate_version,
 )
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
@@ -48,11 +55,15 @@ if TYPE_CHECKING:
     from hugrgate.cluster.node import ClusterNode
 
 __all__ = [
+    "DecideRequest",
+    "ErrorBody",
     "KeywordBackend",
     "ModelInfo",
+    "ProtocolBody",
     "UniformBackend",
     "build_gate",
     "create_app",
+    "dump_openapi_schema",
     "list_models",
     "register_model",
     "run",
@@ -244,6 +255,94 @@ def build_gate(extra_backends: list[Backend] | None = None) -> HugrGate:
     return gate
 
 
+# --- OpenAPI stabilization (slice 427) ---------------------------------------
+#
+# The ``/decide`` handler still parses its body defensively (the raw-dict
+# path is what guarantees our 422 taxonomy codes), but these models are
+# the *documented* contract: they drive the generated OpenAPI schema,
+# power ``hugrgate openapi``, and validate the request envelope before
+# spec/policy parsing runs.
+
+
+class DecideRequest(BaseModel):
+    """Documented ``POST /decide`` request body (protocol v1)."""
+
+    model_config = ConfigDict(extra="allow", json_schema_extra={
+        "example": {
+            "protocol_version": "1.0",
+            "spec": {"type": "categorical", "options": ["a", "b"]},
+            "state": {"signal": 0.7},
+            "backend_name": None,
+            "context": None,
+            "policy": None,
+        }})
+
+    protocol_version: str | None = Field(
+        default=None,
+        description="Wire-protocol version; any 1.x is accepted.")
+    spec: dict[str, Any] = Field(
+        description="DecisionSpec JSON (see hugrgate.spec).")
+    state: dict[str, Any] = Field(
+        description="Feature state the decision is conditioned on.")
+    backend_name: str | None = Field(
+        default=None, description="Pin one backend by registry name.")
+    context: dict[str, Any] | None = Field(
+        default=None, description="Caller context (provenance, privacy).")
+    policy: dict[str, Any] | None = Field(
+        default=None, description="DecisionPolicy JSON.")
+
+
+class ErrorBody(BaseModel):
+    """Documented error envelope returned with 4xx/5xx statuses."""
+
+    model_config = ConfigDict(json_schema_extra={
+        "example": {"error": {"code": "spec_error",
+                              "message": "categorical spec needs ≥2 options",
+                              "recoverable": False, "details": {}}}})
+
+    error: dict[str, Any]
+
+
+class ProtocolBody(BaseModel):
+    """Documented ``GET /protocol`` response body."""
+
+    protocol_version: str = Field(description="Canonical protocol version.")
+    supported_versions: list[str] = Field(
+        description="Every protocol version this service accepts.")
+    service_version: str = Field(description="HugrGate package version.")
+
+
+def dump_openapi_schema() -> dict[str, Any]:
+    """Return the stabilized OpenAPI schema for the service app.
+
+    Used by ``hugrgate openapi`` and by the snapshot test; the schema
+    is generated from the live route table so it can never drift from
+    the implementation.
+
+    The ``/decide`` handler reads the raw request body (so malformed
+    envelopes get our taxonomy 422s instead of FastAPI's default
+    422s), which means FastAPI cannot infer its request schema. We
+    document it explicitly here with the *same*
+    :class:`DecideRequest` model the handler validates against, so
+    the published contract and the runtime validation are one
+    object, not two.
+    """
+    schema = create_app().openapi()
+    components = schema.setdefault("components", {}).setdefault(
+        "schemas", {})
+    components.setdefault(
+        "DecideRequest",
+        DecideRequest.model_json_schema(
+            ref_template="#/components/schemas/{model}"))
+    decide_op = schema["paths"]["/decide"]["post"]
+    decide_op["requestBody"] = {
+        "required": True,
+        "content": {"application/json": {
+            "schema": {"$ref": "#/components/schemas/DecideRequest"}}},
+    }
+    return schema
+
+
 def _error_response(error: HugrGateError, status: int) -> JSONResponse:
     return JSONResponse(
         status_code=status,
@@ -268,21 +367,29 @@ def create_app(gate: HugrGate | None = None,
     app.state.gate = gate
     started_at = time.time()
 
-    @app.get("/")
+    @app.get("/", tags=["meta"], summary="Service identity",
+              description="Returns the service name, package version, and "
+                          "the HugrGate motto.")
     def root() -> dict[str, Any]:
         return {"service": "hugrgate", "version": HUGRGATE_VERSION,
                 "motto": "Deterministic where possible. "
                          "Probabilistic where useful. "
                          "Generative only where necessary."}
 
-    @app.get("/health")
+    @app.get("/health", tags=["meta"], summary="Liveness probe",
+              description="Never requires auth. Reports status, uptime, "
+                          "registered backends, and decisions served.")
     def health() -> dict[str, Any]:
         return {"status": "ok", "version": HUGRGATE_VERSION,
                 "backends": gate.registry.list(),
                 "uptime_s": round(time.time() - started_at, 3),
                 "decisions_served": gate.provenance.count()}
 
-    @app.get("/backends")
+    @app.get("/backends", tags=["introspection"],
+              summary="List registered backends",
+              description="Capabilities, latency/cost estimates, "
+                          "calibration, privacy properties, and health "
+                          "for every registered backend.")
     def backends() -> list[dict[str, Any]]:
         infos = []
         for name in gate.registry.list():
@@ -301,17 +408,52 @@ def create_app(gate: HugrGate | None = None,
             })
         return infos
 
-    @app.get("/models")
+    @app.get("/models", tags=["introspection"],
+              summary="List known models",
+              description="The model catalogue (see "
+                          ":func:`register_model`).")
     def models() -> list[dict[str, Any]]:
         return [asdict(m) for m in list_models()]
 
-    @app.post("/decide")
+    @app.get("/protocol", tags=["meta"], summary="Protocol advertisement",
+              response_model=ProtocolBody,
+              description="Advertise the wire-protocol versions this "
+                          "service speaks (slice 426). Clients call this "
+                          "first and fail fast on version skew.")
+    def protocol() -> dict[str, Any]:
+        """Advertise the wire-protocol versions this service speaks.
+
+        Slice 426: clients call this first and fail fast on version
+        skew instead of sending doomed requests.
+        """
+        return {
+            "protocol_version": PROTOCOL_VERSION,
+            "supported_versions": list(SUPPORTED_PROTOCOL_VERSIONS),
+            "service_version": HUGRGATE_VERSION,
+        }
+
+    @app.post("/decide", tags=["decisions"], summary="Make a decision",
+               description="Evaluate a spec against a state with an "
+                           "optional policy. The request envelope is "
+                           "validated against the documented schema "
+                           "first; spec/policy problems return 422 "
+                           "with a HugrGate taxonomy error code.",
+               responses={400: {"model": ErrorBody,
+                                 "description": "Malformed request envelope"},
+                          422: {"model": ErrorBody,
+                                "description": "Invalid spec, policy, or "
+                                               "protocol version"},
+                          502: {"model": ErrorBody,
+                                "description": "Backend failure"},
+                          503: {"model": ErrorBody,
+                                "description": "No backend available"}})
     async def decide(request: Request) -> JSONResponse:
         """Make a decision.
 
         Success → the DecisionResult JSON directly (HTTP 200).
         Abstention → HTTP 200 with ``{"abstained": true, ...}``.
-        Invalid spec/policy → 422; no backend → 503; backend failure → 502.
+        Invalid envelope/spec/policy → 422; no backend → 503;
+        backend failure → 502.
         """
         try:
             body = await request.json()
@@ -321,8 +463,36 @@ def create_app(gate: HugrGate | None = None,
                 content={"error": {"code": "bad_request",
                                    "message": "request body must be JSON",
                                    "recoverable": True, "details": {}}})
+        # Slice 427: validate the envelope against the documented
+        # schema before any domain parsing, so malformed requests get
+        # a structured 422 instead of an accidental 500.
+        if not isinstance(body, dict):
+            return JSONResponse(
+                status_code=400,
+                content={"error": {"code": "bad_request",
+                                   "message": "request body must be a "
+                                              "JSON object",
+                                   "recoverable": True, "details": {}}})
         try:
-            spec = DecisionSpec.from_dict(body["spec"])
+            envelope = DecideRequest.model_validate(body)
+        except ValidationError as e:
+            return JSONResponse(
+                status_code=422,
+                content={"error": {"code": "bad_request",
+                                   "message": "malformed decide request: "
+                                   + "; ".join(
+                                       f"{'.'.join(map(str, err['loc']))}: "
+                                       f"{err['msg']}"
+                                       for err in e.errors()),
+                                   "recoverable": True, "details": {}}})
+        # Slice 426: protocol-version negotiation runs before any
+        # spec/policy parsing — skew is a caller bug, not a data bug.
+        try:
+            negotiated = negotiate_version(envelope.protocol_version)
+        except ProtocolError as e:
+            return _error_response(e, 422)
+        try:
+            spec = DecisionSpec.from_dict(envelope.spec)
         except KeyError:
             return _error_response(
                 SpecError("request needs a 'spec' object"), 422)
@@ -330,20 +500,17 @@ def create_app(gate: HugrGate | None = None,
             return _error_response(
                 e if isinstance(e, HugrGateError)
                 else SpecError(f"invalid spec: {e}"), 422)
-        state = body.get("state")
-        if not isinstance(state, dict):
-            return _error_response(
-                SpecError("request needs a 'state' object"), 422)
+        state = envelope.state
         policy = None
-        if body.get("policy") is not None:
+        if envelope.policy is not None:
             try:
-                policy = policy_from_dict(body["policy"])
+                policy = policy_from_dict(envelope.policy)
             except (PolicyError, TypeError, ValueError, KeyError) as e:
                 return _error_response(
                     e if isinstance(e, HugrGateError)
                     else PolicyError(f"invalid policy: {e}"), 422)
-        backend_name = body.get("backend_name")
-        context = body.get("context")
+        backend_name = envelope.backend_name
+        context = envelope.context
         try:
             result = gate.decide(state, spec, policy,
                                  context=context,
@@ -362,6 +529,7 @@ def create_app(gate: HugrGate | None = None,
             return _error_response(e, 422)
         except HugrGateError as e:
             return _error_response(e, 500)
+        result.metadata["protocol_version"] = negotiated
         return JSONResponse(status_code=200, content=result.to_dict())
 
     if node is not None:
