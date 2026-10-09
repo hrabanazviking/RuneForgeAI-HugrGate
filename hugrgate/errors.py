@@ -212,6 +212,7 @@ class EdgeCacheError(HugrGateError):
 class ChaosError(HugrGateError):
     """A fault-injection scenario failed its verification."""
     code = "edge_chaos_error"
+    recoverable = False
 class GateError(HugrGateError):
     """The release gate itself failed to execute (not a check failure)."""
     code = "edge_gate_error"
