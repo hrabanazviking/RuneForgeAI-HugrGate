@@ -49,6 +49,14 @@ from hugrgate.ensemble.base import (
     shannon_entropy,
 )
 from hugrgate.ensemble.batch import batch_collect_votes
+from hugrgate.ensemble.benchmarks import (
+    STRATEGIES_BENCHMARKED,
+    benchmark_scaling,
+    benchmark_strategies,
+    demo_council,
+    regenerate_ensemble_benchmarks,
+    write_benchmark_report,
+)
 from hugrgate.ensemble.blending import (
     Blender,
     blending_combine,
@@ -134,6 +142,12 @@ __all__ = [
     "collect_votes",
     "finalize_result",
     "batch_collect_votes",
+    "STRATEGIES_BENCHMARKED",
+    "benchmark_strategies",
+    "benchmark_scaling",
+    "write_benchmark_report",
+    "demo_council",
+    "regenerate_ensemble_benchmarks",
     "SaboteurBackend",
     "DropoutBackend",
     "CorruptBackend",
