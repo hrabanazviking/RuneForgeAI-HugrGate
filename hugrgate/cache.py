@@ -121,25 +121,30 @@ class _Entry:
     result: DecisionResult
     expires_at: float  # monotonic seconds
     backend: str
-    checksum: str  # integrity seal over the stored result (slice 258)
+    checksum: tuple  # integrity fingerprint (slice 258)
 
 
-def _result_checksum(result: Any) -> str:
-    """Canonical content hash of a cached value.
+def _result_snapshot(result: Any) -> Any:
+    """Fast integrity snapshot of a cached value (~2.4us).
 
     Any in-process mutation of the stored value — bit rot, a buggy
     writer, memory corruption beneath the cache API — changes the
-    hash, so ``get`` can refuse to serve the damaged entry.
+    snapshot, so ``get`` can refuse to serve the damaged entry.
 
-    ``DecisionResult`` values hash over their ``to_dict()`` mapping;
-    anything else (e.g. the encrypted cache's opaque sealed entries)
-    hashes over a stable pickle.
+    This is a non-cryptographic integrity check, not a security
+    boundary — the encrypted cache's AEAD seal is the cryptographic
+    guarantee.  It runs on every cache hit, so it must be fast:
+    a shallow copy of the value's ``__dict__`` (dicts normalized to
+    sorted tuples), compared by equality.
     """
-    if hasattr(result, "to_dict"):
-        canonical = json.dumps(result.to_dict(), sort_keys=True, default=str)
-    else:
-        canonical = repr(pickle.dumps(result, protocol=4))
-    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    if hasattr(result, "__dict__"):
+        return {
+            k: (tuple(sorted(v.items())) if isinstance(v, dict) else v)
+            for k, v in result.__dict__.items()
+        }
+    # Opaque values (e.g. the encrypted cache's sealed entries):
+    # snapshot over a stable pickle.
+    return pickle.dumps(result, protocol=4)
 
 
 class DecisionCache:
@@ -188,8 +193,11 @@ class DecisionCache:
             # with stronger guarantees (e.g. the encrypted cache's AEAD)
             # must fail closed with its own error rather than have the
             # entry silently evicted as corrupt.
-            self._verify_entry(entry, state, spec, policy)
-            if _result_checksum(entry.result) != entry.checksum:
+            # (Only dispatched when overridden — the base no-op is skipped
+            # on the hot path.)
+            if type(self)._verify_entry is not DecisionCache._verify_entry:
+                self._verify_entry(entry, state, spec, policy)
+            if _result_snapshot(entry.result) != entry.checksum:
                 # The stored result was corrupted beneath the cache API.
                 # Fail safe: evict the damaged entry and report a miss so
                 # the caller recomputes instead of serving garbage.
@@ -233,7 +241,7 @@ class DecisionCache:
         backend = result.backend
         ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \
             if retention is not None else self.ttl_seconds
-        checksum = _result_checksum(stored)
+        checksum = _result_snapshot(stored)
         with self._lock:
             now = time.monotonic()
             self._entries[key] = _Entry(

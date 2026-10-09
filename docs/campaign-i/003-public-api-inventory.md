@@ -2236,9 +2236,9 @@ that this document never drifts from the code.
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SchedulerError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
 | `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
-| `SchedulerError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SerdeError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |

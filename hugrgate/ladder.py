@@ -330,7 +330,7 @@ class LadderRouter:
                             list[LadderAuditEntry]]:
             i, _rung, backend = planned_rung
             worker_audit: list[LadderAuditEntry] = []
-            result = self._attempt(backend, state, spec, context,
+            result = self._attempt(backend, state, spec, context, policy,
                                    worker_audit, i)
             return i, result, worker_audit
 
