@@ -281,3 +281,16 @@ it into an opaque agent.
   only; the operator decides the response. Thresholds are parameters.
 - Tests: `tests/test_memory_adversarial.py` (10 tests, each crafting
   the attack it asserts is caught).
+
+### Slice 324 — Memory benchmark suite
+- `hugrgate/memory/benchmarks.py`: seeded reproducible workload
+  (record / attach_outcome / find / recall / export+import /
+  estimate_bytes) with per-op mean/p50/p95/min/max; artifact
+  read/write/compare; CLI (`python -m hugrgate.memory.benchmarks`,
+  `--compare` never overwrites the baseline).
+- `benchmarks/memory_bench.json`: checked-in baseline (seed 324,
+  n=2000; this machine): record mean 60.3us, attach 40.4us, find
+  81.9ms, recall 100.3ms, export+import 232.8ms, estimate_bytes
+  31.7ms. find/recall are linear scans — fine for thousands of
+  episodes; indexing is future work if histories grow past that.
+- Tests: `tests/test_memory_benchmarks.py` (8 tests).
