@@ -1823,6 +1823,7 @@ flowchart TD
     security --> security_depscan
     security --> security_injection_corpus
     security --> security_input_limits
+    security --> security_malicious_backend
     security --> security_model_signing
     security --> security_path_guards
     security --> security_plugins
@@ -1837,6 +1838,14 @@ flowchart TD
     security_injection_corpus -.-> security_prompt_injection
     security_input_limits --> errors
     security_input_limits --> validation
+    security_malicious_backend -.-> hugrgate
+    security_malicious_backend --> backend
+    security_malicious_backend --> errors
+    security_malicious_backend --> result
+    security_malicious_backend --> security_sandbox
+    security_malicious_backend --> spec
+    security_malicious_backend --> timeout
+    security_malicious_backend --> validation
     security_model_signing --> errors
     security_model_signing -.-> privacy_crypto
     security_path_guards --> errors
@@ -3300,6 +3309,7 @@ flowchart TD
 | `security` | `security.depscan` | no |
 | `security` | `security.injection_corpus` | no |
 | `security` | `security.input_limits` | no |
+| `security` | `security.malicious_backend` | no |
 | `security` | `security.model_signing` | no |
 | `security` | `security.path_guards` | no |
 | `security` | `security.plugins` | no |
@@ -3314,6 +3324,14 @@ flowchart TD
 | `security.injection_corpus` | `security.prompt_injection` | yes |
 | `security.input_limits` | `errors` | no |
 | `security.input_limits` | `validation` | no |
+| `security.malicious_backend` | `hugrgate` | yes |
+| `security.malicious_backend` | `backend` | no |
+| `security.malicious_backend` | `errors` | no |
+| `security.malicious_backend` | `result` | no |
+| `security.malicious_backend` | `security.sandbox` | no |
+| `security.malicious_backend` | `spec` | no |
+| `security.malicious_backend` | `timeout` | no |
+| `security.malicious_backend` | `validation` | no |
 | `security.model_signing` | `errors` | no |
 | `security.model_signing` | `privacy_crypto` | yes |
 | `security.path_guards` | `errors` | no |

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 378 · **public names:** 2338
+**Modules:** 379 · **public names:** 2349
 
 ## API stability policy
 
@@ -3993,6 +3993,7 @@ that this document never drifts from the code.
 | `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
 | `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_result_size` | function | `(result: 'DecisionResult', max_bytes: 'int' = 1000000) -> 'int'` |
 | `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
@@ -4008,6 +4009,7 @@ that this document never drifts from the code.
 | `register_safe_class` | function | `(cls: 'type') -> 'type'` |
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
 | `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
+| `run_gauntlet` | function | `() -> 'GauntletReport'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
 | `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
@@ -4078,6 +4080,20 @@ that this document never drifts from the code.
 | `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
 | `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
+
+### `hugrgate.security.malicious_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_RESULT_BYTES` | constant | `1000000` |
+| `ExfiltratingBackend` | class | `()` |
+| `ExplodingBackend` | class | `()` |
+| `GauntletReport` | class | `(contained: 'dict[str, str]' = <factory>, escaped: 'list[str]' = <factory>, control_ok: 'bool' = False) -> None` |
+| `GiantOutputBackend` | class | `()` |
+| `HangingBackend` | class | `()` |
+| `LyingBackend` | class | `()` |
+| `check_result_size` | function | `(result: 'DecisionResult', max_bytes: 'int' = 1000000) -> 'int'` |
+| `run_gauntlet` | function | `() -> 'GauntletReport'` |
 
 ### `hugrgate.security.model_signing`
 

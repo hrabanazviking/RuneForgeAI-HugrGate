@@ -93,6 +93,10 @@ from hugrgate.security.input_limits import (
     check_prompt,
     check_state,
 )
+from hugrgate.security.malicious_backend import (
+    check_result_size,
+    run_gauntlet,
+)
 from hugrgate.security.model_signing import (
     ModelSigner,
     SignedMetadata,
@@ -182,6 +186,7 @@ __all__ = [
     "build_prompt",
     "check_batch",
     "check_prompt",
+    "check_result_size",
     "check_state",
     "curated_surface",
     "default_threat_model",
@@ -197,6 +202,7 @@ __all__ = [
     "register_safe_class",
     "restricted_loads",
     "run_corpus",
+    "run_gauntlet",
     "run_sandboxed",
     "safe_join",
     "safe_read_text",
