@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 58 · **public names:** 264
+**Modules:** 59 · **public names:** 267
 
 ## API stability policy
 
@@ -407,6 +407,14 @@ that this document never drifts from the code.
 | `ThermalLevel` | class | `(*values)` |
 | `ThermalSensor` | class | `()` |
 | `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
+
+### `hugrgate.edge.watchdog`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
+| `MissPolicy` | class | `(*values)` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.errors`
 
