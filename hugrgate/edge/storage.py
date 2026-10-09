@@ -14,6 +14,9 @@ resource:
   a power cut (slice 193) can never leave a torn tail;
 - **wear telemetry**: bytes written, flush count, and an
   amplification estimate (``bytes_written / payload_bytes``).
+- **disk-full mapping** (slice 259): ``ENOSPC``/``EDQUOT`` during
+  flush surface as :class:`StorageError` (buffer retained for retry),
+  never a raw ``OSError``.
 
 Reads are served from an in-RAM index rebuilt from the log at open;
 ``compact()`` rewrites only live keys when the log grows stale-heavy.
@@ -21,6 +24,8 @@ Reads are served from an in-RAM index rebuilt from the log at open;
 
 from __future__ import annotations
 
+import contextlib
+import errno
 import os
 import struct
 import threading
@@ -191,11 +196,28 @@ class WearAwareStore:
                 with open(self._log_path, "rb") as fh:
                     existing = fh.read()
             tmp = self._log_path.with_suffix(".log.tmp")
-            with open(tmp, "wb") as fh:
-                fh.write(existing + blob)
-                fh.flush()
-                os.fsync(fh.fileno())
-            os.replace(tmp, self._log_path)
+            try:
+                with open(tmp, "wb") as fh:
+                    fh.write(existing + blob)
+                    fh.flush()
+                    os.fsync(fh.fileno())
+                os.replace(tmp, self._log_path)
+            except OSError as e:
+                # A full (or failed) disk must surface as the taxonomy's
+                # StorageError, never a raw OSError — and the torn temp
+                # file must not be left behind. The buffer is retained
+                # so the write can be retried after space is freed.
+                with contextlib.suppress(OSError):
+                    tmp.unlink(missing_ok=True)
+                if e.errno in (errno.ENOSPC, errno.EDQUOT):
+                    raise StorageError(
+                        f"disk full while flushing {len(blob)} bytes "
+                        f"to {self._log_path}: {e.strerror or e}; "
+                        f"buffer retained, retry after freeing space"
+                    ) from e
+                raise StorageError(
+                    f"flush to {self._log_path} failed: "
+                    f"{e.strerror or e}") from e
             for key, value in self._buffer:
                 if value is None:
                     self._index.pop(key, None)

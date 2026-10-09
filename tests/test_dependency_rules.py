@@ -180,6 +180,8 @@ _STDLIB = {
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",
                   "privacy_bench_249"}
+    "errno",
+_LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes", "tests"}
 
 
 def _third_party_imports() -> dict[str, set[str]]:

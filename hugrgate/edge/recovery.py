@@ -20,6 +20,8 @@ stage, before heavier subsystems exist.
 
 from __future__ import annotations
 
+import contextlib
+import errno
 import json
 import os
 import threading
@@ -112,11 +114,30 @@ class CheckpointJournal:
                                 sort_keys=True).encode("utf-8")
             path = self._path(seq, state_id)
             tmp = path.with_suffix(".json.tmp")
-            with open(tmp, "wb") as fh:
-                fh.write(record)
-                fh.flush()
-                os.fsync(fh.fileno())
-            os.replace(tmp, path)
+            try:
+                with open(tmp, "wb") as fh:
+                    fh.write(record)
+                    fh.flush()
+                    os.fsync(fh.fileno())
+                os.replace(tmp, path)
+            except OSError as e:
+                # Disk failures surface as RecoveryError, never a raw
+                # OSError; the torn temp file is removed best-effort.
+                # The consumed sequence number is intentionally not
+                # reused — the journal tolerates seq gaps.
+                with contextlib.suppress(OSError):
+                    tmp.unlink(missing_ok=True)
+                if e.errno in (errno.ENOSPC, errno.EDQUOT):
+                    raise RecoveryError(
+                        f"disk full while writing checkpoint "
+                        f"{state_id!r}: {e.strerror or e}") from e
+                if e.errno == errno.EROFS:
+                    raise RecoveryError(
+                        f"read-only filesystem: cannot write checkpoint "
+                        f"{state_id!r}: {e.strerror or e}") from e
+                raise RecoveryError(
+                    f"checkpoint {state_id!r} write failed: "
+                    f"{e.strerror or e}") from e
             self._prune()
             return Checkpoint(seq, state_id, payload)
 

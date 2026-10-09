@@ -295,6 +295,25 @@ flowchart TD
         edge_chaos[edge.chaos]
         edge_gate[edge.gate]
     end
+    subgraph chaos[chaos]
+        chaos[chaos]
+        chaos_framework[chaos.framework]
+        chaos_backend_faults[chaos.backend_faults]
+        chaos_model_faults[chaos.model_faults]
+        chaos_cache_faults[chaos.cache_faults]
+        chaos_filesystem[chaos.filesystem]
+        chaos_resources[chaos.resources]
+        chaos_network[chaos.network]
+        chaos_clock[chaos.clock]
+        chaos_experiments[chaos.experiments]
+        chaos_retry[chaos.retry]
+        chaos_bulkhead[chaos.bulkhead]
+        chaos_degradation[chaos.degradation]
+        chaos_recovery[chaos.recovery]
+        chaos_crash[chaos.crash]
+        chaos_soak[chaos.soak]
+        chaos_scorecard[chaos.scorecard]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -517,6 +536,69 @@ flowchart TD
     calibration_viz --> errors
     calibration_window -.-> calibration__base
     calibration_window --> errors
+    chaos --> chaos_backend_faults
+    chaos --> chaos_bulkhead
+    chaos --> chaos_cache_faults
+    chaos --> chaos_clock
+    chaos --> chaos_crash
+    chaos --> chaos_degradation
+    chaos --> chaos_experiments
+    chaos --> chaos_filesystem
+    chaos --> chaos_framework
+    chaos --> chaos_model_faults
+    chaos --> chaos_network
+    chaos --> chaos_recovery
+    chaos --> chaos_resources
+    chaos --> chaos_retry
+    chaos --> chaos_scorecard
+    chaos --> chaos_soak
+    chaos_backend_faults --> backend
+    chaos_backend_faults --> errors
+    chaos_backend_faults --> result
+    chaos_backend_faults --> spec
+    chaos_bulkhead --> errors
+    chaos_cache_faults --> cache
+    chaos_cache_faults --> errors
+    chaos_cache_faults --> policy
+    chaos_cache_faults --> result
+    chaos_cache_faults --> spec
+    chaos_clock --> cache
+    chaos_clock --> chaos_framework
+    chaos_clock --> circuit
+    chaos_clock --> edge_watchdog
+    chaos_clock --> errors
+    chaos_crash --> hugrgate
+    chaos_crash --> edge_recovery
+    chaos_crash --> errors
+    chaos_degradation --> errors
+    chaos_experiments --> backend
+    chaos_experiments -.-> backends_embedding
+    chaos_experiments -.-> backends_logreg
+    chaos_experiments --> chaos_backend_faults
+    chaos_experiments --> chaos_framework
+    chaos_experiments --> errors
+    chaos_experiments --> fallback
+    chaos_experiments -.-> features
+    chaos_experiments --> policy
+    chaos_experiments --> result
+    chaos_experiments --> spec
+    chaos_experiments --> validation
+    chaos_framework --> errors
+    chaos_model_faults --> errors
+    chaos_model_faults --> runtimes_gguf
+    chaos_network --> backend
+    chaos_network --> errors
+    chaos_network --> result
+    chaos_network --> spec
+    chaos_recovery --> errors
+    chaos_resources --> backend
+    chaos_resources --> errors
+    chaos_resources --> log
+    chaos_resources --> result
+    chaos_resources --> spec
+    chaos_retry --> errors
+    chaos_scorecard --> errors
+    chaos_soak --> errors
     circuit --> log
     cli -.-> bench
     cli -.-> bench_report
@@ -800,6 +882,8 @@ flowchart TD
     contracts_utility --> contracts_schema
     contracts_utility --> errors
     core --> backend
+    core --> chaos_bulkhead
+    core --> chaos_retry
     core -.-> contracts_migration
     core -.-> contracts_schema
     core --> errors
@@ -1312,6 +1396,7 @@ flowchart TD
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
+| chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 
 ## Internal dependency edges
 
@@ -1538,6 +1623,69 @@ flowchart TD
 | `calibration.viz` | `errors` | no |
 | `calibration.window` | `calibration._base` | yes |
 | `calibration.window` | `errors` | no |
+| `chaos` | `chaos.backend_faults` | no |
+| `chaos` | `chaos.bulkhead` | no |
+| `chaos` | `chaos.cache_faults` | no |
+| `chaos` | `chaos.clock` | no |
+| `chaos` | `chaos.crash` | no |
+| `chaos` | `chaos.degradation` | no |
+| `chaos` | `chaos.experiments` | no |
+| `chaos` | `chaos.filesystem` | no |
+| `chaos` | `chaos.framework` | no |
+| `chaos` | `chaos.model_faults` | no |
+| `chaos` | `chaos.network` | no |
+| `chaos` | `chaos.recovery` | no |
+| `chaos` | `chaos.resources` | no |
+| `chaos` | `chaos.retry` | no |
+| `chaos` | `chaos.scorecard` | no |
+| `chaos` | `chaos.soak` | no |
+| `chaos.backend_faults` | `backend` | no |
+| `chaos.backend_faults` | `errors` | no |
+| `chaos.backend_faults` | `result` | no |
+| `chaos.backend_faults` | `spec` | no |
+| `chaos.bulkhead` | `errors` | no |
+| `chaos.cache_faults` | `cache` | no |
+| `chaos.cache_faults` | `errors` | no |
+| `chaos.cache_faults` | `policy` | no |
+| `chaos.cache_faults` | `result` | no |
+| `chaos.cache_faults` | `spec` | no |
+| `chaos.clock` | `cache` | no |
+| `chaos.clock` | `chaos.framework` | no |
+| `chaos.clock` | `circuit` | no |
+| `chaos.clock` | `edge.watchdog` | no |
+| `chaos.clock` | `errors` | no |
+| `chaos.crash` | `hugrgate` | no |
+| `chaos.crash` | `edge.recovery` | no |
+| `chaos.crash` | `errors` | no |
+| `chaos.degradation` | `errors` | no |
+| `chaos.experiments` | `backend` | no |
+| `chaos.experiments` | `backends.embedding` | yes |
+| `chaos.experiments` | `backends.logreg` | yes |
+| `chaos.experiments` | `chaos.backend_faults` | no |
+| `chaos.experiments` | `chaos.framework` | no |
+| `chaos.experiments` | `errors` | no |
+| `chaos.experiments` | `fallback` | no |
+| `chaos.experiments` | `features` | yes |
+| `chaos.experiments` | `policy` | no |
+| `chaos.experiments` | `result` | no |
+| `chaos.experiments` | `spec` | no |
+| `chaos.experiments` | `validation` | no |
+| `chaos.framework` | `errors` | no |
+| `chaos.model_faults` | `errors` | no |
+| `chaos.model_faults` | `runtimes.gguf` | no |
+| `chaos.network` | `backend` | no |
+| `chaos.network` | `errors` | no |
+| `chaos.network` | `result` | no |
+| `chaos.network` | `spec` | no |
+| `chaos.recovery` | `errors` | no |
+| `chaos.resources` | `backend` | no |
+| `chaos.resources` | `errors` | no |
+| `chaos.resources` | `log` | no |
+| `chaos.resources` | `result` | no |
+| `chaos.resources` | `spec` | no |
+| `chaos.retry` | `errors` | no |
+| `chaos.scorecard` | `errors` | no |
+| `chaos.soak` | `errors` | no |
 | `circuit` | `log` | no |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
@@ -1821,6 +1969,8 @@ flowchart TD
 | `contracts.utility` | `contracts.schema` | no |
 | `contracts.utility` | `errors` | no |
 | `core` | `backend` | no |
+| `core` | `chaos.bulkhead` | no |
+| `core` | `chaos.retry` | no |
 | `core` | `contracts.migration` | yes |
 | `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |

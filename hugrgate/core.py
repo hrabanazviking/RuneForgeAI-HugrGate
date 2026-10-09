@@ -8,6 +8,8 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Union
 
 from hugrgate.backend import Backend, BackendRegistry
+from hugrgate.chaos.bulkhead import BulkheadExecutor
+from hugrgate.chaos.retry import RetryBudget, retry_with_budget
 from hugrgate.errors import (
     Abstention,
     BackendError,
@@ -116,7 +118,9 @@ class HugrGate:
     def decide(self, state: Mapping[str, Any], spec: SpecLike,
                policy: DecisionPolicy | None = None,
                context: Mapping[str, Any] | None = None,
-               backend_name: str | None = None) -> DecisionResult:
+               backend_name: str | None = None,
+               retry_budget: RetryBudget | None = None,
+               bulkhead: BulkheadExecutor | None = None) -> DecisionResult:
         """Make a bounded machine judgment.
 
         Never returns a value outside the spec's decision space.
@@ -125,6 +129,14 @@ class HugrGate:
         :class:`~hugrgate.contracts.schema.DecisionContract`; v2
         contracts with a v1 equivalent are migrated at the boundary
         (their ``contract_id`` rides in ``result.metadata``).
+
+        ``retry_budget`` (slice 268) is optional: when given, the
+        backend call retries recoverable failures within the budget
+        and raises :class:`RetryBudgetExhausted` when it is spent.
+        ``bulkhead`` (slice 269) is optional: when given, the backend
+        call runs inside the backend's bulkhead lanes and a full
+        bulkhead raises :class:`BulkheadRejected` fast. ``None``
+        (default) keeps the single-attempt, uncapped behavior.
         """
         policy = policy or DecisionPolicy()
         validate_state(state)
@@ -143,7 +155,21 @@ class HugrGate:
             backend = self._select_backend(spec, policy)
 
         try:
-            result = backend.evaluate(state, spec, context)
+            if retry_budget is None and bulkhead is None:
+                result = backend.evaluate(state, spec, context)
+            else:
+                def _call() -> DecisionResult:
+                    if retry_budget is None:
+                        return backend.evaluate(state, spec, context)
+                    return retry_with_budget(
+                        lambda: backend.evaluate(state, spec, context),
+                        retry_budget)
+                # Bulkhead outermost: one logical call holds one lane
+                # across its retries.
+                if bulkhead is None:
+                    result = _call()
+                else:
+                    result = bulkhead.execute(backend.name, _call)
         except Abstention:
             logger.debug("backend %r abstained (spec=%s)", backend.name,
                          spec.type)
@@ -176,9 +202,15 @@ class HugrGate:
 
         # Provenance — slice 238: per-class privacy-preserving
         # records (keys / fingerprints / redacted / none).
-        self.provenance.append(privacy_preserving_record(
-            state, spec, result, policy,
-            policy_threshold=policy.minimum_probability))
+        # Provenance is observability, not the decision: a failing
+        # provenance store must never fail a decision the backend
+        # already made (slice 267 hardening). Degrade to a warning.
+        try:
+            self.provenance.append(privacy_preserving_record(
+                state, spec, result, policy,
+                policy_threshold=policy.minimum_probability))
+        except Exception as e:  # noqa: BLE001 - provenance must not fail decide
+            logger.warning("provenance append failed; decision kept: %s", e)
 
         return result
 
@@ -190,7 +222,9 @@ class HugrGate:
                       spec: DecisionSpec,
                       policy: DecisionPolicy | None = None,
                       context: Mapping[str, Any] | None = None,
-                      backend_name: str | None = None) -> DecisionResult:
+                      backend_name: str | None = None,
+                      retry_budget: RetryBudget | None = None,
+                      bulkhead: BulkheadExecutor | None = None) -> DecisionResult:
         """Async variant of :meth:`decide` (slice 018).
 
         Backend inference is synchronous and may block; this runs it in
@@ -198,4 +232,5 @@ class HugrGate:
         stays responsive. Same contract, same errors as ``decide``.
         """
         return await asyncio.to_thread(
-            self.decide, state, spec, policy, context, backend_name)
+            self.decide, state, spec, policy, context, backend_name,
+            retry_budget, bulkhead)

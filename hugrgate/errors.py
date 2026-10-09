@@ -20,6 +20,7 @@ __all__ = [
     "BackendError",
     "BackendUnavailable",
     "BenchmarkError",
+    "BulkheadRejected",
     "CalibrationError",
     "ChaosError",
     "ClusterAuthError",
@@ -45,6 +46,7 @@ __all__ = [
     "ResidencyError",
     "SealError",
     "SecretDetected",
+    "RetryBudgetExhausted",
     "SpecError",
     "StorageError",
     "TelemetryError",
@@ -119,6 +121,20 @@ class BackendUnavailable(BackendError):
 
 class CalibrationError(HugrGateError):
     code = "calibration_error"
+    recoverable = True
+
+
+class BulkheadRejected(BackendError):
+    """The per-backend bulkhead was full: the call was rejected fast
+    instead of queueing behind a stuck backend.
+
+    A backend-family failure so existing failover handlers apply
+    (shedding to another backend is the correct response).
+    Recoverable: capacity frees as in-flight calls finish.
+    Deliberately *not* retried by the default retry policy —
+    spinning against a full bulkhead with no backoff helps nobody.
+    """
+    code = "bulkhead_rejected"
     recoverable = True
 
 
@@ -324,6 +340,15 @@ class RecoveryError(HugrGateError):
 class ResidencyError(HugrGateError):
     """A residency invariant was violated (unknown model, no room)."""
     code = "edge_residency_error"
+class RetryBudgetExhausted(BackendError):
+    """The retry budget was exhausted before the operation succeeded.
+
+    A backend-family failure: the call did not succeed, after a
+    bounded number of retries. Recoverable: after the budget window
+    refills, retrying can plausibly succeed.
+    """
+    code = "retry_budget_exhausted"
+    recoverable = True
 class StorageError(HugrGateError):
     """A storage invariant was violated (budget, format, key)."""
     code = "edge_storage_error"

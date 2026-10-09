@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T15:53:30.845099+00:00",
-  "module_count": 254,
+  "generated_utc": "2026-10-09T15:47:10.242320+00:00",
+  "module_count": 251,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -847,7 +847,7 @@
       ]
     },
     "hugrgate.cache": {
-      "docstring": "Decision cache \u2014 request-hash keyed result memoization. Slice 38.\n\n:class:`DecisionCache` maps a hash of ``(state, spec, policy)`` to the\n:class:`DecisionResult`, with TTL expiry, LRU eviction at ``max_size``,\nand two safety rails:\n\n- **Privacy-aware**: entries are never stored for (or served to) decisions\n  whose ``privacy_class`` forbids retention (``\"strict\"``) \u2014 see\n  :class:`hugrgate.privacy.PrivacyGuard`.\n- **Invalidation on model change**: :meth:`invalidate_backend` drops every\n  entry produced by a backend, so a retrained model can never serve stale\n  decisions.\n\nResults are deep-copied on the way in and out so callers cannot mutate the\ncached copy.",
+      "docstring": "Decision cache \u2014 request-hash keyed result memoization. Slice 38;\nintegrity-hardened in slice 258.\n\n:class:`DecisionCache` maps a hash of ``(state, spec, policy)`` to the\n:class:`DecisionResult`, with TTL expiry, LRU eviction at ``max_size``,\nand three safety rails:\n\n- **Privacy-aware**: entries are never stored for (or served to) decisions\n  whose ``privacy_class`` forbids retention (``\"strict\"``) \u2014 see\n  :class:`hugrgate.privacy.PrivacyGuard`.\n- **Invalidation on model change**: :meth:`invalidate_backend` drops every\n  entry produced by a backend, so a retrained model can never serve stale\n  decisions.\n- **Integrity-sealed**: every stored result carries a SHA-256 checksum\n  over its canonical form; ``get`` re-verifies and evicts damaged\n  entries (counted in ``stats()[\"corruptions\"]``) instead of serving\n  garbage \u2014 see :mod:`hugrgate.chaos.cache_faults`.\n\nResults are deep-copied on the way in and out so callers cannot mutate the\ncached copy.",
       "imports": [
         "__future__",
         "collections",
@@ -860,7 +860,7 @@
         "time",
         "typing"
       ],
-      "loc": 189,
+      "loc": 211,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -1554,6 +1554,477 @@
         "window_span",
         "get_params",
         "from_params"
+      ]
+    },
+    "hugrgate.chaos.__init__": {
+      "docstring": "Reliability & chaos engineering. Campaign XI (slices 251-275).\n\nThis package unifies HugrGate's fault-injection, resilience, and\nrecovery machinery behind one experiment discipline:\n\n- :mod:`hugrgate.chaos.framework` \u2014 the experiment model: hypothesis,\n  steady-state probes, faults with rollback, blast-radius guards, and\n  a runner that records every outcome instead of aborting;\n- later slices add fault libraries (backend, model, cache, filesystem,\n  network, clock), resilience primitives (retry budgets, bulkheads,\n  degradation plans, recovery verification), and the chaos scorecard.\n\nThe older :mod:`hugrgate.edge.chaos` edge-device scenarios and\n:mod:`hugrgate.cluster.chaos` network fault proxy remain the\ndomain-specific fault sources; the framework here is the shared\nexperiment harness they can run inside.",
+      "imports": [
+        "hugrgate"
+      ],
+      "loc": 172,
+      "path": "hugrgate/chaos/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.chaos.backend_faults": {
+      "docstring": "Backend fault injection \u2014 crash, hang, latency, error-rate, and\nmalformed-result faults. Slices 252-256.\n\n:class:`FaultyBackend` wraps any :class:`~hugrgate.backend.Backend`\nand injects scripted failures into :meth:`evaluate`. Faults are armed\nper mode with a rate in [0, 1] and a seed, so every fault sequence is\nreproducible. The wrapper is transparent: capabilities, ``supports``,\n``health``, ``name``, and ``is_remote`` delegate to the wrapped\nbackend, and every call is counted in :meth:`fault_stats`.\n\nFault modes (each slice wires one):\n\n- ``CRASH`` (252) \u2014 ``evaluate`` raises\n  :class:`~hugrgate.errors.BackendUnavailable`: the process died.\n  Recoverable: failover or retry can succeed.\n- ``HANG`` (253) \u2014 ``evaluate`` blocks until the caller's deadline;\n  the timeout layer must convert it to ``TimeoutError``.\n- ``LATENCY`` (254) \u2014 sleeps a configured delay before delegating.\n- ``ERROR_RATE`` (255) \u2014 raises ``BackendError`` at the armed rate.\n- ``MALFORMED`` (256) \u2014 returns a result outside the spec's value\n  space; the validation layer must reject it.\n\nThese are test-only tools: nothing in production code paths arms\nthem \u2014 there is no flag that turns chaos on by accident.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 311,
+      "path": "hugrgate/chaos/backend_faults.py",
+      "public_defs": [
+        "FaultSpec",
+        "FaultyBackend",
+        "capabilities",
+        "supports",
+        "health",
+        "warmup",
+        "close",
+        "arm",
+        "disarm",
+        "disarm_all",
+        "armed_modes",
+        "fault_stats",
+        "reset_stats",
+        "evaluate"
+      ]
+    },
+    "hugrgate.chaos.bulkhead": {
+      "docstring": "Bulkheads: per-backend concurrency caps (slice 269).\n\nA hanging backend (slice 253) must not be able to starve every other\nbackend: without isolation, N concurrent ``decide()`` calls against\none stuck backend exhaust the caller's threads and everything else\nqueues behind them. A :class:`BulkheadExecutor` gives each backend its\nown semaphore \u2014 a slow backend can only ever occupy its own lanes.\n\nFail-fast is the default: ``execute(..., timeout_s=0.0)`` raises\n:class:`BulkheadRejected` immediately when the backend's lanes are\nfull instead of queueing unboundedly. The rejection is a signal to\nshed load (fail over, degrade, answer from cache) \u2014 it is\ndeliberately *not* retried by the default retry policy (slice 268):\nspinning against a full bulkhead with no backoff helps nobody.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "typing"
+      ],
+      "loc": 126,
+      "path": "hugrgate/chaos/bulkhead.py",
+      "public_defs": [
+        "BulkheadExecutor",
+        "cap_for",
+        "execute",
+        "stats"
+      ]
+    },
+    "hugrgate.chaos.cache_faults": {
+      "docstring": "Cache corruption simulation. Slice 258.\n\n:class:`CacheCorruptor` simulates memory corruption *beneath* the\n:class:`~hugrgate.cache.DecisionCache` API \u2014 the bit rot, stray\npointer write, or buggy background thread that mutates a stored\nresult in place. It reaches into the cache's private entry store\ndeliberately: the corruption it models happens below the level the\npublic API can see.\n\nThe hardened cache (slice 258) seals every entry with a SHA-256\nchecksum over its canonical form; :meth:`get` re-verifies the seal\nand, on mismatch, evicts the damaged entry, counts it in\n``stats()[\"corruptions\"]``, and reports a miss so the caller\nrecomputes instead of serving garbage.\n\nThese are test-only tools: nothing in production code paths tampers\nwith cache entries.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 77,
+      "path": "hugrgate/chaos/cache_faults.py",
+      "public_defs": [
+        "CacheCorruptor",
+        "tamper",
+        "corrupt_value",
+        "corrupt_metadata",
+        "scribble"
+      ]
+    },
+    "hugrgate.chaos.clock": {
+      "docstring": "Clock-skew simulation and audit. Slice 265.\n\nWall-clock time jumps: NTP step corrections, VM pauses, daylight\nfollies. Any *duration* measured on the wall clock \u2014 deadlines,\nTTLs, staleness \u2014 breaks when it does. HugrGate's rule, verified by\nthis module's audit: every enforcement path (deadlines, TTLs,\nbreaker timeouts, watchdog intervals, experiment durations) runs on\na monotonic clock; the wall clock is used only for *timestamps*\n(human-readable records), never for decisions.\n\n- :class:`SkewedClock` \u2014 a test clock that jumps: wraps a base\n  clock and applies instantaneous offsets, modeling NTP steps.\n  Usable anywhere a ``clock=`` callable is accepted.\n- :func:`audit_deadline_clocks` \u2014 inspects the live code and\n  reports which clock each resilience-critical component uses.\n  This is a regression tripwire: if someone rewires a deadline to\n  the wall clock, the audit (and its test) fails until the change\n  is made deliberately.\n\nKnown wall-clock *durations* (audited, accepted, documented \u2014\nnot tripwired because their blast radius is bounded and\nself-healing):\n\n- ``adaptive.delayed.PendingLabel.age`` \u2014 delayed-label expiry;\n  skew causes early/late expiry of telemetry labels (never a\n  decision);\n- ``cluster.discovery.PeerInfo.is_stale`` \u2014 peer staleness; skew\n  can drop live peers or keep dead ones until the next heartbeat\n  (degraded routing, self-heals);\n- ``cluster.lan`` announce cadence \u2014 announce interval shifts\n  (benign).",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "inspect",
+        "threading",
+        "time"
+      ],
+      "loc": 139,
+      "path": "hugrgate/chaos/clock.py",
+      "public_defs": [
+        "SkewedClock",
+        "audit_deadline_clocks",
+        "now",
+        "jump",
+        "advance",
+        "offset"
+      ]
+    },
+    "hugrgate.chaos.crash": {
+      "docstring": "Crash-only restart: kill -9 the worker, recover from the journal (slice 272).\n\nCrash-only design means the system never needs a graceful shutdown:\nafter a SIGKILL at an arbitrary instant, recovery from the journal\nalone must yield a consistent state. :class:`CrashOnlyHarness`\nproves it \u2014 it spawns a worker subprocess writing checkpoints in a\ntight loop, kills it with SIGKILL mid-write, then recovers in the\nparent and verifies the invariants:\n\n- recovery succeeds (no exception, no manual repair);\n- the recovered checkpoint is the newest *completed* write \u2014 never\n  a torn or phantom one (the journal's tmp+fsync+replace makes a\n  killed write invisible);\n- torn ``.tmp`` files and corrupt records are ignored.\n\nThe worker runs as ``python -m hugrgate.chaos.crash worker <dir>\n<count>`` so the kill is a real OS-level SIGKILL, not an\nin-process simulation.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "os",
+        "pathlib",
+        "signal",
+        "subprocess",
+        "sys",
+        "time",
+        "typing"
+      ],
+      "loc": 165,
+      "path": "hugrgate/chaos/crash.py",
+      "public_defs": [
+        "worker_main",
+        "CrashReport",
+        "CrashOnlyHarness",
+        "recovered_cleanly",
+        "to_dict",
+        "run_worker"
+      ]
+    },
+    "hugrgate.chaos.degradation": {
+      "docstring": "Degradation plans: ordered playbooks for failure modes (slice 270).\n\nWhen a fault strikes, the system should degrade according to a plan,\nnot improvise. A :class:`DegradationPlan` names a failure mode (via\nthe taxonomy codes it answers, e.g. ``\"backend_unavailable\"``)\nand lists the steps to take in order \u2014 fail over, serve stale, shed\nload, abstain \u2014 each step a callable taking a context dict and\nreturning a human-readable note.\n\nExecution is best-effort: a failing step is recorded and the plan\ncontinues with the next step, because a degradation plan that aborts\nhalfway is worse than none. The last-resort step of every builtin\nplan is an explicit, reasoned abstention \u2014 never a silent wrong\nanswer.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 272,
+      "path": "hugrgate/chaos/degradation.py",
+      "public_defs": [
+        "DegradationStep",
+        "DegradationPlan",
+        "DegradationReport",
+        "DegradationPlanRegistry",
+        "builtin_degradation_plans",
+        "answers",
+        "to_dict",
+        "outcome",
+        "degraded_gracefully",
+        "to_dict",
+        "register",
+        "names",
+        "get",
+        "plans_for",
+        "execute",
+        "probe_cache",
+        "attempt_failover"
+      ]
+    },
+    "hugrgate.chaos.experiments": {
+      "docstring": "Ready-made chaos experiments. Slices 266-267.\n\nThe framework (:mod:`hugrgate.chaos.framework`) is the experiment\n*discipline*; this module is the *library* of standard experiments\nbuilt from the fault injectors:\n\n- :func:`partial_service_failure_experiment` (266) \u2014 crash a subset\n  of a service's backends and verify the survivors keep serving;\n- :func:`dependency_failure_matrix` (267) \u2014 run a matrix of\n  dependency-outage scenarios and report which the system survives.\n\n:class:`ServiceUnderTest` is the harness: a :class:`FallbackChain`\nover named backends, some wrapped in :class:`FaultyBackend` so the\nexperiment can break and heal them.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "json",
+        "threading",
+        "typing",
+        "unittest"
+      ],
+      "loc": 498,
+      "path": "hugrgate/chaos/experiments.py",
+      "public_defs": [
+        "ServiceUnderTest",
+        "partial_service_failure_experiment",
+        "run_experiment_on_lab",
+        "DependencyScenario",
+        "DependencyMatrix",
+        "builtin_dependency_matrix",
+        "dependency_failure_matrix",
+        "names",
+        "breakable",
+        "inject_crash",
+        "recover",
+        "decide",
+        "crashed_names",
+        "is_healthy",
+        "check",
+        "check",
+        "inject",
+        "verify",
+        "rollback",
+        "inject",
+        "verify",
+        "rollback",
+        "to_dict",
+        "add",
+        "scenarios",
+        "run_all",
+        "break_numpy",
+        "check_numpy",
+        "break_sklearn",
+        "check_sklearn",
+        "break_embedding_numpy",
+        "check_embedding_numpy"
+      ]
+    },
+    "hugrgate.chaos.filesystem": {
+      "docstring": "Filesystem fault simulation. Slices 259-260.\n\nDeterministic disk-failure simulation for code that touches the\nfilesystem, without needing a real full (or read-only) disk:\n\n- :func:`disk_full` (259) \u2014 every ``open()`` for writing raises\n  ``OSError`` with ``errno.ENOSPC`` (\"No space left on device\");\n  reads pass through untouched;\n- :func:`read_only` (260) \u2014 every ``open()`` for writing raises\n  ``OSError`` with ``errno.EROFS`` (\"Read-only file system\").\n\nBoth are implemented by patching :func:`builtins.open` for the\nduration of the context. They are single-threaded test tools, not\nproduction mechanisms: while active, *all* write-opens in the\nprocess fail, which is exactly the blast radius a full disk has.\n\nThe production contract they verify: HugrGate storage code maps\nthese ``OSError``s to the taxonomy's :class:`StorageError` (see\n``hugrgate/edge/storage.py`` \u2014 buffer retained, torn temp files\ncleaned up), never letting a raw ``OSError`` escape.",
+      "imports": [
+        "__future__",
+        "builtins",
+        "collections",
+        "contextlib",
+        "errno",
+        "os",
+        "typing",
+        "unittest"
+      ],
+      "loc": 80,
+      "path": "hugrgate/chaos/filesystem.py",
+      "public_defs": [
+        "disk_full",
+        "read_only",
+        "faulty_open"
+      ]
+    },
+    "hugrgate.chaos.framework": {
+      "docstring": "Chaos experiment framework. Slice 251.\n\nA chaos experiment is a *falsifiable* claim about resilience, not a\nscript that breaks things and hopes. The model:\n\n- :class:`ChaosExperiment` states a **hypothesis**\n  (\"the fallback chain survives a backend crash\") and the\n  **steady-state probes** that define \"healthy\";\n- :class:`Fault` describes one injected failure: ``inject`` breaks,\n  ``verify`` asserts the documented degradation held, ``rollback``\n  restores the world. Injection and verification are separate\n  callables so a broken injector cannot masquerade as a passing\n  verification;\n- :class:`BlastRadius` is the safety interlock: faults run only\n  against named, allow-listed targets, with an optional dry-run mode\n  that verifies and rolls back without ever injecting;\n- :class:`ExperimentRunner` executes the experiment and **records\n  every outcome** \u2014 a raising fault, a failed verification, or a\n  rollback error is a recorded failure, never an abort. The report\n  must show *all* outcomes.\n\nProbes run before any fault and again after the last rollback; a\nsteady-state delta means the experiment itself leaked damage, which\nis reported as a failure even when every fault \"passed\".\n\nEvery fault receives a context dict carrying a seeded\n``random.Random`` under ``\"rng\"`` (``experiment.seed``), so fault\nsequences are reproducible. ``seed=None`` uses system entropy and is\nrecorded as such in the report.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 314,
+      "path": "hugrgate/chaos/framework.py",
+      "public_defs": [
+        "ProbeOutcome",
+        "SteadyStateProbe",
+        "Fault",
+        "FaultResult",
+        "BlastRadius",
+        "ChaosExperiment",
+        "ExperimentReport",
+        "ExperimentRunner",
+        "to_dict",
+        "run",
+        "passed",
+        "to_dict",
+        "check",
+        "steady_state_held",
+        "all_passed",
+        "to_dict",
+        "run",
+        "last_report"
+      ]
+    },
+    "hugrgate.chaos.model_faults": {
+      "docstring": "Corrupt-model simulation. Slice 257.\n\nA broken model file is one of the nastiest production failures: the\nbytes are there, the loader starts, and then something is wrong.\n:class:`ModelCorruptor` builds minimal *valid* GGUF files from scratch\n(no model weights needed \u2014 headers only) and corrupts them in\nscripted, seeded ways, so the loader's rejection behavior can be\nattacked deterministically:\n\n- ``flip_magic`` \u2014 magic bytes destroyed; must be rejected as\n  \"not a GGUF file\";\n- ``bad_version`` \u2014 version field rewritten; must be rejected;\n- ``truncate`` \u2014 file cut at a seeded offset; the bounded reader\n  must raise instead of returning short data;\n- ``kv_bomb`` \u2014 key/value count inflated past the implausibility\n  limit; must be rejected without allocating;\n- ``zero_out`` \u2014 every byte zeroed;\n- ``bit_flip`` \u2014 one seeded byte flipped. This one *may* survive\n  parsing (a flipped padding byte is harmless); the asserted\n  property is weaker but honest: parsing either succeeds or raises\n  :class:`~hugrgate.errors.GGUFError` \u2014 never another exception\n  type, never a hang.\n\nCorruption never touches the original: :meth:`corrupt` writes a\nsibling copy. Verification helpers assert the loader rejects the\ncorruption through both entry points \u2014 :func:`parse_gguf_header`\n(raises) and :func:`discover_gguf_models` (records ``error``, never\naborts the scan).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "pathlib",
+        "random",
+        "struct"
+      ],
+      "loc": 159,
+      "path": "hugrgate/chaos/model_faults.py",
+      "public_defs": [
+        "ModelCorruptor",
+        "write_valid",
+        "corrupt",
+        "assert_rejected",
+        "assert_scan_survives"
+      ]
+    },
+    "hugrgate.chaos.network": {
+      "docstring": "Network fault simulation. Slices 263-264.\n\nThe network is a shared fate: when it fails, every remote backend\nfails together. :class:`NetworkSimulator` scripts reachability per\nhost \u2014 up/down/partitioned (slice 263) plus time-based flapping\nwith an injectable clock (slice 264). :class:`NetworkGuard` wraps a\nremote backend and fails *fast* with :class:`BackendUnavailable`\nwhen its host is unreachable \u2014 no hanging on dead sockets, no\nhalf-open waits.\n\nThe policy invariant under test: network failure must never\nsilently weaken policy. ``DecisionPolicy.remote_inference`` and\n``minimum_probability`` are not mutated by network events; when no\nbackend can serve, the system abstains instead of lowering the bar.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 205,
+      "path": "hugrgate/chaos/network.py",
+      "public_defs": [
+        "NetworkSimulator",
+        "NetworkGuard",
+        "set_down",
+        "set_up",
+        "set_all_up",
+        "flap",
+        "stop_flap",
+        "flapping_hosts",
+        "partition",
+        "is_reachable",
+        "down_hosts",
+        "host",
+        "capabilities",
+        "supports",
+        "health",
+        "stats",
+        "evaluate"
+      ]
+    },
+    "hugrgate.chaos.recovery": {
+      "docstring": "Recovery verification: post-fault probes (slice 271).\n\nDisarming a fault is not the same as recovering from it. A backend\ncan be disarmed while its circuit breaker is still open, its cache\nstill poisoned, or its threads still wedged \u2014 declaring \"healthy\"\nat disarm time is how incidents relapse. A :class:`RecoveryVerifier`\nruns an ordered set of :class:`RecoveryProbe`\\ s *after* the fault\nclears and reports ``recovered`` only when every probe passes.\n\nProbes may need a few attempts: a restarted backend often needs a\nmoment to warm up. :meth:`RecoveryVerifier.verify` therefore takes\n``max_attempts``/``wait_s`` (with an injectable clock/sleep so\ntests stay fast and deterministic); the report records how many\nattempts recovery took.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 224,
+      "path": "hugrgate/chaos/recovery.py",
+      "public_defs": [
+        "RecoveryProbe",
+        "RecoveryReport",
+        "RecoveryVerifier",
+        "backend_health_probe",
+        "decision_smoke_probe",
+        "circuit_closed_probe",
+        "to_dict",
+        "recovered",
+        "attempts",
+        "to_dict",
+        "name",
+        "probe_names",
+        "verify",
+        "check",
+        "check",
+        "check"
+      ]
+    },
+    "hugrgate.chaos.resources": {
+      "docstring": "Resource-pressure simulation and guards. Slices 261-262.\n\nThe edge layer already sheds load under memory pressure (slice 199's\n``memory-pressure`` scenario); the general HugrGate path had no\nequivalent. This module provides it:\n\n- :class:`MemoryReading` \u2014 a point-in-time memory snapshot with a\n  ``pressure_ratio`` (fraction of memory *unavailable*);\n- :class:`MemoryPressureSimulator` \u2014 scripted readings for\n  deterministic tests: ``set_available`` / ``set_pressure_ratio``\n  drive the reported memory without touching the real machine;\n- :class:`ResourceGuard` \u2014 watches a reader callable and escalates\n  through ``ok`` \u2192 ``warn`` \u2192 ``critical`` as pressure crosses\n  thresholds. On entering ``warn`` it runs registered shed\n  callbacks (best-effort: a raising shedder is logged, never fatal);\n  on entering ``critical`` it additionally refuses new work until\n  pressure recedes. Transitions are edge-triggered \u2014 a sustained\n  ``warn`` sheds once, not on every check.\n\nSlice 262 adds CPU-starvation simulation to the same module.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 272,
+      "path": "hugrgate/chaos/resources.py",
+      "public_defs": [
+        "MemoryReading",
+        "MemoryPressureSimulator",
+        "ResourceGuard",
+        "CPUStarvationSimulator",
+        "pressure_ratio",
+        "set_available",
+        "set_pressure_ratio",
+        "info",
+        "register_shed",
+        "unregister_shed",
+        "state",
+        "allow_work",
+        "transitions",
+        "check",
+        "set_share",
+        "share",
+        "dilation",
+        "stretched",
+        "starve_backend",
+        "StarvedBackend",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.chaos.retry": {
+      "docstring": "Retry budgets: bounded retries for recoverable failures (slice 268).\n\nUnbounded retry is a reliability hazard: a flapping backend turns one\nbad call into a self-inflicted denial of service. A :class:`RetryBudget`\nis a small fixed-window token bucket \u2014 the first attempt is always\nfree, every *retry* consumes one token, and when the tokens are gone\n:func:`retry_with_budget` raises :class:`RetryBudgetExhausted`\n(chaining the last failure) instead of hammering the backend forever.\n\nThe default retry policy retries taxonomy errors that declare\nthemselves ``recoverable`` (``BackendUnavailable``, ``TimeoutError``,\n``QueueFull``\u2026); argument errors (``SpecError``, ``PolicyError``,\n``ChaosError``) propagate immediately and never consume budget.\nBackoff is deliberately out of scope here \u2014 callers compose their own\ndelay; the budget only bounds *how many* retries, never *when*.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 150,
+      "path": "hugrgate/chaos/retry.py",
+      "public_defs": [
+        "default_retry_policy",
+        "RetryBudget",
+        "retry_with_budget",
+        "max_retries",
+        "acquire",
+        "remaining",
+        "stats"
+      ]
+    },
+    "hugrgate.chaos.scorecard": {
+      "docstring": "Reliability scorecard: one graded view over experiment reports (slice 274).\n\nThe campaign built six reporting shapes \u2014 experiment reports,\ndependency-matrix dicts, degradation reports, recovery reports,\nsoak reports, crash reports. A scorecard aggregates them into a\nsingle verdict for the release gate (slice 275): per-category\nentries, a weighted score, a letter grade, and PASS/FAIL.\n\nGrading is strict by default: the verdict threshold is 1.0 \u2014\nchaos findings are release-blockers until fixed or *explicitly\nwaived*. :meth:`Scorecard.waive` records the waiver with a reason\nso nothing is silently dropped; waived entries count as passed\nbut stay visible in the report.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 273,
+      "path": "hugrgate/chaos/scorecard.py",
+      "public_defs": [
+        "ScorecardEntry",
+        "ScorecardReport",
+        "Scorecard",
+        "counts_as_passed",
+        "to_dict",
+        "total_weight",
+        "score",
+        "grade",
+        "failed",
+        "waived",
+        "verdict",
+        "to_dict",
+        "render",
+        "add",
+        "waive",
+        "add_experiment",
+        "add_dependency_matrix",
+        "add_degradation",
+        "add_recovery",
+        "add_soak",
+        "add_crash",
+        "entry_names",
+        "build"
+      ]
+    },
+    "hugrgate.chaos.soak": {
+      "docstring": "Long soak: sustained load + scheduled faults + invariants (slice 273).\n\nA soak test answers \"does the system stay healthy over time, not\njust at instants?\" :class:`SoakRunner` drives a workload at a\ntarget rate for a duration, applies and reverts scheduled faults\nmid-run (via the chaos toolkit), checks invariants periodically,\nand reports. The soak passes when no invariant is violated and no\n*unexpected* error type appears \u2014 expected fault-induced errors\n(e.g. ``BackendError`` under an armed ``error_rate`` fault) are\ncounted, not failed.\n\nSmall by default (``duration_s=2.0``): the point of the committed\ntest is the machinery and the invariants, not burning CI hours.\nLonger soaks are one argument away. Single-threaded and\ndeterministic by construction.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 195,
+      "path": "hugrgate/chaos/soak.py",
+      "public_defs": [
+        "ScheduledFault",
+        "SoakConfig",
+        "SoakReport",
+        "SoakRunner",
+        "passed",
+        "to_dict",
+        "run",
+        "note_error"
       ]
     },
     "hugrgate.circuit": {
@@ -2964,7 +3435,7 @@
         "time",
         "typing"
       ],
-      "loc": 201,
+      "loc": 235,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -3192,7 +3663,7 @@
       ]
     },
     "hugrgate.edge.chaos": {
-      "docstring": "Edge failure testing \u2014 deterministic fault injection. Slice 199.\n\n:class:`ChaosRunner` executes named :class:`FaultScenario`s against\nreal Campaign VIII components. Each scenario *injects* a fault\n(power cut, thermal spike, NPU dropout, memory pressure, flash\nexhaustion, watchdog starvation) and then *verifies* the documented\ndegradation behavior held \u2014 the same assertions the unit tests pin,\nbut exercised as end-to-end failure stories with a report at the end.\n\nScenarios are deterministic (scripted sensors, fixture memory maps,\ntmpdirs) and hermetic: every scenario builds its own components, so\na fault in one cannot leak into the next.",
+      "docstring": "Edge failure testing \u2014 deterministic fault injection. Slice 199;\nhardened in slice 251 (steady-state pre/post hooks, ``run_one``).\n\n:class:`ChaosRunner` executes named :class:`FaultScenario`s against\nreal Campaign VIII components. Each scenario *injects* a fault\n(power cut, thermal spike, NPU dropout, memory pressure, flash\nexhaustion, watchdog starvation) and then *verifies* the documented\ndegradation behavior held \u2014 the same assertions the unit tests pin,\nbut exercised as end-to-end failure stories with a report at the end.\n\nScenarios are deterministic (scripted sensors, fixture memory maps,\ntmpdirs) and hermetic: every scenario builds its own components, so\na fault in one cannot leak into the next.",
       "imports": [
         "__future__",
         "collections",
@@ -3203,7 +3674,7 @@
         "threading",
         "typing"
       ],
-      "loc": 259,
+      "loc": 304,
       "path": "hugrgate/edge/chaos.py",
       "public_defs": [
         "FaultScenario",
@@ -3215,6 +3686,7 @@
         "register",
         "scenarios",
         "run_all",
+        "run_one",
         "report",
         "Be",
         "capabilities",
@@ -3455,6 +3927,8 @@
       "docstring": "Intermittent-power recovery via checkpoint journal. Slice 193.\n\nEdge nodes lose power mid-write. :class:`CheckpointJournal` makes\n\"what was I doing?\" answerable after the lights come back:\n\n- :meth:`checkpoint` atomically persists a CRC32-protected JSON\n  record (temp file \u2192 fsync \u2192 ``os.replace``); a torn write from a\n  power cut fails CRC validation and is *skipped*, never trusted;\n- :meth:`latest` returns the newest *valid* checkpoint, scanning\n  past corrupt ones toward the previous good record;\n- :meth:`mark_complete` removes a checkpoint once its work finished,\n  turning at-least-once resume into at-most-once handoff;\n- only the newest ``keep`` checkpoints are retained, so the journal\n  cannot grow without bound on a node that checkpoints often.\n\nThe journal is deliberately dependency-free (no\n:class:`WearAwareStore`): recovery must work at the earliest boot\nstage, before heavier subsystems exist.",
       "imports": [
         "__future__",
+        "contextlib",
+        "errno",
         "hugrgate",
         "json",
         "os",
@@ -3463,7 +3937,7 @@
         "typing",
         "zlib"
       ],
-      "loc": 191,
+      "loc": 212,
       "path": "hugrgate/edge/recovery.py",
       "public_defs": [
         "Checkpoint",
@@ -3523,9 +3997,11 @@
       ]
     },
     "hugrgate.edge.storage": {
-      "docstring": "Flash-wear-aware storage for edge devices. Slice 191.\n\nSD cards and eMMC die from write amplification: many small writes\ncost far more erase cycles than their payload. :class:`WearAwareStore`\nis a small persistent key/value store that treats flash as a finite\nresource:\n\n- **write budget**: a lifetime byte budget; every flushed byte\n  decrements it, and writes beyond the budget raise instead of\n  silently killing the card;\n- **coalescing buffer**: puts accumulate in RAM and flush as one\n  sequential append (one erase-cycle hit instead of dozens);\n- **atomic flush**: buffer \u2192 temp file \u2192 ``os.replace`` \u2192 fsync, so\n  a power cut (slice 193) can never leave a torn tail;\n- **wear telemetry**: bytes written, flush count, and an\n  amplification estimate (``bytes_written / payload_bytes``).\n\nReads are served from an in-RAM index rebuilt from the log at open;\n``compact()`` rewrites only live keys when the log grows stale-heavy.",
+      "docstring": "Flash-wear-aware storage for edge devices. Slice 191.\n\nSD cards and eMMC die from write amplification: many small writes\ncost far more erase cycles than their payload. :class:`WearAwareStore`\nis a small persistent key/value store that treats flash as a finite\nresource:\n\n- **write budget**: a lifetime byte budget; every flushed byte\n  decrements it, and writes beyond the budget raise instead of\n  silently killing the card;\n- **coalescing buffer**: puts accumulate in RAM and flush as one\n  sequential append (one erase-cycle hit instead of dozens);\n- **atomic flush**: buffer \u2192 temp file \u2192 ``os.replace`` \u2192 fsync, so\n  a power cut (slice 193) can never leave a torn tail;\n- **wear telemetry**: bytes written, flush count, and an\n  amplification estimate (``bytes_written / payload_bytes``).\n- **disk-full mapping** (slice 259): ``ENOSPC``/``EDQUOT`` during\n  flush surface as :class:`StorageError` (buffer retained for retry),\n  never a raw ``OSError``.\n\nReads are served from an in-RAM index rebuilt from the log at open;\n``compact()`` rewrites only live keys when the log grows stale-heavy.",
       "imports": [
         "__future__",
+        "contextlib",
+        "errno",
         "hugrgate",
         "os",
         "pathlib",
@@ -3533,7 +4009,7 @@
         "threading",
         "typing"
       ],
-      "loc": 283,
+      "loc": 305,
       "path": "hugrgate/edge/storage.py",
       "public_defs": [
         "WearAwareStore",
@@ -4114,7 +4590,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 337,
+      "loc": 274,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4123,14 +4599,9 @@
         "BackendError",
         "BackendUnavailable",
         "CalibrationError",
+        "BulkheadRejected",
         "TimeoutError",
         "PrivacyViolation",
-        "DataFlowDenied",
-        "JurisdictionViolation",
-        "LocalOnlyViolation",
-        "SecretDetected",
-        "SealError",
-        "KeyProviderError",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -4148,6 +4619,7 @@
         "QuantError",
         "RecoveryError",
         "ResidencyError",
+        "RetryBudgetExhausted",
         "StorageError",
         "TelemetryError",
         "WatchdogError",
@@ -4246,7 +4718,7 @@
         "time",
         "typing"
       ],
-      "loc": 368,
+      "loc": 343,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -4332,7 +4804,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 101,
+      "loc": 96,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -4342,7 +4814,7 @@
       ]
     },
     "hugrgate.privacy": {
-      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.\n\nSlice 226 (privacy classification v2) promotes the old binary\n``standard``/``strict`` classes to a five-rung ordered ladder \u2014\n``public`` < ``standard`` < ``sensitive`` < ``strict`` < ``forbidden`` \u2014\neach with machine-enforceable semantics (minimum backend trust, cache\nretention, remote eligibility, provenance mode). The ladder is defined\nhere; :class:`DecisionPolicy` accepts exactly these classes.",
+      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
       "imports": [
         "__future__",
         "collections",
@@ -4350,550 +4822,17 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 416,
+      "loc": 131,
       "path": "hugrgate/privacy.py",
       "public_defs": [
-        "class_rank",
-        "at_least",
-        "semantics_for",
-        "provenance_mode_for",
         "PrivacyGuard",
-        "compile_outbound",
-        "trust_level_for",
-        "jurisdiction_for",
         "remote_allowed",
         "check_backend",
         "filter_backends",
-        "enforce_local_only",
-        "check_no_secrets",
         "cache_allowed",
         "redact_state",
         "redact_record",
         "provenance_redaction_needed"
-      ]
-    },
-    "hugrgate.privacy_audit": {
-      "docstring": "Policy violation audit log. Slice 244.\n\nEvery privacy denial should leave a trace. :class:`PrivacyAuditLog`\nis an append-only, hash-chained log of privacy-relevant events\n(backend blocks, flow denials, secret detections, jurisdiction and\nlocal-only violations, key rotations, purges). Each event commits\nto the previous event's hash, so silent edits or deletions break\n:meth:`PrivacyAuditLog.verify`.\n\nThe log is in-memory by default; attach a sink (e.g.\n:class:`FileAuditSink`) for durability. Sinks receive the event\ndict and must not raise \u2014 a failing sink would otherwise turn an\naudit trail into a denial of service; sink errors are logged and\nswallowed deliberately (documented).",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hashlib",
-        "hugrgate",
-        "json",
-        "pathlib",
-        "time",
-        "typing"
-      ],
-      "loc": 151,
-      "path": "hugrgate/privacy_audit.py",
-      "public_defs": [
-        "PrivacyAuditEvent",
-        "FileAuditSink",
-        "PrivacyAuditLog",
-        "to_dict",
-        "from_dict",
-        "record",
-        "verify",
-        "events",
-        "count",
-        "to_dict",
-        "from_dict"
-      ]
-    },
-    "hugrgate.privacy_crypto": {
-      "docstring": "Authenticated encryption (stdlib only) + encrypted cache. Slice 241.\n\nNo third-party crypto dependency: :class:`SealedBox` is an\nencrypt-then-MAC construction from ``hashlib``/``hmac``/``secrets``:\n\n- key derivation: HKDF-SHA256 (RFC 5869);\n- encryption: HMAC-SHA256 in counter mode as a keystream (a\n  well-studied PRF-based stream cipher), random 128-bit nonce per\n  message;\n- authentication: HMAC-SHA256 over ``domain || nonce || associated\n  || ciphertext``; verification is constant-time and any tampering\n  raises :class:`SealError`.\n\nThis is a deliberately small, auditable construction \u2014 not a\nreplacement for libsodium where available. The threat model:\nprotect cached decisions at rest from offline disk theft and from\ncross-tenant reads in shared storage. It does not protect against\nan attacker who already holds the key.\n\n:class:`EncryptedDecisionCache` wraps :class:`DecisionCache`:\nentries are pickled, sealed, and stored as opaque blobs. The\nprivacy-class cache rules still apply first (``strict`` /\n``forbidden`` are never cached, sealed or not).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hashlib",
-        "hmac",
-        "hugrgate",
-        "pickle",
-        "secrets",
-        "typing"
-      ],
-      "loc": 230,
-      "path": "hugrgate/privacy_crypto.py",
-      "public_defs": [
-        "hkdf",
-        "require_key",
-        "SealedBox",
-        "EncryptedDecisionCache",
-        "seal",
-        "open",
-        "put",
-        "get",
-        "key_id_hint"
-      ]
-    },
-    "hugrgate.privacy_deletion": {
-      "docstring": "Secure deletion hooks. Slice 240.\n\nDeleting a record should mean it is *gone* \u2014 not merely\nunreferenced. This module provides:\n\n- :func:`shred_bytes` \u2014 multi-pass overwrite of a ``bytearray``\n  (zeros, ones, CSPRNG), plus :class:`SecureBuffer`, a context\n  manager that shreds on exit. Secrets should live in\n  ``bytearray``\\ s, never in immutable ``str`` (which cannot be\n  overwritten).\n- :class:`SecureDeleter` \u2014 a hook registry fired per deleted\n  record: each hook runs, bytearray values in the record's metadata\n  are shredded best-effort, and a :class:`DeletionReceipt` is\n  returned as auditable proof of deletion.\n- :class:`CryptoShredder` \u2014 for encrypted stores: dropping the\n  data-encryption key cryptographically shreds everything sealed\n  under it, without touching the ciphertext.\n\nHonesty note: overwriting reduces a secret's lifetime in memory; it\ncannot guarantee against copies the interpreter, OS paging, or\nhardware already made. The receipt records what *was* done, not a\nforensic guarantee. Encrypted-at-rest data + key destruction\n(crypto-shredding) is the stronger primitive \u2014 prefer it for\nhigh-sensitivity stores (slices 241-242).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "secrets",
-        "time",
-        "typing"
-      ],
-      "loc": 202,
-      "path": "hugrgate/privacy_deletion.py",
-      "public_defs": [
-        "shred_bytes",
-        "SecureBuffer",
-        "DeletionReceipt",
-        "SecureDeleter",
-        "CryptoShredder",
-        "shred",
-        "shredded",
-        "walk",
-        "to_dict",
-        "register",
-        "unregister",
-        "hooks",
-        "shred_key",
-        "shredded_keys"
-      ]
-    },
-    "hugrgate.privacy_dryrun": {
-      "docstring": "Privacy dry-run mode. Slice 245.\n\n:func:`PrivacyDryRun.evaluate` simulates the entire outbound\nprivacy pipeline for a decision \u2014 attempt gate, local-only\nstripping, the remote payload compiler (flow policy,\nminimization, clearance, secret scan, PII scrub, redaction) \u2014\nwithout executing it: nothing is sent, nothing is cached, the\ninput state is not mutated. The returned :class:`DryRunReport`\nsays exactly what *would* happen, stage by stage, so operators\ncan preview the effect of policy changes before they bite.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 172,
-      "path": "hugrgate/privacy_dryrun.py",
-      "public_defs": [
-        "DryRunStage",
-        "DryRunReport",
-        "PrivacyDryRun",
-        "to_dict",
-        "to_dict",
-        "summary",
-        "evaluate"
-      ]
-    },
-    "hugrgate.privacy_exfil": {
-      "docstring": "Exfiltration simulation. Slice 248.\n\nThe fortress claims to stop data exfiltration; this module\nattacks that claim. :class:`ExfilSimulator` runs a suite of\nattacker scenarios against a configured :class:`PrivacyGuard`\n\u2014 direct remote calls, secret smuggling, local-only exfil,\nPII in free text, jurisdiction hops, untrusted backends \u2014\nand reports, per scenario, whether the attempt was\n**blocked** (refused outright), **neutralized** (the data was\nsanitized before leaving), or **allowed** (it got out).\n\nEach scenario declares what it *expects*; the report fails\nwhen reality disagrees. A red-team operator runs the default\nsuite against their production guard configuration: any\n``allowed`` where ``blocked`` was expected is a live hole.",
-      "imports": [
-        "__future__",
-        "copy",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 268,
-      "path": "hugrgate/privacy_exfil.py",
-      "public_defs": [
-        "ExfilAttempt",
-        "ExfilOutcome",
-        "ExfilReport",
-        "default_attacks",
-        "ExfilSimulator",
-        "capabilities",
-        "supports",
-        "evaluate",
-        "passed",
-        "to_dict",
-        "passed",
-        "failures",
-        "to_dict",
-        "summary",
-        "attempt",
-        "run_suite"
-      ]
-    },
-    "hugrgate.privacy_explain": {
-      "docstring": "Privacy explanation reports. Slice 246.\n\nPrivacy denials are cryptic by default \u2014 a bare error code tells\nan operator nothing actionable. :class:`PrivacyExplainer` turns\nany privacy error (or dry-run report, or redacted provenance\nrecord) into a plain-language explanation: what happened, why\nthe policy requires it, and what the operator can do about it.\n\nRemediation advice is advisory only \u2014 it never bypasses the\npolicy; every suggested action goes *through* the policy\n(change the flow, the classification, or the configuration, not\naround it).",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 207,
-      "path": "hugrgate/privacy_explain.py",
-      "public_defs": [
-        "PrivacyExplainer",
-        "explain_denial",
-        "explain_denial",
-        "explain_dry_run",
-        "explain_record"
-      ]
-    },
-    "hugrgate.privacy_flow": {
-      "docstring": "Data-flow policy engine. Slice 228.\n\nWhere should data be allowed to move? :class:`DataFlowPolicy`\nanswers that for a single planned flow \u2014 a :class:`FlowRequest`\ndescribing *what* (privacy class, field sensitivity levels,\nlocal-only fields) moves *where* (destination backend, its trust\nlevel, remoteness, jurisdiction) \u2014 and returns a :class:`FlowDecision`\n(``allow`` / ``redact`` / ``deny``) with machine-readable reasons.\nDenials raise :class:`~hugrgate.errors.DataFlowDenied`.\n\nRules are evaluated in a fixed, documented order so decisions are\ndeterministic and explainable (slice 246 renders them):\n\n1. class eligibility \u2014 a ``forbidden``-class payload never flows remote;\n2. trust floor \u2014 destination trust must meet the class minimum;\n3. jurisdiction \u2014 remote destinations outside the allowed set are denied;\n4. field levels \u2014 fields above the remote clearance are stripped\n   (``redact`` mode) or deny the flow (strict mode);\n5. local-only fields are always stripped from remote flows.\n\nThe engine takes abstract inputs (trust levels, jurisdictions) so\nslices 229-230 can supply attested values without changing the rules.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 206,
-      "path": "hugrgate/privacy_flow.py",
-      "public_defs": [
-        "FlowRequest",
-        "FlowDecision",
-        "DataFlowPolicy",
-        "raise_if_denied",
-        "check",
-        "to_dict"
-      ]
-    },
-    "hugrgate.privacy_jurisdiction": {
-      "docstring": "Jurisdiction metadata. Slice 230.\n\nData has a passport: where it is processed matters. This module\ntracks which jurisdiction each backend operates in and enforces\noperator-declared allowed jurisdictions at selection and attempt\ntime.\n\n- :class:`JurisdictionRegistry` maps backend names to jurisdiction\n  codes (``\"local\"``, ``\"EU\"``, ``\"US\"``, ...). Unlisted local\n  backends default to ``\"local\"``; unlisted remote backends default\n  to ``\"unknown\"`` \u2014 and ``\"unknown\"`` is never in an allowed set,\n  so undeclared remotes are denied by default under a jurisdiction\n  policy (fail closed).\n- :class:`JurisdictionPolicy` holds the allowed set (``None`` = no\n  restriction) and raises :class:`JurisdictionViolation` on breach.\n- :class:`~hugrgate.privacy.PrivacyGuard` accepts\n  ``jurisdiction_registry=`` and ``jurisdictions_allowed=`` and\n  enforces them in ``remote_allowed`` / ``check_backend`` /\n  ``filter_backends``.\n\nLocal backends are always jurisdiction-clean: data never crosses a\nborder when it never leaves the process.",
-      "imports": [
-        "__future__",
-        "collections",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 128,
-      "path": "hugrgate/privacy_jurisdiction.py",
-      "public_defs": [
-        "JurisdictionRegistry",
-        "JurisdictionPolicy",
-        "declare",
-        "jurisdiction_for",
-        "to_dict",
-        "from_dict",
-        "check",
-        "to_dict",
-        "from_dict"
-      ]
-    },
-    "hugrgate.privacy_keys": {
-      "docstring": "Key-provider abstraction. Slice 243.\n\nEncryption is only as good as key management. :class:`KeyProvider`\nis the interface every key consumer (encrypted cache, sealed\nprovenance, token vaults) uses; implementations:\n\n- :class:`EnvKeyProvider` \u2014 32-byte key from an environment\n  variable (hex or base64);\n- :class:`FileKeyProvider` \u2014 key from a file (hex, base64, or raw\n  32 bytes; the file should be mode ``0o600`` \u2014 warn otherwise);\n- :class:`EphemeralKeyProvider` \u2014 in-memory CSPRNG keys, generated\n  on first use; gone when the process exits;\n- :class:`RotatingKeyProvider` \u2014 a primary provider plus retired\n  providers: encryption always uses the primary, decryption tries\n  each in turn, so rotation never strands sealed data.\n\n:func:`derive_key` derives per-context subkeys via HKDF, so one\nmaster key safely serves many namespaces (cache vs provenance vs\ntoken vault).",
-      "imports": [
-        "__future__",
-        "abc",
-        "base64",
-        "binascii",
-        "hugrgate",
-        "os",
-        "pathlib",
-        "secrets",
-        "stat",
-        "typing",
-        "warnings"
-      ],
-      "loc": 254,
-      "path": "hugrgate/privacy_keys.py",
-      "public_defs": [
-        "KeyProvider",
-        "EnvKeyProvider",
-        "FileKeyProvider",
-        "EphemeralKeyProvider",
-        "RotatingKeyProvider",
-        "derive_key",
-        "cache_from_provider",
-        "provenance_store_from_provider",
-        "get_key",
-        "key_ids",
-        "forget",
-        "get_key",
-        "key_ids",
-        "get_key",
-        "key_ids",
-        "get_key",
-        "key_ids",
-        "forget",
-        "get_key",
-        "key_ids",
-        "retire_primary",
-        "get_key_any"
-      ]
-    },
-    "hugrgate.privacy_labels": {
-      "docstring": "Field-level sensitivity labels. Slice 227.\n\nThe privacy-class ladder (slice 226) classifies a whole *decision*.\nThis module classifies the *fields inside the state*: each field gets\na :class:`Sensitivity` level, consumers get a clearance, and\n:func:`filter_by_clearance` drops everything above it. Fields can\nalso be marked *local-only* \u2014 they may be processed in-process but\nmust never be compiled into a remote payload (enforced in slice 231).\n\nLabels support dotted paths (``\"user.ssn\"``) for nested mappings; a\nlabel on a parent (``\"user\"``) covers its children unless a more\nspecific dotted label overrides it.",
-      "imports": [
-        "__future__",
-        "collections",
-        "enum",
-        "typing"
-      ],
-      "loc": 190,
-      "path": "hugrgate/privacy_labels.py",
-      "public_defs": [
-        "Sensitivity",
-        "FieldLabels",
-        "filter_by_clearance",
-        "label",
-        "is_local_only",
-        "label_state",
-        "fields_at_or_above",
-        "to_dict",
-        "from_dict",
-        "walk"
-      ]
-    },
-    "hugrgate.privacy_localonly": {
-      "docstring": "Local-only field enforcement. Slice 231.\n\nSlice 227 lets operators *mark* fields local-only; this module\n*enforces* the marking. :class:`LocalOnlyPolicy` inspects an\noutbound state against :class:`~hugrgate.privacy_labels.FieldLabels`\nand guarantees no local-only field reaches a remote destination:\n\n- strip mode (default): local-only fields are removed from the\n  outbound copy and reported;\n- strict mode: the mere presence of a local-only field in a\n  remote-bound payload raises :class:`LocalOnlyViolation` \u2014 a hard\n  guarantee for callers that must never silently drop data.\n\nIn-process (local backend) flows are untouched: local-only means\n\"never leaves the process\", not \"never used\".",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 129,
-      "path": "hugrgate/privacy_localonly.py",
-      "public_defs": [
-        "LocalOnlyResult",
-        "LocalOnlyPolicy",
-        "enforce_local_only",
-        "clean",
-        "enforce",
-        "enforce_for_backend",
-        "to_dict"
-      ]
-    },
-    "hugrgate.privacy_minimize": {
-      "docstring": "Prompt / data minimization. Slice 236.\n\nSend the least data that still answers the question. This module\nprovides two mechanisms:\n\n- :func:`minimize_state` \u2014 project a state mapping down to an\n  explicit keep-list (top-level names or dotted paths); everything\n  else is dropped. Nested-aware, non-mutating.\n- :class:`MinimizationPolicy` \u2014 per-backend keep-lists; backends\n  declare the fields they actually need and every outbound payload\n  is projected before compilation.\n- :class:`PromptMinimizer` \u2014 renders the minimized state into a\n  compact prompt string under a character budget, so prompt\n  construction itself can't smuggle undeclared fields.\n\nA backend with no declared keep-list passes state through unchanged\n(documented): minimization is only as good as the declarations, so\ndeclare them.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "json",
-        "typing"
-      ],
-      "loc": 185,
-      "path": "hugrgate/privacy_minimize.py",
-      "public_defs": [
-        "MinimizationReport",
-        "minimize_state",
-        "MinimizationPolicy",
-        "PromptMinimizer",
-        "leaf_paths",
-        "keep_for",
-        "declare",
-        "minimize",
-        "to_dict",
-        "from_dict",
-        "render"
-      ]
-    },
-    "hugrgate.privacy_payload": {
-      "docstring": "Remote payload compiler \u2014 the outbound chokepoint. Slice 237.\n\nEvery byte that leaves the process for a remote backend passes\nthrough :class:`RemotePayloadCompiler.compile`. The compilation is\na fixed, ordered pipeline; each stage is recorded in the\n:attr:`RemotePayload.manifest` so any payload is auditable\nafter the fact:\n\n1. **attempt gate** \u2014 ``PrivacyGuard.check_backend`` (guard mode,\n   class trust floor, jurisdiction); raises on denial;\n2. **local-only enforcement** \u2014 strip (or strict-raise) local-only\n   fields first, so strict mode fires before any other stage can\n   silently drop them;\n3. **data-flow policy** \u2014 ``DataFlowPolicy.check`` on the planned\n   flow; ``redact`` decisions strip the named fields;\n4. **minimization** \u2014 project to the backend's keep-list;\n5. **clearance filter** \u2014 drop fields above the remote clearance;\n6. **secret scan** \u2014 raise ``SecretDetected`` on any hit;\n7. **PII scrub** \u2014 mask/drop PII findings;\n8. **redaction pipeline** \u2014 per-field / per-level strategies.\n\nLocal backends bypass compilation (the data never leaves the\nprocess) and get a passthrough manifest. Compilation is\ndeterministic: the same inputs always produce the same payload and\nmanifest.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 270,
-      "path": "hugrgate/privacy_payload.py",
-      "public_defs": [
-        "RemotePayload",
-        "RemotePayloadCompiler",
-        "to_dict",
-        "compile",
-        "walk"
-      ]
-    },
-    "hugrgate.privacy_pii": {
-      "docstring": "PII detector interface. Slice 235.\n\nPluggable personally-identifiable-information detection for outbound\ndata. :class:`PIIDetector` is the interface \u2014 implement\n:meth:`PIIDetector.scan_text` and you get nested state scanning for\nfree. :class:`RegexPIIDetector` is the built-in default with\nvalidated patterns (Luhn-checked credit cards, area-validated SSNs);\n:class:`PIIScrubber` applies mask/drop actions to state.\n\nDesign notes:\n\n- Detectors are *precision-first*: every pattern carries a\n  confidence, and expensive validators (Luhn, SSN area rules) run\n  before a finding is reported, so \"order 1234\" doesn't become a\n  credit-card finding.\n- Findings never carry the raw value \u2014 only a redacted preview.\n- Custom detectors compose: :class:`CompositePIIDetector` unions any\n  set of detectors.",
-      "imports": [
-        "__future__",
-        "abc",
-        "collections",
-        "dataclasses",
-        "re",
-        "typing"
-      ],
-      "loc": 246,
-      "path": "hugrgate/privacy_pii.py",
-      "public_defs": [
-        "PIIFinding",
-        "PIIDetector",
-        "RegexPIIDetector",
-        "CompositePIIDetector",
-        "PIIScrubber",
-        "to_dict",
-        "scan_text",
-        "scan_state",
-        "scan_text",
-        "scan_text",
-        "scrub_state",
-        "walk",
-        "scrub"
-      ]
-    },
-    "hugrgate.privacy_provenance": {
-      "docstring": "Privacy-preserving provenance. Slice 238.\n\nProvenance must explain a decision without leaking the data behind\nit. :func:`privacy_preserving_record` builds a\n:class:`DecisionRecord` whose state-derived metadata follows the\nprivacy-class ladder (slice 226):\n\n- ``public`` / ``standard`` \u2014 state keys (never values);\n- ``sensitive`` \u2014 state keys, plus optional per-field value\n  fingerprints (prove *what* the input was without storing it);\n- ``strict`` \u2014 fully redacted (deep-scrubbed);\n- ``forbidden`` \u2014 no state-derived metadata at all.\n\nEvery record carries its ``privacy_class`` marker, so the policy is\nauditable from the record alone. The integrity chain\n(``prev_hash``/``record_hash``) is computed over the canonical\nrecord *including* whatever metadata survived, so redacted and\nfingerprinted records verify exactly like full ones.\n\n:class:`PrivacyAwareProvenanceStore` wraps :class:`ProvenanceStore`\nwith a one-call ``append_decision`` entry point, and\n:class:`SealedProvenanceStore` additionally seals every record body\nat rest (slice 242): the on-disk/in-memory chain commits to\n*ciphertext*, while the plaintext record (with its own hashes) rides\ninside the sealed body.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hashlib",
-        "hugrgate",
-        "pickle",
-        "typing"
-      ],
-      "loc": 261,
-      "path": "hugrgate/privacy_provenance.py",
-      "public_defs": [
-        "fingerprint_state",
-        "privacy_preserving_record",
-        "PrivacyAwareProvenanceStore",
-        "SealedProvenanceStore",
-        "append_decision",
-        "append",
-        "recent",
-        "by_hash",
-        "verify_chain",
-        "purge",
-        "key_id_hint"
-      ]
-    },
-    "hugrgate.privacy_redact": {
-      "docstring": "Redaction pipeline v2. Slice 232.\n\nSlice 40's redaction was shallow: ``redact_state`` masked whole\nvalues and ``redact_record`` dropped three top-level metadata keys.\nAnything nested \u2014 a ``{\"state\": {...}}`` dict *inside* metadata, a\nsecret embedded in a longer string \u2014 sailed through.\n\nThis module is a composable redaction pipeline:\n\n- :class:`Redactor` strategies: :class:`MaskRedactor`,\n  :class:`PatternRedactor` (regexes over strings, including nested\n  ones), :class:`HashRedactor` (deterministic salted hash, keeps\n  joinability without reversibility), :class:`DropRedactor` (removes\n  the field), :class:`TokenRedactor` (reversible via a token vault,\n  slice 233).\n- :class:`RedactionPipeline`: per-field redactors, per-\n  :class:`Sensitivity` level strategies applied with\n  :meth:`apply_with_labels`, and free-text scrubbing.\n- :func:`redact_metadata`: deep scrub of provenance metadata \u2014\n  drops ``state``/``state_keys``/``raw_state`` keys at *any* depth\n  and pattern-scrubs string values. :class:`PrivacyGuard.redact_record`\n  now uses it (superset of the old behavior).",
-      "imports": [
-        "__future__",
-        "abc",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hashlib",
-        "hugrgate",
-        "re",
-        "typing"
-      ],
-      "loc": 320,
-      "path": "hugrgate/privacy_redact.py",
-      "public_defs": [
-        "Redactor",
-        "MaskRedactor",
-        "PatternRedactor",
-        "HashRedactor",
-        "DropRedactor",
-        "TokenRedactor",
-        "RedactionPipeline",
-        "redact_metadata",
-        "redact_record_deep",
-        "redact",
-        "redact",
-        "redact",
-        "scrub",
-        "redact",
-        "redact",
-        "redact",
-        "apply_to_state",
-        "apply_with_labels",
-        "apply_to_text",
-        "scrub",
-        "leaf_paths"
-      ]
-    },
-    "hugrgate.privacy_retention": {
-      "docstring": "Retention policies. Slice 239.\n\nData should not outlive its purpose. :class:`RetentionPolicy`\ndeclares per-privacy-class maximum ages; :func:`purge_expired`\nremoves overdue records from a :class:`ProvenanceStore` (via the\nchain-safe :meth:`ProvenanceStore.purge`), and\n:meth:`RetentionPolicy.cache_ttl_for` caps decision-cache TTLs.\n\nDefaults (seconds; ``None`` = unbounded):\n\n- ``public`` \u2014 unbounded;\n- ``standard`` \u2014 30 days;\n- ``sensitive`` \u2014 7 days;\n- ``strict`` \u2014 24 hours;\n- ``forbidden`` \u2014 0: never persist (purged on the next sweep).\n\n``forbidden`` records are still *created* (the decision happened and\nthe chain binds it) but must not be *retained* \u2014 the next purge\nremoves them. Operators wanting zero creation should not log at all.",
-      "imports": [
-        "__future__",
-        "collections",
-        "hugrgate",
-        "time",
-        "typing"
-      ],
-      "loc": 118,
-      "path": "hugrgate/privacy_retention.py",
-      "public_defs": [
-        "RetentionPolicy",
-        "purge_expired",
-        "max_age_for",
-        "is_expired",
-        "cache_ttl_for",
-        "to_dict",
-        "from_dict"
-      ]
-    },
-    "hugrgate.privacy_secrets": {
-      "docstring": "Secret detection hooks. Slice 234.\n\nLast line of defense before data leaves the process: scan outbound\nstate (or free text) for secret-shaped values \u2014 API keys, tokens,\nprivate keys, credentials \u2014 and raise :class:`SecretDetected` instead\nof transmitting them.\n\n:class:`SecretScanner` combines:\n\n- curated high-precision patterns (AWS keys, GitHub/Slack tokens,\n  PEM private keys, bearer tokens, credential assignments);\n- a conservative high-entropy heuristic for opaque tokens with no\n  known prefix (off by default \u2014 see below).\n\nFindings carry the dotted field path, the pattern name, a redacted\npreview (never the full secret), and a confidence level. The scanner\nis deliberately *not* a DLP oracle: it catches accidents, not\nadversaries. High-entropy detection stays opt-in because natural\ntext (hashes in logs, base64 blobs) triggers it.\n\nHook points:\n\n- :func:`assert_no_secrets` \u2014 one-shot check; raises on any finding;\n- :meth:`PrivacyGuard.check_no_secrets <hugrgate.privacy.PrivacyGuard.check_no_secrets>` \u2014\n  guard-level convenience used by the remote payload compiler\n  (slice 237).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "re",
-        "typing"
-      ],
-      "loc": 199,
-      "path": "hugrgate/privacy_secrets.py",
-      "public_defs": [
-        "SecretFinding",
-        "SecretScanner",
-        "assert_no_secrets",
-        "to_dict",
-        "scan_text",
-        "scan_state",
-        "assert_no_secrets",
-        "walk"
-      ]
-    },
-    "hugrgate.privacy_tokens": {
-      "docstring": "Tokenization / pseudonymization vault. Slice 233.\n\nReversible redaction: :class:`TokenVault` replaces sensitive values\nwith opaque random tokens (``hgptok_...``) and keeps the\ntoken\u2192value mapping in memory. Tokens reveal nothing without vault\naccess; only the vault holder can detokenize. This is the vault\nbehind :class:`~hugrgate.privacy_redact.TokenRedactor`.\n\nSecurity properties (documented, tested):\n\n- tokens are 192-bit CSPRNG outputs \u2014 unguessable, no structure to\n  exploit;\n- the mapping (the actual secret) never leaves the vault except via\n  explicit ``export``/``import`` for encrypted persistence (slices\n  241-242 seal the export);\n- namespaces isolate token spaces: a token minted in one namespace\n  never detokenizes in another vault;\n- values are deep-copied on the way in and out, so callers cannot\n  mutate vault contents through a reference.\n\nThis is pseudonymization, not anonymization: anyone holding the\nvault (or its export) can reverse it. Treat the vault like a key.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "pickle",
-        "secrets",
-        "typing"
-      ],
-      "loc": 122,
-      "path": "hugrgate/privacy_tokens.py",
-      "public_defs": [
-        "TokenVault",
-        "tokenize",
-        "detokenize",
-        "revoke",
-        "clear",
-        "tokenize_state",
-        "export",
-        "import_vault"
-      ]
-    },
-    "hugrgate.privacy_trust": {
-      "docstring": "Backend trust levels. Slice 229.\n\nNot all backends deserve the same data. :class:`BackendTrustRegistry`\nholds *attestations*: operator-signed claims that a backend meets a\ntrust level (``untrusted`` < ``basic`` < ``verified`` < ``enclave``).\nUnattested backends fall back to :func:`default_trust_level`\n(in-process = ``enclave``, remote = ``basic``). Attestations expire\nand can be revoked; an expired or revoked attestation silently drops\nback to the default \u2014 never to a higher level.\n\nThe registry plugs into :class:`~hugrgate.privacy.PrivacyGuard`\n(``trust_registry=``), so the slice-226 class trust floors are\nevaluated against attested trust rather than bare defaults.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "time",
-        "typing"
-      ],
-      "loc": 169,
-      "path": "hugrgate/privacy_trust.py",
-      "public_defs": [
-        "trust_rank",
-        "default_trust_level",
-        "TrustAttestation",
-        "BackendTrustRegistry",
-        "expired",
-        "to_dict",
-        "from_dict",
-        "attest",
-        "revoke",
-        "attestation_for",
-        "level_for",
-        "rank_for",
-        "meets",
-        "to_dict",
-        "from_dict"
       ]
     },
     "hugrgate.provenance": {
@@ -4910,7 +4849,7 @@
         "time",
         "typing"
       ],
-      "loc": 239,
+      "loc": 218,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -4920,7 +4859,6 @@
         "from_dict",
         "append",
         "evicted_count",
-        "purge",
         "by_hash",
         "recent",
         "count",
@@ -4964,7 +4902,7 @@
         "time",
         "typing"
       ],
-      "loc": 404,
+      "loc": 403,
       "path": "hugrgate/routing/architecture.py",
       "public_defs": [
         "RungMode",
@@ -6292,6 +6230,30 @@
     "test_calib_shift.py",
     "test_calib_viz.py",
     "test_calib_window.py",
+    "test_chaos_backend_crash.py",
+    "test_chaos_backend_hang.py",
+    "test_chaos_bulkhead.py",
+    "test_chaos_cache_corruption.py",
+    "test_chaos_clock_skew.py",
+    "test_chaos_corrupt_model.py",
+    "test_chaos_cpu_starvation.py",
+    "test_chaos_crash.py",
+    "test_chaos_degradation.py",
+    "test_chaos_dependency_matrix.py",
+    "test_chaos_disk_full.py",
+    "test_chaos_error_rate.py",
+    "test_chaos_framework.py",
+    "test_chaos_latency.py",
+    "test_chaos_malformed.py",
+    "test_chaos_memory_pressure.py",
+    "test_chaos_network_flap.py",
+    "test_chaos_network_loss.py",
+    "test_chaos_partial_service.py",
+    "test_chaos_readonly_fs.py",
+    "test_chaos_recovery.py",
+    "test_chaos_retry_budget.py",
+    "test_chaos_scorecard.py",
+    "test_chaos_soak.py",
     "test_cluster_auth.py",
     "test_cluster_backpressure.py",
     "test_cluster_bench.py",
@@ -6422,31 +6384,6 @@
     "test_ml_calibration.py",
     "test_package_boundaries.py",
     "test_policy_invariants.py",
-    "test_privacy_audit.py",
-    "test_privacy_bench_249.py",
-    "test_privacy_classification.py",
-    "test_privacy_crypto.py",
-    "test_privacy_deletion.py",
-    "test_privacy_dryrun.py",
-    "test_privacy_exfil.py",
-    "test_privacy_explain.py",
-    "test_privacy_flow.py",
-    "test_privacy_fortress_gate.py",
-    "test_privacy_fuzz.py",
-    "test_privacy_jurisdiction.py",
-    "test_privacy_keys.py",
-    "test_privacy_labels.py",
-    "test_privacy_localonly.py",
-    "test_privacy_minimize.py",
-    "test_privacy_payload.py",
-    "test_privacy_pii.py",
-    "test_privacy_provenance.py",
-    "test_privacy_redact.py",
-    "test_privacy_retention.py",
-    "test_privacy_sealed.py",
-    "test_privacy_secrets.py",
-    "test_privacy_tokens.py",
-    "test_privacy_trust.py",
     "test_provenance_integrity.py",
     "test_release_gate.py",
     "test_repo_truth.py",
@@ -6484,5 +6421,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 54479
+  "total_loc": 53828
 }

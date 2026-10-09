@@ -1,8 +1,9 @@
-"""Decision cache — request-hash keyed result memoization. Slice 38.
+"""Decision cache — request-hash keyed result memoization. Slice 38;
+integrity-hardened in slice 258.
 
 :class:`DecisionCache` maps a hash of ``(state, spec, policy)`` to the
 :class:`DecisionResult`, with TTL expiry, LRU eviction at ``max_size``,
-and two safety rails:
+and three safety rails:
 
 - **Privacy-aware**: entries are never stored for (or served to) decisions
   whose ``privacy_class`` forbids retention (``"strict"``) — see
@@ -10,6 +11,10 @@ and two safety rails:
 - **Invalidation on model change**: :meth:`invalidate_backend` drops every
   entry produced by a backend, so a retrained model can never serve stale
   decisions.
+- **Integrity-sealed**: every stored result carries a SHA-256 checksum
+  over its canonical form; ``get`` re-verifies and evicts damaged
+  entries (counted in ``stats()["corruptions"]``) instead of serving
+  garbage — see :mod:`hugrgate.chaos.cache_faults`.
 
 Results are deep-copied on the way in and out so callers cannot mutate the
 cached copy.
@@ -74,6 +79,18 @@ class _Entry:
     result: DecisionResult
     expires_at: float  # monotonic seconds
     backend: str
+    checksum: str  # integrity seal over the stored result (slice 258)
+
+
+def _result_checksum(result: DecisionResult) -> str:
+    """Canonical content hash of a result.
+
+    Any in-process mutation of the stored result — bit rot, a buggy
+    writer, memory corruption beneath the cache API — changes the
+    hash, so ``get`` can refuse to serve the damaged entry.
+    """
+    canonical = json.dumps(result.to_dict(), sort_keys=True, default=str)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 class DecisionCache:
@@ -89,6 +106,7 @@ class DecisionCache:
         self._entries: OrderedDict[str, _Entry] = OrderedDict()
         self.hits = 0
         self.misses = 0
+        self.corruptions = 0  # lifetime count of evicted-damaged entries
         # RLock: stats() calls len(self), which also takes the lock.
         self._lock = threading.RLock()
 
@@ -115,6 +133,15 @@ class DecisionCache:
             self.misses += 1
             logger.debug("cache miss (expired)")
             return None
+        if _result_checksum(entry.result) != entry.checksum:
+            # The stored result was corrupted beneath the cache API.
+            # Fail safe: evict the damaged entry and report a miss so
+            # the caller recomputes instead of serving garbage.
+            del self._entries[key]
+            self.corruptions += 1
+            self.misses += 1
+            logger.warning("cache corruption detected; entry evicted")
+            return None
         self._entries.move_to_end(key)  # LRU touch
         self.hits += 1
         logger.debug("cache hit")
@@ -135,10 +162,12 @@ class DecisionCache:
             now = time.monotonic()
             ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \
                 if retention is not None else self.ttl_seconds
+            stored = copy.deepcopy(result)
             self._entries[key] = _Entry(
-                result=copy.deepcopy(result),
+                result=stored,
                 expires_at=now + ttl,
-                backend=result.backend)
+                backend=result.backend,
+                checksum=_result_checksum(stored))
             self._entries.move_to_end(key)
             while len(self._entries) > self.max_size:
                 self._entries.popitem(last=False)  # evict least-recently-used
@@ -185,5 +214,6 @@ class DecisionCache:
                 "ttl_seconds": self.ttl_seconds,
                 "hits": self.hits,
                 "misses": self.misses,
+                "corruptions": self.corruptions,
                 "hit_rate": self.hits / total if total else 0.0,
             }
