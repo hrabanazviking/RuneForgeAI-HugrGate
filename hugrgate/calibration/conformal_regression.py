@@ -32,18 +32,12 @@ def _require_numpy() -> None:
             "numpy is required for calibration; install the 'ml' extra: pip install 'hugrgate[ml]'"
         )
 
+from hugrgate.calibration.conformal import _quantile
 from hugrgate.errors import CalibrationError
 
 __all__ = [
     "ConformalRegressor",
 ]
-
-
-def _quantile(scores: np.ndarray, alpha: float) -> float:
-    n = scores.size
-    k = int(math.ceil((n + 1) * (1.0 - alpha)))
-    k = min(n, max(1, k))
-    return float(np.sort(scores)[k - 1])
 
 
 class ConformalRegressor:
