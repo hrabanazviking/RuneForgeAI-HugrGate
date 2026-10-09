@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 44 · **public names:** 184
+**Modules:** 47 · **public names:** 217
 
 ## API stability policy
 
@@ -20,30 +20,30 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
+| `DecisionSpec` | class | `(type: 'str', options: 'Optional[List[str]]' = None, statement: 'Optional[str]' = None, levels: 'Optional[List[str]]' = None, minimum: 'Optional[float]' = None, maximum: 'Optional[float]' = None, labels: 'Optional[List[str]]' = None, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `DecisionResult` | class | `(value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'Optional[float]' = None, remote_inference: 'bool' = False, allowed_backends: 'Optional[List[str]]' = None, preferred_backends: 'Optional[List[str]]' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'Optional[float]' = None, review_band: 'Optional[tuple]' = None) -> None` |
 | `Backend` | class | `()` |
-| `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendRegistry` | class | `()` |
+| `HugrGate` | class | `(registry: 'Optional[BackendRegistry]' = None)` |
+| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'float | None' = None, remote_inference: 'bool' = False, allowed_backends: 'list[str] | None' = None, preferred_backends: 'list[str] | None' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'float | None' = None, review_band: 'tuple | None' = None) -> None` |
-| `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `DecisionSpec` | class | `(type: 'str', options: 'list[str] | None' = None, statement: 'str | None' = None, levels: 'list[str] | None' = None, minimum: 'float | None' = None, maximum: 'float | None' = None, labels: 'list[str] | None' = None, metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `HugrGate` | class | `(registry: 'BackendRegistry | None' = None)` |
-| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 
 ### `hugrgate.abstain`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `abstain` | function | `(spec: 'DecisionSpec', reason: 'str' = 'below_threshold', backend: 'str' = 'unknown', metadata: 'dict[str, Any] | None' = None) -> 'DecisionResult'` |
+| `abstain` | function | `(spec: 'DecisionSpec', reason: 'str' = 'below_threshold', backend: 'str' = 'unknown', metadata: 'Optional[Dict[str, Any]]' = None) -> 'DecisionResult'` |
+| `mark_for_review` | function | `(result: 'DecisionResult', reason: 'str', reviewer: 'Optional[str]' = None) -> 'DecisionResult'` |
 | `apply_abstention_policy` | function | `(result: 'DecisionResult', spec: 'DecisionSpec', policy: 'DecisionPolicy') -> 'DecisionResult'` |
-| `mark_for_review` | function | `(result: 'DecisionResult', reason: 'str', reviewer: 'str | None' = None) -> 'DecisionResult'` |
 
 ### `hugrgate.backend`
 
@@ -56,7 +56,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `GradientBoostingBackend` | class | `(model_name: 'str', feature_pipeline: 'FeatureExtractor | None' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
+| `GradientBoostingBackend` | class | `(model_name: 'str', feature_pipeline: 'Optional[FeatureExtractor]' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
 
 ### `hugrgate.backends.embedding`
 
@@ -64,65 +64,65 @@ that this document never drifts from the code.
 |---|---|---|
 | `TEXT_FIELDS` | constant | `('text', 'message', 'content', 'statement', 'premise', 'inpu` |
 | `Embedder` | class | `()` |
-| `HashEmbedder` | class | `(dim: 'int' = 256, ngram_range: 'tuple[int, int]' = (3, 5))` |
-| `PrototypeBackend` | class | `(embedder: 'Embedder | None' = None, temperature: 'float' = 0.25, text_fields: 'Sequence[str]' = ('text', 'message', 'content', 'statement', 'premise', 'input'))` |
+| `HashEmbedder` | class | `(dim: 'int' = 256, ngram_range: 'Tuple[int, int]' = (3, 5))` |
+| `PrototypeBackend` | class | `(embedder: 'Optional[Embedder]' = None, temperature: 'float' = 0.25, text_fields: 'Sequence[str]' = ('text', 'message', 'content', 'statement', 'premise', 'input'))` |
 
 ### `hugrgate.backends.forest`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `RandomForestBackend` | class | `(model_name: 'str', feature_pipeline: 'FeatureExtractor | None' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
+| `RandomForestBackend` | class | `(model_name: 'str', feature_pipeline: 'Optional[FeatureExtractor]' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
 
 ### `hugrgate.backends.llm`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `MAX_STATE_CHARS` | constant | `2000` |
-| `LLMBackend` | class | `(engine: 'LLMEngine | None' = None, max_tokens: 'int' = 32, timeout_s: 'float' = 30.0)` |
 | `LLMChoice` | class | `(value: 'str', confidence: 'float') -> None` |
 | `LLMEngine` | class | `()` |
 | `LlamaCppEngine` | class | `(model_path: 'str', n_ctx: 'int' = 2048, temperature: 'float' = 0.0)` |
+| `LLMBackend` | class | `(engine: 'Optional[LLMEngine]' = None, max_tokens: 'int' = 32, timeout_s: 'float' = 30.0)` |
 
 ### `hugrgate.backends.logreg`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `LogisticRegressionBackend` | class | `(model_name: 'str', feature_pipeline: 'FeatureExtractor | None' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
-| `SklearnClassifierBackend` | class | `(model_name: 'str', feature_pipeline: 'FeatureExtractor | None' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
+| `SklearnClassifierBackend` | class | `(model_name: 'str', feature_pipeline: 'Optional[FeatureExtractor]' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
+| `LogisticRegressionBackend` | class | `(model_name: 'str', feature_pipeline: 'Optional[FeatureExtractor]' = None, version: 'str' = '1.0.0', **classifier_kwargs: 'Any')` |
 
 ### `hugrgate.backends.nli`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `PREMISE_FIELDS` | constant | `('premise', 'text', 'message', 'content', 'input')` |
-| `NLIBackend` | class | `(nli_fn: 'Callable[[str, str], float] | None' = None, model_name: 'str' = 'facebook/bart-large-mnli')` |
+| `NLIBackend` | class | `(nli_fn: 'Optional[Callable[[str, str], float]]' = None, model_name: 'str' = 'facebook/bart-large-mnli')` |
 
 ### `hugrgate.backends.rules`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `OPERATORS` | constant | `('eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'in', 'contains', 'ex` |
-| `Rule` | class | `(condition: 'dict[str, Any] | None', then: 'Any', confidence: 'float' = 1.0, priority: 'int' = 0, name: 'str | None' = None) -> None` |
-| `RuleBackend` | class | `(rules: 'list[Rule] | None' = None, name: 'str' = 'rules', model_name: 'str' = 'ruleset')` |
+| `Rule` | class | `(condition: 'Optional[Dict[str, Any]]', then: 'Any', confidence: 'float' = 1.0, priority: 'int' = 0, name: 'Optional[str]' = None) -> None` |
+| `RuleBackend` | class | `(rules: 'Optional[List[Rule]]' = None, name: 'str' = 'rules', model_name: 'str' = 'ruleset')` |
 
 ### `hugrgate.bench`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `Benchmark` | class | `(gate: 'HugrGate', dataset: 'Any') -> 'None'` |
-| `BenchmarkConfig` | class | `(backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> None` |
-| `accuracy` | function | `(results: 'list[tuple[Any, DecisionResult]]') -> 'float | None'` |
-| `brier_score` | function | `(results: 'list[tuple[Any, DecisionResult]]', spec: 'DecisionSpec') -> 'float | None'` |
+| `accuracy` | function | `(results: 'List[Tuple[Any, DecisionResult]]') -> 'Optional[float]'` |
+| `brier_score` | function | `(results: 'List[Tuple[Any, DecisionResult]]', spec: 'DecisionSpec') -> 'Optional[float]'` |
+| `reliability_bins` | function | `(results: 'List[Tuple[Any, DecisionResult]]', n_bins: 'int' = 10) -> 'List[Dict[str, Any]]'` |
+| `expected_calibration_error` | function | `(results: 'List[Tuple[Any, DecisionResult]]', n_bins: 'int' = 10) -> 'Optional[float]'` |
 | `dataset_fingerprint` | function | `(dataset: 'Mapping[str, Any]') -> 'str'` |
-| `expected_calibration_error` | function | `(results: 'list[tuple[Any, DecisionResult]]', n_bins: 'int' = 10) -> 'float | None'` |
-| `reliability_bins` | function | `(results: 'list[tuple[Any, DecisionResult]]', n_bins: 'int' = 10) -> 'list[dict[str, Any]]'` |
-| `run_benchmark` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None, config: 'BenchmarkConfig | None' = None) -> 'dict[str, Any]'` |
+| `BenchmarkConfig` | class | `(backends: 'Optional[List[str]]' = None, policy: 'Optional[DecisionPolicy]' = None, max_items: 'Optional[int]' = None) -> None` |
+| `run_benchmark` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Optional[List[str]]' = None, policy: 'Optional[DecisionPolicy]' = None, max_items: 'Optional[int]' = None, config: 'Optional[BenchmarkConfig]' = None) -> 'Dict[str, Any]'` |
+| `Benchmark` | class | `(gate: 'HugrGate', dataset: 'Any') -> 'None'` |
 
 ### `hugrgate.bench_report`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `ascii_reliability_diagram` | function | `(bins: 'list[Mapping[str, Any]]', width: 'int' = 30) -> 'str'` |
+| `ascii_reliability_diagram` | function | `(bins: 'List[Mapping[str, Any]]', width: 'int' = 30) -> 'str'` |
 | `render_markdown` | function | `(report: 'Mapping[str, Any]') -> 'str'` |
 | `write_report` | function | `(report: 'Mapping[str, Any]', path: 'str') -> 'str'` |
 
@@ -130,8 +130,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecisionCache` | class | `(ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000)` |
 | `cache_key` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'DecisionPolicy') -> 'str'` |
+| `DecisionCache` | class | `(ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000)` |
 
 ### `hugrgate.calibration`
 
@@ -139,8 +139,8 @@ that this document never drifts from the code.
 |---|---|---|
 | `Calibrator` | class | `()` |
 | `CalibratorRegistry` | class | `()` |
-| `IsotonicCalibrator` | class | `()` |
 | `PlattCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
+| `IsotonicCalibrator` | class | `()` |
 | `TemperatureCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
 | `metrics` | constant | `<module 'hugrgate.calibration.metrics' from '/home/hatch/wor` |
 | `profiles` | constant | `<module 'hugrgate.calibration.profiles' from '/home/hatch/wo` |
@@ -163,11 +163,11 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `brier_score` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]') -> 'float'` |
-| `ece_multiclass` | function | `(y_true: 'Sequence[str]', probas: 'Sequence[dict[str, float]]', n_bins: 'int' = 10) -> 'float'` |
-| `expected_calibration_error` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `log_loss` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', eps: 'float' = 1e-15) -> 'float'` |
+| `reliability_diagram` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'List[Dict[str, float]]'` |
+| `expected_calibration_error` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `maximum_calibration_error` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
-| `reliability_diagram` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'list[dict[str, float]]'` |
+| `ece_multiclass` | function | `(y_true: 'Sequence[str]', probas: 'Sequence[Dict[str, float]]', n_bins: 'int' = 10) -> 'float'` |
 
 ### `hugrgate.calibration.platt`
 
@@ -179,10 +179,10 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CalibratedBackend` | class | `(inner: 'Backend', profile: 'CalibrationProfile', calibrators: 'dict[str, Calibrator] | None' = None)` |
-| `CalibrationProfile` | class | `(name: 'str', version: 'str' = '1.0.0', backend_name: 'str' = '', model_name: 'str' = '', model_version: 'str' = '', calibrator_name: 'str' = 'platt', calibrator_params: 'dict[str, dict[str, Any]]' = <factory>, metrics: 'dict[str, float]' = <factory>, dataset_hash: 'str' = '', n_samples: 'int' = 0, created_at: 'str' = <factory>, notes: 'str' = '') -> None` |
-| `CalibrationProfileStore` | class | `(root: 'str | Path')` |
 | `hash_dataset` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]') -> 'str'` |
+| `CalibrationProfile` | class | `(name: 'str', version: 'str' = '1.0.0', backend_name: 'str' = '', model_name: 'str' = '', model_version: 'str' = '', calibrator_name: 'str' = 'platt', calibrator_params: 'Dict[str, Dict[str, Any]]' = <factory>, metrics: 'Dict[str, float]' = <factory>, dataset_hash: 'str' = '', n_samples: 'int' = 0, created_at: 'str' = <factory>, notes: 'str' = '') -> None` |
+| `CalibrationProfileStore` | class | `(root: 'str | Path')` |
+| `CalibratedBackend` | class | `(inner: 'Backend', profile: 'CalibrationProfile', calibrators: 'Optional[Dict[str, Calibrator]]' = None)` |
 
 ### `hugrgate.calibration.temperature`
 
@@ -195,8 +195,8 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `CLOSED` | constant | `'closed'` |
-| `HALF_OPEN` | constant | `'half-open'` |
 | `OPEN` | constant | `'open'` |
+| `HALF_OPEN` | constant | `'half-open'` |
 | `CircuitBreaker` | class | `(name: 'str', failure_threshold: 'int' = 5, reset_timeout_s: 'float' = 30.0, half_open_max_probes: 'int' = 1, clock: 'Callable[[], float]' = <built-in function monotonic>)` |
 | `CircuitRegistry` | class | `(failure_threshold: 'int' = 5, reset_timeout_s: 'float' = 30.0, half_open_max_probes: 'int' = 1, clock: 'Callable[[], float]' = <built-in function monotonic>)` |
 
@@ -204,33 +204,33 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `build_parser` | function | `() -> 'argparse.ArgumentParser'` |
-| `cmd_backends` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_bench` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_decide` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_health` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_models` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_report` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `cmd_serve` | function | `(args: 'argparse.Namespace') -> 'int'` |
-| `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
 | `load_spec` | function | `(path: 'str') -> 'DecisionSpec'` |
-| `load_state` | function | `(path: 'str') -> 'dict[str, Any]'` |
-| `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
+| `load_state` | function | `(path: 'str') -> 'Dict[str, Any]'` |
+| `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
+| `cmd_decide` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_backends` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_models` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_health` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_serve` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_bench` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_report` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `build_parser` | function | `() -> 'argparse.ArgumentParser'` |
+| `main` | function | `(argv: 'Optional[List[str]]' = None) -> 'int'` |
 
 ### `hugrgate.client`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `HugrGateClient` | class | `(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True) -> 'None'` |
+| `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'Dict[str, Any]'` |
 | `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
-| `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
+| `HugrGateClient` | class | `(url: 'Optional[str]' = None, socket_path: 'Optional[str]' = None, gate: 'Optional[HugrGate]' = None, extra_backends: 'Optional[List[Backend]]' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True) -> 'None'` |
 
 ### `hugrgate.core`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `HugrGate` | class | `(registry: 'BackendRegistry | None' = None)` |
+| `HugrGate` | class | `(registry: 'Optional[BackendRegistry]' = None)` |
 
 ### `hugrgate.daemon`
 
@@ -238,98 +238,154 @@ that this document never drifts from the code.
 |---|---|---|
 | `DEFAULT_HOST` | constant | `'127.0.0.1'` |
 | `DEFAULT_PORT` | constant | `8377` |
-| `BatchingQueue` | class | `(gate: 'HugrGate', window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024) -> 'None'` |
-| `Daemon` | class | `(config: 'DaemonConfig | None' = None, gate: 'HugrGate | None' = None) -> 'None'` |
-| `DaemonConfig` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, unix_socket: 'str | None' = None, batch_window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024, client_policies_path: 'str | None' = None, client_id_header: 'str' = 'x-client-id', drain_timeout_s: 'float' = 10.0) -> None` |
+| `DaemonConfig` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, unix_socket: 'Optional[str]' = None, batch_window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024, client_policies_path: 'Optional[str]' = None, client_id_header: 'str' = 'x-client-id', drain_timeout_s: 'float' = 10.0) -> None` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'HugrGate | None' = None)` |
-| `load_client_policies` | function | `(path: 'str') -> 'dict[str, DecisionPolicy]'` |
-| `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
-| `serve_forever` | function | `(config: 'DaemonConfig | None' = None) -> 'None'` |
+| `BatchingQueue` | class | `(gate: 'HugrGate', window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024) -> 'None'` |
+| `load_client_policies` | function | `(path: 'str') -> 'Dict[str, DecisionPolicy]'` |
+| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'Optional[HugrGate]' = None)` |
+| `Daemon` | class | `(config: 'Optional[DaemonConfig]' = None, gate: 'Optional[HugrGate]' = None) -> 'None'` |
+| `serve_forever` | function | `(config: 'Optional[DaemonConfig]' = None) -> 'None'` |
+| `main` | function | `(argv: 'Optional[List[str]]' = None) -> 'int'` |
 
 ### `hugrgate.drift`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `PSI_ALERT` | constant | `0.25` |
 | `PSI_WATCH` | constant | `0.1` |
+| `PSI_ALERT` | constant | `0.25` |
+| `population_stability_index` | function | `(reference: 'List[float]', live: 'List[float]') -> 'float'` |
+| `DriftReport` | class | `(psi: 'float', alert: 'bool', severity: 'str', n_reference: 'int', n_live: 'int', n_bins: 'int', reference_hist: 'List[float]' = <factory>, live_hist: 'List[float]' = <factory>, observed_at: 'float' = <factory>) -> None` |
 | `DriftMonitor` | class | `(n_bins: 'int' = 10, alert_threshold: 'float' = 0.25, watch_threshold: 'float' = 0.1, min_live_samples: 'int' = 30) -> 'None'` |
-| `DriftReport` | class | `(psi: 'float', alert: 'bool', severity: 'str', n_reference: 'int', n_live: 'int', n_bins: 'int', reference_hist: 'list[float]' = <factory>, live_hist: 'list[float]' = <factory>, observed_at: 'float' = <factory>) -> None` |
-| `population_stability_index` | function | `(reference: 'list[float]', live: 'list[float]') -> 'float'` |
-| `recalibration_advisory` | function | `(report: 'DriftReport') -> 'dict[str, Any]'` |
+| `recalibration_advisory` | function | `(report: 'DriftReport') -> 'Dict[str, Any]'` |
+
+### `hugrgate.ensemble`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+| `EnsembleConfig` | class | `(weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x7fade2729260>, 'hard': <` |
+| `register_strategy` | function | `(name: 'str', combiner: 'Combiner') -> 'None'` |
+| `get_strategy` | function | `(name: 'str') -> 'Combiner'` |
+| `MemberVote` | class | `(backend: 'str', value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, weight: 'float' = 1.0, skipped: 'bool' = False, skip_reason: 'str' = '', latency_ms: 'float' = 0.0) -> None` |
+| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None) -> None` |
+| `Combiner` | constant | `typing.Callable[[typing.List[hugrgate.ensemble.base.MemberVo` |
+| `DISCRETE_SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal')` |
+| `normalize_weights` | function | `(weights: 'Mapping[str, float]', members: 'List[str]') -> 'Dict[str, float]'` |
+| `shannon_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+| `normalized_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+| `break_tie` | function | `(candidates: 'List[str]', scores: 'Mapping[str, float]', first_seen: 'Mapping[str, int]') -> 'str'` |
+| `require_discrete_spec` | function | `(spec: 'DecisionSpec', strategy: 'str') -> 'None'` |
+| `collect_votes` | function | `(members: 'List[Backend]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Optional[Mapping[str, Any]]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, ensemble_name: 'str' = 'ensemble') -> 'List[MemberVote]'` |
+| `finalize_result` | function | `(*, strategy: 'str', spec: 'DecisionSpec', votes: 'List[MemberVote]', weights: 'Mapping[str, float]', value: 'Any', probability: 'float', distribution: 'Dict[str, float]', uncertainty: 'float', winner_share: 'Optional[float]' = None, extra: 'Optional[Dict[str, Any]]' = None, model: 'str' = 'ensemble', latency_ms: 'float' = 0.0, backend: 'str' = 'ensemble') -> 'DecisionResult'` |
+| `soft_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `hard_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+
+### `hugrgate.ensemble.api`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x7fade2729260>, 'hard': <` |
+| `register_strategy` | function | `(name: 'str', combiner: 'Combiner') -> 'None'` |
+| `get_strategy` | function | `(name: 'str') -> 'Combiner'` |
+| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+| `EnsembleConfig` | class | `(weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+
+### `hugrgate.ensemble.base`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemberVote` | class | `(backend: 'str', value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, weight: 'float' = 1.0, skipped: 'bool' = False, skip_reason: 'str' = '', latency_ms: 'float' = 0.0) -> None` |
+| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None) -> None` |
+| `Combiner` | constant | `typing.Callable[[typing.List[hugrgate.ensemble.base.MemberVo` |
+| `DISCRETE_SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal')` |
+| `normalize_weights` | function | `(weights: 'Mapping[str, float]', members: 'List[str]') -> 'Dict[str, float]'` |
+| `shannon_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+| `normalized_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+| `break_tie` | function | `(candidates: 'List[str]', scores: 'Mapping[str, float]', first_seen: 'Mapping[str, int]') -> 'str'` |
+| `require_discrete_spec` | function | `(spec: 'DecisionSpec', strategy: 'str') -> 'None'` |
+| `collect_votes` | function | `(members: 'List[Backend]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Optional[Mapping[str, Any]]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, ensemble_name: 'str' = 'ensemble') -> 'List[MemberVote]'` |
+| `finalize_result` | function | `(*, strategy: 'str', spec: 'DecisionSpec', votes: 'List[MemberVote]', weights: 'Mapping[str, float]', value: 'Any', probability: 'float', distribution: 'Dict[str, float]', uncertainty: 'float', winner_share: 'Optional[float]' = None, extra: 'Optional[Dict[str, Any]]' = None, model: 'str' = 'ensemble', latency_ms: 'float' = 0.0, backend: 'str' = 'ensemble') -> 'DecisionResult'` |
+
+### `hugrgate.ensemble.voting`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `soft_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `hard_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 
 ### `hugrgate.errors`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
+| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `FallbackChain` | class | `(backends: 'list[Backend]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None, circuits: 'CircuitRegistry | None' = None, name: 'str' = 'fallback-chain')` |
+| `FallbackChain` | class | `(backends: 'List[Backend]', policy: 'Optional[DecisionPolicy]' = None, safe_default: 'Any' = None, circuits: 'Optional[CircuitRegistry]' = None, name: 'str' = 'fallback-chain')` |
 
 ### `hugrgate.features`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CategoricalEncoder` | class | `(field: 'str', categories: 'Sequence[str] | None' = None, handle_unknown: 'str' = 'ignore')` |
-| `FeatureExtractor` | class | `()` |
 | `MissingValuePolicy` | class | `(*values)` |
+| `FeatureExtractor` | class | `()` |
 | `NumericEncoder` | class | `(fields: 'Sequence[str]', missing: 'MissingValuePolicy' = <MissingValuePolicy.ZERO: 'zero'>)` |
+| `CategoricalEncoder` | class | `(field: 'str', categories: 'Optional[Sequence[str]]' = None, handle_unknown: 'str' = 'ignore')` |
+| `TextLengthEncoder` | class | `(field: 'str', include_words: 'bool' = True, normalize: 'Optional[float]' = None)` |
 | `Pipeline` | class | `(extractors: 'Sequence[FeatureExtractor]')` |
-| `TextLengthEncoder` | class | `(field: 'str', include_words: 'bool' = True, normalize: 'float | None' = None)` |
 
 ### `hugrgate.health`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `BackendStats` | class | `(latencies: 'deque[float]' = <factory>, errors: 'int' = 0, samples: 'int' = 0, consecutive_failures: 'int' = 0) -> None` |
+| `BackendStats` | class | `(latencies: 'Deque[float]' = <factory>, errors: 'int' = 0, samples: 'int' = 0, consecutive_failures: 'int' = 0) -> None` |
 | `HealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.3, max_consecutive_failures: 'int' = 5, latency_target_ms: 'float' = 1000.0, min_samples: 'int' = 3)` |
 
 ### `hugrgate.ladder`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `RUNG_ABSTAINED` | constant | `'backend_abstained'` |
 | `RUNG_ACCEPTED` | constant | `'accepted'` |
 | `RUNG_BELOW_CONFIDENCE` | constant | `'below_confidence'` |
-| `RUNG_ERROR` | constant | `'backend_error'` |
-| `RUNG_SKIPPED_LATENCY` | constant | `'skipped_latency_budget'` |
-| `RUNG_SKIPPED_PRIVACY` | constant | `'skipped_privacy_blocked'` |
 | `RUNG_SKIPPED_UNKNOWN` | constant | `'skipped_unknown_backend'` |
 | `RUNG_SKIPPED_UNSUPPORTED` | constant | `'skipped_unsupported'` |
+| `RUNG_SKIPPED_PRIVACY` | constant | `'skipped_privacy_blocked'` |
+| `RUNG_SKIPPED_LATENCY` | constant | `'skipped_latency_budget'` |
 | `RUNG_UNAVAILABLE` | constant | `'backend_unavailable'` |
-| `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'float | None' = None, latency_ms: 'float' = 0.0) -> None` |
-| `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'list[LadderRung] | None' = None, *, ladders: 'dict[str, list[LadderRung]] | None' = None, provenance: 'ProvenanceStore | None' = None, privacy_guard: 'PrivacyGuard | None' = None)` |
-| `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'float | None' = None) -> None` |
+| `RUNG_ERROR` | constant | `'backend_error'` |
+| `RUNG_ABSTAINED` | constant | `'backend_abstained'` |
+| `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None) -> None` |
+| `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'Optional[float]' = None, latency_ms: 'float' = 0.0) -> None` |
+| `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'Optional[List[LadderRung]]' = None, *, ladders: 'Optional[Dict[str, List[LadderRung]]]' = None, provenance: 'Optional[ProvenanceStore]' = None, privacy_guard: 'Optional[PrivacyGuard]' = None)` |
 
 ### `hugrgate.log`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `PRIVACY_RULE` | constant | `'Log metadata, never payload: decision state dicts and resul` |
-| `JsonFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
-| `configure_logging` | function | `(level: 'str' = 'WARNING', stream: 'TextIO | None' = None, json_format: 'bool' = False) -> 'logging.Logger'` |
 | `get_logger` | function | `(name: 'str') -> 'logging.Logger'` |
+| `configure_logging` | function | `(level: 'str' = 'WARNING', stream: 'Optional[TextIO]' = None, json_format: 'bool' = False) -> 'logging.Logger'` |
+| `JsonFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
+| `PRIVACY_RULE` | constant | `'Log metadata, never payload: decision state dicts and resul` |
 
 ### `hugrgate.models`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `ModelManifest` | class | `(name: 'str', version: 'str', backend: 'str', spec_type: 'str', features: 'list[str]', classes: 'list[str]', trained_at: 'str' = <factory>, metrics: 'dict[str, float]' = <factory>, payload_hash: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
-| `ModelStore` | class | `(root: 'str | Path')` |
 | `sha256_bytes` | function | `(payload: 'bytes') -> 'str'` |
+| `ModelManifest` | class | `(name: 'str', version: 'str', backend: 'str', spec_type: 'str', features: 'List[str]', classes: 'List[str]', trained_at: 'str' = <factory>, metrics: 'Dict[str, float]' = <factory>, payload_hash: 'str' = '', extra: 'Dict[str, Any]' = <factory>) -> None` |
+| `ModelStore` | class | `(root: 'str | Path')` |
 
 ### `hugrgate.negotiate`
 
@@ -337,85 +393,77 @@ that this document never drifts from the code.
 |---|---|---|
 | `ACCURACY_WEIGHT` | constant | `0.7` |
 | `CALIBRATION_WEIGHT` | constant | `0.3` |
-| `select_backend` | function | `(spec: 'DecisionSpec', policy: 'DecisionPolicy', registry: 'BackendRegistry', *, privacy_guard: 'PrivacyGuard | None' = None, health: 'Callable[[str], float] | None' = None, min_health: 'float' = 0.0, stats: 'Mapping[str, Mapping[str, float]] | None' = None) -> 'list[Backend]'` |
+| `select_backend` | function | `(spec: 'DecisionSpec', policy: 'DecisionPolicy', registry: 'BackendRegistry', *, privacy_guard: 'Optional[PrivacyGuard]' = None, health: 'Optional[Callable[[str], float]]' = None, min_health: 'float' = 0.0, stats: 'Optional[Mapping[str, Mapping[str, float]]]' = None) -> 'List[Backend]'` |
 
 ### `hugrgate.policy`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'float | None' = None, remote_inference: 'bool' = False, allowed_backends: 'list[str] | None' = None, preferred_backends: 'list[str] | None' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'float | None' = None, review_band: 'tuple | None' = None) -> None` |
+| `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'Optional[float]' = None, remote_inference: 'bool' = False, allowed_backends: 'Optional[List[str]]' = None, preferred_backends: 'Optional[List[str]]' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'Optional[float]' = None, review_band: 'Optional[tuple]' = None) -> None` |
 
 ### `hugrgate.privacy`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `frozenset({'strict'})` |
 | `REMOTE_MODES` | constant | `('allow', 'forbidden')` |
+| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `frozenset({'strict'})` |
 | `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True)` |
 
 ### `hugrgate.provenance`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecisionRecord` | class | `(request_hash: 'str', spec: 'dict[str, Any]', backend: 'str', model: 'str', model_version: 'str' = 'unknown', calibration_profile: 'str' = 'none', value: 'Any' = None, probability: 'float' = 0.0, policy_threshold: 'float' = 0.0, accepted: 'bool' = True, fallback_used: 'bool' = False, fallback_trace: 'list[str]' = <factory>, latency_ms: 'float' = 0.0, timestamp: 'float' = <factory>, metadata: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
-| `ProvenanceStore` | class | `(max_records: 'int | None' = None)` |
+| `DecisionRecord` | class | `(request_hash: 'str', spec: 'Dict[str, Any]', backend: 'str', model: 'str', model_version: 'str' = 'unknown', calibration_profile: 'str' = 'none', value: 'Any' = None, probability: 'float' = 0.0, policy_threshold: 'float' = 0.0, accepted: 'bool' = True, fallback_used: 'bool' = False, fallback_trace: 'List[str]' = <factory>, latency_ms: 'float' = 0.0, timestamp: 'float' = <factory>, metadata: 'Dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
+| `ProvenanceStore` | class | `()` |
 
 ### `hugrgate.result`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
-
-### `hugrgate.serde`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
-| `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
-| `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
+| `DecisionResult` | class | `(value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
 
 ### `hugrgate.server`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `KeywordBackend` | class | `()` |
-| `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
 | `UniformBackend` | class | `()` |
-| `build_gate` | function | `(extra_backends: 'list[Backend] | None' = None) -> 'HugrGate'` |
-| `create_app` | function | `(gate: 'HugrGate | None' = None) -> 'FastAPI'` |
-| `list_models` | function | `() -> 'list[ModelInfo]'` |
+| `KeywordBackend` | class | `()` |
+| `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'List[str]' = <factory>, description: 'str' = '', trained_at: 'Optional[str]' = None, metrics: 'Dict[str, Any]' = <factory>) -> None` |
 | `register_model` | function | `(info: 'ModelInfo') -> 'None'` |
-| `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'HugrGate | None' = None) -> 'None'` |
+| `list_models` | function | `() -> 'List[ModelInfo]'` |
+| `build_gate` | function | `(extra_backends: 'Optional[List[Backend]]' = None) -> 'HugrGate'` |
+| `create_app` | function | `(gate: 'Optional[HugrGate]' = None) -> 'FastAPI'` |
+| `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'Optional[HugrGate]' = None) -> 'None'` |
 
 ### `hugrgate.spec`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal', 'numeric', 'multilabel'` |
-| `DecisionSpec` | class | `(type: 'str', options: 'list[str] | None' = None, statement: 'str | None' = None, levels: 'list[str] | None' = None, minimum: 'float | None' = None, maximum: 'float | None' = None, labels: 'list[str] | None' = None, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `DecisionSpec` | class | `(type: 'str', options: 'Optional[List[str]]' = None, statement: 'Optional[str]' = None, levels: 'Optional[List[str]]' = None, minimum: 'Optional[float]' = None, maximum: 'Optional[float]' = None, labels: 'Optional[List[str]]' = None, metadata: 'Dict[str, Any]' = <factory>) -> None` |
 
 ### `hugrgate.threshold`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `NumericBand` | class | `(name: 'str', lo: 'float', hi: 'float', min_probability: 'float' = 0.0) -> None` |
-| `ThresholdConfig` | class | `(per_option: 'dict[str, float]' = <factory>, ordinal_minimum: 'tuple[str, float] | None' = None, numeric_bands: 'list[NumericBand]' = <factory>, global_minimum: 'float | None' = None) -> None` |
-| `apply_thresholds` | function | `(result: 'DecisionResult', spec: 'DecisionSpec', config: 'ThresholdConfig | None' = None, policy: 'DecisionPolicy | None' = None) -> 'DecisionResult'` |
-| `classify_numeric_band` | function | `(value: 'float', bands: 'list[NumericBand]') -> 'NumericBand | None'` |
+| `ThresholdConfig` | class | `(per_option: 'Dict[str, float]' = <factory>, ordinal_minimum: 'Optional[Tuple[str, float]]' = None, numeric_bands: 'List[NumericBand]' = <factory>, global_minimum: 'Optional[float]' = None) -> None` |
 | `ordinal_cumulative_probability` | function | `(result: 'DecisionResult', spec: 'DecisionSpec', level: 'str') -> 'float'` |
+| `classify_numeric_band` | function | `(value: 'float', bands: 'List[NumericBand]') -> 'Optional[NumericBand]'` |
+| `apply_thresholds` | function | `(result: 'DecisionResult', spec: 'DecisionSpec', config: 'Optional[ThresholdConfig]' = None, policy: 'Optional[DecisionPolicy]' = None) -> 'DecisionResult'` |
 
 ### `hugrgate.timeout`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `TimeoutBackend` | class | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5, explicit_deadline_ms: 'float | None' = None)` |
-| `deadline_ms_for` | function | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5) -> 'float'` |
-| `evaluate_with_timeout` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', deadline_ms: 'float', context: 'Mapping[str, Any] | None' = None) -> 'DecisionResult'` |
 | `run_with_deadline` | function | `(fn: 'Callable[[], Any]', deadline_s: 'float', name: 'str' = 'task') -> 'Any'` |
+| `deadline_ms_for` | function | `(backend: 'Backend', policy: 'Optional[DecisionPolicy]' = None, headroom: 'float' = 1.5) -> 'float'` |
+| `evaluate_with_timeout` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', deadline_ms: 'float', context: 'Optional[Mapping[str, Any]]' = None) -> 'DecisionResult'` |
+| `TimeoutBackend` | class | `(backend: 'Backend', policy: 'Optional[DecisionPolicy]' = None, headroom: 'float' = 1.5, explicit_deadline_ms: 'Optional[float]' = None)` |
 
 ### `hugrgate.validation`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `validate_result` | function | `(result: 'DecisionResult', spec: 'DecisionSpec') -> 'None'` |
 | `validate_state` | function | `(state: 'Mapping[str, Any]', max_bytes: 'int' = 1000000, max_depth: 'int' = 64) -> 'None'` |
+| `validate_result` | function | `(result: 'DecisionResult', spec: 'DecisionSpec') -> 'None'` |

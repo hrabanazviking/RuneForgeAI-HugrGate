@@ -60,6 +60,30 @@ flowchart TD
         calibration_profiles[calibration.profiles]
         calibration_temperature[calibration.temperature]
     end
+    subgraph ensemble[ensemble]
+        ensemble[ensemble]
+        ensemble_base[ensemble.base]
+        ensemble_api[ensemble.api]
+        ensemble_voting[ensemble.voting]
+        ensemble_averaging[ensemble.averaging]
+        ensemble_stacking[ensemble.stacking]
+        ensemble_blending[ensemble.blending]
+        ensemble_moe[ensemble.moe]
+        ensemble_diversity[ensemble.diversity]
+        ensemble_disagreement[ensemble.disagreement]
+        ensemble_consensus[ensemble.consensus]
+        ensemble_correlation[ensemble.correlation]
+        ensemble_reliability[ensemble.reliability]
+        ensemble_membership[ensemble.membership]
+        ensemble_calibration[ensemble.calibration]
+        ensemble_provenance[ensemble.provenance]
+        ensemble_explanations[ensemble.explanations]
+        ensemble_cache[ensemble.cache]
+        ensemble_batch[ensemble.batch]
+        ensemble_adversarial[ensemble.adversarial]
+        ensemble_benchmarks[ensemble.benchmarks]
+        ensemble_release[ensemble.release]
+    end
     subgraph service[service]
         server[server]
         daemon[daemon]
@@ -173,6 +197,24 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    ensemble --> ensemble_api
+    ensemble --> ensemble_base
+    ensemble --> ensemble_voting
+    ensemble_api --> backend
+    ensemble_api --> ensemble_base
+    ensemble_api --> ensemble_voting
+    ensemble_api --> errors
+    ensemble_api --> result
+    ensemble_api --> spec
+    ensemble_api --> validation
+    ensemble_base --> backend
+    ensemble_base --> errors
+    ensemble_base --> result
+    ensemble_base --> spec
+    ensemble_base --> validation
+    ensemble_voting --> ensemble_base
+    ensemble_voting --> errors
+    ensemble_voting --> result
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -241,6 +283,7 @@ flowchart TD
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
+| ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
 
@@ -351,6 +394,24 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `ensemble` | `ensemble.api` | no |
+| `ensemble` | `ensemble.base` | no |
+| `ensemble` | `ensemble.voting` | no |
+| `ensemble.api` | `backend` | no |
+| `ensemble.api` | `ensemble.base` | no |
+| `ensemble.api` | `ensemble.voting` | no |
+| `ensemble.api` | `errors` | no |
+| `ensemble.api` | `result` | no |
+| `ensemble.api` | `spec` | no |
+| `ensemble.api` | `validation` | no |
+| `ensemble.base` | `backend` | no |
+| `ensemble.base` | `errors` | no |
+| `ensemble.base` | `result` | no |
+| `ensemble.base` | `spec` | no |
+| `ensemble.base` | `validation` | no |
+| `ensemble.voting` | `ensemble.base` | no |
+| `ensemble.voting` | `errors` | no |
+| `ensemble.voting` | `result` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
