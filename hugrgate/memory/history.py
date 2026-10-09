@@ -35,6 +35,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from hugrgate.errors import MemoryError
+from hugrgate.memory.compaction import CompactionSummary
 from hugrgate.memory.groundtruth import GroundTruth
 from hugrgate.memory.outcomes import Outcome
 from hugrgate.memory.policies import MemoryDecision, MemoryPolicy
@@ -116,6 +117,7 @@ class DecisionHistory:
         self._max_episodes = max_episodes
         self._episodes: list[Episode] = []
         self._by_id: dict[str, Episode] = {}
+        self._summaries: list[CompactionSummary] = []
         self._evicted = 0
         self._lock = threading.RLock()
 
@@ -252,6 +254,20 @@ class DecisionHistory:
                 self._episodes = kept
                 self._by_id = {e.episode_id: e for e in kept}
             return removed
+
+    def add_compaction_summary(self, summary: CompactionSummary) -> None:
+        """Store a compaction summary (slice 317)."""
+        if not isinstance(summary, CompactionSummary):
+            raise TypeError(
+                f"add_compaction_summary needs a CompactionSummary, got "
+                f"{type(summary).__name__}")
+        with self._lock:
+            self._summaries.append(summary)
+
+    def compaction_summaries(self) -> list[CompactionSummary]:
+        """Copies of stored compaction summaries, oldest first."""
+        with self._lock:
+            return copy.deepcopy(self._summaries)
 
     def find(self, query: MemoryQuery) -> list[Episode]:
         """Run a :class:`MemoryQuery`; return deep copies, never aliases."""

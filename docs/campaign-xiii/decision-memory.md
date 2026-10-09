@@ -209,3 +209,13 @@ it into an opaque agent.
   `ProvenanceStore.estimate_bytes()` — direct answer to the Campaign
   XII +1.3 GB unbounded-growth flag: measure before controlling.
 - Tests: `tests/test_memory_retention.py` (12 tests).
+
+### Slice 317 — Memory compaction
+- `hugrgate/memory/compaction.py`: `compact(history, older_than_seconds)`
+  rolls old episodes into a `CompactionSummary` (window, per-backend
+  and outcome counts, success rate, mean probability, privacy-class
+  mix, compacted ids), purges the raw episodes, and stores the summary
+  on the history (`add_compaction_summary` /
+  `compaction_summaries()`). Ground-truth-bearing episodes are spared
+  by default — verified labels are irreplaceable by aggregates.
+- Tests: `tests/test_memory_compaction.py` (9 tests).

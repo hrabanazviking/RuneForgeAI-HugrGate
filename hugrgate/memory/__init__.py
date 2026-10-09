@@ -25,6 +25,7 @@ from hugrgate.memory.access import (
     RolePermission,
 )
 from hugrgate.memory.backend_history import BackendHistory, backend_histories
+from hugrgate.memory.compaction import CompactionSummary, compact
 from hugrgate.memory.conditioned import retrieve_conditioned
 from hugrgate.memory.contract_history import (
     ContractHistory,
@@ -89,6 +90,7 @@ __all__ = [
     "OUTCOME_KINDS",
     "ROLE_PERMISSIONS",
     "BackendHistory",
+    "CompactionSummary",
     "ContractHistory",
     "DecisionHistory",
     "DomainProfile",
@@ -117,6 +119,7 @@ __all__ = [
     "by_model",
     "by_outcome_kind",
     "check_quota",
+    "compact",
     "contract_histories",
     "contract_key_for",
     "cosine",
