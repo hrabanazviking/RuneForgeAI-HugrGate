@@ -1,4 +1,4 @@
-"""Local LLM backend — constrained decoding. Slice 35.
+"""Local LLM backend — constrained decoding. Slice 35; slice 152 rewire.
 
 :class:`LLMBackend` runs an open-weight local model through a small engine
 interface and applies **constrained decoding**: the engine may only emit
@@ -6,9 +6,13 @@ spec-valid values (categorical/ordinal → option tokens, binary → yes/no).
 Whatever the engine returns is re-validated against the spec — an
 out-of-spec emission is a :class:`BackendError`, never a result.
 
-The ``llama_cpp`` dependency is optional and imported lazily; without an
-engine, evaluation raises :class:`BackendUnavailable`. Tests inject a mock
-engine — no model download required.
+:class:`LlamaCppEngine` is now a thin legacy-compat subclass of the v2
+:mod:`hugrgate.runtimes.llama_cpp` runtime: same constructor signature
+and :class:`LLMChoice` return type as slice 35, but with lazy model
+loading, GBNF grammar passthrough, timeouts, and lifecycle management
+underneath. The ``llama_cpp`` dependency is optional and imported
+lazily; without an engine, evaluation raises :class:`BackendUnavailable`.
+Tests inject a mock engine — no model download required.
 """
 
 from __future__ import annotations
@@ -19,6 +23,8 @@ from dataclasses import dataclass
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable, TimeoutError
 from hugrgate.result import DecisionResult
+from hugrgate.runtimes import GenerationOptions
+from hugrgate.runtimes.llama_cpp import LlamaCppRuntime
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
@@ -28,11 +34,6 @@ __all__ = [
     "LLMEngine",
     "LlamaCppEngine",
 ]
-
-try:  # optional dependency — the module must import without it
-    from llama_cpp import Llama as _Llama
-except Exception:  # noqa: BLE001 - any import failure means 'no llm'
-    _Llama = None
 
 #: How much state text the prompt may carry (characters).
 MAX_STATE_CHARS = 2000
@@ -56,49 +57,38 @@ class LLMEngine:
         raise NotImplementedError
 
 
-class LlamaCppEngine(LLMEngine):
-    """llama.cpp adapter with logit-level constrained decoding.
+class LlamaCppEngine(LlamaCppRuntime, LLMEngine):
+    """llama.cpp adapter — legacy :class:`LLMEngine` signature, v2 runtime.
 
-    Uses ``llama_cpp``'s grammar-free approach: the prompt lists the allowed
-    tokens explicitly, and the returned text is matched against them. Logit
-    bias pushes sampling toward the allowed vocabulary.
+    Slice 152 rewire: the slice-35 engine is now the canonical
+    :class:`hugrgate.runtimes.llama_cpp.LlamaCppRuntime` underneath, so
+    ``LLMBackend(engine=LlamaCppEngine(...))`` gains lazy loading,
+    timeouts, and lifecycle management. The constructor signature and
+    the :class:`LLMChoice` return type are unchanged.
     """
-
-    name = "llama-cpp"
 
     def __init__(self, model_path: str, n_ctx: int = 2048,
                  temperature: float = 0.0):
-        if _Llama is None:
+        if not self.available():
             raise BackendUnavailable(
                 "llama_cpp is not installed; install the 'llm' extra",
                 backend="local-llm")
-        self.model_path = model_path
-        self._llm = _Llama(model_path=model_path, n_ctx=n_ctx, verbose=False)
+        super().__init__(model=model_path, n_ctx=n_ctx)
         self.temperature = temperature
 
-    @staticmethod
-    def available() -> bool:
-        return _Llama is not None
-
-    def generate(self, prompt: str, choices: list[str], max_tokens: int,
-                 timeout_s: float) -> LLMChoice:
-        import time
-        deadline = time.monotonic() + timeout_s
-        out = self._llm(prompt, max_tokens=max_tokens,
-                        temperature=self.temperature,
-                        stop=["\n"])
-        if time.monotonic() > deadline:
-            raise TimeoutError("LLM generation exceeded timeout",
-                               timeout_s=timeout_s)
-        text = out["choices"][0]["text"].strip()
-        logprobs = out["choices"][0].get("logprobs")
-        confidence = 1.0
-        if logprobs and logprobs.get("token_logprobs"):
-            import math
-            toks = logprobs["token_logprobs"][:2]
-            confidence = float(math.exp(sum(toks) / len(toks)))
-            confidence = max(0.0, min(1.0, confidence))
-        return LLMChoice(value=text, confidence=confidence)
+    def generate(  # type: ignore[override]  # legacy LLMEngine signature,
+        # deliberately incompatible with the v2 runtime signature
+        self, prompt: str, choices: list[str], max_tokens: int,
+        timeout_s: float,
+    ) -> LLMChoice:
+        _ = choices  # constrained by LLMBackend, not by the engine call
+        _text, confidence, _raw = self._generate_raw(
+            prompt,
+            GenerationOptions(max_tokens=max_tokens,
+                              temperature=getattr(self, "temperature", 0.0),
+                              timeout_s=timeout_s),
+        )
+        return LLMChoice(value=_text, confidence=confidence)
 
 
 class LLMBackend(Backend):

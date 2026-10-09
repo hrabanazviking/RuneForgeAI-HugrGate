@@ -49,6 +49,11 @@ def _is_backend(mod: str) -> bool:
     return mod.startswith("hugrgate.backends.")
 
 
+def _is_runtime(mod: str) -> bool:
+    # Slice 152: the local-model-fabric runtime layer (package + submodules).
+    return mod == "hugrgate.runtimes" or mod.startswith("hugrgate.runtimes.")
+
+
 def _is_calibration(mod: str) -> bool:
     return mod == "hugrgate.calibration" or mod.startswith("hugrgate.calibration.")
 
@@ -58,7 +63,10 @@ CONTRACTS = {
     "hugrgate.backend", "hugrgate.policy", "hugrgate.validation",
 }
 SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client"}
-BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models"}
+# Slice 152: the local-model-fabric runtime layer sits *below* backends —
+# backends may build on runtime adapters, never the reverse.
+BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
+                               "hugrgate.runtimes"}
 CALIB_ALLOWED = {
     "hugrgate.errors", "hugrgate.backend",
     "hugrgate.result", "hugrgate.spec",
@@ -80,7 +88,7 @@ def test_backends_stay_below_the_service_layer():
         f"{m} -> {t}" for m, ts in _eager_edges().items()
         if _is_backend(m)
         for t in ts
-        if not (t in BACKEND_ALLOWED or _is_backend(t))
+        if not (t in BACKEND_ALLOWED or _is_backend(t) or _is_runtime(t))
     ]
     assert not violations, f"backend layering violations: {violations}"
 
@@ -101,6 +109,18 @@ def test_only_service_modules_import_service_modules():
         if m not in SERVICE for t in ts if t in SERVICE
     ]
     assert not violations, f"service layer leaks: {violations}"
+
+
+def test_runtimes_stay_below_backends():
+    # Slice 152: the runtime layer is below backends — adapters must not
+    # reach up into backends or the service layer.
+    violations = [
+        f"{m} -> {t}" for m, ts in _eager_edges().items()
+        if _is_runtime(m)
+        for t in ts
+        if _is_backend(t) or t in SERVICE
+    ]
+    assert not violations, f"runtime layering violations: {violations}"
 
 
 # --- third-party coverage ------------------------------------------------------
