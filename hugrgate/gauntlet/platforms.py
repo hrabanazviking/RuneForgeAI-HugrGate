@@ -35,11 +35,13 @@ __all__ = [
     "MacOSFinding",
     "PlatformInfo",
     "PosixFinding",
+    "check_arch_assumptions",
     "check_macos_assumptions",
     "check_windows_import_safety",
     "current_platform",
     "is_validated",
     "linux_live_checks",
+    "normalize_arch",
     "record_validated",
     "scan_posix_only",
 ]
@@ -68,6 +70,27 @@ POSIX_ONLY_ATTRS = frozenset(
 VALIDATED_PLATFORMS: tuple[tuple[str, str], ...] = ()
 
 
+#: Canonical architecture names. Linux reports "aarch64" where macOS
+#: reports "arm64" for the same ISA — the matrix must not treat them
+#: as different platforms.
+_ARCH_ALIASES = {
+    "aarch64": "arm64",
+    "aarch64_be": "arm64",
+    "arm64": "arm64",
+    "amd64": "x86_64",
+    "x86_64": "x86_64",
+    "x64": "x86_64",
+    "i386": "x86",
+    "i686": "x86",
+    "x86": "x86",
+}
+
+
+def normalize_arch(machine: str) -> str:
+    """Canonicalize ``platform.machine()`` output for matrix keys."""
+    return _ARCH_ALIASES.get(machine.strip().lower(), machine.strip().lower())
+
+
 @dataclass(frozen=True)
 class PlatformInfo:
     """The platform we are standing on."""
@@ -83,6 +106,15 @@ class PlatformInfo:
             self.sys_platform,
             "windows" if self.sys_platform == "win32" else self.sys_platform,
         )
+
+    @property
+    def arch_key(self) -> str:
+        """Normalized architecture for matrix keys (slice 482)."""
+        return normalize_arch(self.machine)
+
+    @property
+    def platform_key(self) -> tuple[str, str]:
+        return (self.os_key, self.arch_key)
 
 
 @dataclass(frozen=True)
@@ -112,15 +144,15 @@ def current_platform() -> PlatformInfo:
 def record_validated(info: PlatformInfo) -> tuple[tuple[str, str], ...]:
     """Return the validated-platforms tuple with ``info`` added."""
     global VALIDATED_PLATFORMS
-    key = (info.os_key, info.machine)
+    key = info.platform_key
     if key not in VALIDATED_PLATFORMS:
         VALIDATED_PLATFORMS = (*VALIDATED_PLATFORMS, key)
     return VALIDATED_PLATFORMS
 
 
 def is_validated(info: PlatformInfo) -> bool:
-    """Whether ``info``'s (os, machine) pair has been proven."""
-    return (info.os_key, info.machine) in VALIDATED_PLATFORMS
+    """Whether ``info``'s (os, arch) pair has been proven."""
+    return info.platform_key in VALIDATED_PLATFORMS
 
 
 def _is_guarded(tree: ast.Module, node: ast.AST) -> bool:
@@ -210,6 +242,70 @@ def scan_posix_only(root: str | Path) -> tuple[PosixFinding, ...]:
             findings.append(
                 PosixFinding(rel, lineno, api, _is_guarded(tree, node))
             )
+    return tuple(findings)
+
+
+#: String patterns that betray x86-64-only assumptions in Python
+#: source: raw ISA names, SIMD intrinsic families, and exact-match
+#: machine comparisons that should go through normalize_arch().
+_ARCH_ASSUMPTION_PATTERNS = (
+    "__x86_64__",
+    "__SSE__",
+    "__AVX__",
+)
+
+
+def check_arch_assumptions(root: str | Path) -> tuple[MacOSFinding, ...]:
+    """Scan ``root`` for x86-64-only assumptions.
+
+    Flags raw ISA/intrinsic tokens and *exact* ``platform.machine()``
+    string comparisons (``== "x86_64"``), which silently miss
+    ``"AMD64"``/``"aarch64"`` aliases — compare
+    :func:`normalize_arch` output instead.
+    """
+    findings: list[MacOSFinding] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+            tree = ast.parse(text, filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        rel = str(path)
+        lowered = text.lower()
+        for token in _ARCH_ASSUMPTION_PATTERNS:
+            if token.lower() in lowered and "normalize_arch" not in text:
+                findings.append(
+                    MacOSFinding(rel, 1, f"raw ISA token {token!r}")
+                )
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Compare)
+                and any(isinstance(op, (ast.Eq, ast.NotEq))
+                        for op in node.ops)
+                and any(
+                    isinstance(c, ast.Constant)
+                    and isinstance(c.value, str)
+                    and c.value.lower() in
+                    ("x86_64", "amd64", "aarch64", "arm64")
+                    for c in node.comparators
+                )
+                and any(
+                    isinstance(call, ast.Call)
+                    and isinstance(call.func, ast.Attribute)
+                    and call.func.attr == "machine"
+                    for call in ast.walk(node)
+                )
+                and "normalize_arch" not in text
+            ):
+                findings.append(
+                    MacOSFinding(
+                        rel, node.lineno,
+                        "exact platform.machine() comparison; "
+                        "use normalize_arch()",
+                    )
+                )
     return tuple(findings)
 
 

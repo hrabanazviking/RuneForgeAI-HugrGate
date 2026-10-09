@@ -61,13 +61,21 @@ def test_scan_finds_guarded_resource_imports():
     assert len(guarded) == 3, [str(f) for f in findings.values()]
 
 
-def test_scan_flags_unguarded_sigkill():
-    findings = scan_posix_only(ROOT / "hugrgate")
+def test_scan_flags_unguarded_sigkill(tmp_path):
+    # Slice 479 proved the detector on the real tree (it found the
+    # unguarded signal.SIGKILL default in hugrgate/chaos/crash.py:98);
+    # slice 480 fixed it, so this now proves the detector on a
+    # synthetic file carrying the same hazard.
+    (tmp_path / "x.py").write_text(
+        "import signal\n"
+        "def run(kill_signal: int = signal.SIGKILL):\n"
+        "    pass\n",
+        encoding="utf-8",
+    )
+    findings = scan_posix_only(tmp_path)
     bad = [f for f in findings
            if f.api == "signal.SIGKILL" and not f.guarded]
     assert len(bad) == 1
-    assert bad[0].path.endswith("hugrgate/chaos/crash.py")
-    assert bad[0].lineno == 98
 
 
 def test_scan_flags_synthetic_unguarded_fork(tmp_path):
