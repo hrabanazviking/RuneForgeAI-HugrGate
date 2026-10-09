@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 383 · **public names:** 2375
+**Modules:** 384 · **public names:** 2377
 
 ## API stability policy
 
@@ -3962,7 +3962,7 @@ that this document never drifts from the code.
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
@@ -3981,6 +3981,7 @@ that this document never drifts from the code.
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
+| `RateLimiter` | class | `(capacity: 'int' = 10, refill_per_second: 'float' = 1.0, max_keys: 'int' = 100000, idle_ttl_seconds: 'float' = 600.0) -> 'None'` |
 | `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
 | `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
 | `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
@@ -4050,7 +4051,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
@@ -4170,6 +4171,12 @@ that this document never drifts from the code.
 | `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
 | `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.ratelimit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RateLimiter` | class | `(capacity: 'int' = 10, refill_per_second: 'float' = 1.0, max_keys: 'int' = 100000, idle_ttl_seconds: 'float' = 600.0) -> 'None'` |
 
 ### `hugrgate.security.replay`
 

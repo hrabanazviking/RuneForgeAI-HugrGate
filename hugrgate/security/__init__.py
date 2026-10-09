@@ -133,6 +133,7 @@ from hugrgate.security.provenance_guards import (
     seal_tip,
     verify_tip,
 )
+from hugrgate.security.ratelimit import RateLimiter
 from hugrgate.security.replay import (
     ReplayGuard,
     open_request,
@@ -194,6 +195,7 @@ __all__ = [
     "PluginManifest",
     "PluginRegistry",
     "Principal",
+    "RateLimiter",
     "ReplayGuard",
     "ResourceBudget",
     "SafeUnpickler",

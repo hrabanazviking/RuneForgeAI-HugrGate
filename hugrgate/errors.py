@@ -733,3 +733,14 @@ class AuthzDenied(HugrGateError):
     """
     code = "authz_denied"
     recoverable = False
+
+
+class RateLimitExceeded(HugrGateError):
+    """A per-key rate limit was exceeded.
+    Slice 420.  Raised by :mod:`hugrgate.security.ratelimit` when a
+    caller's token bucket is empty. Recoverable: the caller may
+    retry after ``retry_after_ms``. Carries ``key`` (the throttled
+    identity) and ``retry_after_ms`` in details.
+    """
+    code = "rate_limit_exceeded"
+    recoverable = True
