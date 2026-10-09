@@ -1,5 +1,21 @@
 # Changelog — HugrGate
 
+## Unreleased — Gjallarbrú Campaign XIX: Autonomous Optimization (slices 451–475)
+
+Safe automatic tuning of routing, thresholds, calibration, and resource use:
+the `hugrgate.autotune` package — an optimization controller with a typed
+parameter store and mode lifecycle (offline/shadow/canary/applied), objective
+specs (weighted/lexicographic/guarded), constraint specs, and 12 tuners
+(threshold, confidence-gate with Wilson-bound guarantees, latency-budget,
+cache-policy, batch-size, backend-order, ensemble-weight, calibration
+selector, hardware-aware, energy-aware, cost-aware, privacy-constrained).
+Safety spine: kill-switch/blast-radius/step-size/rate safety limits,
+sustained-breach rollback triggers, canary leases, hash-chained optimization
+provenance, run manifests with replay verification, an adversarial harness
+(honest finding: 40% label noise breaks the threshold tuner — contained at
+20%), a measured-improvement benchmark, and a 6-check release gate.
+231 new tests; ruff and mypy clean.
+
 ## Unreleased — Gjallarbrú Campaign XIII: Decision Memory (slices 301–325)
 
 Episodic memory for the runtime: every decision becomes a recallable,
