@@ -256,7 +256,7 @@ class DAGExecutor(RungExecutor):
                 continue
 
             result = router._attempt(backend, state, ctx.spec, None,
-                                     audit, i)
+                                     policy, audit, i)
             if result is None:
                 release(name)
                 continue
