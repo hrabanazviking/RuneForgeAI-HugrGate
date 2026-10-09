@@ -47,6 +47,8 @@ from hugrgate.ensemble.disagreement import (
     DisagreementDetector,
     DisagreementReport,
     DisagreementThresholds,
+    EscalationPolicy,
+    escalate,
 )
 from hugrgate.ensemble.diversity import (
     disagreement_rate,
@@ -119,4 +121,6 @@ __all__ = [
     "DisagreementThresholds",
     "DisagreementReport",
     "DisagreementDetector",
+    "EscalationPolicy",
+    "escalate",
 ]
