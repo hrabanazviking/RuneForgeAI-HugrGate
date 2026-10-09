@@ -4,12 +4,24 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, LadderSynthesizer,
-                              QOS_DEPTH_CAPS, RouterContext, RoutingOptions,
-                              RungMode, score_capability)
+from hugrgate.routing import (
+    QOS_DEPTH_CAPS,
+    LadderRouterV2,
+    LadderSynthesizer,
+    RouterContext,
+    RoutingOptions,
+    RungMode,
+    score_capability,
+)
 
 
 class SynBackend(Backend):
@@ -89,8 +101,8 @@ def test_qos_changes_ladder_order():
         ctx(options=RoutingOptions(qos="best_effort")))
     crit = LadderSynthesizer(reg).plan(
         ctx(options=RoutingOptions(qos="critical")))
-    assert [n.backend_name for n in be.nodes][0] == "fast-cheap"
-    assert [n.backend_name for n in crit.nodes][0] == "slow-smart"
+    assert next(n.backend_name for n in be.nodes) == "fast-cheap"
+    assert next(n.backend_name for n in crit.nodes) == "slow-smart"
 
 
 def test_depth_caps_by_qos():

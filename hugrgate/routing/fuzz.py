@@ -26,25 +26,30 @@ from __future__ import annotations
 
 import random
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from hugrgate import Backend, BackendRegistry, DecisionPolicy, DecisionSpec
+from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.errors import BackendError, BackendUnavailable, HugrGateError
 from hugrgate.ladder import LadderRung
+from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
-from hugrgate.routing.architecture import (LadderRouterV2, RungPlanner,
-                                            RoutingOptions,
-                                            SerialPlanExecutor)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RoutingOptions,
+    RungPlanner,
+    SerialPlanExecutor,
+)
 from hugrgate.routing.early_exit import EarlyExitExecutor
 from hugrgate.routing.fallback import FallbackGraph, FallbackGraphExecutor
 from hugrgate.routing.rungs import DynamicRungPlanner, RungBuilder
 from hugrgate.routing.synthesis import LadderSynthesizer
+from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result
 
 __all__ = [
+    "KNOWN_OUTCOMES",
     "FuzzBackend",
     "run_fuzz",
-    "KNOWN_OUTCOMES",
 ]
 
 KNOWN_OUTCOMES = {
@@ -69,7 +74,7 @@ class FuzzBackend(Backend):
         self.calls = 0
 
     def capabilities(self):
-        caps: Dict[str, Any] = {"spec_types": ["categorical"]}
+        caps: dict[str, Any] = {"spec_types": ["categorical"]}
         if self._rng.random() < 0.3:
             caps["accuracy"] = round(self._rng.uniform(0.5, 1.0), 2)
         return caps
@@ -90,7 +95,7 @@ class FuzzBackend(Backend):
         if b == "unavailable":
             raise BackendUnavailable("gone")
         if b == "abstainer":
-            from hugrgate import Abstention
+            from hugrgate.errors import Abstention
             raise Abstention("nope", reason="fuzz")
         prob = {"honest": 0.95, "weak": 0.4, "slow": 0.9,
                 "liar_prob": 1.5, "liar_dist": 0.9,
@@ -111,7 +116,7 @@ class FuzzBackend(Backend):
         return round(self._rng.uniform(0.0, 0.5), 4)
 
 
-def _random_policy(rng: random.Random, names: List[str]) -> DecisionPolicy:
+def _random_policy(rng: random.Random, names: list[str]) -> DecisionPolicy:
     return DecisionPolicy(
         minimum_probability=round(rng.uniform(0.0, 0.95), 2),
         maximum_latency_ms=rng.choice(
@@ -136,7 +141,7 @@ def _random_options(rng: random.Random) -> RoutingOptions:
 
 
 def _planner(rng: random.Random,
-              registry) -> Optional[RungPlanner]:
+              registry) -> RungPlanner | None:
     return rng.choice([
         None,
         DynamicRungPlanner(registry),
@@ -157,9 +162,9 @@ def _executor(rng: random.Random):
     # tests; fuzz determinism checks require serial scheduling.
 
 
-def run_fuzz(seed: int, iterations: int = 100) -> Dict[str, Any]:
+def run_fuzz(seed: int, iterations: int = 100) -> dict[str, Any]:
     """Run seeded fuzz iterations; return the violation report."""
-    violations: List[str] = []
+    violations: list[str] = []
     decided = abstained = 0
 
     for it in range(iterations):
@@ -179,7 +184,7 @@ def run_fuzz(seed: int, iterations: int = 100) -> Dict[str, Any]:
             "abstained": abstained, "violations": violations}
 
 
-def _one_iteration(seed: int, it: int) -> Dict[str, Any]:
+def _one_iteration(seed: int, it: int) -> dict[str, Any]:
     """One fully deterministic fuzz iteration.
 
     Every RNG derives from ``(seed, it)``, so re-running the same
@@ -217,8 +222,8 @@ def _one_iteration(seed: int, it: int) -> Dict[str, Any]:
 
 
 def _check_invariants(tag: str, seed: int, it: int,
-                      outcome: Dict[str, Any]) -> List[str]:
-    violations: List[str] = []
+                      outcome: dict[str, Any]) -> list[str]:
+    violations: list[str] = []
     router = outcome["router"]
     result = outcome["result"]
     spec = outcome["spec"]

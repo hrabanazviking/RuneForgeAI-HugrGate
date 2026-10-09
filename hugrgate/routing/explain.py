@@ -15,23 +15,28 @@ and reasons, never the data that flowed through.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
-from hugrgate.ladder import (RUNG_ABSTAINED, RUNG_ACCEPTED,
-                             RUNG_BELOW_CONFIDENCE, RUNG_CANCELLED,
-                             RUNG_ERROR, RUNG_SKIPPED_LATENCY,
-                             RUNG_SKIPPED_PRIVACY, RUNG_SKIPPED_UNKNOWN,
-                             RUNG_SKIPPED_UNSUPPORTED, RUNG_UNAVAILABLE)
-from hugrgate.routing.architecture import (RoutingDecision, RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ABSTAINED,
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_CANCELLED,
+    RUNG_ERROR,
+    RUNG_SKIPPED_LATENCY,
+    RUNG_SKIPPED_PRIVACY,
+    RUNG_SKIPPED_UNKNOWN,
+    RUNG_SKIPPED_UNSUPPORTED,
+    RUNG_UNAVAILABLE,
+)
+from hugrgate.routing.architecture import RoutingDecision, RoutingPlan
 
 __all__ = [
+    "OUTCOME_PHRASES",
+    "explain_decision",
     "explain_plan",
     "explain_route",
-    "explain_decision",
-    "OUTCOME_PHRASES",
 ]
 
-OUTCOME_PHRASES: Dict[str, str] = {
+OUTCOME_PHRASES: dict[str, str] = {
     RUNG_ACCEPTED: "accepted — cleared its gate",
     RUNG_BELOW_CONFIDENCE: "below its confidence gate; climbed on",
     RUNG_SKIPPED_UNKNOWN: "skipped — backend not in the registry",
@@ -73,8 +78,8 @@ def explain_plan(plan: RoutingPlan) -> str:
     return "\n".join(lines)
 
 
-def explain_route(audit: List[Dict], plan: Optional[RoutingPlan] = None,
-                  winner: Optional[int] = None) -> str:
+def explain_route(audit: list[dict], plan: RoutingPlan | None = None,
+                  winner: int | None = None) -> str:
     """Narrate an executed climb from its audit trail."""
     if not audit:
         return "No rungs were attempted."
@@ -117,4 +122,4 @@ def explain_decision(decision: RoutingDecision) -> str:
     ]
     body = explain_route(decision.audit, decision.plan,
                          decision.accepted_rung)
-    return "\n".join(header + [body])
+    return "\n".join([*header, body])

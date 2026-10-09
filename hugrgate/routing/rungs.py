@@ -15,16 +15,21 @@ ladder per request instead of reusing a configured one.
 
 from __future__ import annotations
 
-from typing import Callable, List, Optional, Sequence
+from collections.abc import Callable, Sequence
 
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungMode, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungMode,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "RungFilter",
-    "RungBuilder",
     "DynamicRungPlanner",
+    "RungBuilder",
+    "RungFilter",
 ]
 
 #: A predicate deciding whether a backend may become a rung.
@@ -63,7 +68,7 @@ class RungBuilder:
 
     def __init__(self, extra_filters: Sequence[RungFilter] = (),
                  order: str = "cost",
-                 max_rungs: Optional[int] = None):
+                 max_rungs: int | None = None):
         if order not in ("cost", "latency", "capability"):
             raise ValueError(f"unknown rung order: {order!r}")
         if max_rungs is not None and max_rungs < 0:
@@ -72,11 +77,11 @@ class RungBuilder:
         self.order = order
         self.max_rungs = max_rungs
 
-    def _filters(self) -> List[RungFilter]:
+    def _filters(self) -> list[RungFilter]:
         return [_allowlist_filter, _supports_filter, _privacy_prefilter,
                 *self.extra_filters]
 
-    def candidates(self, registry, ctx: RouterContext) -> List[Backend]:
+    def candidates(self, registry, ctx: RouterContext) -> list[Backend]:
         """Backends surviving every filter, cheapest-first."""
         survivors = []
         for name in registry.list():
@@ -87,20 +92,23 @@ class RungBuilder:
                 survivors.append(backend)
         preferred = set(ctx.policy.preferred_backends or ())
         if self.order == "cost":
-            key = lambda b: (b.estimated_cost(), b.estimated_latency())
+            def key(b: Backend) -> tuple:
+                return (b.estimated_cost(), b.estimated_latency())
         elif self.order == "latency":
-            key = lambda b: (b.estimated_latency(), b.estimated_cost())
+            def key(b: Backend) -> tuple:
+                return (b.estimated_latency(), b.estimated_cost())
         else:  # capability — highest scored first, cost breaks ties
             from hugrgate.routing.capability import CapabilityScorer
             scorer = CapabilityScorer()
             scores = {b.name: scorer.score(b, ctx).value
                       for b in survivors}
-            key = lambda b: (-scores[b.name], b.estimated_cost())
+            def key(b: Backend) -> tuple:
+                return (-scores[b.name], b.estimated_cost())
         survivors.sort(key=lambda b: (b.name not in preferred, key(b)))
         return survivors
 
     def build(self, registry, ctx: RouterContext,
-              min_confidence: Optional[float] = None) -> List[RungNode]:
+              min_confidence: float | None = None) -> list[RungNode]:
         """Build the rung list: one node per surviving backend."""
         gate = (min_confidence if min_confidence is not None
                 else ctx.policy.minimum_probability)
@@ -124,7 +132,7 @@ class RungBuilder:
 class DynamicRungPlanner(RungPlanner):
     """A planner that builds a fresh ladder per request via :class:`RungBuilder`."""
 
-    def __init__(self, registry, builder: Optional[RungBuilder] = None):
+    def __init__(self, registry, builder: RungBuilder | None = None):
         self.registry = registry
         self.builder = builder or RungBuilder()
 

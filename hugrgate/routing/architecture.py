@@ -24,9 +24,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Mapping, Optional, Protocol, Tuple
+from typing import Any, Protocol
 
 from hugrgate.errors import PolicyError, SpecError
 from hugrgate.ladder import LadderRouter, LadderRung
@@ -35,16 +36,16 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "RungMode",
-    "RoutingOptions",
-    "RouterContext",
-    "RungNode",
-    "RoutingPlan",
-    "RoutingDecision",
-    "RungPlanner",
-    "RungExecutor",
-    "SerialPlanExecutor",
     "LadderRouterV2",
+    "RouterContext",
+    "RoutingDecision",
+    "RoutingOptions",
+    "RoutingPlan",
+    "RungExecutor",
+    "RungMode",
+    "RungNode",
+    "RungPlanner",
+    "SerialPlanExecutor",
 ]
 
 
@@ -67,16 +68,16 @@ class RoutingOptions:
 
     qos: str = "standard"               # best_effort|standard|priority|critical
     strategy: str = "serial"            # serial|parallel|hedged|dag
-    max_cost: Optional[float] = None
-    max_energy_j: Optional[float] = None
-    max_memory_mb: Optional[float] = None
+    max_cost: float | None = None
+    max_energy_j: float | None = None
+    max_memory_mb: float | None = None
     privacy_tier: str = "internal"      # public|internal|confidential|restricted
     hedge_delay_ms: float = 50.0
     parallel_width: int = 3
     fast_path_probability: float = 0.97
-    early_exit_delta: Optional[float] = None
+    early_exit_delta: float | None = None
     record: bool = False                # record per-rung results for replay
-    seed: Optional[int] = None
+    seed: int | None = None
 
     def __post_init__(self):
         if self.qos not in ("best_effort", "standard", "priority", "critical"):
@@ -109,14 +110,14 @@ class RouterContext:
     spec: DecisionSpec
     policy: DecisionPolicy
     options: RoutingOptions = field(default_factory=RoutingOptions)
-    state_keys: Tuple[str, ...] = ()
+    state_keys: tuple[str, ...] = ()
     state_size_hint: int = 0
 
     @classmethod
     def from_request(cls, state: Mapping[str, Any], spec: DecisionSpec,
-                     policy: Optional[DecisionPolicy] = None,
-                     options: Optional[RoutingOptions] = None,
-                     ) -> "RouterContext":
+                     policy: DecisionPolicy | None = None,
+                     options: RoutingOptions | None = None,
+                     ) -> RouterContext:
         keys = tuple(sorted(str(k) for k in state.keys()))
         return cls(spec=spec, policy=policy or DecisionPolicy(),
                    options=options or RoutingOptions(),
@@ -129,10 +130,10 @@ class RungNode:
 
     backend_name: str
     min_confidence: float = 0.0
-    latency_budget_ms: Optional[float] = None
+    latency_budget_ms: float | None = None
     mode: RungMode = RungMode.SERIAL
     why: str = ""                       # planner rationale, human readable
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not 0.0 <= self.min_confidence <= 1.0:
@@ -147,7 +148,7 @@ class RungNode:
         return LadderRung(self.backend_name, self.min_confidence,
                           self.latency_budget_ms)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend_name": self.backend_name,
             "min_confidence": self.min_confidence,
@@ -162,10 +163,10 @@ class RungNode:
 class RoutingPlan:
     """An ordered, inspectable execution plan produced by a planner."""
 
-    nodes: List[RungNode]
+    nodes: list[RungNode]
     strategy: RungMode = RungMode.SERIAL
     created_by: str = "unknown"
-    rationale: List[str] = field(default_factory=list)
+    rationale: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.strategy, str):
@@ -179,7 +180,7 @@ class RoutingPlan:
             sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "fingerprint": self.fingerprint,
             "strategy": self.strategy.value,
@@ -195,7 +196,7 @@ class RoutingDecision:
 
     result: DecisionResult
     plan: RoutingPlan
-    audit: List[Dict[str, Any]]
+    audit: list[dict[str, Any]]
     accepted_rung: int
 
 
@@ -208,7 +209,7 @@ class RungPlanner(Protocol):
 class RungExecutor(Protocol):
     """Walks a :class:`RoutingPlan` and returns a :class:`RoutingDecision`."""
 
-    def execute(self, router: "LadderRouterV2", plan: RoutingPlan,
+    def execute(self, router: LadderRouterV2, plan: RoutingPlan,
                 state: Mapping[str, Any], ctx: RouterContext
                 ) -> RoutingDecision: ...
 
@@ -221,25 +222,28 @@ class SerialPlanExecutor:
     behavior-identical to the v1 ladder.
     """
 
-    def execute(self, router: "LadderRouterV2", plan: RoutingPlan,
+    def execute(self, router: LadderRouterV2, plan: RoutingPlan,
                 state: Mapping[str, Any], ctx: RouterContext
                 ) -> RoutingDecision:
         import time
 
         from hugrgate.errors import Abstention
-        from hugrgate.ladder import (RUNG_ACCEPTED,
-                                     RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
-                                     RUNG_SKIPPED_LATENCY,
-                                     RUNG_SKIPPED_PRIVACY,
-                                     RUNG_SKIPPED_UNKNOWN,
-                                     RUNG_SKIPPED_UNSUPPORTED,
-                                     RUNG_UNAVAILABLE,
-                                     LadderAuditEntry)
+        from hugrgate.ladder import (
+            RUNG_ACCEPTED,
+            RUNG_BELOW_CONFIDENCE,
+            RUNG_ERROR,
+            RUNG_SKIPPED_LATENCY,
+            RUNG_SKIPPED_PRIVACY,
+            RUNG_SKIPPED_UNKNOWN,
+            RUNG_SKIPPED_UNSUPPORTED,
+            RUNG_UNAVAILABLE,
+            LadderAuditEntry,
+        )
 
         _SKIP = {RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
                  RUNG_SKIPPED_PRIVACY, RUNG_SKIPPED_LATENCY}
 
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
         started = time.perf_counter()
         policy = ctx.policy
 
@@ -307,8 +311,8 @@ class LadderRouterV2(LadderRouter):
     existing callers are unaffected.
     """
 
-    def __init__(self, *args, planner: Optional[RungPlanner] = None,
-                 executor: Optional[RungExecutor] = None,
+    def __init__(self, *args, planner: RungPlanner | None = None,
+                 executor: RungExecutor | None = None,
                  latency_tracker=None, cost_ledger=None,
                  energy_ledger=None, availability_tracker=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -318,7 +322,7 @@ class LadderRouterV2(LadderRouter):
         self.cost_ledger = cost_ledger
         self.energy_ledger = energy_ledger
         self.availability_tracker = availability_tracker
-        self.last_plan: Optional[RoutingPlan] = None
+        self.last_plan: RoutingPlan | None = None
 
     def note_availability(self, backend_name: str, succeeded: bool) -> None:
         """Feed attempt outcomes into the circuit breaker, if one is set."""
@@ -343,7 +347,7 @@ class LadderRouterV2(LadderRouter):
         self.cost_ledger.spend(backend.name, max(0.0, actual))
 
     def note_energy(self, backend, result) -> None:
-        """Record a rung's measured energy: measured latency × modeled power."""
+        """Record a rung's measured energy: measured latency x modeled power."""
         if self.energy_ledger is None:
             return
         latency = getattr(result, "latency_ms", None) or 0.0
@@ -363,9 +367,9 @@ class LadderRouterV2(LadderRouter):
                 self.latency_tracker.record(name, latency)
 
     def build_plan(self, state: Mapping[str, Any], spec: DecisionSpec,
-                   policy: Optional[DecisionPolicy] = None,
-                   options: Optional[RoutingOptions] = None
-                   ) -> Tuple[RoutingPlan, RouterContext]:
+                   policy: DecisionPolicy | None = None,
+                   options: RoutingOptions | None = None
+                   ) -> tuple[RoutingPlan, RouterContext]:
         """Inspectable plan construction — no backend is touched."""
         ctx = RouterContext.from_request(state, spec, policy, options)
         plan = self.planner.plan(ctx)
@@ -373,9 +377,9 @@ class LadderRouterV2(LadderRouter):
         return plan, ctx
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
-               policy: Optional[DecisionPolicy] = None,
-               context: Optional[Mapping[str, Any]] = None,
-               options: Optional[RoutingOptions] = None) -> DecisionResult:
+               policy: DecisionPolicy | None = None,
+               context: Mapping[str, Any] | None = None,
+               options: RoutingOptions | None = None) -> DecisionResult:
         """Build the plan, execute it, return the winning result."""
         plan, ctx = self.build_plan(state, spec, policy, options)
         decision = self.executor.execute(self, plan, state, ctx)

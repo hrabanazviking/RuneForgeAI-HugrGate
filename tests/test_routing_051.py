@@ -4,12 +4,24 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec, PolicyError, SpecError)
-from hugrgate.ladder import LadderRouter, LadderRung, RUNG_ACCEPTED
-from hugrgate.routing import (LadderRouterV2, RungMode, RungNode,
-                              RouterContext, RoutingOptions, RoutingPlan,
-                              SerialPlanExecutor)
+from hugrgate import (
+    Abstention,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    PolicyError,
+    SpecError,
+)
+from hugrgate.ladder import RUNG_ACCEPTED, LadderRouter, LadderRung
+from hugrgate.routing import (
+    LadderRouterV2,
+    RoutingOptions,
+    RoutingPlan,
+    RungMode,
+    RungNode,
+    SerialPlanExecutor,
+)
 
 
 class FixedBackend(__import__("hugrgate").Backend):
@@ -44,7 +56,7 @@ def make_v2(*backends, gates=None):
     for b in backends:
         registry.register(b)
     rungs = [LadderRung(b.name, mc) for b, mc
-             in zip(backends, gates or [0.8] * len(backends))]
+             in zip(backends, gates or [0.8] * len(backends), strict=True)]
     return LadderRouterV2(registry, rungs=rungs)
 
 
@@ -83,7 +95,7 @@ def test_build_plan_is_deterministic_and_side_effect_free():
     a, b = FixedBackend("a", prob=0.5), FixedBackend("b", prob=0.99)
     router = make_v2(a, b)
     plan1, ctx1 = router.build_plan({}, make_spec())
-    plan2, ctx2 = router.build_plan({}, make_spec())
+    plan2, _ctx2 = router.build_plan({}, make_spec())
     assert plan1.fingerprint == plan2.fingerprint
     assert [n.backend_name for n in plan1.nodes] == ["a", "b"]
     assert plan1.strategy is RungMode.SERIAL
@@ -112,7 +124,7 @@ def test_v2_serial_matches_v1_climb():
     v1 = LadderRouter(BackendRegistry(), rungs=[LadderRung("a", 0.8),
                                                 LadderRung("b", 0.8)])
     v2 = make_v2(a, b)
-    for name, backend in (("a", a), ("b", b)):
+    for _name, backend in (("a", a), ("b", b)):
         v1.registry.register(backend)
     r1 = v1.decide({}, spec)
     r2 = v2.decide({}, spec)
@@ -149,7 +161,6 @@ def test_skip_reason_reuse_not_duplication():
 
 
 def test_custom_planner_and_executor_plug_in():
-    from hugrgate.routing import RoutingDecision
     a = FixedBackend("a", prob=0.99)
     router = make_v2(a)
 

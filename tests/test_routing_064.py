@@ -6,11 +6,21 @@ import time
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, BackendError,
-                      DecisionPolicy, DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendError,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, ParallelPlanExecutor,
-                              RouterContext, RoutingOptions, RungMode)
+from hugrgate.routing import (
+    LadderRouterV2,
+    ParallelPlanExecutor,
+    RoutingOptions,
+)
 
 
 class RaceBackend(Backend):

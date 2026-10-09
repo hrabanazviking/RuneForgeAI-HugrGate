@@ -4,11 +4,21 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, RouterContext, RoutingOptions,
-                              SimulationReport, simulate)
+from hugrgate.routing import (
+    LadderRouterV2,
+    RouterContext,
+    SimulationReport,
+    simulate,
+)
 
 
 class SimBackend(Backend):
@@ -34,7 +44,6 @@ class SimBackend(Backend):
             raise AssertionError("simulation must never call backends")
         n = len(spec.options)
         rest = (1.0 - self._prob) / max(n - 1, 1)
-        from hugrgate import DecisionResult
         return DecisionResult(
             value="a", probability=self._prob,
             distribution={o: (self._prob if o == "a" else rest)

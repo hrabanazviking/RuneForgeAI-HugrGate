@@ -1,146 +1,146 @@
 {
   "slice": "074",
   "description": "routing throughput: v2 executors vs v1 baseline",
-  "decisions_per_config": 200,
+  "decisions_per_config": 30,
   "note": "near-instant backends; staggered confidences force a full climb every decision, so this measures routing machinery, not backend work.",
   "results": [
     {
       "label": "v1-baseline/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 29794.3,
-      "mean_ms": 0.0336,
-      "p50_ms": 0.0304,
-      "p99_ms": 0.0667
+      "decisions": 30,
+      "decisions_per_sec": 21440.5,
+      "mean_ms": 0.0466,
+      "p50_ms": 0.0398,
+      "p99_ms": 0.1541
     },
     {
       "label": "v2-serial/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 14995.3,
-      "mean_ms": 0.0667,
-      "p50_ms": 0.0644,
-      "p99_ms": 0.0863
+      "decisions": 30,
+      "decisions_per_sec": 10429.1,
+      "mean_ms": 0.0959,
+      "p50_ms": 0.0748,
+      "p99_ms": 0.3141
     },
     {
       "label": "v2-plan-only/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 91548.0,
-      "mean_ms": 0.0109,
-      "p50_ms": 0.0107,
-      "p99_ms": 0.0179
+      "decisions": 30,
+      "decisions_per_sec": 81057.9,
+      "mean_ms": 0.0123,
+      "p50_ms": 0.011,
+      "p99_ms": 0.0368
     },
     {
       "label": "v2-parallel/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 697.2,
-      "mean_ms": 1.4344,
-      "p50_ms": 0.9464,
-      "p99_ms": 5.9194
+      "decisions": 30,
+      "decisions_per_sec": 1243.0,
+      "mean_ms": 0.8045,
+      "p50_ms": 0.5189,
+      "p99_ms": 3.2949
     },
     {
       "label": "v2-hedged/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 1039.8,
-      "mean_ms": 0.9617,
-      "p50_ms": 0.613,
-      "p99_ms": 3.8727
+      "decisions": 30,
+      "decisions_per_sec": 465.8,
+      "mean_ms": 2.1467,
+      "p50_ms": 1.2335,
+      "p99_ms": 14.2396
     },
     {
       "label": "v2-early-exit/4-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 4637.9,
-      "mean_ms": 0.2156,
-      "p50_ms": 0.0689,
-      "p99_ms": 3.125
+      "decisions": 30,
+      "decisions_per_sec": 6714.8,
+      "mean_ms": 0.1489,
+      "p50_ms": 0.0747,
+      "p99_ms": 1.165
     },
     {
       "label": "v1-baseline/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 5547.6,
-      "mean_ms": 0.1803,
-      "p50_ms": 0.1052,
-      "p99_ms": 1.1927
+      "decisions": 30,
+      "decisions_per_sec": 5097.7,
+      "mean_ms": 0.1962,
+      "p50_ms": 0.1229,
+      "p99_ms": 1.5978
     },
     {
       "label": "v2-serial/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 4631.2,
-      "mean_ms": 0.2159,
-      "p50_ms": 0.2083,
-      "p99_ms": 0.3045
+      "decisions": 30,
+      "decisions_per_sec": 1917.0,
+      "mean_ms": 0.5216,
+      "p50_ms": 0.2383,
+      "p99_ms": 2.2854
     },
     {
       "label": "v2-plan-only/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 36143.1,
-      "mean_ms": 0.0277,
-      "p50_ms": 0.0266,
-      "p99_ms": 0.0492
+      "decisions": 30,
+      "decisions_per_sec": 35656.0,
+      "mean_ms": 0.028,
+      "p50_ms": 0.0269,
+      "p99_ms": 0.045
     },
     {
       "label": "v2-parallel/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 236.5,
-      "mean_ms": 4.2292,
-      "p50_ms": 2.7118,
-      "p99_ms": 15.0545
+      "decisions": 30,
+      "decisions_per_sec": 187.2,
+      "mean_ms": 5.341,
+      "p50_ms": 4.7847,
+      "p99_ms": 10.409
     },
     {
       "label": "v2-hedged/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 468.6,
-      "mean_ms": 2.1339,
-      "p50_ms": 1.5933,
-      "p99_ms": 8.5293
+      "decisions": 30,
+      "decisions_per_sec": 706.2,
+      "mean_ms": 1.416,
+      "p50_ms": 1.4056,
+      "p99_ms": 1.5581
     },
     {
       "label": "v2-early-exit/16-rungs",
-      "decisions": 200,
-      "decisions_per_sec": 4408.1,
-      "mean_ms": 0.2269,
-      "p50_ms": 0.2185,
-      "p99_ms": 0.4281
+      "decisions": 30,
+      "decisions_per_sec": 4184.3,
+      "mean_ms": 0.239,
+      "p50_ms": 0.2383,
+      "p99_ms": 0.2622
     }
   ],
   "comparisons": [
     {
       "rungs": 4,
       "variant": "v2-serial",
-      "vs_v1_baseline": 0.503
+      "vs_v1_baseline": 0.486
     },
     {
       "rungs": 4,
       "variant": "v2-parallel",
-      "vs_v1_baseline": 0.023
+      "vs_v1_baseline": 0.058
     },
     {
       "rungs": 4,
       "variant": "v2-hedged",
-      "vs_v1_baseline": 0.035
+      "vs_v1_baseline": 0.022
     },
     {
       "rungs": 4,
       "variant": "v2-early-exit",
-      "vs_v1_baseline": 0.156
+      "vs_v1_baseline": 0.313
     },
     {
       "rungs": 16,
       "variant": "v2-serial",
-      "vs_v1_baseline": 0.835
+      "vs_v1_baseline": 0.376
     },
     {
       "rungs": 16,
       "variant": "v2-parallel",
-      "vs_v1_baseline": 0.043
+      "vs_v1_baseline": 0.037
     },
     {
       "rungs": 16,
       "variant": "v2-hedged",
-      "vs_v1_baseline": 0.084
+      "vs_v1_baseline": 0.139
     },
     {
       "rungs": 16,
       "variant": "v2-early-exit",
-      "vs_v1_baseline": 0.795
+      "vs_v1_baseline": 0.821
     }
   ]
 }

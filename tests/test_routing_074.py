@@ -23,7 +23,7 @@ def test_stress_benchmark_artifact():
     assert artifact["slice"] == "074"
     assert artifact["decisions_per_config"] == 30
     labels = [r["label"] for r in artifact["results"]]
-    # every executor × rung-count configuration ran
+    # every executor x rung-count configuration ran
     for n in (4, 16):
         for variant in ("v1-baseline", "v2-serial", "v2-plan-only",
                         "v2-parallel", "v2-hedged", "v2-early-exit"):

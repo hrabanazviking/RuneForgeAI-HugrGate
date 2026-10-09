@@ -22,21 +22,27 @@ decisions are recordable; abstentions carry no winner to reproduce.
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.errors import Abstention, SpecError
-from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             LadderAuditEntry)
+from hugrgate.ladder import RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE, LadderAuditEntry
 from hugrgate.result import DecisionResult
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RungMode, RungNode,
-                                            RoutingDecision, RoutingPlan)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+    RungMode,
+    RungNode,
+)
 
 __all__ = [
-    "RouteRecording",
     "RecordingExecutor",
     "ReplayExecutor",
+    "RouteRecording",
     "replay",
 ]
 
@@ -45,17 +51,17 @@ __all__ = [
 class RouteRecording:
     """A JSON-serializable capture of one executed climb."""
 
-    plan: Dict[str, Any]
+    plan: dict[str, Any]
     plan_fingerprint: str
     spec_type: str
-    spec_options: List[str]
+    spec_options: list[str]
     minimum_probability: float
-    rung_outcomes: List[Dict[str, Any]] = field(default_factory=list)
-    winner_index: Optional[int] = None
-    winner_result: Optional[Dict[str, Any]] = None
+    rung_outcomes: list[dict[str, Any]] = field(default_factory=list)
+    winner_index: int | None = None
+    winner_result: dict[str, Any] | None = None
     recorded_at: float = field(default_factory=time.time)
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {
             "plan": self.plan,
             "plan_fingerprint": self.plan_fingerprint,
@@ -70,7 +76,7 @@ class RouteRecording:
         }
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "RouteRecording":
+    def from_json(cls, data: dict[str, Any]) -> RouteRecording:
         return cls(
             plan=data["plan"],
             plan_fingerprint=data["plan_fingerprint"],
@@ -89,7 +95,7 @@ class RecordingExecutor(RungExecutor):
 
     def __init__(self, inner: RungExecutor):
         self.inner = inner
-        self.last_recording: Optional[RouteRecording] = None
+        self.last_recording: RouteRecording | None = None
 
     def execute(self, router: LadderRouterV2, plan: RoutingPlan,
                 state: Mapping, ctx: RouterContext) -> RoutingDecision:
@@ -129,7 +135,7 @@ class ReplayExecutor(RungExecutor):
         return replay(self.recording)
 
 
-def _rebuild_plan(data: Dict[str, Any]) -> RoutingPlan:
+def _rebuild_plan(data: dict[str, Any]) -> RoutingPlan:
     nodes = []
     for nd in data["nodes"]:
         nodes.append(RungNode(
@@ -153,7 +159,7 @@ def replay(recording: RouteRecording) -> RoutingDecision:
         raise SpecError("recording has no winner to replay")
 
     by_index = {o["rung_index"]: o for o in recording.rung_outcomes}
-    audit: List[LadderAuditEntry] = []
+    audit: list[LadderAuditEntry] = []
     gate_policy = recording.minimum_probability
 
     for i, node in enumerate(plan.nodes):

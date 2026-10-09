@@ -28,16 +28,26 @@ from __future__ import annotations
 
 import time
 from collections import deque
-from typing import Dict, List, Mapping, Optional, Set, Tuple
+from collections.abc import Mapping
 
 from hugrgate.errors import Abstention, SpecError
-from hugrgate.ladder import (RUNG_ABSTAINED, RUNG_ACCEPTED,
-                             RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_UNAVAILABLE,
-                             LadderAuditEntry)
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RungNode,
-                                            RoutingDecision, RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ABSTAINED,
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_ERROR,
+    RUNG_SKIPPED_UNKNOWN,
+    RUNG_UNAVAILABLE,
+    LadderAuditEntry,
+)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+    RungNode,
+)
 
 __all__ = [
     "FallbackGraph",
@@ -51,10 +61,10 @@ class FallbackGraph:
     """Directed (backend, error-kind) -> fallback backends graph."""
 
     def __init__(self):
-        self._edges: Dict[Tuple[str, str], List[str]] = {}
+        self._edges: dict[tuple[str, str], list[str]] = {}
 
     def add_edge(self, from_backend: str, to_backend: str,
-                 on: Tuple[str, ...] = ("BackendError",)) -> None:
+                 on: tuple[str, ...] = ("BackendError",)) -> None:
         """On ``from_backend`` failing with one of ``on``, try ``to_backend``."""
         if from_backend == to_backend:
             raise SpecError(
@@ -67,11 +77,11 @@ class FallbackGraph:
                 self._edges[(from_backend, kind)].append(to_backend)
 
     def fallbacks(self, backend_name: str,
-                  error_kind: str) -> List[str]:
+                  error_kind: str) -> list[str]:
         """Fallback backends for this failure, specific edges first."""
         specific = self._edges.get((backend_name, error_kind), [])
         wildcard = self._edges.get((backend_name, WILDCARD), [])
-        seen: Set[str] = set()
+        seen: set[str] = set()
         ordered = []
         for name in specific + wildcard:
             if name not in seen:
@@ -81,33 +91,33 @@ class FallbackGraph:
 
     def validate(self) -> None:
         """Raise SpecError if the graph contains a directed cycle."""
-        adjacency: Dict[str, Set[str]] = {}
+        adjacency: dict[str, set[str]] = {}
         for (frm, _kind), tos in self._edges.items():
             adjacency.setdefault(frm, set()).update(tos)
-        visiting: Set[str] = set()
-        done: Set[str] = set()
+        visiting: set[str] = set()
+        done: set[str] = set()
 
-        def dfs(node: str, path: List[str]) -> None:
+        def dfs(node: str, path: list[str]) -> None:
             if node in done:
                 return
             if node in visiting:
-                cycle = " -> ".join(path + [node])
+                cycle = " -> ".join([*path, node])
                 raise SpecError(f"fallback graph cycle: {cycle}")
             visiting.add(node)
             for nxt in adjacency.get(node, ()):
-                dfs(nxt, path + [node])
+                dfs(nxt, [*path, node])
             visiting.discard(node)
             done.add(node)
 
         for node in adjacency:
             dfs(node, [])
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {f"{frm} [{kind}]": tos
                 for (frm, kind), tos in self._edges.items()}
 
 
-def _error_kinds(entry: LadderAuditEntry) -> Set[str]:
+def _error_kinds(entry: LadderAuditEntry) -> set[str]:
     if entry.outcome == RUNG_UNAVAILABLE:
         return {"BackendUnavailable"}
     if entry.outcome == RUNG_ABSTAINED:
@@ -123,7 +133,7 @@ def _error_kinds(entry: LadderAuditEntry) -> Set[str]:
 class FallbackGraphExecutor(RungExecutor):
     """Serial climb with graph-directed fallback on rung failures."""
 
-    def __init__(self, graph: Optional[FallbackGraph] = None,
+    def __init__(self, graph: FallbackGraph | None = None,
                  validate_graph: bool = True):
         self.graph = graph or FallbackGraph()
         if validate_graph:
@@ -133,17 +143,16 @@ class FallbackGraphExecutor(RungExecutor):
                 state: Mapping, ctx: RouterContext) -> RoutingDecision:
         policy = ctx.policy
         started = time.perf_counter()
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
 
         # Worklist of (rung_index, node, via_fallback_of|None).
         worklist: deque = deque(
             (i, node, None) for i, node in enumerate(plan.nodes))
-        visited: Set[str] = set()
-        next_index = len(plan.nodes)  # fallback rungs get fresh indices
+        visited: set[str] = set()
 
         nonlocal_next = [len(plan.nodes)]
 
-        def attempt(i: int, node: RungNode, via: Optional[str]):
+        def attempt(i: int, node: RungNode, via: str | None):
             backend = router.registry.get(node.backend_name)
             if backend is None:
                 audit.append(LadderAuditEntry(

@@ -4,11 +4,24 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec, SpecError)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    SpecError,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (DAGExecutor, DAGNode, LadderRouterV2,
-                              RoutingDAG, RoutingOptions, evaluate_condition)
+from hugrgate.routing import (
+    DAGExecutor,
+    DAGNode,
+    LadderRouterV2,
+    RoutingDAG,
+    RoutingOptions,
+    evaluate_condition,
+)
 from hugrgate.routing.architecture import RouterContext
 
 

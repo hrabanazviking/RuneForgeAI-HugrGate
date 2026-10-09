@@ -9,12 +9,21 @@ import sys
 
 import pytest
 
-from hugrgate import Backend, BackendRegistry, DecisionPolicy, DecisionResult
-from hugrgate import DecisionSpec
+from hugrgate import (
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (DynamicRungPlanner, LadderRouterV2,
-                              LatencyAwarePlanner, LatencyTracker,
-                              RouterContext)
+from hugrgate.routing import (
+    DynamicRungPlanner,
+    LadderRouterV2,
+    LatencyAwarePlanner,
+    LatencyTracker,
+    RouterContext,
+)
 
 
 class LatBackend(Backend):

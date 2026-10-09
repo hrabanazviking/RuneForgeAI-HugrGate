@@ -7,10 +7,14 @@ import random
 import pytest
 
 from hugrgate import Backend, BackendRegistry, DecisionPolicy, DecisionSpec
-from hugrgate.routing import (CalibrationTracker, ConfidenceAwarePlanner,
-                              LadderSynthesizer, RouterContext, RoutingOptions,
-                              adjusted_gate)
-from hugrgate.routing.architecture import RungNode, RoutingPlan, RungMode
+from hugrgate.routing import (
+    CalibrationTracker,
+    ConfidenceAwarePlanner,
+    LadderSynthesizer,
+    RouterContext,
+    adjusted_gate,
+)
+from hugrgate.routing.architecture import RoutingPlan, RungNode
 
 
 class CalBackend(Backend):

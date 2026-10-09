@@ -15,7 +15,7 @@ routing *confidence-aware* in two ways:
    probability bins, the standard statistical measure of miscalibration.
 
 Metric/coverage assumptions (validated statistically in the tests):
-ECE is computed over 10 equal-width bins as Σ |acc − conf| · n/N.
+ECE is computed over 10 equal-width bins as Σ |acc - conf| · n/N.
 A perfectly calibrated backend has ECE ≈ 0; a backend reporting 0.9
 while correct 70% of the time has ECE ≈ 0.2. Gates are widened
 additively and clamped to [0,1]; widening never *lowers* a gate.
@@ -24,11 +24,14 @@ additively and clamped to [0,1]; widening never *lowers* a gate.
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
 
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
     "CalibrationTracker",
@@ -53,7 +56,7 @@ class CalibrationTracker:
         if n_bins < 1:
             raise ValueError("n_bins must be >= 1")
         self.n_bins = n_bins
-        self._samples: Dict[str, List[Tuple[float, bool]]] = defaultdict(list)
+        self._samples: dict[str, list[tuple[float, bool]]] = defaultdict(list)
 
     def record(self, backend_name: str, probability: float,
                correct: bool) -> None:
@@ -100,7 +103,7 @@ class ConfidenceAwarePlanner(RungPlanner):
     """
 
     def __init__(self, inner: RungPlanner, registry,
-                 tracker: Optional[CalibrationTracker] = None,
+                 tracker: CalibrationTracker | None = None,
                  min_samples: int = 50):
         self.inner = inner
         self.registry = registry
@@ -115,7 +118,7 @@ class ConfidenceAwarePlanner(RungPlanner):
 
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
-        nodes: List[RungNode] = []
+        nodes: list[RungNode] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             if backend is None:

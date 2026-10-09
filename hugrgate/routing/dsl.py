@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from hugrgate.errors import PolicyError, SpecError
 from hugrgate.policy import DecisionPolicy
@@ -90,15 +90,15 @@ class RoutePolicy:
     """Compiled DSL: options, policy overrides, backend lists, rules."""
 
     options: RoutingOptions = field(default_factory=RoutingOptions)
-    policy_values: Dict[str, Any] = field(default_factory=dict)
-    prefer: List[str] = field(default_factory=list)
-    allow: Optional[List[str]] = None
-    forbid: List[str] = field(default_factory=list)
+    policy_values: dict[str, Any] = field(default_factory=dict)
+    prefer: list[str] = field(default_factory=list)
+    allow: list[str] | None = None
+    forbid: list[str] = field(default_factory=list)
     skip_remote_when_strict: bool = False
 
-    def apply(self, policy: Optional[DecisionPolicy] = None,
-              options: Optional[RoutingOptions] = None
-              ) -> Tuple[DecisionPolicy, RoutingOptions]:
+    def apply(self, policy: DecisionPolicy | None = None,
+              options: RoutingOptions | None = None
+              ) -> tuple[DecisionPolicy, RoutingOptions]:
         """Merge onto a base (policy, options); DSL values win."""
         base_policy = policy or DecisionPolicy()
         base_options = options or RoutingOptions()
@@ -126,7 +126,7 @@ class RoutePolicy:
         current.update(values)
         return RoutingOptions(**current)
 
-    _assigned_options: Dict[str, object] = field(default_factory=dict,
+    _assigned_options: dict[str, object] = field(default_factory=dict,
                                                 repr=False)
 
     def _merged_allowlist(self, base_policy: DecisionPolicy):
@@ -179,7 +179,7 @@ def parse(text: str) -> RoutePolicy:
     return parser.parse()
 
 
-def _lex(text: str) -> List[Tuple[Optional[str], str, int]]:
+def _lex(text: str) -> list[tuple[str | None, str, int]]:
     tokens = []
     for m in _TOKEN.finditer(text):
         kind = m.lastgroup
@@ -193,11 +193,11 @@ def _lex(text: str) -> List[Tuple[Optional[str], str, int]]:
 
 class _Parser:
     def __init__(
-        self, tokens: List[Tuple[Optional[str], str, int]]):
+        self, tokens: list[tuple[str | None, str, int]]):
         self.tokens = tokens
         self.pos = 0
         self.route = RoutePolicy()
-        self.seen_keys: Dict[str, int] = {}
+        self.seen_keys: dict[str, int] = {}
 
     def peek(self):
         return self.tokens[self.pos] if self.pos < len(self.tokens) else \

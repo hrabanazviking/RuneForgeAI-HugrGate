@@ -6,7 +6,7 @@ Declared ``backend.estimated_latency()`` values are guesses — often the
 rung latencies per backend, and routing uses the measured EMA once enough
 samples exist, falling back to the declared estimate before that.
 
-- :class:`LatencyTracker.record` / :meth:`estimate` — EMA (α=0.3) with a
+- :class:`LatencyTracker.record` / :meth:`estimate` — EMA (alpha=0.3) with a
   minimum-sample gate.
 - :class:`LatencyAwarePlanner` — wraps any planner; at plan time it
   prunes rungs whose *measured* estimate already exceeds the policy's
@@ -21,15 +21,17 @@ The reproducible measurement artifact lives in
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "LatencyTracker",
     "LatencyAwarePlanner",
+    "LatencyTracker",
 ]
 
 
@@ -43,8 +45,8 @@ class LatencyTracker:
             raise ValueError("min_samples must be >= 1")
         self.alpha = alpha
         self.min_samples = min_samples
-        self._ema: Dict[str, float] = {}
-        self._n: Dict[str, int] = {}
+        self._ema: dict[str, float] = {}
+        self._n: dict[str, int] = {}
 
     def record(self, backend_name: str, latency_ms: float) -> None:
         if latency_ms < 0:
@@ -62,7 +64,7 @@ class LatencyTracker:
     def samples(self, backend_name: str) -> int:
         return self._n.get(backend_name, 0)
 
-    def measured(self, backend_name: str) -> Optional[float]:
+    def measured(self, backend_name: str) -> float | None:
         """EMA once enough samples exist, else None."""
         if self._n.get(backend_name, 0) >= self.min_samples:
             return round(self._ema[backend_name], 3)
@@ -86,7 +88,7 @@ class LatencyAwarePlanner(RungPlanner):
     """
 
     def __init__(self, inner: RungPlanner, registry,
-                 tracker: Optional[LatencyTracker] = None):
+                 tracker: LatencyTracker | None = None):
         self.inner = inner
         self.registry = registry
         self.tracker = tracker or LatencyTracker()
@@ -94,8 +96,8 @@ class LatencyAwarePlanner(RungPlanner):
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
         budget = ctx.policy.maximum_latency_ms
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             estimate = (self.tracker.estimate(backend)

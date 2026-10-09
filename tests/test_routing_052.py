@@ -4,10 +4,20 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
-from hugrgate.routing import (DynamicRungPlanner, LadderRouterV2, RungBuilder,
-                              RouterContext, RoutingPlan)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
+from hugrgate.routing import (
+    DynamicRungPlanner,
+    LadderRouterV2,
+    RouterContext,
+    RungBuilder,
+)
 
 
 class DynBackend(Backend):

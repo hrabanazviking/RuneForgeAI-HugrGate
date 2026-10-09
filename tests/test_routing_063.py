@@ -5,9 +5,17 @@ from __future__ import annotations
 import pytest
 
 from hugrgate import Backend, BackendRegistry, DecisionSpec
-from hugrgate.routing import (QOS_DEPTH_CAPS, QOS_PROFILES, QOS_WEIGHTS,
-                              QoSClass, QoSProfile, RouterContext,
-                              RoutingOptions, LadderSynthesizer, qos_profile)
+from hugrgate.routing import (
+    QOS_DEPTH_CAPS,
+    QOS_PROFILES,
+    QOS_WEIGHTS,
+    LadderSynthesizer,
+    QoSClass,
+    QoSProfile,
+    RouterContext,
+    RoutingOptions,
+    qos_profile,
+)
 
 
 class QosBackend(Backend):

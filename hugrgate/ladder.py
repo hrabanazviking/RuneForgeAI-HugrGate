@@ -40,9 +40,6 @@ from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
 __all__ = [
-    "LadderAuditEntry",
-    "LadderRouter",
-    "LadderRung",
     "RUNG_ABSTAINED",
     "RUNG_ACCEPTED",
     "RUNG_BELOW_CONFIDENCE",
@@ -53,6 +50,9 @@ __all__ = [
     "RUNG_SKIPPED_UNKNOWN",
     "RUNG_SKIPPED_UNSUPPORTED",
     "RUNG_UNAVAILABLE",
+    "LadderAuditEntry",
+    "LadderRouter",
+    "LadderRung",
 ]
 
 #: Audit outcomes for a single rung.
@@ -176,7 +176,7 @@ class LadderRouter:
 
     def skip_reason(self, backend: Backend, rung: LadderRung,
                     spec: DecisionSpec, policy: DecisionPolicy,
-                    started: float) -> Optional[tuple]:
+                    started: float) -> tuple | None:
         """Full pre-run check: (outcome, detail) or None if the rung may run."""
         if not backend.supports(spec):
             return (RUNG_SKIPPED_UNSUPPORTED,
@@ -296,11 +296,17 @@ class LadderRouter:
                 rung_index, backend.name, RUNG_ERROR,
                 detail=str(e), latency_ms=(time.perf_counter() - t0) * 1000))
             return None
-        except SpecError:
-            # Contract violations (invalid values, incoherent results)
-            # propagate: like validate_result below, they are never
-            # swallowed into a rung audit entry (slice 012).
-            raise
+        except SpecError as e:
+            # Slice 073: a backend that raises SpecError *during evaluate*
+            # (e.g. constructing an incoherent DecisionResult) is a faulty
+            # rung — audit it as RUNG_ERROR and keep climbing. SpecError
+            # from validate_result() *after* evaluate still propagates
+            # below (slice 012: never let invalid values climb).
+            audit.append(LadderAuditEntry(
+                rung_index, backend.name, RUNG_ERROR,
+                detail=f"backend raised {type(e).__name__}: {e}",
+                latency_ms=(time.perf_counter() - t0) * 1000))
+            return None
         except Exception as e:  # noqa: BLE001 - never let one rung kill the climb
             audit.append(LadderAuditEntry(
                 rung_index, backend.name, RUNG_ERROR,

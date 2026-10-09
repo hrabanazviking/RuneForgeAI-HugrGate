@@ -25,16 +25,19 @@ import os
 import shutil
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
+    "HardwareAwarePlanner",
     "HostProfile",
     "hardware_compatible",
-    "HardwareAwarePlanner",
 ]
 
 
@@ -46,10 +49,10 @@ class HostProfile:
     memory_mb: float = 1024.0
     has_gpu: bool = False
     platform: str = sys.platform
-    accelerators: List[str] = field(default_factory=list)
+    accelerators: list[str] = field(default_factory=list)
 
     @classmethod
-    def detect(cls) -> "HostProfile":
+    def detect(cls) -> HostProfile:
         """Build a profile from the real machine (stdlib only)."""
         cpu = os.cpu_count() or 1
         memory_mb = cls._detect_memory_mb()
@@ -70,7 +73,7 @@ class HostProfile:
             pass
         return 1024.0  # conservative fallback when unobservable
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "cpu_count": self.cpu_count,
             "memory_mb": self.memory_mb,
@@ -81,7 +84,7 @@ class HostProfile:
 
 
 def hardware_compatible(backend: Backend,
-                        host: HostProfile) -> Optional[str]:
+                        host: HostProfile) -> str | None:
     """None when the backend can run on this host, else the reason."""
     reqs = backend.hardware_requirements() or {}
     if reqs.get("requires_gpu") and not host.has_gpu:
@@ -105,15 +108,15 @@ class HardwareAwarePlanner(RungPlanner):
     """Wrap a planner; prune rungs the host cannot run."""
 
     def __init__(self, inner: RungPlanner, registry,
-                 host: Optional[HostProfile] = None):
+                 host: HostProfile | None = None):
         self.inner = inner
         self.registry = registry
         self.host = host or HostProfile.detect()
 
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             reason = (hardware_compatible(backend, self.host)

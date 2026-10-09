@@ -20,11 +20,11 @@ as such.
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RoutingPlan)
+from hugrgate.routing.architecture import LadderRouterV2, RouterContext, RoutingPlan
 from hugrgate.routing.capability import CapabilityScorer
 from hugrgate.routing.energy import EnergyModel
 from hugrgate.routing.memory import MemoryModel
@@ -48,7 +48,7 @@ class SimulatedRung:
     est_memory_mb: float = 0.0
     capability: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend_name": self.backend_name,
             "rung_index": self.rung_index,
@@ -65,13 +65,13 @@ class SimulatedRung:
 @dataclass
 class SimulationReport:
     plan_fingerprint: str
-    rungs: List[SimulatedRung] = field(default_factory=list)
-    what_if_win: List[Dict[str, Any]] = field(default_factory=list)
+    rungs: list[SimulatedRung] = field(default_factory=list)
+    what_if_win: list[dict[str, Any]] = field(default_factory=list)
     note: str = ("simulation predicts skips and resource use from "
                  "estimates; it cannot predict which rung will clear "
                  "its gate.")
 
-    def totals(self) -> Dict[str, float]:
+    def totals(self) -> dict[str, float]:
         runnable = [r for r in self.rungs if not r.would_skip]
         return {
             "runnable_rungs": len(runnable),
@@ -85,7 +85,7 @@ class SimulationReport:
                 max([r.est_memory_mb for r in runnable] + [0.0]), 3),
         }
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "plan_fingerprint": self.plan_fingerprint,
             "rungs": [r.to_dict() for r in self.rungs],
@@ -97,8 +97,8 @@ class SimulationReport:
 
 def simulate(router: LadderRouterV2, plan: RoutingPlan,
              state: Mapping[str, Any], ctx: RouterContext,
-             energy_model: Optional[EnergyModel] = None,
-             memory_model: Optional[MemoryModel] = None,
+             energy_model: EnergyModel | None = None,
+             memory_model: MemoryModel | None = None,
              ) -> SimulationReport:
     """Dry-run ``plan`` against estimates. Never calls a backend."""
     energy_model = energy_model or EnergyModel()
@@ -107,7 +107,7 @@ def simulate(router: LadderRouterV2, plan: RoutingPlan,
     started = time.perf_counter()
     policy = ctx.policy
 
-    rungs: List[SimulatedRung] = []
+    rungs: list[SimulatedRung] = []
     for i, node in enumerate(plan.nodes):
         backend = router.registry.get(node.backend_name)
         if backend is None:
@@ -132,7 +132,7 @@ def simulate(router: LadderRouterV2, plan: RoutingPlan,
         ))
 
     # What-if table: cumulative spend if rung k (runnable) wins.
-    what_if: List[Dict[str, Any]] = []
+    what_if: list[dict[str, Any]] = []
     cum_lat = cum_cost = cum_energy = 0.0
     for r in rungs:
         if r.would_skip:

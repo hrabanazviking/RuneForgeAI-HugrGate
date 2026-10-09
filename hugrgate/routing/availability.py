@@ -25,23 +25,26 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "CircuitState",
-    "AvailabilityTracker",
     "AvailabilityAwarePlanner",
+    "AvailabilityTracker",
+    "CircuitState",
 ]
 
 
 @dataclass
 class CircuitState:
     consecutive_failures: int = 0
-    open_since: Optional[float] = None  # monotonic seconds, None = closed
+    open_since: float | None = None  # monotonic seconds, None = closed
     half_open_trial: bool = False
 
 
@@ -56,7 +59,7 @@ class AvailabilityTracker:
             raise ValueError("cooldown_s must be non-negative")
         self.failure_threshold = failure_threshold
         self.cooldown_s = cooldown_s
-        self._circuits: Dict[str, CircuitState] = {}
+        self._circuits: dict[str, CircuitState] = {}
 
     def _circuit(self, name: str) -> CircuitState:
         return self._circuits.setdefault(name, CircuitState())
@@ -81,7 +84,7 @@ class AvailabilityTracker:
         return "open"
 
     def available(self, backend: Backend,
-                  check_health: bool = True) -> Optional[str]:
+                  check_health: bool = True) -> str | None:
         """None when the backend may be tried, else the reason."""
         state = self.state(backend.name)
         if state == "open":
@@ -91,7 +94,7 @@ class AvailabilityTracker:
         if check_health:
             try:
                 health = backend.health() or {}
-            except Exception as e:  # health check itself failed
+            except Exception as e:  # noqa: BLE001 - health probe must never crash routing; failure => unhealthy
                 return f"{backend.name} health check raised {type(e).__name__}"
             if health.get("status", "ok") != "ok":
                 return (f"{backend.name} unhealthy: "
@@ -107,7 +110,7 @@ class AvailabilityAwarePlanner(RungPlanner):
     """Wrap a planner; prune unavailable rungs before they can fail."""
 
     def __init__(self, inner: RungPlanner, registry,
-                 tracker: Optional[AvailabilityTracker] = None,
+                 tracker: AvailabilityTracker | None = None,
                  check_health: bool = True):
         self.inner = inner
         self.registry = registry
@@ -116,8 +119,8 @@ class AvailabilityAwarePlanner(RungPlanner):
 
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             reason = (self.tracker.available(backend, self.check_health)

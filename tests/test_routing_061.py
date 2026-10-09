@@ -6,12 +6,23 @@ import sys
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (DynamicRungPlanner, HardwareAwarePlanner,
-                              HostProfile, LadderRouterV2, RouterContext,
-                              hardware_compatible)
+from hugrgate.routing import (
+    DynamicRungPlanner,
+    HardwareAwarePlanner,
+    HostProfile,
+    LadderRouterV2,
+    RouterContext,
+    hardware_compatible,
+)
 
 
 class HwBackend(Backend):

@@ -4,13 +4,24 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (BackendClearance, DataClassifier,
-                              DynamicRungPlanner, LadderRouterV2,
-                              PrivacyAwarePlanner, PrivacyTier, RouterContext,
-                              RoutingOptions)
+from hugrgate.routing import (
+    BackendClearance,
+    DataClassifier,
+    DynamicRungPlanner,
+    LadderRouterV2,
+    PrivacyAwarePlanner,
+    PrivacyTier,
+    RouterContext,
+)
 
 
 class PrivBackend(Backend):

@@ -6,11 +6,16 @@ import time
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (HedgedPlanExecutor, LadderRouterV2,
-                              RoutingOptions)
+from hugrgate.routing import HedgedPlanExecutor, LadderRouterV2, RoutingOptions
 
 
 class HedgeBackend(Backend):

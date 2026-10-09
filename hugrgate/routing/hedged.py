@@ -24,19 +24,28 @@ from __future__ import annotations
 
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-from typing import Dict, List, NamedTuple
-from concurrent.futures import Future
-from hugrgate.backend import Backend
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
+from typing import NamedTuple
 
+from hugrgate.backend import Backend
 from hugrgate.errors import Abstention
-from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             RUNG_CANCELLED, RUNG_ERROR,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_UNAVAILABLE,
-                             LadderAuditEntry)
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RungNode,
-                                            RoutingDecision, RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_CANCELLED,
+    RUNG_ERROR,
+    RUNG_SKIPPED_UNKNOWN,
+    RUNG_UNAVAILABLE,
+    LadderAuditEntry,
+)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+    RungNode,
+)
 from hugrgate.routing.qos import qos_profile
 
 __all__ = [
@@ -48,8 +57,8 @@ class _Flight(NamedTuple):
     """One rung in flight: rung index, node, resolved backend."""
 
     rung_index: int
-    node: "RungNode"
-    backend: "Backend"
+    node: RungNode
+    backend: Backend
 
 
 class HedgedPlanExecutor(RungExecutor):
@@ -64,7 +73,7 @@ class HedgedPlanExecutor(RungExecutor):
         started = time.perf_counter()
 
         runnable = []
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
         for i, node in enumerate(plan.nodes):
             backend = router.registry.get(node.backend_name)
             if backend is None:
@@ -82,12 +91,12 @@ class HedgedPlanExecutor(RungExecutor):
 
         lock = threading.Lock()
         closed = threading.Event()
-        results: Dict[int, object] = {}
+        results: dict[int, object] = {}
 
         def run_one(flight: _Flight, hedged: bool):
             i, node, backend = (flight.rung_index, flight.node,
                                  flight.backend)
-            local: List[LadderAuditEntry] = []
+            local: list[LadderAuditEntry] = []
             result = router._attempt(backend, state, ctx.spec, None,
                                      local, i)
             with lock:
@@ -131,8 +140,8 @@ class HedgedPlanExecutor(RungExecutor):
             plan.rationale.append(
                 f"hedging disabled for QoS {ctx.options.qos}; serial climb")
 
-        pending: List[_Flight] = list(runnable)
-        in_flight: Dict[Future, _Flight] = {}
+        pending: list[_Flight] = list(runnable)
+        in_flight: dict[Future, _Flight] = {}
         winner = None
         # Without hedging the wait is unbounded: strict serial semantics.
         timeout = delay_s if hedging else None
@@ -187,7 +196,7 @@ class HedgedPlanExecutor(RungExecutor):
         router.last_audit = audit
         router.note_latencies(audit)
         if winner is not None:
-            i, node, backend, result, gate = winner
+            i, node, backend, result, _gate = winner
             result.metadata["routing_plan"] = plan.to_dict()
             result.metadata["ladder_trace"] = [e.to_dict() for e in audit]
             result.metadata["ladder_rung"] = i

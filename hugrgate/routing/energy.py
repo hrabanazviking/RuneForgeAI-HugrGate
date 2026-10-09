@@ -3,7 +3,7 @@
 Inference costs energy, and energy is a budget like latency or money.
 :class:`EnergyModel` estimates joules per rung as
 
-    energy_j = latency_s × power_watts
+    energy_j = latency_s x power_watts
 
 where ``power_watts`` comes from ``backend.hardware_requirements()`` when
 declared, else from documented class defaults. :class:`EnergyLedger`
@@ -25,18 +25,20 @@ The reproducible measurement artifact lives in
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "EnergyModel",
-    "EnergyLedger",
-    "EnergyAwarePlanner",
     "DEFAULT_LOCAL_WATTS",
     "DEFAULT_REMOTE_WATTS",
+    "EnergyAwarePlanner",
+    "EnergyLedger",
+    "EnergyModel",
 ]
 
 #: Assumed draw for a local backend that declares no power figure.
@@ -46,7 +48,7 @@ DEFAULT_REMOTE_WATTS = 5.0
 
 
 class EnergyModel:
-    """Joule estimates per backend from latency × power draw."""
+    """Joule estimates per backend from latency x power draw."""
 
     def __init__(self, local_watts: float = DEFAULT_LOCAL_WATTS,
                  remote_watts: float = DEFAULT_REMOTE_WATTS):
@@ -62,11 +64,11 @@ class EnergyModel:
         return self.remote_watts if backend.is_remote else self.local_watts
 
     def estimate_j(self, backend: Backend,
-                   latency_ms: Optional[float] = None) -> float:
+                   latency_ms: float | None = None) -> float:
         """Joules for one rung execution.
 
         Uses the backend's own ``estimated_energy_j()`` when provided,
-        else latency (measured when given, declared otherwise) × power.
+        else latency (measured when given, declared otherwise) x power.
         """
         custom = getattr(backend, "estimated_energy_j", None)
         if callable(custom):
@@ -81,8 +83,8 @@ class EnergyModel:
 class EnergyLedger:
     """Per-request joule accounting: reserve at plan time, spend at run time."""
 
-    def __init__(self, budget_j: Optional[float],
-                 model: Optional[EnergyModel] = None):
+    def __init__(self, budget_j: float | None,
+                 model: EnergyModel | None = None):
         if budget_j is not None and budget_j < 0:
             raise ValueError(f"budget must be non-negative, got {budget_j}")
         self.budget_j = budget_j
@@ -91,7 +93,7 @@ class EnergyLedger:
         self.spent = 0.0
 
     @property
-    def remaining(self) -> Optional[float]:
+    def remaining(self) -> float | None:
         if self.budget_j is None:
             return None
         return max(0.0, self.budget_j - self.reserved - self.spent)
@@ -132,8 +134,8 @@ class EnergyAwarePlanner(RungPlanner):
     """
 
     def __init__(self, inner: RungPlanner, registry,
-                 budget_j: Optional[float] = None,
-                 model: Optional[EnergyModel] = None):
+                 budget_j: float | None = None,
+                 model: EnergyModel | None = None):
         if budget_j is not None and budget_j < 0:
             raise ValueError(f"budget_j must be non-negative, got {budget_j}")
         self.inner = inner
@@ -146,8 +148,8 @@ class EnergyAwarePlanner(RungPlanner):
         budget = (self.budget_j if self.budget_j is not None
                   else ctx.options.max_energy_j)
         ledger = EnergyLedger(budget, self.model)
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             joules = (ledger.model.estimate_j(backend)

@@ -2,15 +2,27 @@
 
 from __future__ import annotations
 
-import pytest
-
-from hugrgate import (Backend, BackendRegistry, DecisionPolicy, DecisionResult,
-                      DecisionSpec)
+from hugrgate import (
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, OUTCOME_PHRASES, RoutingOptions,
-                              explain_decision, explain_plan, explain_route)
-from hugrgate.routing.architecture import (RungMode, RungNode, RoutingDecision,
-                                            RoutingPlan)
+from hugrgate.routing import (
+    OUTCOME_PHRASES,
+    LadderRouterV2,
+    explain_decision,
+    explain_plan,
+    explain_route,
+)
+from hugrgate.routing.architecture import (
+    RoutingDecision,
+    RoutingPlan,
+    RungMode,
+    RungNode,
+)
 
 
 class ExBackend(Backend):

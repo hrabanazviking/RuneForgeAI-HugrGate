@@ -28,16 +28,23 @@ from __future__ import annotations
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List
 
 from hugrgate.errors import Abstention
-from hugrgate.ladder import (RUNG_ACCEPTED,
-                             RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_UNAVAILABLE,
-                             LadderAuditEntry)
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RoutingDecision,
-                                            RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_ERROR,
+    RUNG_SKIPPED_UNKNOWN,
+    RUNG_UNAVAILABLE,
+    LadderAuditEntry,
+)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+)
 from hugrgate.routing.qos import qos_profile
 
 __all__ = [
@@ -56,7 +63,7 @@ class ParallelPlanExecutor(RungExecutor):
 
         # Phase 1 (main thread): pre-run checks, exactly like serial.
         runnable = []  # (index, node, backend)
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
         for i, node in enumerate(plan.nodes):
             backend = router.registry.get(node.backend_name)
             if backend is None:
@@ -77,7 +84,7 @@ class ParallelPlanExecutor(RungExecutor):
 
         def run_one(item):
             i, node, backend = item
-            local_audit: List[LadderAuditEntry] = []
+            local_audit: list[LadderAuditEntry] = []
             result = router._attempt(backend, state, ctx.spec, None,
                                      local_audit, i)
             with lock:
@@ -133,7 +140,7 @@ class ParallelPlanExecutor(RungExecutor):
         router.last_audit = audit
         router.note_latencies(audit)
         if "winner" in winner:
-            i, node, backend, result, gate = winner["winner"]
+            i, node, backend, result, _gate = winner["winner"]
             result.metadata["routing_plan"] = plan.to_dict()
             result.metadata["ladder_trace"] = [e.to_dict() for e in audit]
             result.metadata["ladder_rung"] = i

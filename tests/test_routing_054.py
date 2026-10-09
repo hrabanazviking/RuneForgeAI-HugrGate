@@ -5,9 +5,13 @@ from __future__ import annotations
 import pytest
 
 from hugrgate import Backend, BackendRegistry, DecisionSpec
-from hugrgate.routing import (CAPABILITY_WEIGHTS, CapabilityScore,
-                              CapabilityScorer, RouterContext, RungBuilder,
-                              score_capability)
+from hugrgate.routing import (
+    CAPABILITY_WEIGHTS,
+    CapabilityScorer,
+    RouterContext,
+    RungBuilder,
+    score_capability,
+)
 
 
 class CapBackend(Backend):

@@ -6,12 +6,24 @@ import json
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec, SpecError)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    SpecError,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, RecordingExecutor,
-                              ReplayExecutor, RouteRecording, RoutingOptions,
-                              SerialPlanExecutor, replay)
+from hugrgate.routing import (
+    LadderRouterV2,
+    RecordingExecutor,
+    ReplayExecutor,
+    RouteRecording,
+    SerialPlanExecutor,
+    replay,
+)
 
 
 class RecBackend(Backend):

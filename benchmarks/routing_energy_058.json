@@ -1,7 +1,7 @@
 {
   "slice": "058",
   "description": "energy-aware pruning vs energy-unaware baseline",
-  "rounds": 6,
+  "rounds": 4,
   "power_model": {
     "note": "latencies measured; power draws are declared backend figures (see hugrgate/routing/energy.py)"
   },
@@ -10,11 +10,9 @@
       "gpu-hog",
       "gpu-hog",
       "gpu-hog",
-      "gpu-hog",
-      "gpu-hog",
       "gpu-hog"
     ],
-    "spent_j": 120.2277,
+    "spent_j": 80.1547,
     "per_backend_watts": {
       "gpu-hog": 250.0,
       "lean": 15.0
@@ -25,16 +23,14 @@
       "lean",
       "lean",
       "lean",
-      "lean",
-      "lean",
       "lean"
     ],
-    "spent_j": 7.2115,
+    "spent_j": 4.8081,
     "per_backend_watts": {
       "gpu-hog": 250.0,
       "lean": 15.0
     }
   },
-  "joules_saved": 113.0162,
+  "joules_saved": 75.3466,
   "savings_factor": 16.67
 }

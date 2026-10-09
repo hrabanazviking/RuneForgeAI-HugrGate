@@ -34,19 +34,29 @@ will refuse it rather than guess.
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Dict, List, Mapping, Optional, Set
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import Abstention, SpecError
-from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             RUNG_SKIPPED_UNKNOWN, LadderAuditEntry)
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RungNode,
-                                            RoutingDecision, RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_SKIPPED_UNKNOWN,
+    LadderAuditEntry,
+)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+    RungNode,
+)
 
 __all__ = [
+    "DAGExecutor",
     "DAGNode",
     "RoutingDAG",
-    "DAGExecutor",
     "evaluate_condition",
 ]
 
@@ -89,7 +99,7 @@ class DAGNode:
 
     def __init__(self, name: str, backend_name: str,
                  min_confidence: float = 0.0,
-                 latency_budget_ms: Optional[float] = None,
+                 latency_budget_ms: float | None = None,
                  condition: Condition = None):
         if not name:
             raise SpecError("DAG node needs a name")
@@ -107,7 +117,7 @@ class DAGNode:
     def serializable(self) -> bool:
         return not callable(self.condition)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "rung": self.rung.to_dict(),
@@ -117,7 +127,7 @@ class DAGNode:
 
 
 def _dummy_ctx() -> RouterContext:
-    from hugrgate import DecisionSpec
+    from hugrgate.spec import DecisionSpec
     return RouterContext.from_request({}, DecisionSpec(
         type="categorical", options=["a", "b"]))
 
@@ -126,8 +136,8 @@ class RoutingDAG:
     """A validated directed acyclic graph of conditional rungs."""
 
     def __init__(self):
-        self.nodes: Dict[str, DAGNode] = {}
-        self.edges: Dict[str, List[str]] = {}
+        self.nodes: dict[str, DAGNode] = {}
+        self.edges: dict[str, list[str]] = {}
 
     def add_node(self, node: DAGNode) -> None:
         if node.name in self.nodes:
@@ -144,18 +154,18 @@ class RoutingDAG:
         if to not in self.edges[frm]:
             self.edges[frm].append(to)
 
-    def roots(self) -> List[str]:
+    def roots(self) -> list[str]:
         targeted = {t for tos in self.edges.values() for t in tos}
         return [n for n in self.nodes if n not in targeted]
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Kahn's topological sort; raises SpecError on cycles."""
         in_degree = {n: 0 for n in self.nodes}
-        for frm, tos in self.edges.items():
+        for _, tos in self.edges.items():
             for to in tos:
                 in_degree[to] += 1
         queue = deque(n for n, d in in_degree.items() if d == 0)
-        order: List[str] = []
+        order: list[str] = []
         while queue:
             node = queue.popleft()
             order.append(node)
@@ -170,7 +180,7 @@ class RoutingDAG:
             raise SpecError("DAG has no nodes")
         return order
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"nodes": [n.to_dict() for n in self.nodes.values()],
                 "edges": {k: list(v) for k, v in self.edges.items()}}
 
@@ -182,7 +192,7 @@ class DAGExecutor(RungExecutor):
     and recorded for audit continuity, but execution follows the DAG.
     """
 
-    def __init__(self, dag: Optional[RoutingDAG] = None,
+    def __init__(self, dag: RoutingDAG | None = None,
                  validate: bool = True):
         self.dag = dag
         if dag is not None and validate:
@@ -198,14 +208,14 @@ class DAGExecutor(RungExecutor):
         import time
         policy = ctx.policy
         started = time.perf_counter()
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
 
         in_degree = {n: 0 for n in dag.nodes}
-        for frm, tos in dag.edges.items():
+        for _, tos in dag.edges.items():
             for to in tos:
                 in_degree[to] += 1
         ready: deque = deque(n for n, d in in_degree.items() if d == 0)
-        settled: Set[str] = set()
+        settled: set[str] = set()
         topo_index = {name: i for i, name in enumerate(dag.validate())}
 
         def release(node_name: str) -> None:

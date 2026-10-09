@@ -4,12 +4,20 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (LadderRouterV2, RoutingOptions,
-                              SerialPlanExecutor, run_fuzz)
-
+from hugrgate.routing import (
+    LadderRouterV2,
+    SerialPlanExecutor,
+    run_fuzz,
+)
 
 # -- harness: fixed seeds, zero violations ------------------------------------------
 

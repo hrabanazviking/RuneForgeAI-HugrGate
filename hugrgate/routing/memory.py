@@ -18,17 +18,19 @@ Memory assumptions (stated, not hidden):
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "MemoryModel",
-    "MemoryAwarePlanner",
     "DEFAULT_LOCAL_MEMORY_MB",
     "DEFAULT_REMOTE_MEMORY_MB",
+    "MemoryAwarePlanner",
+    "MemoryModel",
 ]
 
 #: Assumed footprint for a local backend that declares no figure.
@@ -68,8 +70,8 @@ class MemoryAwarePlanner(RungPlanner):
     """
 
     def __init__(self, inner: RungPlanner, registry,
-                 budget_mb: Optional[float] = None,
-                 model: Optional[MemoryModel] = None):
+                 budget_mb: float | None = None,
+                 model: MemoryModel | None = None):
         if budget_mb is not None and budget_mb < 0:
             raise ValueError(
                 f"budget_mb must be non-negative, got {budget_mb}")
@@ -82,8 +84,8 @@ class MemoryAwarePlanner(RungPlanner):
         plan = self.inner.plan(ctx)
         budget = (self.budget_mb if self.budget_mb is not None
                   else ctx.options.max_memory_mb)
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             mb = (self.model.estimate_mb(backend)

@@ -4,12 +4,17 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
 from hugrgate.provenance import ProvenanceStore
-from hugrgate.routing import (EarlyExitExecutor, LadderRouterV2,
-                              RoutingOptions)
+from hugrgate.routing import EarlyExitExecutor, LadderRouterV2, RoutingOptions
 
 
 class ExitBackend(Backend):

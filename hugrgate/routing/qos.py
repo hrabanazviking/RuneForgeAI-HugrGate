@@ -20,12 +20,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Tuple
 
 __all__ = [
+    "QOS_PROFILES",
     "QoSClass",
     "QoSProfile",
-    "QOS_PROFILES",
     "qos_profile",
 ]
 
@@ -37,13 +36,13 @@ class QoSClass(str, Enum):
     CRITICAL = "critical"
 
     @classmethod
-    def parse(cls, name: str) -> "QoSClass":
+    def parse(cls, name: str) -> QoSClass:
         try:
             return cls(name)
         except ValueError:
             raise ValueError(
                 f"unknown QoS class: {name!r}; expected one of "
-                f"{[c.value for c in cls]}")
+                f"{[c.value for c in cls]}") from None
 
 
 @dataclass(frozen=True)
@@ -52,7 +51,7 @@ class QoSProfile:
 
     name: QoSClass
     depth_cap: int
-    weights: Tuple[float, float, float]  # capability, latency, cost
+    weights: tuple[float, float, float]  # capability, latency, cost
     parallel_width: int
     hedge_allowed: bool
     hedge_delay_ms: float
@@ -72,7 +71,7 @@ class QoSProfile:
             raise ValueError("fast_path_probability must be in [0,1]")
 
 
-QOS_PROFILES: Dict[QoSClass, QoSProfile] = {
+QOS_PROFILES: dict[QoSClass, QoSProfile] = {
     QoSClass.BEST_EFFORT: QoSProfile(
         name=QoSClass.BEST_EFFORT, depth_cap=2, weights=(0.2, 0.4, 0.4),
         parallel_width=1, hedge_allowed=False, hedge_delay_ms=100.0,

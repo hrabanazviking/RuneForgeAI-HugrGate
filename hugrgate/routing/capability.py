@@ -26,7 +26,7 @@ decimals so scores are stable and comparable.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.routing.architecture import RouterContext
@@ -51,8 +51,8 @@ class CapabilityScore:
     """A graded capability verdict for one backend on one request."""
 
     value: float
-    reasons: List[str] = field(default_factory=list)
-    factors: Dict[str, float] = field(default_factory=dict)
+    reasons: list[str] = field(default_factory=list)
+    factors: dict[str, float] = field(default_factory=dict)
 
     def __post_init__(self):
         if not 0.0 <= self.value <= 1.0:
@@ -65,13 +65,13 @@ class CapabilityScore:
 class CapabilityScorer:
     """Score backends for a request with an auditable factor breakdown."""
 
-    def __init__(self, weights: Dict[str, float] | None = None):
+    def __init__(self, weights: dict[str, float] | None = None):
         self.weights = dict(weights or WEIGHTS)
         if abs(sum(self.weights.values()) - 1.0) > 1e-9:
             raise ValueError("capability weights must sum to 1.0")
 
     def score(self, backend: Backend, ctx: RouterContext) -> CapabilityScore:
-        reasons: List[str] = []
+        reasons: list[str] = []
         if not backend.supports(ctx.spec):
             return CapabilityScore(
                 0.0,
@@ -80,7 +80,7 @@ class CapabilityScorer:
                 factors={"support": 0.0})
 
         caps = backend.capabilities() or {}
-        factors: Dict[str, float] = {}
+        factors: dict[str, float] = {}
 
         # spec-type claim
         claimed = caps.get("spec_types") or []
@@ -134,7 +134,7 @@ class CapabilityScorer:
 
     @staticmethod
     def _capacity_fit(backend: Backend, ctx: RouterContext,
-                      caps: Dict[str, Any], reasons: List[str]) -> float:
+                      caps: dict[str, Any], reasons: list[str]) -> float:
         space = len(ctx.spec.value_space())
         limits = caps.get("limits") or {}
         for key, needed in (("max_options", space), ("max_labels", space)):

@@ -8,30 +8,37 @@ slice.
 
 from hugrgate.routing.architecture import (
     LadderRouterV2,
-    RungExecutor,
-    RungMode,
-    RungNode,
-    RungPlanner,
     RouterContext,
     RoutingDecision,
     RoutingOptions,
     RoutingPlan,
+    RungExecutor,
+    RungMode,
+    RungNode,
+    RungPlanner,
     SerialPlanExecutor,
-)
-from hugrgate.routing.capability import (
-    CapabilityScore,
-    CapabilityScorer,
-    WEIGHTS as CAPABILITY_WEIGHTS,
 )
 from hugrgate.routing.availability import (
     AvailabilityAwarePlanner,
     AvailabilityTracker,
     CircuitState,
 )
+from hugrgate.routing.capability import (
+    WEIGHTS as CAPABILITY_WEIGHTS,
+)
+from hugrgate.routing.capability import (
+    CapabilityScore,
+    CapabilityScorer,
+)
 from hugrgate.routing.confidence import (
     CalibrationTracker,
     ConfidenceAwarePlanner,
     adjusted_gate,
+)
+from hugrgate.routing.cost import (
+    CostAwarePlanner,
+    CostLedger,
+    budget_for,
 )
 from hugrgate.routing.dag import (
     DAGExecutor,
@@ -41,33 +48,12 @@ from hugrgate.routing.dag import (
 )
 from hugrgate.routing.dsl import (
     RoutePolicy,
+)
+from hugrgate.routing.dsl import (
     parse as parse_route_policy,
 )
-from hugrgate.routing.explain import (
-    OUTCOME_PHRASES,
-    explain_decision,
-    explain_plan,
-    explain_route,
-)
-from hugrgate.routing.fuzz import (
-    FuzzBackend,
-    run_fuzz,
-)
-from hugrgate.routing.replay import (
-    RecordingExecutor,
-    ReplayExecutor,
-    RouteRecording,
-    replay,
-)
-from hugrgate.routing.simulate import (
-    SimulatedRung,
-    SimulationReport,
-    simulate,
-)
-from hugrgate.routing.cost import (
-    CostAwarePlanner,
-    CostLedger,
-    budget_for,
+from hugrgate.routing.early_exit import (
+    EarlyExitExecutor,
 )
 from hugrgate.routing.energy import (
     DEFAULT_LOCAL_WATTS,
@@ -76,17 +62,24 @@ from hugrgate.routing.energy import (
     EnergyLedger,
     EnergyModel,
 )
-from hugrgate.routing.hardware import (
-    HardwareAwarePlanner,
-    HostProfile,
-    hardware_compatible,
-)
-from hugrgate.routing.early_exit import (
-    EarlyExitExecutor,
+from hugrgate.routing.explain import (
+    OUTCOME_PHRASES,
+    explain_decision,
+    explain_plan,
+    explain_route,
 )
 from hugrgate.routing.fallback import (
     FallbackGraph,
     FallbackGraphExecutor,
+)
+from hugrgate.routing.fuzz import (
+    FuzzBackend,
+    run_fuzz,
+)
+from hugrgate.routing.hardware import (
+    HardwareAwarePlanner,
+    HostProfile,
+    hardware_compatible,
 )
 from hugrgate.routing.hedged import (
     HedgedPlanExecutor,
@@ -104,22 +97,33 @@ from hugrgate.routing.memory import (
 from hugrgate.routing.parallel import (
     ParallelPlanExecutor,
 )
-from hugrgate.routing.qos import (
-    QOS_PROFILES,
-    QoSClass,
-    QoSProfile,
-    qos_profile,
-)
 from hugrgate.routing.privacy import (
     BackendClearance,
     DataClassifier,
     PrivacyAwarePlanner,
     PrivacyTier,
 )
+from hugrgate.routing.qos import (
+    QOS_PROFILES,
+    QoSClass,
+    QoSProfile,
+    qos_profile,
+)
+from hugrgate.routing.replay import (
+    RecordingExecutor,
+    ReplayExecutor,
+    RouteRecording,
+    replay,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
     RungFilter,
+)
+from hugrgate.routing.simulate import (
+    SimulatedRung,
+    SimulationReport,
+    simulate,
 )
 from hugrgate.routing.synthesis import (
     QOS_DEPTH_CAPS,
@@ -130,35 +134,38 @@ from hugrgate.routing.synthesis import (
 
 __all__ = [
     "CAPABILITY_WEIGHTS",
+    "DEFAULT_LOCAL_MEMORY_MB",
+    "DEFAULT_LOCAL_WATTS",
+    "DEFAULT_REMOTE_MEMORY_MB",
+    "DEFAULT_REMOTE_WATTS",
+    "OUTCOME_PHRASES",
+    "QOS_DEPTH_CAPS",
+    "QOS_PROFILES",
+    "QOS_WEIGHTS",
     "AvailabilityAwarePlanner",
     "AvailabilityTracker",
+    "BackendClearance",
     "CalibrationTracker",
-    "CircuitState",
     "CapabilityScore",
     "CapabilityScorer",
+    "CircuitState",
     "ConfidenceAwarePlanner",
     "CostAwarePlanner",
     "CostLedger",
-    "DEFAULT_LOCAL_WATTS",
-    "DEFAULT_REMOTE_WATTS",
+    "DAGExecutor",
+    "DAGNode",
+    "DataClassifier",
     "DynamicRungPlanner",
+    "EarlyExitExecutor",
     "EnergyAwarePlanner",
     "EnergyLedger",
     "EnergyModel",
-    "OUTCOME_PHRASES",
-    "explain_decision",
-    "explain_plan",
-    "explain_route",
-    "EarlyExitExecutor",
     "FallbackGraph",
-    "FuzzBackend",
     "FallbackGraphExecutor",
+    "FuzzBackend",
     "HardwareAwarePlanner",
     "HedgedPlanExecutor",
     "HostProfile",
-    "adjusted_gate",
-    "budget_for",
-    "hardware_compatible",
     "LadderRouterV2",
     "LadderSynthesizer",
     "LatencyAwarePlanner",
@@ -168,40 +175,37 @@ __all__ = [
     "ParallelPlanExecutor",
     "PrivacyAwarePlanner",
     "PrivacyTier",
-    "BackendClearance",
-    "DAGExecutor",
-    "DAGNode",
-    "DataClassifier",
-    "RoutingDAG",
-    "evaluate_condition",
-    "QOS_PROFILES",
     "QoSClass",
     "QoSProfile",
-    "qos_profile",
-    "DEFAULT_LOCAL_MEMORY_MB",
-    "DEFAULT_REMOTE_MEMORY_MB",
-    "QOS_DEPTH_CAPS",
-    "QOS_WEIGHTS",
+    "RecordingExecutor",
+    "ReplayExecutor",
+    "RoutePolicy",
+    "RouteRecording",
+    "RouterContext",
+    "RoutingDAG",
+    "RoutingDecision",
+    "RoutingOptions",
+    "RoutingPlan",
     "RungBuilder",
     "RungExecutor",
     "RungFilter",
-    "RecordingExecutor",
-    "ReplayExecutor",
-    "RouteRecording",
     "RungMode",
-    "replay",
     "RungNode",
     "RungPlanner",
-    "RouterContext",
-    "RoutingDecision",
-    "RoutingOptions",
-    "RoutePolicy",
-    "RoutingPlan",
-    "run_fuzz",
-    "parse_route_policy",
     "SerialPlanExecutor",
     "SimulatedRung",
     "SimulationReport",
-    "simulate",
+    "adjusted_gate",
+    "budget_for",
+    "evaluate_condition",
+    "explain_decision",
+    "explain_plan",
+    "explain_route",
+    "hardware_compatible",
+    "parse_route_policy",
+    "qos_profile",
+    "replay",
+    "run_fuzz",
     "score_capability",
+    "simulate",
 ]

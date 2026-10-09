@@ -13,11 +13,14 @@ Capability grading comes from slice 054's :class:`CapabilityScorer`.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungMode, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungMode,
+    RungNode,
+    RungPlanner,
+)
 from hugrgate.routing.capability import CapabilityScorer
 from hugrgate.routing.qos import QOS_PROFILES, qos_profile
 from hugrgate.routing.rungs import RungBuilder
@@ -25,16 +28,16 @@ from hugrgate.routing.rungs import RungBuilder
 __all__ = [
     "QOS_DEPTH_CAPS",
     "QOS_WEIGHTS",
-    "score_capability",
     "LadderSynthesizer",
+    "score_capability",
 ]
 
 #: Backward-compatible views over the slice-063 QoS profiles (single source
 #: of truth now lives in hugrgate.routing.qos).
-QOS_DEPTH_CAPS: Dict[str, int] = {
+QOS_DEPTH_CAPS: dict[str, int] = {
     c.value: p.depth_cap for c, p in QOS_PROFILES.items()
 }
-QOS_WEIGHTS: Dict[str, tuple] = {
+QOS_WEIGHTS: dict[str, tuple] = {
     c.value: p.weights for c, p in QOS_PROFILES.items()
 }
 
@@ -57,7 +60,7 @@ class LadderSynthesizer(RungPlanner):
     builder: candidate source (defaults to a plain :class:`RungBuilder`).
     """
 
-    def __init__(self, registry, builder: Optional[RungBuilder] = None):
+    def __init__(self, registry, builder: RungBuilder | None = None):
         self.registry = registry
         self.builder = builder or RungBuilder()
 
@@ -72,8 +75,8 @@ class LadderSynthesizer(RungPlanner):
         chosen = scored[:cap]
 
         budget = ctx.policy.maximum_latency_ms
-        nodes: List[RungNode] = []
-        rationale: List[str] = []
+        nodes: list[RungNode] = []
+        rationale: list[str] = []
         for rank, (score, backend) in enumerate(chosen):
             rung_budget = (budget / len(chosen)) if budget else None
             node = RungNode(

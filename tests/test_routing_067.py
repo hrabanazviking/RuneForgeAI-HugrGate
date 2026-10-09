@@ -4,12 +4,23 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, BackendError,
-                      BackendUnavailable, DecisionPolicy, DecisionResult,
-                      DecisionSpec, SpecError)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendError,
+    BackendRegistry,
+    BackendUnavailable,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    SpecError,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (FallbackGraph, FallbackGraphExecutor,
-                              LadderRouterV2, RoutingOptions)
+from hugrgate.routing import (
+    FallbackGraph,
+    FallbackGraphExecutor,
+    LadderRouterV2,
+)
 
 
 class FbBackend(Backend):

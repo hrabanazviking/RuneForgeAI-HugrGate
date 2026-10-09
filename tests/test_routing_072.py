@@ -7,7 +7,6 @@ import pytest
 from hugrgate import DecisionPolicy, PolicyError, SpecError
 from hugrgate.routing import RoutePolicy, RoutingOptions, parse_route_policy
 
-
 FULL = """
 route {
   qos = priority;
@@ -119,8 +118,7 @@ def test_dumps_round_trip():
 
 
 def test_dsl_drives_router_end_to_end():
-    from hugrgate import (Backend, BackendRegistry, DecisionResult,
-                          DecisionSpec)
+    from hugrgate import Backend, BackendRegistry, DecisionResult, DecisionSpec
     from hugrgate.ladder import LadderRung
     from hugrgate.routing import LadderRouterV2
 

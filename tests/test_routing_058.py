@@ -9,12 +9,24 @@ import sys
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (DynamicRungPlanner, EnergyAwarePlanner,
-                              EnergyLedger, EnergyModel, LadderRouterV2,
-                              RouterContext, RoutingOptions)
+from hugrgate.routing import (
+    DynamicRungPlanner,
+    EnergyAwarePlanner,
+    EnergyLedger,
+    EnergyModel,
+    LadderRouterV2,
+    RouterContext,
+    RoutingOptions,
+)
 from hugrgate.routing.energy import DEFAULT_LOCAL_WATTS, DEFAULT_REMOTE_WATTS
 
 
@@ -151,7 +163,7 @@ def test_router_records_measured_energy():
     router.decide({}, spec())
     # measured latency is small (no real sleep here), energy tiny but > 0
     assert ledger.spent > 0
-    assert ledger.spent < 15.0 * 1.0  # bounded by 1s × 15W
+    assert ledger.spent < 15.0 * 1.0  # bounded by 1s x 15W
 
 
 def test_no_ledger_no_energy_tracking():

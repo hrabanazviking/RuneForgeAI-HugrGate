@@ -4,12 +4,24 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (CostAwarePlanner, CostLedger, DynamicRungPlanner,
-                              LadderRouterV2, RouterContext, RoutingOptions,
-                              budget_for)
+from hugrgate.routing import (
+    CostAwarePlanner,
+    CostLedger,
+    DynamicRungPlanner,
+    LadderRouterV2,
+    RouterContext,
+    RoutingOptions,
+    budget_for,
+)
 
 
 class CostBackend(Backend):

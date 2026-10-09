@@ -25,17 +25,20 @@ and tested below.
 from __future__ import annotations
 
 from enum import IntEnum
-from typing import Dict, List, Optional
 
 from hugrgate.backend import Backend
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "PrivacyTier",
-    "DataClassifier",
     "BackendClearance",
+    "DataClassifier",
     "PrivacyAwarePlanner",
+    "PrivacyTier",
 ]
 
 
@@ -66,7 +69,7 @@ _KEY_TIERS = (
 class DataClassifier:
     """Classify request state into a privacy tier."""
 
-    def __init__(self, extra_rules: Optional[Dict[str, PrivacyTier]] = None):
+    def __init__(self, extra_rules: dict[str, PrivacyTier] | None = None):
         self.extra_rules = dict(extra_rules or {})
 
     def classify_key(self, key: str) -> PrivacyTier:
@@ -85,7 +88,7 @@ class DataClassifier:
             try:
                 tier = PrivacyTier[str(override).upper()]
             except KeyError:
-                raise ValueError(f"unknown data_tier: {override!r}")
+                raise ValueError(f"unknown data_tier: {override!r}") from None
             return self._apply_policy_floor(ctx, tier)
         tier = PrivacyTier.PUBLIC
         for key in ctx.state_keys:
@@ -115,7 +118,7 @@ class BackendClearance:
         return PrivacyTier.RESTRICTED
 
     @staticmethod
-    def verdict(backend: Backend, tier: PrivacyTier) -> Optional[str]:
+    def verdict(backend: Backend, tier: PrivacyTier) -> str | None:
         """None when the backend may see this tier, else the reason."""
         clearance = BackendClearance.clearance(backend)
         if tier <= clearance:
@@ -128,7 +131,7 @@ class PrivacyAwarePlanner(RungPlanner):
     """Wrap a planner; prune rungs the data tier forbids."""
 
     def __init__(self, inner: RungPlanner, registry,
-                 classifier: Optional[DataClassifier] = None):
+                 classifier: DataClassifier | None = None):
         self.inner = inner
         self.registry = registry
         self.classifier = classifier or DataClassifier()
@@ -136,8 +139,8 @@ class PrivacyAwarePlanner(RungPlanner):
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
         tier = self.classifier.classify(ctx)
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             reason = (BackendClearance.verdict(backend, tier)

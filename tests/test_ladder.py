@@ -200,7 +200,11 @@ def test_ladder_policy_minimum_probability_applies():
 def test_ladder_rejects_invalid_backend_values():
     class Evil(FixedBackend):
         def evaluate(self, state, spec, context=None):
-            return DecisionResult(value="zzz", probability=0.99,
+            # Coherent result, but "zzz" is outside the spec's outcome
+            # space — validate_result must reject it with SpecError
+            # (slice 012). (probability matches distribution so the
+            # failure comes from spec-space validation, not coherence.)
+            return DecisionResult(value="zzz", probability=1.0,
                                   distribution={"zzz": 1.0})
     router = make_router(Evil("evil"))
     with pytest.raises(SpecError):

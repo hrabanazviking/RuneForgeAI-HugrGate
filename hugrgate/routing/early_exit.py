@@ -28,14 +28,23 @@ Both exits are recorded in the audit detail and in
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import Abstention
-from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             RUNG_SKIPPED_UNKNOWN, LadderAuditEntry)
-from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RoutingDecision,
-                                            RoutingPlan)
+from hugrgate.ladder import (
+    RUNG_ACCEPTED,
+    RUNG_BELOW_CONFIDENCE,
+    RUNG_SKIPPED_UNKNOWN,
+    LadderAuditEntry,
+)
+from hugrgate.routing.architecture import (
+    LadderRouterV2,
+    RouterContext,
+    RoutingDecision,
+    RoutingPlan,
+    RungExecutor,
+)
 from hugrgate.routing.qos import qos_profile
 
 __all__ = [
@@ -61,9 +70,9 @@ class EarlyExitExecutor(RungExecutor):
         policy = ctx.policy
         started = time.perf_counter()
 
-        audit: List[LadderAuditEntry] = []
-        best: Optional[Dict[str, Any]] = None  # {prob, result, index, gate}
-        improvements: List[float] = []
+        audit: list[LadderAuditEntry] = []
+        best: dict[str, Any] | None = None  # {prob, result, index, gate}
+        improvements: list[float] = []
 
         for i, node in enumerate(plan.nodes):
             backend = router.registry.get(node.backend_name)

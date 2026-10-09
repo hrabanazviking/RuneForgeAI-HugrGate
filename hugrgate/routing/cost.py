@@ -15,19 +15,21 @@ same pattern slice 056 established for latency.
 
 from __future__ import annotations
 
-from typing import List, Optional
-
-from hugrgate.routing.architecture import (RouterContext, RungNode,
-                                            RungPlanner, RoutingPlan)
+from hugrgate.routing.architecture import (
+    RouterContext,
+    RoutingPlan,
+    RungNode,
+    RungPlanner,
+)
 
 __all__ = [
-    "CostLedger",
     "CostAwarePlanner",
+    "CostLedger",
     "budget_for",
 ]
 
 
-def budget_for(ctx: RouterContext) -> Optional[float]:
+def budget_for(ctx: RouterContext) -> float | None:
     """Effective per-request cost budget: options override policy."""
     if ctx.options.max_cost is not None:
         return ctx.options.max_cost
@@ -37,16 +39,16 @@ def budget_for(ctx: RouterContext) -> Optional[float]:
 class CostLedger:
     """Per-request cost accounting: reserve at plan time, spend at run time."""
 
-    def __init__(self, budget: Optional[float]):
+    def __init__(self, budget: float | None):
         if budget is not None and budget < 0:
             raise ValueError(f"budget must be non-negative, got {budget}")
         self.budget = budget
         self.reserved = 0.0
         self.spent = 0.0
-        self.entries: List[dict] = []
+        self.entries: list[dict] = []
 
     @property
-    def remaining(self) -> Optional[float]:
+    def remaining(self) -> float | None:
         if self.budget is None:
             return None
         return max(0.0, self.budget - self.reserved - self.spent)
@@ -94,7 +96,7 @@ class CostAwarePlanner(RungPlanner):
     """
 
     def __init__(self, inner: RungPlanner, registry,
-                 ledger: Optional[CostLedger] = None):
+                 ledger: CostLedger | None = None):
         self.inner = inner
         self.registry = registry
         self.ledger = ledger  # may be replaced per request in plan()
@@ -102,8 +104,8 @@ class CostAwarePlanner(RungPlanner):
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         plan = self.inner.plan(ctx)
         ledger = self.ledger or CostLedger(budget_for(ctx))
-        kept: List[RungNode] = []
-        pruned: List[str] = []
+        kept: list[RungNode] = []
+        pruned: list[str] = []
         for node in plan.nodes:
             backend = self.registry.get(node.backend_name)
             estimate = (backend.estimated_cost()

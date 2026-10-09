@@ -6,13 +6,24 @@ import time
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, BackendUnavailable,
-                      DecisionPolicy, DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    BackendUnavailable,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.errors import BackendError
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (AvailabilityAwarePlanner, AvailabilityTracker,
-                              CircuitState, DynamicRungPlanner, LadderRouterV2,
-                              RouterContext)
+from hugrgate.routing import (
+    AvailabilityAwarePlanner,
+    AvailabilityTracker,
+    DynamicRungPlanner,
+    LadderRouterV2,
+    RouterContext,
+)
 
 
 class AvailBackend(Backend):

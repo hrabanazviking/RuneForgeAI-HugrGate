@@ -4,13 +4,25 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate import (Abstention, Backend, BackendRegistry, DecisionPolicy,
-                      DecisionResult, DecisionSpec)
+from hugrgate import (
+    Abstention,
+    Backend,
+    BackendRegistry,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+)
 from hugrgate.ladder import LadderRung
-from hugrgate.routing import (DEFAULT_LOCAL_MEMORY_MB,
-                              DEFAULT_REMOTE_MEMORY_MB, DynamicRungPlanner,
-                              LadderRouterV2, MemoryAwarePlanner, MemoryModel,
-                              RouterContext, RoutingOptions)
+from hugrgate.routing import (
+    DEFAULT_LOCAL_MEMORY_MB,
+    DEFAULT_REMOTE_MEMORY_MB,
+    DynamicRungPlanner,
+    LadderRouterV2,
+    MemoryAwarePlanner,
+    MemoryModel,
+    RouterContext,
+    RoutingOptions,
+)
 
 
 class MemBackend(Backend):
