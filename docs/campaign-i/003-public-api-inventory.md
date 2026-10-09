@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 72 · **public names:** 357
+**Modules:** 73 · **public names:** 365
 
 ## API stability policy
 
@@ -263,6 +263,7 @@ that this document never drifts from the code.
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
 | `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
+| `DistributedReleaseGate` | class | `(config: 'ReleaseGateConfig | None' = None) -> 'None'` |
 | `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `FaultInjector` | class | `(drop_rate: 'float' = 0.0, delay_s: 'float' = 0.0, delay_rate: 'float' = 0.0, duplicate_rate: 'float' = 0.0, corrupt_rate: 'float' = 0.0, seed: 'int | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
@@ -286,6 +287,9 @@ that this document never drifts from the code.
 | `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `ReleaseCheck` | class | `(name: 'str', passed: 'bool', detail: 'str') -> None` |
+| `ReleaseGateConfig` | class | `(min_health_score: 'float' = 0.5, max_quarantined: 'int' = 0, require_quorum: 'bool' = True, min_success_rate: 'float' = 0.99, min_throughput_per_s: 'float' = 100.0, benchmark_scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `ReleaseReport` | class | `(checks: 'list[ReleaseCheck]' = <factory>) -> None` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 | `Span` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str', operation: 'str', started_at: 'float' = <factory>, ended_at: 'float | None' = None, status: 'str' = 'ok', attributes: 'dict[str, Any]' = <factory>, _collector: 'Any' = None) -> None` |
@@ -477,6 +481,15 @@ that this document never drifts from the code.
 | `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
 | `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
 | `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.cluster.release_gate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DistributedReleaseGate` | class | `(config: 'ReleaseGateConfig | None' = None) -> 'None'` |
+| `ReleaseCheck` | class | `(name: 'str', passed: 'bool', detail: 'str') -> None` |
+| `ReleaseGateConfig` | class | `(min_health_score: 'float' = 0.5, max_quarantined: 'int' = 0, require_quorum: 'bool' = True, min_success_rate: 'float' = 0.99, min_throughput_per_s: 'float' = 100.0, benchmark_scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `ReleaseReport` | class | `(checks: 'list[ReleaseCheck]' = <factory>) -> None` |
 
 ### `hugrgate.cluster.routes`
 

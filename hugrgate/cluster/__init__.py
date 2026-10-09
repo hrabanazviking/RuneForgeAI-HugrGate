@@ -89,6 +89,12 @@ from hugrgate.cluster.recovery import (
     DEFAULT_RECOVERY_MAX_DELAY_S,
     RecoveryManager,
 )
+from hugrgate.cluster.release_gate import (
+    DistributedReleaseGate,
+    ReleaseCheck,
+    ReleaseGateConfig,
+    ReleaseReport,
+)
 from hugrgate.cluster.routing import (
     DistributedRouter,
     PeerScores,
@@ -161,6 +167,7 @@ __all__ = [
     "Discovery",
     "DiscoveryRegistry",
     "DistributedBatcher",
+    "DistributedReleaseGate",
     "DistributedRouter",
     "FaultInjector",
     "InboundHook",
@@ -184,6 +191,9 @@ __all__ = [
     "ProvenanceExchange",
     "RPCClient",
     "RecoveryManager",
+    "ReleaseCheck",
+    "ReleaseGateConfig",
+    "ReleaseReport",
     "RemoteBackend",
     "RouteCandidate",
     "Span",
