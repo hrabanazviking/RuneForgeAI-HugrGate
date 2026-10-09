@@ -18,10 +18,18 @@ from hugrgate.routing.architecture import (
     RoutingPlan,
     SerialPlanExecutor,
 )
+from hugrgate.routing.rungs import (
+    DynamicRungPlanner,
+    RungBuilder,
+    RungFilter,
+)
 
 __all__ = [
+    "DynamicRungPlanner",
     "LadderRouterV2",
+    "RungBuilder",
     "RungExecutor",
+    "RungFilter",
     "RungMode",
     "RungNode",
     "RungPlanner",
