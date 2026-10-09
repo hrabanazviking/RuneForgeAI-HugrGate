@@ -86,6 +86,7 @@ flowchart TD
         edge_recovery[edge.recovery]
         edge_watchdog[edge.watchdog]
         edge_telemetry[edge.telemetry]
+        edge_bench[edge.bench]
     end
 
     hugrgate --> backend
@@ -192,6 +193,13 @@ flowchart TD
     daemon -.-> server
     daemon -.-> spec
     edge_affinity --> errors
+    edge_bench -.-> hugrgate
+    edge_bench -.-> backends_rules
+    edge_bench -.-> edge
+    edge_bench --> edge_platform
+    edge_bench -.-> edge_storage
+    edge_bench -.-> edge_telemetry
+    edge_bench --> errors
     edge_bootstrap --> edge_cachetune
     edge_bootstrap --> edge_memory
     edge_bootstrap --> edge_npu
@@ -291,7 +299,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench` |
 
 ## Internal dependency edges
 
@@ -401,6 +409,13 @@ flowchart TD
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `edge.affinity` | `errors` | no |
+| `edge.bench` | `hugrgate` | yes |
+| `edge.bench` | `backends.rules` | yes |
+| `edge.bench` | `edge` | yes |
+| `edge.bench` | `edge.platform` | no |
+| `edge.bench` | `edge.storage` | yes |
+| `edge.bench` | `edge.telemetry` | yes |
+| `edge.bench` | `errors` | no |
 | `edge.bootstrap` | `edge.cachetune` | no |
 | `edge.bootstrap` | `edge.memory` | no |
 | `edge.bootstrap` | `edge.npu` | no |

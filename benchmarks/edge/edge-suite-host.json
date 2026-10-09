@@ -1,0 +1,77 @@
+{
+  "schema": "edge-bench/1",
+  "name": "edge-suite",
+  "timestamp": 1791551501.4363914,
+  "platform": {
+    "arch": "x86_64",
+    "system": "Linux",
+    "release": "7.0.0-39-generic",
+    "python_version": [
+      3,
+      12,
+      3
+    ],
+    "python_implementation": "CPython",
+    "cpu_count": 2,
+    "cpu_features": [],
+    "page_size": 4096,
+    "byteorder": "little",
+    "is_64bit": true,
+    "is_arm64": false,
+    "live": true
+  },
+  "baseline_board": null,
+  "hardware_note": "measured on x86_64; no target board bound",
+  "cases": {
+    "decide/rules": {
+      "name": "decide/rules",
+      "iterations": 300,
+      "mean_s": 0.00010956143001749297,
+      "p50_s": 9.000999989439151e-05,
+      "p99_s": 0.0003212428699771406,
+      "min_s": 8.29740001790924e-05,
+      "max_s": 0.0013291649993334431,
+      "ops_per_s": 9127.299633094752
+    },
+    "quant/int8-matvec": {
+      "name": "quant/int8-matvec",
+      "iterations": 300,
+      "mean_s": 1.3349726614251268e-05,
+      "p50_s": 1.2389000403345563e-05,
+      "p99_s": 6.0580910176213355e-05,
+      "min_s": 1.2248000530235004e-05,
+      "max_s": 6.436700004996965e-05,
+      "ops_per_s": 74907.90103015798
+    },
+    "quant/int4-roundtrip": {
+      "name": "quant/int4-roundtrip",
+      "iterations": 300,
+      "mean_s": 4.318578671700379e-05,
+      "p50_s": 3.836799987766426e-05,
+      "p99_s": 0.00011396884012356153,
+      "min_s": 3.797699991991976e-05,
+      "max_s": 0.0003988190001109615,
+      "ops_per_s": 23155.766654269704
+    },
+    "storage/put-flush": {
+      "name": "storage/put-flush",
+      "iterations": 300,
+      "mean_s": 0.0003752826400432241,
+      "p50_s": 0.0001213924997500726,
+      "p99_s": 0.004613868370015518,
+      "min_s": 4.628000078810146e-05,
+      "max_s": 0.015816164999705506,
+      "ops_per_s": 2664.658295637716
+    },
+    "telemetry/record": {
+      "name": "telemetry/record",
+      "iterations": 300,
+      "mean_s": 3.21552332934516e-06,
+      "p50_s": 2.6640000214683823e-06,
+      "p99_s": 1.3866429953850442e-05,
+      "min_s": 2.564000169513747e-06,
+      "max_s": 7.152699981816113e-05,
+      "ops_per_s": 310991.3683019832
+    }
+  }
+}

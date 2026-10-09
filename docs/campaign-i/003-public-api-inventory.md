@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 60 · **public names:** 271
+**Modules:** 61 · **public names:** 279
 
 ## API stability policy
 
@@ -272,6 +272,19 @@ that this document never drifts from the code.
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
 | `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+
+### `hugrgate.edge.bench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
+| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
+| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
+| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
+| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
 
 ### `hugrgate.edge.bootstrap`
 
