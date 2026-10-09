@@ -68,3 +68,15 @@ class HistoryLike(Protocol):
     def clear(self) -> Any:
         """Remove all episodes (owner role in guarded use)."""
         ...  # pragma: no cover - protocol stub
+
+    def count(self) -> int:
+        """Number of retained episodes."""
+        ...  # pragma: no cover - protocol stub
+
+    def estimate_bytes(self) -> int:
+        """Rough in-memory footprint of retained episodes."""
+        ...  # pragma: no cover - protocol stub
+
+    def purge(self, predicate: Any) -> int:
+        """Remove episodes matching ``predicate``; return the count."""
+        ...  # pragma: no cover - protocol stub

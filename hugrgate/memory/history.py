@@ -239,6 +239,20 @@ class DecisionHistory:
             self._by_id.clear()
             return removed
 
+    def purge(self, predicate) -> int:
+        """Remove episodes matching ``predicate``; return the count.
+
+        Slice 316: the retention primitive. ``predicate`` receives an
+        episode and returns truthy to remove it. Thread-safe.
+        """
+        with self._lock:
+            kept = [e for e in self._episodes if not predicate(e)]
+            removed = len(self._episodes) - len(kept)
+            if removed:
+                self._episodes = kept
+                self._by_id = {e.episode_id: e for e in kept}
+            return removed
+
     def find(self, query: MemoryQuery) -> list[Episode]:
         """Run a :class:`MemoryQuery`; return deep copies, never aliases."""
         if not isinstance(query, MemoryQuery):

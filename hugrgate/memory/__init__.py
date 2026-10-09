@@ -68,6 +68,13 @@ from hugrgate.memory.policies import (
 )
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
 from hugrgate.memory.recency import RecencyFeatures, recency_features
+from hugrgate.memory.retention import (
+    MemoryQuota,
+    QuotaStatus,
+    RetentionReport,
+    check_quota,
+    enforce_quotas,
+)
 from hugrgate.memory.retrieval import RetrievalResult, recall, retrieve
 from hugrgate.memory.similarity import (
     SimilarityHit,
@@ -95,9 +102,12 @@ __all__ = [
     "MemoryDecision",
     "MemoryPolicy",
     "MemoryQuery",
+    "MemoryQuota",
     "MemoryRule",
     "Outcome",
+    "QuotaStatus",
     "RecencyFeatures",
+    "RetentionReport",
     "RetrievalResult",
     "RolePermission",
     "SimilarityHit",
@@ -106,6 +116,7 @@ __all__ = [
     "by_backend_value",
     "by_model",
     "by_outcome_kind",
+    "check_quota",
     "contract_histories",
     "contract_key_for",
     "cosine",
@@ -118,6 +129,7 @@ __all__ = [
     "drop_forbidden",
     "drop_unaccepted",
     "effective_count",
+    "enforce_quotas",
     "featurize_episode",
     "featurize_query",
     "find_in_provenance",

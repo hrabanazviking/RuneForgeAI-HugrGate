@@ -196,3 +196,16 @@ it into an opaque agent.
   mutation cannot leak into the store, role-escalation attempts
   contained.
 - Tests: `tests/test_memory_access.py` (13 tests).
+
+### Slice 316 — Memory retention controls
+- `hugrgate/memory/retention.py`: `MemoryQuota` (max episodes, max
+  bytes, warn threshold, TTL overrides reusing
+  `privacy_retention.RETENTION_DEFAULTS`); `enforce_quotas()` applies
+  TTL purges then oldest-first count/byte eviction and returns a
+  `RetentionReport`; `check_quota()` is the non-mutating ok/warn/over
+  probe; `MemoryQuotaExceeded` raised when no single episode can fit
+  `max_bytes` (total amnesia would be the dishonest alternative).
+- `DecisionHistory.purge(predicate)` retention primitive;
+  `ProvenanceStore.estimate_bytes()` — direct answer to the Campaign
+  XII +1.3 GB unbounded-growth flag: measure before controlling.
+- Tests: `tests/test_memory_retention.py` (12 tests).

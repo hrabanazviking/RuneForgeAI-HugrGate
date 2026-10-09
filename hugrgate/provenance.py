@@ -232,6 +232,23 @@ class ProvenanceStore:
         with self._lock:
             return len(self._records)
 
+    def estimate_bytes(self) -> int:
+        """Rough in-memory footprint of the retained records.
+
+        Slice 316: the Campaign XII finding (+1.3 GB RSS over 1M
+        decisions) showed unbounded provenance growth needs
+        measurement before it needs control. Canonical JSON length
+        per record plus a fixed per-record overhead for Python object
+        headers — a budgeting aid, not an allocator reading.
+        """
+        with self._lock:
+            records = list(self._records)
+        total = 0
+        for record in records:
+            body = self._canonical(record)
+            total += len(body.encode("utf-8")) + 512
+        return total
+
     def verify_chain(self) -> bool:
         """Recompute every link. True iff the stored history is intact.
 
