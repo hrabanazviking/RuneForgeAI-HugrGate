@@ -26,12 +26,25 @@ class DecisionPolicy:
     max_cost: Optional[float] = None
     review_band: Optional[tuple] = None  # (low, high) → "review"
 
+    #: The only privacy classes with defined semantics. Anything else is
+    #: a typo, not a new class — rejected loudly (slice 008), because a
+    #: misspelled "strict" must never silently degrade to "standard".
+    PRIVACY_CLASSES = ("standard", "strict")
+
     def __post_init__(self):
         if not 0.0 <= self.minimum_probability <= 1.0:
             raise PolicyError("minimum_probability must be in [0,1]")
         if self.fallback_behavior not in ("abstain", "safe_default", "escalate"):
             raise PolicyError(
                 f"unknown fallback_behavior: {self.fallback_behavior}")
+        if self.privacy_class not in self.PRIVACY_CLASSES:
+            raise PolicyError(
+                f"unknown privacy_class: {self.privacy_class!r}; "
+                f"expected one of {list(self.PRIVACY_CLASSES)}")
+        if self.maximum_latency_ms is not None and self.maximum_latency_ms <= 0:
+            raise PolicyError("maximum_latency_ms must be > 0")
+        if self.max_cost is not None and self.max_cost < 0:
+            raise PolicyError("max_cost must be >= 0")
         if self.review_band:
             lo, hi = self.review_band
             if not 0.0 <= lo <= hi <= 1.0:

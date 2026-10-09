@@ -24,7 +24,7 @@ import json
 import signal
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from fastapi import Request
@@ -64,6 +64,45 @@ class DaemonConfig:
     client_policies_path: Optional[str] = None
     client_id_header: str = "x-client-id"
     drain_timeout_s: float = 10.0
+
+    def __post_init__(self):
+        if not isinstance(self.port, int) or not 1 <= self.port <= 65535:
+            raise ValueError(f"port must be an int in 1..65535, "
+                             f"got {self.port!r}")
+        if self.batch_window_ms <= 0:
+            raise ValueError("batch_window_ms must be > 0")
+        if self.max_batch < 1:
+            raise ValueError("max_batch must be >= 1")
+        if self.max_queue < 1:
+            raise ValueError("max_queue must be >= 1")
+        if self.drain_timeout_s < 0:
+            raise ValueError("drain_timeout_s must be >= 0")
+        if not self.client_id_header or not self.client_id_header.strip():
+            raise ValueError("client_id_header must be a non-empty string")
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Plain dict round-trip for operator config files."""
+        return {
+            "host": self.host,
+            "port": self.port,
+            "unix_socket": self.unix_socket,
+            "batch_window_ms": self.batch_window_ms,
+            "max_batch": self.max_batch,
+            "max_queue": self.max_queue,
+            "client_policies_path": self.client_policies_path,
+            "client_id_header": self.client_id_header,
+            "drain_timeout_s": self.drain_timeout_s,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "DaemonConfig":
+        known = {f.name for f in fields(cls)}
+        unknown = set(d) - known
+        if unknown:
+            raise ValueError(
+                f"unknown daemon config key(s): {sorted(unknown)}; "
+                f"expected keys: {sorted(known)}")
+        return cls(**{k: d[k] for k in d})
 
 
 @dataclass

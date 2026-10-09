@@ -100,8 +100,21 @@ class DecisionSpec:
                 d[k] = v
         return d
 
+    #: Keys accepted by :meth:`from_dict`. Unknown keys are rejected
+    #: loudly (slice 008): a misspelled key must never silently fall
+    #: back to its default.
+    _KEYS = frozenset({
+        "type", "options", "statement", "levels",
+        "minimum", "maximum", "labels", "metadata",
+    })
+
     @classmethod
     def from_dict(cls, d: Dict[str, Any]) -> "DecisionSpec":
+        unknown = set(d) - cls._KEYS
+        if unknown:
+            raise SpecError(
+                f"unknown spec key(s): {sorted(unknown)}; "
+                f"expected keys: {sorted(cls._KEYS)}")
         return cls(
             type=d["type"],
             options=d.get("options"),

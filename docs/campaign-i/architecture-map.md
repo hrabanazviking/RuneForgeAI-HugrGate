@@ -136,6 +136,7 @@ flowchart TD
     cli -.-> daemon
     cli -.-> server
     client --> hugrgate
+    client --> errors
     client -.-> server
     core --> backend
     core --> errors
@@ -281,6 +282,7 @@ flowchart TD
 | `cli` | `daemon` | yes |
 | `cli` | `server` | yes |
 | `client` | `hugrgate` | no |
+| `client` | `errors` | no |
 | `client` | `server` | yes |
 | `core` | `backend` | no |
 | `core` | `errors` | no |

@@ -23,6 +23,7 @@ from hugrgate import (
     DecisionSpec,
     HugrGate,
 )
+from hugrgate.errors import PolicyError
 
 __all__ = [
     "policy_to_dict",
@@ -48,8 +49,23 @@ def policy_to_dict(policy: DecisionPolicy) -> Dict[str, Any]:
     }
 
 
+#: Keys accepted by :func:`policy_from_dict`. Unknown keys are rejected
+#: loudly (slice 008): a misspelled key must never silently fall back
+#: to its default.
+_POLICY_KEYS = frozenset({
+    "minimum_probability", "maximum_latency_ms", "remote_inference",
+    "allowed_backends", "preferred_backends", "fallback_behavior",
+    "privacy_class", "max_cost", "review_band",
+})
+
+
 def policy_from_dict(d: Mapping[str, Any]) -> DecisionPolicy:
     """Rebuild a :class:`DecisionPolicy` from :func:`policy_to_dict` output."""
+    unknown = set(d) - _POLICY_KEYS
+    if unknown:
+        raise PolicyError(
+            f"unknown policy key(s): {sorted(unknown)}; "
+            f"expected keys: {sorted(_POLICY_KEYS)}")
     review_band = d.get("review_band")
     return DecisionPolicy(
         minimum_probability=d.get("minimum_probability", 0.0),
