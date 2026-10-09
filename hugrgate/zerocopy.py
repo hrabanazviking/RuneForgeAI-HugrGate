@@ -84,6 +84,20 @@ class FrozenDecisionResult:
         "_value",
     )
 
+    # Slot type declarations (mypy cannot infer them from
+    # object.__setattr__ calls in __init__).
+    _value: Any
+    _probability: float
+    _distribution: MappingProxyType
+    _uncertainty: float
+    _accepted: bool
+    _backend: str
+    _model: str
+    _latency_ms: float
+    _calibration_profile: str
+    _fallback_used: bool
+    _metadata: MappingProxyType
+
     def __init__(self, result: DecisionResult) -> None:
         # The single permitted deep copy: after this, no copies ever.
         snap = copy.deepcopy(result)

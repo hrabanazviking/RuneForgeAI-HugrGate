@@ -100,6 +100,7 @@ async def evaluate_async(backend: Backend, state: Mapping[str, Any],
     if is_async_backend(backend):
         logger.debug("backend %r evaluating on the event loop",
                      backend.name)
-        return await backend.aevaluate(state, spec, context)
+        aevaluate = backend.aevaluate  # type: ignore[attr-defined]
+        return await aevaluate(state, spec, context)
     logger.debug("backend %r evaluating in a worker thread", backend.name)
     return await asyncio.to_thread(backend.evaluate, state, spec, context)

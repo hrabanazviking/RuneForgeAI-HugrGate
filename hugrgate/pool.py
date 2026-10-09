@@ -112,11 +112,11 @@ class ResourcePool:
         if min_size > max_size:
             raise PoolError(
                 f"min_size ({min_size}) must be <= max_size ({max_size})")
-        for label, value in (("idle_timeout_s", idle_timeout_s),
-                             ("max_lifetime_s", max_lifetime_s),
-                             ("acquire_timeout_s", acquire_timeout_s)):
-            if not isinstance(value, (int, float)) or value <= 0:
-                raise PoolError(f"{label} must be > 0, got {value!r}")
+        for label, timeout_v in (("idle_timeout_s", idle_timeout_s),
+                                 ("max_lifetime_s", max_lifetime_s),
+                                 ("acquire_timeout_s", acquire_timeout_s)):
+            if not isinstance(timeout_v, (int, float)) or timeout_v <= 0:
+                raise PoolError(f"{label} must be > 0, got {timeout_v!r}")
         if health_check is not None and not callable(health_check):
             raise PoolError("health_check must be callable or None")
         self._factory = factory

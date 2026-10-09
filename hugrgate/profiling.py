@@ -124,7 +124,10 @@ def _format_func(func: tuple[str, int, str]) -> str:
 def _stats_to_report(stats: pstats.Stats, wall_ms: float,
                      label: str) -> ProfileReport:
     entries: list[ProfileEntry] = []
-    for func, (_cc, nc, tt, ct, _callers) in stats.stats.items():
+    # pstats.Stats.stats/total_calls/prim_calls exist at runtime;
+    # typeshed does not declare them.
+    raw_stats = stats.stats  # type: ignore[attr-defined]
+    for func, (_cc, nc, tt, ct, _callers) in raw_stats.items():
         entries.append(ProfileEntry(
             function=_format_func(func),
             ncalls=nc,
@@ -134,8 +137,8 @@ def _stats_to_report(stats: pstats.Stats, wall_ms: float,
         ))
     return ProfileReport(
         wall_ms=wall_ms,
-        total_calls=stats.total_calls,
-        primitive_calls=stats.prim_calls,
+        total_calls=stats.total_calls,  # type: ignore[attr-defined]
+        primitive_calls=stats.prim_calls,  # type: ignore[attr-defined]
         entries=entries,
         label=label,
     )
@@ -254,7 +257,8 @@ def profile_region(name: str):
     """
     if not name:
         raise ProfilingError("profile_region requires a non-empty name")
-    frame = {"name": name, "start": time.perf_counter(), "child_ms": 0.0}
+    frame: dict[str, Any] = {"name": name, "start": time.perf_counter(),
+                             "child_ms": 0.0}
     _region_stack.append(frame)
     try:
         yield frame

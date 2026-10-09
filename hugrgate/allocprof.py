@@ -112,7 +112,10 @@ class AllocationReport:
         return "\n".join(lines)
 
 
-def _site_location(trace: tracemalloc.Trace) -> str:
+_TraceLike = tracemalloc.Trace | tracemalloc.StatisticDiff
+
+
+def _site_location(trace: _TraceLike) -> str:
     # Attribute to the outermost user frame (last in the traceback),
     # which is the call site that triggered the allocation chain.
     frame = trace.traceback[-1]

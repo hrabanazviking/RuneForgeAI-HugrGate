@@ -128,7 +128,7 @@ class ProcessPool:
 
     def submit(self, fn: Callable, *args: Any,
                timeout_s: float | None = None, **kwargs: Any
-               ) -> concurrent.futures.Future:
+               ) -> _GuardedFuture:
         """Submit one task. Validates picklability up front.
 
         Returns a Future whose result/exception retrieval translates

@@ -70,6 +70,7 @@ flowchart TD
         runtimes_transformers_rt[runtimes.transformers_rt]
         runtimes_vllm[runtimes.vllm]
         runtimes_warmup[runtimes.warmup]
+        runtimes_session_pool[runtimes.session_pool]
     end
     subgraph runtime[runtime]
         core[core]
@@ -252,6 +253,25 @@ flowchart TD
     subgraph api[api]
         hugrgate[hugrgate]
     end
+    subgraph performance[performance]
+        profiling[profiling]
+        flame[flame]
+        hotpaths[hotpaths]
+        allocprof[allocprof]
+        zerocopy[zerocopy]
+        asyncx[asyncx]
+        async_backend[async_backend]
+        scheduler[scheduler]
+        backpressure[backpressure]
+        pool[pool]
+        lockaudit[lockaudit]
+        multiproc[multiproc]
+        supervision[supervision]
+        numa[numa]
+        gpusched[gpusched]
+        perfgate[perfgate]
+        millionbench[millionbench]
+    end
     subgraph edge[edge]
         edge[edge]
         edge_platform[edge.platform]
@@ -368,6 +388,18 @@ flowchart TD
     adaptive_shadow --> errors
     adaptive_telemetry --> errors
     adaptive_versioning --> errors
+    allocprof --> errors
+    allocprof --> log
+    allocprof --> policy
+    async_backend --> asyncx
+    async_backend --> core
+    async_backend --> errors
+    async_backend --> log
+    async_backend --> policy
+    async_backend --> result
+    asyncx --> backend
+    asyncx --> log
+    asyncx --> spec
     backend --> errors
     backend --> result
     backend --> spec
@@ -401,6 +433,8 @@ flowchart TD
     backends_rules --> errors
     backends_rules --> result
     backends_rules --> spec
+    backpressure --> errors
+    backpressure --> log
     bench --> hugrgate
     bench --> core
     bench --> errors
@@ -501,6 +535,7 @@ flowchart TD
     cli -.-> daemon
     cli -.-> errors
     cli --> policy
+    cli -.-> pool
     cli -.-> serde
     cli -.-> server
     cli --> spec
@@ -776,6 +811,7 @@ flowchart TD
     contracts_utility --> contracts_cost
     contracts_utility --> contracts_schema
     contracts_utility --> errors
+    core -.-> asyncx
     core --> backend
     core -.-> contracts_migration
     core -.-> contracts_schema
@@ -994,6 +1030,14 @@ flowchart TD
     fallback --> result
     fallback --> spec
     features --> errors
+    flame --> hugrgate
+    flame --> errors
+    flame --> log
+    gpusched --> errors
+    gpusched --> log
+    hotpaths --> errors
+    hotpaths --> log
+    hotpaths --> profiling
     ladder --> backend
     ladder --> errors
     ladder --> policy
@@ -1002,18 +1046,40 @@ flowchart TD
     ladder --> result
     ladder --> spec
     ladder --> validation
+    lockaudit --> log
+    millionbench --> backend
+    millionbench --> core
+    millionbench --> log
+    millionbench --> policy
+    millionbench --> result
+    millionbench --> spec
     models --> errors
+    multiproc --> errors
+    multiproc --> log
     negotiate --> backend
     negotiate --> policy
     negotiate --> privacy
     negotiate --> spec
+    numa --> errors
+    numa --> log
+    perfgate -.-> cache
+    perfgate --> errors
+    perfgate --> log
+    perfgate -.-> policy
+    perfgate -.-> result
+    perfgate -.-> spec
     policy --> errors
     policy --> result
+    pool --> errors
+    pool --> log
     privacy --> backend
     privacy --> errors
     privacy --> log
     privacy --> policy
     privacy --> provenance
+    profiling --> errors
+    profiling --> log
+    profiling --> policy
     provenance -.-> errors
     provenance --> result
     provenance --> spec
@@ -1160,6 +1226,10 @@ flowchart TD
     runtimes_probe --> errors
     runtimes_probe --> runtimes
     runtimes_residency --> runtimes
+    runtimes_session_pool --> errors
+    runtimes_session_pool --> log
+    runtimes_session_pool --> pool
+    runtimes_session_pool --> runtimes
     runtimes_structured --> errors
     runtimes_structured --> runtimes
     runtimes_tensorrt --> errors
@@ -1172,6 +1242,9 @@ flowchart TD
     runtimes_warmup --> backend
     runtimes_warmup --> errors
     runtimes_warmup --> runtimes
+    scheduler --> backpressure
+    scheduler --> errors
+    scheduler --> log
     serde --> errors
     serde --> policy
     serde --> result
@@ -1185,6 +1258,8 @@ flowchart TD
     server --> serde
     server --> spec
     spec --> errors
+    supervision --> errors
+    supervision --> log
     threshold --> abstain
     threshold --> errors
     threshold --> policy
@@ -1198,6 +1273,13 @@ flowchart TD
     validation --> errors
     validation --> result
     validation --> spec
+    zerocopy -.-> cache
+    zerocopy --> errors
+    zerocopy --> log
+    zerocopy --> policy
+    zerocopy --> privacy
+    zerocopy --> result
+    zerocopy --> spec
 ```
 
 ## Layer membership
@@ -1207,7 +1289,7 @@ flowchart TD
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
 | contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
-| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup` |
+| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup`, `runtimes.session_pool` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
@@ -1218,6 +1300,7 @@ flowchart TD
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
+| performance | `profiling`, `flame`, `hotpaths`, `allocprof`, `zerocopy`, `asyncx`, `async_backend`, `scheduler`, `backpressure`, `pool`, `lockaudit`, `multiproc`, `supervision`, `numa`, `gpusched`, `perfgate`, `millionbench` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 
 ## Internal dependency edges
@@ -1318,6 +1401,18 @@ flowchart TD
 | `adaptive.shadow` | `errors` | no |
 | `adaptive.telemetry` | `errors` | no |
 | `adaptive.versioning` | `errors` | no |
+| `allocprof` | `errors` | no |
+| `allocprof` | `log` | no |
+| `allocprof` | `policy` | no |
+| `async_backend` | `asyncx` | no |
+| `async_backend` | `core` | no |
+| `async_backend` | `errors` | no |
+| `async_backend` | `log` | no |
+| `async_backend` | `policy` | no |
+| `async_backend` | `result` | no |
+| `asyncx` | `backend` | no |
+| `asyncx` | `log` | no |
+| `asyncx` | `spec` | no |
 | `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
@@ -1351,6 +1446,8 @@ flowchart TD
 | `backends.rules` | `errors` | no |
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
+| `backpressure` | `errors` | no |
+| `backpressure` | `log` | no |
 | `bench` | `hugrgate` | no |
 | `bench` | `core` | no |
 | `bench` | `errors` | no |
@@ -1451,6 +1548,7 @@ flowchart TD
 | `cli` | `daemon` | yes |
 | `cli` | `errors` | yes |
 | `cli` | `policy` | no |
+| `cli` | `pool` | yes |
 | `cli` | `serde` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
@@ -1726,6 +1824,7 @@ flowchart TD
 | `contracts.utility` | `contracts.cost` | no |
 | `contracts.utility` | `contracts.schema` | no |
 | `contracts.utility` | `errors` | no |
+| `core` | `asyncx` | yes |
 | `core` | `backend` | no |
 | `core` | `contracts.migration` | yes |
 | `core` | `contracts.schema` | yes |
@@ -1944,6 +2043,14 @@ flowchart TD
 | `fallback` | `result` | no |
 | `fallback` | `spec` | no |
 | `features` | `errors` | no |
+| `flame` | `hugrgate` | no |
+| `flame` | `errors` | no |
+| `flame` | `log` | no |
+| `gpusched` | `errors` | no |
+| `gpusched` | `log` | no |
+| `hotpaths` | `errors` | no |
+| `hotpaths` | `log` | no |
+| `hotpaths` | `profiling` | no |
 | `ladder` | `backend` | no |
 | `ladder` | `errors` | no |
 | `ladder` | `policy` | no |
@@ -1952,18 +2059,40 @@ flowchart TD
 | `ladder` | `result` | no |
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
+| `lockaudit` | `log` | no |
+| `millionbench` | `backend` | no |
+| `millionbench` | `core` | no |
+| `millionbench` | `log` | no |
+| `millionbench` | `policy` | no |
+| `millionbench` | `result` | no |
+| `millionbench` | `spec` | no |
 | `models` | `errors` | no |
+| `multiproc` | `errors` | no |
+| `multiproc` | `log` | no |
 | `negotiate` | `backend` | no |
 | `negotiate` | `policy` | no |
 | `negotiate` | `privacy` | no |
 | `negotiate` | `spec` | no |
+| `numa` | `errors` | no |
+| `numa` | `log` | no |
+| `perfgate` | `cache` | yes |
+| `perfgate` | `errors` | no |
+| `perfgate` | `log` | no |
+| `perfgate` | `policy` | yes |
+| `perfgate` | `result` | yes |
+| `perfgate` | `spec` | yes |
 | `policy` | `errors` | no |
 | `policy` | `result` | no |
+| `pool` | `errors` | no |
+| `pool` | `log` | no |
 | `privacy` | `backend` | no |
 | `privacy` | `errors` | no |
 | `privacy` | `log` | no |
 | `privacy` | `policy` | no |
 | `privacy` | `provenance` | no |
+| `profiling` | `errors` | no |
+| `profiling` | `log` | no |
+| `profiling` | `policy` | no |
 | `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
@@ -2110,6 +2239,10 @@ flowchart TD
 | `runtimes.probe` | `errors` | no |
 | `runtimes.probe` | `runtimes` | no |
 | `runtimes.residency` | `runtimes` | no |
+| `runtimes.session_pool` | `errors` | no |
+| `runtimes.session_pool` | `log` | no |
+| `runtimes.session_pool` | `pool` | no |
+| `runtimes.session_pool` | `runtimes` | no |
 | `runtimes.structured` | `errors` | no |
 | `runtimes.structured` | `runtimes` | no |
 | `runtimes.tensorrt` | `errors` | no |
@@ -2122,6 +2255,9 @@ flowchart TD
 | `runtimes.warmup` | `backend` | no |
 | `runtimes.warmup` | `errors` | no |
 | `runtimes.warmup` | `runtimes` | no |
+| `scheduler` | `backpressure` | no |
+| `scheduler` | `errors` | no |
+| `scheduler` | `log` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
@@ -2135,6 +2271,8 @@ flowchart TD
 | `server` | `serde` | no |
 | `server` | `spec` | no |
 | `spec` | `errors` | no |
+| `supervision` | `errors` | no |
+| `supervision` | `log` | no |
 | `threshold` | `abstain` | no |
 | `threshold` | `errors` | no |
 | `threshold` | `policy` | no |
@@ -2148,3 +2286,10 @@ flowchart TD
 | `validation` | `errors` | no |
 | `validation` | `result` | no |
 | `validation` | `spec` | no |
+| `zerocopy` | `cache` | yes |
+| `zerocopy` | `errors` | no |
+| `zerocopy` | `log` | no |
+| `zerocopy` | `policy` | no |
+| `zerocopy` | `privacy` | no |
+| `zerocopy` | `result` | no |
+| `zerocopy` | `spec` | no |

@@ -398,8 +398,9 @@ class BatchScheduler:
                 if lease is not None:
                     # The slot releases when the task settles — success,
                     # failure, drop, or executor bug alike.
-                    task.future.add_done_callback(
-                        lambda _f, _lease=lease: _lease.release())
+                    def _release(_f: Any, _lease: Any = lease) -> None:
+                        _lease.release()
+                    task.future.add_done_callback(_release)
                 self._queue.append(task)
                 self._cond.notify()
                 return task.future

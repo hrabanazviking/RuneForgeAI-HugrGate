@@ -243,8 +243,9 @@ def _median_us(fn: Callable[[], Any], iters: int = 2000) -> float:
 
 
 def _cache_key_metric() -> float:
-    from hugrgate import DecisionPolicy, DecisionSpec
     from hugrgate.cache import cache_key
+    from hugrgate.policy import DecisionPolicy
+    from hugrgate.spec import DecisionSpec
     state = {f"k{i}": i for i in range(12)}
     spec = DecisionSpec(type="categorical", options=["a", "b"])
     policy = DecisionPolicy(minimum_probability=0.1)
@@ -252,9 +253,10 @@ def _cache_key_metric() -> float:
 
 
 def _cache_hit_metric() -> float:
-    from hugrgate import DecisionPolicy, DecisionSpec
     from hugrgate.cache import DecisionCache
+    from hugrgate.policy import DecisionPolicy
     from hugrgate.result import DecisionResult
+    from hugrgate.spec import DecisionSpec
     state = {f"k{i}": i for i in range(12)}
     spec = DecisionSpec(type="categorical", options=["a", "b"])
     policy = DecisionPolicy(minimum_probability=0.1)

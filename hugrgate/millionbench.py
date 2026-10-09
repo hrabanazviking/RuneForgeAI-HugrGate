@@ -23,10 +23,12 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
 from hugrgate.backend import Backend
+from hugrgate.core import HugrGate
 from hugrgate.log import get_logger
+from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 
 logger = get_logger(__name__)
 
