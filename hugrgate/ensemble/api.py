@@ -32,6 +32,7 @@ from hugrgate.ensemble.base import (
     normalize_weights,
 )
 from hugrgate.ensemble.blending import blending_combine
+from hugrgate.ensemble.consensus import maybe_apply_consensus
 from hugrgate.ensemble.moe import moe_combine
 from hugrgate.ensemble.stacking import stacking_combine
 from hugrgate.ensemble.voting import (
@@ -209,6 +210,9 @@ class Ensemble(Backend):
             fitted=self.fitted,
             state=state)
         result = combiner(votes, ctx)
+        result = maybe_apply_consensus(
+            result, spec,
+            self.config.strategy_options.get("consensus"))
         result.backend = self.name
         result.latency_ms = (time.perf_counter() - start) * 1000.0
         validate_result(result, spec)

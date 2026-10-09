@@ -40,6 +40,12 @@ from hugrgate.ensemble.blending import (
     log_loss,
     project_simplex,
 )
+from hugrgate.ensemble.consensus import (
+    ConsensusConfig,
+    apply_consensus,
+    maybe_apply_consensus,
+    winner_share,
+)
 from hugrgate.ensemble.disagreement import (
     LEVEL_MILD,
     LEVEL_NONE,
@@ -123,4 +129,8 @@ __all__ = [
     "DisagreementDetector",
     "EscalationPolicy",
     "escalate",
+    "ConsensusConfig",
+    "winner_share",
+    "apply_consensus",
+    "maybe_apply_consensus",
 ]
