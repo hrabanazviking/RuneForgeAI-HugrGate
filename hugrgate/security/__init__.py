@@ -83,6 +83,11 @@ from hugrgate.security.model_signing import (
     SignedMetadata,
     TrustedModelStore,
 )
+from hugrgate.security.plugins import (
+    PluginManifest,
+    PluginRegistry,
+    sign_manifest,
+)
 from hugrgate.security.supply_chain import (
     DependencyRecord,
     SupplyChainPolicy,
@@ -110,6 +115,8 @@ __all__ = [
     "DependencyRecord",
     "ModelChecksumGate",
     "ModelSigner",
+    "PluginManifest",
+    "PluginRegistry",
     "SignedMetadata",
     "SupplyChainPolicy",
     "SupplyVerdict",
@@ -128,6 +135,7 @@ __all__ = [
     "sbom_from_installed",
     "scan_project",
     "scan_requirements",
+    "sign_manifest",
     "verified_open",
     "verify_manifest",
 ]

@@ -48,6 +48,7 @@ from hugrgate.errors import (
     ObservabilityError,
     OfflineBootstrapError,
     PerfGateError,
+    PluginTrustError,
     PolicyError,
     PoolError,
     PowerBudgetError,
@@ -110,6 +111,7 @@ ALL_ERRORS = [
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
     # Campaign XVII security-forge errors (slice 404+).
+    PluginTrustError,
     SignatureVerificationFailed,
     SupplyChainViolation,
 ]

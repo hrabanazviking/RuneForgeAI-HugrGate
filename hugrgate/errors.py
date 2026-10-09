@@ -632,3 +632,15 @@ class SignatureVerificationFailed(HugrGateError):
     """
     code = "signature_verification_failed"
     recoverable = False
+
+
+class PluginTrustError(HugrGateError):
+    """A plugin failed the trust model.
+    Slice 407.  Raised by :mod:`hugrgate.security.plugins` when a
+    plugin manifest is unsigned/invalid, its trust level does not
+    permit loading, its entry point escapes the module allowlist, or
+    it claims a capability its trust level does not grant.  Not
+    recoverable: the plugin declaration itself must change.
+    """
+    code = "plugin_trust_error"
+    recoverable = False
