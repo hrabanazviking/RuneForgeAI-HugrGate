@@ -1,0 +1,76 @@
+{
+  "config": {
+    "chaos_seed": 20261009,
+    "n_items": 200,
+    "scenarios": [
+      "remote_decide",
+      "router_failover",
+      "distributed_batch",
+      "work_steal",
+      "provenance_sync"
+    ]
+  },
+  "generated_at": "2026-10-09T13:54:22+0000",
+  "hugrgate_version": "0.1.0",
+  "platform": {
+    "machine": "x86_64",
+    "python": "3.12.3",
+    "release": "7.0.0-39-generic",
+    "system": "Linux"
+  },
+  "scenarios": {
+    "distributed_batch": {
+      "envelopes_sent": 8,
+      "jobs_per_envelope": 25.0,
+      "n_items": 200,
+      "n_ok": 200,
+      "note": "100.0% of jobs in 8 envelopes",
+      "throughput_per_s": 6176.282402348556,
+      "wall_s": 0.1549372729998595
+    },
+    "provenance_sync": {
+      "chain_valid": true,
+      "n_items": 200,
+      "n_merged": 200,
+      "records_per_s": 9495.189214933316,
+      "wall_s": 0.09595737200015719
+    },
+    "remote_decide": {
+      "latency_mean_ms": 0.618116089999603,
+      "latency_p50_ms": 0.4868309999892517,
+      "latency_p95_ms": 0.6460900001457048,
+      "n_errors": 0,
+      "n_items": 200,
+      "n_ok": 200,
+      "throughput_per_s": 1617.0401491746568,
+      "wall_s": 0.20001752500002112
+    },
+    "router_failover": {
+      "chaos": {
+        "clean": 0,
+        "corrupt": 0,
+        "delay": 0,
+        "drop": 0,
+        "duplicate": 0
+      },
+      "latency_p50_ms": 0.5310779999945225,
+      "latency_p95_ms": 0.7192299999587703,
+      "n_failed": 0,
+      "n_items": 200,
+      "n_ok": 200,
+      "served_by_first_peer": 0,
+      "served_by_second_peer": 200,
+      "success_rate": 1.0,
+      "throughput_per_s": 1797.8026141810856,
+      "wall_s": 0.1940784739999799
+    },
+    "work_steal": {
+      "n_items": 200,
+      "n_stolen": 200,
+      "steal_rounds": 13,
+      "thief_queue": 200,
+      "throughput_per_s": 31397.578430274716,
+      "wall_s": 0.058401971999956004
+    }
+  }
+}

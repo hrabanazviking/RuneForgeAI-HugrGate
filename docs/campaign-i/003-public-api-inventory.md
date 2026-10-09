@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 63 · **public names:** 415
+**Modules:** 73 · **public names:** 365
 
 ## API stability policy
 
@@ -226,6 +226,331 @@ that this document never drifts from the code.
 | `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
 
+### `hugrgate.cluster`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AUTH_HEADER` | constant | `'x-cluster-mac'` |
+| `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
+| `DEFAULT_ADMISSION_CAPACITY` | constant | `128` |
+| `DEFAULT_ADMISSION_REFILL_PER_SECOND` | constant | `64.0` |
+| `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
+| `DEFAULT_LAN_PORT` | constant | `18377` |
+| `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
+| `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
+| `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
+| `DEFAULT_PROVENANCE_PULL_LIMIT` | constant | `100` |
+| `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
+| `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
+| `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
+| `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
+| `DEFAULT_TRACE_MAX_SPANS` | constant | `10000` |
+| `KEY_BYTES` | constant | `32` |
+| `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
+| `MAX_STEAL_BATCH` | constant | `64` |
+| `PROTOCOL_VERSION` | constant | `1` |
+| `SENSITIVE_PREFIX` | constant | `'private_'` |
+| `AdmissionController` | class | `(capacity: 'int' = 128, refill_per_second: 'float' = 64.0) -> 'None'` |
+| `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
+| `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
+| `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
+| `ChaosProxy` | class | `(transport: 'httpx.BaseTransport', injector: 'FaultInjector | None' = None) -> 'None'` |
+| `ClusterKey` | class | `(key: 'bytes') -> None` |
+| `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True, enforce_quorum: 'bool' = False) -> 'None'` |
+| `CostModel` | class | `() -> 'None'` |
+| `Discovery` | class | `()` |
+| `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
+| `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
+| `DistributedReleaseGate` | class | `(config: 'ReleaseGateConfig | None' = None) -> 'None'` |
+| `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `FaultInjector` | class | `(drop_rate: 'float' = 0.0, delay_s: 'float' = 0.0, delay_rate: 'float' = 0.0, duplicate_rate: 'float' = 0.0, corrupt_rate: 'float' = 0.0, seed: 'int | None' = None) -> 'None'` |
+| `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
+| `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
+| `MessageType` | class | `(*values)` |
+| `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
+| `NodeAuthenticator` | class | `(*args, **kwargs)` |
+| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+| `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
+| `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
+| `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `PartitionDetector` | class | `(stale_after_s: 'float' = 30.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
+| `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
+| `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+| `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
+| `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
+| `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
+| `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
+| `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `ReleaseCheck` | class | `(name: 'str', passed: 'bool', detail: 'str') -> None` |
+| `ReleaseGateConfig` | class | `(min_health_score: 'float' = 0.5, max_quarantined: 'int' = 0, require_quorum: 'bool' = True, min_success_rate: 'float' = 0.99, min_throughput_per_s: 'float' = 100.0, benchmark_scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `ReleaseReport` | class | `(checks: 'list[ReleaseCheck]' = <factory>) -> None` |
+| `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
+| `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
+| `Span` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str', operation: 'str', started_at: 'float' = <factory>, ended_at: 'float | None' = None, status: 'str' = 'ok', attributes: 'dict[str, Any]' = <factory>, _collector: 'Any' = None) -> None` |
+| `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
+| `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
+| `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
+| `StealableQueue` | class | `() -> 'None'` |
+| `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `TraceCollector` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `TraceContext` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str') -> None` |
+| `attribute_record` | function | `(record: 'DecisionRecord', node_id: 'str') -> 'DecisionRecord'` |
+| `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
+| `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
+| `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
+| `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
+| `example_config` | function | `() -> 'dict[str, Any]'` |
+| `fetch_server_fingerprint` | function | `(host: 'str', port: 'int', timeout: 'float' = 5.0) -> 'str'` |
+| `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
+| `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
+| `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
+| `new_span_id` | function | `() -> 'str'` |
+| `new_trace_id` | function | `() -> 'str'` |
+| `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
+| `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
+
+### `hugrgate.cluster.auth`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AUTH_HEADER` | constant | `'x-cluster-mac'` |
+| `KEY_BYTES` | constant | `32` |
+| `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
+| `ClusterKey` | class | `(key: 'bytes') -> None` |
+| `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
+
+### `hugrgate.cluster.backpressure`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_ADMISSION_CAPACITY` | constant | `128` |
+| `DEFAULT_ADMISSION_REFILL_PER_SECOND` | constant | `64.0` |
+| `AdmissionController` | class | `(capacity: 'int' = 128, refill_per_second: 'float' = 64.0) -> 'None'` |
+
+### `hugrgate.cluster.bench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ClusterBenchConfig` | class | `(n_items: 'int' = 200, chaos_seed: 'int' = 20261009, policy: 'DecisionPolicy' = <factory>, scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `run_cluster_benchmark` | function | `(config: 'ClusterBenchConfig | None' = None) -> 'dict'` |
+| `scenario_distributed_batch` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_provenance_sync` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_remote_decide` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_router_failover` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_work_steal` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+
+### `hugrgate.cluster.bench_support`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LoopbackCluster` | class | `(names: 'list[str]', admission_capacity: 'int' = 100000) -> 'None'` |
+| `percent_str` | function | `(part: 'float', whole: 'float') -> 'str'` |
+
+### `hugrgate.cluster.capabilities`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+
+### `hugrgate.cluster.chaos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ChaosProxy` | class | `(transport: 'httpx.BaseTransport', injector: 'FaultInjector | None' = None) -> 'None'` |
+| `FaultInjector` | class | `(drop_rate: 'float' = 0.0, delay_s: 'float' = 0.0, delay_rate: 'float' = 0.0, duplicate_rate: 'float' = 0.0, corrupt_rate: 'float' = 0.0, seed: 'int | None' = None) -> 'None'` |
+
+### `hugrgate.cluster.discovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
+| `Discovery` | class | `()` |
+| `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
+| `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+
+### `hugrgate.cluster.distributed_batch`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
+| `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
+| `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
+| `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
+
+### `hugrgate.cluster.identity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `KEY_BYTES` | constant | `32` |
+| `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
+
+### `hugrgate.cluster.lan`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
+| `DEFAULT_LAN_PORT` | constant | `18377` |
+| `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
+| `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
+
+### `hugrgate.cluster.node`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True, enforce_quorum: 'bool' = False) -> 'None'` |
+| `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `NodeAuthenticator` | class | `(*args, **kwargs)` |
+
+### `hugrgate.cluster.node_cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostModel` | class | `() -> 'None'` |
+
+### `hugrgate.cluster.node_health`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
+| `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
+| `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
+
+### `hugrgate.cluster.node_latency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
+| `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
+| `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
+
+### `hugrgate.cluster.partition`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
+| `PartitionDetector` | class | `(stale_after_s: 'float' = 30.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.cluster.policy_sync`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
+| `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
+| `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
+
+### `hugrgate.cluster.privacy_boundary`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SENSITIVE_PREFIX` | constant | `'private_'` |
+| `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
+
+### `hugrgate.cluster.protocol`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
+| `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `PROTOCOL_VERSION` | constant | `1` |
+| `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `MessageType` | class | `(*values)` |
+| `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
+| `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.provenance_dist`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_PROVENANCE_PULL_LIMIT` | constant | `100` |
+| `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
+| `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
+| `attribute_record` | function | `(record: 'DecisionRecord', node_id: 'str') -> 'DecisionRecord'` |
+
+### `hugrgate.cluster.recovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
+| `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
+| `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.cluster.release_gate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DistributedReleaseGate` | class | `(config: 'ReleaseGateConfig | None' = None) -> 'None'` |
+| `ReleaseCheck` | class | `(name: 'str', passed: 'bool', detail: 'str') -> None` |
+| `ReleaseGateConfig` | class | `(min_health_score: 'float' = 0.5, max_quarantined: 'int' = 0, require_quorum: 'bool' = True, min_success_rate: 'float' = 0.99, min_throughput_per_s: 'float' = 100.0, benchmark_scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `ReleaseReport` | class | `(checks: 'list[ReleaseCheck]' = <factory>) -> None` |
+
+### `hugrgate.cluster.routes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `build_cluster_router` | function | `(node: 'ClusterNode') -> 'APIRouter'` |
+
+### `hugrgate.cluster.routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
+| `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
+
+### `hugrgate.cluster.rpc`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
+| `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
+
+### `hugrgate.cluster.static_config`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
+| `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
+| `example_config` | function | `() -> 'dict[str, Any]'` |
+| `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
+
+### `hugrgate.cluster.trace`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_TRACE_MAX_SPANS` | constant | `10000` |
+| `Span` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str', operation: 'str', started_at: 'float' = <factory>, ended_at: 'float | None' = None, status: 'str' = 'ok', attributes: 'dict[str, Any]' = <factory>, _collector: 'Any' = None) -> None` |
+| `TraceCollector` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `TraceContext` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str') -> None` |
+| `new_span_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.transport`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
+| `fetch_server_fingerprint` | function | `(host: 'str', port: 'int', timeout: 'float' = 5.0) -> 'str'` |
+| `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
+| `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
+| `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
+
+### `hugrgate.cluster.work_stealing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_STEAL_BATCH` | constant | `64` |
+| `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
+| `StealableQueue` | class | `() -> 'None'` |
+
 ### `hugrgate.core`
 
 | Name | Kind | Signature / value |
@@ -242,7 +567,7 @@ that this document never drifts from the code.
 | `Daemon` | class | `(config: 'DaemonConfig | None' = None, gate: 'HugrGate | None' = None) -> 'None'` |
 | `DaemonConfig` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, unix_socket: 'str | None' = None, batch_window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024, client_policies_path: 'str | None' = None, client_id_header: 'str' = 'x-client-id', drain_timeout_s: 'float' = 10.0) -> None` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'HugrGate | None' = None)` |
+| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None)` |
 | `load_client_policies` | function | `(path: 'str') -> 'dict[str, DecisionPolicy]'` |
 | `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
 | `serve_forever` | function | `(config: 'DaemonConfig | None' = None) -> 'None'` |
@@ -258,317 +583,6 @@ that this document never drifts from the code.
 | `population_stability_index` | function | `(reference: 'list[float]', live: 'list[float]') -> 'float'` |
 | `recalibration_advisory` | function | `(report: 'DriftReport') -> 'dict[str, Any]'` |
 
-### `hugrgate.edge`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
-| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
-| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
-| `CRITICAL_C` | constant | `85.0` |
-| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
-| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
-| `DEFAULT_MAX_EVENTS` | constant | `256` |
-| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
-| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
-| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
-| `PI_BASELINES` | constant | `{'Raspberry Pi 5': EdgeBaseline(board='Raspberry Pi 5', cpu_` |
-| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
-| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
-| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
-| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
-| `WARN_C` | constant | `70.0` |
-| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
-| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
-| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
-| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
-| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
-| `BootstrapContext` | class | `()` |
-| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
-| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
-| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `ChaosRunner` | class | `()` |
-| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
-| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
-| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
-| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
-| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
-| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
-| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
-| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
-| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
-| `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
-| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
-| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
-| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
-| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
-| `MemoryMode` | class | `(*values)` |
-| `MissPolicy` | class | `(*values)` |
-| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
-| `MockPowerSource` | class | `(script: 'list[float | None]')` |
-| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
-| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `NPUAdapter` | class | `()` |
-| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
-| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `NPURegistry` | class | `()` |
-| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
-| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
-| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
-| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
-| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
-| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `PowerSource` | class | `()` |
-| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `QuantFormat` | class | `(*values)` |
-| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
-| `QuantProfileRegistry` | class | `()` |
-| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
-| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
-| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
-| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
-| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
-| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
-| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
-| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
-| `ThermalLevel` | class | `(*values)` |
-| `ThermalSensor` | class | `()` |
-| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
-| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
-| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
-| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
-| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
-| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
-| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
-| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
-| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
-| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
-| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
-| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
-| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
-| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
-| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
-| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
-| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
-| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
-| `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
-| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
-| `run_builtin_scenarios` | function | `() -> 'dict[str, Any]'` |
-| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
-| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
-
-### `hugrgate.edge.affinity`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
-| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
-| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
-| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
-
-### `hugrgate.edge.bench`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
-| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
-| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
-| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
-| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
-| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
-| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
-| `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
-
-### `hugrgate.edge.bootstrap`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BootstrapContext` | class | `()` |
-| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
-| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
-| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
-| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
-
-### `hugrgate.edge.cachetune`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
-| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
-| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
-| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
-| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
-
-### `hugrgate.edge.chaos`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
-| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `ChaosRunner` | class | `()` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
-| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
-
-### `hugrgate.edge.gate`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
-| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
-| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
-
-### `hugrgate.edge.memory`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
-| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
-| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
-| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
-| `MemoryMode` | class | `(*values)` |
-
-### `hugrgate.edge.npu`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
-| `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
-| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
-| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
-| `NPUAdapter` | class | `()` |
-| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
-| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `NPURegistry` | class | `()` |
-| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
-
-### `hugrgate.edge.platform`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
-| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
-| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
-| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
-| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
-| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
-| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
-| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
-| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
-
-### `hugrgate.edge.power`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `MockPowerSource` | class | `(script: 'list[float | None]')` |
-| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
-| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `PowerSource` | class | `()` |
-| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
-
-### `hugrgate.edge.quant`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
-| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
-| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `QuantFormat` | class | `(*values)` |
-| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
-| `QuantProfileRegistry` | class | `()` |
-| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
-| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
-| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
-| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
-| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
-| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
-| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
-
-### `hugrgate.edge.recovery`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
-| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
-| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
-
-### `hugrgate.edge.residency`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
-
-### `hugrgate.edge.routing`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
-| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
-| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
-
-### `hugrgate.edge.storage`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
-| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
-| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
-
-### `hugrgate.edge.telemetry`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DEFAULT_MAX_EVENTS` | constant | `256` |
-| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
-| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
-
-### `hugrgate.edge.thermal`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CRITICAL_C` | constant | `85.0` |
-| `WARN_C` | constant | `70.0` |
-| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
-| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
-| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
-| `ThermalLevel` | class | `(*values)` |
-| `ThermalSensor` | class | `()` |
-| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
-
-### `hugrgate.edge.watchdog`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
-| `MissPolicy` | class | `(*values)` |
-| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
-
 ### `hugrgate.errors`
 
 | Name | Kind | Signature / value |
@@ -576,28 +590,14 @@ that this document never drifts from the code.
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
-| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
-| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 
@@ -708,7 +708,7 @@ that this document never drifts from the code.
 | `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
 | `UniformBackend` | class | `()` |
 | `build_gate` | function | `(extra_backends: 'list[Backend] | None' = None) -> 'HugrGate'` |
-| `create_app` | function | `(gate: 'HugrGate | None' = None) -> 'FastAPI'` |
+| `create_app` | function | `(gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None) -> 'FastAPI'` |
 | `list_models` | function | `() -> 'list[ModelInfo]'` |
 | `register_model` | function | `(info: 'ModelInfo') -> 'None'` |
 | `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'HugrGate | None' = None) -> 'None'` |

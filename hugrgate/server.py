@@ -24,7 +24,7 @@ import re
 import time
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -43,6 +43,9 @@ from hugrgate.errors import (
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
 from hugrgate.spec import DecisionSpec
+
+if TYPE_CHECKING:
+    from hugrgate.cluster.node import ClusterNode
 
 __all__ = [
     "KeywordBackend",
@@ -251,8 +254,15 @@ def _error_response(error: HugrGateError, status: int) -> JSONResponse:
     )
 
 
-def create_app(gate: HugrGate | None = None) -> FastAPI:
-    """Create the FastAPI application serving ``gate``."""
+def create_app(gate: HugrGate | None = None,
+               node: ClusterNode | None = None) -> FastAPI:
+    """Create the FastAPI application serving ``gate``.
+
+    When ``node`` is given, the ``/cluster/*`` routes are mounted so
+    this process also serves as a cluster peer (slice 207). The import
+    stays function-local so importing ``hugrgate.server`` never drags
+    in the cluster stack unless it is used.
+    """
     gate = gate or build_gate()
     app = FastAPI(title="HugrGate", version=HUGRGATE_VERSION)
     app.state.gate = gate
@@ -353,6 +363,12 @@ def create_app(gate: HugrGate | None = None) -> FastAPI:
         except HugrGateError as e:
             return _error_response(e, 500)
         return JSONResponse(status_code=200, content=result.to_dict())
+
+    if node is not None:
+        # Cluster peer mode (slice 207): mount /cluster/* routes.
+        # Function-local import keeps hugrgate.server import-light.
+        from hugrgate.cluster.routes import build_cluster_router
+        app.include_router(build_cluster_router(node))
 
     return app
 

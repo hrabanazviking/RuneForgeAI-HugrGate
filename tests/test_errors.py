@@ -25,6 +25,7 @@ from hugrgate.errors import (
     EdgeCacheError,
     EdgeMemoryError,
     GateError,
+    ClusterAuthError,
     HugrGateError,
     NPUError,
     OfflineBootstrapError,
@@ -54,6 +55,7 @@ ALL_ERRORS = [
     ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
     QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
     WatchdogError,
+    ClusterAuthError,
 ]
 
 EXPECTED_CODES = {
@@ -84,6 +86,7 @@ EXPECTED_CODES = {
     StorageError: "edge_storage_error",
     TelemetryError: "edge_telemetry_error",
     WatchdogError: "edge_watchdog_error",
+    ClusterAuthError: "cluster_auth_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -118,6 +121,7 @@ EXPECTED_RECOVERABLE = {
     StorageError: True,
     TelemetryError: False,
     WatchdogError: False,
+    ClusterAuthError: False,
 }
 
 
@@ -166,6 +170,7 @@ def test_to_dict_from_dict_round_trip():
         # Campaign VIII taxonomy members round-trip identically.
         NPUError("no Hailo device", vendor="hailo"),
         EdgeMemoryError("budget exceeded", needed_bytes=1024),
+        ClusterAuthError("bad tag"),
     ]
     for original in cases:
         data = original.to_dict()

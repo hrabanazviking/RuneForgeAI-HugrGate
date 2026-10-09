@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T13:21:49.265355+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T14:01:50.436213+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 63 Python files under `hugrgate/`
-- **Total LOC:** 13300
+- **Modules:** 73 Python files under `hugrgate/`
+- **Total LOC:** 13788
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_edge_affinity.py, test_edge_bench.py, test_edge_bootstrap.py, test_edge_cachetune.py, test_edge_chaos.py, test_edge_gate.py, test_edge_memory.py, test_edge_npu.py, test_edge_platform.py, test_edge_power.py, test_edge_quant.py, test_edge_recovery.py, test_edge_residency.py, test_edge_storage.py, test_edge_telemetry.py, test_edge_thermal.py, test_edge_watchdog.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_cluster_auth.py, test_cluster_backpressure.py, test_cluster_bench.py, test_cluster_capabilities.py, test_cluster_chaos.py, test_cluster_discovery.py, test_cluster_distributed_batch.py, test_cluster_identity.py, test_cluster_lan.py, test_cluster_node_cost.py, test_cluster_node_health.py, test_cluster_node_latency.py, test_cluster_partition.py, test_cluster_policy_sync.py, test_cluster_privacy_boundary.py, test_cluster_protocol.py, test_cluster_provenance_dist.py, test_cluster_recovery.py, test_cluster_release_gate.py, test_cluster_routing.py, test_cluster_rpc.py, test_cluster_static_config.py, test_cluster_trace.py, test_cluster_transport.py, test_cluster_work_stealing.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
 
 ## Module table
 
@@ -36,29 +36,39 @@
 | `hugrgate.circuit` | 174 | Circuit breaker — per-backend failure containment. Slice 18. | hugrgate |
 | `hugrgate.cli` | 277 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 220 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
+| `hugrgate.cluster.__init__` | 222 | Cluster package for distributed HugrGate. Campaign IX (slices 201-225). | hugrgate |
+| `hugrgate.cluster.auth` | 155 | Mutual authentication for cluster RPC. Slice 208. | hugrgate |
+| `hugrgate.cluster.backpressure` | 103 | Backpressure protocol. Slice 218. | hugrgate |
+| `hugrgate.cluster.bench` | 304 | Cluster benchmark suite. Slice 224. | hugrgate |
+| `hugrgate.cluster.bench_support` | 142 | Loopback cluster harness for benchmarks (and chaos rehearsals). | hugrgate |
+| `hugrgate.cluster.capabilities` | 168 | Node capability advertisement. Slice 203. | hugrgate |
+| `hugrgate.cluster.chaos` | 138 | Distributed chaos tests. Slice 223. | hugrgate |
+| `hugrgate.cluster.discovery` | 175 | Node discovery — finding peers. Slice 204. | hugrgate |
+| `hugrgate.cluster.distributed_batch` | 211 | Distributed batching. Slice 217. | hugrgate |
+| `hugrgate.cluster.identity` | 123 | Node identity — stable, unforgeable node ids. Slice 202. | hugrgate |
+| `hugrgate.cluster.lan` | 286 | LAN discovery adapter — UDP multicast HELLOs. Slice 206. | hugrgate |
+| `hugrgate.cluster.node` | 680 | ClusterNode — one HugrGate node in a cluster. Slice 207 (grows). | hugrgate |
+| `hugrgate.cluster.node_cost` | 70 | Node cost scoring. Slice 215. | hugrgate |
+| `hugrgate.cluster.node_health` | 144 | Node health scoring. Slice 213. | hugrgate |
+| `hugrgate.cluster.node_latency` | 133 | Node latency scoring. Slice 214. | hugrgate |
+| `hugrgate.cluster.partition` | 98 | Network partition handling. Slice 219. | hugrgate |
+| `hugrgate.cluster.policy_sync` | 189 | Policy propagation across the cluster. Slice 210. | hugrgate |
+| `hugrgate.cluster.privacy_boundary` | 96 | Privacy boundary enforcement. Slice 211. | hugrgate |
+| `hugrgate.cluster.protocol` | 196 | Gjallarbrú node wire protocol. Slice 201. | hugrgate |
+| `hugrgate.cluster.provenance_dist` | 139 | Distributed provenance. Slice 221. | hugrgate |
+| `hugrgate.cluster.recovery` | 103 | Offline peer recovery. Slice 220. | hugrgate |
+| `hugrgate.cluster.release_gate` | 244 | Distributed release gate. Slice 225 (Campaign IX capstone). | hugrgate |
+| `hugrgate.cluster.routes` | 99 | Cluster HTTP routes — ``/cluster/*``. Slice 207. | hugrgate |
+| `hugrgate.cluster.routing` | 255 | Distributed ladder routing. Slice 212. | hugrgate |
+| `hugrgate.cluster.rpc` | 483 | Remote decision RPC. Slice 207. | hugrgate |
+| `hugrgate.cluster.static_config` | 182 | Static peer configuration. Slice 205. | hugrgate |
+| `hugrgate.cluster.trace` | 247 | Trace correlation. Slice 222. | hugrgate |
+| `hugrgate.cluster.transport` | 235 | Encrypted transport for cluster RPC. Slice 209. | hugrgate |
+| `hugrgate.cluster.work_stealing` | 127 | Work stealing. Slice 216. | hugrgate |
 | `hugrgate.core` | 159 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
-| `hugrgate.daemon` | 494 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
+| `hugrgate.daemon` | 502 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |
-| `hugrgate.edge.__init__` | 269 | Edge Intelligence runtime — Campaign VIII (slices 176-200). | hugrgate |
-| `hugrgate.edge.affinity` | 232 | CPU affinity controls for edge inference. Slice 179. | hugrgate |
-| `hugrgate.edge.bench` | 458 | Edge benchmark harness and platform suites. Slices 196-198. | hugrgate |
-| `hugrgate.edge.bootstrap` | 294 | Offline-first bootstrap for edge deployment. Slice 192. | hugrgate |
-| `hugrgate.edge.cachetune` | 157 | Edge-tuned decision cache sizing. Slice 190. | hugrgate |
-| `hugrgate.edge.chaos` | 259 | Edge failure testing — deterministic fault injection. Slice 199. | hugrgate |
-| `hugrgate.edge.gate` | 258 | Edge Intelligence release gate. Slice 200. | hugrgate |
-| `hugrgate.edge.memory` | 210 | Low-RAM operating modes for edge deployment. Slice 178. | hugrgate |
-| `hugrgate.edge.npu` | 507 | NPU capability abstraction and vendor adapter boundaries. | hugrgate |
-| `hugrgate.edge.platform` | 472 | Edge platform detection, ARM64 audit, and Raspberry Pi baselines. | — |
-| `hugrgate.edge.power` | 152 | Power-budget routing for edge deployment. Slice 181. | hugrgate |
-| `hugrgate.edge.quant` | 577 | Quantized-model profiles and simulated quantization paths. Slices 182-18 | hugrgate |
-| `hugrgate.edge.recovery` | 191 | Intermittent-power recovery via checkpoint journal. Slice 193. | hugrgate |
-| `hugrgate.edge.residency` | 199 | Edge model residency management. Slice 189. | hugrgate |
-| `hugrgate.edge.routing` | 146 | Edge-aware backend routing. Slices 180-181. | hugrgate |
-| `hugrgate.edge.storage` | 283 | Flash-wear-aware storage for edge devices. Slice 191. | hugrgate |
-| `hugrgate.edge.telemetry` | 174 | Edge telemetry lite — bounded, privacy-safe metrics. Slice 195. | hugrgate |
-| `hugrgate.edge.thermal` | 182 | Thermal sensing and thermal-aware derating. Slice 180. | — |
-| `hugrgate.edge.watchdog` | 164 | Edge watchdog — heartbeat supervision for the edge runtime. Slice 194. | hugrgate |
-| `hugrgate.errors` | 253 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
+| `hugrgate.errors` | 154 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
 | `hugrgate.fallback` | 171 | Fallback engine — ordered failover across backends. Slice 14. | hugrgate |
 | `hugrgate.features` | 291 | Feature preprocessing contract. Slice 21. | hugrgate |
 | `hugrgate.health` | 140 | Backend health scoring — latency, errors, quarantine. Slice 17. | — |
@@ -71,7 +81,7 @@
 | `hugrgate.provenance` | 218 | Decision provenance — why did the program take this branch? Slice 9. | hugrgate |
 | `hugrgate.result` | 82 | DecisionResult — typed value + probability distribution. Slice 4. | hugrgate |
 | `hugrgate.serde` | 74 | JSON serde helpers shared by the server, daemon, CLI and SDK. | hugrgate |
-| `hugrgate.server` | 370 | HugrGate local HTTP API — FastAPI service. Slice 41. | hugrgate |
+| `hugrgate.server` | 386 | HugrGate local HTTP API — FastAPI service. Slice 41. | hugrgate |
 | `hugrgate.spec` | 127 | DecisionSpec — the decision contract. Slices 2-3. | hugrgate |
 | `hugrgate.threshold` | 213 | Thresholding — per-option, ordinal-cumulative, and numeric-band gates. | hugrgate |
 | `hugrgate.timeout` | 139 | Timeouts — per-decision deadline enforcement via threads. Slice 19. | hugrgate |

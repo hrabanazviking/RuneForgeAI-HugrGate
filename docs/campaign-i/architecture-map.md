@@ -66,6 +66,37 @@ flowchart TD
         client[client]
         cli[cli]
     end
+    subgraph cluster[cluster]
+        cluster[cluster]
+        cluster_protocol[cluster.protocol]
+        cluster_identity[cluster.identity]
+        cluster_capabilities[cluster.capabilities]
+        cluster_discovery[cluster.discovery]
+        cluster_static_config[cluster.static_config]
+        cluster_lan[cluster.lan]
+        cluster_rpc[cluster.rpc]
+        cluster_node[cluster.node]
+        cluster_routes[cluster.routes]
+        cluster_auth[cluster.auth]
+        cluster_transport[cluster.transport]
+        cluster_policy_sync[cluster.policy_sync]
+        cluster_privacy_boundary[cluster.privacy_boundary]
+        cluster_routing[cluster.routing]
+        cluster_node_health[cluster.node_health]
+        cluster_node_latency[cluster.node_latency]
+        cluster_node_cost[cluster.node_cost]
+        cluster_work_stealing[cluster.work_stealing]
+        cluster_distributed_batch[cluster.distributed_batch]
+        cluster_backpressure[cluster.backpressure]
+        cluster_partition[cluster.partition]
+        cluster_recovery[cluster.recovery]
+        cluster_provenance_dist[cluster.provenance_dist]
+        cluster_trace[cluster.trace]
+        cluster_chaos[cluster.chaos]
+        cluster_bench_support[cluster.bench_support]
+        cluster_bench[cluster.bench]
+        cluster_release_gate[cluster.release_gate]
+    end
     subgraph api[api]
         hugrgate[hugrgate]
     end
@@ -177,6 +208,147 @@ flowchart TD
     client --> serde
     client -.-> server
     client --> spec
+    cluster --> cluster_auth
+    cluster --> cluster_backpressure
+    cluster --> cluster_capabilities
+    cluster --> cluster_chaos
+    cluster --> cluster_discovery
+    cluster --> cluster_distributed_batch
+    cluster --> cluster_identity
+    cluster --> cluster_lan
+    cluster --> cluster_node
+    cluster --> cluster_node_cost
+    cluster --> cluster_node_health
+    cluster --> cluster_node_latency
+    cluster --> cluster_partition
+    cluster --> cluster_policy_sync
+    cluster --> cluster_privacy_boundary
+    cluster --> cluster_protocol
+    cluster --> cluster_provenance_dist
+    cluster --> cluster_recovery
+    cluster --> cluster_release_gate
+    cluster --> cluster_routing
+    cluster --> cluster_rpc
+    cluster --> cluster_static_config
+    cluster --> cluster_trace
+    cluster --> cluster_transport
+    cluster --> cluster_work_stealing
+    cluster_auth --> cluster_node
+    cluster_auth --> errors
+    cluster_backpressure --> errors
+    cluster_bench --> hugrgate
+    cluster_bench --> cluster_bench_support
+    cluster_bench --> cluster_chaos
+    cluster_bench --> cluster_distributed_batch
+    cluster_bench --> cluster_work_stealing
+    cluster_bench --> core
+    cluster_bench --> errors
+    cluster_bench --> policy
+    cluster_bench --> spec
+    cluster_bench_support --> cluster_backpressure
+    cluster_bench_support --> cluster_discovery
+    cluster_bench_support --> cluster_identity
+    cluster_bench_support --> cluster_node
+    cluster_bench_support --> cluster_protocol
+    cluster_bench_support --> cluster_rpc
+    cluster_bench_support --> errors
+    cluster_bench_support -.-> server
+    cluster_capabilities --> hugrgate
+    cluster_capabilities --> backend
+    cluster_capabilities --> cluster_identity
+    cluster_capabilities --> cluster_protocol
+    cluster_capabilities --> errors
+    cluster_capabilities --> spec
+    cluster_chaos --> errors
+    cluster_discovery --> cluster_capabilities
+    cluster_discovery --> errors
+    cluster_distributed_batch --> cluster_discovery
+    cluster_distributed_batch --> cluster_privacy_boundary
+    cluster_distributed_batch --> cluster_protocol
+    cluster_distributed_batch --> cluster_rpc
+    cluster_distributed_batch --> errors
+    cluster_distributed_batch --> policy
+    cluster_distributed_batch --> result
+    cluster_distributed_batch --> serde
+    cluster_distributed_batch --> spec
+    cluster_identity --> cluster_protocol
+    cluster_identity --> errors
+    cluster_lan --> cluster_capabilities
+    cluster_lan --> cluster_discovery
+    cluster_lan --> cluster_identity
+    cluster_lan --> cluster_protocol
+    cluster_lan --> errors
+    cluster_node --> cluster_backpressure
+    cluster_node --> cluster_capabilities
+    cluster_node --> cluster_discovery
+    cluster_node --> cluster_distributed_batch
+    cluster_node --> cluster_identity
+    cluster_node --> cluster_node_cost
+    cluster_node --> cluster_node_health
+    cluster_node --> cluster_node_latency
+    cluster_node --> cluster_partition
+    cluster_node --> cluster_policy_sync
+    cluster_node --> cluster_protocol
+    cluster_node --> cluster_provenance_dist
+    cluster_node --> cluster_recovery
+    cluster_node --> cluster_routing
+    cluster_node --> cluster_rpc
+    cluster_node --> cluster_trace
+    cluster_node --> cluster_work_stealing
+    cluster_node --> core
+    cluster_node --> errors
+    cluster_node --> policy
+    cluster_node --> result
+    cluster_node --> serde
+    cluster_node --> spec
+    cluster_node_cost --> errors
+    cluster_node_health --> errors
+    cluster_node_latency --> errors
+    cluster_partition --> errors
+    cluster_policy_sync --> errors
+    cluster_policy_sync --> policy
+    cluster_policy_sync --> serde
+    cluster_privacy_boundary --> errors
+    cluster_privacy_boundary --> policy
+    cluster_protocol --> errors
+    cluster_provenance_dist --> cluster_discovery
+    cluster_provenance_dist --> cluster_protocol
+    cluster_provenance_dist --> cluster_rpc
+    cluster_provenance_dist --> core
+    cluster_provenance_dist --> errors
+    cluster_provenance_dist --> provenance
+    cluster_recovery --> errors
+    cluster_release_gate --> cluster_node
+    cluster_release_gate --> errors
+    cluster_routes --> cluster_node
+    cluster_routes --> cluster_protocol
+    cluster_routes --> errors
+    cluster_routing --> cluster_discovery
+    cluster_routing --> cluster_node_cost
+    cluster_routing --> cluster_privacy_boundary
+    cluster_routing --> core
+    cluster_routing --> errors
+    cluster_routing --> policy
+    cluster_routing --> result
+    cluster_routing --> spec
+    cluster_rpc --> backend
+    cluster_rpc --> cluster_discovery
+    cluster_rpc --> cluster_privacy_boundary
+    cluster_rpc --> cluster_protocol
+    cluster_rpc --> cluster_trace
+    cluster_rpc -.-> cluster_work_stealing
+    cluster_rpc --> errors
+    cluster_rpc --> policy
+    cluster_rpc --> result
+    cluster_rpc --> serde
+    cluster_rpc --> spec
+    cluster_static_config --> cluster_discovery
+    cluster_static_config --> errors
+    cluster_trace --> cluster_protocol
+    cluster_trace --> errors
+    cluster_transport --> errors
+    cluster_work_stealing --> cluster_privacy_boundary
+    cluster_work_stealing --> errors
     core --> backend
     core --> errors
     core --> log
@@ -186,6 +358,7 @@ flowchart TD
     core --> spec
     core --> validation
     daemon -.-> client
+    daemon --> cluster_node
     daemon --> core
     daemon -.-> errors
     daemon -.-> log
@@ -305,6 +478,8 @@ flowchart TD
     serde --> result
     server --> hugrgate
     server --> backend
+    server --> cluster_node
+    server -.-> cluster_routes
     server --> core
     server --> errors
     server --> result
@@ -337,6 +512,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 
@@ -430,6 +606,147 @@ flowchart TD
 | `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
+| `cluster` | `cluster.auth` | no |
+| `cluster` | `cluster.backpressure` | no |
+| `cluster` | `cluster.capabilities` | no |
+| `cluster` | `cluster.chaos` | no |
+| `cluster` | `cluster.discovery` | no |
+| `cluster` | `cluster.distributed_batch` | no |
+| `cluster` | `cluster.identity` | no |
+| `cluster` | `cluster.lan` | no |
+| `cluster` | `cluster.node` | no |
+| `cluster` | `cluster.node_cost` | no |
+| `cluster` | `cluster.node_health` | no |
+| `cluster` | `cluster.node_latency` | no |
+| `cluster` | `cluster.partition` | no |
+| `cluster` | `cluster.policy_sync` | no |
+| `cluster` | `cluster.privacy_boundary` | no |
+| `cluster` | `cluster.protocol` | no |
+| `cluster` | `cluster.provenance_dist` | no |
+| `cluster` | `cluster.recovery` | no |
+| `cluster` | `cluster.release_gate` | no |
+| `cluster` | `cluster.routing` | no |
+| `cluster` | `cluster.rpc` | no |
+| `cluster` | `cluster.static_config` | no |
+| `cluster` | `cluster.trace` | no |
+| `cluster` | `cluster.transport` | no |
+| `cluster` | `cluster.work_stealing` | no |
+| `cluster.auth` | `cluster.node` | no |
+| `cluster.auth` | `errors` | no |
+| `cluster.backpressure` | `errors` | no |
+| `cluster.bench` | `hugrgate` | no |
+| `cluster.bench` | `cluster.bench_support` | no |
+| `cluster.bench` | `cluster.chaos` | no |
+| `cluster.bench` | `cluster.distributed_batch` | no |
+| `cluster.bench` | `cluster.work_stealing` | no |
+| `cluster.bench` | `core` | no |
+| `cluster.bench` | `errors` | no |
+| `cluster.bench` | `policy` | no |
+| `cluster.bench` | `spec` | no |
+| `cluster.bench_support` | `cluster.backpressure` | no |
+| `cluster.bench_support` | `cluster.discovery` | no |
+| `cluster.bench_support` | `cluster.identity` | no |
+| `cluster.bench_support` | `cluster.node` | no |
+| `cluster.bench_support` | `cluster.protocol` | no |
+| `cluster.bench_support` | `cluster.rpc` | no |
+| `cluster.bench_support` | `errors` | no |
+| `cluster.bench_support` | `server` | yes |
+| `cluster.capabilities` | `hugrgate` | no |
+| `cluster.capabilities` | `backend` | no |
+| `cluster.capabilities` | `cluster.identity` | no |
+| `cluster.capabilities` | `cluster.protocol` | no |
+| `cluster.capabilities` | `errors` | no |
+| `cluster.capabilities` | `spec` | no |
+| `cluster.chaos` | `errors` | no |
+| `cluster.discovery` | `cluster.capabilities` | no |
+| `cluster.discovery` | `errors` | no |
+| `cluster.distributed_batch` | `cluster.discovery` | no |
+| `cluster.distributed_batch` | `cluster.privacy_boundary` | no |
+| `cluster.distributed_batch` | `cluster.protocol` | no |
+| `cluster.distributed_batch` | `cluster.rpc` | no |
+| `cluster.distributed_batch` | `errors` | no |
+| `cluster.distributed_batch` | `policy` | no |
+| `cluster.distributed_batch` | `result` | no |
+| `cluster.distributed_batch` | `serde` | no |
+| `cluster.distributed_batch` | `spec` | no |
+| `cluster.identity` | `cluster.protocol` | no |
+| `cluster.identity` | `errors` | no |
+| `cluster.lan` | `cluster.capabilities` | no |
+| `cluster.lan` | `cluster.discovery` | no |
+| `cluster.lan` | `cluster.identity` | no |
+| `cluster.lan` | `cluster.protocol` | no |
+| `cluster.lan` | `errors` | no |
+| `cluster.node` | `cluster.backpressure` | no |
+| `cluster.node` | `cluster.capabilities` | no |
+| `cluster.node` | `cluster.discovery` | no |
+| `cluster.node` | `cluster.distributed_batch` | no |
+| `cluster.node` | `cluster.identity` | no |
+| `cluster.node` | `cluster.node_cost` | no |
+| `cluster.node` | `cluster.node_health` | no |
+| `cluster.node` | `cluster.node_latency` | no |
+| `cluster.node` | `cluster.partition` | no |
+| `cluster.node` | `cluster.policy_sync` | no |
+| `cluster.node` | `cluster.protocol` | no |
+| `cluster.node` | `cluster.provenance_dist` | no |
+| `cluster.node` | `cluster.recovery` | no |
+| `cluster.node` | `cluster.routing` | no |
+| `cluster.node` | `cluster.rpc` | no |
+| `cluster.node` | `cluster.trace` | no |
+| `cluster.node` | `cluster.work_stealing` | no |
+| `cluster.node` | `core` | no |
+| `cluster.node` | `errors` | no |
+| `cluster.node` | `policy` | no |
+| `cluster.node` | `result` | no |
+| `cluster.node` | `serde` | no |
+| `cluster.node` | `spec` | no |
+| `cluster.node_cost` | `errors` | no |
+| `cluster.node_health` | `errors` | no |
+| `cluster.node_latency` | `errors` | no |
+| `cluster.partition` | `errors` | no |
+| `cluster.policy_sync` | `errors` | no |
+| `cluster.policy_sync` | `policy` | no |
+| `cluster.policy_sync` | `serde` | no |
+| `cluster.privacy_boundary` | `errors` | no |
+| `cluster.privacy_boundary` | `policy` | no |
+| `cluster.protocol` | `errors` | no |
+| `cluster.provenance_dist` | `cluster.discovery` | no |
+| `cluster.provenance_dist` | `cluster.protocol` | no |
+| `cluster.provenance_dist` | `cluster.rpc` | no |
+| `cluster.provenance_dist` | `core` | no |
+| `cluster.provenance_dist` | `errors` | no |
+| `cluster.provenance_dist` | `provenance` | no |
+| `cluster.recovery` | `errors` | no |
+| `cluster.release_gate` | `cluster.node` | no |
+| `cluster.release_gate` | `errors` | no |
+| `cluster.routes` | `cluster.node` | no |
+| `cluster.routes` | `cluster.protocol` | no |
+| `cluster.routes` | `errors` | no |
+| `cluster.routing` | `cluster.discovery` | no |
+| `cluster.routing` | `cluster.node_cost` | no |
+| `cluster.routing` | `cluster.privacy_boundary` | no |
+| `cluster.routing` | `core` | no |
+| `cluster.routing` | `errors` | no |
+| `cluster.routing` | `policy` | no |
+| `cluster.routing` | `result` | no |
+| `cluster.routing` | `spec` | no |
+| `cluster.rpc` | `backend` | no |
+| `cluster.rpc` | `cluster.discovery` | no |
+| `cluster.rpc` | `cluster.privacy_boundary` | no |
+| `cluster.rpc` | `cluster.protocol` | no |
+| `cluster.rpc` | `cluster.trace` | no |
+| `cluster.rpc` | `cluster.work_stealing` | yes |
+| `cluster.rpc` | `errors` | no |
+| `cluster.rpc` | `policy` | no |
+| `cluster.rpc` | `result` | no |
+| `cluster.rpc` | `serde` | no |
+| `cluster.rpc` | `spec` | no |
+| `cluster.static_config` | `cluster.discovery` | no |
+| `cluster.static_config` | `errors` | no |
+| `cluster.trace` | `cluster.protocol` | no |
+| `cluster.trace` | `errors` | no |
+| `cluster.transport` | `errors` | no |
+| `cluster.work_stealing` | `cluster.privacy_boundary` | no |
+| `cluster.work_stealing` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `log` | no |
@@ -439,6 +756,7 @@ flowchart TD
 | `core` | `spec` | no |
 | `core` | `validation` | no |
 | `daemon` | `client` | yes |
+| `daemon` | `cluster.node` | no |
 | `daemon` | `core` | no |
 | `daemon` | `errors` | yes |
 | `daemon` | `log` | yes |
@@ -558,6 +876,8 @@ flowchart TD
 | `serde` | `result` | no |
 | `server` | `hugrgate` | no |
 | `server` | `backend` | no |
+| `server` | `cluster.node` | no |
+| `server` | `cluster.routes` | yes |
 | `server` | `core` | no |
 | `server` | `errors` | no |
 | `server` | `result` | no |

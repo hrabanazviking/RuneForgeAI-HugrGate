@@ -26,7 +26,7 @@ import threading
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field, fields
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -38,6 +38,9 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
 from hugrgate.server import build_gate, create_app
+
+if TYPE_CHECKING:
+    from hugrgate.cluster.node import ClusterNode
 
 logger = get_logger(__name__)
 
@@ -295,8 +298,13 @@ def load_client_policies(path: str) -> dict[str, DecisionPolicy]:
 
 
 def create_daemon_app(config: DaemonConfig,
-                      gate: HugrGate | None = None):
-    """Build the daemon FastAPI app: batching + per-client policies."""
+                      gate: HugrGate | None = None,
+                      node: ClusterNode | None = None):
+    """Build the daemon FastAPI app: batching + per-client policies.
+
+    When ``node`` is given, the ``/cluster/*`` routes are mounted so
+    the daemon also serves as a cluster peer (slice 207).
+    """
     from hugrgate.errors import (
         BackendError,
         BackendUnavailable,
@@ -331,7 +339,7 @@ def create_daemon_app(config: DaemonConfig,
         finally:
             await queue.stop(drain_timeout=config.drain_timeout_s)
 
-    app = create_app(gate)
+    app = create_app(gate, node=node)
     app.router.lifespan_context = _lifespan
 
     # Replace the direct /decide route with the batching variant.
