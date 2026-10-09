@@ -93,6 +93,8 @@ flowchart TD
         cluster_provenance_dist[cluster.provenance_dist]
         cluster_trace[cluster.trace]
         cluster_chaos[cluster.chaos]
+        cluster_bench_support[cluster.bench_support]
+        cluster_bench[cluster.bench]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -211,6 +213,23 @@ flowchart TD
     cluster_auth --> cluster_node
     cluster_auth --> errors
     cluster_backpressure --> errors
+    cluster_bench --> hugrgate
+    cluster_bench --> cluster_bench_support
+    cluster_bench --> cluster_chaos
+    cluster_bench --> cluster_distributed_batch
+    cluster_bench --> cluster_work_stealing
+    cluster_bench --> core
+    cluster_bench --> errors
+    cluster_bench --> policy
+    cluster_bench --> spec
+    cluster_bench_support --> cluster_backpressure
+    cluster_bench_support --> cluster_discovery
+    cluster_bench_support --> cluster_identity
+    cluster_bench_support --> cluster_node
+    cluster_bench_support --> cluster_protocol
+    cluster_bench_support --> cluster_rpc
+    cluster_bench_support --> errors
+    cluster_bench_support -.-> server
     cluster_capabilities --> hugrgate
     cluster_capabilities --> backend
     cluster_capabilities --> cluster_identity
@@ -394,7 +413,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -514,6 +533,23 @@ flowchart TD
 | `cluster.auth` | `cluster.node` | no |
 | `cluster.auth` | `errors` | no |
 | `cluster.backpressure` | `errors` | no |
+| `cluster.bench` | `hugrgate` | no |
+| `cluster.bench` | `cluster.bench_support` | no |
+| `cluster.bench` | `cluster.chaos` | no |
+| `cluster.bench` | `cluster.distributed_batch` | no |
+| `cluster.bench` | `cluster.work_stealing` | no |
+| `cluster.bench` | `core` | no |
+| `cluster.bench` | `errors` | no |
+| `cluster.bench` | `policy` | no |
+| `cluster.bench` | `spec` | no |
+| `cluster.bench_support` | `cluster.backpressure` | no |
+| `cluster.bench_support` | `cluster.discovery` | no |
+| `cluster.bench_support` | `cluster.identity` | no |
+| `cluster.bench_support` | `cluster.node` | no |
+| `cluster.bench_support` | `cluster.protocol` | no |
+| `cluster.bench_support` | `cluster.rpc` | no |
+| `cluster.bench_support` | `errors` | no |
+| `cluster.bench_support` | `server` | yes |
 | `cluster.capabilities` | `hugrgate` | no |
 | `cluster.capabilities` | `backend` | no |
 | `cluster.capabilities` | `cluster.identity` | no |

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:51:06.190913+00:00",
-  "module_count": 70,
+  "generated_utc": "2026-10-09T13:55:14.904738+00:00",
+  "module_count": 72,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -592,6 +592,57 @@
         "try_acquire",
         "retry_after_ms",
         "stats"
+      ]
+    },
+    "hugrgate.cluster.bench": {
+      "docstring": "Cluster benchmark suite. Slice 224.\n\nLoopback-only scenarios measuring the distributed machinery:\n\n- ``remote_decide`` \u2014 N ``decide_remote`` calls to one peer:\n  latency p50/p95/mean and throughput.\n- ``router_failover`` \u2014 two peers, the first dropping 50% (seeded\n  chaos): success rate and failover share.\n- ``distributed_batch`` \u2014 N jobs across two peers in one flush:\n  envelopes sent, jobs per envelope, throughput.\n- ``work_steal`` \u2014 a victim queues N jobs, a thief steals them:\n  steal throughput.\n- ``provenance_sync`` \u2014 pull + merge N records: records/s.\n\n``run_cluster_benchmark`` returns a JSON-serializable report dict\n(``hugrgate_version``, ``generated_at``, ``platform``, ``config``,\nper-scenario metrics). ``python -m hugrgate.cluster.bench`` writes\nthe artifact; the committed report lives at\n``benchmarks/cluster_bench_report.json`` (checksummed \u2014 regenerate\nwith ``--full`` and re-record the checksum).",
+      "imports": [
+        "__future__",
+        "argparse",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "platform",
+        "sys",
+        "time"
+      ],
+      "loc": 304,
+      "path": "hugrgate/cluster/bench.py",
+      "public_defs": [
+        "ClusterBenchConfig",
+        "scenario_remote_decide",
+        "scenario_router_failover",
+        "scenario_distributed_batch",
+        "scenario_work_steal",
+        "scenario_provenance_sync",
+        "run_cluster_benchmark",
+        "main"
+      ]
+    },
+    "hugrgate.cluster.bench_support": {
+      "docstring": "Loopback cluster harness for benchmarks (and chaos rehearsals).\n\nSlice 224 support module: builds N :class:`ClusterNode`\\ s whose RPC\ntransports dispatch directly to each other (no sockets), with\nper-node call counting and hot-swappable transports (for\n:class:`ChaosProxy` scenarios).",
+      "imports": [
+        "__future__",
+        "httpx",
+        "hugrgate"
+      ],
+      "loc": 140,
+      "path": "hugrgate/cluster/bench_support.py",
+      "public_defs": [
+        "percent_str",
+        "LoopbackCluster",
+        "handle_request",
+        "handle_request",
+        "peers",
+        "node",
+        "names",
+        "port_for",
+        "name_for_port",
+        "transport_for",
+        "calls_for",
+        "set_transport",
+        "peer_record",
+        "static_adapter"
       ]
     },
     "hugrgate.cluster.capabilities": {
@@ -1685,6 +1736,7 @@
     "test_backend_registry.py",
     "test_cluster_auth.py",
     "test_cluster_backpressure.py",
+    "test_cluster_bench.py",
     "test_cluster_capabilities.py",
     "test_cluster_chaos.py",
     "test_cluster_discovery.py",
@@ -1733,5 +1785,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 13088
+  "total_loc": 13532
 }

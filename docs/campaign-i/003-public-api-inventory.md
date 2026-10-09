@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 70 · **public names:** 348
+**Modules:** 72 · **public names:** 357
 
 ## API stability policy
 
@@ -329,6 +329,25 @@ that this document never drifts from the code.
 | `DEFAULT_ADMISSION_CAPACITY` | constant | `128` |
 | `DEFAULT_ADMISSION_REFILL_PER_SECOND` | constant | `64.0` |
 | `AdmissionController` | class | `(capacity: 'int' = 128, refill_per_second: 'float' = 64.0) -> 'None'` |
+
+### `hugrgate.cluster.bench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ClusterBenchConfig` | class | `(n_items: 'int' = 200, chaos_seed: 'int' = 20261009, policy: 'DecisionPolicy' = <factory>, scenarios: 'tuple[str, ...]' = ('remote_decide', 'router_failover', 'distributed_batch', 'work_steal', 'provenance_sync')) -> None` |
+| `run_cluster_benchmark` | function | `(config: 'ClusterBenchConfig | None' = None) -> 'dict'` |
+| `scenario_distributed_batch` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_provenance_sync` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_remote_decide` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_router_failover` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+| `scenario_work_steal` | function | `(config: 'ClusterBenchConfig') -> 'dict'` |
+
+### `hugrgate.cluster.bench_support`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LoopbackCluster` | class | `(names: 'list[str]', admission_capacity: 'int' = 100000) -> 'None'` |
+| `percent_str` | function | `(part: 'float', whole: 'float') -> 'str'` |
 
 ### `hugrgate.cluster.capabilities`
 
