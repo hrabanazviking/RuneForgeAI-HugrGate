@@ -1,0 +1,156 @@
+"""Decision cache — request-hash keyed result memoization. Slice 38.
+
+:class:`DecisionCache` maps a hash of ``(state, spec, policy)`` to the
+:class:`DecisionResult`, with TTL expiry, LRU eviction at ``max_size``,
+and two safety rails:
+
+- **Privacy-aware**: entries are never stored for (or served to) decisions
+  whose ``privacy_class`` forbids retention (``"strict"``) — see
+  :class:`hugrgate.privacy.PrivacyGuard`.
+- **Invalidation on model change**: :meth:`invalidate_backend` drops every
+  entry produced by a backend, so a retrained model can never serve stale
+  decisions.
+
+Results are deep-copied on the way in and out so callers cannot mutate the
+cached copy.
+"""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+import time
+from collections import OrderedDict
+from dataclasses import dataclass
+from typing import Any, Dict, Mapping, Optional
+
+from hugrgate.policy import DecisionPolicy
+from hugrgate.privacy import PrivacyGuard
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
+
+
+def _policy_fingerprint(policy: DecisionPolicy) -> Dict[str, Any]:
+    """The policy fields that can change a decision outcome."""
+    return {
+        "minimum_probability": policy.minimum_probability,
+        "maximum_latency_ms": policy.maximum_latency_ms,
+        "remote_inference": policy.remote_inference,
+        "allowed_backends": policy.allowed_backends,
+        "preferred_backends": policy.preferred_backends,
+        "fallback_behavior": policy.fallback_behavior,
+        "privacy_class": policy.privacy_class,
+        "max_cost": policy.max_cost,
+        "review_band": list(policy.review_band)
+        if policy.review_band else None,
+    }
+
+
+def cache_key(state: Mapping[str, Any], spec: DecisionSpec,
+              policy: DecisionPolicy) -> str:
+    """Stable hash identifying one cacheable decision request."""
+    payload = json.dumps(
+        {"state": dict(state),
+         "spec": spec.to_dict(),
+         "policy": _policy_fingerprint(policy)},
+        sort_keys=True, default=str)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+@dataclass
+class _Entry:
+    result: DecisionResult
+    expires_at: float  # monotonic seconds
+    backend: str
+
+
+class DecisionCache:
+    """TTL + LRU + privacy-aware cache of decision results."""
+
+    def __init__(self, ttl_seconds: float = 300.0, max_size: int = 1000):
+        if ttl_seconds <= 0:
+            raise ValueError("ttl_seconds must be positive")
+        if max_size < 1:
+            raise ValueError("max_size must be >= 1")
+        self.ttl_seconds = ttl_seconds
+        self.max_size = max_size
+        self._entries: "OrderedDict[str, _Entry]" = OrderedDict()
+        self.hits = 0
+        self.misses = 0
+
+    # -- core API ----------------------------------------------------------
+
+    def get(self, state: Mapping[str, Any], spec: DecisionSpec,
+            policy: DecisionPolicy) -> Optional[DecisionResult]:
+        """Return the cached result, or None on miss/expiry/privacy."""
+        if not PrivacyGuard.cache_allowed(policy):
+            return None
+        key = cache_key(state, spec, policy)
+        entry = self._entries.get(key)
+        if entry is None:
+            self.misses += 1
+            return None
+        if entry.expires_at <= time.monotonic():
+            del self._entries[key]
+            self.misses += 1
+            return None
+        self._entries.move_to_end(key)  # LRU touch
+        self.hits += 1
+        return copy.deepcopy(entry.result)
+
+    def put(self, state: Mapping[str, Any], spec: DecisionSpec,
+            policy: DecisionPolicy, result: DecisionResult) -> bool:
+        """Store ``result``. Returns False when privacy forbids caching."""
+        if not PrivacyGuard.cache_allowed(policy):
+            return False
+        key = cache_key(state, spec, policy)
+        now = time.monotonic()
+        self._entries[key] = _Entry(
+            result=copy.deepcopy(result),
+            expires_at=now + self.ttl_seconds,
+            backend=result.backend)
+        self._entries.move_to_end(key)
+        while len(self._entries) > self.max_size:
+            self._entries.popitem(last=False)  # evict least-recently-used
+        return True
+
+    # -- invalidation ------------------------------------------------------
+
+    def invalidate_backend(self, backend_name: str) -> int:
+        """Drop every entry produced by ``backend_name`` (model changed)."""
+        doomed = [k for k, e in self._entries.items()
+                  if e.backend == backend_name]
+        for k in doomed:
+            del self._entries[k]
+        return len(doomed)
+
+    def invalidate_model(self, backend_name: str,
+                         model_version: Optional[str] = None) -> int:
+        """Alias: a new model version invalidates the backend's entries."""
+        return self.invalidate_backend(backend_name)
+
+    def clear(self) -> None:
+        self._entries.clear()
+
+    # -- introspection -----------------------------------------------------
+
+    def __len__(self) -> int:
+        # Opportunistically sweep expired entries on size checks.
+        now = time.monotonic()
+        expired = [k for k, e in self._entries.items()
+                   if e.expires_at <= now]
+        for k in expired:
+            del self._entries[k]
+        return len(self._entries)
+
+    def stats(self) -> Dict[str, Any]:
+        total = self.hits + self.misses
+        return {
+            "size": len(self),
+            "max_size": self.max_size,
+            "ttl_seconds": self.ttl_seconds,
+            "hits": self.hits,
+            "misses": self.misses,
+            "hit_rate": self.hits / total if total else 0.0,
+        }

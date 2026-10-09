@@ -1,0 +1,5016 @@
+{
+  "name": "urgency_500",
+  "version": "1.0.0",
+  "seed": 20261009,
+  "spec": {
+    "type": "ordinal",
+    "levels": [
+      "low",
+      "medium",
+      "high",
+      "critical"
+    ]
+  },
+  "items": [
+    {
+      "id": "urgency-0399",
+      "state": {
+        "event": "Routine backup of web-01 completed successfully.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0373",
+      "state": {
+        "event": "Backup of jump-01 took 33x longer than usual.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0119",
+      "state": {
+        "event": "Critical: auth service TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0397",
+      "state": {
+        "event": "Routine backup of jump-01 completed successfully.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0405",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-02.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0265",
+      "state": {
+        "event": "Disk usage on web-01 at 55% — cleanup advised.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0020",
+      "state": {
+        "event": "CRITICAL: auth service is completely down — all users affected.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0314",
+      "state": {
+        "event": "mail-01 CPU sustained at 81% during business hours.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0148",
+      "state": {
+        "event": "High error rate on checkout API: 63% of requests failing.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0237",
+      "state": {
+        "event": "Elevated 5xx errors from jump-01 for 40 minutes.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0121",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0498",
+      "state": {
+        "event": "Low priority: update the runbook for auth service.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0273",
+      "state": {
+        "event": "Disk usage on mail-01 at 78% — cleanup advised.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0046",
+      "state": {
+        "event": "Critical security breach detected on fileserver-3; attacker active.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0368",
+      "state": {
+        "event": "Backup of mail-01 took 21x longer than usual.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0006",
+      "state": {
+        "event": "CRITICAL: payment gateway is completely down — all users affected.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0193",
+      "state": {
+        "event": "High latency on search cluster checkout — p99 over 13s.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0131",
+      "state": {
+        "event": "High error rate on auth service: 80% of requests failing.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0456",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0386",
+      "state": {
+        "event": "Routine backup of db-02 completed successfully.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0007",
+      "state": {
+        "event": "CRITICAL: auth service is completely down — all users affected.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0114",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0155",
+      "state": {
+        "event": "Memory on jump-01 at 58%; OOM kills imminent.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0289",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0255",
+      "state": {
+        "event": "Disk usage on jump-01 at 87% — cleanup advised.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0158",
+      "state": {
+        "event": "Memory on web-01 at 58%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0381",
+      "state": {
+        "event": "Routine backup of db-02 completed successfully.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0303",
+      "state": {
+        "event": "jump-01 CPU sustained at 85% during business hours.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0259",
+      "state": {
+        "event": "Disk usage on db-02 at 61% — cleanup advised.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0047",
+      "state": {
+        "event": "Critical security breach detected on db-01; attacker active.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0200",
+      "state": {
+        "event": "High latency on search cluster checkout — p99 over 38s.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0301",
+      "state": {
+        "event": "jump-01 CPU sustained at 95% during business hours.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0389",
+      "state": {
+        "event": "Routine backup of web-02 completed successfully.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0393",
+      "state": {
+        "event": "Routine backup of mail-01 completed successfully.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0244",
+      "state": {
+        "event": "Elevated 5xx errors from web-02 for 4 minutes.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0015",
+      "state": {
+        "event": "CRITICAL: checkout API is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0416",
+      "state": {
+        "event": "Low disk headroom warning cleared on jump-01.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0385",
+      "state": {
+        "event": "Routine backup of web-01 completed successfully.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0261",
+      "state": {
+        "event": "Disk usage on mail-01 at 96% — cleanup advised.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0406",
+      "state": {
+        "event": "Low disk headroom warning cleared on web-01.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0066",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0349",
+      "state": {
+        "event": "Certificate for search cluster expires in 45 days.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0449",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0107",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0041",
+      "state": {
+        "event": "Critical security breach detected on vpn-gw; attacker active.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0470",
+      "state": {
+        "event": "Informational: mail-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0226",
+      "state": {
+        "event": "Elevated 5xx errors from web-02 for 36 minutes.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0135",
+      "state": {
+        "event": "High error rate on search cluster: 84% of requests failing.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0450",
+      "state": {
+        "event": "notification worker nightly report generated without issues.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0421",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0333",
+      "state": {
+        "event": "Certificate for auth service expires in 21 days.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0002",
+      "state": {
+        "event": "CRITICAL: auth service is completely down — all users affected.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0472",
+      "state": {
+        "event": "Informational: fileserver-3 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0037",
+      "state": {
+        "event": "Critical security breach detected on web-01; attacker active.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0330",
+      "state": {
+        "event": "Certificate for payment gateway expires in 46 days.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0372",
+      "state": {
+        "event": "Backup of db-01 took 30x longer than usual.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0185",
+      "state": {
+        "event": "High latency on notification worker checkout — p99 over 48s.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0459",
+      "state": {
+        "event": "Informational: fileserver-3 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0359",
+      "state": {
+        "event": "Backup of fileserver-3 took 20x longer than usual.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0102",
+      "state": {
+        "event": "Critical: notification worker TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0043",
+      "state": {
+        "event": "Critical security breach detected on jump-01; attacker active.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0315",
+      "state": {
+        "event": "mail-01 CPU sustained at 85% during business hours.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0201",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0390",
+      "state": {
+        "event": "Routine backup of db-01 completed successfully.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0218",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0108",
+      "state": {
+        "event": "Critical: search cluster TLS certificates expired, traffic rejected.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0063",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0057",
+      "state": {
+        "event": "CRITICAL: database cluster jump-01 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0278",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0276",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0221",
+      "state": {
+        "event": "Failover of checkout API to secondary region in progress.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0071",
+      "state": {
+        "event": "CRITICAL: database cluster vpn-gw lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0336",
+      "state": {
+        "event": "Certificate for notification worker expires in 15 days.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0437",
+      "state": {
+        "event": "auth service nightly report generated without issues.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0233",
+      "state": {
+        "event": "Elevated 5xx errors from web-01 for 34 minutes.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0461",
+      "state": {
+        "event": "Informational: web-01 rebooted for scheduled patching.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0295",
+      "state": {
+        "event": "Medium priority: search cluster deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0038",
+      "state": {
+        "event": "Critical security breach detected on fileserver-3; attacker active.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0236",
+      "state": {
+        "event": "Elevated 5xx errors from jump-01 for 16 minutes.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0429",
+      "state": {
+        "event": "search cluster nightly report generated without issues.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0339",
+      "state": {
+        "event": "Certificate for notification worker expires in 12 days.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0451",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0340",
+      "state": {
+        "event": "Certificate for notification worker expires in 25 days.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0180",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 11s.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0296",
+      "state": {
+        "event": "Medium priority: auth service deploy canary showing warnings.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0055",
+      "state": {
+        "event": "CRITICAL: database cluster web-01 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0433",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0033",
+      "state": {
+        "event": "Critical security breach detected on web-01; attacker active.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0394",
+      "state": {
+        "event": "Routine backup of fileserver-3 completed successfully.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0484",
+      "state": {
+        "event": "Low priority: update the runbook for auth service.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0068",
+      "state": {
+        "event": "CRITICAL: database cluster web-01 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0130",
+      "state": {
+        "event": "High error rate on auth service: 67% of requests failing.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0031",
+      "state": {
+        "event": "Critical security breach detected on web-01; attacker active.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0191",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 31s.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0391",
+      "state": {
+        "event": "Routine backup of vpn-gw completed successfully.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0024",
+      "state": {
+        "event": "CRITICAL: auth service is completely down — all users affected.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0127",
+      "state": {
+        "event": "High error rate on auth service: 94% of requests failing.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0149",
+      "state": {
+        "event": "High error rate on payment gateway: 78% of requests failing.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0098",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0101",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0126",
+      "state": {
+        "event": "High error rate on payment gateway: 59% of requests failing.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0141",
+      "state": {
+        "event": "High error rate on checkout API: 82% of requests failing.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0305",
+      "state": {
+        "event": "web-02 CPU sustained at 61% during business hours.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0202",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0364",
+      "state": {
+        "event": "Backup of web-01 took 3x longer than usual.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0093",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0215",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0145",
+      "state": {
+        "event": "High error rate on search cluster: 94% of requests failing.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0292",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0079",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0440",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0494",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0035",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0069",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0400",
+      "state": {
+        "event": "Routine backup of fileserver-3 completed successfully.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0254",
+      "state": {
+        "event": "Disk usage on web-01 at 80% — cleanup advised.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0348",
+      "state": {
+        "event": "Certificate for auth service expires in 4 days.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0064",
+      "state": {
+        "event": "CRITICAL: database cluster vpn-gw lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0323",
+      "state": {
+        "event": "web-01 CPU sustained at 60% during business hours.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0256",
+      "state": {
+        "event": "Disk usage on mail-01 at 97% — cleanup advised.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0311",
+      "state": {
+        "event": "db-02 CPU sustained at 91% during business hours.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0136",
+      "state": {
+        "event": "High error rate on checkout API: 83% of requests failing.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0383",
+      "state": {
+        "event": "Routine backup of jump-01 completed successfully.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0414",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0225",
+      "state": {
+        "event": "Failover of auth service to secondary region in progress.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0423",
+      "state": {
+        "event": "Low disk headroom warning cleared on jump-01.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0235",
+      "state": {
+        "event": "Elevated 5xx errors from web-01 for 48 minutes.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0153",
+      "state": {
+        "event": "Memory on mail-01 at 72%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0137",
+      "state": {
+        "event": "High error rate on search cluster: 91% of requests failing.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0146",
+      "state": {
+        "event": "High error rate on checkout API: 67% of requests failing.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0176",
+      "state": {
+        "event": "High latency on notification worker checkout — p99 over 28s.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0435",
+      "state": {
+        "event": "search cluster nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0080",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0032",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0186",
+      "state": {
+        "event": "High latency on notification worker checkout — p99 over 19s.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0212",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0388",
+      "state": {
+        "event": "Routine backup of vpn-gw completed successfully.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0358",
+      "state": {
+        "event": "Backup of vpn-gw took 33x longer than usual.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0246",
+      "state": {
+        "event": "Elevated 5xx errors from db-01 for 44 minutes.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0067",
+      "state": {
+        "event": "CRITICAL: database cluster fileserver-3 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0263",
+      "state": {
+        "event": "Disk usage on web-01 at 87% — cleanup advised.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0344",
+      "state": {
+        "event": "Certificate for search cluster expires in 2 days.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0298",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0001",
+      "state": {
+        "event": "CRITICAL: search cluster is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0205",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0316",
+      "state": {
+        "event": "jump-01 CPU sustained at 55% during business hours.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0445",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0500",
+      "state": {
+        "event": "Low priority: update the runbook for checkout API.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0280",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0229",
+      "state": {
+        "event": "Elevated 5xx errors from jump-01 for 40 minutes.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0382",
+      "state": {
+        "event": "Routine backup of web-02 completed successfully.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0268",
+      "state": {
+        "event": "Disk usage on fileserver-3 at 93% — cleanup advised.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0123",
+      "state": {
+        "event": "Critical: notification worker TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0248",
+      "state": {
+        "event": "Elevated 5xx errors from vpn-gw for 45 minutes.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0156",
+      "state": {
+        "event": "Memory on mail-01 at 92%; OOM kills imminent.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0418",
+      "state": {
+        "event": "Low disk headroom warning cleared on mail-01.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0013",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0249",
+      "state": {
+        "event": "Elevated 5xx errors from db-01 for 10 minutes.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0216",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0362",
+      "state": {
+        "event": "Backup of mail-01 took 20x longer than usual.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0019",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0260",
+      "state": {
+        "event": "Disk usage on vpn-gw at 89% — cleanup advised.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0479",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0203",
+      "state": {
+        "event": "Failover of checkout API to secondary region in progress.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0490",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0159",
+      "state": {
+        "event": "Memory on vpn-gw at 90%; OOM kills imminent.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0204",
+      "state": {
+        "event": "Failover of notification worker to secondary region in progress.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0356",
+      "state": {
+        "event": "Backup of db-02 took 31x longer than usual.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0009",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0321",
+      "state": {
+        "event": "fileserver-3 CPU sustained at 83% during business hours.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0475",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0234",
+      "state": {
+        "event": "Elevated 5xx errors from mail-01 for 31 minutes.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0211",
+      "state": {
+        "event": "Failover of notification worker to secondary region in progress.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0242",
+      "state": {
+        "event": "Elevated 5xx errors from web-02 for 14 minutes.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0469",
+      "state": {
+        "event": "Informational: db-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0320",
+      "state": {
+        "event": "fileserver-3 CPU sustained at 65% during business hours.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0224",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0489",
+      "state": {
+        "event": "Low priority: update the runbook for auth service.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0165",
+      "state": {
+        "event": "Memory on mail-01 at 77%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0347",
+      "state": {
+        "event": "Certificate for payment gateway expires in 24 days.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0195",
+      "state": {
+        "event": "High latency on auth service checkout — p99 over 22s.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0266",
+      "state": {
+        "event": "Disk usage on mail-01 at 87% — cleanup advised.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0404",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-02.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0192",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 43s.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0247",
+      "state": {
+        "event": "Elevated 5xx errors from mail-01 for 6 minutes.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0467",
+      "state": {
+        "event": "Informational: vpn-gw rebooted for scheduled patching.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0075",
+      "state": {
+        "event": "CRITICAL: database cluster jump-01 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0008",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0422",
+      "state": {
+        "event": "Low disk headroom warning cleared on jump-01.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0496",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0270",
+      "state": {
+        "event": "Disk usage on fileserver-3 at 73% — cleanup advised.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0179",
+      "state": {
+        "event": "High latency on auth service checkout — p99 over 10s.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0040",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0084",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0495",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0207",
+      "state": {
+        "event": "Failover of notification worker to secondary region in progress.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0231",
+      "state": {
+        "event": "Elevated 5xx errors from web-02 for 24 minutes.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0128",
+      "state": {
+        "event": "High error rate on auth service: 69% of requests failing.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0471",
+      "state": {
+        "event": "Informational: db-02 rebooted for scheduled patching.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0497",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0052",
+      "state": {
+        "event": "CRITICAL: database cluster jump-01 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0478",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0374",
+      "state": {
+        "event": "Backup of web-01 took 22x longer than usual.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0463",
+      "state": {
+        "event": "Informational: db-02 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0091",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0327",
+      "state": {
+        "event": "Certificate for search cluster expires in 44 days.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0491",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0354",
+      "state": {
+        "event": "Backup of db-01 took 43x longer than usual.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0250",
+      "state": {
+        "event": "Elevated 5xx errors from db-01 for 22 minutes.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0275",
+      "state": {
+        "event": "Disk usage on fileserver-3 at 90% — cleanup advised.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0310",
+      "state": {
+        "event": "web-01 CPU sustained at 86% during business hours.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0474",
+      "state": {
+        "event": "Informational: db-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0304",
+      "state": {
+        "event": "fileserver-3 CPU sustained at 93% during business hours.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0377",
+      "state": {
+        "event": "Routine backup of web-01 completed successfully.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0488",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0431",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0312",
+      "state": {
+        "event": "web-02 CPU sustained at 85% during business hours.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0419",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0238",
+      "state": {
+        "event": "Elevated 5xx errors from web-02 for 6 minutes.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0073",
+      "state": {
+        "event": "CRITICAL: database cluster db-02 lost quorum, writes failing.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0209",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0164",
+      "state": {
+        "event": "Memory on web-01 at 72%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0030",
+      "state": {
+        "event": "Critical security breach detected on db-01; attacker active.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0318",
+      "state": {
+        "event": "fileserver-3 CPU sustained at 83% during business hours.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0104",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0183",
+      "state": {
+        "event": "High latency on payment gateway checkout — p99 over 44s.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0151",
+      "state": {
+        "event": "Memory on vpn-gw at 66%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0217",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0161",
+      "state": {
+        "event": "Memory on jump-01 at 76%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0436",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0133",
+      "state": {
+        "event": "High error rate on notification worker: 56% of requests failing.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0181",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 20s.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0371",
+      "state": {
+        "event": "Backup of mail-01 took 24x longer than usual.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0398",
+      "state": {
+        "event": "Routine backup of vpn-gw completed successfully.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0129",
+      "state": {
+        "event": "High error rate on search cluster: 77% of requests failing.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0045",
+      "state": {
+        "event": "Critical security breach detected on fileserver-3; attacker active.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0078",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0053",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0468",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0424",
+      "state": {
+        "event": "Low disk headroom warning cleared on jump-01.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0477",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0062",
+      "state": {
+        "event": "CRITICAL: database cluster web-01 lost quorum, writes failing.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0253",
+      "state": {
+        "event": "Disk usage on fileserver-3 at 58% — cleanup advised.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0465",
+      "state": {
+        "event": "Informational: mail-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0168",
+      "state": {
+        "event": "Memory on db-02 at 64%; OOM kills imminent.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0432",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0061",
+      "state": {
+        "event": "CRITICAL: database cluster web-02 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0100",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0213",
+      "state": {
+        "event": "Failover of auth service to secondary region in progress.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0012",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0089",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0232",
+      "state": {
+        "event": "Elevated 5xx errors from vpn-gw for 11 minutes.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0157",
+      "state": {
+        "event": "Memory on jump-01 at 90%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0150",
+      "state": {
+        "event": "High error rate on auth service: 79% of requests failing.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0309",
+      "state": {
+        "event": "db-02 CPU sustained at 99% during business hours.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0175",
+      "state": {
+        "event": "Memory on web-01 at 78%; OOM kills imminent.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0407",
+      "state": {
+        "event": "Low disk headroom warning cleared on web-02.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0375",
+      "state": {
+        "event": "Backup of web-01 took 3x longer than usual.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0097",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0194",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 38s.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0286",
+      "state": {
+        "event": "Medium priority: search cluster deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0363",
+      "state": {
+        "event": "Backup of db-01 took 31x longer than usual.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0219",
+      "state": {
+        "event": "Failover of auth service to secondary region in progress.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0070",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0072",
+      "state": {
+        "event": "CRITICAL: database cluster db-02 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0285",
+      "state": {
+        "event": "Medium priority: search cluster deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0317",
+      "state": {
+        "event": "web-02 CPU sustained at 84% during business hours.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0454",
+      "state": {
+        "event": "Informational: db-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0178",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 13s.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0220",
+      "state": {
+        "event": "Failover of auth service to secondary region in progress.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0099",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0004",
+      "state": {
+        "event": "CRITICAL: checkout API is completely down — all users affected.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0199",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 40s.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0060",
+      "state": {
+        "event": "CRITICAL: database cluster fileserver-3 lost quorum, writes failing.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0118",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0331",
+      "state": {
+        "event": "Certificate for checkout API expires in 33 days.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0396",
+      "state": {
+        "event": "Routine backup of db-01 completed successfully.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0412",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-02.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0103",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0120",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0411",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-02.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0428",
+      "state": {
+        "event": "notification worker nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0300",
+      "state": {
+        "event": "Medium priority: payment gateway deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0481",
+      "state": {
+        "event": "Low priority: update the runbook for payment gateway.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0410",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0352",
+      "state": {
+        "event": "Backup of web-02 took 48x longer than usual.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0049",
+      "state": {
+        "event": "Critical security breach detected on db-02; attacker active.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0297",
+      "state": {
+        "event": "Medium priority: auth service deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0240",
+      "state": {
+        "event": "Elevated 5xx errors from jump-01 for 5 minutes.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0139",
+      "state": {
+        "event": "High error rate on search cluster: 57% of requests failing.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0228",
+      "state": {
+        "event": "Elevated 5xx errors from fileserver-3 for 15 minutes.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0163",
+      "state": {
+        "event": "Memory on web-01 at 75%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0076",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0081",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0426",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0335",
+      "state": {
+        "event": "Certificate for notification worker expires in 43 days.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0082",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0147",
+      "state": {
+        "event": "High error rate on auth service: 65% of requests failing.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0460",
+      "state": {
+        "event": "Informational: db-02 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0322",
+      "state": {
+        "event": "mail-01 CPU sustained at 75% during business hours.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0124",
+      "state": {
+        "event": "Critical: auth service TLS certificates expired, traffic rejected.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0241",
+      "state": {
+        "event": "Elevated 5xx errors from mail-01 for 25 minutes.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0111",
+      "state": {
+        "event": "Critical: search cluster TLS certificates expired, traffic rejected.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0208",
+      "state": {
+        "event": "Failover of notification worker to secondary region in progress.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0029",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0198",
+      "state": {
+        "event": "High latency on notification worker checkout — p99 over 25s.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0094",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0206",
+      "state": {
+        "event": "Failover of notification worker to secondary region in progress.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0210",
+      "state": {
+        "event": "Failover of auth service to secondary region in progress.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0011",
+      "state": {
+        "event": "CRITICAL: checkout API is completely down — all users affected.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0010",
+      "state": {
+        "event": "CRITICAL: search cluster is completely down — all users affected.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0392",
+      "state": {
+        "event": "Routine backup of jump-01 completed successfully.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0282",
+      "state": {
+        "event": "Medium priority: payment gateway deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0028",
+      "state": {
+        "event": "Critical security breach detected on vpn-gw; attacker active.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0319",
+      "state": {
+        "event": "web-01 CPU sustained at 99% during business hours.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0447",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0115",
+      "state": {
+        "event": "Critical: auth service TLS certificates expired, traffic rejected.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0154",
+      "state": {
+        "event": "Memory on fileserver-3 at 79%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0122",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0334",
+      "state": {
+        "event": "Certificate for search cluster expires in 10 days.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0294",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0483",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0090",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0441",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0413",
+      "state": {
+        "event": "Low disk headroom warning cleared on web-01.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0016",
+      "state": {
+        "event": "CRITICAL: search cluster is completely down — all users affected.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0350",
+      "state": {
+        "event": "Certificate for search cluster expires in 32 days.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0014",
+      "state": {
+        "event": "CRITICAL: checkout API is completely down — all users affected.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0442",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0056",
+      "state": {
+        "event": "CRITICAL: database cluster mail-01 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0138",
+      "state": {
+        "event": "High error rate on notification worker: 96% of requests failing.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0415",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0271",
+      "state": {
+        "event": "Disk usage on vpn-gw at 80% — cleanup advised.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0166",
+      "state": {
+        "event": "Memory on web-01 at 70%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0338",
+      "state": {
+        "event": "Certificate for notification worker expires in 37 days.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0152",
+      "state": {
+        "event": "Memory on db-01 at 88%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0367",
+      "state": {
+        "event": "Backup of web-01 took 32x longer than usual.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0420",
+      "state": {
+        "event": "Low disk headroom warning cleared on mail-01.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0401",
+      "state": {
+        "event": "Low disk headroom warning cleared on mail-01.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0307",
+      "state": {
+        "event": "vpn-gw CPU sustained at 58% during business hours.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0025",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0288",
+      "state": {
+        "event": "Medium priority: auth service deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0281",
+      "state": {
+        "event": "Medium priority: auth service deploy canary showing warnings.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0279",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0239",
+      "state": {
+        "event": "Elevated 5xx errors from mail-01 for 13 minutes.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0269",
+      "state": {
+        "event": "Disk usage on db-02 at 75% — cleanup advised.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0050",
+      "state": {
+        "event": "Critical security breach detected on db-01; attacker active.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0378",
+      "state": {
+        "event": "Routine backup of web-02 completed successfully.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0284",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0277",
+      "state": {
+        "event": "Medium priority: search cluster deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0403",
+      "state": {
+        "event": "Low disk headroom warning cleared on fileserver-3.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0332",
+      "state": {
+        "event": "Certificate for payment gateway expires in 10 days.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0453",
+      "state": {
+        "event": "Informational: mail-01 rebooted for scheduled patching.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0272",
+      "state": {
+        "event": "Disk usage on mail-01 at 58% — cleanup advised.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0132",
+      "state": {
+        "event": "High error rate on checkout API: 86% of requests failing.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0387",
+      "state": {
+        "event": "Routine backup of web-02 completed successfully.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0326",
+      "state": {
+        "event": "Certificate for checkout API expires in 38 days.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0302",
+      "state": {
+        "event": "mail-01 CPU sustained at 98% during business hours.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0058",
+      "state": {
+        "event": "CRITICAL: database cluster vpn-gw lost quorum, writes failing.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0177",
+      "state": {
+        "event": "High latency on payment gateway checkout — p99 over 27s.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0023",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0473",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0343",
+      "state": {
+        "event": "Certificate for notification worker expires in 11 days.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0409",
+      "state": {
+        "event": "Low disk headroom warning cleared on web-02.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0036",
+      "state": {
+        "event": "Critical security breach detected on vpn-gw; attacker active.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0167",
+      "state": {
+        "event": "Memory on fileserver-3 at 61%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0257",
+      "state": {
+        "event": "Disk usage on mail-01 at 61% — cleanup advised.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0444",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0172",
+      "state": {
+        "event": "Memory on web-01 at 76%; OOM kills imminent.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0462",
+      "state": {
+        "event": "Informational: fileserver-3 rebooted for scheduled patching.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0299",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0499",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0092",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0329",
+      "state": {
+        "event": "Certificate for checkout API expires in 17 days.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0308",
+      "state": {
+        "event": "mail-01 CPU sustained at 78% during business hours.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0196",
+      "state": {
+        "event": "High latency on auth service checkout — p99 over 21s.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0106",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0365",
+      "state": {
+        "event": "Backup of fileserver-3 took 24x longer than usual.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0328",
+      "state": {
+        "event": "Certificate for checkout API expires in 20 days.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0324",
+      "state": {
+        "event": "fileserver-3 CPU sustained at 83% during business hours.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0096",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0143",
+      "state": {
+        "event": "High error rate on notification worker: 90% of requests failing.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0144",
+      "state": {
+        "event": "High error rate on notification worker: 73% of requests failing.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0059",
+      "state": {
+        "event": "CRITICAL: database cluster fileserver-3 lost quorum, writes failing.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0117",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0252",
+      "state": {
+        "event": "Disk usage on fileserver-3 at 83% — cleanup advised.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0021",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0345",
+      "state": {
+        "event": "Certificate for auth service expires in 19 days.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0395",
+      "state": {
+        "event": "Routine backup of vpn-gw completed successfully.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0492",
+      "state": {
+        "event": "Low priority: update the runbook for payment gateway.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0086",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0417",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0174",
+      "state": {
+        "event": "Memory on mail-01 at 79%; OOM kills imminent.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0287",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0380",
+      "state": {
+        "event": "Routine backup of web-02 completed successfully.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0283",
+      "state": {
+        "event": "Medium priority: payment gateway deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0262",
+      "state": {
+        "event": "Disk usage on db-01 at 94% — cleanup advised.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0313",
+      "state": {
+        "event": "db-02 CPU sustained at 75% during business hours.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0134",
+      "state": {
+        "event": "High error rate on notification worker: 70% of requests failing.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0042",
+      "state": {
+        "event": "Critical security breach detected on db-01; attacker active.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0112",
+      "state": {
+        "event": "Critical: auth service TLS certificates expired, traffic rejected.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0290",
+      "state": {
+        "event": "Medium priority: notification worker deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0325",
+      "state": {
+        "event": "vpn-gw CPU sustained at 99% during business hours.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0083",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0222",
+      "state": {
+        "event": "Failover of payment gateway to secondary region in progress.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0088",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0189",
+      "state": {
+        "event": "High latency on payment gateway checkout — p99 over 20s.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0110",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0140",
+      "state": {
+        "event": "High error rate on search cluster: 90% of requests failing.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0054",
+      "state": {
+        "event": "CRITICAL: database cluster db-02 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0376",
+      "state": {
+        "event": "Routine backup of web-01 completed successfully.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0214",
+      "state": {
+        "event": "Failover of search cluster to secondary region in progress.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0095",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0402",
+      "state": {
+        "event": "Low disk headroom warning cleared on db-01.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0251",
+      "state": {
+        "event": "Disk usage on web-02 at 88% — cleanup advised.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0116",
+      "state": {
+        "event": "Critical: checkout API TLS certificates expired, traffic rejected.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0482",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0051",
+      "state": {
+        "event": "CRITICAL: database cluster vpn-gw lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0434",
+      "state": {
+        "event": "notification worker nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0027",
+      "state": {
+        "event": "Critical security breach detected on fileserver-3; attacker active.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0142",
+      "state": {
+        "event": "High error rate on notification worker: 71% of requests failing.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0476",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0044",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0408",
+      "state": {
+        "event": "Low disk headroom warning cleared on web-02.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0448",
+      "state": {
+        "event": "notification worker nightly report generated without issues.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0171",
+      "state": {
+        "event": "Memory on mail-01 at 80%; OOM kills imminent.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0169",
+      "state": {
+        "event": "Memory on fileserver-3 at 86%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0443",
+      "state": {
+        "event": "search cluster nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0351",
+      "state": {
+        "event": "Backup of web-01 took 30x longer than usual.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0087",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0267",
+      "state": {
+        "event": "Disk usage on mail-01 at 65% — cleanup advised.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0427",
+      "state": {
+        "event": "checkout API nightly report generated without issues.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0187",
+      "state": {
+        "event": "High latency on auth service checkout — p99 over 33s.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0184",
+      "state": {
+        "event": "High latency on payment gateway checkout — p99 over 16s.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0357",
+      "state": {
+        "event": "Backup of fileserver-3 took 46x longer than usual.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0493",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0113",
+      "state": {
+        "event": "Critical: search cluster TLS certificates expired, traffic rejected.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0379",
+      "state": {
+        "event": "Routine backup of vpn-gw completed successfully.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0245",
+      "state": {
+        "event": "Elevated 5xx errors from db-01 for 11 minutes.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0188",
+      "state": {
+        "event": "High latency on search cluster checkout — p99 over 30s.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0439",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0264",
+      "state": {
+        "event": "Disk usage on web-02 at 69% — cleanup advised.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0230",
+      "state": {
+        "event": "Elevated 5xx errors from db-02 for 2 minutes.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0022",
+      "state": {
+        "event": "CRITICAL: payment gateway is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0425",
+      "state": {
+        "event": "Low disk headroom warning cleared on fileserver-3.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0355",
+      "state": {
+        "event": "Backup of db-01 took 12x longer than usual.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0173",
+      "state": {
+        "event": "Memory on web-01 at 88%; OOM kills imminent.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0291",
+      "state": {
+        "event": "Medium priority: auth service deploy canary showing warnings.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0452",
+      "state": {
+        "event": "Informational: mail-01 rebooted for scheduled patching.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0369",
+      "state": {
+        "event": "Backup of db-02 took 34x longer than usual.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0342",
+      "state": {
+        "event": "Certificate for notification worker expires in 17 days.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0105",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0034",
+      "state": {
+        "event": "Critical security breach detected on fileserver-3; attacker active.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0074",
+      "state": {
+        "event": "CRITICAL: database cluster fileserver-3 lost quorum, writes failing.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0170",
+      "state": {
+        "event": "Memory on web-01 at 76%; OOM kills imminent.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0458",
+      "state": {
+        "event": "Informational: web-01 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0026",
+      "state": {
+        "event": "Critical security breach detected on db-01; attacker active.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0125",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0446",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0370",
+      "state": {
+        "event": "Backup of db-02 took 40x longer than usual.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0243",
+      "state": {
+        "event": "Elevated 5xx errors from mail-01 for 42 minutes.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0353",
+      "state": {
+        "event": "Backup of db-01 took 33x longer than usual.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0039",
+      "state": {
+        "event": "Critical security breach detected on web-02; attacker active.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0274",
+      "state": {
+        "event": "Disk usage on web-02 at 87% — cleanup advised.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0480",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0182",
+      "state": {
+        "event": "High latency on checkout API checkout — p99 over 14s.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0197",
+      "state": {
+        "event": "High latency on search cluster checkout — p99 over 46s.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0485",
+      "state": {
+        "event": "Low priority: update the runbook for checkout API.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0455",
+      "state": {
+        "event": "Informational: web-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0438",
+      "state": {
+        "event": "payment gateway nightly report generated without issues.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0464",
+      "state": {
+        "event": "Informational: jump-01 rebooted for scheduled patching.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0227",
+      "state": {
+        "event": "Elevated 5xx errors from fileserver-3 for 28 minutes.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0337",
+      "state": {
+        "event": "Certificate for notification worker expires in 47 days.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0366",
+      "state": {
+        "event": "Backup of web-01 took 41x longer than usual.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0223",
+      "state": {
+        "event": "Failover of checkout API to secondary region in progress.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0341",
+      "state": {
+        "event": "Certificate for notification worker expires in 3 days.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0487",
+      "state": {
+        "event": "Low priority: update the runbook for notification worker.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0430",
+      "state": {
+        "event": "auth service nightly report generated without issues.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0306",
+      "state": {
+        "event": "web-01 CPU sustained at 69% during business hours.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0160",
+      "state": {
+        "event": "Memory on db-02 at 61%; OOM kills imminent.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0017",
+      "state": {
+        "event": "CRITICAL: notification worker is completely down — all users affected.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0048",
+      "state": {
+        "event": "Critical security breach detected on vpn-gw; attacker active.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0258",
+      "state": {
+        "event": "Disk usage on db-02 at 58% — cleanup advised.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0190",
+      "state": {
+        "event": "High latency on search cluster checkout — p99 over 27s.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0109",
+      "state": {
+        "event": "Critical: payment gateway TLS certificates expired, traffic rejected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0346",
+      "state": {
+        "event": "Certificate for notification worker expires in 9 days.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0003",
+      "state": {
+        "event": "CRITICAL: search cluster is completely down — all users affected.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0018",
+      "state": {
+        "event": "CRITICAL: checkout API is completely down — all users affected.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0457",
+      "state": {
+        "event": "Informational: web-01 rebooted for scheduled patching.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0065",
+      "state": {
+        "event": "CRITICAL: database cluster db-01 lost quorum, writes failing.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0360",
+      "state": {
+        "event": "Backup of fileserver-3 took 18x longer than usual.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0486",
+      "state": {
+        "event": "Low priority: update the runbook for search cluster.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0085",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0162",
+      "state": {
+        "event": "Memory on web-02 at 84%; OOM kills imminent.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "high"
+    },
+    {
+      "id": "urgency-0077",
+      "state": {
+        "event": "Production payments failing at 100% — critical incident declared.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    },
+    {
+      "id": "urgency-0293",
+      "state": {
+        "event": "Medium priority: checkout API deploy canary showing warnings.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0384",
+      "state": {
+        "event": "Routine backup of db-01 completed successfully.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0466",
+      "state": {
+        "event": "Informational: web-01 rebooted for scheduled patching.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "low"
+    },
+    {
+      "id": "urgency-0361",
+      "state": {
+        "event": "Backup of db-01 took 21x longer than usual.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "ordinal",
+      "expected": "medium"
+    },
+    {
+      "id": "urgency-0005",
+      "state": {
+        "event": "CRITICAL: search cluster is completely down — all users affected.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "ordinal",
+      "expected": "critical"
+    }
+  ]
+}

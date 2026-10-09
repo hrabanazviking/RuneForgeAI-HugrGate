@@ -1,0 +1,5016 @@
+{
+  "name": "triage_500",
+  "version": "1.0.0",
+  "seed": 20261009,
+  "spec": {
+    "type": "categorical",
+    "options": [
+      "ignore",
+      "log",
+      "investigate",
+      "escalate"
+    ]
+  },
+  "items": [
+    {
+      "id": "triage-0473",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0333",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Lagos to Oslo).",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0250",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool mimikatz ran on mail-01.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0357",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on jump-01 by svc-backup.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0097",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from vpn-gw to vault.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0455",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0148",
+      "state": {
+        "alert": "Log: 47 failed SSH logins for ops-bot on mail-01 — recording for audit.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0492",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from fileserver-3 to 203.0.113.44.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0497",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-01 to 198.51.100.9.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0009",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner jump-01 finished its sweep.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0079",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from mail-01 to vault.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0283",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 35GB from payment gateway.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0101",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on db-01.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0248",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on jump-01.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0431",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-01.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0152",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to vpn-gw port 22.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0124",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on fileserver-3.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0372",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-02 by m.chen.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0335",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Berlin to Austin).",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0064",
+      "state": {
+        "alert": "Benign: mail-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0125",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on jump-01.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0345",
+      "state": {
+        "alert": "Investigate: impossible travel login for admin-temp (Oslo to Oslo).",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0239",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on db-01.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0489",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-01 to 192.0.2.77.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0295",
+      "state": {
+        "alert": "Please investigate: jdoe downloaded 17GB from notification worker.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0495",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from jump-01 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0070",
+      "state": {
+        "alert": "Benign: db-02 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0051",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0316",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0260",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-02 to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0498",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-02 to 192.0.2.77.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0206",
+      "state": {
+        "alert": "Record in log: db-01 password changed by jdoe.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0336",
+      "state": {
+        "alert": "Investigate: impossible travel login for jdoe (Oslo to Toronto).",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0445",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0369",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-02 by jdoe.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0232",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on web-02.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0390",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on jump-01 — isolate now.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0251",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 203.0.113.44.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0406",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0246",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on web-01.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0179",
+      "state": {
+        "alert": "Log only: svc-backup accessed search cluster outside business hours.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0478",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-01 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0020",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0003",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner mail-01 finished its sweep.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0185",
+      "state": {
+        "alert": "Log only: svc-backup accessed notification worker outside business hours.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0228",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on vpn-gw.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0373",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on vpn-gw by svc-backup.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0308",
+      "state": {
+        "alert": "Investigate web-01: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0103",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on db-01.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0146",
+      "state": {
+        "alert": "Log: 44 failed SSH logins for jdoe on mail-01 — recording for audit.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0323",
+      "state": {
+        "alert": "Investigate fileserver-3: process spawning shells at odd hours.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0128",
+      "state": {
+        "alert": "Log: 29 failed SSH logins for m.chen on jump-01 — recording for audit.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0049",
+      "state": {
+        "alert": "Ignore — svc-backup ran the approved pentest from db-02.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0482",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-02 to 203.0.113.44.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0137",
+      "state": {
+        "alert": "Log: 10 failed SSH logins for m.chen on fileserver-3 — recording for audit.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0193",
+      "state": {
+        "alert": "Log only: m.chen accessed payment gateway outside business hours.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0389",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on jump-01 — isolate now.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0054",
+      "state": {
+        "alert": "Benign: db-02 heartbeat OK, no action needed. Ignore.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0313",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0272",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 203.0.113.44.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0175",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to db-02 port 22.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0108",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on db-02.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0118",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on vpn-gw.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0045",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from web-01.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0414",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-02 confirmed.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0184",
+      "state": {
+        "alert": "Log only: ops-bot accessed search cluster outside business hours.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0130",
+      "state": {
+        "alert": "Log: 28 failed SSH logins for jdoe on jump-01 — recording for audit.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0022",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner jump-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0052",
+      "state": {
+        "alert": "Benign: web-02 heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0368",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-01 by m.chen.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0301",
+      "state": {
+        "alert": "Investigate fileserver-3: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0235",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on db-02.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0299",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 10GB from notification worker.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0468",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0131",
+      "state": {
+        "alert": "Log: 24 failed SSH logins for m.chen on db-02 — recording for audit.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0394",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on fileserver-3 — isolate now.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0055",
+      "state": {
+        "alert": "Benign: mail-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0485",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from jump-01 to 198.51.100.9.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0204",
+      "state": {
+        "alert": "Record in log: vpn-gw password changed by admin-temp.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0161",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to web-01 port 22.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0021",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0355",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-01 by jdoe.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0420",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from jump-01 confirmed.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0136",
+      "state": {
+        "alert": "Log: 27 failed SSH logins for admin-temp on web-02 — recording for audit.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0086",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from vpn-gw to vault.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0401",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0347",
+      "state": {
+        "alert": "Investigate: impossible travel login for admin-temp (Toronto to Toronto).",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0465",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0092",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-01 to vault.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0142",
+      "state": {
+        "alert": "Log: 27 failed SSH logins for admin-temp on web-01 — recording for audit.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0398",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on mail-01 — isolate now.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0466",
+      "state": {
+        "alert": "Escalate: search cluster defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0104",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on db-01.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0457",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0363",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on jump-01 by m.chen.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0332",
+      "state": {
+        "alert": "Investigate: impossible travel login for jdoe (Berlin to Berlin).",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0113",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on web-01.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0122",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on db-02.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0463",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0056",
+      "state": {
+        "alert": "Benign: fileserver-3 heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0039",
+      "state": {
+        "alert": "Ignore — svc-backup ran the approved pentest from db-02.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0144",
+      "state": {
+        "alert": "Log: 12 failed SSH logins for m.chen on fileserver-3 — recording for audit.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0075",
+      "state": {
+        "alert": "Benign: web-02 heartbeat OK, no action needed. Ignore.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0419",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from db-02 confirmed.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0404",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from jump-01 confirmed.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0499",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-01 to 192.0.2.77.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0214",
+      "state": {
+        "alert": "Record in log: fileserver-3 password changed by m.chen.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0479",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-02 to 192.0.2.77.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0033",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from vpn-gw.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0215",
+      "state": {
+        "alert": "Record in log: fileserver-3 password changed by m.chen.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0409",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from db-01 confirmed.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0496",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from jump-01 to 192.0.2.77.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0192",
+      "state": {
+        "alert": "Log only: svc-backup accessed search cluster outside business hours.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0065",
+      "state": {
+        "alert": "Benign: vpn-gw heartbeat OK, no action needed. Ignore.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0090",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-02 to vault.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0303",
+      "state": {
+        "alert": "Investigate jump-01: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0375",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-01 by admin-temp.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0209",
+      "state": {
+        "alert": "Record in log: jump-01 password changed by m.chen.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0023",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner vpn-gw finished its sweep.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0216",
+      "state": {
+        "alert": "Record in log: db-02 password changed by ops-bot.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0067",
+      "state": {
+        "alert": "Benign: web-01 heartbeat OK, no action needed. Ignore.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0059",
+      "state": {
+        "alert": "Benign: db-02 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0038",
+      "state": {
+        "alert": "Ignore — jdoe ran the approved pentest from web-02.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0119",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on db-01.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0480",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from jump-01 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0218",
+      "state": {
+        "alert": "Record in log: web-01 password changed by jdoe.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0191",
+      "state": {
+        "alert": "Log only: jdoe accessed auth service outside business hours.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0076",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-01 to vault.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0062",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0237",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on vpn-gw.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0036",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from web-02.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0361",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on vpn-gw by m.chen.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0287",
+      "state": {
+        "alert": "Please investigate: admin-temp downloaded 33GB from auth service.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0491",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from vpn-gw to 203.0.113.44.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0416",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0294",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 14GB from search cluster.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0454",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0178",
+      "state": {
+        "alert": "Log only: admin-temp accessed search cluster outside business hours.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0449",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown fileserver-3.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0425",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0238",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on web-02.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0365",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-02 by svc-backup.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0243",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool mimikatz ran on db-02.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0306",
+      "state": {
+        "alert": "Investigate db-02: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0244",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool mimikatz ran on vpn-gw.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0415",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from mail-01 confirmed.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0224",
+      "state": {
+        "alert": "Record in log: db-02 password changed by ops-bot.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0160",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to mail-01 port 22.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0460",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0402",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-01 confirmed.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0321",
+      "state": {
+        "alert": "Investigate web-01: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0296",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 20GB from checkout API.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0265",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-01 to 192.0.2.77.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0342",
+      "state": {
+        "alert": "Investigate: impossible travel login for m.chen (Oslo to Berlin).",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0201",
+      "state": {
+        "alert": "Record in log: web-01 password changed by m.chen.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0267",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from jump-01 to 192.0.2.77.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0186",
+      "state": {
+        "alert": "Log only: m.chen accessed auth service outside business hours.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0037",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from web-01.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0029",
+      "state": {
+        "alert": "Ignore — jdoe ran the approved pentest from db-01.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0196",
+      "state": {
+        "alert": "Log only: jdoe accessed payment gateway outside business hours.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0091",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-01 to vault.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0016",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0153",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to jump-01 port 445.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0428",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0354",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on jump-01 by svc-backup.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0349",
+      "state": {
+        "alert": "Investigate: impossible travel login for jdoe (Oslo to Toronto).",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0291",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 21GB from auth service.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0252",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 203.0.113.44.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0307",
+      "state": {
+        "alert": "Investigate db-02: process spawning shells at odd hours.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0483",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from fileserver-3 to 192.0.2.77.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0019",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner fileserver-3 finished its sweep.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0002",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner vpn-gw finished its sweep.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0106",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on web-01.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0253",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from fileserver-3 to 192.0.2.77.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0274",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-01 to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0464",
+      "state": {
+        "alert": "Escalate: checkout API defaced; public-facing compromise in progress.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0100",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from jump-01 to vault.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0263",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from db-02 to 203.0.113.44.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0068",
+      "state": {
+        "alert": "Benign: web-02 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0084",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-02 to vault.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0284",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 18GB from checkout API.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0392",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on web-02 — isolate now.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0351",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on jump-01 by admin-temp.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0451",
+      "state": {
+        "alert": "Escalate: checkout API defaced; public-facing compromise in progress.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0217",
+      "state": {
+        "alert": "Record in log: web-01 password changed by ops-bot.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0150",
+      "state": {
+        "alert": "Log: 42 failed SSH logins for svc-backup on web-01 — recording for audit.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0170",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to jump-01 port 3389.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0242",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool mimikatz ran on db-01.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0311",
+      "state": {
+        "alert": "Investigate jump-01: process spawning shells at odd hours.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0111",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on web-02.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0187",
+      "state": {
+        "alert": "Log only: jdoe accessed notification worker outside business hours.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0261",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-02 to 203.0.113.44.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0325",
+      "state": {
+        "alert": "Investigate mail-01: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0063",
+      "state": {
+        "alert": "Benign: db-02 heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0005",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner fileserver-3 finished its sweep.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0190",
+      "state": {
+        "alert": "Log only: jdoe accessed checkout API outside business hours.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0322",
+      "state": {
+        "alert": "Investigate web-01: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0133",
+      "state": {
+        "alert": "Log: 11 failed SSH logins for svc-backup on vpn-gw — recording for audit.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0477",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from fileserver-3 to 203.0.113.44.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0302",
+      "state": {
+        "alert": "Investigate db-01: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0004",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner web-01 finished its sweep.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0210",
+      "state": {
+        "alert": "Record in log: db-02 password changed by admin-temp.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0198",
+      "state": {
+        "alert": "Log only: svc-backup accessed search cluster outside business hours.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0110",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on fileserver-3.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0061",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0456",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0429",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0138",
+      "state": {
+        "alert": "Log: 47 failed SSH logins for jdoe on vpn-gw — recording for audit.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0114",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on fileserver-3.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0476",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-02 to 198.51.100.9.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0450",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0472",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0438",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0269",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0205",
+      "state": {
+        "alert": "Record in log: web-02 password changed by admin-temp.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0258",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from jump-01 to 192.0.2.77.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0202",
+      "state": {
+        "alert": "Record in log: mail-01 password changed by m.chen.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0279",
+      "state": {
+        "alert": "Please investigate: m.chen downloaded 24GB from search cluster.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0320",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0135",
+      "state": {
+        "alert": "Log: 18 failed SSH logins for jdoe on db-02 — recording for audit.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0270",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from db-02 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0424",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from vpn-gw confirmed.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0027",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from web-02.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0446",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-01.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0011",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner jump-01 finished its sweep.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0172",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to mail-01 port 445.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0297",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 13GB from notification worker.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0379",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on db-01 — isolate now.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0166",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to mail-01 port 22.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0317",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0377",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on fileserver-3 — isolate now.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0475",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0025",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0364",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on jump-01 by admin-temp.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0072",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0231",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on web-01.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0271",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from db-02 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0437",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0249",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on fileserver-3.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0304",
+      "state": {
+        "alert": "Investigate fileserver-3: process spawning shells at odd hours.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0470",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0331",
+      "state": {
+        "alert": "Investigate: impossible travel login for jdoe (Toronto to Lagos).",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0034",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from vpn-gw.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0182",
+      "state": {
+        "alert": "Log only: svc-backup accessed checkout API outside business hours.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0343",
+      "state": {
+        "alert": "Investigate: impossible travel login for admin-temp (Oslo to Oslo).",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0399",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on fileserver-3 — isolate now.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0423",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from db-01 confirmed.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0095",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-01 to vault.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0273",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-02 to 198.51.100.9.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0143",
+      "state": {
+        "alert": "Log: 41 failed SSH logins for ops-bot on db-02 — recording for audit.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0358",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on fileserver-3 by ops-bot.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0255",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0158",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to mail-01 port 3389.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0413",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-01 confirmed.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0381",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on db-01 — isolate now.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0018",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner vpn-gw finished its sweep.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0010",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner web-02 finished its sweep.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0208",
+      "state": {
+        "alert": "Record in log: db-01 password changed by ops-bot.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0408",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-01 confirmed.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0328",
+      "state": {
+        "alert": "Investigate: impossible travel login for jdoe (Lagos to Austin).",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0105",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on mail-01.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0411",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from mail-01 confirmed.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0174",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to web-02 port 3389.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0344",
+      "state": {
+        "alert": "Investigate: impossible travel login for ops-bot (Toronto to Oslo).",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0474",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0040",
+      "state": {
+        "alert": "Ignore — jdoe ran the approved pentest from fileserver-3.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0440",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown fileserver-3.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0120",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on web-01.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0181",
+      "state": {
+        "alert": "Log only: jdoe accessed notification worker outside business hours.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0012",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0366",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-02 by admin-temp.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0384",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on db-02 — isolate now.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0155",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to web-01 port 22.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0008",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner web-02 finished its sweep.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0395",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on web-02 — isolate now.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0462",
+      "state": {
+        "alert": "Escalate: checkout API defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0007",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner mail-01 finished its sweep.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0318",
+      "state": {
+        "alert": "Investigate web-01: process spawning shells at odd hours.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0452",
+      "state": {
+        "alert": "Escalate: checkout API defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0289",
+      "state": {
+        "alert": "Please investigate: jdoe downloaded 30GB from checkout API.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0195",
+      "state": {
+        "alert": "Log only: svc-backup accessed notification worker outside business hours.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0427",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0226",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on vpn-gw.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0435",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown vpn-gw.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0169",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to fileserver-3 port 445.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0300",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 26GB from search cluster.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0006",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner web-02 finished its sweep.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0422",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0386",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on jump-01 — isolate now.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0383",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on web-01 — isolate now.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0410",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from vpn-gw confirmed.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0053",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0256",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from fileserver-3 to 203.0.113.44.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0173",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to web-01 port 445.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0050",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from web-01.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0360",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-02 by ops-bot.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0032",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from mail-01.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0293",
+      "state": {
+        "alert": "Please investigate: m.chen downloaded 34GB from checkout API.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0268",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from db-02 to 198.51.100.9.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0278",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 4GB from search cluster.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0467",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0484",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from mail-01 to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0043",
+      "state": {
+        "alert": "Ignore — jdoe ran the approved pentest from fileserver-3.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0436",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown db-02.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0115",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on jump-01.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0058",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0088",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-01 to vault.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0165",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to web-02 port 3389.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0222",
+      "state": {
+        "alert": "Record in log: db-01 password changed by jdoe.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0444",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown mail-01.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0339",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Lagos to Berlin).",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0085",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-01 to vault.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0229",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on web-01.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0015",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-02 finished its sweep.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0081",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from jump-01 to vault.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0127",
+      "state": {
+        "alert": "Log: 27 failed SSH logins for m.chen on web-01 — recording for audit.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0494",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-01 to 203.0.113.44.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0099",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from mail-01 to vault.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0247",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on mail-01.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0426",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0348",
+      "state": {
+        "alert": "Investigate: impossible travel login for ops-bot (Lagos to Toronto).",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0254",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-02 to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0240",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on vpn-gw.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0031",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from fileserver-3.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0352",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-02 by admin-temp.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0194",
+      "state": {
+        "alert": "Log only: m.chen accessed payment gateway outside business hours.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0286",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 39GB from search cluster.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0168",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to jump-01 port 22.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0481",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from mail-01 to 203.0.113.44.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0060",
+      "state": {
+        "alert": "Benign: web-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0448",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0112",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on vpn-gw.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0077",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from jump-01 to vault.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0223",
+      "state": {
+        "alert": "Record in log: web-02 password changed by m.chen.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0353",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-02 by ops-bot.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0078",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from jump-01 to vault.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0123",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on web-02.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0211",
+      "state": {
+        "alert": "Record in log: jump-01 password changed by ops-bot.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0319",
+      "state": {
+        "alert": "Investigate fileserver-3: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0157",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to jump-01 port 3389.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0197",
+      "state": {
+        "alert": "Log only: m.chen accessed search cluster outside business hours.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0094",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-01 to vault.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0443",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown fileserver-3.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0028",
+      "state": {
+        "alert": "Ignore — svc-backup ran the approved pentest from vpn-gw.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0087",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from jump-01 to vault.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0490",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-02 to 203.0.113.44.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0441",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0367",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on db-01 by jdoe.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0486",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-02 to 192.0.2.77.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0221",
+      "state": {
+        "alert": "Record in log: mail-01 password changed by m.chen.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0257",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from web-01 to 198.51.100.9.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0154",
+      "state": {
+        "alert": "Log firewall deny from 203.0.113.44 to mail-01 port 445.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0213",
+      "state": {
+        "alert": "Record in log: fileserver-3 password changed by admin-temp.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0156",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to web-02 port 3389.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0233",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on web-01.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0014",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner mail-01 finished its sweep.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0047",
+      "state": {
+        "alert": "Ignore — admin-temp ran the approved pentest from web-02.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0393",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on web-01 — isolate now.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0315",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0041",
+      "state": {
+        "alert": "Ignore — m.chen ran the approved pentest from db-01.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0359",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on fileserver-3 by admin-temp.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0362",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-02 by admin-temp.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0234",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on fileserver-3.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0388",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on web-02 — isolate now.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0371",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-02 by admin-temp.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0098",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-02 to vault.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0346",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Berlin to Oslo).",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0046",
+      "state": {
+        "alert": "Ignore — m.chen ran the approved pentest from web-01.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0447",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0162",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to web-02 port 445.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0134",
+      "state": {
+        "alert": "Log: 18 failed SSH logins for m.chen on db-02 — recording for audit.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0225",
+      "state": {
+        "alert": "Record in log: mail-01 password changed by ops-bot.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0264",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from fileserver-3 to 198.51.100.9.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0042",
+      "state": {
+        "alert": "Ignore — jdoe ran the approved pentest from web-01.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0066",
+      "state": {
+        "alert": "Benign: web-02 heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0276",
+      "state": {
+        "alert": "Please investigate: svc-backup downloaded 10GB from search cluster.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0132",
+      "state": {
+        "alert": "Log: 3 failed SSH logins for ops-bot on jump-01 — recording for audit.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0403",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from vpn-gw confirmed.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0151",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to fileserver-3 port 3389.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0434",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0163",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to mail-01 port 22.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0241",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on web-01.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0189",
+      "state": {
+        "alert": "Log only: admin-temp accessed search cluster outside business hours.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0149",
+      "state": {
+        "alert": "Log: 16 failed SSH logins for svc-backup on web-02 — recording for audit.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0382",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on jump-01 — isolate now.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0442",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0017",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner fileserver-3 finished its sweep.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0164",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to vpn-gw port 445.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0107",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on db-02.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0188",
+      "state": {
+        "alert": "Log only: jdoe accessed auth service outside business hours.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0096",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-02 to vault.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0083",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-02 to vault.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0082",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from db-02 to vault.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0180",
+      "state": {
+        "alert": "Log only: m.chen accessed search cluster outside business hours.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0350",
+      "state": {
+        "alert": "Investigate: impossible travel login for ops-bot (Berlin to Austin).",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0380",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on vpn-gw — isolate now.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0159",
+      "state": {
+        "alert": "Log firewall deny from 198.51.100.9 to db-02 port 22.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0288",
+      "state": {
+        "alert": "Please investigate: m.chen downloaded 32GB from payment gateway.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0378",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on db-02 — isolate now.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0421",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from fileserver-3 confirmed.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0203",
+      "state": {
+        "alert": "Record in log: mail-01 password changed by svc-backup.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0298",
+      "state": {
+        "alert": "Please investigate: jdoe downloaded 19GB from auth service.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0236",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on jump-01.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0432",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown db-02.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0089",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-02 to vault.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0262",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from mail-01 to 203.0.113.44.",
+        "source": "user-report",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0093",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from web-02 to vault.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0458",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0035",
+      "state": {
+        "alert": "Ignore — m.chen ran the approved pentest from db-02.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0266",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from fileserver-3 to 198.51.100.9.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0230",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on jump-01.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0071",
+      "state": {
+        "alert": "Benign: jump-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0171",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to db-01 port 445.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0048",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from vpn-gw.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0167",
+      "state": {
+        "alert": "Log firewall deny from 192.0.2.77 to web-02 port 22.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0117",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on web-01.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0275",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from mail-01 to 192.0.2.77.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0471",
+      "state": {
+        "alert": "Escalate: payment gateway defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0309",
+      "state": {
+        "alert": "Investigate db-01: process spawning shells at odd hours.",
+        "source": "siem",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0121",
+      "state": {
+        "alert": "False positive signature SIG-2026-204; safe to ignore on fileserver-3.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0330",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Toronto to Berlin).",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0176",
+      "state": {
+        "alert": "Log only: jdoe accessed payment gateway outside business hours.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0337",
+      "state": {
+        "alert": "Investigate: impossible travel login for m.chen (Lagos to Austin).",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0200",
+      "state": {
+        "alert": "Log only: jdoe accessed checkout API outside business hours.",
+        "source": "firewall",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0396",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on web-01 — isolate now.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0219",
+      "state": {
+        "alert": "Record in log: jump-01 password changed by admin-temp.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0385",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-204 detected on web-01 — isolate now.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0290",
+      "state": {
+        "alert": "Please investigate: admin-temp downloaded 19GB from checkout API.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0292",
+      "state": {
+        "alert": "Please investigate: admin-temp downloaded 30GB from auth service.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0024",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-02 finished its sweep.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0129",
+      "state": {
+        "alert": "Log: 31 failed SSH logins for jdoe on web-02 — recording for audit.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0418",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-01 confirmed.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0453",
+      "state": {
+        "alert": "Escalate: auth service defaced; public-facing compromise in progress.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0469",
+      "state": {
+        "alert": "Escalate: checkout API defaced; public-facing compromise in progress.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0001",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-01 finished its sweep.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0500",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-01 to 203.0.113.44.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0387",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on jump-01 — isolate now.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0405",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-02 confirmed.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0282",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 19GB from notification worker.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0493",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-02 to 203.0.113.44.",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0285",
+      "state": {
+        "alert": "Please investigate: m.chen downloaded 9GB from notification worker.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0487",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from db-02 to 198.51.100.9.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0140",
+      "state": {
+        "alert": "Log: 20 failed SSH logins for jdoe on jump-01 — recording for audit.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0407",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-02 confirmed.",
+        "source": "user-report",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0412",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from mail-01 confirmed.",
+        "source": "edr",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0147",
+      "state": {
+        "alert": "Log: 9 failed SSH logins for jdoe on db-02 — recording for audit.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0334",
+      "state": {
+        "alert": "Investigate: impossible travel login for admin-temp (Toronto to Oslo).",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0370",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-01 by admin-temp.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0207",
+      "state": {
+        "alert": "Record in log: db-02 password changed by svc-backup.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0109",
+      "state": {
+        "alert": "False positive signature SIG-2026-118; safe to ignore on vpn-gw.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0326",
+      "state": {
+        "alert": "Investigate: impossible travel login for m.chen (Toronto to Lagos).",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0280",
+      "state": {
+        "alert": "Please investigate: ops-bot downloaded 15GB from payment gateway.",
+        "source": "siem",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0314",
+      "state": {
+        "alert": "Investigate jump-01: process spawning shells at odd hours.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0374",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on web-02 by admin-temp.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0212",
+      "state": {
+        "alert": "Record in log: vpn-gw password changed by jdoe.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0340",
+      "state": {
+        "alert": "Investigate: impossible travel login for m.chen (Lagos to Oslo).",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0312",
+      "state": {
+        "alert": "Investigate web-02: process spawning shells at odd hours.",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0430",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown db-02.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0417",
+      "state": {
+        "alert": "Escalate to incident response: data exfiltration from web-02 confirmed.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0102",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on web-01.",
+        "source": "siem",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0139",
+      "state": {
+        "alert": "Log: 45 failed SSH logins for m.chen on web-01 — recording for audit.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0376",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on db-01 — isolate now.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0013",
+      "state": {
+        "alert": "Ignore: known-benign vulnerability scanner db-02 finished its sweep.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0259",
+      "state": {
+        "alert": "Investigate: unusual outbound traffic from vpn-gw to 192.0.2.77.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0338",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Oslo to Lagos).",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0391",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on web-01 — isolate now.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0044",
+      "state": {
+        "alert": "Ignore — ops-bot ran the approved pentest from db-02.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0245",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool psExec ran on web-02.",
+        "source": "firewall",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0461",
+      "state": {
+        "alert": "Escalate: search cluster defaced; public-facing compromise in progress.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0324",
+      "state": {
+        "alert": "Investigate web-01: process spawning shells at odd hours.",
+        "source": "user-report",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0141",
+      "state": {
+        "alert": "Log: 42 failed SSH logins for jdoe on web-02 — recording for audit.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0400",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2026-118 detected on db-02 — isolate now.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0329",
+      "state": {
+        "alert": "Investigate: impossible travel login for svc-backup (Oslo to Austin).",
+        "source": "firewall",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0069",
+      "state": {
+        "alert": "Benign: db-01 heartbeat OK, no action needed. Ignore.",
+        "source": "edr",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0116",
+      "state": {
+        "alert": "False positive signature SIG-2025-977; safe to ignore on db-02.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0177",
+      "state": {
+        "alert": "Log only: jdoe accessed checkout API outside business hours.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0227",
+      "state": {
+        "alert": "Log: unusual-but-allowed admin tool nmap ran on jump-01.",
+        "source": "edr",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0080",
+      "state": {
+        "alert": "Ignore: scheduled backup traffic from fileserver-3 to vault.",
+        "source": "user-report",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0030",
+      "state": {
+        "alert": "Ignore — svc-backup ran the approved pentest from vpn-gw.",
+        "source": "edr",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0397",
+      "state": {
+        "alert": "ESCALATE: ransomware signature SIG-2025-977 detected on db-02 — isolate now.",
+        "source": "user-report",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0433",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown web-02.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0199",
+      "state": {
+        "alert": "Log only: ops-bot accessed auth service outside business hours.",
+        "source": "siem",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0277",
+      "state": {
+        "alert": "Please investigate: jdoe downloaded 13GB from search cluster.",
+        "source": "firewall",
+        "asset": "db-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0074",
+      "state": {
+        "alert": "Benign: vpn-gw heartbeat OK, no action needed. Ignore.",
+        "source": "firewall",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0341",
+      "state": {
+        "alert": "Investigate: impossible travel login for admin-temp (Oslo to Toronto).",
+        "source": "edr",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0305",
+      "state": {
+        "alert": "Investigate jump-01: process spawning shells at odd hours.",
+        "source": "firewall",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0356",
+      "state": {
+        "alert": "Investigate privilege escalation attempt on fileserver-3 by ops-bot.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0459",
+      "state": {
+        "alert": "Escalate: search cluster defaced; public-facing compromise in progress.",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0073",
+      "state": {
+        "alert": "Benign: web-01 heartbeat OK, no action needed. Ignore.",
+        "source": "siem",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0026",
+      "state": {
+        "alert": "Ignore — svc-backup ran the approved pentest from db-01.",
+        "source": "user-report",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0327",
+      "state": {
+        "alert": "Investigate: impossible travel login for m.chen (Austin to Toronto).",
+        "source": "firewall",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0310",
+      "state": {
+        "alert": "Investigate vpn-gw: process spawning shells at odd hours.",
+        "source": "edr",
+        "asset": "web-02"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0183",
+      "state": {
+        "alert": "Log only: ops-bot accessed checkout API outside business hours.",
+        "source": "user-report",
+        "asset": "mail-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0126",
+      "state": {
+        "alert": "Log: 25 failed SSH logins for m.chen on vpn-gw — recording for audit.",
+        "source": "siem",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0220",
+      "state": {
+        "alert": "Record in log: db-01 password changed by svc-backup.",
+        "source": "siem",
+        "asset": "fileserver-3"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    },
+    {
+      "id": "triage-0281",
+      "state": {
+        "alert": "Please investigate: admin-temp downloaded 34GB from payment gateway.",
+        "source": "siem",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "investigate"
+    },
+    {
+      "id": "triage-0057",
+      "state": {
+        "alert": "Benign: vpn-gw heartbeat OK, no action needed. Ignore.",
+        "source": "user-report",
+        "asset": "db-01"
+      },
+      "spec_type": "categorical",
+      "expected": "ignore"
+    },
+    {
+      "id": "triage-0439",
+      "state": {
+        "alert": "ESCALATE: domain admin credentials used from unknown jump-01.",
+        "source": "edr",
+        "asset": "vpn-gw"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0488",
+      "state": {
+        "alert": "Immediate escalation: wiper malware beaconing from web-02 to 203.0.113.44.",
+        "source": "edr",
+        "asset": "web-01"
+      },
+      "spec_type": "categorical",
+      "expected": "escalate"
+    },
+    {
+      "id": "triage-0145",
+      "state": {
+        "alert": "Log: 27 failed SSH logins for m.chen on db-02 — recording for audit.",
+        "source": "firewall",
+        "asset": "jump-01"
+      },
+      "spec_type": "categorical",
+      "expected": "log"
+    }
+  ]
+}

@@ -1,0 +1,4517 @@
+{
+  "name": "intent_500",
+  "version": "1.0.0",
+  "seed": 20261009,
+  "spec": {
+    "type": "categorical",
+    "options": [
+      "billing",
+      "technical",
+      "account",
+      "refund",
+      "shipping"
+    ]
+  },
+  "items": [
+    {
+      "id": "intent-0360",
+      "state": {
+        "ticket": "The item was never delivered — refund order #77312.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0045",
+      "state": {
+        "ticket": "I need a copy of my bill for January.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0006",
+      "state": {
+        "ticket": "I was charged $75.25 twice on my credit card this month.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0454",
+      "state": {
+        "ticket": "How much is express shipping to Austin?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0111",
+      "state": {
+        "ticket": "I get error E-2091 when trying to save my work.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0184",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.6.4.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0008",
+      "state": {
+        "ticket": "I was charged $8.50 twice on my credit card this month.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0201",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0092",
+      "state": {
+        "ticket": "Split my bill into two payments of $49.00 and $49.00.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0424",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0134",
+      "state": {
+        "ticket": "My iPhone overheats when running your software.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0043",
+      "state": {
+        "ticket": "Please explain the $19.99 charge labeled 'ADDON-STORAGE' on my statement.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0032",
+      "state": {
+        "ticket": "Why did my subscription renew at $240.00 without notice?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0173",
+      "state": {
+        "ticket": "Audio stutters during calls on my Android phone.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0408",
+      "state": {
+        "ticket": "Where is my package? Tracking 94055112 hasn't updated in 14 days.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0081",
+      "state": {
+        "ticket": "The payment of $19.99 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0318",
+      "state": {
+        "ticket": "Please refund the $75.25 charge, I cancelled within the trial.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0463",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0161",
+      "state": {
+        "ticket": "The search button does nothing when I click it.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0341",
+      "state": {
+        "ticket": "Refund my last payment of $129.95, I was charged after cancelling.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0212",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0242",
+      "state": {
+        "ticket": "My account was locked after 3 failed login attempts.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0227",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0010",
+      "state": {
+        "ticket": "There is an unexpected $310.40 fee on my bill.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0304",
+      "state": {
+        "ticket": "I want a refund for order #77312 — the item arrived broken.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0054",
+      "state": {
+        "ticket": "My card was billed $49.00 but my plan costs $310.40.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0208",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0396",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0328",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0395",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0347",
+      "state": {
+        "ticket": "How long does a refund take? It's been 5 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0020",
+      "state": {
+        "ticket": "My invoice #99173 shows the wrong amount.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0440",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0329",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0389",
+      "state": {
+        "ticket": "Refund the duplicate charge of $240.00 on my card.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0059",
+      "state": {
+        "ticket": "My card was billed $129.95 but my plan costs $75.25.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0392",
+      "state": {
+        "ticket": "Refund the duplicate charge of $8.50 on my card.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0109",
+      "state": {
+        "ticket": "The app crashes every time I open dashboard on my tablet.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0178",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.5.1.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0279",
+      "state": {
+        "ticket": "Transfer ownership of the account to Nadia.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0433",
+      "state": {
+        "ticket": "Can I change the shipping address for order #31208?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0330",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0061",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0122",
+      "state": {
+        "ticket": "The settings page loads forever and then times out.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0264",
+      "state": {
+        "ticket": "Deactivate the old account under maya@example.com.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0478",
+      "state": {
+        "ticket": "The carrier lost my package 1Z8842W0; I need a replacement shipped.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0257",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0319",
+      "state": {
+        "ticket": "The refund for order #20456 never arrived in my bank.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0412",
+      "state": {
+        "ticket": "My order #31208 was supposed to arrive last Friday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0355",
+      "state": {
+        "ticket": "The item was never delivered — refund order #31208.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0492",
+      "state": {
+        "ticket": "Schedule my delivery for Friday morning instead.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0014",
+      "state": {
+        "ticket": "There is an unexpected $75.25 fee on my bill.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0217",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0375",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0096",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0234",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0177",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.4.9.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0455",
+      "state": {
+        "ticket": "How much is express shipping to Lagos?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0029",
+      "state": {
+        "ticket": "Why did my subscription renew at $19.99 without notice?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0426",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0238",
+      "state": {
+        "ticket": "My account was locked after 19 failed login attempts.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0022",
+      "state": {
+        "ticket": "My invoice #48210 shows the wrong amount.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0083",
+      "state": {
+        "ticket": "The payment of $240.00 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0307",
+      "state": {
+        "ticket": "I want a refund for order #55890 — the item arrived broken.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0239",
+      "state": {
+        "ticket": "My account was locked after 10 failed login attempts.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0354",
+      "state": {
+        "ticket": "The item was never delivered — refund order #20456.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0285",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0024",
+      "state": {
+        "ticket": "My invoice #48210 shows the wrong amount.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0066",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0151",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my iPhone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0250",
+      "state": {
+        "ticket": "Change the username on my account to Ravi.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0438",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0335",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0001",
+      "state": {
+        "ticket": "I was charged $19.99 twice on my credit card this month.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0140",
+      "state": {
+        "ticket": "The latest update broke search — it worked yesterday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0366",
+      "state": {
+        "ticket": "I returned the package last last week; where is my refund?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0306",
+      "state": {
+        "ticket": "I want a refund for order #31208 — the item arrived broken.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0484",
+      "state": {
+        "ticket": "The carrier lost my package TRK-99120; I need a replacement shipped.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0007",
+      "state": {
+        "ticket": "I was charged $75.25 twice on my credit card this month.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0294",
+      "state": {
+        "ticket": "Add Henrik as an admin on my account.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0063",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0460",
+      "state": {
+        "ticket": "How much is express shipping to Lagos?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0183",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.9.9.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0016",
+      "state": {
+        "ticket": "There is an unexpected $12.99 fee on my bill.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0277",
+      "state": {
+        "ticket": "Transfer ownership of the account to Marco.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0145",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my iPhone.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0468",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0091",
+      "state": {
+        "ticket": "Split my bill into two payments of $49.00 and $19.99.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0154",
+      "state": {
+        "ticket": "Sync fails with error E-500 between my iPhone and laptop.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0117",
+      "state": {
+        "ticket": "I get error E-2091 when trying to save my work.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0235",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0089",
+      "state": {
+        "ticket": "Split my bill into two payments of $49.00 and $75.25.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0205",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0214",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0221",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0267",
+      "state": {
+        "ticket": "Deactivate the old account under jonas@example.com.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0487",
+      "state": {
+        "ticket": "Schedule my delivery for Monday morning instead.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0078",
+      "state": {
+        "ticket": "The payment of $240.00 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0384",
+      "state": {
+        "ticket": "You promised a refund of $240.00 on my last call — still waiting.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0359",
+      "state": {
+        "ticket": "The item was never delivered — refund order #99173.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0230",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0187",
+      "state": {
+        "ticket": "The app freezes for 15 seconds whenever I type.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0362",
+      "state": {
+        "ticket": "I returned the package last last week; where is my refund?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0393",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0451",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0171",
+      "state": {
+        "ticket": "Audio stutters during calls on my iPhone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0195",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my desktop last Tuesday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0009",
+      "state": {
+        "ticket": "I was charged $240.00 twice on my credit card this month.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0051",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0129",
+      "state": {
+        "ticket": "My desktop overheats when running your software.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0471",
+      "state": {
+        "ticket": "Split my order #77312 into two shipments.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0349",
+      "state": {
+        "ticket": "How long does a refund take? It's been 10 days.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0269",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0397",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0170",
+      "state": {
+        "ticket": "Audio stutters during calls on my desktop.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0430",
+      "state": {
+        "ticket": "Can I change the shipping address for order #99173?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0095",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0486",
+      "state": {
+        "ticket": "Schedule my delivery for Tuesday morning instead.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0047",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0018",
+      "state": {
+        "ticket": "There is an unexpected $12.99 fee on my bill.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0218",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0338",
+      "state": {
+        "ticket": "Refund my last payment of $19.99, I was charged after cancelling.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0243",
+      "state": {
+        "ticket": "My account was locked after 16 failed login attempts.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0485",
+      "state": {
+        "ticket": "Schedule my delivery for last week morning instead.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0132",
+      "state": {
+        "ticket": "My desktop overheats when running your software.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0295",
+      "state": {
+        "ticket": "Add Maya as an admin on my account.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0249",
+      "state": {
+        "ticket": "Change the username on my account to Sofia.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0225",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0488",
+      "state": {
+        "ticket": "Schedule my delivery for Friday morning instead.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0194",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my desktop last last week.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0268",
+      "state": {
+        "ticket": "Deactivate the old account under maya@example.com.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0067",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0138",
+      "state": {
+        "ticket": "The latest update broke settings — it worked yesterday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0027",
+      "state": {
+        "ticket": "My invoice #31208 shows the wrong amount.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0025",
+      "state": {
+        "ticket": "My invoice #55890 shows the wrong amount.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0431",
+      "state": {
+        "ticket": "Can I change the shipping address for order #20456?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0321",
+      "state": {
+        "ticket": "The refund for order #77312 never arrived in my bank.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0398",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0348",
+      "state": {
+        "ticket": "How long does a refund take? It's been 44 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0315",
+      "state": {
+        "ticket": "Please refund the $240.00 charge, I cancelled within the trial.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0163",
+      "state": {
+        "ticket": "The settings button does nothing when I click it.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0220",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0490",
+      "state": {
+        "ticket": "Schedule my delivery for Friday morning instead.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0287",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0420",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0300",
+      "state": {
+        "ticket": "Add Sofia as an admin on my account.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0480",
+      "state": {
+        "ticket": "The carrier lost my package 94055112; I need a replacement shipped.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0150",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my iPhone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0316",
+      "state": {
+        "ticket": "Please refund the $12.99 charge, I cancelled within the trial.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0002",
+      "state": {
+        "ticket": "I was charged $49.00 twice on my credit card this month.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0040",
+      "state": {
+        "ticket": "Please explain the $19.99 charge labeled 'OVERAGE' on my statement.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0064",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0310",
+      "state": {
+        "ticket": "Please refund the $129.95 charge, I cancelled within the trial.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0365",
+      "state": {
+        "ticket": "I returned the package last Friday; where is my refund?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0479",
+      "state": {
+        "ticket": "The carrier lost my package 1Z8842W0; I need a replacement shipped.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0400",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0019",
+      "state": {
+        "ticket": "My invoice #55890 shows the wrong amount.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0004",
+      "state": {
+        "ticket": "I was charged $310.40 twice on my credit card this month.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0290",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0465",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0282",
+      "state": {
+        "ticket": "Transfer ownership of the account to Ravi.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0028",
+      "state": {
+        "ticket": "Why did my subscription renew at $49.00 without notice?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0364",
+      "state": {
+        "ticket": "I returned the package last Monday; where is my refund?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0371",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0116",
+      "state": {
+        "ticket": "I get error E-1042 when trying to save my work.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0174",
+      "state": {
+        "ticket": "Audio stutters during calls on my iPhone.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0411",
+      "state": {
+        "ticket": "My order #48210 was supposed to arrive last Monday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0356",
+      "state": {
+        "ticket": "The item was never delivered — refund order #20456.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0112",
+      "state": {
+        "ticket": "I get error E-1042 when trying to save my work.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0425",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0202",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0164",
+      "state": {
+        "ticket": "The notifications button does nothing when I click it.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0263",
+      "state": {
+        "ticket": "Deactivate the old account under maya@example.com.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0050",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0149",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my iPhone.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0391",
+      "state": {
+        "ticket": "Refund the duplicate charge of $240.00 on my card.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0100",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0086",
+      "state": {
+        "ticket": "Split my bill into two payments of $19.99 and $19.99.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0058",
+      "state": {
+        "ticket": "My card was billed $49.00 but my plan costs $12.99.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0233",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0123",
+      "state": {
+        "ticket": "The export page loads forever and then times out.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0237",
+      "state": {
+        "ticket": "My account was locked after 45 failed login attempts.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0246",
+      "state": {
+        "ticket": "Change the username on my account to Nadia.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0121",
+      "state": {
+        "ticket": "The checkout page loads forever and then times out.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0270",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0181",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.2.5.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0139",
+      "state": {
+        "ticket": "The latest update broke settings — it worked yesterday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0052",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0026",
+      "state": {
+        "ticket": "My invoice #48210 shows the wrong amount.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0101",
+      "state": {
+        "ticket": "The app crashes every time I open dashboard on my Android phone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0107",
+      "state": {
+        "ticket": "The app crashes every time I open checkout on my tablet.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0023",
+      "state": {
+        "ticket": "My invoice #77312 shows the wrong amount.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0062",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0500",
+      "state": {
+        "ticket": "Why does shipping to Oslo cost $129.95? That seems high.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0374",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0275",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0241",
+      "state": {
+        "ticket": "My account was locked after 29 failed login attempts.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0409",
+      "state": {
+        "ticket": "Where is my package? Tracking 94055112 hasn't updated in 40 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0253",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0336",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0074",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0175",
+      "state": {
+        "ticket": "Audio stutters during calls on my iPhone.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0292",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0198",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my Android phone last Friday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0142",
+      "state": {
+        "ticket": "The latest update broke export — it worked yesterday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0373",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0213",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0449",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0446",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0401",
+      "state": {
+        "ticket": "Where is my package? Tracking 94055112 hasn't updated in 46 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0293",
+      "state": {
+        "ticket": "Add Maya as an admin on my account.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0417",
+      "state": {
+        "ticket": "My order #99173 was supposed to arrive last Monday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0314",
+      "state": {
+        "ticket": "Please refund the $129.95 charge, I cancelled within the trial.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0423",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0291",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0127",
+      "state": {
+        "ticket": "The notifications page loads forever and then times out.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0156",
+      "state": {
+        "ticket": "Sync fails with error E-500 between my laptop and laptop.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0462",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0289",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0191",
+      "state": {
+        "ticket": "The app freezes for 41 seconds whenever I type.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0011",
+      "state": {
+        "ticket": "There is an unexpected $8.50 fee on my bill.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0350",
+      "state": {
+        "ticket": "How long does a refund take? It's been 11 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0252",
+      "state": {
+        "ticket": "Change the username on my account to Nadia.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0017",
+      "state": {
+        "ticket": "There is an unexpected $12.99 fee on my bill.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0080",
+      "state": {
+        "ticket": "The payment of $310.40 failed but my bank shows it went through.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0491",
+      "state": {
+        "ticket": "Schedule my delivery for last week morning instead.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0474",
+      "state": {
+        "ticket": "Split my order #99173 into two shipments.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0435",
+      "state": {
+        "ticket": "Can I change the shipping address for order #31208?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0228",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0443",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0210",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0085",
+      "state": {
+        "ticket": "Split my bill into two payments of $129.95 and $310.40.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0394",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0013",
+      "state": {
+        "ticket": "There is an unexpected $8.50 fee on my bill.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0434",
+      "state": {
+        "ticket": "Can I change the shipping address for order #31208?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0166",
+      "state": {
+        "ticket": "The settings button does nothing when I click it.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0152",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my tablet.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0404",
+      "state": {
+        "ticket": "Where is my package? Tracking TRK-99120 hasn't updated in 8 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0199",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my laptop last Friday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0126",
+      "state": {
+        "ticket": "The search page loads forever and then times out.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0413",
+      "state": {
+        "ticket": "My order #55890 was supposed to arrive last Friday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0262",
+      "state": {
+        "ticket": "Deactivate the old account under ops@example.com.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0042",
+      "state": {
+        "ticket": "Please explain the $310.40 charge labeled 'PRO-PLAN' on my statement.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0317",
+      "state": {
+        "ticket": "Please refund the $12.99 charge, I cancelled within the trial.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0079",
+      "state": {
+        "ticket": "The payment of $8.50 failed but my bank shows it went through.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0325",
+      "state": {
+        "ticket": "The refund for order #31208 never arrived in my bank.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0299",
+      "state": {
+        "ticket": "Add Maya as an admin on my account.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0247",
+      "state": {
+        "ticket": "Change the username on my account to Marco.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0167",
+      "state": {
+        "ticket": "The export button does nothing when I click it.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0421",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0477",
+      "state": {
+        "ticket": "The carrier lost my package 1Z8842W0; I need a replacement shipped.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0015",
+      "state": {
+        "ticket": "There is an unexpected $129.95 fee on my bill.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0143",
+      "state": {
+        "ticket": "The latest update broke checkout — it worked yesterday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0192",
+      "state": {
+        "ticket": "The app freezes for 43 seconds whenever I type.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0305",
+      "state": {
+        "ticket": "I want a refund for order #55890 — the item arrived broken.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0464",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0333",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0284",
+      "state": {
+        "ticket": "Transfer ownership of the account to Elin.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0410",
+      "state": {
+        "ticket": "My order #77312 was supposed to arrive last Monday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0432",
+      "state": {
+        "ticket": "Can I change the shipping address for order #77312?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0473",
+      "state": {
+        "ticket": "Split my order #31208 into two shipments.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0399",
+      "state": {
+        "ticket": "I was charged a restocking fee — I want that refunded too.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0071",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0211",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0376",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0141",
+      "state": {
+        "ticket": "The latest update broke search — it worked yesterday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0030",
+      "state": {
+        "ticket": "Why did my subscription renew at $12.99 without notice?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0103",
+      "state": {
+        "ticket": "The app crashes every time I open settings on my Android phone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0207",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0494",
+      "state": {
+        "ticket": "Why does shipping to Toronto cost $19.99? That seems high.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0105",
+      "state": {
+        "ticket": "The app crashes every time I open dashboard on my Android phone.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0428",
+      "state": {
+        "ticket": "Can I change the shipping address for order #55890?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0447",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0439",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0358",
+      "state": {
+        "ticket": "The item was never delivered — refund order #31208.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0041",
+      "state": {
+        "ticket": "Please explain the $240.00 charge labeled 'ADDON-STORAGE' on my statement.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0244",
+      "state": {
+        "ticket": "My account was locked after 45 failed login attempts.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0222",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0476",
+      "state": {
+        "ticket": "Split my order #48210 into two shipments.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0266",
+      "state": {
+        "ticket": "Deactivate the old account under ops@example.com.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0176",
+      "state": {
+        "ticket": "Audio stutters during calls on my tablet.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0169",
+      "state": {
+        "ticket": "Audio stutters during calls on my tablet.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0012",
+      "state": {
+        "ticket": "There is an unexpected $75.25 fee on my bill.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0204",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0367",
+      "state": {
+        "ticket": "I returned the package last Friday; where is my refund?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0342",
+      "state": {
+        "ticket": "Refund my last payment of $129.95, I was charged after cancelling.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0361",
+      "state": {
+        "ticket": "I returned the package last last week; where is my refund?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0055",
+      "state": {
+        "ticket": "My card was billed $8.50 but my plan costs $12.99.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0327",
+      "state": {
+        "ticket": "The refund for order #20456 never arrived in my bank.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0320",
+      "state": {
+        "ticket": "The refund for order #55890 never arrived in my bank.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0302",
+      "state": {
+        "ticket": "I want a refund for order #31208 — the item arrived broken.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0251",
+      "state": {
+        "ticket": "Change the username on my account to Nadia.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0370",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0168",
+      "state": {
+        "ticket": "The notifications button does nothing when I click it.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0113",
+      "state": {
+        "ticket": "I get error E-500 when trying to save my work.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0147",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my desktop.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0377",
+      "state": {
+        "ticket": "You promised a refund of $129.95 on my last call — still waiting.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0137",
+      "state": {
+        "ticket": "The latest update broke search — it worked yesterday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0368",
+      "state": {
+        "ticket": "I returned the package last Tuesday; where is my refund?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0418",
+      "state": {
+        "ticket": "My order #48210 was supposed to arrive last Friday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0498",
+      "state": {
+        "ticket": "Why does shipping to Oslo cost $8.50? That seems high.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0482",
+      "state": {
+        "ticket": "The carrier lost my package 94055112; I need a replacement shipped.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0265",
+      "state": {
+        "ticket": "Deactivate the old account under ops@example.com.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0057",
+      "state": {
+        "ticket": "My card was billed $12.99 but my plan costs $240.00.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0118",
+      "state": {
+        "ticket": "I get error E-500 when trying to save my work.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0324",
+      "state": {
+        "ticket": "The refund for order #48210 never arrived in my bank.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0229",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0469",
+      "state": {
+        "ticket": "Split my order #77312 into two shipments.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0283",
+      "state": {
+        "ticket": "Transfer ownership of the account to Elin.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0441",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0172",
+      "state": {
+        "ticket": "Audio stutters during calls on my Android phone.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0298",
+      "state": {
+        "ticket": "Add Maya as an admin on my account.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0069",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0219",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0160",
+      "state": {
+        "ticket": "Sync fails with error E-500 between my tablet and laptop.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0301",
+      "state": {
+        "ticket": "I want a refund for order #48210 — the item arrived broken.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0114",
+      "state": {
+        "ticket": "I get error E-500 when trying to save my work.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0065",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0475",
+      "state": {
+        "ticket": "Split my order #99173 into two shipments.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0332",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0162",
+      "state": {
+        "ticket": "The search button does nothing when I click it.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0053",
+      "state": {
+        "ticket": "My card was billed $129.95 but my plan costs $310.40.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0345",
+      "state": {
+        "ticket": "How long does a refund take? It's been 4 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0419",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0188",
+      "state": {
+        "ticket": "The app freezes for 38 seconds whenever I type.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0363",
+      "state": {
+        "ticket": "I returned the package last last week; where is my refund?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0076",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0073",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0157",
+      "state": {
+        "ticket": "Sync fails with error E-500 between my desktop and laptop.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0459",
+      "state": {
+        "ticket": "How much is express shipping to Berlin?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0106",
+      "state": {
+        "ticket": "The app crashes every time I open export on my iPhone.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0196",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my desktop last last week.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0087",
+      "state": {
+        "ticket": "Split my bill into two payments of $49.00 and $310.40.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0458",
+      "state": {
+        "ticket": "How much is express shipping to Berlin?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0461",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0245",
+      "state": {
+        "ticket": "Change the username on my account to Priya.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0286",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0261",
+      "state": {
+        "ticket": "Deactivate the old account under ops@example.com.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0034",
+      "state": {
+        "ticket": "Why did my subscription renew at $49.00 without notice?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0457",
+      "state": {
+        "ticket": "How much is express shipping to Toronto?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0159",
+      "state": {
+        "ticket": "Sync fails with error E-2091 between my tablet and laptop.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0372",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0153",
+      "state": {
+        "ticket": "Sync fails with error E-500 between my tablet and laptop.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0021",
+      "state": {
+        "ticket": "My invoice #20456 shows the wrong amount.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0483",
+      "state": {
+        "ticket": "The carrier lost my package 94055112; I need a replacement shipped.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0232",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0044",
+      "state": {
+        "ticket": "Please explain the $19.99 charge labeled 'OVERAGE' on my statement.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0082",
+      "state": {
+        "ticket": "The payment of $8.50 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0272",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0158",
+      "state": {
+        "ticket": "Sync fails with error E-1042 between my Android phone and laptop.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0311",
+      "state": {
+        "ticket": "Please refund the $75.25 charge, I cancelled within the trial.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0312",
+      "state": {
+        "ticket": "Please refund the $19.99 charge, I cancelled within the trial.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0258",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0406",
+      "state": {
+        "ticket": "Where is my package? Tracking 1Z8842W0 hasn't updated in 45 days.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0182",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.8.4.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0414",
+      "state": {
+        "ticket": "My order #31208 was supposed to arrive last Monday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0049",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0448",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0470",
+      "state": {
+        "ticket": "Split my order #55890 into two shipments.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0131",
+      "state": {
+        "ticket": "My Android phone overheats when running your software.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0036",
+      "state": {
+        "ticket": "Why did my subscription renew at $8.50 without notice?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0110",
+      "state": {
+        "ticket": "I get error E-2091 when trying to save my work.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0489",
+      "state": {
+        "ticket": "Schedule my delivery for last week morning instead.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0186",
+      "state": {
+        "ticket": "The app freezes for 35 seconds whenever I type.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0193",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my Android phone last Tuesday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0259",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0380",
+      "state": {
+        "ticket": "You promised a refund of $129.95 on my last call — still waiting.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0099",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0273",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0466",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0437",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0308",
+      "state": {
+        "ticket": "I want a refund for order #55890 — the item arrived broken.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0378",
+      "state": {
+        "ticket": "You promised a refund of $310.40 on my last call — still waiting.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0119",
+      "state": {
+        "ticket": "The export page loads forever and then times out.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0097",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0039",
+      "state": {
+        "ticket": "Please explain the $129.95 charge labeled 'ADDON-STORAGE' on my statement.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0323",
+      "state": {
+        "ticket": "The refund for order #48210 never arrived in my bank.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0060",
+      "state": {
+        "ticket": "My card was billed $19.99 but my plan costs $49.00.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0155",
+      "state": {
+        "ticket": "Sync fails with error E-1042 between my Android phone and laptop.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0144",
+      "state": {
+        "ticket": "The latest update broke settings — it worked yesterday.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0255",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0346",
+      "state": {
+        "ticket": "How long does a refund take? It's been 42 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0303",
+      "state": {
+        "ticket": "I want a refund for order #77312 — the item arrived broken.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0499",
+      "state": {
+        "ticket": "Why does shipping to Oslo cost $310.40? That seems high.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0037",
+      "state": {
+        "ticket": "Please explain the $310.40 charge labeled 'OVERAGE' on my statement.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0224",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0070",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0402",
+      "state": {
+        "ticket": "Where is my package? Tracking TRK-99120 hasn't updated in 38 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0493",
+      "state": {
+        "ticket": "Why does shipping to Oslo cost $310.40? That seems high.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0084",
+      "state": {
+        "ticket": "The payment of $19.99 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0094",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0497",
+      "state": {
+        "ticket": "Why does shipping to Berlin cost $19.99? That seems high.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0296",
+      "state": {
+        "ticket": "Add Marco as an admin on my account.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0223",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0353",
+      "state": {
+        "ticket": "The item was never delivered — refund order #20456.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0383",
+      "state": {
+        "ticket": "You promised a refund of $240.00 on my last call — still waiting.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0075",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0481",
+      "state": {
+        "ticket": "The carrier lost my package LX44710DE; I need a replacement shipped.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0281",
+      "state": {
+        "ticket": "Transfer ownership of the account to Elin.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0385",
+      "state": {
+        "ticket": "Refund the duplicate charge of $240.00 on my card.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0077",
+      "state": {
+        "ticket": "The payment of $49.00 failed but my bank shows it went through.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0165",
+      "state": {
+        "ticket": "The notifications button does nothing when I click it.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0135",
+      "state": {
+        "ticket": "My laptop overheats when running your software.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0260",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0256",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0496",
+      "state": {
+        "ticket": "Why does shipping to Lagos cost $8.50? That seems high.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0337",
+      "state": {
+        "ticket": "Refund my last payment of $310.40, I was charged after cancelling.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0046",
+      "state": {
+        "ticket": "I need a copy of my bill for January.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0322",
+      "state": {
+        "ticket": "The refund for order #48210 never arrived in my bank.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0090",
+      "state": {
+        "ticket": "Split my bill into two payments of $75.25 and $75.25.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0048",
+      "state": {
+        "ticket": "I need a copy of my bill for August.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0436",
+      "state": {
+        "ticket": "Can I change the shipping address for order #48210?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0125",
+      "state": {
+        "ticket": "The dashboard page loads forever and then times out.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0254",
+      "state": {
+        "ticket": "I want to upgrade my account to the team plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0093",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0203",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0297",
+      "state": {
+        "ticket": "Add Maya as an admin on my account.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0216",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0379",
+      "state": {
+        "ticket": "You promised a refund of $75.25 on my last call — still waiting.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0189",
+      "state": {
+        "ticket": "The app freezes for 24 seconds whenever I type.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0422",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0068",
+      "state": {
+        "ticket": "Can you update the billing address on my account?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0240",
+      "state": {
+        "ticket": "My account was locked after 31 failed login attempts.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0382",
+      "state": {
+        "ticket": "You promised a refund of $129.95 on my last call — still waiting.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0390",
+      "state": {
+        "ticket": "Refund the duplicate charge of $240.00 on my card.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0344",
+      "state": {
+        "ticket": "Refund my last payment of $310.40, I was charged after cancelling.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0407",
+      "state": {
+        "ticket": "Where is my package? Tracking LX44710DE hasn't updated in 32 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0388",
+      "state": {
+        "ticket": "Refund the duplicate charge of $12.99 on my card.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0248",
+      "state": {
+        "ticket": "Change the username on my account to Ravi.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0226",
+      "state": {
+        "ticket": "Someone changed the email on my account without my permission.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0429",
+      "state": {
+        "ticket": "Can I change the shipping address for order #48210?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0288",
+      "state": {
+        "ticket": "Why was my account suspended? I did nothing wrong.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0445",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0357",
+      "state": {
+        "ticket": "The item was never delivered — refund order #99173.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0215",
+      "state": {
+        "ticket": "Please delete my account and all my data.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0180",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.3.3.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0120",
+      "state": {
+        "ticket": "The checkout page loads forever and then times out.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0128",
+      "state": {
+        "ticket": "My Android phone overheats when running your software.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0197",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my desktop last Friday.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0467",
+      "state": {
+        "ticket": "My package arrived damaged — the box was crushed.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0179",
+      "state": {
+        "ticket": "My files disappeared after the update to version 4.4.5.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0033",
+      "state": {
+        "ticket": "Why did my subscription renew at $240.00 without notice?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0104",
+      "state": {
+        "ticket": "The app crashes every time I open notifications on my iPhone.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0136",
+      "state": {
+        "ticket": "My desktop overheats when running your software.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0148",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my tablet.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0313",
+      "state": {
+        "ticket": "Please refund the $129.95 charge, I cancelled within the trial.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0453",
+      "state": {
+        "ticket": "How much is express shipping to Oslo?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0452",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0088",
+      "state": {
+        "ticket": "Split my bill into two payments of $49.00 and $12.99.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0343",
+      "state": {
+        "ticket": "Refund my last payment of $240.00, I was charged after cancelling.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0405",
+      "state": {
+        "ticket": "Where is my package? Tracking 94055112 hasn't updated in 47 days.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0035",
+      "state": {
+        "ticket": "Why did my subscription renew at $129.95 without notice?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0340",
+      "state": {
+        "ticket": "Refund my last payment of $12.99, I was charged after cancelling.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0271",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0115",
+      "state": {
+        "ticket": "I get error E-500 when trying to save my work.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0206",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0403",
+      "state": {
+        "ticket": "Where is my package? Tracking 94055112 hasn't updated in 40 days.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0309",
+      "state": {
+        "ticket": "I want a refund for order #48210 — the item arrived broken.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0236",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0278",
+      "state": {
+        "ticket": "Transfer ownership of the account to Aisha.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0038",
+      "state": {
+        "ticket": "Please explain the $19.99 charge labeled 'PRO-PLAN' on my statement.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0450",
+      "state": {
+        "ticket": "The tracking says delivered but I never received anything.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0387",
+      "state": {
+        "ticket": "Refund the duplicate charge of $129.95 on my card.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0130",
+      "state": {
+        "ticket": "My iPhone overheats when running your software.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0133",
+      "state": {
+        "ticket": "My iPhone overheats when running your software.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0102",
+      "state": {
+        "ticket": "The app crashes every time I open notifications on my tablet.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0326",
+      "state": {
+        "ticket": "The refund for order #99173 never arrived in my bank.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0003",
+      "state": {
+        "ticket": "I was charged $19.99 twice on my credit card this month.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0056",
+      "state": {
+        "ticket": "My card was billed $310.40 but my plan costs $75.25.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0146",
+      "state": {
+        "ticket": "I see a blank screen after logging in on my Android phone.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0031",
+      "state": {
+        "ticket": "Why did my subscription renew at $19.99 without notice?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0098",
+      "state": {
+        "ticket": "Why is my bill higher this month? I used the same plan.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0072",
+      "state": {
+        "ticket": "I keep getting charged after I cancelled — bill me no more.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0124",
+      "state": {
+        "ticket": "The checkout page loads forever and then times out.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0005",
+      "state": {
+        "ticket": "I was charged $49.00 twice on my credit card this month.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "billing"
+    },
+    {
+      "id": "intent-0351",
+      "state": {
+        "ticket": "How long does a refund take? It's been 37 days.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0280",
+      "state": {
+        "ticket": "Transfer ownership of the account to Marco.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0369",
+      "state": {
+        "ticket": "Partial refund please: only half the order arrived.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0108",
+      "state": {
+        "ticket": "The app crashes every time I open export on my laptop.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0442",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0386",
+      "state": {
+        "ticket": "Refund the duplicate charge of $240.00 on my card.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0190",
+      "state": {
+        "ticket": "The app freezes for 41 seconds whenever I type.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0416",
+      "state": {
+        "ticket": "My order #48210 was supposed to arrive last Monday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0444",
+      "state": {
+        "ticket": "My shipment is stuck at customs — what do I do?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0200",
+      "state": {
+        "ticket": "Push notifications stopped arriving on my tablet last Friday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0334",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0352",
+      "state": {
+        "ticket": "How long does a refund take? It's been 28 days.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0495",
+      "state": {
+        "ticket": "Why does shipping to Lagos cost $129.95? That seems high.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0209",
+      "state": {
+        "ticket": "I can't log into my account — the password reset email never arrives.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0472",
+      "state": {
+        "ticket": "Split my order #77312 into two shipments.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0231",
+      "state": {
+        "ticket": "How do I merge my two accounts into one?",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0185",
+      "state": {
+        "ticket": "The app freezes for 37 seconds whenever I type.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "technical"
+    },
+    {
+      "id": "intent-0274",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0276",
+      "state": {
+        "ticket": "My account shows the wrong timezone and language.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "account"
+    },
+    {
+      "id": "intent-0339",
+      "state": {
+        "ticket": "Refund my last payment of $12.99, I was charged after cancelling.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0415",
+      "state": {
+        "ticket": "My order #77312 was supposed to arrive last Friday.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0456",
+      "state": {
+        "ticket": "How much is express shipping to Austin?",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0381",
+      "state": {
+        "ticket": "You promised a refund of $310.40 on my last call — still waiting.",
+        "channel": "email"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    },
+    {
+      "id": "intent-0427",
+      "state": {
+        "ticket": "The delivery driver left my package at the wrong address.",
+        "channel": "chat"
+      },
+      "spec_type": "categorical",
+      "expected": "shipping"
+    },
+    {
+      "id": "intent-0331",
+      "state": {
+        "ticket": "I'd like a full refund; the product doesn't match the description.",
+        "channel": "phone"
+      },
+      "spec_type": "categorical",
+      "expected": "refund"
+    }
+  ]
+}
