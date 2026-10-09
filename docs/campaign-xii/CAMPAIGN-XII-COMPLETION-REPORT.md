@@ -113,4 +113,5 @@ API inventory drift.
 - Ruff: clean. Mypy gate: clean. API inventory, arch map, repo-truth
   manifest, test taxonomy, package boundaries: all green
   (release-gate pass fixed drift in each).
-- `git push origin gjallarbu/campaign-xii`: done (see below).
+- `git push origin gjallarbu/campaign-xii`: done 2026-10-09; remote
+  HEAD `ab6ead2` verified via `git ls-remote`.
