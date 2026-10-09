@@ -50,6 +50,7 @@ class OfflineDriver(ModeDriver):
 
     mode: Mode = Mode.OFFLINE
     journal: list[dict[str, Any]] = field(default_factory=list)
+    seen: dict[str, Proposal] = field(default_factory=dict)
 
     def handle(self, proposal: Proposal, ctx: TuningContext) -> DriverResult:
         entry = {"proposal": proposal.to_dict(),
@@ -58,6 +59,7 @@ class OfflineDriver(ModeDriver):
                  "mode": self.mode.value,
                  "run_id": ctx.run_id}
         self.journal.append(entry)
+        self.seen[proposal.proposal_id] = proposal
         return DriverResult(proposal_id=proposal.proposal_id,
                             disposition=Disposition.RECORDED,
                             detail={"journal_index": len(self.journal) - 1})
