@@ -174,6 +174,15 @@ class SchedulerConfig:
     # lane starves no matter how much high-priority pressure arrives.
     priority_enabled: bool = False
     starvation_horizon_s: float = 30.0
+    # Slice 288 — deadline scheduling: when True, batch selection is
+    # earliest-deadline-first (tasks without deadlines sort last), the
+    # collection window never waits past the earliest deadline, and
+    # tasks already late at selection are either dropped (drop_late)
+    # with their future failed, or executed anyway — both counted in
+    # stats()["deadline_misses"].  With priority also enabled, deadline
+    # is the primary key and effective priority the tiebreak.
+    deadline_enabled: bool = False
+    drop_late: bool = True
 
     def __post_init__(self) -> None:
         if not isinstance(self.max_batch_size, int) or \
@@ -225,6 +234,13 @@ class SchedulerConfig:
             raise SchedulerError(
                 f"starvation_horizon_s must be > 0, got "
                 f"{self.starvation_horizon_s!r}")
+        if not isinstance(self.deadline_enabled, bool):
+            raise SchedulerError(
+                f"deadline_enabled must be a bool, got "
+                f"{self.deadline_enabled!r}")
+        if not isinstance(self.drop_late, bool):
+            raise SchedulerError(
+                f"drop_late must be a bool, got {self.drop_late!r}")
 
 
 @dataclass
@@ -302,6 +318,7 @@ class BatchScheduler:
         self._in_flight = 0  # batches pulled from the queue, not yet done
         self._batches = 0
         self._tasks_completed = 0
+        self._deadline_misses = 0
         self._batch_sizes: deque[int] = deque(maxlen=1000)
         self._queue_waits_ms: deque[float] = deque(maxlen=1000)
         self._batch_exec_ms: deque[float] = deque(maxlen=1000)
@@ -337,10 +354,16 @@ class BatchScheduler:
         if not isinstance(priority, int):
             raise SchedulerError(
                 f"priority must be an int, got {type(priority).__name__}")
-        if deadline is not None and deadline <= time.monotonic():
-            raise SchedulerError(
-                "deadline is already in the past; refusing to schedule "
-                "work that cannot meet its deadline")
+        if deadline is not None:
+            if isinstance(deadline, bool) or not isinstance(
+                    deadline, (int, float)):
+                raise SchedulerError(
+                    f"deadline must be a monotonic timestamp (float), got "
+                    f"{type(deadline).__name__}")
+            if deadline <= time.monotonic():
+                raise SchedulerError(
+                    "deadline is already in the past; refusing to schedule "
+                    "work that cannot meet its deadline")
         with self._cond:
             if not self._accepting:
                 raise SchedulerError("scheduler is shut down")
@@ -388,15 +411,29 @@ class BatchScheduler:
             self._assembly_held = 1
             window_end = time.monotonic() + self.config.batch_window_s
             while True:
-                remaining = window_end - time.monotonic()
+                now = time.monotonic()
+                remaining = window_end - now
                 if (remaining <= 0 or not self._accepting
                         or self._flush_requested):
                     break
                 if not self.config.priority_enabled and len(held) >= cap:
                     break  # FIFO fast path: cap already reached
+                timeout = remaining
+                if self.config.deadline_enabled:
+                    # Never wait past the earliest deadline: batching must
+                    # not blow a task's lateness budget (slice 288).
+                    deadlines = [t.deadline for t in held
+                                 if t.deadline is not None]
+                    deadlines += [t.deadline for t in self._queue
+                                  if t.deadline is not None]
+                    if deadlines:
+                        timeout = min(timeout, max(
+                            0.0, min(deadlines) - now - 0.001))
+                        if timeout <= 0:
+                            break  # earliest deadline reached: dispatch
                 # Priority mode keeps collecting through the window: choosing
                 # the best tasks needs the full candidate set.
-                self._cond.wait(timeout=remaining)
+                self._cond.wait(timeout=timeout)
                 while self._queue and (self.config.priority_enabled
                                        or len(held) < cap):
                     held.append(self._queue.popleft())
@@ -411,20 +448,56 @@ class BatchScheduler:
     def _select_batch(self, held: list[_Task], cap: int) -> list[_Task]:
         """Choose up to ``cap`` tasks from the held candidates (lock held).
 
-        FIFO when priority is disabled (slice-285 behavior preserved):
-        ``held`` never exceeds ``cap`` in that mode.  With priority
-        enabled, the top-``cap`` by effective priority win and the rest
-        go back to the *front* of the queue in arrival order.
+        Slice 288: with deadlines enabled, tasks already late at
+        selection are dropped (future failed with :class:`SchedulerError`)
+        or executed anyway when ``drop_late`` is False — both counted as
+        misses.  Survivors sort earliest-deadline-first (no-deadline
+        tasks last); with priority also enabled, effective priority
+        breaks deadline ties.  Without deadlines, slice-287 behavior is
+        preserved; without priority either, plain FIFO.
         """
-        if not self.config.priority_enabled:
-            return held
         now = time.monotonic()
-        horizon = self.config.starvation_horizon_s
-        ranked = sorted(
-            held,
-            key=lambda t: (-(t.priority + (now - t.submitted_at) / horizon),
-                           t.submitted_at))
-        chosen = ranked[:cap]
+        if self.config.deadline_enabled:
+            live: list[_Task] = []
+            for task in held:
+                if task.deadline is not None and task.deadline <= now:
+                    # _cond is held here; the counter lives under _cond
+                    # (never nest _stats_lock inside it).
+                    self._deadline_misses += 1
+                    if self.config.drop_late:
+                        if not task.future.done():
+                            task.future.set_exception(SchedulerError(
+                                f"task {task.task_id} missed its deadline "
+                                f"before execution"))
+                        continue
+                    live.append(task)  # late but executes; still counted
+                else:
+                    live.append(task)
+            held = live
+        if not held:
+            return []
+        if self.config.deadline_enabled:
+            horizon = self.config.starvation_horizon_s
+            use_priority = self.config.priority_enabled
+
+            def _key(t: _Task):
+                prio = -(t.priority + (now - t.submitted_at) / horizon) \
+                    if use_priority else 0.0
+                return (t.deadline if t.deadline is not None else float("inf"),
+                        prio, t.submitted_at)
+
+            ranked = sorted(held, key=_key)
+            chosen = ranked[:cap]
+        elif not self.config.priority_enabled:
+            return held  # FIFO: held never exceeds cap in this mode
+        else:
+            horizon = self.config.starvation_horizon_s
+            ranked = sorted(
+                held,
+                key=lambda t: (-(t.priority
+                                 + (now - t.submitted_at) / horizon),
+                               t.submitted_at))
+            chosen = ranked[:cap]
         chosen_ids = {id(task) for task in chosen}
         rest = [task for task in held if id(task) not in chosen_ids]
         for task in reversed(rest):
@@ -499,6 +572,12 @@ class BatchScheduler:
 
     def stats(self) -> dict[str, Any]:
         """Scheduler statistics snapshot."""
+        # Read cond-guarded state first, then stats-guarded state: never
+        # nest _cond inside _stats_lock (lock order is _cond -> _stats).
+        with self._cond:
+            deadline_misses = self._deadline_misses
+            queue_depth = len(self._queue)
+            accepting = self._accepting
         with self._stats_lock:
             sizes = list(self._batch_sizes)
             waits = list(self._queue_waits_ms)
@@ -510,11 +589,13 @@ class BatchScheduler:
                 "max_batch_size_seen": max(sizes) if sizes else 0,
                 "queue_wait_p50_ms": statistics.median(waits) if waits else 0.0,
                 "batch_exec_p50_ms": statistics.median(execs) if execs else 0.0,
-                "queue_depth": self.queue_depth(),
-                "accepting": self._accepting,
+                "queue_depth": queue_depth,
+                "accepting": accepting,
                 "adaptive": self._adaptive is not None,
                 "effective_max_batch": self._effective_max_batch(),
                 "priority_enabled": self.config.priority_enabled,
+                "deadline_enabled": self.config.deadline_enabled,
+                "deadline_misses": deadline_misses,
             }
             if self._adaptive is not None:
                 stats["adaptive_controller"] = self._adaptive.snapshot()
