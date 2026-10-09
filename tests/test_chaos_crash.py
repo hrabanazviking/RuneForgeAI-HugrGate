@@ -77,11 +77,14 @@ def test_run_worker_rejects_bad_arguments(tmp_path):
 def test_recovery_survives_repeated_kills(tmp_path):
     # Three consecutive kill -9 cycles on the same directory: the
     # journal must stay consistent every time (seq continues, no
-    # phantom state).
+    # phantom state). The kill countdown starts only after the first
+    # checkpoint exists, so the test measures crash recovery rather
+    # than racing worker startup (slice 500).
     harness = CrashOnlyHarness(tmp_path)
     counters = []
     for _ in range(3):
-        report = harness.run_worker(kill_after_s=0.5)
+        report = harness.run_worker(kill_after_s=0.5,
+                                    arm_after_first_checkpoint=True)
         assert report.recovered_cleanly is True
         counters.append(report.recovered_counter)
     assert all(c >= 1 for c in counters)

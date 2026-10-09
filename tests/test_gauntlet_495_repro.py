@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from hugrgate.gauntlet.repro import (
     MAX_BASELINE_DRIFT,
     ReproReport,
@@ -58,10 +60,13 @@ def test_digest_mismatch_fails_audit():
 
 
 def test_compare_with_baseline_match():
-    base = run_workload(n=500, seed=495)
-    verdict = compare_with_baseline(run_workload(n=500, seed=495), base)
+    # Deterministic: synthetic measurements, no machine timing.
+    base = {"digest": "d", "ops_per_sec": 1000.0}
+    measured = {"digest": "d", "ops_per_sec": 1150.0}
+    verdict = compare_with_baseline(measured, base)
     assert verdict["digest_match"] is True
     assert verdict["within_band"] is True
+    assert verdict["relative_drift"] == pytest.approx(0.15)
 
 
 def test_compare_with_baseline_flags_drift():
@@ -82,9 +87,13 @@ def test_compare_with_baseline_flags_digest_change():
 
 
 def test_baseline_json_round_trip(tmp_path):
-    base = run_workload(n=200, seed=495)
+    # The workload's measurement must survive JSON serialization
+    # with its digest intact. Timing is deliberately NOT asserted
+    # here — it is load-sensitive; determinism is asserted above
+    # and timing stability via the audit's CV band.
+    meas = run_workload(n=200, seed=495)
     path = tmp_path / "baseline.json"
-    path.write_text(json.dumps(base))
+    path.write_text(json.dumps(meas))
     loaded = json.loads(path.read_text())
-    verdict = compare_with_baseline(run_workload(n=200, seed=495), loaded)
-    assert verdict["within_band"] is True
+    assert loaded["digest"] == meas["digest"]
+    assert loaded["n"] == meas["n"] == 200

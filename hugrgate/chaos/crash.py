@@ -106,10 +106,18 @@ class CrashOnlyHarness:
 
     def run_worker(self, count: int = 10 ** 9,
                    kill_after_s: float = 1.0,
-                   kill_signal: int | None = None) -> CrashReport:
+                   kill_signal: int | None = None,
+                   arm_after_first_checkpoint: bool = False) -> CrashReport:
         """Run the worker, kill it after ``kill_after_s``, recover.
 
         ``kill_signal`` defaults to :meth:`default_kill_signal`.
+
+        ``arm_after_first_checkpoint``: wait (bounded) for the worker
+        to write its first checkpoint before starting the kill
+        countdown. Slice 500: without this, a slow interpreter
+        startup under load lets the kill land before any checkpoint
+        exists, and the test measures startup instead of crash
+        recovery (flaky ``recovered_counter=None``).
         """
         if kill_after_s <= 0:
             raise SpecError(
@@ -126,6 +134,14 @@ class CrashOnlyHarness:
              str(self._dir), str(count)],
             env=env, stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL)
+        if arm_after_first_checkpoint:
+            deadline = time.monotonic() + 60.0
+            while time.monotonic() < deadline:
+                if proc.poll() is not None:
+                    break  # worker exited on its own; proceed to report
+                if any(self._dir.glob("chk_*.json")):
+                    break
+                time.sleep(0.05)
         try:
             try:
                 proc.wait(timeout=kill_after_s)

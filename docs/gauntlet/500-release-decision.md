@@ -14,7 +14,7 @@ re-verified at 1.0.0 (`tools/rc_build.py`: 5/5 checks).
 ## Full-suite verification
 
 Final full run (`pytest -q -p no:cacheprovider`, this machine):
-**5270 passed, 10 failed, 1 skipped** — then every failure was
+**5277 passed, 3 failed, 1 skipped** — then every failure was
 triaged and fixed:
 
 | Failure | Cause | Fix |
@@ -30,6 +30,8 @@ triaged and fixed:
 | `test_gauntlet_479_linux` | pinned count of guarded `resource` imports (3) missed slice 488's `soak.py` | count 3 → 4 |
 | `test_gauntlet_486_api_audit` | baseline recorded mid-campaign (slice 486); 10 gauntlet modules added since | re-recorded `api-baseline-1.0.json` at the 1.0 tree (432 modules, no drift, non-breaking) |
 | `test_sec_410_resource_guards` | **real test bug (slice 410)**: `RLIMIT_CPU` counts total process CPU; after a long suite run the process had already exceeded the absolute 60s budget, so arming the guard fired `SIGXCPU` immediately | budget armed relative to already-consumed CPU (`consumed + 60`); proven passing with 65s pre-burned |
+| `test_chaos_crash` (flaky) | **race in slice 480's harness**: worker startup could exceed the 0.5s kill delay under load, so the kill landed before any checkpoint existed | new `arm_after_first_checkpoint` option; kill countdown starts after the first checkpoint; 5/5 green |
+| `test_gauntlet_495_repro` (2, mine) | timing-band assertions flaked under full-suite CPU load | made deterministic: synthetic measurements for the band logic, digest-only assertion for the JSON round trip |
 
 After fixes, all affected suites re-run green; the release
 checklist (`test_gauntlet_500_release.py`) passes: version 1.0.0
