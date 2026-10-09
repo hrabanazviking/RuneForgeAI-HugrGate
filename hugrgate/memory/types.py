@@ -40,3 +40,31 @@ class HistoryLike(Protocol):
     def find(self, query: Any) -> list[EpisodeLike]:
         """Run a query; return episode copies."""
         ...  # pragma: no cover - protocol stub
+
+    def get(self, episode_id: str) -> EpisodeLike:
+        """Return one episode copy; raise when unknown."""
+        ...  # pragma: no cover - protocol stub
+
+    def recent(self, n: int = 10) -> list[EpisodeLike]:
+        """Chronological episode copies (newest last)."""
+        ...  # pragma: no cover - protocol stub
+
+    def by_request_hash(self, request_hash: str) -> list[EpisodeLike]:
+        """Episode copies matching a provenance request hash."""
+        ...  # pragma: no cover - protocol stub
+
+    def record(self, *args: Any, **kwargs: Any) -> Any:
+        """Remember a decision (owner role in guarded use)."""
+        ...  # pragma: no cover - protocol stub
+
+    def attach_outcome(self, *args: Any, **kwargs: Any) -> Any:
+        """Attach an outcome (owner role in guarded use)."""
+        ...  # pragma: no cover - protocol stub
+
+    def attach_ground_truth(self, *args: Any, **kwargs: Any) -> Any:
+        """Attach ground truth (owner role in guarded use)."""
+        ...  # pragma: no cover - protocol stub
+
+    def clear(self) -> Any:
+        """Remove all episodes (owner role in guarded use)."""
+        ...  # pragma: no cover - protocol stub

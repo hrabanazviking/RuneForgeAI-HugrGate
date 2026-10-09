@@ -181,3 +181,18 @@ it into an opaque agent.
   outcome distribution, success rate, top-3 backends, spec-type mix,
   mean probability, decay-weighted activity, first/last seen).
 - Tests: `tests/test_memory_domain_profiles.py` (9 tests).
+
+### Slice 315 — Memory privacy controls
+- `hugrgate/memory/access.py`: `MemoryAccessPolicy` maps
+  owner/analyst/auditor roles over the privacy ladder (max readable
+  class, redact-at threshold, write flag); `GuardedHistory` wraps a
+  history — reads filtered + redacted per role, writes
+  (`record`/`attach_*`/`clear`) owner-only via `MemoryAccessDenied`.
+  Denied reads raise, never return partial episodes; views are deep
+  copies. Fixed during testing: `recent(n)` returns the n most recent
+  *readable* episodes, not the readable subset of the n newest.
+- Negative/adversarial tests: cross-class reads denied, non-owner
+  writes denied (store untouched), unknown roles rejected, view
+  mutation cannot leak into the store, role-escalation attempts
+  contained.
+- Tests: `tests/test_memory_access.py` (13 tests).

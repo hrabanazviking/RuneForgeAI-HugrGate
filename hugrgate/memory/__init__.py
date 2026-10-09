@@ -19,6 +19,11 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
+from hugrgate.memory.access import (
+    GuardedHistory,
+    MemoryAccessPolicy,
+    RolePermission,
+)
 from hugrgate.memory.backend_history import BackendHistory, backend_histories
 from hugrgate.memory.conditioned import retrieve_conditioned
 from hugrgate.memory.contract_history import (
@@ -75,6 +80,7 @@ from hugrgate.memory.similarity import (
 __all__ = [
     "DEFAULT_DOMAIN",
     "OUTCOME_KINDS",
+    "ROLE_PERMISSIONS",
     "BackendHistory",
     "ContractHistory",
     "DecisionHistory",
@@ -83,6 +89,8 @@ __all__ = [
     "FrequencyEntry",
     "FrequencyTable",
     "GroundTruth",
+    "GuardedHistory",
+    "MemoryAccessPolicy",
     "MemoryAction",
     "MemoryDecision",
     "MemoryPolicy",
@@ -91,6 +99,7 @@ __all__ = [
     "Outcome",
     "RecencyFeatures",
     "RetrievalResult",
+    "RolePermission",
     "SimilarityHit",
     "backend_histories",
     "by_backend",
