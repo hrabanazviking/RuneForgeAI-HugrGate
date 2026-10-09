@@ -43,6 +43,7 @@ flowchart TD
         contracts_composition[contracts.composition]
         contracts_templates[contracts.templates]
         contracts_migration[contracts.migration]
+        contracts_lint[contracts.lint]
     end
     subgraph runtime[runtime]
         core[core]
@@ -174,6 +175,7 @@ flowchart TD
     contracts --> contracts_features
     contracts --> contracts_hierarchy
     contracts --> contracts_inheritance
+    contracts --> contracts_lint
     contracts --> contracts_migration
     contracts --> contracts_multilabel
     contracts --> contracts_negotiation
@@ -236,6 +238,19 @@ flowchart TD
     contracts_inheritance --> contracts_utility
     contracts_inheritance --> errors
     contracts_inheritance -.-> spec
+    contracts_lint --> contracts_composite
+    contracts_lint --> contracts_cost
+    contracts_lint --> contracts_deadlines
+    contracts_lint --> contracts_distributions
+    contracts_lint --> contracts_explanations
+    contracts_lint --> contracts_features
+    contracts_lint --> contracts_multilabel
+    contracts_lint --> contracts_nested
+    contracts_lint --> contracts_ordinal
+    contracts_lint --> contracts_schema
+    contracts_lint --> contracts_templates
+    contracts_lint --> contracts_uncertainty
+    contracts_lint --> errors
     contracts_migration --> contracts_multilabel
     contracts_migration --> contracts_nested
     contracts_migration --> contracts_ordinal
@@ -327,7 +342,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -420,6 +435,7 @@ flowchart TD
 | `contracts` | `contracts.features` | no |
 | `contracts` | `contracts.hierarchy` | no |
 | `contracts` | `contracts.inheritance` | no |
+| `contracts` | `contracts.lint` | no |
 | `contracts` | `contracts.migration` | no |
 | `contracts` | `contracts.multilabel` | no |
 | `contracts` | `contracts.negotiation` | no |
@@ -482,6 +498,19 @@ flowchart TD
 | `contracts.inheritance` | `contracts.utility` | no |
 | `contracts.inheritance` | `errors` | no |
 | `contracts.inheritance` | `spec` | yes |
+| `contracts.lint` | `contracts.composite` | no |
+| `contracts.lint` | `contracts.cost` | no |
+| `contracts.lint` | `contracts.deadlines` | no |
+| `contracts.lint` | `contracts.distributions` | no |
+| `contracts.lint` | `contracts.explanations` | no |
+| `contracts.lint` | `contracts.features` | no |
+| `contracts.lint` | `contracts.multilabel` | no |
+| `contracts.lint` | `contracts.nested` | no |
+| `contracts.lint` | `contracts.ordinal` | no |
+| `contracts.lint` | `contracts.schema` | no |
+| `contracts.lint` | `contracts.templates` | no |
+| `contracts.lint` | `contracts.uncertainty` | no |
+| `contracts.lint` | `errors` | no |
 | `contracts.migration` | `contracts.multilabel` | no |
 | `contracts.migration` | `contracts.nested` | no |
 | `contracts.migration` | `contracts.ordinal` | no |

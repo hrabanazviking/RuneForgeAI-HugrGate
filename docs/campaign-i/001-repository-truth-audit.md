@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T12:04:50.918923+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T12:10:29.918877+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 65 Python files under `hugrgate/`
-- **Total LOC:** 12905
+- **Modules:** 66 Python files under `hugrgate/`
+- **Total LOC:** 13251
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_contracts_048.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -49,6 +49,7 @@
 | `hugrgate.contracts.features` | 288 | Input feature contracts — what the model may assume. | hugrgate |
 | `hugrgate.contracts.hierarchy` | 370 | Hierarchical labels — label forests with ancestor semantics. | hugrgate |
 | `hugrgate.contracts.inheritance` | 375 | Contract inheritance — derive, specialize, and check compatibility. | hugrgate |
+| `hugrgate.contracts.lint` | 346 | Contract linting — static checks with severities. | hugrgate |
 | `hugrgate.contracts.migration` | 238 | Contract migration engine — v1 DecisionSpec ↔ v2 contracts. | hugrgate |
 | `hugrgate.contracts.multilabel` | 269 | Multilabel cardinality constraints — how many, which, with what. | hugrgate |
 | `hugrgate.contracts.negotiation` | 212 | Contract version negotiation. Gjallarbrú slice 027. | hugrgate |

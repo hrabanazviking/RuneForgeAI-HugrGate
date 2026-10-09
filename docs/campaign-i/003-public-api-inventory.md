@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 65 · **public names:** 292
+**Modules:** 66 · **public names:** 303
 
 ## API stability policy
 
@@ -258,6 +258,7 @@ that this document never drifts from the code.
 | `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
 | `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/hatch/wor` |
 | `migration` | constant | `<module 'hugrgate.contracts.migration' from '/home/hatch/wor` |
+| `lint` | constant | `<module 'hugrgate.contracts.lint' from '/home/hatch/workspac` |
 
 ### `hugrgate.contracts.composite`
 
@@ -356,6 +357,21 @@ that this document never drifts from the code.
 | `derive_contract` | function | `(base: 'DecisionContract', contract_id: 'str', *, name: 'str' = '', description: 'str' = '', metadata: 'Optional[Dict[str, Any]]' = None, **overrides: 'Any') -> 'DecisionContract'` |
 | `is_compatible` | function | `(child: 'DecisionContract', base: 'DecisionContract') -> 'bool'` |
 | `DERIVED_FROM_KEY` | constant | `'derived_from'` |
+
+### `hugrgate.contracts.lint`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `INFO` | constant | `'info'` |
+| `WARNING` | constant | `'warning'` |
+| `ERROR` | constant | `'error'` |
+| `LINT_CHECKS` | constant | `[<function _check_documented at 0x…>, <function _` |
+| `LintFinding` | class | `(severity: 'str', code: 'str', message: 'str', contract_id: 'str' = '') -> None` |
+| `LintReport` | class | `(findings: 'List[LintFinding]' = <factory>) -> None` |
+| `lint_all` | function | `(contracts: 'Iterable[DecisionContract]') -> 'LintReport'` |
+| `lint_contract` | function | `(contract: 'DecisionContract') -> 'LintReport'` |
+| `lint_template` | function | `(template: 'ContractTemplate') -> 'LintReport'` |
+| `register_check` | function | `(func: 'LintCheck') -> 'LintCheck'` |
 
 ### `hugrgate.contracts.migration`
 

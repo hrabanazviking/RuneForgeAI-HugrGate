@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:04:50.918923+00:00",
-  "module_count": 65,
+  "generated_utc": "2026-10-09T12:10:29.918877+00:00",
+  "module_count": 66,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -813,6 +813,32 @@
         "is_compatible"
       ]
     },
+    "hugrgate.contracts.lint": {
+      "docstring": "Contract linting \u2014 static checks with severities.\n\nGjallarbr\u00fa slice 048.\n\nValidation proves a contract is *well-formed*; linting judges whether it\nis *well-built*. Degenerate configs slip past construction \u2014 a zero cost\nmatrix, an ordinal whose anchors all sit at one position, a\nsingle-field composite, anchors that never span the scale \u2014 and then\nsilently do nothing in production. :func:`lint_contract` runs every\nregistered check and returns a :class:`LintReport` of :class:`LintFinding`\\ s\ngraded info / warning / error.\n\nChecks are plain functions appended to :data:`LINT_CHECKS`, so teams can\nadd their own house rules:\n\n>>> from hugrgate.contracts.lint import LINT_CHECKS, lint_contract\n>>> LINT_CHECKS.append(lambda c: [])  # a no-op house rule\n\n:func:`lint_template` applies the same discipline to contract templates\n(unused parameters, undocumented parameters); :func:`lint_all` lints a\nwhole fleet of contracts at once.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 346,
+      "path": "hugrgate/contracts/lint.py",
+      "public_defs": [
+        "register_check",
+        "LintFinding",
+        "LintReport",
+        "lint_contract",
+        "lint_template",
+        "lint_all",
+        "errors",
+        "warnings",
+        "infos",
+        "has_errors",
+        "clean",
+        "by_severity",
+        "describe"
+      ]
+    },
     "hugrgate.contracts.migration": {
       "docstring": "Contract migration engine \u2014 v1 DecisionSpec \u2194 v2 contracts.\n\nGjallarbr\u00fa slice 047.\n\n``DecisionSpec`` (v1) and ``DecisionContract`` (v2) have lived side by\nside since slice 026, and ``from_dict``'s version error has pointed at\nthis module since then. The migration engine bridges them:\n\n- :func:`spec_to_contract`: v1 \u2192 v2. categorical \u2192 flat\n  nested-categorical; binary \u2192 nested-categorical ``[\"true\", \"false\"]``\n  (statement preserved in ``description``); ordinal \u2192 ordinal (default\n  anchors); numeric \u2192 numeric-interval; multilabel \u2192 multilabel-cardinality\n  (no rules). Metadata carries over.\n- :func:`contract_to_spec`: v2 \u2192 v1 for the four unambiguous kinds\n  (flat nested \u2192 categorical, ordinal, numeric-interval, rule-free\n  multilabel); anything else raises \u2014 no silent lossy downgrades.\n- :class:`MigrationReport`: the result plus ``warnings`` and a ``lossy``\n  flag, so callers know exactly what changed.\n- :data:`MIGRATIONS`: the ``(from_version, to_version) \u2192 function``\n  registry; :func:`migrate` dispatches a raw dict on its\n  ``schema_version`` (absent = ``\"1.0\"``).\n\nMigrations are total on their documented domain and loud everywhere else.",
       "imports": [
@@ -1521,6 +1547,7 @@
     "test_contracts_045.py",
     "test_contracts_046.py",
     "test_contracts_047.py",
+    "test_contracts_048.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1531,5 +1558,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 12905
+  "total_loc": 13251
 }
