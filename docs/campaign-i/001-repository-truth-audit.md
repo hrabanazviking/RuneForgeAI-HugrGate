@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T11:27:49.115471+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T11:30:06.647122+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 55 Python files under `hugrgate/`
-- **Total LOC:** 10260
+- **Modules:** 56 Python files under `hugrgate/`
+- **Total LOC:** 10534
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -36,7 +36,7 @@
 | `hugrgate.circuit` | 164 | Circuit breaker — per-backend failure containment. Slice 18. | — |
 | `hugrgate.cli` | 275 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 261 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
-| `hugrgate.contracts.__init__` | 54 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
+| `hugrgate.contracts.__init__` | 55 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
 | `hugrgate.contracts.composite` | 187 | Structured composite decisions. Gjallarbrú slice 030. | hugrgate |
 | `hugrgate.contracts.conditional` | 268 | Conditional decision fields. Gjallarbrú slice 031. | hugrgate |
 | `hugrgate.contracts.cost` | 256 | Cost-sensitive decisions — when mistakes have different prices. | hugrgate |
@@ -49,6 +49,7 @@
 | `hugrgate.contracts.ordinal` | 193 | Rich ordinal semantics — ordinals you can measure. Gjallarbrú slice 033. | hugrgate |
 | `hugrgate.contracts.schema` | 243 | Decision contract schema v2. Gjallarbrú slice 026. | hugrgate |
 | `hugrgate.contracts.uncertainty` | 232 | Numeric uncertainty intervals. Gjallarbrú slice 034. | hugrgate |
+| `hugrgate.contracts.utility` | 273 | Utility matrices — decisions as gains, not just losses. | hugrgate |
 | `hugrgate.core` | 111 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
 | `hugrgate.daemon` | 394 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |

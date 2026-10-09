@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 55 · **public names:** 242
+**Modules:** 56 · **public names:** 247
 
 ## API stability policy
 
@@ -247,6 +247,7 @@ that this document never drifts from the code.
 | `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/hatch` |
 | `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/hatch/wo` |
 | `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/hatch/workspac` |
+| `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/hatch/works` |
 
 ### `hugrgate.contracts.composite`
 
@@ -355,6 +356,15 @@ that this document never drifts from the code.
 | `covers` | function | `(a: 'UncertainValue', b: 'UncertainValue') -> 'bool'` |
 | `intersect` | function | `(a: 'UncertainValue', b: 'UncertainValue') -> 'Optional[UncertainValue]'` |
 | `widen` | function | `(v: 'UncertainValue', factor: 'float') -> 'UncertainValue'` |
+
+### `hugrgate.contracts.utility`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `UtilityMatrix` | class | `(outcomes: 'List[str]', utilities: 'Mapping[str, Mapping[str, float]]') -> 'None'` |
+| `UtilityContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, utilities: 'Dict[str, Dict[str, float]]' = <factory>) -> None` |
+| `expected_utility` | function | `(matrix: 'UtilityMatrix', distribution: 'Mapping[str, float]', decision: 'str') -> 'float'` |
+| `max_utility_decision` | function | `(matrix: 'UtilityMatrix', distribution: 'Mapping[str, float]') -> 'Tuple[str, float]'` |
 
 ### `hugrgate.core`
 

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:27:49.115471+00:00",
-  "module_count": 55,
+  "generated_utc": "2026-10-09T11:30:06.647122+00:00",
+  "module_count": 56,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 54,
+      "loc": 55,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -824,6 +824,36 @@
         "from_dict",
         "point",
         "validate_value",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.utility": {
+      "docstring": "Utility matrices \u2014 decisions as gains, not just losses.\n\nGjallarbr\u00fa slice 038.\n\nSlice 037 prices mistakes (losses \u2265 0, minimized). The dual prices\n*outcomes* (gains, possibly negative, maximized): a medical treatment\nhas benefit when right and harm when wrong; a bid has profit and loss.\nThis module adds:\n\n- :class:`UtilityMatrix`: ``utility[decision][outcome]``, finite reals\n  (negatives allowed), square over the outcome list;\n- :func:`expected_utility` and :func:`max_utility_decision` (ties \u2192 outcome\n  order);\n- :class:`UtilityContract` (kind ``\"utility\"``): outcomes + matrix, with\n  :meth:`decide`, :meth:`regret` (optimal EU \u2212 EU(chosen) \u2265 0), and\n  :meth:`as_cost_matrix` \u2014 the duality bridge: ``C = max(U) \u2212 U`` is a\n  valid cost matrix whose min-cost decision equals the max-utility one.\n\nUtility and cost are two faces of one decision rule; the bridge is tested,\nnot just claimed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 273,
+      "path": "hugrgate/contracts/utility.py",
+      "public_defs": [
+        "UtilityMatrix",
+        "expected_utility",
+        "max_utility_decision",
+        "UtilityContract",
+        "outcomes",
+        "utility",
+        "row",
+        "as_cost_matrix",
+        "to_dict",
+        "from_dict",
+        "matrix",
+        "validate_value",
+        "decide",
+        "regret",
+        "as_cost_matrix",
         "describe"
       ]
     },
@@ -1279,6 +1309,7 @@
     "test_contracts_035.py",
     "test_contracts_036.py",
     "test_contracts_037.py",
+    "test_contracts_038.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1289,5 +1320,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10260
+  "total_loc": 10534
 }

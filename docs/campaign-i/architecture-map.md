@@ -33,6 +33,7 @@ flowchart TD
         contracts_distributions[contracts.distributions]
         contracts_multilabel[contracts.multilabel]
         contracts_cost[contracts.cost]
+        contracts_utility[contracts.utility]
     end
     subgraph runtime[runtime]
         core[core]
@@ -179,6 +180,9 @@ flowchart TD
     contracts_schema --> errors
     contracts_uncertainty --> contracts_schema
     contracts_uncertainty --> errors
+    contracts_utility --> contracts_cost
+    contracts_utility --> contracts_schema
+    contracts_utility --> errors
     core --> backend
     core --> errors
     core --> policy
@@ -244,7 +248,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -352,6 +356,9 @@ flowchart TD
 | `contracts.schema` | `errors` | no |
 | `contracts.uncertainty` | `contracts.schema` | no |
 | `contracts.uncertainty` | `errors` | no |
+| `contracts.utility` | `contracts.cost` | no |
+| `contracts.utility` | `contracts.schema` | no |
+| `contracts.utility` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `policy` | no |
