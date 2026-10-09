@@ -46,6 +46,11 @@ from hugrgate.ensemble.consensus import (
     maybe_apply_consensus,
     winner_share,
 )
+from hugrgate.ensemble.correlation import (
+    CorrelatedErrorReport,
+    CorrelatedPair,
+    detect_correlated_errors,
+)
 from hugrgate.ensemble.disagreement import (
     LEVEL_MILD,
     LEVEL_NONE,
@@ -139,4 +144,7 @@ __all__ = [
     "winner_share",
     "apply_consensus",
     "maybe_apply_consensus",
+    "CorrelatedPair",
+    "CorrelatedErrorReport",
+    "detect_correlated_errors",
 ]
