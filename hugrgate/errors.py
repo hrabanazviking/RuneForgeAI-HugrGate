@@ -608,3 +608,15 @@ class EvalGateError(HugrGateError):
     """
     code = "eval_gate_error"
     recoverable = False
+
+
+class SupplyChainViolation(HugrGateError):
+    """A dependency or artifact violates the supply-chain policy.
+    Slice 404.  Raised by
+    :func:`hugrgate.security.supply_chain.SupplyChainPolicy.enforce`
+    when a package comes from an unapproved index, lacks required
+    hashes, carries a disallowed license, or is on the blocklist.
+    Not recoverable: the dependency declaration itself must change.
+    """
+    code = "supply_chain_violation"
+    recoverable = False

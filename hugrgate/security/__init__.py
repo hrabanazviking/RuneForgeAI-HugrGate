@@ -70,6 +70,13 @@ from hugrgate.security.depscan import (
 from hugrgate.security.depscan import (
     Finding as DependencyFinding,
 )
+from hugrgate.security.supply_chain import (
+    DependencyRecord,
+    SupplyChainPolicy,
+    SupplyVerdict,
+    generate_sbom,
+    sbom_from_installed,
+)
 from hugrgate.security.threat_model import (
     STRIDE,
     Asset,
@@ -86,6 +93,9 @@ __all__ = [
     "Asset",
     "AttackSurface",
     "DependencyFinding",
+    "DependencyRecord",
+    "SupplyChainPolicy",
+    "SupplyVerdict",
     "SurfaceEntry",
     "Threat",
     "ThreatModel",
@@ -94,6 +104,8 @@ __all__ = [
     "default_threat_model",
     "enumerate_surface",
     "find_unlisted",
+    "generate_sbom",
+    "sbom_from_installed",
     "scan_project",
     "scan_requirements",
 ]

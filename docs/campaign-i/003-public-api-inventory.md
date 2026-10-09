@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 366 · **public names:** 2222
+**Modules:** 368 · **public names:** 2246
 
 ## API stability policy
 
@@ -3959,9 +3959,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
+| `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
+| `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
+| `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
 | `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
@@ -3970,6 +3976,10 @@ that this document never drifts from the code.
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+| `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
+| `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
 
 ### `hugrgate.security.attack_surface`
 
@@ -3979,6 +3989,30 @@ that this document never drifts from the code.
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.depscan`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
+| `ADVISORY_DB_NOTE` | constant | `"Curated subset of verified CVEs affecting HugrGate's depend` |
+| `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
+| `Finding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
+| `installed_versions` | function | `() -> 'dict[str, str]'` |
+| `parse_requirement` | function | `(line: 'str') -> 'dict[str, str]'` |
+| `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
+| `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
+| `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.supply_chain`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
+| `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
+| `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 
 ### `hugrgate.security.threat_model`
 

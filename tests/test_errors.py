@@ -66,6 +66,7 @@ from hugrgate.errors import (
     SpecError,
     StorageError,
     SupervisionError,
+    SupplyChainViolation,
     TelemetryError,
     TimeoutError,
     TraceError,
@@ -107,6 +108,8 @@ ALL_ERRORS = [
     MemoryQuotaExceeded,
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
+    # Campaign XVII security-forge errors (slice 404+).
+    SupplyChainViolation,
 ]
 
 EXPECTED_CODES = {
@@ -169,6 +172,7 @@ EXPECTED_CODES = {
     DatasetError: "dataset_error",
     EvalError: "eval_error",
     EvalGateError: "eval_gate_error",
+    SupplyChainViolation: "supply_chain_violation",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -237,6 +241,7 @@ EXPECTED_RECOVERABLE = {
     DatasetError: False,
     EvalError: False,
     EvalGateError: False,
+    SupplyChainViolation: False,
 }
 
 

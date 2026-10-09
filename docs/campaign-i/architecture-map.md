@@ -1817,7 +1817,9 @@ flowchart TD
     scheduler --> log
     security --> security_attack_surface
     security --> security_depscan
+    security --> security_supply_chain
     security --> security_threat_model
+    security_supply_chain --> errors
     serde --> errors
     serde --> policy
     serde --> result
@@ -3262,7 +3264,9 @@ flowchart TD
 | `scheduler` | `log` | no |
 | `security` | `security.attack_surface` | no |
 | `security` | `security.depscan` | no |
+| `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
+| `security.supply_chain` | `errors` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
