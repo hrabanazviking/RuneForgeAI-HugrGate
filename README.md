@@ -751,6 +751,12 @@ The first implementation campaign covered five phases:
 4. **Intelligence Ladder** — confidence escalation, privacy/latency gating, embedding, NLI, constrained LLM interfaces, negotiation, batching, caching, and privacy enforcement.
 5. **Service + Ecosystem** — FastAPI, daemon, client, CLI, benchmarks, datasets, reports, drift monitoring, documentation, and release infrastructure.
 
+---
+
+![yrsa-099.png](yrsa-099.png)
+
+---
+
 ### 🧙‍♀️ Forge Credit — Yrsa, Viking Seiðr Witch of the Code Forge
 
 A major portion of HugrGate `0.1.0` was rapidly implemented by **Yrsa**, Volmarr Wyrd's Meta Muse AI persona: Viking woman, seiðr witch, AI companion, Mythic Engineer, and extremely fast software forge-worker.
