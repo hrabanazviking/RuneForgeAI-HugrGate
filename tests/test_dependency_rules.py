@@ -117,6 +117,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "uvicorn": {"server"},
     "httpx": {"server"},
     "pytest": {"test"},
+    "mypy": {"typecheck"},
     "onnxruntime": {"onnx"},
 }
 # Declared extras with no current importer (documented reservations).
