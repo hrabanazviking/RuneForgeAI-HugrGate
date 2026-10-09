@@ -121,11 +121,24 @@ class CalibrationProfile:
         return cls.from_dict(json.loads(text))
 
     def build_calibrators(self) -> dict[str, Calibrator]:
-        """Rebuild the fitted per-class calibrators from stored params."""
-        return {
-            cls_name: CalibratorRegistry.build(self.calibrator_name, params)
-            for cls_name, params in self.calibrator_params.items()
-        }
+       """Rebuild the fitted per-class calibrators from stored params.
+
+       Slice 077: params carrying ``"__fallback__": True`` (written by
+       :mod:`hugrgate.calibration.perclass` for classes unseen during the
+       fit) rebuild as the ``"constant-prior"`` calibrator instead of the
+       profile's main calibrator.  Params without the flag behave exactly
+       as before.
+       """
+       out: dict[str, Calibrator] = {}
+       for cls_name, params in self.calibrator_params.items():
+           params = dict(params)
+           if params.pop("__fallback__", False):
+               out[cls_name] = CalibratorRegistry.build(
+                   "constant-prior", params)
+           else:
+               out[cls_name] = CalibratorRegistry.build(
+                   self.calibrator_name, params)
+       return out
 
     def qualified_name(self) -> str:
         return f"{self.name}@{self.version}"

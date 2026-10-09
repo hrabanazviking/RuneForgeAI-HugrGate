@@ -107,11 +107,35 @@ flowchart TD
     subgraph calibration[calibration]
         calibration[calibration]
         calibration__base[calibration._base]
+        calibration_adversarial[calibration.adversarial]
+        calibration_aleatoric[calibration.aleatoric]
+        calibration_autoselect[calibration.autoselect]
+        calibration_bayes[calibration.bayes]
+        calibration_bench[calibration.bench]
+        calibration_conformal[calibration.conformal]
+        calibration_conformal_regression[calibration.conformal_regression]
+        calibration_coverage[calibration.coverage]
+        calibration_decomposition[calibration.decomposition]
+        calibration_drift[calibration.drift]
+        calibration_ensemble[calibration.ensemble]
+        calibration_epistemic[calibration.epistemic]
+        calibration_group[calibration.group]
+        calibration_imbalance[calibration.imbalance]
         calibration_isotonic[calibration.isotonic]
         calibration_metrics[calibration.metrics]
+        calibration_online[calibration.online]
+        calibration_perclass[calibration.perclass]
+        calibration_pipeline[calibration.pipeline]
         calibration_platt[calibration.platt]
         calibration_profiles[calibration.profiles]
+        calibration_registry[calibration.registry]
+        calibration_risk_coverage[calibration.risk_coverage]
+        calibration_selective[calibration.selective]
+        calibration_sets[calibration.sets]
+        calibration_shift[calibration.shift]
         calibration_temperature[calibration.temperature]
+        calibration_viz[calibration.viz]
+        calibration_window[calibration.window]
     end
     subgraph service[service]
         server[server]
@@ -175,13 +199,65 @@ flowchart TD
     cache --> result
     cache --> spec
     calibration --> calibration__base
+    calibration --> calibration_bayes
+    calibration --> calibration_ensemble
     calibration --> calibration_isotonic
+    calibration --> calibration_online
+    calibration --> calibration_perclass
     calibration --> calibration_platt
     calibration --> calibration_temperature
+    calibration --> calibration_window
     calibration__base --> errors
+    calibration_adversarial --> calibration__base
+    calibration_adversarial --> calibration_metrics
+    calibration_adversarial --> errors
+    calibration_aleatoric --> errors
+    calibration_autoselect --> calibration__base
+    calibration_autoselect --> calibration_metrics
+    calibration_autoselect --> calibration_registry
+    calibration_autoselect --> errors
+    calibration_bayes --> calibration__base
+    calibration_bayes --> errors
+    calibration_bench --> calibration__base
+    calibration_bench --> calibration_metrics
+    calibration_bench --> errors
+    calibration_conformal --> errors
+    calibration_conformal_regression --> errors
+    calibration_coverage --> calibration_bayes
+    calibration_coverage --> errors
+    calibration_decomposition --> errors
+    calibration_drift --> calibration_metrics
+    calibration_drift --> errors
+    calibration_ensemble --> calibration__base
+    calibration_ensemble --> calibration_isotonic
+    calibration_ensemble --> calibration_platt
+    calibration_ensemble --> calibration_temperature
+    calibration_ensemble --> errors
+    calibration_epistemic --> abstain
+    calibration_epistemic --> calibration_decomposition
+    calibration_epistemic --> errors
+    calibration_epistemic --> result
+    calibration_group --> calibration__base
+    calibration_group --> calibration_metrics
+    calibration_group --> calibration_pipeline
+    calibration_group --> errors
+    calibration_imbalance --> calibration__base
+    calibration_imbalance --> calibration_metrics
+    calibration_imbalance --> errors
     calibration_isotonic --> calibration__base
     calibration_isotonic --> errors
     calibration_metrics --> errors
+    calibration_online --> calibration__base
+    calibration_online --> errors
+    calibration_perclass --> calibration__base
+    calibration_perclass --> calibration_metrics
+    calibration_perclass --> calibration_pipeline
+    calibration_perclass --> calibration_profiles
+    calibration_perclass --> errors
+    calibration_pipeline --> calibration__base
+    calibration_pipeline --> calibration_metrics
+    calibration_pipeline --> calibration_profiles
+    calibration_pipeline --> errors
     calibration_platt --> calibration__base
     calibration_platt --> errors
     calibration_profiles --> backend
@@ -189,8 +265,21 @@ flowchart TD
     calibration_profiles --> errors
     calibration_profiles --> result
     calibration_profiles --> spec
+    calibration_registry --> calibration__base
+    calibration_registry --> errors
+    calibration_risk_coverage --> errors
+    calibration_selective --> errors
+    calibration_sets --> errors
+    calibration_shift --> calibration__base
+    calibration_shift --> calibration_imbalance
+    calibration_shift --> errors
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
+    calibration_viz --> calibration_metrics
+    calibration_viz --> errors
+    calibration_window -.-> calibration
+    calibration_window --> calibration__base
+    calibration_window --> errors
     circuit --> log
     cli -.-> bench
     cli -.-> bench_report
@@ -518,7 +607,7 @@ flowchart TD
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
-| calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
+| calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
 
@@ -578,13 +667,65 @@ flowchart TD
 | `cache` | `result` | no |
 | `cache` | `spec` | no |
 | `calibration` | `calibration._base` | no |
+| `calibration` | `calibration.bayes` | no |
+| `calibration` | `calibration.ensemble` | no |
 | `calibration` | `calibration.isotonic` | no |
+| `calibration` | `calibration.online` | no |
+| `calibration` | `calibration.perclass` | no |
 | `calibration` | `calibration.platt` | no |
 | `calibration` | `calibration.temperature` | no |
+| `calibration` | `calibration.window` | no |
 | `calibration._base` | `errors` | no |
+| `calibration.adversarial` | `calibration._base` | no |
+| `calibration.adversarial` | `calibration.metrics` | no |
+| `calibration.adversarial` | `errors` | no |
+| `calibration.aleatoric` | `errors` | no |
+| `calibration.autoselect` | `calibration._base` | no |
+| `calibration.autoselect` | `calibration.metrics` | no |
+| `calibration.autoselect` | `calibration.registry` | no |
+| `calibration.autoselect` | `errors` | no |
+| `calibration.bayes` | `calibration._base` | no |
+| `calibration.bayes` | `errors` | no |
+| `calibration.bench` | `calibration._base` | no |
+| `calibration.bench` | `calibration.metrics` | no |
+| `calibration.bench` | `errors` | no |
+| `calibration.conformal` | `errors` | no |
+| `calibration.conformal_regression` | `errors` | no |
+| `calibration.coverage` | `calibration.bayes` | no |
+| `calibration.coverage` | `errors` | no |
+| `calibration.decomposition` | `errors` | no |
+| `calibration.drift` | `calibration.metrics` | no |
+| `calibration.drift` | `errors` | no |
+| `calibration.ensemble` | `calibration._base` | no |
+| `calibration.ensemble` | `calibration.isotonic` | no |
+| `calibration.ensemble` | `calibration.platt` | no |
+| `calibration.ensemble` | `calibration.temperature` | no |
+| `calibration.ensemble` | `errors` | no |
+| `calibration.epistemic` | `abstain` | no |
+| `calibration.epistemic` | `calibration.decomposition` | no |
+| `calibration.epistemic` | `errors` | no |
+| `calibration.epistemic` | `result` | no |
+| `calibration.group` | `calibration._base` | no |
+| `calibration.group` | `calibration.metrics` | no |
+| `calibration.group` | `calibration.pipeline` | no |
+| `calibration.group` | `errors` | no |
+| `calibration.imbalance` | `calibration._base` | no |
+| `calibration.imbalance` | `calibration.metrics` | no |
+| `calibration.imbalance` | `errors` | no |
 | `calibration.isotonic` | `calibration._base` | no |
 | `calibration.isotonic` | `errors` | no |
 | `calibration.metrics` | `errors` | no |
+| `calibration.online` | `calibration._base` | no |
+| `calibration.online` | `errors` | no |
+| `calibration.perclass` | `calibration._base` | no |
+| `calibration.perclass` | `calibration.metrics` | no |
+| `calibration.perclass` | `calibration.pipeline` | no |
+| `calibration.perclass` | `calibration.profiles` | no |
+| `calibration.perclass` | `errors` | no |
+| `calibration.pipeline` | `calibration._base` | no |
+| `calibration.pipeline` | `calibration.metrics` | no |
+| `calibration.pipeline` | `calibration.profiles` | no |
+| `calibration.pipeline` | `errors` | no |
 | `calibration.platt` | `calibration._base` | no |
 | `calibration.platt` | `errors` | no |
 | `calibration.profiles` | `backend` | no |
@@ -592,8 +733,21 @@ flowchart TD
 | `calibration.profiles` | `errors` | no |
 | `calibration.profiles` | `result` | no |
 | `calibration.profiles` | `spec` | no |
+| `calibration.registry` | `calibration._base` | no |
+| `calibration.registry` | `errors` | no |
+| `calibration.risk_coverage` | `errors` | no |
+| `calibration.selective` | `errors` | no |
+| `calibration.sets` | `errors` | no |
+| `calibration.shift` | `calibration._base` | no |
+| `calibration.shift` | `calibration.imbalance` | no |
+| `calibration.shift` | `errors` | no |
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
+| `calibration.viz` | `calibration.metrics` | no |
+| `calibration.viz` | `errors` | no |
+| `calibration.window` | `calibration` | yes |
+| `calibration.window` | `calibration._base` | no |
+| `calibration.window` | `errors` | no |
 | `circuit` | `log` | no |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |

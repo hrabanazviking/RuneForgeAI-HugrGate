@@ -1,0 +1,431 @@
+{
+  "calibrators": [
+    "raw",
+    "platt",
+    "isotonic",
+    "temperature",
+    "beta-binomial",
+    "ensemble"
+  ],
+  "datasets": [
+    "overconfident",
+    "underconfident",
+    "label-noise",
+    "well-calibrated"
+  ],
+  "metric_note": "before/after are in-sample on the benchmark fit set; delta_* = before \u2212 after (positive is good)",
+  "n_per_dataset": 2000,
+  "name": "calibration_500",
+  "results": [
+    {
+      "after": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "raw",
+      "dataset": "overconfident",
+      "delta_brier": 0.0,
+      "delta_ece": 0.0,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2106131255333554,
+        "ece": 0.04285486208021749,
+        "log_loss": 0.6094584783778763
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "platt",
+      "dataset": "overconfident",
+      "delta_brier": 0.01271631025740777,
+      "delta_ece": 0.07239894930039521,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20490942962306588,
+        "ece": 3.377853552422039e-17,
+        "log_loss": 0.5911800290275545
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "isotonic",
+      "dataset": "overconfident",
+      "delta_brier": 0.01842000616769729,
+      "delta_ece": 0.11525381138061268,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20869667063908287,
+        "ece": 0.01864749951312182,
+        "log_loss": 0.6027828972582804
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "temperature",
+      "dataset": "overconfident",
+      "delta_brier": 0.0146327651516803,
+      "delta_ece": 0.09660631186749088,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20973595437411485,
+        "ece": 0.0015573311298626893,
+        "log_loss": 0.607754845353089
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "beta-binomial",
+      "dataset": "overconfident",
+      "delta_brier": 0.013593481416648318,
+      "delta_ece": 0.11369648025075002,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20731188198001005,
+        "ece": 0.024560878353141576,
+        "log_loss": 0.5995953127735602
+      },
+      "before": {
+        "brier": 0.22332943579076317,
+        "ece": 0.1152538113806127,
+        "log_loss": 0.6616539826851552
+      },
+      "calibrator": "ensemble",
+      "dataset": "overconfident",
+      "delta_brier": 0.01601755381075312,
+      "delta_ece": 0.09069293302747113,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "raw",
+      "dataset": "underconfident",
+      "delta_brier": 0.0,
+      "delta_ece": 0.0,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20456694494538605,
+        "ece": 0.015873498121387292,
+        "log_loss": 0.5954942916793932
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "platt",
+      "dataset": "underconfident",
+      "delta_brier": 0.009421940779725524,
+      "delta_ece": 0.07277964464097514,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20140483971154707,
+        "ece": 9.400466516318318e-18,
+        "log_loss": 0.5862745328833694
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "isotonic",
+      "dataset": "underconfident",
+      "delta_brier": 0.012584046013564498,
+      "delta_ece": 0.08865314276236241,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2046056646636436,
+        "ece": 0.015774731093493713,
+        "log_loss": 0.5955871803523471
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "temperature",
+      "dataset": "underconfident",
+      "delta_brier": 0.009383221061467967,
+      "delta_ece": 0.07287841166886871,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.20604638309071147,
+        "ece": 0.0021316376851238847,
+        "log_loss": 0.5991932431026483
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "beta-binomial",
+      "dataset": "underconfident",
+      "delta_brier": 0.007942502634400106,
+      "delta_ece": 0.08652150507723855,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2033454290785545,
+        "ece": 0.013104329161174823,
+        "log_loss": 0.5919482641823247
+      },
+      "before": {
+        "brier": 0.21398888572511157,
+        "ece": 0.08865314276236243,
+        "log_loss": 0.6184353172285356
+      },
+      "calibrator": "ensemble",
+      "dataset": "underconfident",
+      "delta_brier": 0.010643456646557081,
+      "delta_ece": 0.0755488136011876,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "raw",
+      "dataset": "label-noise",
+      "delta_brier": 0.0,
+      "delta_ece": 0.0,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.22728259693781963,
+        "ece": 0.015924307390443905,
+        "log_loss": 0.6462279131634537
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "platt",
+      "dataset": "label-noise",
+      "delta_brier": 0.0034742414766134877,
+      "delta_ece": 0.030290432651516715,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.22428562552400114,
+        "ece": 3.236300116782331e-17,
+        "log_loss": 0.6382733598148852
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "isotonic",
+      "dataset": "label-noise",
+      "delta_brier": 0.006471212890431982,
+      "delta_ece": 0.046214740041960585,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2275035182179181,
+        "ece": 0.019262306276581886,
+        "log_loss": 0.646789379722042
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "temperature",
+      "dataset": "label-noise",
+      "delta_brier": 0.0032533201965150305,
+      "delta_ece": 0.026952433765378734,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.22636580738284245,
+        "ece": 0.0017515016393505134,
+        "log_loss": 0.6439179537831676
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "beta-binomial",
+      "dataset": "label-noise",
+      "delta_brier": 0.004391031031590664,
+      "delta_ece": 0.04446323840261011,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.22609174072598928,
+        "ece": 0.01813481528166461,
+        "log_loss": 0.6432298638046913
+      },
+      "before": {
+        "brier": 0.23075683841443312,
+        "ece": 0.04621474004196062,
+        "log_loss": 0.6575798258183035
+      },
+      "calibrator": "ensemble",
+      "dataset": "label-noise",
+      "delta_brier": 0.004665097688443837,
+      "delta_ece": 0.02807992476029601,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "raw",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.0,
+      "delta_ece": 0.0,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.21481903008276856,
+        "ece": 0.018841268156554614,
+        "log_loss": 0.6182698948069524
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "platt",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.00039831989888028385,
+      "delta_ece": 0.009800521253065225,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.21135973583085876,
+        "ece": 7.088774012231624e-17,
+        "log_loss": 0.6086148277906616
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "isotonic",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.003857614150790084,
+      "delta_ece": 0.02864178940961977,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2146051870951484,
+        "ece": 0.025451024191100468,
+        "log_loss": 0.6178068787447175
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "temperature",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.0006121628865004558,
+      "delta_ece": 0.003190765218519371,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.2146650329433092,
+        "ece": 0.002095987239248524,
+        "log_loss": 0.6175203565523136
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "beta-binomial",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.0005523170383396614,
+      "delta_ece": 0.026545802170371315,
+      "n": 2000
+    },
+    {
+      "after": {
+        "brier": 0.21329766165745795,
+        "ece": 0.015345407827482727,
+        "log_loss": 0.6141148127483491
+      },
+      "before": {
+        "brier": 0.21521734998164885,
+        "ece": 0.02864178940961984,
+        "log_loss": 0.6196355303841091
+      },
+      "calibrator": "ensemble",
+      "dataset": "well-calibrated",
+      "delta_brier": 0.001919688324190899,
+      "delta_ece": 0.013296381582137112,
+      "n": 2000
+    }
+  ],
+  "seed": 20261009,
+  "version": "1.0.0"
+}

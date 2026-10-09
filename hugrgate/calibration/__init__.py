@@ -29,12 +29,31 @@ from hugrgate.calibration.platt import PlattCalibrator
 from hugrgate.calibration.temperature import (
     TemperatureCalibrator,
 )
+from hugrgate.calibration.online import OnlineCalibrator
+from hugrgate.calibration.window import SlidingWindowCalibrator
+from hugrgate.calibration.bayes import BetaBinomialCalibrator
+from hugrgate.calibration.perclass import _ConstantCalibrator
+from hugrgate.calibration.ensemble import CalibratorEnsemble
 
 from . import metrics, profiles
 
+# Registrations run BEFORE the submodule imports below: several submodules
+# (autoselect, registry) read the registry at import time (slice 092).
 CalibratorRegistry.register("platt", PlattCalibrator)
 CalibratorRegistry.register("isotonic", IsotonicCalibrator)
 CalibratorRegistry.register("temperature", TemperatureCalibrator)
+CalibratorRegistry.register("online", OnlineCalibrator)
+CalibratorRegistry.register("sliding-window", SlidingWindowCalibrator)
+CalibratorRegistry.register("beta-binomial", BetaBinomialCalibrator)
+CalibratorRegistry.register("constant-prior", _ConstantCalibrator)
+CalibratorRegistry.register("ensemble", CalibratorEnsemble)
+
+from . import (  # noqa: E402
+    adversarial, aleatoric, autoselect, bench, conformal,
+    conformal_regression, coverage, decomposition, drift, epistemic, group,
+    imbalance, metrics, perclass, pipeline, profiles, registry,
+    risk_coverage, selective, sets, shift, viz,
+)
 
 __all__ = [
     "Calibrator",
@@ -42,6 +61,30 @@ __all__ = [
     "IsotonicCalibrator",
     "PlattCalibrator",
     "TemperatureCalibrator",
+    "OnlineCalibrator",
+    "SlidingWindowCalibrator",
+    "BetaBinomialCalibrator",
+    "CalibratorEnsemble",
+    "adversarial",
+    "aleatoric",
+    "autoselect",
+    "bench",
+    "conformal",
+    "conformal_regression",
+    "coverage",
+    "decomposition",
+    "drift",
+    "epistemic",
+    "group",
+    "imbalance",
+    "registry",
+    "risk_coverage",
+    "selective",
+    "sets",
+    "shift",
+    "viz",
     "metrics",
+    "perclass",
+    "pipeline",
     "profiles",
 ]
