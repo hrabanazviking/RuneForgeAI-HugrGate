@@ -266,7 +266,7 @@ class HugrGate:
         :func:`asyncio.to_thread` so the loop stays responsive.  Same
         contract, same errors, same provenance as ``decide``.
         """
-        from hugrgate.asyncx import evaluate_async, is_async_backend
+        from hugrgate.asyncx import evaluate_async
         # retry/bulkhead are sync-path features: delegate to decide()
         # in a worker thread so they keep working from async callers.
         if retry_budget is not None or bulkhead is not None:
