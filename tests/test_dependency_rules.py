@@ -175,6 +175,8 @@ _STDLIB = {
     "resource", "types", "builtins",
     "glob", "zlib",
     "hmac", "secrets", "ssl", "stat",
+    # Campaign XII (slices 276-281): profiling/allocation/benchmark stdlib.
+    "cProfile", "pstats", "tracemalloc", "timeit",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes"}

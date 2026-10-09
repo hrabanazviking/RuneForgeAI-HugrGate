@@ -112,25 +112,10 @@ class HugrGate:
                 return preferred[0]
         return candidates[0]
 
-    def decide(self, state: Mapping[str, Any], spec: SpecLike,
-               policy: DecisionPolicy | None = None,
-               context: Mapping[str, Any] | None = None,
-               backend_name: str | None = None) -> DecisionResult:
-        """Make a bounded machine judgment.
-
-        Never returns a value outside the spec's decision space.
-
-        ``spec`` may be a v1 :class:`DecisionSpec` or a v2
-        :class:`~hugrgate.contracts.schema.DecisionContract`; v2
-        contracts with a v1 equivalent are migrated at the boundary
-        (their ``contract_id`` rides in ``result.metadata``).
-        """
-        policy = policy or DecisionPolicy()
-        validate_state(state)
-        start = time.perf_counter()
-
-        spec, contract_id = _ensure_spec(spec)
-
+    def _resolve_backend(self, spec: DecisionSpec,
+                         policy: DecisionPolicy,
+                         backend_name: str | None) -> Backend:
+        """Select the backend for a decision (shared sync/async)."""
         if backend_name:
             backend = self.registry.get(backend_name)
             if backend is None:
@@ -138,11 +123,20 @@ class HugrGate:
             if not policy.backend_allowed(backend.name, backend.is_remote):
                 raise BackendUnavailable(
                     f"backend {backend_name} blocked by policy")
-        else:
-            backend = self._select_backend(spec, policy)
+            return backend
+        return self._select_backend(spec, policy)
 
+    @staticmethod
+    def _translate_backend_error(backend: Backend, spec: DecisionSpec,
+                                 evaluate) -> DecisionResult:
+        """Run the backend's evaluate callable with core error semantics.
+
+        Shared by :meth:`decide` (sync) and :meth:`adecide` (async):
+        Abstention propagates, BackendError propagates, anything else
+        becomes BackendError.
+        """
         try:
-            result = backend.evaluate(state, spec, context)
+            return evaluate()
         except Abstention:
             logger.debug("backend %r abstained (spec=%s)", backend.name,
                          spec.type)
@@ -156,6 +150,16 @@ class HugrGate:
                            backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}") from e
 
+    def _finalize_result(self, result: DecisionResult, backend: Backend,
+                         state: Mapping[str, Any], spec: DecisionSpec,
+                         policy: DecisionPolicy, contract_id: str | None,
+                         start: float) -> DecisionResult:
+        """Post-evaluation pipeline (shared sync/async).
+
+        Stamps latency/backend, validates the result, applies the policy
+        gate, and records provenance.  Identical semantics whichever
+        path evaluated the backend.
+        """
         result.latency_ms = (time.perf_counter() - start) * 1000
         result.backend = backend.name
 
@@ -182,20 +186,94 @@ class HugrGate:
 
         return result
 
+    def decide(self, state: Mapping[str, Any], spec: SpecLike,
+               policy: DecisionPolicy | None = None,
+               context: Mapping[str, Any] | None = None,
+               backend_name: str | None = None) -> DecisionResult:
+        """Make a bounded machine judgment.
+
+        Never returns a value outside the spec's decision space.
+
+        ``spec`` may be a v1 :class:`DecisionSpec` or a v2
+        :class:`~hugrgate.contracts.schema.DecisionContract`; v2
+        contracts with a v1 equivalent are migrated at the boundary
+        (their ``contract_id`` rides in ``result.metadata``).
+        """
+        policy = policy or DecisionPolicy()
+        validate_state(state)
+        start = time.perf_counter()
+
+        spec, contract_id = _ensure_spec(spec)
+        backend = self._resolve_backend(spec, policy, backend_name)
+
+        result = self._translate_backend_error(
+            backend, spec, lambda: backend.evaluate(state, spec, context))
+        return self._finalize_result(result, backend, state, spec, policy,
+                                     contract_id, start)
+
     def decide_batch(self, states: list, spec: SpecLike,
                      policy: DecisionPolicy | None = None) -> list:
         return [self.decide(s, spec, policy) for s in states]
 
     async def adecide(self, state: Mapping[str, Any],
-                      spec: DecisionSpec,
+                      spec: SpecLike,
                       policy: DecisionPolicy | None = None,
                       context: Mapping[str, Any] | None = None,
                       backend_name: str | None = None) -> DecisionResult:
-        """Async variant of :meth:`decide` (slice 018).
+        """Async variant of :meth:`decide` (slices 018, 282).
 
-        Backend inference is synchronous and may block; this runs it in
-        a worker thread via :func:`asyncio.to_thread` so the event loop
-        stays responsive. Same contract, same errors as ``decide``.
+        Natively async backends (see :mod:`hugrgate.asyncx`) are awaited
+        on the event loop; sync backends run in a worker thread via
+        :func:`asyncio.to_thread` so the loop stays responsive.  Same
+        contract, same errors, same provenance as ``decide``.
         """
-        return await asyncio.to_thread(
-            self.decide, state, spec, policy, context, backend_name)
+        from hugrgate.asyncx import evaluate_async
+        policy = policy or DecisionPolicy()
+        validate_state(state)
+        start = time.perf_counter()
+
+        spec, contract_id = _ensure_spec(spec)
+        backend = self._resolve_backend(spec, policy, backend_name)
+
+        async def _evaluate():
+            return await evaluate_async(backend, state, spec, context)
+
+        try:
+            result = await _evaluate()
+        except Abstention:
+            logger.debug("backend %r abstained (spec=%s)", backend.name,
+                         spec.type)
+            raise
+        except BackendError:
+            logger.warning("backend %r failed; no failover in core path",
+                           backend.name)
+            raise
+        except Exception as e:
+            logger.warning("backend %r raised unexpected %s",
+                           backend.name, type(e).__name__)
+            raise BackendError(f"backend {backend.name} failed: {e}") from e
+
+        return self._finalize_result(result, backend, state, spec, policy,
+                                     contract_id, start)
+
+    async def adecide_batch(self, states: list, spec: SpecLike,
+                            policy: DecisionPolicy | None = None,
+                            max_concurrency: int = 8) -> list:
+        """Decide many states concurrently (slice 282).
+
+        Runs :meth:`adecide` for each state under a semaphore so at most
+        ``max_concurrency`` backend evaluations are in flight.  Results
+        keep input order; the first exception raised propagates (other
+        tasks are cancelled).
+        """
+        if not isinstance(max_concurrency, int) or max_concurrency < 1:
+            raise SpecError(
+                f"max_concurrency must be a positive int, got "
+                f"{max_concurrency!r}")
+        semaphore = asyncio.Semaphore(max_concurrency)
+
+        async def _one(state):
+            async with semaphore:
+                return await self.adecide(state, spec, policy)
+
+        return await asyncio.gather(*(_one(s) for s in states))
