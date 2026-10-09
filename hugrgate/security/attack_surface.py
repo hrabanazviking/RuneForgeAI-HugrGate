@@ -232,6 +232,9 @@ def curated_surface() -> AttackSurface:
     add(SurfaceEntry("POST /decide", "api_endpoint",
                      "runs a full decision pipeline on caller JSON",
                      False, "high"))
+    add(SurfaceEntry("GET /protocol", "api_endpoint",
+                     "returns the wire-protocol version and capabilities",
+                     False, "low"))
     # CLI (hugrgate/cli.py)
     for cmd, desc, risk in [
         ("decide", "make one decision from argv/JSON", "medium"),
@@ -241,6 +244,16 @@ def curated_surface() -> AttackSurface:
         ("serve", "run the service daemon", "medium"),
         ("bench", "run a benchmark", "low"),
         ("report", "render a benchmark report as markdown", "low"),
+        ("check-backend", "run backend conformance battery", "low"),
+        ("check-contract", "run contract conformance battery", "low"),
+        ("completion", "emit shell completion script", "low"),
+        ("doctor", "diagnose environment and configuration", "low"),
+        ("gen", "generate project scaffolding", "medium"),
+        ("init", "initialize a new project", "medium"),
+        ("inspect", "inspect models/contracts/backends", "low"),
+        ("new", "create a new component from template", "medium"),
+        ("openapi", "emit OpenAPI specification", "low"),
+        ("plugins", "list/manage plugins", "low"),
     ]:
         add(SurfaceEntry(cmd, "cli_command", desc, False, risk))
     # Environment variables actually read by the package

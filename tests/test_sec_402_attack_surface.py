@@ -34,6 +34,8 @@ def test_enumeration_finds_all_cli_commands():
     assert set(derived["cli_command"]) == {
         "decide", "backends", "models", "health",
         "serve", "bench", "report",
+        "check-backend", "check-contract", "completion", "doctor",
+        "gen", "init", "inspect", "new", "openapi", "plugins",
     }
 
 

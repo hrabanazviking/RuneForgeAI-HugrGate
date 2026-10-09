@@ -1,0 +1,37 @@
+{
+  "backend_name": "logreg",
+  "calibrator_name": "platt",
+  "calibrator_params": {
+    "escalate": {
+      "A": 303864981406.50903,
+      "B": -4622370812857.03,
+      "n_samples": 600
+    },
+    "ignore": {
+      "A": 6.531793084029038,
+      "B": -3.3652240308087373,
+      "n_samples": 600
+    },
+    "inspect": {
+      "A": 5.9707685413153015,
+      "B": -3.0490031622593663,
+      "n_samples": 600
+    },
+    "log": {
+      "A": 5.127978802889242,
+      "B": -2.6790982440939386,
+      "n_samples": 600
+    }
+  },
+  "created_at": "2026-10-09T19:16:09.512345+00:00",
+  "dataset_hash": "696533e3bdb93916134427b61e798cc80e39a56cd574d238f1060bffd8cfe44c",
+  "metrics": {
+    "ece_val_raw": 0.02027283513744111
+  },
+  "model_name": "triage-logreg",
+  "model_version": "1.0.0",
+  "n_samples": 600,
+  "name": "triage-platt",
+  "notes": "one-vs-rest Platt on prior-shifted validation set",
+  "version": "1.0.0"
+}

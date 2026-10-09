@@ -70,12 +70,8 @@ def describe(module, name: str) -> tuple[str, str]:
     else:
         # Determinism: sort set/frozenset constants (iteration order
         # varies with hash seed) and sanitize memory addresses in reprs.
-        if isinstance(obj, (set, frozenset)):
-            shown = "{" + ", ".join(repr(x) for x in sorted(obj, key=repr)) + "}"
-        else:
-            shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
+        shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", _stable_repr(obj))
         return "constant", shown[:60]
-        return "constant", _stable_repr(obj)[:60]
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):
