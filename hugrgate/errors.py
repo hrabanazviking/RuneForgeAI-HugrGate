@@ -17,6 +17,13 @@ from typing import Any, ClassVar
 
 __all__ = [
     "Abstention",
+    "AgentBudgetExhausted",
+    "AgentContractViolation",
+    "AgentError",
+    "AgentEscalationFailed",
+    "AgentLoopDetected",
+    "AgentNotFound",
+    "AgentRunaway",
     "BackendError",
     "BackendUnavailable",
     "BackpressureError",
@@ -37,6 +44,7 @@ __all__ = [
     "GateError",
     "GpuschedError",
     "HugrGateError",
+    "HumanReviewTimeout",
     "JurisdictionViolation",
     "KeyProviderError",
     "LocalOnlyViolation",
@@ -608,3 +616,80 @@ class EvalGateError(HugrGateError):
     """
     code = "eval_gate_error"
     recoverable = False
+
+
+# --- Campaign XVI: agent nervous system -------------------------------------
+
+
+class AgentError(HugrGateError):
+    """Base for all agent-nervous-system errors. Slice 376.
+
+    Recoverable by default: most nervous-system faults (a dropped
+    signal, a saturated bus, a timed-out review) are transient and
+    the loop can continue or retry once the condition clears.
+    """
+    code = "agent_error"
+    recoverable = True
+
+
+class AgentContractViolation(AgentError):
+    """An agent's integration contract is invalid or was breached.
+    Slice 376.  Not recoverable: a bad contract is a configuration
+    bug — fix the declaration, do not retry the same contract.
+    """
+    code = "agent_contract_violation"
+    recoverable = False
+
+
+class AgentNotFound(AgentError):
+    """No registered agent matches the requested id/capability/intent.
+    Slice 376.  Not recoverable: the registry is authoritative —
+    register the agent first.
+    """
+    code = "agent_not_found"
+    recoverable = False
+
+
+class AgentLoopDetected(AgentError):
+    """An agent call chain cycled back on itself. Slice 393.
+    Recoverable: the loop-breaker severs the cycle and the ticket
+    can be rerouted or escalated.
+    """
+    code = "agent_loop_detected"
+    recoverable = True
+
+
+class AgentRunaway(AgentError):
+    """A ticket breached runaway limits (escalations/steps/tokens) or
+    the kill switch tripped. Slice 394.  Not recoverable: a runaway
+    ticket is terminated, never resumed — start a new ticket.
+    """
+    code = "agent_runaway"
+    recoverable = False
+
+
+class AgentBudgetExhausted(AgentError):
+    """An agent exhausted its decision/token/latency budget.
+    Slice 395.  Recoverable: budgets reset on a new window or a
+    supervisor can top them up.
+    """
+    code = "agent_budget_exhausted"
+    recoverable = True
+
+
+class AgentEscalationFailed(AgentError):
+    """An escalation could not be delivered (no higher level, depth
+    cap reached, cooldown storm). Slice 384.  Recoverable: the ticket
+    stays with its current owner and can retry after cooldown.
+    """
+    code = "agent_escalation_failed"
+    recoverable = True
+
+
+class HumanReviewTimeout(AgentError):
+    """A human-review item breached its SLA without a decision.
+    Slice 385.  Recoverable: the item stays queued and the timeout
+    policy (escalate / auto-deny / auto-approve) decides.
+    """
+    code = "human_review_timeout"
+    recoverable = True

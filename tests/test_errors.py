@@ -14,6 +14,13 @@ from pathlib import Path
 import hugrgate
 from hugrgate.errors import (
     Abstention,
+    AgentBudgetExhausted,
+    AgentContractViolation,
+    AgentError,
+    AgentEscalationFailed,
+    AgentLoopDetected,
+    AgentNotFound,
+    AgentRunaway,
     AlertError,
     BackendError,
     BackendUnavailable,
@@ -35,6 +42,7 @@ from hugrgate.errors import (
     GGUFError,
     GpuschedError,
     HugrGateError,
+    HumanReviewTimeout,
     JurisdictionViolation,
     KeyProviderError,
     LocalOnlyViolation,
@@ -107,6 +115,10 @@ ALL_ERRORS = [
     MemoryQuotaExceeded,
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
+    # Campaign XVI agent-nervous-system errors (slice 376 taxonomy promotion).
+    AgentError, AgentContractViolation, AgentNotFound, AgentLoopDetected,
+    AgentRunaway, AgentBudgetExhausted, AgentEscalationFailed,
+    HumanReviewTimeout,
 ]
 
 EXPECTED_CODES = {
@@ -167,6 +179,15 @@ EXPECTED_CODES = {
     SLOError: "slo_error",
     AlertError: "alert_error",
     DatasetError: "dataset_error",
+    # Campaign XVI agent-nervous-system errors (slice 376).
+    AgentError: "agent_error",
+    AgentContractViolation: "agent_contract_violation",
+    AgentNotFound: "agent_not_found",
+    AgentLoopDetected: "agent_loop_detected",
+    AgentRunaway: "agent_runaway",
+    AgentBudgetExhausted: "agent_budget_exhausted",
+    AgentEscalationFailed: "agent_escalation_failed",
+    HumanReviewTimeout: "human_review_timeout",
     EvalError: "eval_error",
     EvalGateError: "eval_gate_error",
 }
