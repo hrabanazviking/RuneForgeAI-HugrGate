@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T17:28:48.675125+00:00",
-  "module_count": 363,
+  "generated_utc": "2026-10-09T18:32:56.553576+00:00",
+  "module_count": 373,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -2159,18 +2159,18 @@
         "__future__",
         "argparse",
         "dataclasses",
+        "difflib",
         "hugrgate",
         "json",
+        "pathlib",
+        "re",
         "sys",
         "typing",
         "yaml"
       ],
-      "loc": 280,
+      "loc": 783,
       "path": "hugrgate/cli.py",
       "public_defs": [
-        "load_spec",
-        "load_state",
-        "load_policy",
         "cmd_decide",
         "cmd_backends",
         "cmd_models",
@@ -2178,8 +2178,20 @@
         "cmd_serve",
         "cmd_bench",
         "cmd_report",
+        "cmd_openapi",
+        "cmd_doctor",
+        "cmd_completion",
+        "cmd_new",
+        "cmd_plugins",
+        "cmd_check_backend",
+        "cmd_check_contract",
+        "cmd_inspect",
+        "cmd_init",
+        "cmd_gen",
         "build_parser",
-        "main"
+        "main",
+        "check",
+        "error"
       ]
     },
     "hugrgate.client": {
@@ -2191,11 +2203,12 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 220,
+      "loc": 245,
       "path": "hugrgate/client.py",
       "public_defs": [
         "HugrGateClient",
         "decide",
+        "protocol",
         "health",
         "backends",
         "close"
@@ -2917,6 +2930,61 @@
         "drain"
       ]
     },
+    "hugrgate.compat": {
+      "docstring": "Developer-facing compatibility helpers. Gjallarbr\u00fa slice 444.\n\nThree migrations developers actually face, each with a function and\na prose guide in ``docs/migration.md``:\n\n1. **v1 client \u2192 SDK v2** (:func:`upgrade_client`): rebuilds a\n   :class:`~hugrgate.client.HugrGateClient` as a\n   :class:`~hugrgate.sdk.HugrGateSDK` with identical transport\n   settings. v1 is untouched and keeps working; v2 is a strict\n   superset (context manager, retries, batch, versioned\n   User-Agent).\n2. **contract schema v1 \u2192 v2** (:func:`migrate_contract`): upgrades\n   a v1 contract/spec dict through\n   :func:`hugrgate.contracts.migration.migrate` and returns the\n   v2 contract plus its :class:`MigrationReport`.\n3. **pre-protocol clients** (slice 426): no code needed \u2014 the\n   server negotiates. Documented in ``docs/migration.md`` only.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 94,
+      "path": "hugrgate/compat.py",
+      "public_defs": [
+        "upgrade_client",
+        "migrate_contract"
+      ]
+    },
+    "hugrgate.configgen": {
+      "docstring": "Configuration generator. Slice 437.\n\nGenerates annotated, *valid* configuration files:\n\n- ``hugrgate init`` \u2014 a starter working directory: ``hugrgate.yaml``\n  (daemon config), ``spec.yaml``, ``policy.yaml``,\n  ``state.example.yaml``.\n- ``hugrgate gen daemon|spec|policy`` \u2014 one file at a time, with\n  flag-driven customization.\n\nEvery generated file round-trips through the real validators\n(:class:`DaemonConfig`, :class:`DecisionSpec`,\n:func:`policy_from_dict`), so the generator can never emit a file\nHugrGate itself rejects. :func:`load_daemon_config` closes the\nloop for hand-edited files, and ``hugrgate serve --config`` applies\na config file to the daemon.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "pathlib",
+        "typing",
+        "yaml"
+      ],
+      "loc": 229,
+      "path": "hugrgate/configgen.py",
+      "public_defs": [
+        "generate_daemon_config",
+        "load_daemon_config",
+        "generate_spec",
+        "generate_policy",
+        "write_new",
+        "init_project"
+      ]
+    },
+    "hugrgate.conformance": {
+      "docstring": "Backend conformance kit. Slice 440.\n\nA backend is not conformant because it *imports* \u2014 it is\nconformant because it honors the :class:`Backend` contract under\nexercise. :func:`run_backend_conformance` drives a backend through\na battery of checks and returns a :class:`ConformanceReport`:\n\n- interface shape (via :func:`hugrgate.plugins.validate_plugin`),\n- ``supports()`` returns booleans and never raises on well-formed\n  specs of every spec type,\n- ``evaluate()`` returns well-formed results (distribution sums to\n  1, probabilities in [0, 1], decided value inside the spec's\n  value space, probability consistent with the distribution),\n- ``evaluate()`` failures raise taxonomy errors or stdlib\n  validation errors \u2014 never raw ``Exception``\\ s (slice 007 law),\n- ``health()`` / ``privacy_properties()`` /\n  ``calibration_info()`` return dicts,\n- latency/cost estimates are sane non-negative numbers.\n\n:func:`assert_conformance` raises\n:class:`~hugrgate.errors.ConformanceError` listing every failure.\n``hugrgate check-backend NAME`` runs the kit from the CLI.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 227,
+      "path": "hugrgate/conformance.py",
+      "public_defs": [
+        "ConformanceCheck",
+        "ConformanceReport",
+        "run_backend_conformance",
+        "assert_conformance",
+        "passed",
+        "failures",
+        "to_dict"
+      ]
+    },
     "hugrgate.contracts.__init__": {
       "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.\n\nAll contract submodules are imported eagerly (``import`` form, so the\nimport graph stays acyclic) so every contract ``kind`` is registered the\nmoment this package is imported \u2014 ``contract_from_dict`` never fails on\nan unimported kind.",
       "imports": [
@@ -2983,6 +3051,28 @@
         "validate_value",
         "describe",
         "visit"
+      ]
+    },
+    "hugrgate.contracts.conformance": {
+      "docstring": "Contract conformance kit \u2014 behavioral checks for templates.\n\nGjallarbr\u00fa slice 441.\n\n:func:`lint_template` judges whether a template is *well-built*;\nthis kit proves a template *behaves*: it instantiates across its\nparameter space, rejects what it must reject, and every instance\nit produces is a valid, round-trippable, lint-clean contract.\n\n- :func:`run_template_conformance` \u2014 the battery.\n- :func:`run_contract_conformance` \u2014 the instance-level battery\n  (round-trip, lint-clean, value validation sane).\n- :func:`assert_conformance` \u2014 raise\n  :class:`~hugrgate.errors.ConformanceError` on any failure.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "typing"
+      ],
+      "loc": 333,
+      "path": "hugrgate/contracts/conformance.py",
+      "public_defs": [
+        "TemplateConformanceCheck",
+        "TemplateConformanceReport",
+        "run_template_conformance",
+        "run_contract_conformance",
+        "assert_conformance",
+        "passed",
+        "failures",
+        "to_dict"
       ]
     },
     "hugrgate.contracts.context": {
@@ -4691,7 +4781,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 610,
+      "loc": 676,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4752,6 +4842,12 @@
         "DatasetError",
         "EvalError",
         "EvalGateError",
+        "ProtocolError",
+        "SDKError",
+        "PluginError",
+        "ConformanceError",
+        "ConfigError",
+        "ScaffoldError",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -5568,6 +5664,37 @@
         "collect"
       ]
     },
+    "hugrgate.inspect": {
+      "docstring": "Interactive inspector REPL. Slice 436.\n``hugrgate inspect`` drops the operator into a small read-eval loop\nagainst a live service (or the in-process gate):\n\n    hugrgate> backends\n    hugrgate> decide spec.yaml state.json --backend keyword\n    hugrgate> last\n    hugrgate> quit\n\nEvery command prints human-readable output; errors are reported\ninline and never kill the loop. ``Ctrl-D`` / ``quit`` exits cleanly.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "json",
+        "readline",
+        "shlex",
+        "typing"
+      ],
+      "loc": 237,
+      "path": "hugrgate/inspect.py",
+      "public_defs": [
+        "InspectSession",
+        "run_inspect",
+        "out",
+        "close",
+        "do_help",
+        "do_url",
+        "do_health",
+        "do_protocol",
+        "do_backends",
+        "do_models",
+        "do_decide",
+        "do_last",
+        "do_quit",
+        "handle_line",
+        "run"
+      ]
+    },
     "hugrgate.ladder": {
       "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nSlice 284 adds :meth:`LadderRouter.decide_concurrent`: the same ordered\nsemantics, but rungs evaluate in parallel and the lowest-index rung that\nclears its gate wins the race.  Pre-run pruning stays sequential (cheap\nand deterministic); evaluation overlaps.  Backends used concurrently\nmust be thread-safe.\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
       "imports": [
@@ -5592,6 +5719,22 @@
         "skip_reason",
         "decide",
         "decide_concurrent"
+      ]
+    },
+    "hugrgate.loaders": {
+      "docstring": "Shared file loaders for the CLI and the inspector.\n\nGjallarbr\u00fa slice 444 (extracted from ``hugrgate.cli``).\n\n``load_spec`` / ``load_state`` / ``load_policy`` used to live in\n:mod:`hugrgate.cli`, but the inspector (:mod:`hugrgate.inspect`)\nneeds them too \u2014 and the CLI needs the inspector for\n``hugrgate inspect``. Keeping them here breaks that import cycle.\n:mod:`hugrgate.cli` re-exports them, so ``hugrgate.cli.load_spec``\nkeeps working.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing",
+        "yaml"
+      ],
+      "loc": 53,
+      "path": "hugrgate/loaders.py",
+      "public_defs": [
+        "load_spec",
+        "load_state",
+        "load_policy"
       ]
     },
     "hugrgate.lockaudit": {
@@ -6881,6 +7024,27 @@
         "check"
       ]
     },
+    "hugrgate.plugins": {
+      "docstring": "Backend plugin SDK. Slice 439.\n\nThird-party backends plug into HugrGate through the\n``hugrgate.backends`` entry-point group::\n\n    # third-party pyproject.toml\n    [project.entry-points.\"hugrgate.backends\"]\n    mybackend = \"mypackage.module:MyBackend\"\n\n    # mypackage/module.py\n    from hugrgate.backend import Backend\n    class MyBackend(Backend):\n        name = \"mybackend\"\n        ...\n\nThis module is the *loading* side:\n\n- :func:`discover_plugins` \u2014 find installed entry points without\n  importing them (cheap, never raises on a broken plugin when\n  ``on_error=\"collect\"``).\n- :func:`load_plugin` \u2014 import one entry point, instantiate it,\n  and validate it against the :class:`Backend` contract.\n- :func:`validate_plugin` \u2014 interface + smoke validation.\n- :func:`register_discovered_plugins` \u2014 load everything and\n  register it on a :class:`BackendRegistry`, isolating failures:\n  one broken plugin can never take down the others (or the gate).\n\nFailures raise :class:`~hugrgate.errors.PluginError` with the\nplugin name attached.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "typing"
+      ],
+      "loc": 221,
+      "path": "hugrgate/plugins.py",
+      "public_defs": [
+        "PluginInfo",
+        "discover_plugins",
+        "load_plugin",
+        "validate_plugin",
+        "PluginReport",
+        "register_discovered_plugins",
+        "loaded"
+      ]
+    },
     "hugrgate.policy": {
       "docstring": "DecisionPolicy \u2014 application-controlled thresholds. Slice 5.",
       "imports": [
@@ -7505,6 +7669,25 @@
         "profile_raw",
         "profile",
         "profile_decision"
+      ]
+    },
+    "hugrgate.protocol": {
+      "docstring": "HugrGate stable wire protocol v1. Slice 426.\n\nThis module is the single source of truth for the versioned HTTP wire\nprotocol between HugrGate clients (Python SDK, TypeScript/Rust/Go/C\nSDKs, the CLI) and the service (:mod:`hugrgate.server`).\n\nProtocol v1 rules:\n\n- Every ``POST /decide`` request may carry ``protocol_version``. When\n  absent the request is treated as v1 (pre-version clients).\n- The service accepts any ``1.x`` version with ``x >= 0`` (minor\n  versions stay wire-compatible) and rejects anything else with\n  :class:`~hugrgate.errors.ProtocolError` (HTTP 422).\n- ``GET /protocol`` advertises the service's protocol versions, so\n  clients can fail fast instead of sending doomed requests.\n- :class:`Envelope` wraps responses where the caller wants explicit\n  version echo; ``/decide`` keeps its legacy bare body for backward\n  compatibility and adds the version inside ``metadata`` instead.\n\nVersion history:\n\n- ``1.0`` \u2014 initial stable protocol: ``/``, ``/health``,\n  ``/backends``, ``/models``, ``/decide``, ``/protocol``.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 120,
+      "path": "hugrgate/protocol.py",
+      "public_defs": [
+        "parse_protocol_version",
+        "negotiate_version",
+        "Envelope",
+        "build_envelope",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.provenance": {
@@ -8731,6 +8914,22 @@
         "warmup_backend"
       ]
     },
+    "hugrgate.scaffold": {
+      "docstring": "Project scaffolder. Slice 438.\n\n``hugrgate new NAME`` creates a complete, working HugrGate project:\n\n    myproj/\n        pyproject.toml        # hugrgate dependency, pytest config\n        README.md             # run instructions\n        .gitignore\n        spec.yaml             # starter DecisionSpec\n        policy.yaml           # starter DecisionPolicy\n        state.example.yaml    # example decision state\n        src/myproj/__init__.py\n        src/myproj/main.py    # decide() via the SDK v2 in-process gate\n        tests/test_smoke.py   # a smoke test that actually passes\n\nThe scaffolded project's own test suite is executed by this\nslice's tests to prove the scaffold works out of the box.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "keyword",
+        "pathlib",
+        "re"
+      ],
+      "loc": 196,
+      "path": "hugrgate/scaffold.py",
+      "public_defs": [
+        "validate_project_name",
+        "scaffold_project"
+      ]
+    },
     "hugrgate.scheduler": {
       "docstring": "Batch scheduler v2 \u2014 general-purpose windowed batch engine. Slice 285.\n\nThe daemon's :class:`BatchingQueue` (slice 018) is asyncio-only and\ncoupled to daemon wire types.  This module is the reusable scheduling\ncore for Campaign XII:\n\n- :class:`BatchScheduler` \u2014 thread-safe, works from any thread, no\n  event loop required.  Submissions are futures; a background worker\n  thread coalesces them into batches (``max_batch_size`` items or\n  ``batch_window_s`` expiry, whichever comes first) and hands each\n  batch to a :class:`BatchExecutor`.\n- :class:`BatchExecutor` \u2014 protocol: ``execute_batch(tasks)`` runs one\n  batch and settles each task's future.  :class:`ThreadPoolBatchExecutor`\n  is the default (each task's callable in a worker thread).\n- :class:`SchedulerConfig` \u2014 validated knobs (bad values raise\n  :class:`SchedulerError`, not ``ValueError``).\n- Backpressure: ``max_queue_depth`` submissions beyond capacity raise\n  :class:`SchedulerError` (recoverable \u2014 shed load, retry later).\n- Observability: :meth:`BatchScheduler.stats` reports batches, tasks,\n  average batch size, queue-wait p50, and batch-execution p50.\n\nSlices 286-288 extend this engine (adaptive sizing, priority lanes,\ndeadline scheduling); the task record already carries ``priority`` and\n``deadline`` fields so those slices slot in without reshaping.",
       "imports": [
@@ -8766,6 +8965,26 @@
         "stats"
       ]
     },
+    "hugrgate.sdk": {
+      "docstring": "HugrGate Python SDK v2. Slice 428.\n\n:class:`HugrGateSDK` builds on the battle-tested\n:class:`~hugrgate.client.HugrGateClient` transport and adds the\nergonomics production integrations actually need:\n\n- context-manager use (``with HugrGateSDK(...) as sdk:``),\n- automatic retry with exponential backoff on *recoverable* failures\n  (transport errors, HTTP 502/503, taxonomy errors flagged\n  recoverable) \u2014 never on caller bugs like ``spec_error``,\n- HTTP error envelopes mapped back onto the HugrGate error taxonomy\n  (``SpecError``, ``BackendUnavailable``, ...) instead of leaking\n  ``httpx.HTTPStatusError``,\n- ``decide_batch`` for one spec over many states,\n- a versioned ``User-Agent`` header so operators can see SDK skew in\n  their access logs.\n\nv1 (:mod:`hugrgate.client`) is untouched and keeps working; v2 is a\nstrict superset.",
+      "imports": [
+        "__future__",
+        "collections",
+        "httpx",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 226,
+      "path": "hugrgate/sdk.py",
+      "public_defs": [
+        "HugrGateSDK",
+        "close",
+        "decide",
+        "decide_batch",
+        "decide_value"
+      ]
+    },
     "hugrgate.serde": {
       "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.\n\nSlice 281 adds a compact positional encoding alongside the canonical\ndict form.  The dict form stays the stable wire contract; the compact\nform is the fast path for high-frequency internal transport (cache\npayloads, batch results, cluster messages): no key hashing on encode,\npositional indexing on decode, and JSON-serializable so it composes\nwith :class:`hugrgate.zerocopy.SharedPayload`.",
       "imports": [
@@ -8795,13 +9014,14 @@
         "fastapi",
         "hugrgate",
         "math",
+        "pydantic",
         "re",
         "time",
         "typing",
         "uvicorn",
         "warnings"
       ],
-      "loc": 386,
+      "loc": 554,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -8810,6 +9030,10 @@
         "register_model",
         "list_models",
         "build_gate",
+        "DecideRequest",
+        "ErrorBody",
+        "ProtocolBody",
+        "dump_openapi_schema",
         "create_app",
         "run",
         "capabilities",
@@ -8822,6 +9046,7 @@
         "health",
         "backends",
         "models",
+        "protocol",
         "decide"
       ]
     },
@@ -9116,6 +9341,31 @@
     "test_dependency_rules.py",
     "test_determinism_contract.py",
     "test_deterministic.py",
+    "test_deveco_426_protocol.py",
+    "test_deveco_427_openapi.py",
+    "test_deveco_428_sdk.py",
+    "test_deveco_429_ts_sdk.py",
+    "test_deveco_430_rust_sdk.py",
+    "test_deveco_431_go_sdk.py",
+    "test_deveco_432_c_abi.py",
+    "test_deveco_433_c_client.py",
+    "test_deveco_434_mojo.py",
+    "test_deveco_435_cli_ux.py",
+    "test_deveco_435_doctor_live.py",
+    "test_deveco_436_inspect.py",
+    "test_deveco_437_configgen.py",
+    "test_deveco_438_scaffold.py",
+    "test_deveco_439_plugins.py",
+    "test_deveco_440_backend_conformance.py",
+    "test_deveco_441_contract_conformance.py",
+    "test_deveco_442_gallery.py",
+    "test_deveco_443_cookbook.py",
+    "test_deveco_444_compat.py",
+    "test_deveco_446_docker.py",
+    "test_deveco_447_systemd.py",
+    "test_deveco_448_windows.py",
+    "test_deveco_449_macos.py",
+    "test_deveco_450_release_gate.py",
     "test_edge_affinity.py",
     "test_edge_bench.py",
     "test_edge_bootstrap.py",
@@ -9337,5 +9587,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 79153
+  "total_loc": 81851
 }

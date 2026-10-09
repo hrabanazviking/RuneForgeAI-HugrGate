@@ -206,6 +206,9 @@ _STDLIB = {
     # Campaign XVIII (slices 435/436/438): CLI did-you-mean, the
     # inspector REPL, and the scaffolder's stdlib.
     "difflib", "shlex", "readline", "keyword", "py_compile",
+    # Campaign XVIII (slices 447/449): packaging tests parse the
+    # systemd unit and the launchd plist with the stdlib.
+    "configparser", "plistlib",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

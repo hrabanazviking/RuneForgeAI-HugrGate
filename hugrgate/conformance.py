@@ -2,8 +2,9 @@
 
 A backend is not conformant because it *imports* — it is
 conformant because it honors the :class:`Backend` contract under
-exercise. :func:`run_backend_conformance` drives a backend through
-a battery of checks and returns a :class:`ConformanceReport`:
+exercise. :func:`run_backend_conformance` drives a backend
+through a battery of checks and returns a
+:class:`ConformanceReport`:
 
 - interface shape (via :func:`hugrgate.plugins.validate_plugin`),
 - ``supports()`` returns booleans and never raises on well-formed
@@ -12,7 +13,7 @@ a battery of checks and returns a :class:`ConformanceReport`:
   1, probabilities in [0, 1], decided value inside the spec's
   value space, probability consistent with the distribution),
 - ``evaluate()`` failures raise taxonomy errors or stdlib
-  validation errors — never raw ``Exception``\ s (slice 007 law),
+  validation errors — never raw ``Exception``s (slice 007 law),
 - ``health()`` / ``privacy_properties()`` /
   ``calibration_info()`` return dicts,
 - latency/cost estimates are sane non-negative numbers.

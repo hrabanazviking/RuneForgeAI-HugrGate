@@ -46,6 +46,7 @@ flowchart TD
         contracts_migration[contracts.migration]
         contracts_lint[contracts.lint]
         contracts_fuzz[contracts.fuzz]
+        contracts_conformance[contracts.conformance]
     end
     subgraph local-runtimes[local-runtimes]
         runtimes[runtimes]
@@ -241,6 +242,15 @@ flowchart TD
         daemon[daemon]
         client[client]
         cli[cli]
+        protocol[protocol]
+        sdk[sdk]
+        inspect[inspect]
+        plugins[plugins]
+        conformance[conformance]
+        compat[compat]
+        configgen[configgen]
+        scaffold[scaffold]
+        loaders[loaders]
     end
     subgraph adaptive[adaptive]
         adaptive[adaptive]
@@ -717,17 +727,26 @@ flowchart TD
     cli -.-> bench
     cli -.-> bench_report
     cli -.-> client
+    cli -.-> configgen
+    cli -.-> conformance
+    cli -.-> contracts_conformance
+    cli -.-> contracts_schema
+    cli -.-> contracts_templates
     cli -.-> daemon
     cli -.-> errors
-    cli --> policy
+    cli -.-> inspect
+    cli --> loaders
+    cli -.-> plugins
     cli -.-> pool
-    cli -.-> serde
+    cli -.-> protocol
+    cli -.-> scaffold
     cli -.-> server
     cli --> spec
     client --> backend
     client --> core
     client --> errors
     client --> policy
+    client --> protocol
     client --> result
     client --> serde
     client -.-> server
@@ -873,6 +892,20 @@ flowchart TD
     cluster_transport --> errors
     cluster_work_stealing --> cluster_privacy_boundary
     cluster_work_stealing --> errors
+    compat --> client
+    compat --> contracts_migration
+    compat --> contracts_schema
+    compat --> errors
+    compat -.-> sdk
+    configgen -.-> daemon
+    configgen --> errors
+    configgen -.-> serde
+    configgen -.-> spec
+    conformance --> backend
+    conformance --> errors
+    conformance -.-> plugins
+    conformance --> result
+    conformance --> spec
     contracts --> contracts_composite
     contracts --> contracts_composition
     contracts --> contracts_conditional
@@ -910,6 +943,10 @@ flowchart TD
     contracts_conditional --> contracts_composite
     contracts_conditional --> contracts_schema
     contracts_conditional --> errors
+    contracts_conformance --> contracts_lint
+    contracts_conformance --> contracts_schema
+    contracts_conformance --> contracts_templates
+    contracts_conformance --> errors
     contracts_context --> contracts_schema
     contracts_context --> errors
     contracts_cost --> contracts_schema
@@ -1359,6 +1396,10 @@ flowchart TD
     hotpaths --> errors
     hotpaths --> log
     hotpaths --> profiling
+    inspect -.-> client
+    inspect -.-> errors
+    inspect -.-> loaders
+    inspect -.-> pool
     ladder --> backend
     ladder --> errors
     ladder --> policy
@@ -1368,6 +1409,9 @@ flowchart TD
     ladder --> result
     ladder --> spec
     ladder --> validation
+    loaders --> policy
+    loaders -.-> serde
+    loaders --> spec
     lockaudit --> log
     memory --> memory_access
     memory --> memory_adversarial
@@ -1545,6 +1589,9 @@ flowchart TD
     perfgate -.-> policy
     perfgate -.-> result
     perfgate -.-> spec
+    plugins --> backend
+    plugins --> errors
+    plugins --> spec
     policy --> errors
     policy --> result
     pool --> errors
@@ -1624,6 +1671,8 @@ flowchart TD
     profiling --> errors
     profiling --> log
     profiling --> policy
+    protocol -.-> hugrgate
+    protocol --> errors
     provenance -.-> errors
     provenance --> result
     provenance --> spec
@@ -1786,9 +1835,19 @@ flowchart TD
     runtimes_warmup --> backend
     runtimes_warmup --> errors
     runtimes_warmup --> runtimes
+    scaffold -.-> configgen
+    scaffold --> errors
     scheduler --> backpressure
     scheduler --> errors
     scheduler --> log
+    sdk --> backend
+    sdk --> client
+    sdk --> core
+    sdk --> errors
+    sdk --> policy
+    sdk --> result
+    sdk -.-> serde
+    sdk --> spec
     serde --> errors
     serde --> policy
     serde --> result
@@ -1798,6 +1857,7 @@ flowchart TD
     server -.-> cluster_routes
     server --> core
     server --> errors
+    server --> protocol
     server --> result
     server --> serde
     server --> spec
@@ -1832,7 +1892,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz`, `contracts.conformance` |
 | local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup`, `runtimes.session_pool` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
@@ -1842,7 +1902,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
-| service | `server`, `daemon`, `client`, `cli` |
+| service | `server`, `daemon`, `client`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
@@ -2158,17 +2218,26 @@ flowchart TD
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
 | `cli` | `client` | yes |
+| `cli` | `configgen` | yes |
+| `cli` | `conformance` | yes |
+| `cli` | `contracts.conformance` | yes |
+| `cli` | `contracts.schema` | yes |
+| `cli` | `contracts.templates` | yes |
 | `cli` | `daemon` | yes |
 | `cli` | `errors` | yes |
-| `cli` | `policy` | no |
+| `cli` | `inspect` | yes |
+| `cli` | `loaders` | no |
+| `cli` | `plugins` | yes |
 | `cli` | `pool` | yes |
-| `cli` | `serde` | yes |
+| `cli` | `protocol` | yes |
+| `cli` | `scaffold` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
 | `client` | `backend` | no |
 | `client` | `core` | no |
 | `client` | `errors` | no |
 | `client` | `policy` | no |
+| `client` | `protocol` | no |
 | `client` | `result` | no |
 | `client` | `serde` | no |
 | `client` | `server` | yes |
@@ -2314,6 +2383,20 @@ flowchart TD
 | `cluster.transport` | `errors` | no |
 | `cluster.work_stealing` | `cluster.privacy_boundary` | no |
 | `cluster.work_stealing` | `errors` | no |
+| `compat` | `client` | no |
+| `compat` | `contracts.migration` | no |
+| `compat` | `contracts.schema` | no |
+| `compat` | `errors` | no |
+| `compat` | `sdk` | yes |
+| `configgen` | `daemon` | yes |
+| `configgen` | `errors` | no |
+| `configgen` | `serde` | yes |
+| `configgen` | `spec` | yes |
+| `conformance` | `backend` | no |
+| `conformance` | `errors` | no |
+| `conformance` | `plugins` | yes |
+| `conformance` | `result` | no |
+| `conformance` | `spec` | no |
 | `contracts` | `contracts.composite` | no |
 | `contracts` | `contracts.composition` | no |
 | `contracts` | `contracts.conditional` | no |
@@ -2351,6 +2434,10 @@ flowchart TD
 | `contracts.conditional` | `contracts.composite` | no |
 | `contracts.conditional` | `contracts.schema` | no |
 | `contracts.conditional` | `errors` | no |
+| `contracts.conformance` | `contracts.lint` | no |
+| `contracts.conformance` | `contracts.schema` | no |
+| `contracts.conformance` | `contracts.templates` | no |
+| `contracts.conformance` | `errors` | no |
 | `contracts.context` | `contracts.schema` | no |
 | `contracts.context` | `errors` | no |
 | `contracts.cost` | `contracts.schema` | no |
@@ -2800,6 +2887,10 @@ flowchart TD
 | `hotpaths` | `errors` | no |
 | `hotpaths` | `log` | no |
 | `hotpaths` | `profiling` | no |
+| `inspect` | `client` | yes |
+| `inspect` | `errors` | yes |
+| `inspect` | `loaders` | yes |
+| `inspect` | `pool` | yes |
 | `ladder` | `backend` | no |
 | `ladder` | `errors` | no |
 | `ladder` | `policy` | no |
@@ -2809,6 +2900,9 @@ flowchart TD
 | `ladder` | `result` | no |
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
+| `loaders` | `policy` | no |
+| `loaders` | `serde` | yes |
+| `loaders` | `spec` | no |
 | `lockaudit` | `log` | no |
 | `memory` | `memory.access` | no |
 | `memory` | `memory.adversarial` | no |
@@ -2986,6 +3080,9 @@ flowchart TD
 | `perfgate` | `policy` | yes |
 | `perfgate` | `result` | yes |
 | `perfgate` | `spec` | yes |
+| `plugins` | `backend` | no |
+| `plugins` | `errors` | no |
+| `plugins` | `spec` | no |
 | `policy` | `errors` | no |
 | `policy` | `result` | no |
 | `pool` | `errors` | no |
@@ -3065,6 +3162,8 @@ flowchart TD
 | `profiling` | `errors` | no |
 | `profiling` | `log` | no |
 | `profiling` | `policy` | no |
+| `protocol` | `hugrgate` | yes |
+| `protocol` | `errors` | no |
 | `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
@@ -3227,9 +3326,19 @@ flowchart TD
 | `runtimes.warmup` | `backend` | no |
 | `runtimes.warmup` | `errors` | no |
 | `runtimes.warmup` | `runtimes` | no |
+| `scaffold` | `configgen` | yes |
+| `scaffold` | `errors` | no |
 | `scheduler` | `backpressure` | no |
 | `scheduler` | `errors` | no |
 | `scheduler` | `log` | no |
+| `sdk` | `backend` | no |
+| `sdk` | `client` | no |
+| `sdk` | `core` | no |
+| `sdk` | `errors` | no |
+| `sdk` | `policy` | no |
+| `sdk` | `result` | no |
+| `sdk` | `serde` | yes |
+| `sdk` | `spec` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
@@ -3239,6 +3348,7 @@ flowchart TD
 | `server` | `cluster.routes` | yes |
 | `server` | `core` | no |
 | `server` | `errors` | no |
+| `server` | `protocol` | no |
 | `server` | `result` | no |
 | `server` | `serde` | no |
 | `server` | `spec` | no |

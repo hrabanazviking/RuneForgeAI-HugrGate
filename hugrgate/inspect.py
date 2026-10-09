@@ -209,7 +209,8 @@ class InspectSession:
 
     def run(self) -> int:
         try:
-            import readline  # noqa: F401 - history support when present
+            import readline
+            readline.set_history_length(1000)
         except ImportError:
             pass
         self.out(f"hugrgate inspector — talking to {self.url} "

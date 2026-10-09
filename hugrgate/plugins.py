@@ -209,12 +209,13 @@ def register_discovered_plugins(
         try:
             registry.register(info.backend, replace=replace)
         except Exception as e:
-            err = PluginError(
-                f"plugin {info.name!r} failed to register: {e}",
-                plugin=info.name)
             if on_error == "raise":
-                raise err from e
-            report.errors.append(err)
+                raise PluginError(
+                    f"plugin {info.name!r} failed to register: {e}",
+                    plugin=info.name) from e
+            report.errors.append(PluginError(
+                f"plugin {info.name!r} failed to register: {e}",
+                plugin=info.name))
         else:
             report.registered.append(name)
     return report
