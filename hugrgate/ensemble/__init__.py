@@ -20,6 +20,10 @@ from hugrgate.ensemble.averaging import (
     bma_combine,
     predictive_log_likelihood,
 )
+from hugrgate.ensemble.provenance import (
+    find_ensemble_records,
+    record_ensemble_decision,
+)
 from hugrgate.ensemble.base import (
     DISCRETE_SPEC_TYPES,
     Combiner,
@@ -123,6 +127,8 @@ __all__ = [
     "BayesianModelAverager",
     "bma_combine",
     "predictive_log_likelihood",
+    "record_ensemble_decision",
+    "find_ensemble_records",
     "SoftmaxRegression",
     "StackingEngine",
     "stacking_combine",
