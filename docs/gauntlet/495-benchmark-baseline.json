@@ -1,0 +1,19 @@
+{
+  "baseline": {
+    "n": 2000,
+    "seed": 495,
+    "digest": "5992c1a0b43a9832e9bcf646977f003fb6bdea4b321e1ab74bebbff08adca104",
+    "elapsed_s": 0.25540285500028403,
+    "ops_per_sec": 7830.7660264713,
+    "python": "3.12.3",
+    "machine": "x86_64"
+  },
+  "audit": {
+    "runs": 3,
+    "n": 2000,
+    "seed": 495,
+    "deterministic": true,
+    "timing_cv": 0.06837882071720917,
+    "passed": true
+  }
+}
