@@ -42,6 +42,7 @@ from hugrgate.log import get_logger
 logger = get_logger(__name__)
 
 __all__ = [
+    "AdaptiveBatchController",
     "BatchExecutor",
     "BatchScheduler",
     "SchedulerConfig",
@@ -49,6 +50,106 @@ __all__ = [
 ]
 
 _task_ids = itertools.count(1)
+
+
+class AdaptiveBatchController:
+    """AIMD controller for the scheduler's batch size (slice 286).
+
+    After every batch, the observed batch-execution latency is compared
+    against ``target_latency_s``:
+
+    - under target: ``size += additive_increase`` (probe for more
+      throughput), capped at ``max_batch_size``;
+    - over target: ``size = max(min_batch_size, size * decrease_factor)``
+      (back off fast).
+
+    This is the classic TCP-style AIMD loop: it converges to the
+    largest batch the executor can sustain within the latency budget,
+    and re-converges when conditions change.  All state transitions are
+    explicit and inspectable via :meth:`snapshot`.
+    """
+
+    def __init__(self, min_batch_size: int = 1, max_batch_size: int = 32,
+                 target_latency_s: float = 0.05,
+                 additive_increase: int = 1,
+                 decrease_factor: float = 0.5) -> None:
+        if not isinstance(min_batch_size, int) or min_batch_size < 1:
+            raise SchedulerError(
+                f"min_batch_size must be a positive int, got "
+                f"{min_batch_size!r}")
+        if not isinstance(max_batch_size, int) or \
+                max_batch_size < min_batch_size:
+            raise SchedulerError(
+                f"max_batch_size must be an int >= min_batch_size, got "
+                f"{max_batch_size!r}")
+        if not isinstance(target_latency_s, (int, float)) or \
+                target_latency_s <= 0:
+            raise SchedulerError(
+                f"target_latency_s must be > 0, got {target_latency_s!r}")
+        if not isinstance(additive_increase, int) or additive_increase < 1:
+            raise SchedulerError(
+                f"additive_increase must be a positive int, got "
+                f"{additive_increase!r}")
+        if not isinstance(decrease_factor, (int, float)) or not \
+                0.0 < decrease_factor < 1.0:
+            raise SchedulerError(
+                f"decrease_factor must be in (0, 1), got "
+                f"{decrease_factor!r}")
+        self.min_batch_size = min_batch_size
+        self.max_batch_size = max_batch_size
+        self.target_latency_s = float(target_latency_s)
+        self.additive_increase = additive_increase
+        self.decrease_factor = float(decrease_factor)
+        self._lock = threading.Lock()
+        self._current = min_batch_size
+        self._increases = 0
+        self._decreases = 0
+
+    @property
+    def current_size(self) -> int:
+        """The batch size the scheduler should use right now."""
+        with self._lock:
+            return self._current
+
+    def observe(self, batch_latency_s: float, batch_size: int) -> int:
+        """Feed one batch observation; returns the new target size.
+
+        ``batch_latency_s`` is the measured execution latency of a batch
+        of ``batch_size`` tasks.  Only batches that actually filled the
+        current target carry signal about headroom — a half-empty batch
+        that beat the target tells us nothing about a bigger batch, so
+        it never triggers an increase (but an over-target batch always
+        triggers a decrease, whatever its size).
+        """
+        if batch_latency_s < 0:
+            raise SchedulerError(
+                f"batch_latency_s must be >= 0, got {batch_latency_s!r}")
+        with self._lock:
+            if batch_latency_s > self.target_latency_s:
+                new = max(self.min_batch_size,
+                          int(self._current * self.decrease_factor))
+                if new < self._current:
+                    self._decreases += 1
+                self._current = new
+            elif batch_size >= self._current:
+                new = min(self.max_batch_size,
+                          self._current + self.additive_increase)
+                if new > self._current:
+                    self._increases += 1
+                self._current = new
+            return self._current
+
+    def snapshot(self) -> dict[str, Any]:
+        """Inspectable controller state."""
+        with self._lock:
+            return {
+                "current_size": self._current,
+                "min_batch_size": self.min_batch_size,
+                "max_batch_size": self.max_batch_size,
+                "target_latency_s": self.target_latency_s,
+                "increases": self._increases,
+                "decreases": self._decreases,
+            }
 
 
 @dataclass
@@ -59,6 +160,12 @@ class SchedulerConfig:
     max_queue_depth: int = 1024
     max_workers: int = 8
     shutdown_timeout_s: float = 10.0
+    # Slice 286 — dynamic batching: when True, an AIMD controller varies
+    # the effective batch size between min_batch_size and max_batch_size
+    # to hold batch-execution latency near target_batch_latency_s.
+    adaptive: bool = False
+    min_batch_size: int = 1
+    target_batch_latency_s: float = 0.05
 
     def __post_init__(self) -> None:
         if not isinstance(self.max_batch_size, int) or \
@@ -84,6 +191,23 @@ class SchedulerConfig:
             raise SchedulerError(
                 f"shutdown_timeout_s must be > 0, got "
                 f"{self.shutdown_timeout_s!r}")
+        if not isinstance(self.adaptive, bool):
+            raise SchedulerError(
+                f"adaptive must be a bool, got {self.adaptive!r}")
+        if not isinstance(self.min_batch_size, int) or \
+                self.min_batch_size < 1:
+            raise SchedulerError(
+                f"min_batch_size must be a positive int, got "
+                f"{self.min_batch_size!r}")
+        if self.min_batch_size > self.max_batch_size:
+            raise SchedulerError(
+                f"min_batch_size ({self.min_batch_size}) must be <= "
+                f"max_batch_size ({self.max_batch_size})")
+        if not isinstance(self.target_batch_latency_s, (int, float)) or \
+                self.target_batch_latency_s <= 0:
+            raise SchedulerError(
+                f"target_batch_latency_s must be > 0, got "
+                f"{self.target_batch_latency_s!r}")
 
 
 @dataclass
@@ -161,7 +285,19 @@ class BatchScheduler:
         self._queue_waits_ms: deque[float] = deque(maxlen=1000)
         self._batch_exec_ms: deque[float] = deque(maxlen=1000)
         self._stats_lock = threading.Lock()
+        self._adaptive = None
+        if self.config.adaptive:
+            self._adaptive = AdaptiveBatchController(
+                min_batch_size=self.config.min_batch_size,
+                max_batch_size=self.config.max_batch_size,
+                target_latency_s=self.config.target_batch_latency_s)
         self._worker.start()
+
+    def _effective_max_batch(self) -> int:
+        """Batch-size cap: adaptive target when enabled, else the config."""
+        if self._adaptive is not None:
+            return self._adaptive.current_size
+        return self.config.max_batch_size
 
     # -- submission -------------------------------------------------------
 
@@ -224,14 +360,14 @@ class BatchScheduler:
                 return None  # shut down while idle
             batch = [self._queue.popleft()]
             window_end = time.monotonic() + self.config.batch_window_s
-            while len(batch) < self.config.max_batch_size:
+            cap = self._effective_max_batch()
+            while len(batch) < cap:
                 remaining = window_end - time.monotonic()
                 if (remaining <= 0 or not self._accepting
                         or self._flush_requested):
                     break
                 self._cond.wait(timeout=remaining)
-                while (self._queue
-                       and len(batch) < self.config.max_batch_size):
+                while self._queue and len(batch) < cap:
                     batch.append(self._queue.popleft())
             # The queue -> in-flight transition is atomic under the lock:
             # drain() can never observe "empty and idle" mid-handoff.
@@ -255,6 +391,8 @@ class BatchScheduler:
                         SchedulerError(f"batch executor failed: {e}"))
         finally:
             exec_ms = (time.perf_counter() - exec_start) * 1000.0
+            if self._adaptive is not None:
+                self._adaptive.observe(exec_ms / 1000.0, len(batch))
             with self._stats_lock:
                 self._batches += 1
                 self._tasks_completed += len(batch)
@@ -308,7 +446,7 @@ class BatchScheduler:
             sizes = list(self._batch_sizes)
             waits = list(self._queue_waits_ms)
             execs = list(self._batch_exec_ms)
-            return {
+            stats = {
                 "batches": self._batches,
                 "tasks_completed": self._tasks_completed,
                 "avg_batch_size": (sum(sizes) / len(sizes)) if sizes else 0.0,
@@ -317,4 +455,9 @@ class BatchScheduler:
                 "batch_exec_p50_ms": statistics.median(execs) if execs else 0.0,
                 "queue_depth": self.queue_depth(),
                 "accepting": self._accepting,
+                "adaptive": self._adaptive is not None,
+                "effective_max_batch": self._effective_max_batch(),
             }
+            if self._adaptive is not None:
+                stats["adaptive_controller"] = self._adaptive.snapshot()
+            return stats
