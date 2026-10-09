@@ -1,0 +1,972 @@
+{
+  "generated_utc": "2026-10-09T10:45:26.783815+00:00",
+  "module_count": 42,
+  "modules": {
+    "hugrgate.__init__": {
+      "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
+      "imports": [
+        "hugrgate"
+      ],
+      "loc": 25,
+      "path": "hugrgate/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.abstain": {
+      "docstring": "Abstention \u2014 typed \"I don't know\" results and review banding. Slice 15.\n\nTwo outcomes are weaker than acceptance, and they are distinct:\n\n- **abstain**: no value at all (``value=None``, ``accepted=False``). The\n  gate refuses to decide. Carries a machine-readable ``abstain_reason``.\n- **review**: a value *was* produced, but its probability fell inside the\n  policy's ``review_band`` \u2014 a human should look before it is acted on.\n  ``accepted=False`` with ``policy_verdict=\"review\"`` in metadata.\n\n:func:`apply_abstention_policy` maps :meth:`DecisionPolicy.evaluate`\nverdicts to these result types without raising, so pipelines can stay\nexception-free when they prefer values over control flow.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 105,
+      "path": "hugrgate/abstain.py",
+      "public_defs": [
+        "abstain",
+        "mark_for_review",
+        "apply_abstention_policy"
+      ]
+    },
+    "hugrgate.backend": {
+      "docstring": "Backend interface + registry. Slice 6.",
+      "imports": [
+        "__future__",
+        "abc",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 79,
+      "path": "hugrgate/backend.py",
+      "public_defs": [
+        "Backend",
+        "BackendRegistry",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "warmup",
+        "batch",
+        "calibration_info",
+        "estimated_latency",
+        "estimated_cost",
+        "privacy_properties",
+        "hardware_requirements",
+        "register",
+        "get",
+        "list",
+        "supporting"
+      ]
+    },
+    "hugrgate.backends.boosting": {
+      "docstring": "Gradient boosting backend. Slice 24.\n\nSame train/predict/save/load contract as :class:`LogisticRegressionBackend`\n(slice 22), powered by scikit-learn's histogram-based gradient boosting\nclassifier.  Early stopping is configurable via constructor kwargs\n(``early_stopping``, ``validation_fraction``, ``n_iter_no_change``).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "sklearn",
+        "typing"
+      ],
+      "loc": 51,
+      "path": "hugrgate/backends/boosting.py",
+      "public_defs": [
+        "GradientBoostingBackend",
+        "capabilities"
+      ]
+    },
+    "hugrgate.backends.embedding": {
+      "docstring": "Embedding backend \u2014 prototype classifier. Slice 33.\n\n:class:`Embedder` turns texts into vectors. :class:`PrototypeBackend` is a\nnearest-prototype classifier: each class prototype is the mean embedding of\nits labeled examples, and a new text is classified by cosine similarity to\nthe prototypes passed through a temperature-scaled softmax.\n\nShips with :class:`HashEmbedder`, a tiny deterministic char-n-gram hashing\nembedder. No model download, no network, works fully offline \u2014 the ladder's\n\"good enough\" rung between classical ML and heavy neural models.",
+      "imports": [
+        "__future__",
+        "abc",
+        "hashlib",
+        "hugrgate",
+        "math",
+        "numpy",
+        "re",
+        "typing"
+      ],
+      "loc": 236,
+      "path": "hugrgate/backends/embedding.py",
+      "public_defs": [
+        "Embedder",
+        "HashEmbedder",
+        "PrototypeBackend",
+        "dim",
+        "name",
+        "embed",
+        "dim",
+        "embed",
+        "fit",
+        "fitted",
+        "classes",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "estimated_latency",
+        "calibration_info"
+      ]
+    },
+    "hugrgate.backends.forest": {
+      "docstring": "Random forest backend. Slice 23.\n\nSame train/predict/save/load contract as :class:`LogisticRegressionBackend`\n(slice 22); additionally exposes per-feature importances in result metadata.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "sklearn",
+        "typing"
+      ],
+      "loc": 52,
+      "path": "hugrgate/backends/forest.py",
+      "public_defs": [
+        "RandomForestBackend",
+        "capabilities"
+      ]
+    },
+    "hugrgate.backends.llm": {
+      "docstring": "Local LLM backend \u2014 constrained decoding. Slice 35.\n\n:class:`LLMBackend` runs an open-weight local model through a small engine\ninterface and applies **constrained decoding**: the engine may only emit\nspec-valid values (categorical/ordinal \u2192 option tokens, binary \u2192 yes/no).\nWhatever the engine returns is re-validated against the spec \u2014 an\nout-of-spec emission is a :class:`BackendError`, never a result.\n\nThe ``llama_cpp`` dependency is optional and imported lazily; without an\nengine, evaluation raises :class:`BackendUnavailable`. Tests inject a mock\nengine \u2014 no model download required.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "llama_cpp",
+        "math",
+        "time",
+        "typing"
+      ],
+      "loc": 239,
+      "path": "hugrgate/backends/llm.py",
+      "public_defs": [
+        "LLMChoice",
+        "LLMEngine",
+        "LlamaCppEngine",
+        "LLMBackend",
+        "generate",
+        "available",
+        "generate",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "estimated_latency",
+        "privacy_properties"
+      ]
+    },
+    "hugrgate.backends.logreg": {
+      "docstring": "Logistic regression backend. Slice 22.\n\nTrains on ``(state, label)`` pairs, emits ``predict_proba`` distributions,\nand round-trips through pickle + :class:`ModelManifest`.  This module also\ndefines :class:`SklearnClassifierBackend`, the shared contract base reused\nby the forest (slice 23) and boosting (slice 24) backends.",
+      "imports": [
+        "__future__",
+        "datetime",
+        "hugrgate",
+        "numpy",
+        "pickle",
+        "sklearn",
+        "time",
+        "typing"
+      ],
+      "loc": 281,
+      "path": "hugrgate/backends/logreg.py",
+      "public_defs": [
+        "SklearnClassifierBackend",
+        "LogisticRegressionBackend",
+        "is_trained",
+        "train",
+        "predict_proba_dict",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "estimated_latency",
+        "calibration_info",
+        "manifest",
+        "save",
+        "load",
+        "capabilities"
+      ]
+    },
+    "hugrgate.backends.nli": {
+      "docstring": "NLI backend \u2014 statement entailment as a binary decision. Slice 34.\n\n:class:`NLIBackend` answers one question: *is the spec's statement supported\nby the state?* A natural-language-inference model scores\n``P(entailment | premise, statement)`` and that becomes the probability of\n``\"true\"``. Constrained to ``binary`` specs only.\n\nThe ``transformers`` dependency is optional and imported lazily: without it\n(or without a model/engine), evaluation raises :class:`BackendUnavailable`\ninstead of failing at import time. Tests inject a plain callable\n``nli_fn(premise, statement) -> float`` \u2014 no downloads required.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "transformers",
+        "typing"
+      ],
+      "loc": 144,
+      "path": "hugrgate/backends/nli.py",
+      "public_defs": [
+        "NLIBackend",
+        "engine_available",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "estimated_latency"
+      ]
+    },
+    "hugrgate.backends.rules": {
+      "docstring": "Rule backend \u2014 predicates, decision tables, confidence distributions.\n\nSlices 11-13: a deterministic backend that evaluates predicate rules\nagainst the decision state.\n\nSlice 11 \u2014 predicates:\n    {\"if\": {\"field\": \"temperature\", \"gt\": 90},\n     \"then\": \"critical\", \"confidence\": 0.99}\nOperators: eq, ne, gt, gte, lt, lte, in, contains, exists.\nFirst-match wins.\n\nSlice 12 \u2014 decision tables:\nRows of conditions -> outcome, explicit priority ordering, a default\nrule, and YAML-loadable rule sets::\n\n    rules:\n      - name: critical-malware\n        priority: 100\n        if:\n          all:\n            - {field: severity, gte: 8}\n            - {field: category, eq: malware}\n        then: escalate\n        confidence: 0.97\n      - {default: log, confidence: 0.5}\n\nSlice 13 \u2014 confidence & distribution:\nThe matched rule's confidence becomes the winner's probability; the\nremainder (1 - confidence) is split uniformly across the other options\nof the spec's value space. supports(): categorical, binary, ordinal.\n\nMissing-field semantics (documented, pinned by tests):\n  - eq / in / contains / gt / gte / lt / lte on a missing field -> False\n  - ne on a missing field -> True (\"not equal\" includes absent)\n  - exists -> True iff the field is present (or per explicit flag)\nComparison type errors (e.g. gt between str and int) never match.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing",
+        "yaml"
+      ],
+      "loc": 373,
+      "path": "hugrgate/backends/rules.py",
+      "public_defs": [
+        "Rule",
+        "RuleBackend",
+        "is_default",
+        "from_dict",
+        "to_dict",
+        "matches",
+        "from_rules",
+        "from_dicts",
+        "from_yaml_text",
+        "from_yaml_file",
+        "to_dicts",
+        "capabilities",
+        "supports",
+        "estimated_latency",
+        "health",
+        "evaluate"
+      ]
+    },
+    "hugrgate.bench": {
+      "docstring": "Benchmark harness \u2014 datasets \u2192 backends \u2192 metrics. Slice 45.\n\nRuns a labeled (or unlabeled) dataset through one or more backends and\nreports:\n\n- ``accuracy`` \u2014 exact-match rate (categorical / ordinal / binary;\n  set-equality for multilabel; skipped for numeric)\n- ``brier_score`` \u2014 mean squared error of the full distribution\n  against the one-hot truth\n- ``ece`` \u2014 expected calibration error over 10 confidence bins\n- ``latency_p50_ms`` / ``latency_p99_ms`` \u2014 from ``result.latency_ms``\n- ``throughput_per_s`` \u2014 decisions per wall-clock second\n- ``abstention_rate`` \u2014 fraction of items the gate abstained on\n\nThe report is a plain JSON-serializable dict (see :func:`run_benchmark`),\nrenderable to markdown by :mod:`hugrgate.bench_report`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "platform",
+        "time",
+        "typing"
+      ],
+      "loc": 321,
+      "path": "hugrgate/bench.py",
+      "public_defs": [
+        "accuracy",
+        "brier_score",
+        "reliability_bins",
+        "expected_calibration_error",
+        "dataset_fingerprint",
+        "BenchmarkConfig",
+        "run_benchmark",
+        "Benchmark",
+        "run"
+      ]
+    },
+    "hugrgate.bench_report": {
+      "docstring": "Benchmark report \u2014 markdown rendering of benchmark JSON. Slice 47.\n\nProduces a human-readable report with:\n\n- summary + per-backend metric tables,\n- ASCII reliability diagrams (accuracy vs confidence per bin),\n- a hardware / methodology block for reproducibility.",
+      "imports": [
+        "__future__",
+        "typing"
+      ],
+      "loc": 139,
+      "path": "hugrgate/bench_report.py",
+      "public_defs": [
+        "ascii_reliability_diagram",
+        "render_markdown",
+        "write_report"
+      ]
+    },
+    "hugrgate.cache": {
+      "docstring": "Decision cache \u2014 request-hash keyed result memoization. Slice 38.\n\n:class:`DecisionCache` maps a hash of ``(state, spec, policy)`` to the\n:class:`DecisionResult`, with TTL expiry, LRU eviction at ``max_size``,\nand two safety rails:\n\n- **Privacy-aware**: entries are never stored for (or served to) decisions\n  whose ``privacy_class`` forbids retention (``\"strict\"``) \u2014 see\n  :class:`hugrgate.privacy.PrivacyGuard`.\n- **Invalidation on model change**: :meth:`invalidate_backend` drops every\n  entry produced by a backend, so a retrained model can never serve stale\n  decisions.\n\nResults are deep-copied on the way in and out so callers cannot mutate the\ncached copy.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "time",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/cache.py",
+      "public_defs": [
+        "cache_key",
+        "DecisionCache",
+        "get",
+        "put",
+        "invalidate_backend",
+        "invalidate_model",
+        "clear",
+        "stats"
+      ]
+    },
+    "hugrgate.calibration.__init__": {
+      "docstring": "Probability calibration package. Slices 26-29.\n\nCalibrators map raw classifier scores to trustworthy probabilities:\n\n- :mod:`hugrgate.calibration.platt` \u2014 Platt scaling (sigmoid fit, independent\n  Newton implementation)\n- :mod:`hugrgate.calibration.isotonic` \u2014 isotonic regression (independent\n  PAV implementation)\n- :mod:`hugrgate.calibration.temperature` \u2014 single-parameter temperature scaling\n- :mod:`hugrgate.calibration.metrics` \u2014 Brier, log loss, ECE, MCE, reliability data\n- :mod:`hugrgate.calibration.profiles` \u2014 versioned calibration profiles +\n  :class:`CalibratedBackend` wrapper\n\nAll calibrators are binary one-vs-rest units: ``fit(scores, labels)`` learns\nthe map from a score in any real range to a calibrated probability in\n``[0, 1]``.  Multiclass calibration applies one unit per class and\nrenormalizes (see :mod:`hugrgate.calibration.profiles`).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 47,
+      "path": "hugrgate/calibration/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.calibration._base": {
+      "docstring": "Calibration base classes (private).\n\nMoved here from ``hugrgate.calibration.__init__`` (slice 002) so\ncalibrator submodules can import the base classes without creating a\nparent<->child import cycle with the package ``__init__``.\n\nNot part of the public API: import ``Calibrator`` and\n``CalibratorRegistry`` from ``hugrgate.calibration`` instead.",
+      "imports": [
+        "__future__",
+        "abc",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 102,
+      "path": "hugrgate/calibration/_base.py",
+      "public_defs": [
+        "Calibrator",
+        "CalibratorRegistry",
+        "fitted",
+        "fit",
+        "calibrate",
+        "calibrate_batch",
+        "get_params",
+        "from_params",
+        "register",
+        "get",
+        "build",
+        "list"
+      ]
+    },
+    "hugrgate.calibration.isotonic": {
+      "docstring": "Isotonic regression via the Pool Adjacent Violators (PAV) algorithm.\n\nSlice 27.  Fits a non-decreasing stepwise map from raw scores to empirical\nevent rates.  The PAV implementation below is written independently from the\ntextbook description: sort by score, greedily merge adjacent blocks whose\nmeans violate monotonicity, and predict with the resulting step function.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 94,
+      "path": "hugrgate/calibration/isotonic.py",
+      "public_defs": [
+        "IsotonicCalibrator",
+        "fit",
+        "calibrate",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.metrics": {
+      "docstring": "Calibration metrics. Slice 28.\n\nBinary metrics \u2014 Brier score, log loss, expected/maximum calibration error\n(ECE/MCE) \u2014 plus reliability-diagram bin data and a multiclass ECE helper\n(max-probability confidence vs. correctness) for whole-distribution checks.",
+      "imports": [
+        "__future__",
+        "numpy",
+        "typing"
+      ],
+      "loc": 123,
+      "path": "hugrgate/calibration/metrics.py",
+      "public_defs": [
+        "brier_score",
+        "log_loss",
+        "reliability_diagram",
+        "expected_calibration_error",
+        "maximum_calibration_error",
+        "ece_multiclass"
+      ]
+    },
+    "hugrgate.calibration.platt": {
+      "docstring": "Platt scaling. Slice 26.\n\nFits a sigmoid ``p = 1 / (1 + exp(A\u00b7s + B))`` to validation scores by\nminimizing the negative log-likelihood with Platt's target smoothing.\nThe Newton optimization below is an independent implementation written\nfrom the textbook formulation (gradient/Hessian of the logistic loss);\nno code is copied from scikit-learn or any other library.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 112,
+      "path": "hugrgate/calibration/platt.py",
+      "public_defs": [
+        "PlattCalibrator",
+        "fit",
+        "calibrate",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.profiles": {
+      "docstring": "Calibration profiles. Slice 29.\n\nA :class:`CalibrationProfile` is a named, versioned record of a fitted\ncalibration: which backend + model it applies to, which calibrator with\nwhich per-class parameters, the metrics on the calibration set, and a hash\nof that dataset.  Profiles are stored *separately* from model weights, so\nrecalibration never touches the underlying model.\n\n:class:`CalibratedBackend` wraps any trained classifier backend, applies the\nprofile's per-class (one-vs-rest) calibrators to the raw distribution,\nrenormalizes, and stamps ``result.calibration_profile``.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "numpy",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 244,
+      "path": "hugrgate/calibration/profiles.py",
+      "public_defs": [
+        "hash_dataset",
+        "CalibrationProfile",
+        "CalibrationProfileStore",
+        "CalibratedBackend",
+        "classes",
+        "to_dict",
+        "to_json",
+        "from_dict",
+        "from_json",
+        "build_calibrators",
+        "qualified_name",
+        "save",
+        "get",
+        "list_versions",
+        "latest_version",
+        "list_profiles",
+        "inner",
+        "profile",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "calibration_info"
+      ]
+    },
+    "hugrgate.calibration.temperature": {
+      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = \u03c3(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 116,
+      "path": "hugrgate/calibration/temperature.py",
+      "public_defs": [
+        "TemperatureCalibrator",
+        "fit",
+        "calibrate",
+        "get_params",
+        "from_params",
+        "nll"
+      ]
+    },
+    "hugrgate.circuit": {
+      "docstring": "Circuit breaker \u2014 per-backend failure containment. Slice 18.\n\nStates:\n\n- **closed**: traffic flows; consecutive failures are counted.\n- **open**: calls are rejected fast (``allow()`` -> False) until\n  ``reset_timeout_s`` has elapsed.\n- **half-open**: after the timeout, a limited number of probe calls\n  (``half_open_max_probes``) are let through. A probe success closes the\n  circuit; a probe failure re-opens it and restarts the timeout.\n\n:class:`CircuitRegistry` owns one breaker per backend name and creates\nthem on demand. :class:`~hugrgate.fallback.FallbackChain` accepts a\nregistry: open circuits are skipped (recorded in the fallback trace)\nand every attempt's outcome is reported back to its breaker.\n\nThe clock is injectable (``clock`` parameter) so tests can drive time\ndeterministically. All methods are thread-safe.",
+      "imports": [
+        "__future__",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/circuit.py",
+      "public_defs": [
+        "CircuitBreaker",
+        "CircuitRegistry",
+        "state",
+        "allow",
+        "record_success",
+        "record_failure",
+        "snapshot",
+        "get",
+        "configure",
+        "snapshot"
+      ]
+    },
+    "hugrgate.cli": {
+      "docstring": "HugrGate command-line interface. Slice 44.\n\nCommands:\n    hugrgate decide --spec spec.yaml --state state.json [--policy policy.yaml]\n             [--backend NAME] [--url URL]\n    hugrgate backends [--url URL]\n    hugrgate models [--url URL]\n    hugrgate health [--url URL]\n    hugrgate serve [--host H] [--port P] [--unix-socket PATH] ...\n    hugrgate bench --dataset DATASET.json --backends a,b --out report.json\n    hugrgate report --report report.json [--out report.md]\n\nEntry point: ``hugrgate`` (see ``pyproject.toml``).",
+      "imports": [
+        "__future__",
+        "argparse",
+        "dataclasses",
+        "httpx",
+        "hugrgate",
+        "json",
+        "sys",
+        "typing",
+        "yaml"
+      ],
+      "loc": 258,
+      "path": "hugrgate/cli.py",
+      "public_defs": [
+        "load_spec",
+        "load_state",
+        "load_policy",
+        "cmd_decide",
+        "cmd_backends",
+        "cmd_models",
+        "cmd_health",
+        "cmd_serve",
+        "cmd_bench",
+        "cmd_report",
+        "build_parser",
+        "main"
+      ]
+    },
+    "hugrgate.client": {
+      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nAlso home to the JSON serde helpers shared by the server, daemon and CLI:\n:func:`policy_to_dict`, :func:`policy_from_dict`, :func:`result_from_dict`.",
+      "imports": [
+        "__future__",
+        "httpx",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 232,
+      "path": "hugrgate/client.py",
+      "public_defs": [
+        "policy_to_dict",
+        "policy_from_dict",
+        "result_from_dict",
+        "HugrGateClient",
+        "decide",
+        "health",
+        "backends",
+        "close"
+      ]
+    },
+    "hugrgate.core": {
+      "docstring": "HugrGate core runtime \u2014 decide(). Slice 8.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 107,
+      "path": "hugrgate/core.py",
+      "public_defs": [
+        "HugrGate",
+        "register",
+        "decide",
+        "decide_batch"
+      ]
+    },
+    "hugrgate.daemon": {
+      "docstring": "HugrGate service daemon \u2014 long-running process mode. Slice 42.\n\nBeyond the plain HTTP app (:mod:`hugrgate.server`), the daemon adds:\n\n- **Unix-socket + localhost HTTP** listeners served from one process.\n- **Model warm pool**: every registered backend's ``warmup()`` runs at\n  startup so the first real decision is already fast.\n- **Request batching**: ``POST /decide`` calls are coalesced over a short\n  window and executed concurrently (:class:`BatchingQueue`).\n- **Per-client policies**: an ``X-Client-Id`` header selects a server-side\n  :class:`DecisionPolicy` from a JSON policy file, overriding the policy\n  (if any) in the request body.\n- **Back-pressure**: a bounded queue; overload returns HTTP 429 instead of\n  unbounded memory growth.\n- **Graceful shutdown**: SIGINT/SIGINT drains the queue before exiting.\n\nEntry point: ``hugrgate-server`` (see ``pyproject.toml``).",
+      "imports": [
+        "__future__",
+        "argparse",
+        "asyncio",
+        "contextlib",
+        "dataclasses",
+        "fastapi",
+        "hugrgate",
+        "json",
+        "signal",
+        "threading",
+        "time",
+        "typing",
+        "uvicorn"
+      ],
+      "loc": 378,
+      "path": "hugrgate/daemon.py",
+      "public_defs": [
+        "DaemonConfig",
+        "QueueFull",
+        "BatchingQueue",
+        "load_client_policies",
+        "create_daemon_app",
+        "Daemon",
+        "serve_forever",
+        "main",
+        "start",
+        "stop",
+        "submit",
+        "stats",
+        "decide_batched",
+        "daemon_info",
+        "start",
+        "stop",
+        "join"
+      ]
+    },
+    "hugrgate.drift": {
+      "docstring": "Calibration drift detection \u2014 PSI over prediction distributions. Slice 48.\n\n:class:`DriftMonitor` snapshots the predicted-class confidence distribution\nat calibration time (``fit_reference``) and compares it against live\ntraffic (``observe``) using the Population Stability Index (PSI):\n\n    PSI = sum_b (live%_b - ref%_b) * ln(live%_b / ref%_b)\n\nIndustry rule of thumb, encoded as defaults:\n\n- PSI < 0.10 \u2014 no significant drift,\n- 0.10 \u2264 PSI < 0.25 \u2014 watch; investigate the shift,\n- PSI \u2265 0.25 \u2014 significant drift; recalibration advised.\n\nWhen drift trips the alert threshold, :func:`recalibration_advisory`\nproduces a concrete, actionable recommendation instead of a bare number.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "math",
+        "time",
+        "typing"
+      ],
+      "loc": 241,
+      "path": "hugrgate/drift.py",
+      "public_defs": [
+        "population_stability_index",
+        "DriftReport",
+        "DriftMonitor",
+        "recalibration_advisory",
+        "to_dict",
+        "has_reference",
+        "fit_reference",
+        "observe",
+        "check_drift",
+        "psi",
+        "stream_count",
+        "history"
+      ]
+    },
+    "hugrgate.errors": {
+      "docstring": "Error taxonomy for HugrGate. Slice 10.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 60,
+      "path": "hugrgate/errors.py",
+      "public_defs": [
+        "HugrGateError",
+        "SpecError",
+        "PolicyError",
+        "BackendError",
+        "BackendUnavailable",
+        "CalibrationError",
+        "TimeoutError",
+        "PrivacyViolation",
+        "Abstention"
+      ]
+    },
+    "hugrgate.fallback": {
+      "docstring": "Fallback engine \u2014 ordered failover across backends. Slice 14.\n\n``FallbackChain`` is itself a :class:`~hugrgate.backend.Backend`, so it\ndrops straight into :class:`~hugrgate.core.HugrGate` and the provenance\ntrail. Backends are tried in order; on :class:`BackendError` (which\nincludes :class:`TimeoutError` and :class:`BackendUnavailable`) the next\nbackend is tried. When every backend has failed, the policy's\n``fallback_behavior`` decides:\n\n- ``\"abstain\"``   -> raise :class:`Abstention` (reason\n  ``all_backends_failed``)\n- ``\"safe_default\"`` -> return a ``DecisionResult`` for the configured\n  safe value (must lie inside the spec's value space)\n- ``\"escalate\"``  -> raise :class:`Abstention` with reason\n  ``escalation_required`` (a human must take the decision)\n\n``Abstention`` raised by an inner backend is *not* swallowed: abstaining\nis a decision, not a failure, and it propagates to the caller.\n\nEvery attempt is recorded in ``result.metadata[\"fallback_trace\"]`` and\n``result.fallback_used`` is set when any failover happened, so the\nprovenance record carries the full chain trace.\n\nA :class:`~hugrgate.circuit.CircuitRegistry` may be supplied; backends\nwhose circuit is open are skipped (recorded in the trace) and outcomes\nare reported back to their breakers.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 159,
+      "path": "hugrgate/fallback.py",
+      "public_defs": [
+        "FallbackChain",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health"
+      ]
+    },
+    "hugrgate.features": {
+      "docstring": "Feature preprocessing contract. Slice 21.\n\nRaw decision ``state`` dicts are not model-ready.  This module defines the\n:class:`FeatureExtractor` interface \u2014 ``extract(state) -> dict[str, float]``\n\u2014 plus a small library of encoders and a composable :class:`Pipeline`.\n\nAll encoders are stateful in the same way: :meth:`fit` learns whatever the\nencoder needs (category vocabularies, running means) from a sample of\nstates, then :meth:`extract` maps one state to a flat ``{name: float}``\nfeature dict.  :meth:`feature_names` always returns the column order used\nby :meth:`transform_batch`, so backends can line vectors up with names.",
+      "imports": [
+        "__future__",
+        "abc",
+        "enum",
+        "hugrgate",
+        "math",
+        "numpy",
+        "typing"
+      ],
+      "loc": 268,
+      "path": "hugrgate/features.py",
+      "public_defs": [
+        "MissingValuePolicy",
+        "FeatureExtractor",
+        "NumericEncoder",
+        "CategoricalEncoder",
+        "TextLengthEncoder",
+        "Pipeline",
+        "fitted",
+        "fit",
+        "extract",
+        "feature_names",
+        "transform_batch",
+        "fit",
+        "extract",
+        "feature_names",
+        "categories",
+        "fit",
+        "extract",
+        "feature_names",
+        "extract",
+        "feature_names",
+        "fit",
+        "extract",
+        "feature_names"
+      ]
+    },
+    "hugrgate.health": {
+      "docstring": "Backend health scoring \u2014 latency, errors, quarantine. Slice 17.\n\n:class:`HealthMonitor` tracks per-backend observations over a bounded\nwindow and derives a ``score()`` in [0, 1]:\n\n    score = (1 - error_rate) * latency_factor\n\nwhere ``latency_factor = min(1, latency_target_ms / p50_latency_ms)`` \u2014\na backend at or under its latency target keeps a factor of 1.\n\nBackends are **quarantined** when their score drops below\n``quarantine_threshold`` (or consecutive failures reach\n``max_consecutive_failures``). Quarantine is computed live from the\nstats, so a success **auto-recovers** the backend: the consecutive\nfailure count resets and the score climbs back above the threshold.\n\nAll methods are thread-safe.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "threading",
+        "typing"
+      ],
+      "loc": 136,
+      "path": "hugrgate/health.py",
+      "public_defs": [
+        "BackendStats",
+        "HealthMonitor",
+        "record",
+        "stats",
+        "score",
+        "is_quarantined",
+        "quarantined",
+        "reset"
+      ]
+    },
+    "hugrgate.ladder": {
+      "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 274,
+      "path": "hugrgate/ladder.py",
+      "public_defs": [
+        "LadderRung",
+        "LadderAuditEntry",
+        "LadderRouter",
+        "to_dict",
+        "ladder_for",
+        "decide"
+      ]
+    },
+    "hugrgate.models": {
+      "docstring": "Model manifests and a disk-backed versioned model store. Slice 25.\n\nA :class:`ModelManifest` describes *what* a trained model is (name, version,\nbackend, feature schema, classes, training metrics) while the :class:`ModelStore`\nkeeps manifests next to their weight payloads on disk, with a SHA-256\nintegrity hash so tampering or truncated writes are caught on load.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "shutil",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/models.py",
+      "public_defs": [
+        "sha256_bytes",
+        "ModelManifest",
+        "ModelStore",
+        "to_dict",
+        "to_json",
+        "from_dict",
+        "from_json",
+        "verify",
+        "put",
+        "get",
+        "list_versions",
+        "latest_version",
+        "list_models",
+        "delete"
+      ]
+    },
+    "hugrgate.negotiate": {
+      "docstring": "Backend capability negotiation. Slice 36.\n\n:func:`select_backend` turns a registry into an ordered candidate list for\none decision: filter by capability, privacy, latency, cost and health, then\nrank the survivors by historical quality (accuracy + calibration) with\nlatency and name as deterministic tie-breakers.\n\nIt returns candidates \u2014 it never raises \u2014 so routers (ladder, fallback)\ncan decide what \"no candidate\" means for their policy.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 90,
+      "path": "hugrgate/negotiate.py",
+      "public_defs": [
+        "select_backend",
+        "rank_key"
+      ]
+    },
+    "hugrgate.policy": {
+      "docstring": "DecisionPolicy \u2014 application-controlled thresholds. Slice 5.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 55,
+      "path": "hugrgate/policy.py",
+      "public_defs": [
+        "DecisionPolicy",
+        "evaluate",
+        "backend_allowed"
+      ]
+    },
+    "hugrgate.privacy": {
+      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 117,
+      "path": "hugrgate/privacy.py",
+      "public_defs": [
+        "PrivacyGuard",
+        "remote_allowed",
+        "check_backend",
+        "filter_backends",
+        "cache_allowed",
+        "redact_state",
+        "redact_record",
+        "provenance_redaction_needed"
+      ]
+    },
+    "hugrgate.provenance": {
+      "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "time",
+        "typing"
+      ],
+      "loc": 79,
+      "path": "hugrgate/provenance.py",
+      "public_defs": [
+        "DecisionRecord",
+        "ProvenanceStore",
+        "from_decision",
+        "append",
+        "by_hash",
+        "recent",
+        "count"
+      ]
+    },
+    "hugrgate.result": {
+      "docstring": "DecisionResult \u2014 typed value + probability distribution. Slice 4.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 60,
+      "path": "hugrgate/result.py",
+      "public_defs": [
+        "DecisionResult",
+        "to_dict"
+      ]
+    },
+    "hugrgate.server": {
+      "docstring": "HugrGate local HTTP API \u2014 FastAPI service. Slice 41.\n\nExposes the in-process :class:`HugrGate` runtime over HTTP:\n\n- ``POST /decide`` \u2014 spec + state + policy JSON \u2192 result JSON\n- ``GET  /health`` \u2014 liveness probe\n- ``GET  /backends`` \u2014 registered backend capabilities\n- ``GET  /models`` \u2014 known model catalogue entries\n\nLocalhost-only by default: :func:`run` binds ``127.0.0.1`` unless the\noperator explicitly passes a different host.\n\nThis module also ships two small deterministic built-in backends\n(``uniform`` and ``keyword``) so the service, CLI, daemon and benchmark\nharness are usable end to end with zero ML dependencies. They are honest\nbaselines \u2014 not intelligent \u2014 and richer backends register through the\nsame :class:`BackendRegistry` contract.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "fastapi",
+        "hugrgate",
+        "math",
+        "re",
+        "time",
+        "typing",
+        "uvicorn",
+        "warnings"
+      ],
+      "loc": 354,
+      "path": "hugrgate/server.py",
+      "public_defs": [
+        "UniformBackend",
+        "KeywordBackend",
+        "ModelInfo",
+        "register_model",
+        "list_models",
+        "build_gate",
+        "create_app",
+        "run",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "root",
+        "health",
+        "backends",
+        "models",
+        "decide"
+      ]
+    },
+    "hugrgate.spec": {
+      "docstring": "DecisionSpec \u2014 the decision contract. Slices 2-3.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 104,
+      "path": "hugrgate/spec.py",
+      "public_defs": [
+        "DecisionSpec",
+        "value_space",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.threshold": {
+      "docstring": "Thresholding \u2014 per-option, ordinal-cumulative, and numeric-band gates.\n\nSlice 16. The policy's ``minimum_probability`` is a single global floor;\nthis module adds finer gates that the application configures per spec:\n\n- **per-option thresholds**: ``{\"escalate\": 0.9}`` \u2014 the winning option\n  must carry at least that much of the distribution mass.\n- **ordinal cumulative thresholds**: ``(\"moderate\", 0.8)`` \u2014 for ordinal\n  specs, P(level >= \"moderate\") must clear the bar (\"at least moderate\").\n- **numeric band thresholds**: the numeric value lands in a named band\n  (e.g. ``normal`` / ``watch`` / ``alert``); each band may demand its own\n  minimum probability.\n\n:func:`apply_thresholds` runs the policy floor first, then the\nconfigured gates. The first failing gate turns the result into an\nabstention (via :mod:`hugrgate.abstain`) whose reason names the gate.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 159,
+      "path": "hugrgate/threshold.py",
+      "public_defs": [
+        "NumericBand",
+        "ThresholdConfig",
+        "ordinal_cumulative_probability",
+        "classify_numeric_band",
+        "apply_thresholds",
+        "contains"
+      ]
+    },
+    "hugrgate.timeout": {
+      "docstring": "Timeouts \u2014 per-decision deadline enforcement via threads. Slice 19.\n\nThe decision function runs on a daemon worker thread while the caller\njoins with the deadline. On breach a :class:`TimeoutError` is raised;\nthe worker thread is daemonized so a hung backend can never block\nprocess exit (it may still finish in the background \u2014 threads cannot be\nkilled, a documented limitation).\n\nThe deadline for a backend is::\n\n    min(policy.maximum_latency_ms, backend.estimated_latency_ms * headroom)\n\nwhen the policy sets a latency cap, else\n``backend.estimated_latency_ms * headroom``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "threading",
+        "typing"
+      ],
+      "loc": 131,
+      "path": "hugrgate/timeout.py",
+      "public_defs": [
+        "run_with_deadline",
+        "deadline_ms_for",
+        "evaluate_with_timeout",
+        "TimeoutBackend",
+        "target",
+        "deadline_ms",
+        "capabilities",
+        "supports",
+        "estimated_latency",
+        "health",
+        "evaluate"
+      ]
+    },
+    "hugrgate.validation": {
+      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "typing"
+      ],
+      "loc": 53,
+      "path": "hugrgate/validation.py",
+      "public_defs": [
+        "validate_state",
+        "validate_result"
+      ]
+    }
+  },
+  "pyproject_version": "0.1.0",
+  "python_requires": ">=3.10 (per pyproject)",
+  "test_files": [
+    "test_arch_map.py",
+    "test_deterministic.py",
+    "test_foundation.py",
+    "test_ladder.py",
+    "test_ml_calibration.py",
+    "test_repo_truth.py",
+    "test_service.py"
+  ],
+  "total_loc": 6666
+}
