@@ -185,6 +185,8 @@ _STDLIB = {
     "cProfile", "pstats", "tracemalloc", "timeit",
     # Campaign XII (slice 294): multiprocess mode.
     "multiprocessing",
+    # Campaign XVI (slice 383): attention priority queue.
+    "heapq",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",
