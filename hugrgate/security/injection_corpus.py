@@ -249,12 +249,20 @@ def run_corpus(category: str | None = None) -> list[CorpusResult]:
             if payload.category == "sqli":
                 flagged = detect_sqli(payload.text)
                 results.append(CorpusResult(payload, "<rejected>", flagged))
-            else:
-                # Prompt-override detection is slice 414's job; the
-                # corpus records the payloads here so the detector
-                # has a fixed target. Not a detection claim.
+            elif payload.category == "prompt":
+                # Slice 414: real detector, no longer a placeholder.
+                from hugrgate.security.prompt_injection import (
+                    detect_override,
+                )
+                findings = detect_override(payload.text)
+                hot = [f for f in findings if f.confidence == "high"]
                 results.append(CorpusResult(
-                    payload, "<pending: slice 414 detector>", True))
+                    payload,
+                    "; ".join(f.pattern for f in hot) or "<not detected>",
+                    bool(hot)))
+            else:
+                raise ValueError(
+                    f"no detector for category {payload.category!r}")
         else:
             raise ValueError(f"unknown handling {payload.handling!r}")
     return results

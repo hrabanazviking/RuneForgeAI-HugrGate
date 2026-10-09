@@ -108,6 +108,12 @@ from hugrgate.security.plugins import (
     PluginRegistry,
     sign_manifest,
 )
+from hugrgate.security.prompt_injection import (
+    BoundaryEnforcer,
+    UntrustedData,
+    build_prompt,
+    detect_override,
+)
 from hugrgate.security.resource_guards import (
     CostLedger,
     ResourceBudget,
@@ -148,6 +154,7 @@ __all__ = [
     "Advisory",
     "Asset",
     "AttackSurface",
+    "BoundaryEnforcer",
     "ChecksumManifest",
     "CostLedger",
     "DependencyFinding",
@@ -170,12 +177,15 @@ __all__ = [
     "ThreatModel",
     "TrustBoundary",
     "TrustedModelStore",
+    "UntrustedData",
     "build_manifest",
+    "build_prompt",
     "check_batch",
     "check_prompt",
     "check_state",
     "curated_surface",
     "default_threat_model",
+    "detect_override",
     "detect_sqli",
     "enforce_manifest",
     "enumerate_surface",

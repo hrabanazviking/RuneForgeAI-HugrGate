@@ -700,3 +700,13 @@ class PathTraversalBlocked(HugrGateError):
     """
     code = "path_traversal_blocked"
     recoverable = False
+
+
+class PromptInjectionBlocked(HugrGateError):
+    """A prompt-injection attempt was stopped at the boundary.
+    Slice 414.  Raised by :mod:`hugrgate.security.prompt_injection`
+    when untrusted content carries a high-confidence instruction-
+    override attempt.  Not recoverable: the content is hostile.
+    """
+    code = "prompt_injection_blocked"
+    recoverable = False

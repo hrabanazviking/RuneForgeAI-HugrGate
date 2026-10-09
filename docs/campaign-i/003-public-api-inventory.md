@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 377 · **public names:** 2329
+**Modules:** 378 · **public names:** 2338
 
 ## API stability policy
 
@@ -3965,6 +3965,7 @@ that this document never drifts from the code.
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
 | `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
 | `CostLedger` | class | `(budget_units: 'int', name: 'str' = 'cost') -> 'None'` |
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
@@ -3987,12 +3988,15 @@ that this document never drifts from the code.
 | `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
 | `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
+| `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
 | `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
+| `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
 | `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
 | `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
+| `detect_override` | function | `(text: 'str') -> 'list[OverrideFinding]'` |
 | `detect_sqli` | function | `(text: 'str') -> 'bool'` |
 | `enforce_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
@@ -4102,6 +4106,16 @@ that this document never drifts from the code.
 | `TRUST_LEVELS` | constant | `('denied', 'sandboxed', 'signed', 'builtin')` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+
+### `hugrgate.security.prompt_injection`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
+| `OverrideFinding` | class | `(pattern: 'str', matched: 'str', confidence: 'str', span: 'tuple[int, int]') -> None` |
+| `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
+| `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
+| `detect_override` | function | `(text: 'str') -> 'list[OverrideFinding]'` |
 
 ### `hugrgate.security.resource_guards`
 
