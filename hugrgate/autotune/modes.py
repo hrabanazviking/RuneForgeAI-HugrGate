@@ -11,7 +11,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+import statistics
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -27,6 +28,7 @@ from hugrgate.errors import AutotuneError
 
 __all__ = [
     "OfflineDriver",
+    "ShadowDriver",
 ]
 
 
@@ -80,3 +82,75 @@ class OfflineDriver(ModeDriver):
 
     def clear(self) -> None:
         self.journal.clear()
+
+
+@dataclass
+class ShadowDriver(ModeDriver):
+    """Compare proposals against live config on mirrored traffic.
+
+    Slice 467. The shadow driver scores every proposal's candidate
+    config *alongside* the live config on the same recorded samples —
+    like a shadow deployment, but fully offline and deterministic.
+    Nothing is applied; the verdict is recorded:
+
+    - ``would_win``: shadow mean beats live mean by ``min_delta``;
+    - ``would_lose``: live beats shadow by ``min_delta``;
+    - ``tie``: within ``min_delta``.
+
+    ``live_scorer`` / ``shadow_scorer`` map ``(values, sample)`` to a
+    higher-is-better score. Scorers are operator-supplied (e.g. a
+    simulator over recorded decisions); a crashing scorer becomes
+    :class:`AutotuneError`, never a silent tie.
+    """
+
+    mode: Mode = Mode.SHADOW
+    samples: Sequence[Mapping[str, Any]] = field(default_factory=list)
+    live_scorer: Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None = None
+    shadow_scorer: Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None = None
+    min_delta: float = 0.005
+    journal: list[dict[str, Any]] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not self.samples:
+            raise AutotuneError("shadow driver needs samples")
+        if self.live_scorer is None or self.shadow_scorer is None:
+            raise AutotuneError("shadow driver needs live/shadow scorers")
+
+    def _mean(self, scorer: Callable[[Mapping[str, Any], Mapping[str, Any]], float],
+               values: Mapping[str, Any], proposal_id: str) -> float:
+        try:
+            scores = [float(scorer(values, s)) for s in self.samples]
+        except Exception as exc:  # scorer isolation
+            raise AutotuneError("shadow scorer raised",
+                                proposal=proposal_id,
+                                error=repr(exc)) from exc
+        return statistics.fmean(scores)
+
+    def handle(self, proposal: Proposal, ctx: TuningContext) -> DriverResult:
+        live_values = ctx.store.snapshot()
+        candidate = dict(live_values)
+        candidate.update(proposal.changes)
+        live = self._mean(self.live_scorer, live_values,  # type: ignore[arg-type]
+                          proposal.proposal_id)
+        shadow = self._mean(self.shadow_scorer, candidate,  # type: ignore[arg-type]
+                            proposal.proposal_id)
+        delta = shadow - live
+        verdict = ("would_win" if delta >= self.min_delta
+                   else "would_lose" if delta <= -self.min_delta
+                   else "tie")
+        self.journal.append({
+            "proposal": proposal.to_dict(),
+            "disposition": Disposition.SHADOWED.value,
+            "verdict": verdict,
+            "live_mean": live,
+            "shadow_mean": shadow,
+            "delta": delta,
+            "n_samples": len(self.samples),
+            "run_id": ctx.run_id,
+        })
+        return DriverResult(
+            proposal_id=proposal.proposal_id,
+            disposition=Disposition.SHADOWED,
+            detail={"verdict": verdict, "delta": delta,
+                    "live_mean": live, "shadow_mean": shadow,
+                    "journal_index": len(self.journal) - 1})
