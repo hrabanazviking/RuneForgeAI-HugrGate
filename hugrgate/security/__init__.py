@@ -54,6 +54,13 @@ hardening what exists instead of duplicating it:
 
 from __future__ import annotations
 
+from hugrgate.security.attack_surface import (
+    AttackSurface,
+    SurfaceEntry,
+    curated_surface,
+    enumerate_surface,
+    find_unlisted,
+)
 from hugrgate.security.threat_model import (
     STRIDE,
     Asset,
@@ -66,8 +73,13 @@ from hugrgate.security.threat_model import (
 __all__ = [
     "STRIDE",
     "Asset",
+    "AttackSurface",
+    "SurfaceEntry",
     "Threat",
     "ThreatModel",
     "TrustBoundary",
+    "curated_surface",
     "default_threat_model",
+    "enumerate_surface",
+    "find_unlisted",
 ]

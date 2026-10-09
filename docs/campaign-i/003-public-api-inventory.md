@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 365 · **public names:** 2213
+**Modules:** 366 · **public names:** 2222
 
 ## API stability policy
 
@@ -3961,10 +3961,24 @@ that this document never drifts from the code.
 |---|---|---|
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
+| `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
 | `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
+| `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
+| `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.attack_surface`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
+| `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
+| `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 
 ### `hugrgate.security.threat_model`
 

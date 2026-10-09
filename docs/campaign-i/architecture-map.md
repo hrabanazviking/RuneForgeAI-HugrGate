@@ -1815,6 +1815,7 @@ flowchart TD
     scheduler --> backpressure
     scheduler --> errors
     scheduler --> log
+    security --> security_attack_surface
     security --> security_threat_model
     serde --> errors
     serde --> policy
@@ -3258,6 +3259,7 @@ flowchart TD
 | `scheduler` | `backpressure` | no |
 | `scheduler` | `errors` | no |
 | `scheduler` | `log` | no |
+| `security` | `security.attack_surface` | no |
 | `security` | `security.threat_model` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
