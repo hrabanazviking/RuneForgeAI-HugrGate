@@ -115,6 +115,12 @@ from hugrgate.evlab.privacy import (
     randomized_response_q,
     scan_dataset_pii,
 )
+from hugrgate.evlab.report import (
+    LabReport,
+    lab_report_from_run,
+    render_lab_markdown,
+    write_lab_report,
+)
 from hugrgate.evlab.repro import (
     ReproCheck,
     ReproManifest,
@@ -183,6 +189,7 @@ __all__ = [
     "HistoryStore",
     "IdentityCalibrator",
     "LabCalibrator",
+    "LabReport",
     "LabelNoise",
     "LatencyReport",
     "MetricSet",
@@ -228,6 +235,7 @@ __all__ = [
     "fingerprint_items",
     "gates_from_config",
     "kfold_indices",
+    "lab_report_from_run",
     "label_psi",
     "latency_aware_evaluate",
     "make_splits",
@@ -240,6 +248,7 @@ __all__ = [
     "privacy_utility_curve",
     "randomized_response_q",
     "read_bundle",
+    "render_lab_markdown",
     "risk_at_coverage",
     "risk_coverage_curve",
     "robustness_evaluate",
@@ -250,5 +259,6 @@ __all__ = [
     "stratified_evaluate",
     "verify_bundle",
     "write_bundle",
+    "write_lab_report",
     "zip_bundle",
 ]

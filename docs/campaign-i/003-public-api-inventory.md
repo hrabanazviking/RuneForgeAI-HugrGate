@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 311 · **public names:** 1933
+**Modules:** 312 · **public names:** 1941
 
 ## API stability policy
 
@@ -2283,6 +2283,7 @@ that this document never drifts from the code.
 | `HistoryStore` | class | `(path: 'str | Path') -> 'None'` |
 | `IdentityCalibrator` | class | `()` |
 | `LabCalibrator` | class | `()` |
+| `LabReport` | class | `(title: 'str', generated_at: 'str' = <factory>, run: 'RunRecord | None' = None, bench_json: 'Mapping[str, Any] | None' = None, comparisons: 'list[dict[str, Any]]' = <factory>, gate_results: 'list[dict[str, Any]]' = <factory>, regressions: 'list[dict[str, Any]]' = <factory>, repro: 'Mapping[str, Any] | None' = None, notes: 'list[str]' = <factory>) -> None` |
 | `LabelNoise` | class | `(p: 'float') -> 'None'` |
 | `LatencyReport` | class | `(backends: 'dict[str, dict[str, Any]]', slo_ms: 'float', n_items: 'int') -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
@@ -2328,6 +2329,7 @@ that this document never drifts from the code.
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `gates_from_config` | function | `(configs: 'Sequence[Mapping[str, Any]]', name: 'str' = 'suite') -> 'GateSuite'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
+| `lab_report_from_run` | function | `(record: 'RunRecord', title: 'str | None' = None, comparisons: 'Sequence[Mapping[str, Any]]' = (), gate_results: 'Sequence[Mapping[str, Any]]' = (), regressions: 'Sequence[Mapping[str, Any]]' = (), repro: 'Mapping[str, Any] | None' = None, bench_json: 'Mapping[str, Any] | None' = None, notes: 'Sequence[str]' = ()) -> 'LabReport'` |
 | `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
 | `latency_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, slo_ms: 'float' = 100.0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'LatencyReport'` |
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
@@ -2340,6 +2342,7 @@ that this document never drifts from the code.
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `read_bundle` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `render_lab_markdown` | function | `(report: 'LabReport') -> 'str'` |
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
 | `robustness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, perturbations: 'Sequence[Perturbation] | None' = None, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'RobustnessReport'` |
@@ -2350,6 +2353,7 @@ that this document never drifts from the code.
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 | `verify_bundle` | function | `(path: 'str | Path') -> 'BundleReport'` |
 | `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, repro_manifest: 'ReproManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
+| `write_lab_report` | function | `(report: 'LabReport', path: 'str | Path') -> 'str'` |
 | `zip_bundle` | function | `(path: 'str | Path') -> 'Path'` |
 
 ### `hugrgate.evlab.api`
@@ -2484,6 +2488,15 @@ that this document never drifts from the code.
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
+
+### `hugrgate.evlab.report`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LabReport` | class | `(title: 'str', generated_at: 'str' = <factory>, run: 'RunRecord | None' = None, bench_json: 'Mapping[str, Any] | None' = None, comparisons: 'list[dict[str, Any]]' = <factory>, gate_results: 'list[dict[str, Any]]' = <factory>, regressions: 'list[dict[str, Any]]' = <factory>, repro: 'Mapping[str, Any] | None' = None, notes: 'list[str]' = <factory>) -> None` |
+| `lab_report_from_run` | function | `(record: 'RunRecord', title: 'str | None' = None, comparisons: 'Sequence[Mapping[str, Any]]' = (), gate_results: 'Sequence[Mapping[str, Any]]' = (), regressions: 'Sequence[Mapping[str, Any]]' = (), repro: 'Mapping[str, Any] | None' = None, bench_json: 'Mapping[str, Any] | None' = None, notes: 'Sequence[str]' = ()) -> 'LabReport'` |
+| `render_lab_markdown` | function | `(report: 'LabReport') -> 'str'` |
+| `write_lab_report` | function | `(report: 'LabReport', path: 'str | Path') -> 'str'` |
 
 ### `hugrgate.evlab.repro`
 
