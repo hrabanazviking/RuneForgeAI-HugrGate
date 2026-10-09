@@ -24,6 +24,7 @@ from hugrgate.memory.access import (
     MemoryAccessPolicy,
     RolePermission,
 )
+from hugrgate.memory.assisted_routing import RoutingAdvice, advise_route
 from hugrgate.memory.backend_history import BackendHistory, backend_histories
 from hugrgate.memory.compaction import CompactionSummary, compact
 from hugrgate.memory.conditioned import retrieve_conditioned
@@ -126,8 +127,10 @@ __all__ = [
     "RetentionReport",
     "RetrievalResult",
     "RolePermission",
+    "RoutingAdvice",
     "SimilarityHit",
     "ValueCounterfactual",
+    "advise_route",
     "backend_histories",
     "by_backend",
     "by_backend_value",

@@ -250,3 +250,11 @@ it into an opaque agent.
   (exchangeability, no unmeasured confounding); propensity-based
   off-policy evaluation stays in `adaptive.counterfactual`.
 - Tests: `tests/test_memory_counterfactuals.py` (8 tests).
+
+### Slice 321 — Memory-assisted routing
+- `hugrgate/memory/assisted_routing.py`: `advise_route()` recommends
+  the candidate backend with the best historical success on similar
+  decisions (ties: more samples, tighter Wilson interval), or abstains
+  with `chosen=None` when no candidate has enough labeled history.
+  Memory advises; the caller decides what abstention means.
+- Tests: `tests/test_memory_assisted_routing.py` (9 tests).
