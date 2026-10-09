@@ -36,6 +36,29 @@ def iter_modules() -> list[str]:
     return sorted(mods)
 
 
+def _stable_repr(obj: object) -> str:
+    """Deterministic repr for constants.
+
+    Plain ``repr()`` embeds memory addresses (functions) and
+    arbitrary order (sets), which makes the generated inventory
+    differ run to run. This renders those stably.
+    """
+    if inspect.isfunction(obj) or inspect.isbuiltin(obj):
+        return f"<function {obj.__qualname__}>"
+    if isinstance(obj, dict):
+        items = sorted(obj.items(), key=lambda kv: repr(kv[0]))
+        inner = ", ".join(
+            f"{_stable_repr(k)}: {_stable_repr(v)}" for k, v in items)
+        return "{" + inner + "}"
+    if isinstance(obj, (set, frozenset)):
+        inner = ", ".join(sorted(_stable_repr(v) for v in obj))
+        return f"{type(obj).__name__}({{{inner}}})"
+    if isinstance(obj, (list, tuple)):
+        inner = ", ".join(_stable_repr(v) for v in obj)
+        return f"[{inner}]" if isinstance(obj, list) else f"({inner})"
+    return repr(obj)
+
+
 def describe(module, name: str) -> tuple[str, str]:
     obj = getattr(module, name)
     if inspect.isclass(obj):
@@ -52,6 +75,7 @@ def describe(module, name: str) -> tuple[str, str]:
         else:
             shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
         return "constant", shown[:60]
+        return "constant", _stable_repr(obj)[:60]
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):

@@ -18,6 +18,7 @@ from hugrgate.errors import (
     BackendUnavailable,
     CalibrationError,
     ContractError,
+    GGUFError,
     HugrGateError,
     PolicyError,
     PrivacyViolation,
@@ -32,6 +33,7 @@ ALL_ERRORS = [
     HugrGateError, SpecError, PolicyError, BackendError, BackendUnavailable,
     CalibrationError, TimeoutError, PrivacyViolation, QueueFull, Abstention,
     ContractError,
+    GGUFError,
 ]
 
 EXPECTED_CODES = {
@@ -46,6 +48,7 @@ EXPECTED_CODES = {
     QueueFull: "queue_full",
     Abstention: "abstention",
     ContractError: "contract_error",
+    GGUFError: "gguf_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -59,6 +62,8 @@ EXPECTED_RECOVERABLE = {
     PrivacyViolation: False,
     QueueFull: True,
     Abstention: True,
+    ContractError: False,
+    GGUFError: True,
 }
 
 

@@ -21,6 +21,7 @@ __all__ = [
     "BackendUnavailable",
     "CalibrationError",
     "ContractError",
+    "GGUFError",
     "HugrGateError",
     "PolicyError",
     "PrivacyViolation",
@@ -150,3 +151,15 @@ class Abstention(HugrGateError):
         return cls(data.get("message", "insufficient confidence"),
                    reason=data.get("reason", "below_threshold"),
                    **data.get("details", {}))
+
+
+class GGUFError(HugrGateError):
+    """A GGUF model file is corrupt, truncated, or not GGUF at all.
+
+    Moved into the taxonomy in slice 175 (was a bare ``Exception``
+    in ``hugrgate.runtimes.gguf``). Recoverable: callers such as the
+    model metadata scanner skip the file and continue with the next
+    candidate.
+    """
+    code = "gguf_error"
+    recoverable = True

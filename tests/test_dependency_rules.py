@@ -49,6 +49,11 @@ def _is_backend(mod: str) -> bool:
     return mod.startswith("hugrgate.backends.")
 
 
+def _is_runtime(mod: str) -> bool:
+    # Slice 152: the local-model-fabric runtime layer (package + submodules).
+    return mod == "hugrgate.runtimes" or mod.startswith("hugrgate.runtimes.")
+
+
 def _is_calibration(mod: str) -> bool:
     return mod == "hugrgate.calibration" or mod.startswith("hugrgate.calibration.")
 
@@ -58,7 +63,10 @@ CONTRACTS = {
     "hugrgate.backend", "hugrgate.policy", "hugrgate.validation",
 }
 SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client"}
-BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models"}
+# Slice 152: the local-model-fabric runtime layer sits *below* backends —
+# backends may build on runtime adapters, never the reverse.
+BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
+                               "hugrgate.runtimes"}
 CALIB_ALLOWED = {
     "hugrgate.errors", "hugrgate.backend",
     "hugrgate.result", "hugrgate.spec",
@@ -84,7 +92,7 @@ def test_backends_stay_below_the_service_layer():
         f"{m} -> {t}" for m, ts in _eager_edges().items()
         if _is_backend(m)
         for t in ts
-        if not (t in BACKEND_ALLOWED or _is_backend(t))
+        if not (t in BACKEND_ALLOWED or _is_backend(t) or _is_runtime(t))
     ]
     assert not violations, f"backend layering violations: {violations}"
 
@@ -107,6 +115,18 @@ def test_only_service_modules_import_service_modules():
     assert not violations, f"service layer leaks: {violations}"
 
 
+def test_runtimes_stay_below_backends():
+    # Slice 152: the runtime layer is below backends — adapters must not
+    # reach up into backends or the service layer.
+    violations = [
+        f"{m} -> {t}" for m, ts in _eager_edges().items()
+        if _is_runtime(m)
+        for t in ts
+        if _is_backend(t) or t in SERVICE
+    ]
+    assert not violations, f"runtime layering violations: {violations}"
+
+
 # --- third-party coverage ------------------------------------------------------
 
 THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
@@ -126,9 +146,17 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "ruff": {"lint"},
     "coverage": {"lint"},
     "onnxruntime": {"onnx"},
+    "onnx": {"onnx"},
+    "vllm": {"vllm"},
+    "mlx_lm": {"mlx"},
+    "openvino": {"openvino"},
+    "tensorrt": {"tensorrt"},
+    "pycuda": {"tensorrt"},
 }
 # Declared extras with no current importer (documented reservations).
-RESERVED_EXTRAS = {"onnx": "reserved for a future ONNX backend (slice 004 audit)"}
+# (The ``onnx`` reservation was retired in slice 154: the future ONNX
+# backend it waited for is ``hugrgate.runtimes.onnx``.)
+RESERVED_EXTRAS: dict[str, str] = {}
 
 _STDLIB = {
     "__future__", "abc", "argparse", "ast", "asyncio", "collections",
@@ -140,6 +168,8 @@ _STDLIB = {
     "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
     "concurrent",
+    "csv", "gzip", "zipfile", "email", "html", "http", "urllib", "struct",
+    "resource", "concurrent", "types", "builtins",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes"}
@@ -191,6 +221,7 @@ def test_every_third_party_import_is_declared():
                 "pyyaml": "yaml",
                 "scikit-learn": "sklearn",
                 "llama-cpp-python": "llama_cpp",
+                "mlx-lm": "mlx_lm",
             }.get(dist, dist),
             set(),
         ).update(exs)

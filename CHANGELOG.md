@@ -1,5 +1,41 @@
 # Changelog — HugrGate
 
+## Unreleased — Gjallarbrú Campaign VII: Local Model Fabric
+
+New `hugrgate/runtimes/` layer (slices 151–175): a v2 local-runtime
+contract (`LocalRuntime`, `RuntimeRegistry`, `ModelRef`) with eight
+engine adapters (llama.cpp, Ollama, ONNX Runtime, Transformers,
+vLLM, MLX, OpenVINO, TensorRT), GGUF discovery, a model metadata
+scanner, capability probing, structured/grammar/JSON-schema
+constrained decoding, curated NLI/embedding/classifier model packs,
+and serving operations — warmup manager, ref-counted residency
+manager, LRU/TTL/memory-pressure eviction, health probes, a
+contract conformance suite, and a measured benchmark matrix
+(`benchmarks/localrt-matrix.json`).
+
+### Added
+- `GGUFError` to the error taxonomy (`hugrgate.errors`, code
+  `gguf_error`, recoverable; re-exported from `hugrgate` and
+  `hugrgate.runtimes.gguf`)
+- `local-runtimes` layer in the architecture map (below backends,
+  above contracts — pinned by `test_dependency_rules.py`)
+- `onnx` distribution added to the `hugrgate[onnx]` extra (the
+  metadata scanner's deep ONNX scan imports it)
+
+### Fixed
+- `LlamaCppRuntime.warmup()` raised with no model loaded; now a
+  no-op like every sibling adapter (contract conformance)
+- `StructuredRuntime.generate_structured` and
+  `JsonSchemaConstrainedRuntime` built `GenerationOptions` with
+  both `grammar` and `json_schema` (mutually exclusive); now a
+  `SpecError` conflict, consistent policy
+- `ResidencyManager.release()` unloaded at refcount zero, leaving
+  nothing for eviction; models now stay warm until `evict()`
+- `probe.probe_runtime` renamed `probe_capabilities` (name collided
+  with `health_probes.probe_runtime`)
+- `gen_api_inventory.py` emitted nondeterministic constant reprs
+  (memory addresses, set order); now stable
+
 ## Unreleased — Gjallarbrú Campaign I: Iron Foundation
 
 Audit-and-harden campaign over the existing codebase (slices
