@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 248)
+- Exfiltration simulation (`hugrgate.privacy_exfil`):
+  `ExfilSimulator` red-teams a guard configuration with 7
+  attacker scenarios (blocked/neutralized/allowed verdicts);
+  fixed a real bug where attempt labels never reached the
+  payload compiler.
+
 ### Added (slice 247)
 - Privacy fuzz tests (`tests/test_privacy_fuzz.py`): 15
   stdlib-seeded property tests. Found and fixed a real gap:
