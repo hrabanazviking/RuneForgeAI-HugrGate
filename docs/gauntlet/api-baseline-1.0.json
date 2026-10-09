@@ -1162,6 +1162,421 @@
       "sig": "(backend: 'Any') -> 'bool'"
     }
   },
+  "hugrgate.autotune": {
+    "__version__": {
+      "kind": "constant",
+      "sig": ""
+    }
+  },
+  "hugrgate.autotune.adversarial": {
+    "AttackResult": {
+      "kind": "class",
+      "sig": "(name: 'str', measurements: 'dict[str, Any]' = <factory>, notes: 'str' = '') -> None"
+    },
+    "crash_storm_attack": {
+      "kind": "function",
+      "sig": "(controller: 'OptimizationController', n_crashers: 'int' = 5) -> 'AttackResult'"
+    },
+    "label_poisoning_attack": {
+      "kind": "function",
+      "sig": "(tuner_factory: 'Callable[[Sequence[tuple[float, int]]], BaseTuner]', dataset: 'Sequence[tuple[float, int]]', clean_metric: 'Callable[[float], float]', param: 'str', poison_fraction: 'float' = 0.2, seed: 'int' = 0) -> 'AttackResult'"
+    },
+    "latency_spike_attack": {
+      "kind": "function",
+      "sig": "(tuner_factory: 'Callable[[Mapping[str, Sequence[float]]], BaseTuner]', samples: 'Mapping[str, Sequence[float]]', total_budget_ms: 'float', min_stage_ms: 'float', spike_fraction: 'float' = 0.1, spike_factor: 'float' = 10.0, seed: 'int' = 0) -> 'AttackResult'"
+    },
+    "malicious_tuner_attack": {
+      "kind": "function",
+      "sig": "(controller: 'OptimizationController', malicious_changes: 'Mapping[str, Any]', tuner_name: 'str' = 'malicious') -> 'AttackResult'"
+    },
+    "poison_labels": {
+      "kind": "function",
+      "sig": "(dataset: 'Sequence[tuple[float, int]]', fraction: 'float', seed: 'int') -> 'list[tuple[float, int]]'"
+    },
+    "spike_samples": {
+      "kind": "function",
+      "sig": "(samples: 'Mapping[str, Sequence[float]]', fraction: 'float', spike_factor: 'float', seed: 'int') -> 'dict[str, list[float]]'"
+    }
+  },
+  "hugrgate.autotune.benchmark": {
+    "AutotuneBenchmark": {
+      "kind": "class",
+      "sig": "(scenarios: 'Sequence[BenchmarkScenario]') -> 'None'"
+    },
+    "BenchmarkReport": {
+      "kind": "class",
+      "sig": "(seed: 'int', results: 'list[BenchmarkResult]' = <factory>, generated_at: 'float' = <factory>) -> None"
+    },
+    "BenchmarkResult": {
+      "kind": "class",
+      "sig": "(scenario: 'str', baseline_score: 'float', tuned_score: 'float', improvement: 'float', seconds: 'float', proposal_id: 'str', data_fingerprint: 'str') -> None"
+    },
+    "BenchmarkScenario": {
+      "kind": "class",
+      "sig": "(name: 'str', tuner: 'BaseTuner', params: 'Sequence[TunableParameter]', replay: 'Callable[[Mapping[str, Any]], float]', data_fingerprint: 'str' = '', baseline_note: 'str' = '') -> None"
+    }
+  },
+  "hugrgate.autotune.constraints": {
+    "ConstraintSet": {
+      "kind": "class",
+      "sig": "(constraints: 'Sequence[ConstraintSpec]' = ()) -> 'None'"
+    },
+    "ConstraintSpec": {
+      "kind": "class",
+      "sig": "(constraint_id: 'str', predicate: 'Callable[[Mapping[str, Any]], bool]', message: 'str', severity: 'str' = 'hard') -> None"
+    },
+    "Violation": {
+      "kind": "class",
+      "sig": "(constraint_id: 'str', message: 'str', severity: 'str' = 'hard') -> None"
+    },
+    "change_within": {
+      "kind": "function",
+      "sig": "(param: 'str', baseline: 'Mapping[str, Any]', max_delta: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    },
+    "implies": {
+      "kind": "function",
+      "sig": "(param_a: 'str', value_a: 'Any', param_b: 'str', allowed: 'Sequence[Any]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    },
+    "mutual_exclusion": {
+      "kind": "function",
+      "sig": "(params: 'Sequence[str]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    },
+    "requires": {
+      "kind": "function",
+      "sig": "(param: 'str', predicate: 'Callable[[Any], bool]', message: 'str', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    },
+    "sum_leq": {
+      "kind": "function",
+      "sig": "(params: 'Sequence[str]', cap: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    },
+    "within_bounds": {
+      "kind": "function",
+      "sig": "(param: 'str', lo: 'float', hi: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'"
+    }
+  },
+  "hugrgate.autotune.controller": {
+    "ConfigStore": {
+      "kind": "class",
+      "sig": "() -> 'None'"
+    },
+    "DEFAULT_MODES": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "Disposition": {
+      "kind": "class",
+      "sig": "(*values)"
+    },
+    "DriverResult": {
+      "kind": "class",
+      "sig": "(proposal_id: 'str', disposition: 'Disposition', detail: 'dict[str, Any]' = <factory>) -> None"
+    },
+    "Mode": {
+      "kind": "class",
+      "sig": "(*values)"
+    },
+    "ModeDriver": {
+      "kind": "class",
+      "sig": "(*args, **kwargs)"
+    },
+    "OptimizationController": {
+      "kind": "class",
+      "sig": "(store: 'ConfigStore | None' = None) -> 'None'"
+    },
+    "Proposal": {
+      "kind": "class",
+      "sig": "(proposal_id: 'str', tuner: 'str', changes: 'dict[str, Any]', objective_id: 'str', baseline: 'float', estimate: 'float', seed: 'int', created_at: 'float' = <factory>, evidence: 'dict[str, Any]' = <factory>) -> None"
+    },
+    "TunableParameter": {
+      "kind": "class",
+      "sig": "(name: 'str', dtype: 'str', default: 'Any', description: 'str' = '', owner: 'str' = '', lo: 'float | None' = None, hi: 'float | None' = None, choices: 'tuple[str, ...] | None' = None) -> None"
+    },
+    "Tuner": {
+      "kind": "class",
+      "sig": "(*args, **kwargs)"
+    },
+    "TuningContext": {
+      "kind": "class",
+      "sig": "(store: 'ConfigStore', objectives: 'Mapping[str, Callable[[Mapping[str, Any]], float]]', constraints: 'Sequence[Callable[[Mapping[str, Any]], None]]', seed: 'int', mode: 'Mode', run_id: 'str', data: 'Mapping[str, Any]' = <factory>) -> None"
+    },
+    "TuningRun": {
+      "kind": "class",
+      "sig": "(run_id: 'str', mode: 'Mode', seed: 'int', started_at: 'float', finished_at: 'float', results: 'list[DriverResult]' = <factory>, notes: 'list[str]' = <factory>) -> None"
+    }
+  },
+  "hugrgate.autotune.limits": {
+    "SafetyEnforcer": {
+      "kind": "class",
+      "sig": "(limits: 'SafetyLimits | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'"
+    },
+    "SafetyLimits": {
+      "kind": "class",
+      "sig": "(kill_switch: 'bool' = False, frozen_params: 'tuple[str, ...]' = (), max_params_per_proposal: 'int' = 5, max_step_fraction: 'float' = 0.25, allowed_modes: 'tuple[Mode, ...]' = (<Mode.OFFLINE: 'offline'>, <Mode.SHADOW: 'shadow'>, <Mode.CANARY: 'canary'>), max_cycles_per_hour: 'int' = 12) -> None"
+    }
+  },
+  "hugrgate.autotune.modes": {
+    "CanaryDriver": {
+      "kind": "class",
+      "sig": "(mode: 'Mode' = <Mode.CANARY: 'canary'>, fraction: 'float' = 0.05, lease_seconds: 'float' = 600.0, guardrails: 'list[Callable[[], tuple[bool, str]]]' = <factory>, clock: 'Callable[[], float]' = <built-in function time>, leases: 'list[CanaryLease]' = <factory>) -> None"
+    },
+    "CanaryLease": {
+      "kind": "class",
+      "sig": "(lease_id: 'str', proposal_id: 'str', changes: 'dict[str, Any]', previous: 'dict[str, Any]', fraction: 'float', started_at: 'float', ends_at: 'float', status: 'str' = 'active', events: 'list[str]' = <factory>) -> None"
+    },
+    "OfflineDriver": {
+      "kind": "class",
+      "sig": "(mode: 'Mode' = <Mode.OFFLINE: 'offline'>, journal: 'list[dict[str, Any]]' = <factory>, seen: 'dict[str, Proposal]' = <factory>) -> None"
+    },
+    "ShadowDriver": {
+      "kind": "class",
+      "sig": "(mode: 'Mode' = <Mode.SHADOW: 'shadow'>, samples: 'Sequence[Mapping[str, Any]]' = <factory>, live_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, shadow_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, min_delta: 'float' = 0.005, journal: 'list[dict[str, Any]]' = <factory>) -> None"
+    }
+  },
+  "hugrgate.autotune.objectives": {
+    "Direction": {
+      "kind": "class",
+      "sig": "(*values)"
+    },
+    "GuardedObjective": {
+      "kind": "class",
+      "sig": "(objective_id: 'str', primary: 'ObjectiveSpec', guards: 'tuple[tuple[ObjectiveSpec, float], ...]' = ()) -> None"
+    },
+    "LexicographicObjective": {
+      "kind": "class",
+      "sig": "(objective_id: 'str', specs: 'tuple[ObjectiveSpec, ...]', tolerance: 'float' = 1e-09) -> None"
+    },
+    "ObjectiveSpec": {
+      "kind": "class",
+      "sig": "(objective_id: 'str', evaluate: 'Callable[[Mapping[str, Any]], float]', direction: 'Direction' = <Direction.MAXIMIZE: 'maximize'>, bounds: 'tuple[float, float]' = (0.0, 1.0), target: 'float | None' = None, description: 'str' = '') -> None"
+    },
+    "WeightedObjective": {
+      "kind": "class",
+      "sig": "(objective_id: 'str', parts: 'tuple[tuple[ObjectiveSpec, float], ...]') -> None"
+    }
+  },
+  "hugrgate.autotune.provenance": {
+    "OptimizationProvenance": {
+      "kind": "class",
+      "sig": "(max_records: 'int | None' = None) -> 'None'"
+    },
+    "OptimizationRecord": {
+      "kind": "class",
+      "sig": "(record_id: 'str', timestamp: 'float', tuner: 'str', proposal_id: 'str', mode: 'str', disposition: 'str', changes: 'dict[str, Any]', config_before_hash: 'str', config_after_hash: 'str', data_fingerprint: 'str', seed: 'int', evidence_summary: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None"
+    },
+    "ProvenanceTracker": {
+      "kind": "class",
+      "sig": "(store: 'OptimizationProvenance | None' = None, clock: 'Any' = <built-in function time>) -> 'None'"
+    },
+    "hash_mapping": {
+      "kind": "function",
+      "sig": "(mapping: 'Mapping[str, Any]') -> 'str'"
+    }
+  },
+  "hugrgate.autotune.release": {
+    "HOLD": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "RELEASE": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "ReleaseCheck": {
+      "kind": "class",
+      "sig": "(name: 'str', run: 'Callable[[], tuple[bool, str]]') -> None"
+    },
+    "ReleaseVerdict": {
+      "kind": "class",
+      "sig": "(verdict: 'str', results: 'list[dict[str, Any]]' = <factory>, generated_at: 'str' = <factory>) -> None"
+    },
+    "assert_release": {
+      "kind": "function",
+      "sig": "(verdict: 'ReleaseVerdict') -> 'None'"
+    },
+    "campaign_checks": {
+      "kind": "function",
+      "sig": "() -> 'list[ReleaseCheck]'"
+    },
+    "release_gate": {
+      "kind": "function",
+      "sig": "(checks: 'Sequence[ReleaseCheck] | None' = None) -> 'ReleaseVerdict'"
+    }
+  },
+  "hugrgate.autotune.repro": {
+    "RunManifest": {
+      "kind": "class",
+      "sig": "(run_id: 'str', seed: 'int', mode: 'str', tuners: 'dict[str, dict[str, Any]]', objective_ids: 'list[str]', objective_refs: 'dict[str, str]', constraint_refs: 'list[str]', data_fingerprint: 'str', config_before: 'dict[str, Any]', config_before_hash: 'str', proposal_signatures: 'list[list[str]]' = <factory>, code_version: 'str' = 'gjallarbu-campaign-xix', recorded_at: 'float' = <factory>) -> None"
+    },
+    "record_manifest": {
+      "kind": "function",
+      "sig": "(controller: 'OptimizationController', run: 'TuningRun', tuners: 'Mapping[str, Any]', proposals: 'Mapping[str, Proposal] | None' = None, data_fingerprint: 'str' = '') -> 'RunManifest'"
+    },
+    "restore_bundle": {
+      "kind": "function",
+      "sig": "(bundle: 'bytes') -> 'dict[str, Any]'"
+    },
+    "snapshot_bundle": {
+      "kind": "function",
+      "sig": "(values: 'Mapping[str, Any]') -> 'bytes'"
+    },
+    "verify_replay": {
+      "kind": "function",
+      "sig": "(manifest: 'RunManifest', make_controller: 'Callable[[], tuple[OptimizationController, Callable[[], Mapping[str, Proposal]]]]') -> 'dict[str, Any]'"
+    }
+  },
+  "hugrgate.autotune.rollback": {
+    "RollbackController": {
+      "kind": "class",
+      "sig": "(restore: 'Callable[[], None] | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'"
+    },
+    "RollbackEvent": {
+      "kind": "class",
+      "sig": "(trigger: 'str', fired_at: 'float', breaches: 'int', reason: 'str') -> None"
+    },
+    "RollbackTrigger": {
+      "kind": "class",
+      "sig": "(name: 'str', metric: 'Callable[[], float]', direction: 'str', threshold: 'float', sustained: 'int' = 3, description: 'str' = '') -> None"
+    }
+  },
+  "hugrgate.autotune.tuners": {},
+  "hugrgate.autotune.tuners._base": {
+    "BaseTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'base_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005) -> None"
+    },
+    "kfold_indices": {
+      "kind": "function",
+      "sig": "(n: 'int', labels: 'Sequence[int]', n_folds: 'int', seed: 'int') -> 'list[tuple[list[int], list[int]]]'"
+    },
+    "linspace": {
+      "kind": "function",
+      "sig": "(lo: 'float', hi: 'float', n: 'int') -> 'list[float]'"
+    },
+    "seeded_rng": {
+      "kind": "function",
+      "sig": "(seed: 'int') -> 'random.Random'"
+    }
+  },
+  "hugrgate.autotune.tuners.backends": {
+    "BackendOrderTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'backend_order_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, backends: 'Sequence[str]' = <factory>, stats: 'Mapping[str, tuple[float, float]]' = <factory>, rank_prefix: 'str' = 'backend.rank') -> None"
+    },
+    "expected_chain_cost": {
+      "kind": "function",
+      "sig": "(order: 'Sequence[str]', stats: 'Mapping[str, tuple[float, float]]') -> 'float'"
+    }
+  },
+  "hugrgate.autotune.tuners.batching": {
+    "BatchSizeTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'batch_size_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, samples: 'Sequence[tuple[int, float, float]]' = <factory>, latency_cap_ms: 'float' = 100.0, memory_cap_mb: 'float' = 4096.0, min_r_squared: 'float' = 0.5) -> None"
+    },
+    "fit_linear": {
+      "kind": "function",
+      "sig": "(xs: 'Sequence[float]', ys: 'Sequence[float]') -> 'tuple[float, float, float]'"
+    },
+    "powers_of_two": {
+      "kind": "function",
+      "sig": "(lo: 'int', hi: 'int') -> 'list[int]'"
+    }
+  },
+  "hugrgate.autotune.tuners.cache": {
+    "CachePolicyTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'cache_policy_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, ttl_param: 'str' = '', size_param: 'str' = '', eviction_param: 'str' = '', trace: 'Sequence[TraceEvent]' = <factory>, ttl_grid: 'int' = 9, size_ladder: 'Sequence[int]' = (32, 128, 512, 2048, 8192)) -> None"
+    },
+    "simulate_trace": {
+      "kind": "function",
+      "sig": "(trace: 'Sequence[TraceEvent]', ttl: 'float', max_size: 'int', eviction: 'str') -> 'dict[str, float]'"
+    }
+  },
+  "hugrgate.autotune.tuners.calibration_select": {
+    "CalibrationSelectorTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'calibration_selector_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, scores: 'Sequence[float]' = <factory>, labels: 'Sequence[int]' = <factory>, candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, min_win: 'float' = 0.0) -> None"
+    }
+  },
+  "hugrgate.autotune.tuners.cost": {
+    "CostAwareTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'cost_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, cost: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', cost_budget: 'float' = 1.0, quality_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None"
+    }
+  },
+  "hugrgate.autotune.tuners.energy": {
+    "EnergyAwareTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'energy_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, energy_j: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', energy_budget_j: 'float' = 1.0, min_samples: 'int' = 20) -> None"
+    }
+  },
+  "hugrgate.autotune.tuners.gates": {
+    "ConfidenceGateTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'confidence_gate_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, bool]]' = <factory>, mode: 'str' = 'accuracy_floor', floor: 'float' = 0.8, target: 'float' = 0.8, alpha: 'float' = 0.05, grid: 'int' = 41, train_fraction: 'float' = 0.7) -> None"
+    },
+    "wilson_lower_bound": {
+      "kind": "function",
+      "sig": "(successes: 'int', trials: 'int', alpha: 'float' = 0.05) -> 'float'"
+    }
+  },
+  "hugrgate.autotune.tuners.hardware": {
+    "HardwareAwareTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'hardware_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, tiers: 'list[HardwareTier]' = <factory>, injected_hardware: 'HardwareProfile | None' = None) -> None"
+    },
+    "HardwareProfile": {
+      "kind": "class",
+      "sig": "(cpu_count: 'int', memory_mb: 'float', arch: 'str', system: 'str') -> None"
+    },
+    "HardwareTier": {
+      "kind": "class",
+      "sig": "(name: 'str', min_cpu: 'int', min_memory_mb: 'float', profile: 'Mapping[str, Any]') -> None"
+    },
+    "detect_hardware": {
+      "kind": "function",
+      "sig": "() -> 'HardwareProfile'"
+    }
+  },
+  "hugrgate.autotune.tuners.latency": {
+    "LatencyBudgetTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'latency_budget_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, stages: 'Sequence[str]' = <factory>, samples: 'Mapping[str, Sequence[float]]' = <factory>, total_budget_ms: 'float' = 1000.0, seed_quantile: 'float' = 0.99, refine_steps: 'int' = 200, step_ms: 'float' = 1.0, min_stage_ms: 'float' = 1.0) -> None"
+    },
+    "empirical_tail": {
+      "kind": "function",
+      "sig": "(samples: 'Sequence[float]', budget: 'float') -> 'float'"
+    },
+    "quantile": {
+      "kind": "function",
+      "sig": "(samples: 'Sequence[float]', q: 'float') -> 'float'"
+    }
+  },
+  "hugrgate.autotune.tuners.privacy": {
+    "PrivacyConstrainedTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'privacy_constrained_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, privacy_class: 'Mapping[str, str]' = <factory>, epsilon: 'Mapping[str, float]' = <factory>, utility: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', epsilon_budget: 'float' = 1.0, utility_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None"
+    }
+  },
+  "hugrgate.autotune.tuners.thresholds": {
+    "ThresholdTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'threshold_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, int]]' = <factory>, metric: 'str' = 'f1', n_folds: 'int' = 5, grid: 'int' = 41) -> None"
+    },
+    "threshold_metric": {
+      "kind": "function",
+      "sig": "(metric: 'str', scores: 'Sequence[float]', labels: 'Sequence[int]', threshold: 'float') -> 'float'"
+    }
+  },
+  "hugrgate.autotune.tuners.weights": {
+    "EnsembleWeightTuner": {
+      "kind": "class",
+      "sig": "(name: 'str' = 'ensemble_weight_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, members: 'Sequence[str]' = <factory>, votes: 'Sequence[Sequence[Sequence[float]]]' = <factory>, labels: 'Sequence[int]' = <factory>, weight_prefix: 'str' = 'ensemble.weight', max_iter: 'int' = 200, tol: 'float' = 1e-06) -> None"
+    },
+    "mean_log_likelihood": {
+      "kind": "function",
+      "sig": "(votes: 'Sequence[Sequence[Sequence[float]]]', labels: 'Sequence[int]', weights: 'Sequence[float]') -> 'float'"
+    }
+  },
   "hugrgate.backend": {
     "Backend": {
       "kind": "class",
@@ -1519,13 +1934,21 @@
       "kind": "constant",
       "sig": ""
     },
+    "NONE_CANDIDATE": {
+      "kind": "constant",
+      "sig": ""
+    },
     "SelectionResult": {
       "kind": "class",
-      "sig": "(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '') -> None"
+      "sig": "(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '', incumbent: 'str | None' = None, kept_incumbent: 'bool' = False, paired_win_vs_incumbent: 'float | None' = None) -> None"
     },
     "auto_select": {
       "kind": "function",
-      "sig": "(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True) -> 'SelectionResult'"
+      "sig": "(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True, incumbent: 'str | None' = None, min_win: 'float' = 0.0) -> 'SelectionResult'"
+    },
+    "paired_win": {
+      "kind": "function",
+      "sig": "(challenger: 'dict[int, float]', incumbent: 'dict[int, float]') -> 'float | None'"
     }
   },
   "hugrgate.calibration.bayes": {
@@ -2517,7 +2940,19 @@
       "kind": "function",
       "sig": "(args: 'argparse.Namespace') -> 'int'"
     },
+    "cmd_completion": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
     "cmd_decide": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_doctor": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_gen": {
       "kind": "function",
       "sig": "(args: 'argparse.Namespace') -> 'int'"
     },
@@ -2525,7 +2960,27 @@
       "kind": "function",
       "sig": "(args: 'argparse.Namespace') -> 'int'"
     },
+    "cmd_init": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_inspect": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
     "cmd_models": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_new": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_openapi": {
+      "kind": "function",
+      "sig": "(args: 'argparse.Namespace') -> 'int'"
+    },
+    "cmd_plugins": {
       "kind": "function",
       "sig": "(args: 'argparse.Namespace') -> 'int'"
     },
@@ -3350,6 +3805,60 @@
       "sig": "() -> 'None'"
     }
   },
+  "hugrgate.compat": {
+    "migrate_contract": {
+      "kind": "function",
+      "sig": "(d: 'Mapping[str, Any]', to_version: 'str' = '2.0') -> 'tuple[DecisionContract, MigrationReport]'"
+    },
+    "upgrade_client": {
+      "kind": "function",
+      "sig": "(client: 'HugrGateClient', *, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'HugrGateSDK'"
+    }
+  },
+  "hugrgate.configgen": {
+    "generate_daemon_config": {
+      "kind": "function",
+      "sig": "(**overrides: 'Any') -> 'str'"
+    },
+    "generate_policy": {
+      "kind": "function",
+      "sig": "(**overrides: 'Any') -> 'str'"
+    },
+    "generate_spec": {
+      "kind": "function",
+      "sig": "(spec_type: 'str' = 'categorical', **fields: 'Any') -> 'str'"
+    },
+    "init_project": {
+      "kind": "function",
+      "sig": "(directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'"
+    },
+    "load_daemon_config": {
+      "kind": "function",
+      "sig": "(path: 'str | Path') -> 'Any'"
+    },
+    "write_new": {
+      "kind": "function",
+      "sig": "(path: 'str | Path', content: 'str', force: 'bool' = False) -> 'Path'"
+    }
+  },
+  "hugrgate.conformance": {
+    "ConformanceCheck": {
+      "kind": "class",
+      "sig": "(name: 'str', passed: 'bool', detail: 'str' = '') -> None"
+    },
+    "ConformanceReport": {
+      "kind": "class",
+      "sig": "(backend: 'str', checks: 'list[ConformanceCheck]' = <factory>) -> None"
+    },
+    "assert_conformance": {
+      "kind": "function",
+      "sig": "(report: 'ConformanceReport') -> 'None'"
+    },
+    "run_backend_conformance": {
+      "kind": "function",
+      "sig": "(backend: 'Backend') -> 'ConformanceReport'"
+    }
+  },
   "hugrgate.contracts": {
     "CONTRACT_KINDS": {
       "kind": "constant",
@@ -3516,6 +4025,28 @@
     "FieldCondition": {
       "kind": "class",
       "sig": "(on_field: 'str', op: 'str', expected: 'Any' = None) -> None"
+    }
+  },
+  "hugrgate.contracts.conformance": {
+    "TemplateConformanceCheck": {
+      "kind": "class",
+      "sig": "(name: 'str', passed: 'bool', detail: 'str' = '') -> None"
+    },
+    "TemplateConformanceReport": {
+      "kind": "class",
+      "sig": "(template_id: 'str', checks: 'list[TemplateConformanceCheck]' = <factory>) -> None"
+    },
+    "assert_conformance": {
+      "kind": "function",
+      "sig": "(report: 'TemplateConformanceReport') -> 'None'"
+    },
+    "run_contract_conformance": {
+      "kind": "function",
+      "sig": "(contract: 'DecisionContract') -> 'TemplateConformanceReport'"
+    },
+    "run_template_conformance": {
+      "kind": "function",
+      "sig": "(template: 'ContractTemplate', fuzz_runs: 'int' = 25, seed: 'int' = 441) -> 'TemplateConformanceReport'"
     }
   },
   "hugrgate.contracts.context": {
@@ -6980,7 +7511,7 @@
     },
     "read_runtime_dependencies": {
       "kind": "function",
-      "sig": "(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
+      "sig": "(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
     },
     "render_min_requirements": {
       "kind": "function",
@@ -6988,7 +7519,7 @@
     },
     "scan_deprecated_api": {
       "kind": "function",
-      "sig": "(root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'tuple[tuple[str, int, str], ...]'"
+      "sig": "(root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'tuple[tuple[str, int, str], ...]'"
     },
     "version_key": {
       "kind": "function",
@@ -7040,7 +7571,7 @@
     },
     "load_manifest": {
       "kind": "function",
-      "sig": "(path: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/release/freeze.toml')) -> 'FreezeManifest'"
+      "sig": "(path: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/release/freeze.toml')) -> 'FreezeManifest'"
     }
   },
   "hugrgate.gauntlet.fuzz": {
@@ -7258,7 +7789,7 @@
     },
     "validate_matrix": {
       "kind": "function",
-      "sig": "(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'MatrixReport'"
+      "sig": "(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'MatrixReport'"
     }
   },
   "hugrgate.gauntlet.racehunt": {
@@ -7371,6 +7902,16 @@
       "sig": "(runs: 'int', total_ms: 'float', functions: 'list[HotFunction]' = <factory>, label: 'str' = '') -> None"
     }
   },
+  "hugrgate.inspect": {
+    "InspectSession": {
+      "kind": "class",
+      "sig": "(url: 'str | None' = None) -> 'None'"
+    },
+    "run_inspect": {
+      "kind": "function",
+      "sig": "(url: 'str | None' = None) -> 'int'"
+    }
+  },
   "hugrgate.ladder": {
     "LadderAuditEntry": {
       "kind": "class",
@@ -7423,6 +7964,20 @@
     "RUNG_UNAVAILABLE": {
       "kind": "constant",
       "sig": ""
+    }
+  },
+  "hugrgate.loaders": {
+    "load_policy": {
+      "kind": "function",
+      "sig": "(path: 'str') -> 'DecisionPolicy'"
+    },
+    "load_spec": {
+      "kind": "function",
+      "sig": "(path: 'str') -> 'DecisionSpec'"
+    },
+    "load_state": {
+      "kind": "function",
+      "sig": "(path: 'str') -> 'dict[str, Any]'"
     }
   },
   "hugrgate.lockaudit": {
@@ -8660,6 +9215,28 @@
       "sig": "() -> 'list[tuple]'"
     }
   },
+  "hugrgate.plugins": {
+    "PluginInfo": {
+      "kind": "class",
+      "sig": "(name: 'str', entry_point: 'EntryPoint | None' = None, backend: 'Backend | None' = None, error: 'PluginError | None' = None) -> None"
+    },
+    "discover_plugins": {
+      "kind": "function",
+      "sig": "(on_error: \"Literal['raise', 'collect']\" = 'collect') -> 'tuple[list[PluginInfo], list[PluginInfo]]'"
+    },
+    "load_plugin": {
+      "kind": "function",
+      "sig": "(name: 'str', entry_point: 'EntryPoint | None' = None) -> 'Backend'"
+    },
+    "register_discovered_plugins": {
+      "kind": "function",
+      "sig": "(registry: 'BackendRegistry', on_error: \"Literal['raise', 'collect']\" = 'collect', replace: 'bool' = False) -> 'PluginReport'"
+    },
+    "validate_plugin": {
+      "kind": "function",
+      "sig": "(backend: 'Any', name: 'str' = '?') -> 'None'"
+    }
+  },
   "hugrgate.policy": {
     "DecisionPolicy": {
       "kind": "class",
@@ -9110,6 +9687,32 @@
     "region_report": {
       "kind": "function",
       "sig": "(reset: 'bool' = True) -> 'dict[str, dict[str, float]]'"
+    }
+  },
+  "hugrgate.protocol": {
+    "Envelope": {
+      "kind": "class",
+      "sig": "(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0', server_version: 'str' = '') -> None"
+    },
+    "PROTOCOL_VERSION": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "SUPPORTED_PROTOCOL_VERSIONS": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "build_envelope": {
+      "kind": "function",
+      "sig": "(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0') -> 'dict[str, Any]'"
+    },
+    "negotiate_version": {
+      "kind": "function",
+      "sig": "(requested: 'Any') -> 'str'"
+    },
+    "parse_protocol_version": {
+      "kind": "function",
+      "sig": "(value: 'Any') -> 'tuple[int, int]'"
     }
   },
   "hugrgate.provenance": {
@@ -10262,6 +10865,20 @@
       "sig": "(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None"
     }
   },
+  "hugrgate.scaffold": {
+    "SCAFFOLD_FILES": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "scaffold_project": {
+      "kind": "function",
+      "sig": "(name: 'str', directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'"
+    },
+    "validate_project_name": {
+      "kind": "function",
+      "sig": "(name: 'str') -> 'str'"
+    }
+  },
   "hugrgate.scheduler": {
     "AdaptiveBatchController": {
       "kind": "class",
@@ -10282,6 +10899,16 @@
     "ThreadPoolBatchExecutor": {
       "kind": "class",
       "sig": "(max_workers: 'int' = 8) -> 'None'"
+    }
+  },
+  "hugrgate.sdk": {
+    "HugrGateSDK": {
+      "kind": "class",
+      "sig": "(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'None'"
+    },
+    "SDK_VERSION": {
+      "kind": "constant",
+      "sig": ""
     }
   },
   "hugrgate.security": {
@@ -11183,6 +11810,14 @@
     }
   },
   "hugrgate.server": {
+    "DecideRequest": {
+      "kind": "class",
+      "sig": "(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, typing.Any] | None = None, policy: dict[str, typing.Any] | None = None, **extra_data: Any) -> None"
+    },
+    "ErrorBody": {
+      "kind": "class",
+      "sig": "(*, error: dict[str, typing.Any]) -> None"
+    },
     "KeywordBackend": {
       "kind": "class",
       "sig": "()"
@@ -11190,6 +11825,10 @@
     "ModelInfo": {
       "kind": "class",
       "sig": "(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None"
+    },
+    "ProtocolBody": {
+      "kind": "class",
+      "sig": "(*, protocol_version: str, supported_versions: list[str], service_version: str) -> None"
     },
     "UniformBackend": {
       "kind": "class",
@@ -11202,6 +11841,10 @@
     "create_app": {
       "kind": "function",
       "sig": "(gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None) -> 'FastAPI'"
+    },
+    "dump_openapi_schema": {
+      "kind": "function",
+      "sig": "() -> 'dict[str, Any]'"
     },
     "list_models": {
       "kind": "function",
