@@ -24,6 +24,8 @@ from typing import Any
 from hugrgate.errors import HugrGateError
 
 __all__ = [
+    "CRITICAL_AVAILABLE_BYTES",
+    "LOW_AVAILABLE_BYTES",
     "EdgeMemoryError",
     "MemoryInfo",
     "MemoryManager",

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 47 · **public names:** 197
+**Modules:** 48 · **public names:** 204
 
 ## API stability policy
 
@@ -263,10 +263,22 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 
+### `hugrgate.edge.affinity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
+| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
+| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+
 ### `hugrgate.edge.memory`
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
+| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
 | `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
