@@ -39,6 +39,7 @@ from hugrgate.errors import (
     QueueFull,
     RecoveryError,
     ResidencyError,
+    SealError,
     SecretDetected,
     SpecError,
     StorageError,
@@ -64,6 +65,7 @@ ALL_ERRORS = [
     JurisdictionViolation,
     LocalOnlyViolation,
     SecretDetected,
+    SealError,
 ]
 
 EXPECTED_CODES = {
@@ -99,6 +101,7 @@ EXPECTED_CODES = {
     JurisdictionViolation: "jurisdiction_violation",
     LocalOnlyViolation: "local_only_violation",
     SecretDetected: "secret_detected",
+    SealError: "seal_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -138,6 +141,7 @@ EXPECTED_RECOVERABLE = {
     JurisdictionViolation: False,
     LocalOnlyViolation: False,
     SecretDetected: False,
+    SealError: False,
 }
 
 

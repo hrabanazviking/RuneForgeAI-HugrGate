@@ -42,6 +42,7 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "SealError",
     "SecretDetected",
     "SpecError",
     "StorageError",
@@ -180,6 +181,24 @@ class SecretDetected(PrivacyViolation):
 
     code = "secret_detected"
     recoverable = False
+
+
+class SealError(HugrGateError):
+    """Raised when authenticated decryption fails (slice 241).
+
+    Wrong key, truncated blob, or failed authentication tag — the
+    blob must not be trusted. Not recoverable by blind retry with
+    the same blob and key; the caller must supply the right key or
+    treat the data as lost/tampered.
+    """
+
+    code = "seal_error"
+    recoverable = False
+
+    def __init__(self, message: str = "", reason: str = "auth",
+                 **details: Any):
+        super().__init__(message, reason=reason, **details)
+        self.reason = reason
 
 
 class ClusterAuthError(HugrGateError):

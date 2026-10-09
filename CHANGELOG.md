@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 241)
+- Encrypted cache option (`hugrgate.privacy_crypto`): stdlib
+  `SealedBox` authenticated encryption + HKDF, and
+  `EncryptedDecisionCache` with sealed entries, fail-closed
+  tamper handling, and retention TTL caps. New `SealError` error
+  (code `seal_error`).
+
 ### Added (slice 240)
 - Secure deletion hooks (`hugrgate.privacy_deletion`):
   `shred_bytes`, `SecureBuffer`, `SecureDeleter` with
