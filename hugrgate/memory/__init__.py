@@ -19,6 +19,11 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
+from hugrgate.memory.groundtruth import (
+    GroundTruth,
+    consistency_report,
+    outcome_agrees,
+)
 from hugrgate.memory.history import DecisionHistory, Episode
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
@@ -27,7 +32,10 @@ __all__ = [
     "OUTCOME_KINDS",
     "DecisionHistory",
     "Episode",
+    "GroundTruth",
     "MemoryQuery",
     "Outcome",
+    "consistency_report",
     "find_in_provenance",
+    "outcome_agrees",
 ]

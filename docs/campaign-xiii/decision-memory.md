@@ -66,3 +66,14 @@ it into an opaque agent.
 - Outcomes are queryable (`has_outcome`, `outcome_kinds` filters from
   slice 302) and feed slices 305-322.
 - Tests: `tests/test_memory_outcomes.py` (13 tests).
+
+### Slice 304 — Ground-truth attachment
+- `hugrgate/memory/groundtruth.py`: frozen `GroundTruth`
+  (label/confidence/source/verified_at/note) with round-trip;
+  `outcome_agrees()` (bool or outcome-kind labels comparable,
+  partial outcomes never verdicts); `consistency_report(history)`
+  listing episodes where verified truth contradicts observed outcome.
+- `DecisionHistory.attach_ground_truth(episode_id, truth, supersede=False)`:
+  immutable once set; supersede preserves the displaced truth in
+  `annotations["ground_truth_revisions"]`.
+- Tests: `tests/test_memory_groundtruth.py` (12 tests).

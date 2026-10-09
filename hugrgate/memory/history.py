@@ -32,16 +32,14 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from hugrgate.errors import MemoryError
+from hugrgate.memory.groundtruth import GroundTruth
 from hugrgate.memory.outcomes import Outcome
 from hugrgate.memory.query import MemoryQuery
 from hugrgate.privacy import PRIVACY_CLASS_ORDER
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
-
-if TYPE_CHECKING:  # pragma: no cover - typing only, no runtime cycle
-    from hugrgate.memory.groundtruth import GroundTruth
 
 __all__ = [
     "DecisionHistory",
@@ -252,6 +250,39 @@ class DecisionHistory:
                     f"pass overwrite=True to replace it",
                     episode_id=episode_id)
             episode.outcome = outcome
+            return copy.deepcopy(episode)
+
+    def attach_ground_truth(self, episode_id: str, truth: GroundTruth, *,
+                            supersede: bool = False) -> Episode:
+        """Attach a verified label to one episode (slice 304).
+
+        Ground truth is immutable once set: re-attaching requires
+        ``supersede=True``, and the displaced truth is preserved in
+        ``episode.annotations["ground_truth_revisions"]`` so corrections
+        stay auditable. Raises :class:`MemoryError` for an unknown id
+        or a non-superseding re-attach. Returns a copy of the updated
+        episode.
+        """
+        if not isinstance(truth, GroundTruth):
+            raise TypeError(
+                f"attach_ground_truth needs a GroundTruth, got "
+                f"{type(truth).__name__}")
+        with self._lock:
+            episode = self._by_id.get(episode_id)
+            if episode is None:
+                raise MemoryError(
+                    f"unknown episode_id: {episode_id!r}",
+                    episode_id=episode_id)
+            if episode.ground_truth is not None and not supersede:
+                raise MemoryError(
+                    f"episode {episode_id!r} already has ground truth; "
+                    f"pass supersede=True to correct it",
+                    episode_id=episode_id)
+            if episode.ground_truth is not None:
+                revisions = episode.annotations.setdefault(
+                    "ground_truth_revisions", [])
+                revisions.append(episode.ground_truth.to_dict())
+            episode.ground_truth = truth
             return copy.deepcopy(episode)
 
     # -- introspection -------------------------------------------------
