@@ -26,7 +26,7 @@ PACKAGE_API_SNAPSHOT = frozenset({
     "Backend", "BackendRegistry", "HugrGate",
     "HugrGateError", "SpecError", "PolicyError", "BackendError",
     "BackendUnavailable", "CalibrationError", "TimeoutError",
-    "PrivacyViolation", "Abstention",
+    "PrivacyViolation", "QueueFull", "Abstention",
 })
 
 

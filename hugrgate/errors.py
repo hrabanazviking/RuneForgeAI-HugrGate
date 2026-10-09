@@ -1,6 +1,20 @@
-"""Error taxonomy for HugrGate. Slice 10."""
+"""Error taxonomy for HugrGate. Slice 10; hardened in slice 007.
+
+Every HugrGate error carries:
+
+- ``code`` — a stable machine-readable string (unique across the taxonomy;
+  enforced by ``tests/test_errors.py``), also used on the HTTP wire;
+- ``recoverable`` — whether retrying the operation can plausibly succeed;
+- ``message`` + ``details`` — human text and structured context.
+
+``to_dict()`` / ``from_dict()`` give a lossless wire round-trip so a
+client can reconstruct the exact error class from an HTTP error body.
+"""
 
 from __future__ import annotations
+
+from typing import Any, ClassVar, Dict, Type
+
 
 __all__ = [
     "HugrGateError",
@@ -11,19 +25,53 @@ __all__ = [
     "CalibrationError",
     "TimeoutError",
     "PrivacyViolation",
+    "QueueFull",
     "Abstention",
 ]
 
 
 class HugrGateError(Exception):
     """Base for all HugrGate errors."""
-    code = "hugrgate_error"
-    recoverable = True
+    code: ClassVar[str] = "hugrgate_error"
+    recoverable: ClassVar[bool] = True
 
-    def __init__(self, message: str = "", **details):
+    _registry: ClassVar[Dict[str, Type["HugrGateError"]]] = {}
+
+    def __init__(self, message: str = "", **details: Any):
         super().__init__(message)
         self.message = message
         self.details = details
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        # Register concrete subclasses by code for from_dict().
+        if cls.code != HugrGateError.code:
+            HugrGateError._registry[cls.code] = cls
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Lossless wire representation of this error."""
+        return {
+            "code": self.code,
+            "message": self.message,
+            "recoverable": self.recoverable,
+            "details": dict(self.details),
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "HugrGateError":
+        """Rebuild the exact error subclass from :meth:`to_dict` output.
+
+        Unknown codes fall back to the base class rather than raising —
+        a client must never crash on a newer server's error code.
+        """
+        code = data.get("code", HugrGateError.code)
+        klass = HugrGateError._registry.get(code, HugrGateError)
+        error = klass(data.get("message", ""), **data.get("details", {}))
+        return error
+
+    def __str__(self) -> str:
+        return f"[{self.code}] {self.message}" if self.message else \
+            f"[{self.code}]"
 
 
 class SpecError(HugrGateError):
@@ -61,12 +109,34 @@ class PrivacyViolation(HugrGateError):
     recoverable = False
 
 
+class QueueFull(HugrGateError):
+    """Raised when the daemon batching queue is at capacity (back-pressure).
+
+    Moved into the taxonomy in slice 007 (was a bare ``Exception`` in
+    ``hugrgate.daemon``). Recoverable: the caller should retry, ideally
+    with backoff — the queue drains as the daemon works.
+    """
+    code = "queue_full"
+    recoverable = True
+
+
 class Abstention(HugrGateError):
     """Raised when the gate abstains — not an error, a decision."""
     code = "abstention"
     recoverable = True
 
     def __init__(self, message: str = "insufficient confidence",
-                 reason: str = "below_threshold", **details):
+                 reason: str = "below_threshold", **details: Any):
         super().__init__(message, reason=reason, **details)
         self.reason = reason
+
+    def to_dict(self) -> Dict[str, Any]:
+        data = super().to_dict()
+        data["reason"] = self.reason
+        return data
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Abstention":
+        return cls(data.get("message", "insufficient confidence"),
+                   reason=data.get("reason", "below_threshold"),
+                   **data.get("details", {}))

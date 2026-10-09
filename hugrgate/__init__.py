@@ -12,7 +12,7 @@ from hugrgate.core import HugrGate
 from hugrgate.errors import (
     HugrGateError, SpecError, PolicyError, BackendError,
     BackendUnavailable, CalibrationError, TimeoutError,
-    PrivacyViolation, Abstention,
+    PrivacyViolation, QueueFull, Abstention,
 )
 
 __version__ = "0.1.0"
@@ -21,5 +21,5 @@ __all__ = [
     "Backend", "BackendRegistry", "HugrGate",
     "HugrGateError", "SpecError", "PolicyError", "BackendError",
     "BackendUnavailable", "CalibrationError", "TimeoutError",
-    "PrivacyViolation", "Abstention",
+    "PrivacyViolation", "QueueFull", "Abstention",
 ]

@@ -32,6 +32,7 @@ from fastapi.responses import JSONResponse
 
 from hugrgate import Abstention, DecisionPolicy, DecisionResult, HugrGate
 from hugrgate.client import policy_from_dict
+from hugrgate.errors import QueueFull
 from hugrgate.server import build_gate, create_app
 
 __all__ = [
@@ -74,10 +75,6 @@ class _QueuedDecision:
     context: Optional[Dict[str, Any]]
     future: "asyncio.Future[DecisionResult]"
     enqueued_at: float = field(default_factory=time.perf_counter)
-
-
-class QueueFull(Exception):
-    """Raised when the batching queue is at capacity (back-pressure)."""
 
 
 class BatchingQueue:

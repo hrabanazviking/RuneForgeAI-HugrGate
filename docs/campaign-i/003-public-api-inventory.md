@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 42 · **public names:** 175
+**Modules:** 42 · **public names:** 177
 
 ## API stability policy
 
@@ -26,15 +26,16 @@ that this document never drifts from the code.
 | `Backend` | class | `()` |
 | `BackendRegistry` | class | `()` |
 | `HugrGate` | class | `(registry: 'Optional[BackendRegistry]' = None)` |
-| `HugrGateError` | class | `(message: 'str' = '', **details)` |
-| `SpecError` | class | `(message: 'str' = '', **details)` |
-| `PolicyError` | class | `(message: 'str' = '', **details)` |
-| `BackendError` | class | `(message: 'str' = '', **details)` |
-| `BackendUnavailable` | class | `(message: 'str' = '', **details)` |
-| `CalibrationError` | class | `(message: 'str' = '', **details)` |
-| `TimeoutError` | class | `(message: 'str' = '', **details)` |
-| `PrivacyViolation` | class | `(message: 'str' = '', **details)` |
-| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details)` |
+| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
+| `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
+| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 
 ### `hugrgate.abstain`
 
@@ -238,7 +239,7 @@ that this document never drifts from the code.
 | `DEFAULT_HOST` | constant | `'127.0.0.1'` |
 | `DEFAULT_PORT` | constant | `8377` |
 | `DaemonConfig` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, unix_socket: 'Optional[str]' = None, batch_window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024, client_policies_path: 'Optional[str]' = None, client_id_header: 'str' = 'x-client-id', drain_timeout_s: 'float' = 10.0) -> None` |
-| `QueueFull` | class | — |
+| `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BatchingQueue` | class | `(gate: 'HugrGate', window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024) -> 'None'` |
 | `load_client_policies` | function | `(path: 'str') -> 'Dict[str, DecisionPolicy]'` |
 | `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'Optional[HugrGate]' = None)` |
@@ -261,15 +262,16 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `HugrGateError` | class | `(message: 'str' = '', **details)` |
-| `SpecError` | class | `(message: 'str' = '', **details)` |
-| `PolicyError` | class | `(message: 'str' = '', **details)` |
-| `BackendError` | class | `(message: 'str' = '', **details)` |
-| `BackendUnavailable` | class | `(message: 'str' = '', **details)` |
-| `CalibrationError` | class | `(message: 'str' = '', **details)` |
-| `TimeoutError` | class | `(message: 'str' = '', **details)` |
-| `PrivacyViolation` | class | `(message: 'str' = '', **details)` |
-| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details)` |
+| `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
+| `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
+| `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 
