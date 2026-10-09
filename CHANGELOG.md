@@ -125,3 +125,41 @@ First implementation release. 50 slices forged via Mythic Engineering.
 - Docs: quickstart, concepts, backends, calibration, ladder, api,
   release checklist; 5 new worked examples
 - Packaging: extras `ml`, `onnx`, `nli`, `llm`, `server`, `bench`
+
+## Contract Engine (2026-10-09) — Gjallarbrú campaign II (slices 026–050)
+
+Versioned, self-describing v2 decision contracts in `hugrgate/contracts/`
+(24 modules, 17 kinds), built alongside the untouched v1 `DecisionSpec`.
+`ContractError(SpecError)` with per-instance codes.
+
+- 026 Contract schema v2: `DecisionContract`, kind registry, canonical
+  SHA-256 hash, dict round-trips
+- 027 Version negotiation: rank-sum negotiation, session agreements
+- 028 Nested categorical contracts: option trees, dotted leaf paths
+- 029 Hierarchical labels: label forests, hierarchical precision/recall
+- 030 Structured composite decisions: composites of v2 contracts / v1 specs
+- 031 Conditional decision fields: fixpoint activation
+- 032 Cross-field constraints: declarative field constraints
+- 033 Rich ordinal semantics: anchors, interpolation
+- 034 Numeric uncertainty intervals: interval algebra
+- 035 Distribution constraints: outcome-space health checks
+- 036 Multilabel cardinality constraints
+- 037 Cost-sensitive decisions: `CostMatrix`, Bayes-optimal choice
+- 038 Utility matrices + cost↔utility duality
+- 039 Risk matrices: minimax, regret, CVaR
+- 040 Decision deadlines: `TimedContract` (budgets, time windows)
+- 041 Context schemas, 042 Input feature contracts
+- 043 Output explanation contracts (word-boundary faithfulness)
+- 044 Contract inheritance: `derive_contract`, compatibility checks
+- 045 Contract composition: merge, product, deadline wrapping
+- 046 Contract templates: `${param}` substitution, `TemplateLibrary`
+- 047 Contract migration engine: v1 `DecisionSpec` ↔ v2, `(1.0→2.0)`
+  registry, `MigrationReport`
+- 048 Contract linting: 12+ checks, info/warning/error severities,
+  extensible `LINT_CHECKS`, template linting
+- 049 Contract fuzzing: seeded generators for 6 kinds, invariant checks
+  (round-trip, hash stability, validate soundness); ~15k checks, 0 failures
+- 050 Release gate: `HugrGate.decide()`/`decide_batch()` accept v2
+  contracts with a v1 equivalent (migrated at the boundary, `contract_id`
+  in result metadata); stdlib-only contract dependencies; full suite
+  green (876 tests), mypy clean, v1 API untouched

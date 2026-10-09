@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +45,9 @@ def describe(module, name: str) -> tuple[str, str]:
     elif inspect.ismethoddescriptor(obj):
         kind = "method-descriptor"
     else:
-        return "constant", repr(obj)[:60]
+        # Sanitize memory addresses: reprs of callables/objects embed them,
+        # which would make the inventory nondeterministic across runs.
+        return "constant", re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj)[:60])
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):

@@ -26,6 +26,7 @@ __all__ = [
     "QueueFull",
     "SpecError",
     "TimeoutError",
+    "ContractError",
 ]
 
 
@@ -117,6 +118,16 @@ class QueueFull(HugrGateError):
     """
     code = "queue_full"
     recoverable = True
+
+
+class ContractError(SpecError):
+    """A decision contract is malformed, unsupported, or violated.
+
+    Subclass of :class:`SpecError`: a bad contract is a bad spec, so
+    existing ``except SpecError`` handlers keep working.
+    """
+    code = "contract_error"
+    recoverable = False
 
 
 class Abstention(HugrGateError):
