@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 363 · **public names:** 2201
+**Modules:** 373 · **public names:** 2251
 
 ## API stability policy
 
@@ -950,9 +950,17 @@ that this document never drifts from the code.
 | `build_parser` | function | `() -> 'argparse.ArgumentParser'` |
 | `cmd_backends` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_bench` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_completion` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_decide` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_doctor` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_gen` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_health` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_init` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_inspect` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_models` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_new` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_openapi` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_plugins` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_report` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_serve` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
@@ -1294,6 +1302,33 @@ that this document never drifts from the code.
 | `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
 | `StealableQueue` | class | `() -> 'None'` |
 
+### `hugrgate.compat`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `migrate_contract` | function | `(d: 'Mapping[str, Any]', to_version: 'str' = '2.0') -> 'tuple[DecisionContract, MigrationReport]'` |
+| `upgrade_client` | function | `(client: 'HugrGateClient', *, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'HugrGateSDK'` |
+
+### `hugrgate.configgen`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `generate_daemon_config` | function | `(**overrides: 'Any') -> 'str'` |
+| `generate_policy` | function | `(**overrides: 'Any') -> 'str'` |
+| `generate_spec` | function | `(spec_type: 'str' = 'categorical', **fields: 'Any') -> 'str'` |
+| `init_project` | function | `(directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'` |
+| `load_daemon_config` | function | `(path: 'str | Path') -> 'Any'` |
+| `write_new` | function | `(path: 'str | Path', content: 'str', force: 'bool' = False) -> 'Path'` |
+
+### `hugrgate.conformance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ConformanceReport` | class | `(backend: 'str', checks: 'list[ConformanceCheck]' = <factory>) -> None` |
+| `assert_conformance` | function | `(report: 'ConformanceReport') -> 'None'` |
+| `run_backend_conformance` | function | `(backend: 'Backend') -> 'ConformanceReport'` |
+
 ### `hugrgate.contracts`
 
 | Name | Kind | Signature / value |
@@ -1353,6 +1388,16 @@ that this document never drifts from the code.
 | `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
 | `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'dict[str, Any]' = <factory>, fields: 'dict[str, FieldContract]' = <factory>, conditions: 'dict[str, FieldCondition]' = <factory>) -> None` |
 | `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
+
+### `hugrgate.contracts.conformance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TemplateConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `TemplateConformanceReport` | class | `(template_id: 'str', checks: 'list[TemplateConformanceCheck]' = <factory>) -> None` |
+| `assert_conformance` | function | `(report: 'TemplateConformanceReport') -> 'None'` |
+| `run_contract_conformance` | function | `(contract: 'DecisionContract') -> 'TemplateConformanceReport'` |
+| `run_template_conformance` | function | `(template: 'ContractTemplate', fuzz_runs: 'int' = 25, seed: 'int' = 441) -> 'TemplateConformanceReport'` |
 
 ### `hugrgate.contracts.context`
 
@@ -2630,6 +2675,13 @@ that this document never drifts from the code.
 | `HotFunction` | class | `(function: 'str', cumtime_ms: 'float', tottime_ms: 'float', calls: 'int', runs_seen: 'int', share: 'float' = 0.0) -> None` |
 | `HotPathInventory` | class | `(runs: 'int', total_ms: 'float', functions: 'list[HotFunction]' = <factory>, label: 'str' = '') -> None` |
 
+### `hugrgate.inspect`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InspectSession` | class | `(url: 'str | None' = None) -> 'None'` |
+| `run_inspect` | function | `(url: 'str | None' = None) -> 'int'` |
+
 ### `hugrgate.ladder`
 
 | Name | Kind | Signature / value |
@@ -2647,6 +2699,14 @@ that this document never drifts from the code.
 | `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'float | None' = None, latency_ms: 'float' = 0.0) -> None` |
 | `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'list[LadderRung] | None' = None, *, ladders: 'dict[str, list[LadderRung]] | None' = None, provenance: 'ProvenanceStore | None' = None, privacy_guard: 'PrivacyGuard | None' = None)` |
 | `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'float | None' = None) -> None` |
+
+### `hugrgate.loaders`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
+| `load_spec` | function | `(path: 'str') -> 'DecisionSpec'` |
+| `load_state` | function | `(path: 'str') -> 'dict[str, Any]'` |
 
 ### `hugrgate.lockaudit`
 
@@ -3216,6 +3276,16 @@ that this document never drifts from the code.
 | `PerfGate` | class | `(baseline_path: 'str | Path' = PosixPath('benchmarks/perf_baseline.json')) -> 'None'` |
 | `default_gates` | function | `() -> 'list[tuple]'` |
 
+### `hugrgate.plugins`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PluginInfo` | class | `(name: 'str', entry_point: 'EntryPoint | None' = None, backend: 'Backend | None' = None, error: 'PluginError | None' = None) -> None` |
+| `discover_plugins` | function | `(on_error: "Literal['raise', 'collect']" = 'collect') -> 'tuple[list[PluginInfo], list[PluginInfo]]'` |
+| `load_plugin` | function | `(name: 'str', entry_point: 'EntryPoint | None' = None) -> 'Backend'` |
+| `register_discovered_plugins` | function | `(registry: 'BackendRegistry', on_error: "Literal['raise', 'collect']" = 'collect', replace: 'bool' = False) -> 'PluginReport'` |
+| `validate_plugin` | function | `(backend: 'Any', name: 'str' = '?') -> 'None'` |
+
 ### `hugrgate.policy`
 
 | Name | Kind | Signature / value |
@@ -3436,6 +3506,17 @@ that this document never drifts from the code.
 | `ProfileReport` | class | `(wall_ms: 'float', total_calls: 'int', primitive_calls: 'int', entries: 'list[ProfileEntry]' = <factory>, label: 'str' = '') -> None` |
 | `profile_region` | function | `(name: 'str')` |
 | `region_report` | function | `(reset: 'bool' = True) -> 'dict[str, dict[str, float]]'` |
+
+### `hugrgate.protocol`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PROTOCOL_VERSION` | constant | `'1.0'` |
+| `SUPPORTED_PROTOCOL_VERSIONS` | constant | `('1.0',)` |
+| `Envelope` | class | `(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0', server_version: 'str' = '') -> None` |
+| `build_envelope` | function | `(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0') -> 'dict[str, Any]'` |
+| `negotiate_version` | function | `(requested: 'Any') -> 'str'` |
+| `parse_protocol_version` | function | `(value: 'Any') -> 'tuple[int, int]'` |
 
 ### `hugrgate.provenance`
 
@@ -3945,6 +4026,14 @@ that this document never drifts from the code.
 | `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
 | `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
+### `hugrgate.scaffold`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCAFFOLD_FILES` | constant | `('pyproject.toml', 'README.md', '.gitignore', 'spec.yaml', '` |
+| `scaffold_project` | function | `(name: 'str', directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'` |
+| `validate_project_name` | function | `(name: 'str') -> 'str'` |
+
 ### `hugrgate.scheduler`
 
 | Name | Kind | Signature / value |
@@ -3954,6 +4043,13 @@ that this document never drifts from the code.
 | `BatchScheduler` | class | `(config: 'SchedulerConfig | None' = None, executor: 'BatchExecutor | None' = None, backpressure: 'BackpressureEngine | None' = None) -> 'None'` |
 | `SchedulerConfig` | class | `(max_batch_size: 'int' = 32, batch_window_s: 'float' = 0.005, max_queue_depth: 'int' = 1024, max_workers: 'int' = 8, shutdown_timeout_s: 'float' = 10.0, adaptive: 'bool' = False, min_batch_size: 'int' = 1, target_batch_latency_s: 'float' = 0.05, priority_enabled: 'bool' = False, starvation_horizon_s: 'float' = 30.0, deadline_enabled: 'bool' = False, drop_late: 'bool' = True) -> None` |
 | `ThreadPoolBatchExecutor` | class | `(max_workers: 'int' = 8) -> 'None'` |
+
+### `hugrgate.sdk`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SDK_VERSION` | constant | `'2.0'` |
+| `HugrGateSDK` | class | `(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'None'` |
 
 ### `hugrgate.serde`
 
@@ -3972,11 +4068,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `DecideRequest` | class | `(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, typing.Any] | None = None, policy: dict[str, typing.Any] | None = None, **extra_data: Any) -> None` |
+| `ErrorBody` | class | `(*, error: dict[str, typing.Any]) -> None` |
 | `KeywordBackend` | class | `()` |
 | `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
+| `ProtocolBody` | class | `(*, protocol_version: str, supported_versions: list[str], service_version: str) -> None` |
 | `UniformBackend` | class | `()` |
 | `build_gate` | function | `(extra_backends: 'list[Backend] | None' = None) -> 'HugrGate'` |
 | `create_app` | function | `(gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None) -> 'FastAPI'` |
+| `dump_openapi_schema` | function | `() -> 'dict[str, Any]'` |
 | `list_models` | function | `() -> 'list[ModelInfo]'` |
 | `register_model` | function | `(info: 'ModelInfo') -> 'None'` |
 | `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'HugrGate | None' = None) -> 'None'` |
