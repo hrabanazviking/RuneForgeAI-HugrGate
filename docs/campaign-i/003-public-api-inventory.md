@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 56 · **public names:** 255
+**Modules:** 57 · **public names:** 261
 
 ## API stability policy
 
@@ -272,6 +272,17 @@ that this document never drifts from the code.
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
 | `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+
+### `hugrgate.edge.bootstrap`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BootstrapContext` | class | `()` |
+| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
+| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
+| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
 
 ### `hugrgate.edge.cachetune`
 

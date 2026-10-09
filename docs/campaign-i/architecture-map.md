@@ -82,6 +82,7 @@ flowchart TD
         edge_residency[edge.residency]
         edge_cachetune[edge.cachetune]
         edge_storage[edge.storage]
+        edge_bootstrap[edge.bootstrap]
     end
 
     hugrgate --> backend
@@ -188,6 +189,14 @@ flowchart TD
     daemon -.-> server
     daemon -.-> spec
     edge_affinity --> errors
+    edge_bootstrap --> edge_cachetune
+    edge_bootstrap --> edge_memory
+    edge_bootstrap --> edge_npu
+    edge_bootstrap --> edge_platform
+    edge_bootstrap --> edge_residency
+    edge_bootstrap --> edge_storage
+    edge_bootstrap --> edge_thermal
+    edge_bootstrap --> errors
     edge_cachetune --> cache
     edge_cachetune --> edge_memory
     edge_cachetune --> edge_platform
@@ -276,7 +285,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap` |
 
 ## Internal dependency edges
 
@@ -386,6 +395,14 @@ flowchart TD
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `edge.affinity` | `errors` | no |
+| `edge.bootstrap` | `edge.cachetune` | no |
+| `edge.bootstrap` | `edge.memory` | no |
+| `edge.bootstrap` | `edge.npu` | no |
+| `edge.bootstrap` | `edge.platform` | no |
+| `edge.bootstrap` | `edge.residency` | no |
+| `edge.bootstrap` | `edge.storage` | no |
+| `edge.bootstrap` | `edge.thermal` | no |
+| `edge.bootstrap` | `errors` | no |
 | `edge.cachetune` | `cache` | no |
 | `edge.cachetune` | `edge.memory` | no |
 | `edge.cachetune` | `edge.platform` | no |
