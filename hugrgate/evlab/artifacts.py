@@ -25,6 +25,7 @@ from hugrgate import __version__
 from hugrgate.errors import EvalError
 from hugrgate.evlab.api import RunRecord
 from hugrgate.evlab.dataset import DatasetManifest
+from hugrgate.evlab.repro import ReproManifest
 
 __all__ = [
     "BundleReport",
@@ -78,14 +79,15 @@ def write_bundle(
     name: str,
     run_record: RunRecord | None = None,
     dataset_manifest: DatasetManifest | None = None,
+    repro_manifest: ReproManifest | None = None,
     reports: Mapping[str, Mapping[str, Any]] | None = None,
     files: Mapping[str, str | bytes] | None = None,
 ) -> Path:
     """Write a bundle directory; return its path.
 
     Layout: ``bundle.json`` index, ``run_record.json``,
-    ``dataset_manifest.json``, ``reports/<name>.json``,
-    ``files/<name>``.
+    ``dataset_manifest.json``, ``repro_manifest.json``,
+    ``reports/<name>.json``, ``files/<name>``.
     """
     if not name:
         raise EvalError("bundle name must be a non-empty string")
@@ -112,6 +114,12 @@ def write_bundle(
             raise EvalError("dataset_manifest must be a DatasetManifest")
         _put("dataset_manifest.json",
              json.dumps(dataset_manifest.to_dict(), indent=2,
+                        sort_keys=True).encode())
+    if repro_manifest is not None:
+        if not isinstance(repro_manifest, ReproManifest):
+            raise EvalError("repro_manifest must be a ReproManifest")
+        _put("repro_manifest.json",
+             json.dumps(repro_manifest.to_dict(), indent=2,
                         sort_keys=True).encode())
     for report_name, report in (reports or {}).items():
         if not report_name or "/" in report_name or "\\" in report_name:
@@ -214,6 +222,9 @@ def read_bundle(path: str | Path) -> dict[str, Any]:
                 (root / rel).read_text(encoding="utf-8"))
         elif rel == "dataset_manifest.json":
             payload["dataset_manifest"] = json.loads(
+                (root / rel).read_text(encoding="utf-8"))
+        elif rel == "repro_manifest.json":
+            payload["repro_manifest"] = json.loads(
                 (root / rel).read_text(encoding="utf-8"))
         elif rel.startswith("reports/"):
             payload["reports"][rel[len("reports/"):-len(".json")]] = \

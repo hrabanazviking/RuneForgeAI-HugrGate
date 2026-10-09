@@ -107,6 +107,13 @@ from hugrgate.evlab.privacy import (
     randomized_response_q,
     scan_dataset_pii,
 )
+from hugrgate.evlab.repro import (
+    ReproCheck,
+    ReproManifest,
+    build_repro_manifest,
+    check_reproducibility,
+    manifest_for_run,
+)
 from hugrgate.evlab.robustness import (
     LabelNoise,
     Perturbation,
@@ -174,6 +181,8 @@ __all__ = [
     "PrivacyUtilityCurve",
     "PrivacyUtilityPoint",
     "RegressionFinding",
+    "ReproCheck",
+    "ReproManifest",
     "RobustnessReport",
     "RunRecord",
     "SelectivePoint",
@@ -189,6 +198,8 @@ __all__ = [
     "bootstrap_backend_ci",
     "bootstrap_mean_ci",
     "bootstrap_metric_ci",
+    "build_repro_manifest",
+    "check_reproducibility",
     "co2e_grams",
     "compare_backend_calibration",
     "compare_backends",
@@ -206,6 +217,7 @@ __all__ = [
     "label_psi",
     "latency_aware_evaluate",
     "make_splits",
+    "manifest_for_run",
     "manifest_splits",
     "mcnemar_test",
     "oracle_aurc",

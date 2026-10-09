@@ -1169,6 +1169,7 @@ flowchart TD
     evlab --> evlab_history
     evlab --> evlab_latency
     evlab --> evlab_privacy
+    evlab --> evlab_repro
     evlab --> evlab_robustness
     evlab --> evlab_selective
     evlab --> evlab_shift
@@ -1186,6 +1187,7 @@ flowchart TD
     evlab_artifacts --> errors
     evlab_artifacts --> evlab_api
     evlab_artifacts --> evlab_dataset
+    evlab_artifacts --> evlab_repro
     evlab_bootstrap --> hugrgate
     evlab_bootstrap --> core
     evlab_bootstrap --> errors
@@ -1245,6 +1247,11 @@ flowchart TD
     evlab_privacy --> privacy_pii
     evlab_privacy --> result
     evlab_privacy --> spec
+    evlab_repro --> hugrgate
+    evlab_repro --> errors
+    evlab_repro --> evlab_api
+    evlab_repro --> evlab_dataset
+    evlab_repro --> policy
     evlab_robustness --> hugrgate
     evlab_robustness --> core
     evlab_robustness --> errors
@@ -2433,6 +2440,7 @@ flowchart TD
 | `evlab` | `evlab.history` | no |
 | `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.privacy` | no |
+| `evlab` | `evlab.repro` | no |
 | `evlab` | `evlab.robustness` | no |
 | `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.shift` | no |
@@ -2450,6 +2458,7 @@ flowchart TD
 | `evlab.artifacts` | `errors` | no |
 | `evlab.artifacts` | `evlab.api` | no |
 | `evlab.artifacts` | `evlab.dataset` | no |
+| `evlab.artifacts` | `evlab.repro` | no |
 | `evlab.bootstrap` | `hugrgate` | no |
 | `evlab.bootstrap` | `core` | no |
 | `evlab.bootstrap` | `errors` | no |
@@ -2509,6 +2518,11 @@ flowchart TD
 | `evlab.privacy` | `privacy_pii` | no |
 | `evlab.privacy` | `result` | no |
 | `evlab.privacy` | `spec` | no |
+| `evlab.repro` | `hugrgate` | no |
+| `evlab.repro` | `errors` | no |
+| `evlab.repro` | `evlab.api` | no |
+| `evlab.repro` | `evlab.dataset` | no |
+| `evlab.repro` | `policy` | no |
 | `evlab.robustness` | `hugrgate` | no |
 | `evlab.robustness` | `core` | no |
 | `evlab.robustness` | `errors` | no |

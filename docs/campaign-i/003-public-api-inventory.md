@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 309 · **public names:** 1911
+**Modules:** 310 · **public names:** 1921
 
 ## API stability policy
 
@@ -2288,6 +2288,8 @@ that this document never drifts from the code.
 | `PrivacyUtilityCurve` | class | `(backend: 'str', baseline_accuracy: 'float | None', points: 'list[PrivacyUtilityPoint]', disclaimer: 'str' = 'Simulation of the privacy/utility tradeoff shape via randomized response. Not a differential-privacy guarantee: no privacy budget is tracked and no mechanism is certified.') -> None` |
 | `PrivacyUtilityPoint` | class | `(epsilon: 'float', flip_q: 'float', accuracy: 'float | None', n: 'int') -> None` |
 | `RegressionFinding` | class | `(dataset: 'str', backend: 'str', metric: 'str', current: 'float', baseline: 'float', drop: 'float', current_run_id: 'str', baseline_run_id: 'str', current_sha: 'str | None', baseline_sha: 'str | None', current_at: 'str', baseline_at: 'str') -> None` |
+| `ReproCheck` | class | `(ok: 'bool', mismatches: 'list[str]') -> None` |
+| `ReproManifest` | class | `(dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', backends: 'list[str]', policy: 'dict[str, Any]', seed: 'int', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', git_sha: 'str | None', command: 'str | None', created_at: 'str', extra: 'dict[str, Any]') -> None` |
 | `RobustnessReport` | class | `(backends: 'dict[str, dict[str, Any]]', perturbations: 'list[str]', n_items: 'int', seed: 'int') -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 | `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
@@ -2303,6 +2305,8 @@ that this document never drifts from the code.
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+| `build_repro_manifest` | function | `(dataset: 'Mapping[str, Any]', backends: 'Sequence[str]', policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, command: 'str | None' = None, extra: 'Mapping[str, Any] | None' = None) -> 'ReproManifest'` |
+| `check_reproducibility` | function | `(manifest: 'ReproManifest') -> 'ReproCheck'` |
 | `co2e_grams` | function | `(energy_mj: 'float', grid_intensity_g_per_kwh: 'float' = 400.0) -> 'float'` |
 | `compare_backend_calibration` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str]', calibrator_factories: 'Sequence[Callable[[], LabCalibrator]]', *, calib_frac: 'float' = 0.5, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, n_bins: 'int' = 10, max_items: 'int | None' = None) -> 'dict[str, CalibrationComparison]'` |
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
@@ -2320,6 +2324,7 @@ that this document never drifts from the code.
 | `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
 | `latency_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, slo_ms: 'float' = 100.0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'LatencyReport'` |
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
+| `manifest_for_run` | function | `(record: 'RunRecord') -> 'ReproManifest'` |
 | `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 | `mcnemar_test` | function | `(b01: 'int', b10: 'int', *, alpha: 'float' = 0.05) -> 'SignificanceResult'` |
 | `oracle_aurc` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
@@ -2337,7 +2342,7 @@ that this document never drifts from the code.
 | `shift_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, shift_key: 'str' = 'period', source: 'Any' = 'source', target: 'Any' = 'target', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'ShiftReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 | `verify_bundle` | function | `(path: 'str | Path') -> 'BundleReport'` |
-| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
+| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, repro_manifest: 'ReproManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
 | `zip_bundle` | function | `(path: 'str | Path') -> 'Path'` |
 
 ### `hugrgate.evlab.api`
@@ -2357,7 +2362,7 @@ that this document never drifts from the code.
 | `BundleReport` | class | `(path: 'str', name: 'str', files: 'int', ok: 'bool', problems: 'list[str]') -> None` |
 | `read_bundle` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
 | `verify_bundle` | function | `(path: 'str | Path') -> 'BundleReport'` |
-| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
+| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, repro_manifest: 'ReproManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
 | `zip_bundle` | function | `(path: 'str | Path') -> 'Path'` |
 
 ### `hugrgate.evlab.bootstrap`
@@ -2462,6 +2467,16 @@ that this document never drifts from the code.
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
+
+### `hugrgate.evlab.repro`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReproCheck` | class | `(ok: 'bool', mismatches: 'list[str]') -> None` |
+| `ReproManifest` | class | `(dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', backends: 'list[str]', policy: 'dict[str, Any]', seed: 'int', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', git_sha: 'str | None', command: 'str | None', created_at: 'str', extra: 'dict[str, Any]') -> None` |
+| `build_repro_manifest` | function | `(dataset: 'Mapping[str, Any]', backends: 'Sequence[str]', policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, command: 'str | None' = None, extra: 'Mapping[str, Any] | None' = None) -> 'ReproManifest'` |
+| `check_reproducibility` | function | `(manifest: 'ReproManifest') -> 'ReproCheck'` |
+| `manifest_for_run` | function | `(record: 'RunRecord') -> 'ReproManifest'` |
 
 ### `hugrgate.evlab.robustness`
 
