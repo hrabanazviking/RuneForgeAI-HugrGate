@@ -40,6 +40,7 @@ from hugrgate.memory.policies import (
     redact_above,
 )
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
+from hugrgate.memory.recency import RecencyFeatures, recency_features
 from hugrgate.memory.retrieval import RetrievalResult, recall, retrieve
 from hugrgate.memory.similarity import (
     SimilarityHit,
@@ -60,6 +61,7 @@ __all__ = [
     "MemoryQuery",
     "MemoryRule",
     "Outcome",
+    "RecencyFeatures",
     "RetrievalResult",
     "SimilarityHit",
     "cosine",
@@ -76,6 +78,7 @@ __all__ = [
     "most_similar",
     "outcome_agrees",
     "recall",
+    "recency_features",
     "record_only_backend",
     "redact_above",
     "retrieve",

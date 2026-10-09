@@ -123,3 +123,12 @@ it into an opaque agent.
 - `retrieval.py` refactored onto the shared module (as its docstring
   promised); regression test keeps half-life behavior pinned.
 - Tests: `tests/test_memory_decay.py` (7 tests).
+
+### Slice 309 — Recency features
+- `hugrgate/memory/recency.py`: `recency_features(history, features)`
+  distills time-since-last-similar, last outcome kind, current
+  success/failure streaks (head-of-history runs, broken by unknown
+  outcomes), raw + decay-weighted similar counts, mean similarity.
+  Cosine threshold gate, newest-first scan capped at `max_candidates`
+  for large histories.
+- Tests: `tests/test_memory_recency.py` (9 tests).
