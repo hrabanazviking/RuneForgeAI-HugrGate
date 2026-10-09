@@ -66,7 +66,13 @@ SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.clien
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
-                               "hugrgate.runtimes"}
+                               "hugrgate.runtimes",
+                               # Slice 411: backends that unpickle model
+                               # files must go through the deserialization
+                               # guard. serde_guards is foundation-clean
+                               # (imports only hugrgate.errors), so this
+                               # is a deliberate, acyclic layering grant.
+                               "hugrgate.security.serde_guards"}
 CALIB_ALLOWED = {
     "hugrgate.errors", "hugrgate.backend",
     "hugrgate.result", "hugrgate.spec",
@@ -181,6 +187,8 @@ _STDLIB = {
     "hmac", "secrets", "ssl", "stat",
     "base64", "binascii",
     "errno",
+    "decimal",  # Campaign XVII (slice 411): stdlib, used in serde tests.
+    "shlex", "unicodedata",  # Campaign XVII (slice 413): stdlib.
     # Campaign XII (slices 276-281): profiling/allocation/benchmark stdlib.
     "cProfile", "pstats", "tracemalloc", "timeit",
     # Campaign XII (slice 294): multiprocess mode.

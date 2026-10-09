@@ -30,6 +30,9 @@ import secrets
 from collections.abc import Mapping
 from typing import Any
 
+from hugrgate.errors import DeserializationBlocked
+from hugrgate.security.serde_guards import restricted_loads
+
 __all__ = [
     "TOKEN_PREFIX",
     "TokenVault",
@@ -109,8 +112,20 @@ class TokenVault:
 
     @classmethod
     def import_vault(cls, blob: bytes) -> TokenVault:
-        """Rebuild a vault from :meth:`export` bytes."""
-        data = pickle.loads(blob)
+        """Rebuild a vault from :meth:`export` bytes.
+
+        Slice 423: this used ``pickle.loads`` on caller-supplied
+        bytes — arbitrary code execution on a hostile blob
+        (found by tools/secscan.py). Now decoded through the
+        deserialization allowlist, and the structure is validated.
+        """
+        data = restricted_loads(blob)
+        if not isinstance(data, dict) or \
+                not isinstance(data.get("namespace"), str) or \
+                not isinstance(data.get("store"), dict):
+            raise DeserializationBlocked(
+                "vault blob has an unexpected structure",
+                actual_type=type(data).__name__)
         vault = cls(namespace=data["namespace"])
         vault._store = data["store"]
         return vault

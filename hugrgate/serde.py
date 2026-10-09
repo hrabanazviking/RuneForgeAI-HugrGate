@@ -52,15 +52,45 @@ def policy_to_dict(policy: DecisionPolicy) -> dict[str, Any]:
     return policy.to_dict()
 
 
+def _as_dict(value: Any, field: str) -> dict[str, Any]:
+    """Coerce an optional mapping field; SerdeError on hostile types.
+
+    Slice 422: ``dict(value or {})`` let non-mappings escape as
+    TypeError/ValueError (fuzz-found, T-16).
+    """
+    if value is None:
+        return {}
+    if isinstance(value, Mapping):
+        return dict(value)
+    raise SerdeError(
+        f"{field} must be a mapping, got {type(value).__name__}")
+
+
+def _as_pair(value: Any, field: str) -> tuple | None:
+    """Coerce an optional pair field; SerdeError when not iterable."""
+    if value is None:
+        return None
+    try:
+        return tuple(value)
+    except TypeError:
+        raise SerdeError(
+            f"{field} must be a pair, got {type(value).__name__}") from None
+
+
 def policy_from_dict(d: Mapping[str, Any]) -> DecisionPolicy:
     """Rebuild a :class:`DecisionPolicy` from :func:`policy_to_dict` output."""
     # dict.keys() - frozenset avoids building an intermediate set (slice 281).
+    # Slice 422: non-mapping input and mixed-type keys used to escape
+    # as AttributeError/TypeError (fuzz-found, T-16).
+    if not isinstance(d, Mapping):
+        raise SerdeError(
+            f"policy must be a mapping, got {type(d).__name__}")
     unknown = d.keys() - _POLICY_KEYS
     if unknown:
         raise PolicyError(
-            f"unknown policy key(s): {sorted(unknown)}; "
+            f"unknown policy key(s): {sorted(unknown, key=repr)}; "
             f"expected keys: {sorted(_POLICY_KEYS)}")
-    review_band = d.get("review_band")
+    review_band = _as_pair(d.get("review_band"), "review_band")
     return DecisionPolicy(
         minimum_probability=d.get("minimum_probability", 0.0),
         maximum_latency_ms=d.get("maximum_latency_ms"),
@@ -70,16 +100,23 @@ def policy_from_dict(d: Mapping[str, Any]) -> DecisionPolicy:
         fallback_behavior=d.get("fallback_behavior", "abstain"),
         privacy_class=d.get("privacy_class", "standard"),
         max_cost=d.get("max_cost"),
-        review_band=tuple(review_band) if review_band is not None else None,
+        review_band=review_band,
     )
 
 
 def result_from_dict(d: Mapping[str, Any]) -> DecisionResult:
     """Rebuild a :class:`DecisionResult` from ``to_dict()`` output."""
+    # Slice 422: a missing "probability" used to escape as KeyError
+    # (fuzz-found, T-16). Missing required keys are SerdeErrors.
+    if not isinstance(d, Mapping):
+        raise SerdeError(
+            f"result must be a mapping, got {type(d).__name__}")
+    if "probability" not in d:
+        raise SerdeError("result is missing required key 'probability'")
     return DecisionResult(
         value=d.get("value"),
         probability=d["probability"],
-        distribution=dict(d.get("distribution") or {}),
+        distribution=_as_dict(d.get("distribution"), "distribution"),
         uncertainty=d.get("uncertainty", 0.0),
         accepted=d.get("accepted", True),
         backend=d.get("backend", "unknown"),
@@ -87,7 +124,7 @@ def result_from_dict(d: Mapping[str, Any]) -> DecisionResult:
         latency_ms=d.get("latency_ms", 0.0),
         calibration_profile=d.get("calibration_profile", "none"),
         fallback_used=d.get("fallback_used", False),
-        metadata=dict(d.get("metadata") or {}),
+        metadata=_as_dict(d.get("metadata"), "metadata"),
     )
 
 
@@ -150,7 +187,7 @@ def result_from_compact(data: Sequence[Any]) -> DecisionResult:
     return DecisionResult(
         value=value,
         probability=probability,
-        distribution=dict(distribution or {}),
+        distribution=_as_dict(distribution, "distribution"),
         uncertainty=uncertainty if uncertainty is not None else 0.0,
         accepted=bool(accepted),
         backend=backend or "unknown",
@@ -158,7 +195,7 @@ def result_from_compact(data: Sequence[Any]) -> DecisionResult:
         latency_ms=latency_ms or 0.0,
         calibration_profile=calibration_profile or "none",
         fallback_used=bool(fallback_used),
-        metadata=dict(metadata or {}),
+        metadata=_as_dict(metadata, "metadata"),
     )
 
 
@@ -201,5 +238,5 @@ def policy_from_compact(data: Sequence[Any]) -> DecisionPolicy:
         fallback_behavior=fallback_behavior or "abstain",
         privacy_class=privacy_class or "standard",
         max_cost=max_cost,
-        review_band=tuple(review_band) if review_band is not None else None,
+        review_band=_as_pair(review_band, "review_band"),
     )

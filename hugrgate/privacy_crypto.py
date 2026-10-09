@@ -39,7 +39,16 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
 from hugrgate.privacy_retention import RetentionPolicy
 from hugrgate.result import DecisionResult
+from hugrgate.security.serde_guards import (
+    register_safe_class,
+    restricted_loads,
+)
 from hugrgate.spec import DecisionSpec
+
+# Slice 411: sealed blobs are HMAC-authenticated before unpickling,
+# and the unpickle itself goes through the allowlist anyway
+# (defense in depth — a key-compromise must not become code exec).
+register_safe_class(DecisionResult)
 
 __all__ = [
     "EncryptedDecisionCache",
@@ -175,27 +184,39 @@ class EncryptedDecisionCache(DecisionCache):
         self._namespace = str(namespace)
 
     def _associated(self, state: Mapping[str, Any], spec: DecisionSpec,
-                    policy: DecisionPolicy) -> bytes:
-        return (self._namespace + ":" +
-                cache_key(state, spec, policy)).encode()
+                    policy: DecisionPolicy, namespace: str = "",
+                    model_version: str = "") -> bytes:
+        # Slice 417: the per-call namespace/model_version join the
+        # AEAD associated data, so cross-tenant or cross-version
+        # reads fail authentication, not just the key lookup.
+        scope = ":".join(
+            part for part in
+            (self._namespace, namespace, model_version) if part)
+        return (scope + ":" +
+                cache_key(state, spec, policy, namespace=namespace,
+                          model_version=model_version)).encode()
 
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy, result: DecisionResult,
-            retention: RetentionPolicy | None = None) -> bool:
+            retention: RetentionPolicy | None = None, *,
+            namespace: str = "", model_version: str = "") -> bool:
         """Seal and store ``result``; False when privacy forbids caching."""
         if not PrivacyGuard.cache_allowed(policy):
             return False
         sealed = _SealedEntry(
             blob=SealedBox.seal(
                 self._key, pickle.dumps(result),
-                associated=self._associated(state, spec, policy)),
+                associated=self._associated(
+                    state, spec, policy, namespace, model_version)),
             namespace=self._namespace,
             backend=result.backend)
         return super().put(state, spec, policy, sealed,  # type: ignore[arg-type]
-                           retention=retention)
+                           retention=retention, namespace=namespace,
+                           model_version=model_version)
 
     def _verify_entry(self, entry, state: Mapping[str, Any],
-                      spec: DecisionSpec, policy: DecisionPolicy) -> None:
+                      spec: DecisionSpec, policy: DecisionPolicy, *,
+                      namespace: str = "", model_version: str = "") -> None:
         """Authenticate the sealed blob before the integrity seal runs.
 
         A tampered blob must fail closed with ``SealError`` — the
@@ -209,10 +230,12 @@ class EncryptedDecisionCache(DecisionCache):
         # Raises SealError on authentication failure.
         SealedBox.open(
             self._key, sealed.blob,
-            associated=self._associated(state, spec, policy))
+            associated=self._associated(
+                state, spec, policy, namespace, model_version))
 
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
-            policy: DecisionPolicy) -> DecisionResult | None:
+            policy: DecisionPolicy, *, namespace: str = "",
+            model_version: str = "") -> DecisionResult | None:
         """Return the unsealed cached result, or None.
 
         Raises
@@ -222,7 +245,8 @@ class EncryptedDecisionCache(DecisionCache):
             tampered with or the key changed. Fail closed: never
             return plaintext on auth failure.
         """
-        sealed = super().get(state, spec, policy)
+        sealed = super().get(state, spec, policy, namespace=namespace,
+                             model_version=model_version)
         if sealed is None:
             return None
         if not isinstance(sealed, _SealedEntry):
@@ -230,8 +254,9 @@ class EncryptedDecisionCache(DecisionCache):
                             reason="unexpected-type")
         plaintext = SealedBox.open(
             self._key, sealed.blob,
-            associated=self._associated(state, spec, policy))
-        result = pickle.loads(plaintext)
+            associated=self._associated(
+                state, spec, policy, namespace, model_version))
+        result = restricted_loads(plaintext)
         if not isinstance(result, DecisionResult):
             raise SealError("sealed payload is not a DecisionResult",
                             reason="unexpected-type")

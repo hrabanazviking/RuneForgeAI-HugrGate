@@ -125,6 +125,8 @@ def test_policy_from_dict_empty_is_default():
     assert policy_from_dict({}) == DecisionPolicy()
 
 
-def test_spec_from_dict_missing_type_raises_key_error():
-    with pytest.raises(KeyError):
+def test_spec_from_dict_missing_type_raises_spec_error():
+    # Slice 422 (T-16): a missing "type" used to escape as KeyError
+    # (fuzz-found); missing required keys are SpecErrors now.
+    with pytest.raises(SpecError, match="missing required key 'type'"):
         DecisionSpec.from_dict({"options": ["a", "b"]})

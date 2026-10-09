@@ -28,6 +28,15 @@ from hugrgate.errors import BackendError, BackendUnavailable
 from hugrgate.features import FeatureExtractor, Pipeline
 from hugrgate.models import ModelManifest, sha256_bytes
 from hugrgate.result import DecisionResult
+from hugrgate.security.serde_guards import restricted_loads
+
+#: Slice 411: model files are untrusted bytes (threat T-01). The
+#: manifest hash is an unsigned sidecar, so it cannot be the trust
+#: root — unpickling goes through the allowlist instead. sklearn /
+#: numpy / scipy module prefixes cover trained estimators;
+#: hugrgate. covers our own pipeline/feature classes. Hostile
+#: classes (os.system, builtins.eval, ...) fail closed.
+_MODEL_UNPICKLE_MODULES = ("sklearn.", "numpy", "scipy.", "hugrgate.")
 from hugrgate.spec import DecisionSpec
 
 
@@ -270,7 +279,11 @@ class SklearnClassifierBackend(Backend):
         with open(path + ".manifest.json") as fh:
             manifest = ModelManifest.from_json(fh.read())
         manifest.verify(payload)
-        blob = pickle.loads(payload)
+        # Slice 411: restricted unpickle — the manifest is an unsigned
+        # sidecar, so a rewritten manifest cannot bless a hostile
+        # payload. Only sklearn/numpy/scipy classes may materialize.
+        blob = restricted_loads(payload,
+                                allowed_modules=_MODEL_UNPICKLE_MODULES)
         obj = cls.__new__(cls)
         SklearnClassifierBackend.__init__(
             obj,

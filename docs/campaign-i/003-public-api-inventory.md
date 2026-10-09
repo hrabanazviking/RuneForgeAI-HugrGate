@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 391 · **public names:** 2304
+**Modules:** 387 · **public names:** 2405
 
 ## API stability policy
 
@@ -308,241 +308,6 @@ that this document never drifts from the code.
 | `PolicyVersion` | class | `(version_id: 'str', parent_id: 'str | None', created_at: 'float', note: 'str', state_digest: 'str') -> None` |
 | `digest_state` | function | `(state: 'Mapping[str, Any]') -> 'str'` |
 
-### `hugrgate.agents`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-
-### `hugrgate.agents.attention`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `AttentionConfig` | class | `(w_priority: 'float' = 2.0, w_urgency: 'float' = 3.0, w_novelty: 'float' = 1.5, w_cost: 'float' = 1.0, max_items: 'int' = 256) -> None` |
-| `AttentionItem` | class | `(item_id: 'str', topic: 'str', priority: 'str' = 'normal', urgency: 'float' = 0.5, novelty: 'float' = 0.5, cost: 'float' = 0.5, payload: 'dict[str, Any]' = <factory>) -> None` |
-| `AttentionPrioritizer` | class | `(config: 'AttentionConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-
-### `hugrgate.agents.benchmark`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `AgentBenchmark` | class | `()` |
-| `AgentBenchmarkConfig` | class | `(scenarios: 'Mapping[str, list[dict[str, Any]]]', repetitions: 'int' = 5, seed: 'int' = 0) -> None` |
-| `BenchmarkReport` | class | `(scenarios: 'tuple[ScenarioResult, ...]', repetitions: 'int', seed: 'int', notes: 'tuple[str, ...]' = <factory>) -> None` |
-| `ScenarioResult` | class | `(name: 'str', runs: 'int', success_rate_mean: 'float', success_rate_min: 'float', success_rate_max: 'float', total_failures: 'int', total_loops: 'int', total_runaways: 'int', total_escalations: 'int', latency_p50_ms: 'float', latency_p95_ms: 'float') -> None` |
-
-### `hugrgate.agents.budgets`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BudgetLedger` | class | `() -> 'None'` |
-| `DecisionBudget` | class | `(decisions: 'int' = 1000, tokens: 'int' = 1000000, latency_ms: 'float' = 3600000.0) -> None` |
-
-### `hugrgate.agents.bus`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `EventBus` | class | `(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `Subscription` | class | `(token: 'int', pattern: 'str', priority: 'int') -> None` |
-| `matches` | function | `(pattern: 'str', topic: 'str') -> 'bool'` |
-
-### `hugrgate.agents.contract`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `SCHEMA_TYPES` | constant | `('str', 'int', 'float', 'bool', 'list', 'dict')` |
-| `AgentContract` | class | `(agent_id: 'str', version: 'str' = '1.0.0', capabilities: 'tuple[str, ...]' = (), intents: 'tuple[str, ...]' = (), tools: 'tuple[str, ...]' = (), input_schema: 'Mapping[str, str]' = <factory>, output_schema: 'Mapping[str, str]' = <factory>, max_latency_ms: 'float' = 5000.0, max_cost: 'float' = 1.0, min_confidence: 'float' = 0.0, privacy_clearance: 'str' = 'standard', max_escalation_depth: 'int' = 3) -> None` |
-| `assert_contract` | function | `(contract: 'AgentContract') -> 'None'` |
-| `check_input` | function | `(contract: 'AgentContract', payload: 'Mapping[str, Any]') -> 'tuple[str, ...]'` |
-| `check_output` | function | `(contract: 'AgentContract', payload: 'Mapping[str, Any]') -> 'tuple[str, ...]'` |
-| `check_payload` | function | `(schema: 'Mapping[str, str]', payload: 'Mapping[str, Any]', *, what: 'str') -> 'tuple[str, ...]'` |
-| `validate_contract` | function | `(contract: 'AgentContract') -> 'tuple[str, ...]'` |
-
-### `hugrgate.agents.cost`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CostLedger` | class | `(agent_id: 'str', cost_per_decision: 'float', budget: 'float | None', spent: 'float', remaining: 'float | None', exhausted: 'bool') -> None` |
-| `CostRouter` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-
-### `hugrgate.agents.disagreement`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DISAGREEMENT_STRATEGIES` | constant | `('fuse', 'majority', 'highest_confidence', 'human_review')` |
-| `DisagreementResolver` | class | `(review_queue: 'HumanReviewQueue | None' = None, *, disagreement_threshold: 'float' = 0.4) -> 'None'` |
-| `Resolution` | class | `(label: 'str', strategy: 'str', confidence: 'float', escalated: 'bool', reason: 'str', votes: 'tuple[AgentVote, ...]' = (), fusion: 'FusionResult | None' = None, review_item_id: 'str' = '', metadata: 'dict[str, Any]' = <factory>) -> None` |
-
-### `hugrgate.agents.dispatch`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `STRATEGIES` | constant | `('parallel', 'race', 'quorum')` |
-| `AgentCallResult` | class | `(agent_id: 'str', ok: 'bool', output: 'Any' = None, confidence: 'float' = 0.0, latency_ms: 'float' = 0.0, error: 'str' = '') -> None` |
-| `DispatchResult` | class | `(strategy: 'str', ok: 'bool', results: 'dict[str, AgentCallResult]' = <factory>, winner: 'str' = '', reason: 'str' = '') -> None` |
-| `MultiAgentDispatch` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-
-### `hugrgate.agents.escalation`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ESCALATION_LEVELS` | constant | `('agent', 'supervisor', 'human', 'terminal')` |
-| `Escalation` | class | `(ticket_id: 'str', from_level: 'str', to_level: 'str', reason: 'str', depth: 'int', at: 'float' = 0.0) -> None` |
-| `EscalationPolicy` | class | `(cooldown_s: 'float' = 30.0, bus: 'EventBus | None' = None, contracts: 'dict[str, AgentContract] | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-
-### `hugrgate.agents.fusion`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `FUSION_METHODS` | constant | `('weighted', 'majority', 'max_conf')` |
-| `AgentVote` | class | `(agent_id: 'str', label: 'str', confidence: 'float', weight: 'float' = 1.0) -> None` |
-| `FusionResult` | class | `(label: 'str', confidence: 'float', method: 'str', votes: 'tuple[AgentVote, ...]', disagreement: 'float') -> None` |
-| `disagreement` | function | `(votes: 'tuple[AgentVote, ...] | list[AgentVote]') -> 'float'` |
-| `fuse_confidences` | function | `(votes: 'tuple[AgentVote, ...] | list[AgentVote]', method: 'str' = 'weighted') -> 'FusionResult'` |
-
-### `hugrgate.agents.health`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `HealthRouter` | class | `(*, alpha: 'float' = 0.3, degrade_threshold: 'float' = 0.5, bus: 'EventBus | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `HealthScore` | class | `(agent_id: 'str', score: 'float', samples: 'int', avg_latency_ms: 'float', error_rate: 'float', degraded: 'bool') -> None` |
-
-### `hugrgate.agents.human_review`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `TIMEOUT_POLICIES` | constant | `('escalate', 'auto_deny', 'auto_approve', 'raise')` |
-| `HumanReviewQueue` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `ReviewDecision` | class | `(item_id: 'str', approved: 'bool', reviewer: 'str', decided_at: 'float', note: 'str' = '') -> None` |
-| `ReviewItem` | class | `(item_id: 'str', ticket_id: 'str', agent_id: 'str', summary: 'str', severity: 'str' = 'warning', sla_s: 'float' = 3600.0, enqueued_at: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
-
-### `hugrgate.agents.intent`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `IntentRoute` | class | `(intent: 'str', agent_id: 'str', confidence: 'float', reason: 'str', fallback: 'bool' = False) -> None` |
-| `IntentRouter` | class | `(contracts: 'dict[str, AgentContract]' = <factory>, _regs: 'list[_Registration]' = <factory>, _fallback: 'str' = '') -> None` |
-| `tokenize` | function | `(text: 'str') -> 'frozenset[str]'` |
-
-### `hugrgate.agents.loopbreak`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `LoopBreaker` | class | `(*, max_depth: 'int' = 16, bus: 'EventBus | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `LoopEvent` | class | `(ticket_id: 'str', cycle: 'tuple[str, ...]', depth: 'int') -> None` |
-
-### `hugrgate.agents.memory_read`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `READ_REASONS` | constant | `('ok', 'bad_class', 'unbound_agent', 'clearance', 'role_clas` |
-| `MemoryReadGate` | class | `(config: 'ReadGateConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `ReadGateConfig` | class | `(max_reads_per_minute: 'int' = 600, audit_trail_size: 'int' = 1024, default_role: 'str' = '') -> None` |
-| `ReadPermit` | class | `(granted: 'bool', reason: 'str', agent_id: 'str', privacy_class: 'str' = '', redacted: 'bool' = False) -> None` |
-
-### `hugrgate.agents.memory_write`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `REASONS` | constant | `('ok', 'bad_class', 'unbound_agent', 'clearance', 'role_read` |
-| `MemoryWriteGate` | class | `(config: 'WriteGateConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `WriteGateConfig` | class | `(max_writes_per_minute: 'int' = 60, max_payload_bytes: 'int' = 1048576, dedup_window_s: 'float' = 300.0, default_role: 'str' = '') -> None` |
-| `WritePermit` | class | `(granted: 'bool', reason: 'str', agent_id: 'str', privacy_class: 'str' = '') -> None` |
-
-### `hugrgate.agents.notify`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `NOTIFY_REASONS` | constant | `('sent', 'channel_unknown', 'channel_disabled', 'severity_fi` |
-| `ChannelConfig` | class | `(rate_per_minute: 'int' = 10, min_severity: 'str' = 'info', enabled: 'bool' = True, dedup_window_s: 'float' = 300.0) -> None` |
-| `Notification` | class | `(channel: 'str', title: 'str', body: 'str' = '', severity: 'str' = 'info', dedup_key: 'str' = '', trace_id: 'str' = '') -> None` |
-| `NotificationGate` | class | `(*, sender: 'Callable[[Notification], None] | None' = None, bus: 'Any' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `NotifyDecision` | class | `(sent: 'bool', reason: 'str', channel: 'str', severity: 'str') -> None` |
-
-### `hugrgate.agents.privacy`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PrivacyRouter` | class | `(contracts: 'dict[str, AgentContract] | None' = None) -> 'None'` |
-| `signal_privacy_class` | function | `(signal: 'AgentSignal') -> 'str'` |
-
-### `hugrgate.agents.provenance`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `AgentProvenanceGraph` | class | `() -> 'None'` |
-| `ProvenanceNode` | class | `(node_id: 'str', kind: 'str', agent_id: 'str', ticket_id: 'str', parents: 'tuple[str, ...]' = (), details: 'dict[str, Any]' = <factory>) -> None` |
-
-### `hugrgate.agents.registry`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `AgentRegistry` | class | `(*, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `RegisteredAgent` | class | `(contract: 'AgentContract', endpoint: 'str' = '', healthy: 'bool' = True, health_note: 'str' = '', registered_at: 'float' = 0.0) -> None` |
-
-### `hugrgate.agents.release_gate`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `NervousSystem` | class | `(bus: 'EventBus' = <factory>, registry: 'AgentRegistry' = <factory>, triage: 'EventTriage' = <factory>, intent_router: 'IntentRouter' = <factory>, tool_router: 'ToolRouter' = <factory>, memory_write: 'MemoryWriteGate' = <factory>, memory_read: 'MemoryReadGate' = <factory>, notify_gate: 'NotificationGate' = <factory>, attention: 'AttentionPrioritizer' = <factory>, escalation: 'EscalationPolicy' = <factory>, review_queue: 'HumanReviewQueue' = <factory>, dispatcher: 'MultiAgentDispatch' = <factory>, health: 'HealthRouter' = <factory>, cost: 'CostRouter' = <factory>, privacy: 'PrivacyRouter' = <factory>, loop_breaker: 'LoopBreaker' = <factory>, runaway: 'RunawayGuard' = <factory>, budgets: 'BudgetLedger' = <factory>, provenance: 'AgentProvenanceGraph' = <factory>, replay: 'AgentReplay' = <factory>) -> None` |
-| `NervousSystemReleaseGate` | class | `()` |
-| `ReleaseReport` | class | `(checks: 'tuple[GateCheck, ...]', notes: 'tuple[str, ...]' = ()) -> None` |
-| `assemble` | function | `() -> 'NervousSystem'` |
-
-### `hugrgate.agents.replay`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `AgentReplay` | class | `() -> 'None'` |
-| `RecordedStep` | class | `(index: 'int', kind: 'str', step_input: 'Any', step_output: 'Any') -> None` |
-| `ReplayReport` | class | `(ticket_id: 'str', steps: 'int', matched: 'int', mismatches: 'tuple[int, ...]', deterministic: 'bool', seed: 'int | None' = None, notes: 'tuple[str, ...]' = <factory>) -> None` |
-
-### `hugrgate.agents.runaway`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `RunawayGuard` | class | `(limits: 'RunawayLimits | None' = None, bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
-| `RunawayLimits` | class | `(max_escalations_per_ticket: 'int' = 8, max_steps_per_ticket: 'int' = 256, max_tokens_per_ticket: 'int' = 64000) -> None` |
-| `TicketUsage` | class | `(ticket_id: 'str', escalations: 'int', steps: 'int', tokens: 'int') -> None` |
-
-### `hugrgate.agents.simulator`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BEHAVIORS` | constant | `('honest', 'slow', 'faulty', 'looping', 'escalating')` |
-| `AgentSimulator` | class | `(*, runaway_limits: 'RunawayLimits | None' = None, bus: 'EventBus | None' = None) -> 'None'` |
-| `SimContext` | class | `(ticket_id: 'str', agent_id: 'str', caller: 'str', intent: 'str', step_index: 'int', rng: 'random.Random') -> None` |
-| `SimulationReport` | class | `(steps: 'int', successes: 'int', failures: 'int', loops_detected: 'int', runaways: 'int', escalations: 'int', per_agent: 'dict[str, dict[str, int]]' = <factory>, seed: 'int | None' = None) -> None` |
-
-### `hugrgate.agents.tools`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ToolGrant` | class | `(call_id: 'str', agent_id: 'str', tool: 'str', ticket_id: 'str') -> None` |
-| `ToolPolicy` | class | `(agent_id: 'str', allowed_tools: 'frozenset[str]' = frozenset(), denied_tools: 'frozenset[str]' = frozenset(), max_calls_per_ticket: 'int' = 16, arg_schemas: 'dict[str, dict[str, str]]' = <factory>) -> None` |
-| `ToolRouter` | class | `(contracts: 'dict[str, AgentContract] | None' = None) -> 'None'` |
-
-### `hugrgate.agents.triage`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ACTIONS` | constant | `('route', 'drop', 'defer')` |
-| `EventTriage` | class | `(bus: 'EventBus | None' = None) -> 'None'` |
-| `TriageDecision` | class | `(signal: 'AgentSignal', action: 'str', queue: 'str', priority: 'str', rule_name: 'str', reason: 'str', dropped: 'bool' = False, deferred: 'bool' = False) -> None` |
-| `TriageRule` | class | `(name: 'str', topic_pattern: 'str', action: 'str', queue: 'str' = 'default', priority_boost: 'int' = 0, reason: 'str' = '') -> None` |
-
-### `hugrgate.agents.types`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PRIORITIES` | constant | `('low', 'normal', 'high', 'critical')` |
-| `PRIORITY_RANK` | constant | `{'low': 0, 'normal': 1, 'high': 2, 'critical': 3}` |
-| `AgentDelivery` | class | `(signal: 'AgentSignal', delivered: 'int' = 0, suppressed: 'int' = 0, dropped: 'int' = 0, errors: 'tuple[str, ...]' = ()) -> None` |
-| `AgentId` | class | — |
-| `AgentSignal` | class | `(topic: 'str', payload: 'Mapping[str, Any]' = <factory>, priority: 'str' = 'normal', trace_id: 'str' = '', dedup_key: 'str' = '', source: 'str' = '') -> None` |
-| `AgentTicket` | class | `(ticket_id: 'str', agent_id: 'AgentId', intent: 'str', trace_id: 'str' = '', parent_ticket_id: 'str' = '', max_steps: 'int' = 32, max_tokens: 'int' = 8000, payload: 'Mapping[str, Any]' = <factory>) -> None` |
-| `new_trace_id` | function | `() -> 'str'` |
-
 ### `hugrgate.allocprof`
 
 | Name | Kind | Signature / value |
@@ -662,7 +427,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionCache` | class | `(ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000)` |
-| `cache_key` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'DecisionPolicy') -> 'str'` |
+| `cache_key` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'DecisionPolicy', *, namespace: 'str' = '', model_version: 'str' = '') -> 'str'` |
 
 ### `hugrgate.calibration`
 
@@ -2436,13 +2201,6 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
-| `AgentBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentContractViolation` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentEscalationFailed` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentLoopDetected` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentNotFound` | class | `(message: 'str' = '', **details: 'Any')` |
-| `AgentRunaway` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackpressureError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2463,7 +2221,6 @@ that this document never drifts from the code.
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GpuschedError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `HumanReviewTimeout` | class | `(message: 'str' = '', **details: 'Any')` |
 | `JurisdictionViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `KeyProviderError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `LocalOnlyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -4197,6 +3954,330 @@ that this document never drifts from the code.
 | `BatchScheduler` | class | `(config: 'SchedulerConfig | None' = None, executor: 'BatchExecutor | None' = None, backpressure: 'BackpressureEngine | None' = None) -> 'None'` |
 | `SchedulerConfig` | class | `(max_batch_size: 'int' = 32, batch_window_s: 'float' = 0.005, max_queue_depth: 'int' = 1024, max_workers: 'int' = 8, shutdown_timeout_s: 'float' = 10.0, adaptive: 'bool' = False, min_batch_size: 'int' = 1, target_batch_latency_s: 'float' = 0.05, priority_enabled: 'bool' = False, starvation_horizon_s: 'float' = 30.0, deadline_enabled: 'bool' = False, drop_late: 'bool' = True) -> None` |
 | `ThreadPoolBatchExecutor` | class | `(max_workers: 'int' = 8) -> 'None'` |
+
+### `hugrgate.security`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
+| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
+| `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
+| `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
+| `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
+| `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
+| `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
+| `BatteryResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '', seconds: 'float' = 0.0) -> None` |
+| `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
+| `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
+| `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
+| `CostLedger` | class | `(budget_units: 'int', name: 'str' = 'cost') -> 'None'` |
+| `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
+| `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `DeserializationPolicy` | class | `(allow_pickle: 'bool' = True, allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = <factory>) -> None` |
+| `FuzzReport` | class | `(target_name: 'str', cases: 'int', ok: 'int' = 0, taxonomy_errors: 'int' = 0, hangs: 'int' = 0, crashes: 'list[Crash]' = <factory>) -> None` |
+| `FuzzTarget` | class | `(name: 'str', fn: 'Callable[[Any], Any]', allowed: 'tuple[type[BaseException], ...]' = ()) -> 'None'` |
+| `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
+| `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
+| `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
+| `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
+| `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+| `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
+| `RateLimiter` | class | `(capacity: 'int' = 10, refill_per_second: 'float' = 1.0, max_keys: 'int' = 100000, idle_ttl_seconds: 'float' = 600.0) -> 'None'` |
+| `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
+| `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
+| `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
+| `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
+| `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
+| `SecretAuditFinding` | class | `(path: 'str', line: 'int', rule: 'str', severity: 'str', message: 'str', snippet: 'str' = '') -> None` |
+| `SecurityGauntletReport` | class | `(batteries: 'list[BatteryResult]' = <factory>) -> None` |
+| `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
+| `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
+| `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
+| `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
+| `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
+| `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
+| `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
+| `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
+| `audit_file` | function | `(path: 'str | Path') -> 'list[SecretAuditFinding]'` |
+| `audit_tree` | function | `(root: 'str | Path', exclude: 'tuple[str, ...]' = ('.venv', 'venv', '__pycache__', '.git', 'node_modules')) -> 'list[SecretAuditFinding]'` |
+| `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
+| `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
+| `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_result_size` | function | `(result: 'DecisionResult', max_bytes: 'int' = 1000000) -> 'int'` |
+| `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
+| `curated_surface` | function | `() -> 'AttackSurface'` |
+| `default_threat_model` | function | `() -> 'ThreatModel'` |
+| `detect_override` | function | `(text: 'str') -> 'list[OverrideFinding]'` |
+| `detect_sqli` | function | `(text: 'str') -> 'bool'` |
+| `enforce_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
+| `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
+| `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+| `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
+| `hostile_json_texts` | function | `(rng: 'random.Random') -> 'str'` |
+| `hostile_states` | function | `(rng: 'random.Random') -> 'Any'` |
+| `hostile_values` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
+| `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
+| `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
+| `open_request` | function | `(envelope: 'Mapping[str, Any]', keys: 'Mapping[str, bytes]', guard: 'ReplayGuard') -> 'dict[str, Any]'` |
+| `register_safe_class` | function | `(cls: 'type') -> 'type'` |
+| `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
+| `run_campaign` | function | `(target: 'FuzzTarget', generator: 'Callable[[random.Random], Any]', n_cases: 'int' = 500, seed: 'int' = 20261009, timeout_s: 'float' = 5.0) -> 'FuzzReport'` |
+| `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
+| `run_gauntlet` | function | `() -> 'GauntletReport'` |
+| `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
+| `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `run_secret_audit` | function | `(root: 'str | Path' = '.') -> 'dict[str, Any]'` |
+| `run_security_gauntlet` | function | `() -> 'SecurityGauntletReport'` |
+| `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
+| `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
+| `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
+| `sanitize_filename` | function | `(text: 'str') -> 'str'` |
+| `sanitize_log` | function | `(text: 'str') -> 'str'` |
+| `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
+| `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
+| `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+| `seal_request` | function | `(payload: 'Mapping[str, Any]', key: 'bytes', key_id: 'str') -> 'dict[str, Any]'` |
+| `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
+| `shell_quote` | function | `(arg: 'str') -> 'str'` |
+| `sign_manifest` | function | `(manifest: 'PluginManifest', signer: 'ModelSigner') -> 'PluginManifest'` |
+| `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
+| `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
+| `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.attack_surface`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
+| `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
+| `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.authz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
+| `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
+
+### `hugrgate.security.cache_poisoning`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
+| `PoisonReport` | class | `(attack: 'str', contained: 'bool', detail: 'str' = '') -> None` |
+| `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
+
+### `hugrgate.security.checksums`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
+| `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
+| `VerificationReport` | class | `(ok: 'list[str]' = <factory>, mismatched: 'list[str]' = <factory>, missing: 'list[str]' = <factory>, extra: 'list[str]' = <factory>) -> None` |
+| `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
+| `hash_file` | function | `(path: 'str | Path') -> 'str'` |
+| `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
+| `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
+
+### `hugrgate.security.depscan`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
+| `ADVISORY_DB_NOTE` | constant | `"Curated subset of verified CVEs affecting HugrGate's depend` |
+| `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
+| `Finding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
+| `installed_versions` | function | `() -> 'dict[str, str]'` |
+| `parse_requirement` | function | `(line: 'str') -> 'dict[str, str]'` |
+| `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
+| `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
+| `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.fuzzing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FuzzReport` | class | `(target_name: 'str', cases: 'int', ok: 'int' = 0, taxonomy_errors: 'int' = 0, hangs: 'int' = 0, crashes: 'list[Crash]' = <factory>) -> None` |
+| `FuzzTarget` | class | `(name: 'str', fn: 'Callable[[Any], Any]', allowed: 'tuple[type[BaseException], ...]' = ()) -> 'None'` |
+| `hostile_json_texts` | function | `(rng: 'random.Random') -> 'str'` |
+| `hostile_states` | function | `(rng: 'random.Random') -> 'Any'` |
+| `hostile_values` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
+| `run_campaign` | function | `(target: 'FuzzTarget', generator: 'Callable[[random.Random], Any]', n_cases: 'int' = 500, seed: 'int' = 20261009, timeout_s: 'float' = 5.0) -> 'FuzzReport'` |
+
+### `hugrgate.security.gauntlet`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BatteryResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '', seconds: 'float' = 0.0) -> None` |
+| `SecurityGauntletReport` | class | `(batteries: 'list[BatteryResult]' = <factory>) -> None` |
+| `run_security_gauntlet` | function | `() -> 'SecurityGauntletReport'` |
+
+### `hugrgate.security.injection_corpus`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
+| `Payload` | class | `(text: 'str', category: 'str', handling: 'str', note: 'str' = '') -> None` |
+| `detect_sqli` | function | `(text: 'str') -> 'bool'` |
+| `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
+| `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
+| `sanitize_filename` | function | `(text: 'str') -> 'str'` |
+| `sanitize_log` | function | `(text: 'str') -> 'str'` |
+| `shell_quote` | function | `(arg: 'str') -> 'str'` |
+
+### `hugrgate.security.input_limits`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
+| `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
+
+### `hugrgate.security.malicious_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_RESULT_BYTES` | constant | `1000000` |
+| `ExfiltratingBackend` | class | `()` |
+| `ExplodingBackend` | class | `()` |
+| `GauntletReport` | class | `(contained: 'dict[str, str]' = <factory>, escaped: 'list[str]' = <factory>, control_ok: 'bool' = False) -> None` |
+| `GiantOutputBackend` | class | `()` |
+| `HangingBackend` | class | `()` |
+| `LyingBackend` | class | `()` |
+| `check_result_size` | function | `(result: 'DecisionResult', max_bytes: 'int' = 1000000) -> 'int'` |
+| `run_gauntlet` | function | `() -> 'GauntletReport'` |
+
+### `hugrgate.security.model_signing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ALGORITHM` | constant | `'HMAC-SHA256/hugrgate-metadata-v1'` |
+| `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
+| `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
+| `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
+| `canonical_json` | function | `(payload: 'Mapping[str, Any]') -> 'bytes'` |
+
+### `hugrgate.security.path_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
+| `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
+| `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
+
+### `hugrgate.security.plugins`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BUILTIN_PREFIXES` | constant | `('hugrgate.',)` |
+| `DANGEROUS_CAPABILITIES` | constant | `{'filesystem_write', 'network', 'subprocess'}` |
+| `TRUST_LEVELS` | constant | `('denied', 'sandboxed', 'signed', 'builtin')` |
+| `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
+| `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+
+### `hugrgate.security.prompt_injection`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
+| `OverrideFinding` | class | `(pattern: 'str', matched: 'str', confidence: 'str', span: 'tuple[int, int]') -> None` |
+| `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
+| `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
+| `detect_override` | function | `(text: 'str') -> 'list[OverrideFinding]'` |
+
+### `hugrgate.security.provenance_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TamperReport` | class | `(attack: 'str', detected_by_chain: 'bool', detected_by_tip: 'bool', detail: 'str' = '') -> None` |
+| `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
+| `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
+| `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.ratelimit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RateLimiter` | class | `(capacity: 'int' = 10, refill_per_second: 'float' = 1.0, max_keys: 'int' = 100000, idle_ttl_seconds: 'float' = 600.0) -> 'None'` |
+
+### `hugrgate.security.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
+| `open_request` | function | `(envelope: 'Mapping[str, Any]', keys: 'Mapping[str, bytes]', guard: 'ReplayGuard') -> 'dict[str, Any]'` |
+| `seal_request` | function | `(payload: 'Mapping[str, Any]', key: 'bytes', key_id: 'str') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.resource_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostLedger` | class | `(budget_units: 'int', name: 'str' = 'cost') -> 'None'` |
+| `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
+| `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
+| `posix_available` | function | `() -> 'bool'` |
+
+### `hugrgate.security.sandbox`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
+| `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
+| `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Callable'` |
+
+### `hugrgate.security.secret_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
+| `SecretAuditFinding` | class | `(path: 'str', line: 'int', rule: 'str', severity: 'str', message: 'str', snippet: 'str' = '') -> None` |
+| `audit_file` | function | `(path: 'str | Path') -> 'list[SecretAuditFinding]'` |
+| `audit_tree` | function | `(root: 'str | Path', exclude: 'tuple[str, ...]' = ('.venv', 'venv', '__pycache__', '.git', 'node_modules')) -> 'list[SecretAuditFinding]'` |
+| `run_secret_audit` | function | `(root: 'str | Path' = '.') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.serde_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PICKLE_MAGIC` | constant | `(b'\x80\x02', b'\x80\x03', b'\x80\x04', b'\x80\x05', b'(l', ` |
+| `DeserializationPolicy` | class | `(allow_pickle: 'bool' = True, allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = <factory>) -> None` |
+| `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
+| `register_safe_class` | function | `(cls: 'type') -> 'type'` |
+| `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
+| `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
+
+### `hugrgate.security.supply_chain`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
+| `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
+| `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+
+### `hugrgate.security.threat_model`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
+| `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
+| `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
+| `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
+| `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `default_threat_model` | function | `() -> 'ThreatModel'` |
 
 ### `hugrgate.serde`
 

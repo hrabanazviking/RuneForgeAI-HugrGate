@@ -619,77 +619,136 @@ class EvalGateError(HugrGateError):
 
 
 # --- Campaign XVI: agent nervous system -------------------------------------
-
-
 class AgentError(HugrGateError):
     """Base for all agent-nervous-system errors. Slice 376.
-
     Recoverable by default: most nervous-system faults (a dropped
     signal, a saturated bus, a timed-out review) are transient and
     the loop can continue or retry once the condition clears.
     """
     code = "agent_error"
     recoverable = True
-
-
 class AgentContractViolation(AgentError):
     """An agent's integration contract is invalid or was breached.
     Slice 376.  Not recoverable: a bad contract is a configuration
     bug — fix the declaration, do not retry the same contract.
-    """
     code = "agent_contract_violation"
     recoverable = False
-
-
 class AgentNotFound(AgentError):
     """No registered agent matches the requested id/capability/intent.
     Slice 376.  Not recoverable: the registry is authoritative —
     register the agent first.
-    """
     code = "agent_not_found"
-    recoverable = False
-
-
 class AgentLoopDetected(AgentError):
     """An agent call chain cycled back on itself. Slice 393.
     Recoverable: the loop-breaker severs the cycle and the ticket
     can be rerouted or escalated.
-    """
     code = "agent_loop_detected"
-    recoverable = True
-
-
 class AgentRunaway(AgentError):
     """A ticket breached runaway limits (escalations/steps/tokens) or
     the kill switch tripped. Slice 394.  Not recoverable: a runaway
     ticket is terminated, never resumed — start a new ticket.
-    """
     code = "agent_runaway"
-    recoverable = False
-
-
 class AgentBudgetExhausted(AgentError):
     """An agent exhausted its decision/token/latency budget.
     Slice 395.  Recoverable: budgets reset on a new window or a
     supervisor can top them up.
-    """
     code = "agent_budget_exhausted"
-    recoverable = True
-
-
 class AgentEscalationFailed(AgentError):
     """An escalation could not be delivered (no higher level, depth
     cap reached, cooldown storm). Slice 384.  Recoverable: the ticket
     stays with its current owner and can retry after cooldown.
-    """
     code = "agent_escalation_failed"
-    recoverable = True
-
-
 class HumanReviewTimeout(AgentError):
     """A human-review item breached its SLA without a decision.
     Slice 385.  Recoverable: the item stays queued and the timeout
     policy (escalate / auto-deny / auto-approve) decides.
-    """
     code = "human_review_timeout"
+class SupplyChainViolation(HugrGateError):
+    """A dependency or artifact violates the supply-chain policy.
+    Slice 404.  Raised by
+    :func:`hugrgate.security.supply_chain.SupplyChainPolicy.enforce`
+    when a package comes from an unapproved index, lacks required
+    hashes, carries a disallowed license, or is on the blocklist.
+    Not recoverable: the dependency declaration itself must change.
+    code = "supply_chain_violation"
+class SignatureVerificationFailed(HugrGateError):
+    """A cryptographic signature check failed.
+    Slice 405.  Raised by :mod:`hugrgate.security.model_signing` (and
+    the checksum enforcer, slice 406) when a signed envelope's tag
+    does not verify, the key id is unknown, or the envelope is
+    malformed.  Not recoverable: the bytes or the key are wrong —
+    retrying the same check cannot succeed.
+    code = "signature_verification_failed"
+class PluginTrustError(HugrGateError):
+    """A plugin failed the trust model.
+    Slice 407.  Raised by :mod:`hugrgate.security.plugins` when a
+    plugin manifest is unsigned/invalid, its trust level does not
+    permit loading, its entry point escapes the module allowlist, or
+    it claims a capability its trust level does not grant.  Not
+    recoverable: the plugin declaration itself must change.
+    code = "plugin_trust_error"
+class SandboxViolation(HugrGateError):
+    """A sandboxed backend attempted a forbidden operation.
+    Slice 408.  Raised by :mod:`hugrgate.security.sandbox` when an
+    audit hook observes a denied syscall-class event (subprocess,
+    network, filesystem write) inside a sandbox boundary.  Not
+    recoverable: the backend's behavior violates its policy.
+    code = "sandbox_violation"
+class InputTooLarge(HugrGateError):
+    """An input exceeded the configured size limits.
+    Slice 409.  Raised by :mod:`hugrgate.security.input_limits`
+    when a state payload, batch, or prompt crosses its limit.  Not
+    recoverable: the same bytes will fail again — shrink the input
+    or raise the limit deliberately.
+    code = "input_too_large"
+class ResourceBudgetExceeded(HugrGateError):
+    """A resource budget was exhausted inside a guarded region.
+    Slice 410.  Raised by :mod:`hugrgate.security.resource_guards`
+    when CPU time, address-space, or charged cost units exceed the
+    declared budget.  Not recoverable: the same work will exceed
+    the same budget again — shrink the work or raise the budget.
+    code = "resource_budget_exceeded"
+class DeserializationBlocked(HugrGateError):
+    """Untrusted bytes were refused deserialization.
+    Slice 411.  Raised by :mod:`hugrgate.security.serde_guards`
+    when a pickle payload references a class outside the allowlist,
+    when pickle is disabled by policy, or when opaque bytes are not
+    a recognized safe encoding.  Not recoverable: the bytes are
+    hostile or the policy forbids them.
+    code = "deserialization_blocked"
+class PathTraversalBlocked(HugrGateError):
+    """A path escaped its jail directory.
+    Slice 412.  Raised by :mod:`hugrgate.security.path_guards` when
+    a user-influenced path resolves outside the root it was jailed
+    to (``..`` segments, absolute paths, symlink escapes, null
+    bytes).  Not recoverable: the path itself is hostile.
+    code = "path_traversal_blocked"
+class PromptInjectionBlocked(HugrGateError):
+    """A prompt-injection attempt was stopped at the boundary.
+    Slice 414.  Raised by :mod:`hugrgate.security.prompt_injection`
+    when untrusted content carries a high-confidence instruction-
+    override attempt.  Not recoverable: the content is hostile.
+    code = "prompt_injection_blocked"
+class ReplayDetected(HugrGateError):
+    """A replayed or stale message was rejected.
+    Slice 418.  Raised by :mod:`hugrgate.security.replay` when a
+    nonce repeats inside the window, a timestamp is outside the
+    freshness window, or a signed envelope fails verification.
+    Not recoverable: the message itself is hostile or stale.
+    code = "replay_detected"
+class AuthzDenied(HugrGateError):
+    """An authorization check denied the request.
+    Slice 419.  Raised by :mod:`hugrgate.security.authz` when a
+    principal is unknown, presents a bad/revoked credential, or
+    lacks the capability for the operation. Deny-by-default:
+    anything not explicitly granted is denied. Not recoverable —
+    the caller must obtain the right credential or capability.
+    code = "authz_denied"
+class RateLimitExceeded(HugrGateError):
+    """A per-key rate limit was exceeded.
+    Slice 420.  Raised by :mod:`hugrgate.security.ratelimit` when a
+    caller's token bucket is empty. Recoverable: the caller may
+    retry after ``retry_after_ms``. Carries ``key`` (the throttled
+    identity) and ``retry_after_ms`` in details.
+    code = "rate_limit_exceeded"
     recoverable = True

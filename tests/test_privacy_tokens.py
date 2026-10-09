@@ -130,3 +130,30 @@ def test_adversarial_cross_vault_replay():
     token = a.tokenize("x")
     with pytest.raises(KeyError):
         b.detokenize(token)
+
+
+def test_import_vault_rejects_hostile_pickle():
+    # Slice 423: import_vault used pickle.loads on caller bytes
+    # (found by tools/secscan.py). A hostile blob must raise
+    # DeserializationBlocked, never execute.
+    import pickle
+
+    from hugrgate.errors import DeserializationBlocked
+
+    class Evil:
+        def __reduce__(self):
+            import os
+            return (os.system, ("echo PWNED",))
+
+    hostile = pickle.dumps({"namespace": "x", "store": Evil()})
+    with pytest.raises(DeserializationBlocked):
+        TokenVault.import_vault(hostile)
+
+
+def test_import_vault_rejects_malformed_structure():
+    import pickle
+
+    from hugrgate.errors import DeserializationBlocked
+
+    with pytest.raises(DeserializationBlocked):
+        TokenVault.import_vault(pickle.dumps(["not", "a", "dict"]))
