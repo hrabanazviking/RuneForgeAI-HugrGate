@@ -17,9 +17,10 @@ Semantics:
   delayed sensor); empty sources are rejected.
 - :func:`outcome_agrees` compares an attached outcome against ground
   truth when the label is comparable (bool or one of the outcome
-  kinds); :func:`consistency_report` scans a history for episodes
-  where verified truth contradicts the observed outcome — the raw
-  material for slice 323's adversarial detectors.
+  kinds). :meth:`DecisionHistory.consistency_report <hugrgate.memory.
+  history.DecisionHistory.consistency_report>` scans a history for
+  episodes where verified truth contradicts the observed outcome —
+  the raw material for slice 323's adversarial detectors.
 """
 
 from __future__ import annotations
@@ -27,17 +28,12 @@ from __future__ import annotations
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
-from hugrgate.memory.query import MemoryQuery
-
-if TYPE_CHECKING:  # pragma: no cover - typing only
-    from hugrgate.memory.history import DecisionHistory
 
 __all__ = [
     "GroundTruth",
-    "consistency_report",
     "outcome_agrees",
 ]
 
@@ -104,29 +100,3 @@ def outcome_agrees(truth: GroundTruth, outcome: Outcome) -> bool | None:
     if outcome.kind == "partial":
         return None  # partial outcomes are not verdicts
     return outcome.kind == expected
-
-
-def consistency_report(history: DecisionHistory) -> list[dict[str, Any]]:
-    """Episodes where ground truth contradicts the attached outcome.
-
-    Each entry carries ``episode_id``, the outcome kind, the truth
-    label, and the truth source — the audit trail a reviewer needs.
-    Episodes without both attachments, or with non-comparable labels,
-    are skipped.
-    """
-    report = []
-    episodes = history.find(
-        MemoryQuery(has_outcome=True, has_ground_truth=True))
-    for episode in episodes:
-        outcome = episode.outcome
-        truth = episode.ground_truth
-        if outcome is None or truth is None:
-            continue
-        if outcome_agrees(truth, outcome) is False:
-            report.append({
-                "episode_id": episode.episode_id,
-                "outcome_kind": outcome.kind,
-                "truth_label": truth.label,
-                "truth_source": truth.source,
-            })
-    return report

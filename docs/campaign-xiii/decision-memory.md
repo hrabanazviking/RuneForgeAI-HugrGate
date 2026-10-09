@@ -97,3 +97,19 @@ it into an opaque agent.
 - Exported similarity + retrieval surfaces from `hugrgate.memory`
   (missed in the slice 305 commit).
 - Tests: `tests/test_memory_retrieval.py` (9 tests).
+
+### Slice 307 — Contextual memory policies
+- `hugrgate/memory/policies.py`: `MemoryPolicy` (ordered `MemoryRule`s,
+  first match wins, default record) with `MemoryDecision` verdicts and
+  `explain()`; factories `drop_forbidden` (mirrors
+  `privacy_retention`: forbidden never persists), `redact_above`
+  (privacy-ladder-aware via `at_least`), `drop_backend`,
+  `record_only_backend`, `drop_unaccepted`; custom predicate rules.
+- `DecisionHistory.record(..., policy=...)`: drop returns `None`,
+  redact strips record metadata and marks annotations.
+- `hugrgate/memory/types.py`: `EpisodeLike`/`HistoryLike` Protocols —
+  spokes stay typed without importing the `history` hub (the
+  import-cycle gate counts `TYPE_CHECKING` edges; `consistency_report`
+  moved onto `DecisionHistory` as a method; `MemoryQuery.apply`
+  made generic to preserve concrete episode types).
+- Tests: `tests/test_memory_policies.py` (14 tests).

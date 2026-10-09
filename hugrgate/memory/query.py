@@ -18,14 +18,13 @@ Queries never mutate the store and always return deep copies.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any, TypeVar
 
 from hugrgate.errors import MemoryError
+from hugrgate.memory.types import EpisodeLike
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
-
-if TYPE_CHECKING:  # pragma: no cover - typing only, no runtime cycle
-    from hugrgate.memory.history import Episode
 
 __all__ = [
     "MemoryQuery",
@@ -44,6 +43,8 @@ _MEMORY_ONLY_FIELDS = (
     "has_outcome",
     "has_ground_truth",
 )
+
+_E = TypeVar("_E", bound=EpisodeLike)
 
 
 def _frozen(values: set[str] | frozenset[str] | list[str] | tuple[str, ...]
@@ -111,7 +112,7 @@ class MemoryQuery:
 
     # -- matching -----------------------------------------------------
 
-    def matches(self, episode: Episode) -> bool:
+    def matches(self, episode: EpisodeLike) -> bool:
         """True when the episode satisfies every set filter."""
         record = episode.record
         if self.backends is not None and record.backend not in self.backends:
@@ -204,7 +205,7 @@ class MemoryQuery:
         target = getattr(item, "record", item)
         return getattr(target, self.sort_by)
 
-    def apply(self, episodes: list[Episode]) -> list[Episode]:
+    def apply(self, episodes: Sequence[_E]) -> list[_E]:
         """Filter, sort, and paginate an episode list (already copies)."""
         matched = [e for e in episodes if self.matches(e)]
         matched.sort(key=self._sort_key, reverse=self.descending)

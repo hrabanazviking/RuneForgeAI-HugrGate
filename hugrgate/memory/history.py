@@ -37,6 +37,7 @@ from typing import Any
 from hugrgate.errors import MemoryError
 from hugrgate.memory.groundtruth import GroundTruth
 from hugrgate.memory.outcomes import Outcome
+from hugrgate.memory.policies import MemoryDecision, MemoryPolicy
 from hugrgate.memory.query import MemoryQuery
 from hugrgate.privacy import PRIVACY_CLASS_ORDER
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
@@ -122,18 +123,39 @@ class DecisionHistory:
 
     def record(self, record: DecisionRecord, *,
                privacy_class: str = "standard",
-               tags: tuple[str, ...] | list[str] = ()) -> Episode:
-        """Remember one decision; return the stored episode (a copy)."""
+               tags: tuple[str, ...] | list[str] = (),
+               policy: MemoryPolicy | None = None) -> Episode | None:
+        """Remember one decision; return the stored episode (a copy).
+
+        When ``policy`` is given, its verdict applies first: a
+        ``"drop"`` verdict skips recording and returns ``None``; a
+        ``"redact"`` verdict strips the record's metadata before the
+        episode is stored (marked in ``annotations``).
+        """
         if not isinstance(record, DecisionRecord):
             raise TypeError(
                 f"DecisionHistory only records DecisionRecord, got "
                 f"{type(record).__name__}")
         _check_privacy_class(privacy_class)
+        tags = tuple(tags)
+        annotations: dict[str, Any] = {}
+        if policy is not None:
+            decision: MemoryDecision = policy.decide(
+                record, privacy_class, tags)
+            if decision.action == "drop":
+                return None
+            if decision.action == "redact":
+                annotations["redacted"] = True
+                annotations["redact_rule"] = decision.rule
+        stored_record = copy.deepcopy(record)
+        if annotations.get("redacted"):
+            stored_record.metadata = {}
         episode = Episode(
             episode_id=uuid.uuid4().hex,
-            record=copy.deepcopy(record),
+            record=stored_record,
             privacy_class=privacy_class,
-            tags=tuple(tags),
+            tags=tags,
+            annotations=annotations,
         )
         with self._lock:
             self._episodes.append(episode)
@@ -284,6 +306,32 @@ class DecisionHistory:
                 revisions.append(episode.ground_truth.to_dict())
             episode.ground_truth = truth
             return copy.deepcopy(episode)
+
+    def consistency_report(self) -> list[dict[str, Any]]:
+        """Episodes where ground truth contradicts the attached outcome.
+
+        Each entry carries ``episode_id``, the outcome kind, the truth
+        label, and the truth source — the audit trail a reviewer needs.
+        Episodes without both attachments, or with non-comparable
+        labels, are skipped.
+        """
+        from hugrgate.memory.groundtruth import outcome_agrees
+        report = []
+        episodes = self.find(MemoryQuery(has_outcome=True,
+                                         has_ground_truth=True))
+        for episode in episodes:
+            outcome = episode.outcome
+            truth = episode.ground_truth
+            if outcome is None or truth is None:
+                continue
+            if outcome_agrees(truth, outcome) is False:
+                report.append({
+                    "episode_id": episode.episode_id,
+                    "outcome_kind": outcome.kind,
+                    "truth_label": truth.label,
+                    "truth_source": truth.source,
+                })
+        return report
 
     # -- introspection -------------------------------------------------
 

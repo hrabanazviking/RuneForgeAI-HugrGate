@@ -10,7 +10,6 @@ from hugrgate.memory import (
     GroundTruth,
     MemoryQuery,
     Outcome,
-    consistency_report,
     outcome_agrees,
 )
 from hugrgate.provenance import DecisionRecord
@@ -146,7 +145,7 @@ def test_consistency_report():
     hist.attach_outcome(partial.episode_id, Outcome(kind="partial"))
     hist.attach_ground_truth(partial.episode_id,
                              GroundTruth(label=False, source="audit"))
-    report = consistency_report(hist)
+    report = hist.consistency_report()
     assert len(report) == 1
     entry = report[0]
     assert entry["episode_id"] == clash.episode_id
@@ -156,4 +155,4 @@ def test_consistency_report():
 
 
 def test_consistency_report_empty_history():
-    assert consistency_report(DecisionHistory()) == []
+    assert DecisionHistory().consistency_report() == []

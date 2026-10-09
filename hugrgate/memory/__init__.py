@@ -19,13 +19,20 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
-from hugrgate.memory.groundtruth import (
-    GroundTruth,
-    consistency_report,
-    outcome_agrees,
-)
+from hugrgate.memory.groundtruth import GroundTruth, outcome_agrees
 from hugrgate.memory.history import DecisionHistory, Episode
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
+from hugrgate.memory.policies import (
+    MemoryAction,
+    MemoryDecision,
+    MemoryPolicy,
+    MemoryRule,
+    drop_backend,
+    drop_forbidden,
+    drop_unaccepted,
+    record_only_backend,
+    redact_above,
+)
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
 from hugrgate.memory.retrieval import RetrievalResult, recall, retrieve
 from hugrgate.memory.similarity import (
@@ -41,17 +48,25 @@ __all__ = [
     "DecisionHistory",
     "Episode",
     "GroundTruth",
+    "MemoryAction",
+    "MemoryDecision",
+    "MemoryPolicy",
     "MemoryQuery",
+    "MemoryRule",
     "Outcome",
     "RetrievalResult",
     "SimilarityHit",
-    "consistency_report",
     "cosine",
+    "drop_backend",
+    "drop_forbidden",
+    "drop_unaccepted",
     "featurize_episode",
     "featurize_query",
     "find_in_provenance",
     "most_similar",
     "outcome_agrees",
     "recall",
+    "record_only_backend",
+    "redact_above",
     "retrieve",
 ]

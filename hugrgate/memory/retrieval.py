@@ -15,16 +15,14 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from hugrgate.memory.query import MemoryQuery
 from hugrgate.memory.similarity import (
     featurize_query,
     most_similar,
 )
-
-if TYPE_CHECKING:  # pragma: no cover - typing only
-    from hugrgate.memory.history import DecisionHistory, Episode
+from hugrgate.memory.types import EpisodeLike, HistoryLike
 
 __all__ = [
     "RetrievalResult",
@@ -42,7 +40,7 @@ def _decay_weight(age_seconds: float, half_life_seconds: float) -> float:
     return 0.5 ** (age / half_life_seconds)
 
 
-def _outcome_bonus(episode: Episode) -> float:
+def _outcome_bonus(episode: EpisodeLike) -> float:
     outcome = episode.outcome
     if outcome is None:
         return 0.5  # unknown: neutral
@@ -53,7 +51,7 @@ def _outcome_bonus(episode: Episode) -> float:
 class RetrievalResult:
     """One recalled precedent with its transparent score breakdown."""
 
-    episode: Episode
+    episode: EpisodeLike
     score: float
     similarity: float
     recency: float
@@ -73,7 +71,7 @@ class RetrievalResult:
         )
 
 
-def retrieve(history: DecisionHistory, query_features: dict[str, float], *,
+def retrieve(history: HistoryLike, query_features: dict[str, float], *,
              k: int = 5,
              alpha: float = 0.6,
              beta: float = 0.3,
@@ -120,7 +118,7 @@ def retrieve(history: DecisionHistory, query_features: dict[str, float], *,
     return results[:k]
 
 
-def recall(history: DecisionHistory, *, k: int = 5,
+def recall(history: HistoryLike, *, k: int = 5,
            spec: dict[str, Any] | None = None,
            backend: str | None = None,
            model: str | None = None,

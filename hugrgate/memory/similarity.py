@@ -19,11 +19,11 @@ Deliberate limits (Yrsa Execution Law, rule 14):
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:  # pragma: no cover - typing only
-    from hugrgate.memory.history import Episode
+from hugrgate.memory.types import EpisodeLike
 
 __all__ = [
     "SimilarityHit",
@@ -95,7 +95,7 @@ def featurize_query(*, spec: dict[str, Any] | None = None,
     return features
 
 
-def featurize_episode(episode: Episode) -> dict[str, float]:
+def featurize_episode(episode: EpisodeLike) -> dict[str, float]:
     """Feature vector for a stored episode (see :func:`featurize_query`)."""
     record = episode.record
     metadata = record.metadata or {}
@@ -136,13 +136,13 @@ def cosine(a: dict[str, float], b: dict[str, float]) -> float:
 class SimilarityHit:
     """One similar episode: the episode, its score, and why it matched."""
 
-    episode: Episode
+    episode: EpisodeLike
     score: float
     shared_features: tuple[str, ...] = field(default_factory=tuple)
 
 
 def most_similar(query_features: dict[str, float],
-                 episodes: list[Episode], *,
+                 episodes: Sequence[EpisodeLike], *,
                  k: int = 5,
                  exclude_ids: set[str] | frozenset[str] = frozenset()
                  ) -> list[SimilarityHit]:
@@ -156,7 +156,7 @@ def most_similar(query_features: dict[str, float],
     if k == 0 or not query_features or not episodes:
         return []
     query_keys = set(query_features)
-    scored: list[tuple[float, float, Episode, frozenset[str]]] = []
+    scored: list[tuple[float, float, EpisodeLike, frozenset[str]]] = []
     for episode in episodes:
         if episode.episode_id in exclude_ids:
             continue
