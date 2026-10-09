@@ -334,6 +334,32 @@ flowchart TD
         chaos_soak[chaos.soak]
         chaos_scorecard[chaos.scorecard]
     end
+    subgraph evaluation-lab[evaluation-lab]
+        evlab[evlab]
+        evlab_api[evlab.api]
+        evlab_dataset[evlab.dataset]
+        evlab_splits[evlab.splits]
+        evlab_stratified[evlab.stratified]
+        evlab_crossval[evlab.crossval]
+        evlab_bootstrap[evlab.bootstrap]
+        evlab_significance[evlab.significance]
+        evlab_compare[evlab.compare]
+        evlab_calibration[evlab.calibration]
+        evlab_selective[evlab.selective]
+        evlab_costaware[evlab.costaware]
+        evlab_latency[evlab.latency]
+        evlab_energy[evlab.energy]
+        evlab_privacy[evlab.privacy]
+        evlab_robustness[evlab.robustness]
+        evlab_shift[evlab.shift]
+        evlab_fairness[evlab.fairness]
+        evlab_history[evlab.history]
+        evlab_artifacts[evlab.artifacts]
+        evlab_repro[evlab.repro]
+        evlab_gates[evlab.gates]
+        evlab_report[evlab.report]
+        evlab_release[evlab.release]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -1130,6 +1156,14 @@ flowchart TD
     ensemble_voting --> ensemble_base
     ensemble_voting --> errors
     ensemble_voting --> result
+    evlab --> evlab_api
+    evlab_api --> hugrgate
+    evlab_api --> bench
+    evlab_api --> core
+    evlab_api --> errors
+    evlab_api --> log
+    evlab_api --> policy
+    evlab_api --> spec
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -1480,6 +1514,7 @@ flowchart TD
 | performance | `profiling`, `flame`, `hotpaths`, `allocprof`, `zerocopy`, `asyncx`, `async_backend`, `scheduler`, `backpressure`, `pool`, `lockaudit`, `multiproc`, `supervision`, `numa`, `gpusched`, `perfgate`, `millionbench` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
+| evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
 
 ## Internal dependency edges
 
@@ -2280,6 +2315,14 @@ flowchart TD
 | `ensemble.voting` | `ensemble.base` | no |
 | `ensemble.voting` | `errors` | no |
 | `ensemble.voting` | `result` | no |
+| `evlab` | `evlab.api` | no |
+| `evlab.api` | `hugrgate` | no |
+| `evlab.api` | `bench` | no |
+| `evlab.api` | `core` | no |
+| `evlab.api` | `errors` | no |
+| `evlab.api` | `log` | no |
+| `evlab.api` | `policy` | no |
+| `evlab.api` | `spec` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 289 · **public names:** 1740
+**Modules:** 291 · **public names:** 1752
 
 ## API stability policy
 
@@ -2211,9 +2211,11 @@ that this document never drifts from the code.
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ContractError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `DataFlowDenied` | class | `(message: 'str' = '', **details: 'Any')` |
+| `DatasetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EvalError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GpuschedError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2247,6 +2249,26 @@ that this document never drifts from the code.
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ZeroCopyError` | class | `(message: 'str' = '', **details: 'Any')` |
+
+### `hugrgate.evlab`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
+| `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
+| `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
+| `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
+| `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+
+### `hugrgate.evlab.api`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
+| `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
+| `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
+| `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
+| `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 
 ### `hugrgate.fallback`
 

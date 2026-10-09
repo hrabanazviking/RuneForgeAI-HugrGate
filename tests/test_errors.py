@@ -24,9 +24,11 @@ from hugrgate.errors import (
     ClusterAuthError,
     ContractError,
     DataFlowDenied,
+    DatasetError,
     EdgeAffinityError,
     EdgeCacheError,
     EdgeMemoryError,
+    EvalError,
     GateError,
     GGUFError,
     GpuschedError,
@@ -82,6 +84,8 @@ ALL_ERRORS = [
     StorageError, TelemetryError, WatchdogError,
     ClusterAuthError,
     DataFlowDenied,
+    DatasetError,
+    EvalError,
     JurisdictionViolation,
     LocalOnlyViolation,
     SecretDetected,
@@ -137,6 +141,8 @@ EXPECTED_CODES = {
     SecretDetected: "secret_detected",
     SealError: "seal_error",
     KeyProviderError: "key_provider_error",
+    DatasetError: "dataset_error",
+    EvalError: "eval_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -191,6 +197,8 @@ EXPECTED_RECOVERABLE = {
     SecretDetected: False,
     SealError: False,
     KeyProviderError: False,
+    DatasetError: False,
+    EvalError: False,
 }
 
 

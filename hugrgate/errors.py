@@ -27,9 +27,11 @@ __all__ = [
     "ClusterAuthError",
     "ContractError",
     "DataFlowDenied",
+    "DatasetError",
     "EdgeAffinityError",
     "EdgeCacheError",
     "EdgeMemoryError",
+    "EvalError",
     "GGUFError",
     "GateError",
     "GpuschedError",
@@ -486,4 +488,26 @@ class PerfGateError(HugrGateError):
     retry; fix the regression or consciously re-baseline.
     """
     code = "perfgate_error"
+    recoverable = False
+
+
+class DatasetError(HugrGateError):
+    """A dataset manifest is malformed, fails validation, or is unusable.
+
+    Slice 352.  Deliberately *not* recoverable: a broken manifest is a
+    data-integrity signal, not a transient fault.  Fix the dataset or
+    its manifest; retrying the same bytes cannot succeed.
+    """
+    code = "dataset_error"
+    recoverable = False
+
+
+class EvalError(HugrGateError):
+    """An evaluation-lab operation failed (bad experiment, empty run).
+
+    Slice 351.  Deliberately *not* recoverable: evaluation failures
+    signal misconfiguration or empty data, not transient faults.  Fix
+    the experiment definition and re-run.
+    """
+    code = "eval_error"
     recoverable = False
