@@ -14,6 +14,7 @@ Slice 484 (latest) lives in :func:`latest_audit`.
 
 from __future__ import annotations
 
+import ast
 import importlib.metadata
 import re
 from dataclasses import dataclass
@@ -27,6 +28,7 @@ DEFAULT_PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 __all__ = [
     "DEFAULT_PYPROJECT",
+    "DEPRECATED_PATTERNS",
     "REPO_ROOT",
     "DepReport",
     "DepRequirement",
@@ -37,6 +39,7 @@ __all__ = [
     "parse_requirement",
     "read_runtime_dependencies",
     "render_min_requirements",
+    "scan_deprecated_api",
     "version_key",
     "write_min_requirements",
 ]
@@ -173,6 +176,84 @@ def write_min_requirements(path: str | Path) -> Path:
     path = Path(path)
     path.write_text(render_min_requirements(), encoding="utf-8")
     return path
+
+
+#: (regex, reason) pairs for APIs removed or deprecated in the
+#: latest releases of our dependencies. ``yaml.load`` without a
+#: Loader is an arbitrary-code-execution hole; the naive-UTC
+#: datetime constructor is deprecated since 3.12; the numpy aliases
+#: died in numpy 1.24.
+DEPRECATED_PATTERNS: tuple[tuple[str, str], ...] = (
+    (r"\byaml\.load\s*\(", "yaml.load() without Loader (use safe_load)"),
+    (r"\bdatetime\s*\.\s*utcnow\s*\(", "datetime.utcnow() deprecated (3.12+)"),
+    (r"\bnp\.(float_|unicode_|bool8|object0)\b",
+     "numpy deprecated alias (removed in numpy 1.24)"),
+    (r"\bcollections\.(Mapping|Sequence|MutableMapping)\b",
+     "collections ABCs moved to collections.abc (3.10+)"),
+    (r"\btime\.clock\s*\(", "time.clock() removed (3.8+)"),
+)
+
+
+def _string_constant_spans(path: Path) -> list[tuple[int, int, int, int]]:
+    """Spans of string constants in ``path`` as (lineno, col, end_lineno,
+    end_col) tuples.
+
+    Detection corpora (the secscan patterns, this module's own
+    ``DEPRECATED_PATTERNS`` table) must *name* dangerous APIs to
+    detect them; only real code uses are findings.
+    """
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"),
+                         filename=str(path))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return []
+    spans: list[tuple[int, int, int, int]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            spans.append((node.lineno, node.col_offset,
+                          node.end_lineno or node.lineno,
+                          node.end_col_offset or 0))
+    return spans
+
+
+def _in_string(spans: list[tuple[int, int, int, int]],
+               lineno: int, col: int) -> bool:
+    for sline, scol, eline, ecol in spans:
+        if sline == eline:
+            if lineno == sline and scol <= col < ecol:
+                return True
+        elif (lineno == sline and col >= scol) or (lineno == eline
+                                                  and col < ecol) \
+                or (sline < lineno < eline):
+            return True
+    return False
+
+
+def scan_deprecated_api(
+    root: str | Path = REPO_ROOT,
+) -> tuple[tuple[str, int, str], ...]:
+    """Scan ``root`` for deprecated/removed dependency API usage.
+
+    Returns ``(path, lineno, reason)`` findings. Matches inside
+    string constants are ignored — detection corpora name these
+    APIs to detect them; only real code uses are findings.
+    """
+    findings: list[tuple[str, int, str]] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError):
+            continue
+        string_spans = _string_constant_spans(path)
+        for lineno, line in enumerate(lines, start=1):
+            for pattern, reason in DEPRECATED_PATTERNS:
+                for match in re.finditer(pattern, line):
+                    if _in_string(string_spans, lineno, match.start()):
+                        continue
+                    findings.append((str(path), lineno, reason))
+    return tuple(findings)
 
 
 def latest_audit(
