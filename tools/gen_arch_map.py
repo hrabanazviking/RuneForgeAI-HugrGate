@@ -313,6 +313,22 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.evlab.repro", "hugrgate.evlab.gates",
         "hugrgate.evlab.report", "hugrgate.evlab.release",
     ],
+    "agents": [  # Gjallarbrú campaign XVI, slices 376-400
+        "hugrgate.agents", "hugrgate.agents.types",
+        "hugrgate.agents.bus", "hugrgate.agents.contract",
+        "hugrgate.agents.triage", "hugrgate.agents.intent",
+        "hugrgate.agents.tools", "hugrgate.agents.memory_write",
+        "hugrgate.agents.memory_read", "hugrgate.agents.notify",
+        "hugrgate.agents.attention", "hugrgate.agents.escalation",
+        "hugrgate.agents.human_review", "hugrgate.agents.dispatch",
+        "hugrgate.agents.registry", "hugrgate.agents.health",
+        "hugrgate.agents.cost", "hugrgate.agents.privacy",
+        "hugrgate.agents.fusion", "hugrgate.agents.disagreement",
+        "hugrgate.agents.loopbreak", "hugrgate.agents.runaway",
+        "hugrgate.agents.budgets", "hugrgate.agents.provenance",
+        "hugrgate.agents.replay", "hugrgate.agents.simulator",
+        "hugrgate.agents.benchmark", "hugrgate.agents.release_gate",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 363 · **public names:** 2201
+**Modules:** 391 · **public names:** 2304
 
 ## API stability policy
 
@@ -307,6 +307,241 @@ that this document never drifts from the code.
 | `AdaptivePolicyVersioning` | class | `() -> 'None'` |
 | `PolicyVersion` | class | `(version_id: 'str', parent_id: 'str | None', created_at: 'float', note: 'str', state_digest: 'str') -> None` |
 | `digest_state` | function | `(state: 'Mapping[str, Any]') -> 'str'` |
+
+### `hugrgate.agents`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.agents.attention`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AttentionConfig` | class | `(w_priority: 'float' = 2.0, w_urgency: 'float' = 3.0, w_novelty: 'float' = 1.5, w_cost: 'float' = 1.0, max_items: 'int' = 256) -> None` |
+| `AttentionItem` | class | `(item_id: 'str', topic: 'str', priority: 'str' = 'normal', urgency: 'float' = 0.5, novelty: 'float' = 0.5, cost: 'float' = 0.5, payload: 'dict[str, Any]' = <factory>) -> None` |
+| `AttentionPrioritizer` | class | `(config: 'AttentionConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.agents.benchmark`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AgentBenchmark` | class | `()` |
+| `AgentBenchmarkConfig` | class | `(scenarios: 'Mapping[str, list[dict[str, Any]]]', repetitions: 'int' = 5, seed: 'int' = 0) -> None` |
+| `BenchmarkReport` | class | `(scenarios: 'tuple[ScenarioResult, ...]', repetitions: 'int', seed: 'int', notes: 'tuple[str, ...]' = <factory>) -> None` |
+| `ScenarioResult` | class | `(name: 'str', runs: 'int', success_rate_mean: 'float', success_rate_min: 'float', success_rate_max: 'float', total_failures: 'int', total_loops: 'int', total_runaways: 'int', total_escalations: 'int', latency_p50_ms: 'float', latency_p95_ms: 'float') -> None` |
+
+### `hugrgate.agents.budgets`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BudgetLedger` | class | `() -> 'None'` |
+| `DecisionBudget` | class | `(decisions: 'int' = 1000, tokens: 'int' = 1000000, latency_ms: 'float' = 3600000.0) -> None` |
+
+### `hugrgate.agents.bus`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EventBus` | class | `(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `Subscription` | class | `(token: 'int', pattern: 'str', priority: 'int') -> None` |
+| `matches` | function | `(pattern: 'str', topic: 'str') -> 'bool'` |
+
+### `hugrgate.agents.contract`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCHEMA_TYPES` | constant | `('str', 'int', 'float', 'bool', 'list', 'dict')` |
+| `AgentContract` | class | `(agent_id: 'str', version: 'str' = '1.0.0', capabilities: 'tuple[str, ...]' = (), intents: 'tuple[str, ...]' = (), tools: 'tuple[str, ...]' = (), input_schema: 'Mapping[str, str]' = <factory>, output_schema: 'Mapping[str, str]' = <factory>, max_latency_ms: 'float' = 5000.0, max_cost: 'float' = 1.0, min_confidence: 'float' = 0.0, privacy_clearance: 'str' = 'standard', max_escalation_depth: 'int' = 3) -> None` |
+| `assert_contract` | function | `(contract: 'AgentContract') -> 'None'` |
+| `check_input` | function | `(contract: 'AgentContract', payload: 'Mapping[str, Any]') -> 'tuple[str, ...]'` |
+| `check_output` | function | `(contract: 'AgentContract', payload: 'Mapping[str, Any]') -> 'tuple[str, ...]'` |
+| `check_payload` | function | `(schema: 'Mapping[str, str]', payload: 'Mapping[str, Any]', *, what: 'str') -> 'tuple[str, ...]'` |
+| `validate_contract` | function | `(contract: 'AgentContract') -> 'tuple[str, ...]'` |
+
+### `hugrgate.agents.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostLedger` | class | `(agent_id: 'str', cost_per_decision: 'float', budget: 'float | None', spent: 'float', remaining: 'float | None', exhausted: 'bool') -> None` |
+| `CostRouter` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.agents.disagreement`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DISAGREEMENT_STRATEGIES` | constant | `('fuse', 'majority', 'highest_confidence', 'human_review')` |
+| `DisagreementResolver` | class | `(review_queue: 'HumanReviewQueue | None' = None, *, disagreement_threshold: 'float' = 0.4) -> 'None'` |
+| `Resolution` | class | `(label: 'str', strategy: 'str', confidence: 'float', escalated: 'bool', reason: 'str', votes: 'tuple[AgentVote, ...]' = (), fusion: 'FusionResult | None' = None, review_item_id: 'str' = '', metadata: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.agents.dispatch`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STRATEGIES` | constant | `('parallel', 'race', 'quorum')` |
+| `AgentCallResult` | class | `(agent_id: 'str', ok: 'bool', output: 'Any' = None, confidence: 'float' = 0.0, latency_ms: 'float' = 0.0, error: 'str' = '') -> None` |
+| `DispatchResult` | class | `(strategy: 'str', ok: 'bool', results: 'dict[str, AgentCallResult]' = <factory>, winner: 'str' = '', reason: 'str' = '') -> None` |
+| `MultiAgentDispatch` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.agents.escalation`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ESCALATION_LEVELS` | constant | `('agent', 'supervisor', 'human', 'terminal')` |
+| `Escalation` | class | `(ticket_id: 'str', from_level: 'str', to_level: 'str', reason: 'str', depth: 'int', at: 'float' = 0.0) -> None` |
+| `EscalationPolicy` | class | `(cooldown_s: 'float' = 30.0, bus: 'EventBus | None' = None, contracts: 'dict[str, AgentContract] | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+
+### `hugrgate.agents.fusion`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FUSION_METHODS` | constant | `('weighted', 'majority', 'max_conf')` |
+| `AgentVote` | class | `(agent_id: 'str', label: 'str', confidence: 'float', weight: 'float' = 1.0) -> None` |
+| `FusionResult` | class | `(label: 'str', confidence: 'float', method: 'str', votes: 'tuple[AgentVote, ...]', disagreement: 'float') -> None` |
+| `disagreement` | function | `(votes: 'tuple[AgentVote, ...] | list[AgentVote]') -> 'float'` |
+| `fuse_confidences` | function | `(votes: 'tuple[AgentVote, ...] | list[AgentVote]', method: 'str' = 'weighted') -> 'FusionResult'` |
+
+### `hugrgate.agents.health`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HealthRouter` | class | `(*, alpha: 'float' = 0.3, degrade_threshold: 'float' = 0.5, bus: 'EventBus | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `HealthScore` | class | `(agent_id: 'str', score: 'float', samples: 'int', avg_latency_ms: 'float', error_rate: 'float', degraded: 'bool') -> None` |
+
+### `hugrgate.agents.human_review`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TIMEOUT_POLICIES` | constant | `('escalate', 'auto_deny', 'auto_approve', 'raise')` |
+| `HumanReviewQueue` | class | `(bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `ReviewDecision` | class | `(item_id: 'str', approved: 'bool', reviewer: 'str', decided_at: 'float', note: 'str' = '') -> None` |
+| `ReviewItem` | class | `(item_id: 'str', ticket_id: 'str', agent_id: 'str', summary: 'str', severity: 'str' = 'warning', sla_s: 'float' = 3600.0, enqueued_at: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.agents.intent`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `IntentRoute` | class | `(intent: 'str', agent_id: 'str', confidence: 'float', reason: 'str', fallback: 'bool' = False) -> None` |
+| `IntentRouter` | class | `(contracts: 'dict[str, AgentContract]' = <factory>, _regs: 'list[_Registration]' = <factory>, _fallback: 'str' = '') -> None` |
+| `tokenize` | function | `(text: 'str') -> 'frozenset[str]'` |
+
+### `hugrgate.agents.loopbreak`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LoopBreaker` | class | `(*, max_depth: 'int' = 16, bus: 'EventBus | None' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `LoopEvent` | class | `(ticket_id: 'str', cycle: 'tuple[str, ...]', depth: 'int') -> None` |
+
+### `hugrgate.agents.memory_read`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `READ_REASONS` | constant | `('ok', 'bad_class', 'unbound_agent', 'clearance', 'role_clas` |
+| `MemoryReadGate` | class | `(config: 'ReadGateConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `ReadGateConfig` | class | `(max_reads_per_minute: 'int' = 600, audit_trail_size: 'int' = 1024, default_role: 'str' = '') -> None` |
+| `ReadPermit` | class | `(granted: 'bool', reason: 'str', agent_id: 'str', privacy_class: 'str' = '', redacted: 'bool' = False) -> None` |
+
+### `hugrgate.agents.memory_write`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `REASONS` | constant | `('ok', 'bad_class', 'unbound_agent', 'clearance', 'role_read` |
+| `MemoryWriteGate` | class | `(config: 'WriteGateConfig | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `WriteGateConfig` | class | `(max_writes_per_minute: 'int' = 60, max_payload_bytes: 'int' = 1048576, dedup_window_s: 'float' = 300.0, default_role: 'str' = '') -> None` |
+| `WritePermit` | class | `(granted: 'bool', reason: 'str', agent_id: 'str', privacy_class: 'str' = '') -> None` |
+
+### `hugrgate.agents.notify`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `NOTIFY_REASONS` | constant | `('sent', 'channel_unknown', 'channel_disabled', 'severity_fi` |
+| `ChannelConfig` | class | `(rate_per_minute: 'int' = 10, min_severity: 'str' = 'info', enabled: 'bool' = True, dedup_window_s: 'float' = 300.0) -> None` |
+| `Notification` | class | `(channel: 'str', title: 'str', body: 'str' = '', severity: 'str' = 'info', dedup_key: 'str' = '', trace_id: 'str' = '') -> None` |
+| `NotificationGate` | class | `(*, sender: 'Callable[[Notification], None] | None' = None, bus: 'Any' = None, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `NotifyDecision` | class | `(sent: 'bool', reason: 'str', channel: 'str', severity: 'str') -> None` |
+
+### `hugrgate.agents.privacy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyRouter` | class | `(contracts: 'dict[str, AgentContract] | None' = None) -> 'None'` |
+| `signal_privacy_class` | function | `(signal: 'AgentSignal') -> 'str'` |
+
+### `hugrgate.agents.provenance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AgentProvenanceGraph` | class | `() -> 'None'` |
+| `ProvenanceNode` | class | `(node_id: 'str', kind: 'str', agent_id: 'str', ticket_id: 'str', parents: 'tuple[str, ...]' = (), details: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.agents.registry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AgentRegistry` | class | `(*, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `RegisteredAgent` | class | `(contract: 'AgentContract', endpoint: 'str' = '', healthy: 'bool' = True, health_note: 'str' = '', registered_at: 'float' = 0.0) -> None` |
+
+### `hugrgate.agents.release_gate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `NervousSystem` | class | `(bus: 'EventBus' = <factory>, registry: 'AgentRegistry' = <factory>, triage: 'EventTriage' = <factory>, intent_router: 'IntentRouter' = <factory>, tool_router: 'ToolRouter' = <factory>, memory_write: 'MemoryWriteGate' = <factory>, memory_read: 'MemoryReadGate' = <factory>, notify_gate: 'NotificationGate' = <factory>, attention: 'AttentionPrioritizer' = <factory>, escalation: 'EscalationPolicy' = <factory>, review_queue: 'HumanReviewQueue' = <factory>, dispatcher: 'MultiAgentDispatch' = <factory>, health: 'HealthRouter' = <factory>, cost: 'CostRouter' = <factory>, privacy: 'PrivacyRouter' = <factory>, loop_breaker: 'LoopBreaker' = <factory>, runaway: 'RunawayGuard' = <factory>, budgets: 'BudgetLedger' = <factory>, provenance: 'AgentProvenanceGraph' = <factory>, replay: 'AgentReplay' = <factory>) -> None` |
+| `NervousSystemReleaseGate` | class | `()` |
+| `ReleaseReport` | class | `(checks: 'tuple[GateCheck, ...]', notes: 'tuple[str, ...]' = ()) -> None` |
+| `assemble` | function | `() -> 'NervousSystem'` |
+
+### `hugrgate.agents.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AgentReplay` | class | `() -> 'None'` |
+| `RecordedStep` | class | `(index: 'int', kind: 'str', step_input: 'Any', step_output: 'Any') -> None` |
+| `ReplayReport` | class | `(ticket_id: 'str', steps: 'int', matched: 'int', mismatches: 'tuple[int, ...]', deterministic: 'bool', seed: 'int | None' = None, notes: 'tuple[str, ...]' = <factory>) -> None` |
+
+### `hugrgate.agents.runaway`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RunawayGuard` | class | `(limits: 'RunawayLimits | None' = None, bus: 'EventBus | None' = None, *, clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `RunawayLimits` | class | `(max_escalations_per_ticket: 'int' = 8, max_steps_per_ticket: 'int' = 256, max_tokens_per_ticket: 'int' = 64000) -> None` |
+| `TicketUsage` | class | `(ticket_id: 'str', escalations: 'int', steps: 'int', tokens: 'int') -> None` |
+
+### `hugrgate.agents.simulator`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BEHAVIORS` | constant | `('honest', 'slow', 'faulty', 'looping', 'escalating')` |
+| `AgentSimulator` | class | `(*, runaway_limits: 'RunawayLimits | None' = None, bus: 'EventBus | None' = None) -> 'None'` |
+| `SimContext` | class | `(ticket_id: 'str', agent_id: 'str', caller: 'str', intent: 'str', step_index: 'int', rng: 'random.Random') -> None` |
+| `SimulationReport` | class | `(steps: 'int', successes: 'int', failures: 'int', loops_detected: 'int', runaways: 'int', escalations: 'int', per_agent: 'dict[str, dict[str, int]]' = <factory>, seed: 'int | None' = None) -> None` |
+
+### `hugrgate.agents.tools`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ToolGrant` | class | `(call_id: 'str', agent_id: 'str', tool: 'str', ticket_id: 'str') -> None` |
+| `ToolPolicy` | class | `(agent_id: 'str', allowed_tools: 'frozenset[str]' = frozenset(), denied_tools: 'frozenset[str]' = frozenset(), max_calls_per_ticket: 'int' = 16, arg_schemas: 'dict[str, dict[str, str]]' = <factory>) -> None` |
+| `ToolRouter` | class | `(contracts: 'dict[str, AgentContract] | None' = None) -> 'None'` |
+
+### `hugrgate.agents.triage`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ACTIONS` | constant | `('route', 'drop', 'defer')` |
+| `EventTriage` | class | `(bus: 'EventBus | None' = None) -> 'None'` |
+| `TriageDecision` | class | `(signal: 'AgentSignal', action: 'str', queue: 'str', priority: 'str', rule_name: 'str', reason: 'str', dropped: 'bool' = False, deferred: 'bool' = False) -> None` |
+| `TriageRule` | class | `(name: 'str', topic_pattern: 'str', action: 'str', queue: 'str' = 'default', priority_boost: 'int' = 0, reason: 'str' = '') -> None` |
+
+### `hugrgate.agents.types`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PRIORITIES` | constant | `('low', 'normal', 'high', 'critical')` |
+| `PRIORITY_RANK` | constant | `{'low': 0, 'normal': 1, 'high': 2, 'critical': 3}` |
+| `AgentDelivery` | class | `(signal: 'AgentSignal', delivered: 'int' = 0, suppressed: 'int' = 0, dropped: 'int' = 0, errors: 'tuple[str, ...]' = ()) -> None` |
+| `AgentId` | class | — |
+| `AgentSignal` | class | `(topic: 'str', payload: 'Mapping[str, Any]' = <factory>, priority: 'str' = 'normal', trace_id: 'str' = '', dedup_key: 'str' = '', source: 'str' = '') -> None` |
+| `AgentTicket` | class | `(ticket_id: 'str', agent_id: 'AgentId', intent: 'str', trace_id: 'str' = '', parent_ticket_id: 'str' = '', max_steps: 'int' = 32, max_tokens: 'int' = 8000, payload: 'Mapping[str, Any]' = <factory>) -> None` |
+| `new_trace_id` | function | `() -> 'str'` |
 
 ### `hugrgate.allocprof`
 
@@ -2201,6 +2436,13 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
+| `AgentBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentContractViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentEscalationFailed` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentLoopDetected` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentNotFound` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AgentRunaway` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackpressureError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2221,6 +2463,7 @@ that this document never drifts from the code.
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GpuschedError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `HumanReviewTimeout` | class | `(message: 'str' = '', **details: 'Any')` |
 | `JurisdictionViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `KeyProviderError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `LocalOnlyViolation` | class | `(message: 'str' = '', **details: 'Any')` |

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T17:28:48.675125+00:00",
-  "module_count": 363,
+  "generated_utc": "2026-10-09T18:01:32.032848+00:00",
+  "module_count": 391,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -593,6 +593,627 @@
         "lineage",
         "history",
         "to_dict"
+      ]
+    },
+    "hugrgate.agents.__init__": {
+      "docstring": "HugrGate agent nervous system (Campaign XVI) \u2014 connective tissue\nfor agentic loops: event bus, reactive triggers, state propagation,\nand inter-component signaling.\n\nThis package ties together the three systems that already exist \u2014\ndecision memory (:mod:`hugrgate.memory`), observability tracing\n(:mod:`hugrgate.observability`), and chaos experiments\n(:mod:`hugrgate.chaos`) \u2014 into one bounded-decision nervous system\nfor larger agents.  It does not duplicate them: gates consult\nmemory access policy, signals feed observability, and the\nsimulator reuses chaos fault shapes.\n\nSubmodules are imported individually\n(``from hugrgate.agents import contract``); this ``__init__`` stays\nempty so importing the package never pulls the whole layer in \u2014\nthe same convention as :mod:`hugrgate.observability`.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 21,
+      "path": "hugrgate/agents/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.agents.attention": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 attention prioritization.\n\nSlice 383.  Triage (377) defers non-urgent work; something must\ndecide *what the agent looks at next*.  :class:`AttentionPrioritizer`\nis a bounded scored queue \u2014 the nervous system's spotlight:\n\n``score = w_priority * priority_rank + w_urgency * urgency\n        + w_novelty * novelty - w_cost * cost``\n\n- ``priority`` is the signal's own urgency ladder (376);\n- ``urgency`` is deadline pressure (0..1);\n- ``novelty`` rewards unseen situations over repeats (0..1);\n- ``cost`` penalizes expensive work so cheap wins don't starve\n  behind dear ones (0..1).\n\nThe queue is bounded (``max_items``): when full, the lowest-scored\nitem is shed and counted \u2014 attention is finite and the system says\nso explicitly rather than growing a queue forever.  Ordering is\ndeterministic: score first, then enqueue time, then id.\n:class:`AttentionItem` is frozen; :meth:`reprioritize` replaces an\nitem's urgency/novelty in place by id.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "heapq",
+        "hugrgate",
+        "itertools",
+        "time",
+        "typing"
+      ],
+      "loc": 197,
+      "path": "hugrgate/agents/attention.py",
+      "public_defs": [
+        "AttentionConfig",
+        "AttentionItem",
+        "AttentionPrioritizer",
+        "score",
+        "push",
+        "pop",
+        "peek",
+        "reprioritize",
+        "stats",
+        "priorities"
+      ]
+    },
+    "hugrgate.agents.benchmark": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent-system benchmark.\n\nSlice 399.  The simulator (398) rehearses failure; the benchmark\n*measures* it.  :class:`AgentBenchmark` runs named scenarios\nthrough fresh simulators, repetitions each, and aggregates:\n\n- success rate (mean \u00b1 min/max across repetitions);\n- loops detected, runaways, escalations, failures (totals);\n- wall-clock latency p50/p95 per scenario run (honest numbers\n  from :func:`time.perf_counter`, not simulated time).\n\n``sim_factory`` builds a new :class:`AgentSimulator` per run so\nrepetitions are isolated \u2014 no shared bus, breaker, or guard\nstate leaks between runs.  Seeds derive deterministically from\nthe base seed (``seed + rep``), so the whole benchmark replays.\n:class:`BenchmarkReport` is wire-safe (:meth:`to_dict`) for CI\ngates and the release gate (400).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "time",
+        "typing"
+      ],
+      "loc": 163,
+      "path": "hugrgate/agents/benchmark.py",
+      "public_defs": [
+        "AgentBenchmarkConfig",
+        "ScenarioResult",
+        "BenchmarkReport",
+        "AgentBenchmark",
+        "to_dict",
+        "run"
+      ]
+    },
+    "hugrgate.agents.budgets": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 decision budgets per agent.\n\nSlice 395.  Three budget systems, three jobs \u2014 no overlap:\n\n- cost router (389): *routing-time* wallets \u2014 \"can we afford to\n  send this ticket there\";\n- runaway guard (394): *per-ticket* ceilings \u2014 \"this ticket has\n  gone too far\";\n- this ledger: *per-agent* execution budgets across tickets \u2014\n  \"this agent has done enough this window\".\n\n:class:`BudgetLedger` allocates each agent a :class:`DecisionBudget`\n(decisions, tokens, latency_ms); :meth:`consume` charges usage\nand raises :class:`AgentBudgetExhausted` naming the exhausted\ndimension with limit/used in details.  Exhaustion is recoverable:\n:meth:`reset` opens a new window, :meth:`top_up` adds headroom \u2014\na supervisor or operator decides, never the agent itself.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 152,
+      "path": "hugrgate/agents/budgets.py",
+      "public_defs": [
+        "DecisionBudget",
+        "BudgetLedger",
+        "allocate",
+        "top_up",
+        "reset",
+        "allocated",
+        "remaining",
+        "consume",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.bus": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the event bus.\n\nSlice 376 (shared substrate).  The bus is the spinal cord: every\nreactive trigger, state propagation, and inter-component signal in\nslices 377-400 travels as an :class:`AgentSignal` over\n:class:`EventBus`.\n\nDesign:\n\n- Topic patterns: exact (``\"agent.escalated\"``), prefix\n  (``\"agent.*\"``), or catch-all (``\"*\"``).  Handlers run in\n  subscription-priority order, highest first; ties break by\n  subscription order (deterministic).\n- Dedup: a signal carrying ``dedup_key`` is delivered at most once\n  per ``dedup_window_s`` \u2014 alert-storm protection inherited from the\n  observability :class:`AlertManager` philosophy.\n- Backpressure: ``max_pending`` bounds re-entrant publish depth\n  (in-flight deliveries); policy ``\"raise\"`` surfaces\n  :class:`BackpressureError`, ``\"drop-oldest\"`` sheds the incoming\n  signal and counts it.\n- Handler exceptions never propagate to the publisher; they are\n  collected on the delivery report.  A dead handler must not kill\n  the nervous system.\n- Thread-safe: a single re-entrant lock guards subscriptions,\n  dedup state, and stats.\n\nThe bus intentionally does *not* persist \u2014 durability belongs to\ndecision memory (:mod:`hugrgate.memory`), which subscribers can\nwrite to through the memory-write gate (slice 380).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 207,
+      "path": "hugrgate/agents/bus.py",
+      "public_defs": [
+        "matches",
+        "Subscription",
+        "EventBus",
+        "subscribe",
+        "unsubscribe",
+        "subscription_count",
+        "publish",
+        "stats",
+        "reset_stats"
+      ]
+    },
+    "hugrgate.agents.contract": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the agent integration contract.\n\nSlice 376.  No agent joins the nervous system without a declared\ncontract: who it is, what it can do (capabilities), what it\nunderstands (intents), what tools it may touch, the shape of its\ninputs/outputs, its SLOs, and its privacy clearance.  The contract\nis the trust anchor every later slice builds on \u2014 routers check\ncapabilities (378/379/387), gates check clearance (380/381/390),\nand the release gate (400) refuses to ship agents with invalid\ncontracts.\n\n:class:`AgentContract` is a frozen dataclass so a validated\ncontract is tamper-evident in memory; :func:`assert_contract`\nraises :class:`AgentContractViolation` naming every violation.\nInput/output checking is structural (field presence + declared\nscalar types) \u2014 deep schema validation belongs to\n:mod:`hugrgate.validation`, which callers can layer on top.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/agents/contract.py",
+      "public_defs": [
+        "AgentContract",
+        "validate_contract",
+        "assert_contract",
+        "check_payload",
+        "check_input",
+        "check_output",
+        "has_capability",
+        "handles_intent",
+        "may_use_tool"
+      ]
+    },
+    "hugrgate.agents.cost": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent cost routing.\n\nSlice 389.  Health (388) answers \"who deserves traffic\"; cost\nanswers \"who can we afford\".  :class:`CostRouter` keeps\nper-agent cost ledgers:\n\n- ``set_cost(agent_id, cost_per_decision)`` \u2014 the price tag;\n- ``set_budget(agent_id, budget)`` \u2014 the wallet (``None`` =\n  unbounded);\n- ``spend(agent_id, amount)`` \u2014 records actuals; crossing the\n  budget fires one edge-triggered ``cost.budget_exhausted`` bus\n  signal;\n- ``authorize(agent_id, estimated_cost)`` \u2014 ``True`` when the\n  estimate fits the remaining budget (routing predicate);\n- ``pick_cheapest(candidates, max_cost=...)`` \u2014 cheapest known\n  agent within an optional per-decision cap; unknown costs sort\n  as +infinity (never preferred over a priced agent), and no\n  affordable candidate raises :class:`AgentNotFound`.\n\nCosts are abstract units \u2014 the same unit the contract\n``max_cost`` SLO (376) speaks.  Budgets here are *routing*\nbudgets; the hard per-agent decision/token/latency budgets of\nslice 395 enforce at execution time.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 168,
+      "path": "hugrgate/agents/cost.py",
+      "public_defs": [
+        "CostLedger",
+        "CostRouter",
+        "set_cost",
+        "set_budget",
+        "spend",
+        "ledger",
+        "authorize",
+        "pick_cheapest",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.disagreement": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent disagreement handling.\n\nSlice 392.  Fusion (391) always names a winner \u2014 but a 51/49\n\"winner\" is a coin flip wearing a crown.  :class:`DisagreementResolver`\ndecides what *happens* about disagreement:\n\n- ``\"fuse\"`` \u2014 fuse normally; when ``disagreement`` exceeds the\n  threshold the resolution is marked ``escalated=True`` (the\n  caller moves the ticket up the ladder \u2014 the system refuses to\n  act on a split vote as if it were consensus);\n- ``\"majority\"`` / ``\"highest_confidence\"`` \u2014 fusion with the\n  named method, same escalation-on-split rule;\n- ``\"human_review\"`` \u2014 skip deciding entirely: enqueue the vote\n  slate to a :class:`HumanReviewQueue` (385) and return a\n  resolution with ``escalated=True`` and the review item id.\n\nThe threshold is the honesty knob: 0.0 escalates on any dissent,\n1.0 never escalates.  Default 0.4 \u2014 a clearly-but-not-decisively\nsplit vote goes up, a lone dissenter doesn't.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 163,
+      "path": "hugrgate/agents/disagreement.py",
+      "public_defs": [
+        "Resolution",
+        "DisagreementResolver",
+        "disagreement_threshold",
+        "resolve",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.dispatch": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 multi-agent dispatch.\n\nSlice 386.  Hard problems deserve more than one mind.\n:class:`MultiAgentDispatch` fans one ticket out to several agents\nand reconciles their answers with three strategies:\n\n- ``\"parallel\"`` \u2014 every agent runs; all results collected\n  (reconciliation belongs to fusion, slice 391);\n- ``\"race\"`` \u2014 the successful call with the lowest latency wins;\n- ``\"quorum\"`` \u2014 the first ``quorum`` successes win; fewer than\n  ``quorum`` successes is a failed dispatch.\n\nExecution is **sequential and deterministic** by design: the\ndispatcher is the unit under replay (397), and replay demands\nrepeatable order.  Concurrency is a deployment choice for the\nservice layer, not the nervous system.  Latencies are measured\nper call so ``\"race\"`` still selects the genuinely fastest agent.\n\nEach call is wrapped: exceptions become failed\n:class:`AgentCallResult`s (never propagate \u2014 one bad agent must\nnot sink the dispatch), and a ``dispatch.completed`` bus signal\ncarries winner, strategy, and per-agent latencies for\nobservability.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 184,
+      "path": "hugrgate/agents/dispatch.py",
+      "public_defs": [
+        "AgentCallResult",
+        "DispatchResult",
+        "MultiAgentDispatch",
+        "dispatch",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.escalation": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent escalation policy.\n\nSlice 384.  When an agent cannot complete its ticket \u2014 low\nconfidence, policy conflict, repeated failure \u2014 the ticket must\nmove *up*, not spin.  :class:`EscalationPolicy` owns the ladder:\n\n``agent \u2192 supervisor \u2192 human \u2192 terminal``\n\n- one step per call (or an explicit higher target \u2014 never\n  downward, never skipping without a reason);\n- per-ticket escalation depth capped by the agent's contract\n  ``max_escalation_depth`` (376) \u2014 depth beyond the contract is\n  :class:`AgentEscalationFailed`, not a silent climb;\n- per-ticket cooldown: re-escalation inside ``cooldown_s`` is\n  refused so a flapping agent cannot strobe the levels;\n- ``terminal`` is the end of the line \u2014 escalating from terminal\n  fails loudly instead of wrapping around.\n\nEvery escalation publishes ``agent.escalated`` on the bus (trace\nid preserved) so triage's urgent rules (377), notification gating\n(382), and the provenance graph (396) all see it.  The full\nper-ticket history is queryable for replay (397).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 178,
+      "path": "hugrgate/agents/escalation.py",
+      "public_defs": [
+        "Escalation",
+        "EscalationPolicy",
+        "level_of",
+        "history",
+        "escalate",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.fusion": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent confidence fusion.\n\nSlice 391.  Dispatch (386) fans out; several agents answer; now\n*one* answer must win.  :func:`fuse_confidences` reconciles\nweighted agent votes into a single label + confidence:\n\n- ``\"weighted\"`` \u2014 each label's mass is ``\u03a3 weight\u00b7confidence``;\n  the winner is the heaviest label and its fused confidence is\n  the weight-normalized mean confidence of its supporters;\n- ``\"majority\"`` \u2014 most votes wins (one agent, one vote);\n  ties break toward the higher total confidence, then the\n  lexicographically smallest label \u2014 deterministic, always;\n- ``\"max_conf\"`` \u2014 the single most confident vote wins outright\n  (for when one specialist should overrule the crowd).\n\n:func:`disagreement` scores 0..1 how split the vote was \u2014\n``1 - winner_mass/total_mass`` \u2014 so the disagreement handler\n(392) knows when fusion was a coin flip wearing a winner's\nmask.  Zero-mass votes (all weights 0) are a ``ValueError``:\nfusion with no evidence is not fusion.",
+      "imports": [
+        "__future__",
+        "dataclasses"
+      ],
+      "loc": 129,
+      "path": "hugrgate/agents/fusion.py",
+      "public_defs": [
+        "AgentVote",
+        "FusionResult",
+        "disagreement",
+        "fuse_confidences"
+      ]
+    },
+    "hugrgate.agents.health": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent health routing.\n\nSlice 388.  The registry (387) knows who *claims* a capability;\nthe health router knows who *deserves* the traffic.  Every\ndispatch result, tool call, and escalation feeds\n:meth:`HealthRouter.report`; the router keeps per-agent EWMA\nscores and answers the only question that matters at route time:\n*among these candidates, who is healthiest right now?*\n\n- ``score(agent_id)`` \u2014 EWMA of success samples (1.0 = ok,\n  0.0 = failure); unknown agents start neutral at 0.5 \u2014 new\n  agents get a chance, known-bad agents don't;\n- ``pick(candidates, min_score=...)`` \u2014 highest score wins,\n  ties break by agent id; nobody above the bar raises\n  :class:`AgentNotFound` (a routing failure, not a guess);\n- ``degraded(agent_id)`` \u2014 score below threshold;\n- latency is tracked as a separate EWMA (``avg_latency_ms``) so\n  a slow-but-correct agent isn't confused with a failing one;\n- edge-triggered ``health.degraded`` bus signals fire when an\n  agent *crosses* below threshold \u2014 not on every bad report \u2014\n  so the notification gate (382) pages once;\n- :meth:`sync_registry` pushes health flags into the\n  :class:`AgentRegistry`, closing the loop: sick agents drop out\n  of ``healthy_only`` lookups automatically.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 188,
+      "path": "hugrgate/agents/health.py",
+      "public_defs": [
+        "HealthScore",
+        "HealthRouter",
+        "report",
+        "score",
+        "degraded",
+        "snapshot",
+        "pick",
+        "sync_registry",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.human_review": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 human-review routing.\n\nSlice 385.  The top of the escalation ladder (384) is a human \u2014\nbut \"send it to a human\" without a queue, an SLA, and a timeout\npolicy is a ticket black hole.  :class:`HumanReviewQueue` is the\nhuman's inbox:\n\n- :meth:`enqueue` parks a decision with a severity and an SLA\n  (seconds); the queue orders by severity then arrival;\n- :meth:`decide` records approve/reject with reviewer identity \u2014\n  double decisions raise instead of silently overwriting;\n- :meth:`overdue` lists items past SLA; :meth:`sweep` applies the\n  timeout policy: ``\"auto_deny\"`` / ``\"auto_approve\"`` (recorded\n  with reviewer ``\"timeout-policy\"``), ``\"escalate\"`` (left\n  pending for the caller to escalate), or ``\"raise\"`` which raises\n  :class:`HumanReviewTimeout` naming every overdue item;\n- lifecycle events (``review.enqueued`` / ``review.decided`` /\n  ``review.overdue``) go on the bus with trace continuity, so\n  notification gating (382) can page the human and provenance\n  (396) sees the verdict.\n\nSeverities reuse the observability ladder \u2014 a ``\"critical\"``\nreview sorts above everything, the same word the alerter uses.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 219,
+      "path": "hugrgate/agents/human_review.py",
+      "public_defs": [
+        "ReviewItem",
+        "ReviewDecision",
+        "HumanReviewQueue",
+        "is_overdue",
+        "enqueue",
+        "pending",
+        "overdue",
+        "decide",
+        "sweep",
+        "decision_for",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.intent": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 intent routing.\n\nSlice 378.  Raw user input arrives as text; the nervous system must\ndecide *which agent owns it*.  :class:`IntentRouter` maps intents to\nagents with keyword scoring:\n\n- each registration binds ``(intent, agent_id)`` to a set of\n  keywords and a static priority;\n- scoring is case-insensitive on word boundaries (``\"cat\"`` never\n  matches ``\"concatenate\"``) \u2014 substring false positives are a\n  routing-bug classic;\n- the winner is the highest ``keyword_hits + priority``; ties break\n  deterministically by ``(agent_id, intent)`` so routing is stable\n  across runs;\n- when nothing matches, the registered fallback agent takes the\n  ticket with confidence 0; with no fallback registered the router\n  raises :class:`AgentNotFound` rather than guessing.\n\nWhen contracts are supplied, registration verifies the agent\nactually declares the intent (slice 376) \u2014 a router that sends\ntraffic to agents that never claimed the intent is a misconfiguration\nthe contract layer exists to catch.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re"
+      ],
+      "loc": 160,
+      "path": "hugrgate/agents/intent.py",
+      "public_defs": [
+        "tokenize",
+        "IntentRoute",
+        "IntentRouter",
+        "register",
+        "unregister",
+        "set_fallback",
+        "route",
+        "intents"
+      ]
+    },
+    "hugrgate.agents.loopbreak": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent loop-breaker.\n\nSlice 393.  Agentic loops are the classic failure: planner asks\nworker, worker asks planner, forever, burning budget.  :class:`LoopBreaker`\ntreats delegation as a *call stack* with strict discipline:\n\n- :meth:`observe(ticket_id, caller, callee)` pushes ``callee``\n  onto the ticket's delegation stack (``caller`` must be the\n  stack top \u2014 delegation is a chain, not a graph);\n- :meth:`return_to(ticket_id)` pops the stack when a delegation\n  completes \u2014 returning to a previous agent is legitimate and\n  must not trip the breaker;\n- pushing an agent already on the stack is a cycle \u2192\n  :class:`AgentLoopDetected` (with the cycle path in details);\n- stacks deeper than ``max_depth`` trip the breaker too \u2014\n  even acyclic chains must terminate.\n\nDetection publishes ``agent.loop`` on the bus (triage's urgent\nrules, slice 377, already route it hot).  The breaker is purely\nobservational: it never kills anything itself \u2014 the runaway\nguard (394) and escalation policy (384) decide what happens\nnext.  Tool calls are leaves, not delegation: route them\nthrough the tool router (379), not the breaker.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate"
+      ],
+      "loc": 152,
+      "path": "hugrgate/agents/loopbreak.py",
+      "public_defs": [
+        "LoopEvent",
+        "LoopBreaker",
+        "observe",
+        "return_to",
+        "path",
+        "reset",
+        "stats",
+        "max_depth"
+      ]
+    },
+    "hugrgate.agents.memory_read": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 memory-read gating.\n\nSlice 381.  Reads are the subtler exfiltration path: an agent\nwith broad clearance but a narrow role must never see raw\nepisodes above its role's redaction line.  :class:`MemoryReadGate`\nenforces the read side of :mod:`hugrgate.memory.access`:\n\n1. **shape** \u2014 requested class is on the privacy ladder;\n2. **binding** \u2014 agent bound with role + clearance (fail closed);\n3. **clearance** \u2014 agent clearance covers the requested class;\n4. **role class** \u2014 the role's ``max_class`` covers it\n   (``auditor`` never sees ``sensitive`` even with clearance);\n5. **redaction** \u2014 reads at/above the role's ``redact_at`` line\n   return ``redacted=True``: the caller must strip metadata/tags\n   before use (the *permit* says redacted; the store view enforces\n   it \u2014 same contract as :class:`GuardedHistory`);\n6. **rate** \u2014 per-agent token bucket so a runaway reader cannot\n   scrape the store.\n\nEvery decision appends to a bounded audit trail\n(``agent_id``, class, granted, redacted, purpose, timestamp) for\nthe provenance graph (396) and human review (385).  Like the write\ngate, this gate decides \u2014 it never touches the store.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 206,
+      "path": "hugrgate/agents/memory_read.py",
+      "public_defs": [
+        "ReadGateConfig",
+        "ReadPermit",
+        "MemoryReadGate",
+        "take",
+        "bind_agent",
+        "attempt_read",
+        "audit_trail",
+        "stats",
+        "deny"
+      ]
+    },
+    "hugrgate.agents.memory_write": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 memory-write gating.\n\nSlice 380.  Agents that can write to decision memory unchecked can\npoison every downstream consumer (retrieval, assisted routing,\ncompaction).  :class:`MemoryWriteGate` stands between agents and\nthe memory store, enforcing four checks in order:\n\n1. **shape** \u2014 the episode declares a privacy class on the\n   :mod:`hugrgate.privacy` ladder;\n2. **clearance** \u2014 the agent's clearance (from its slice-376\n   contract) covers the episode's class (fail closed: unbound\n   agents are denied);\n3. **role** \u2014 the agent's bound role grants writes per\n   :data:`hugrgate.memory.access.ROLE_PERMISSIONS` (analysts and\n   auditors cannot write, ever);\n4. **rate + size + dedup** \u2014 per-agent token-bucket rate limit,\n   payload size cap, and dedup-key suppression so a looping agent\n   cannot flood the store with identical episodes.\n\nA grant is an explicit :class:`WritePermit`; the caller performs\nthe store write itself (the gate never touches the store \u2014 it only\ndecides).  Denials carry machine-readable ``reason`` codes for the\nprovenance graph (slice 396).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 198,
+      "path": "hugrgate/agents/memory_write.py",
+      "public_defs": [
+        "WriteGateConfig",
+        "WritePermit",
+        "MemoryWriteGate",
+        "take",
+        "bind_agent",
+        "unbind_agent",
+        "attempt_write",
+        "stats",
+        "deny"
+      ]
+    },
+    "hugrgate.agents.notify": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 notification gating.\n\nSlice 382.  An agentic loop that notifies on everything notifies\nabout nothing \u2014 operators go blind and paging budgets burn.\n:class:`NotificationGate` is the single choke point for\noutbound notifications:\n\n- per-channel :class:`ChannelConfig`: enable/disable, minimum\n  severity, per-minute rate limit;\n- severity ladder shared with the observability alerting layer\n  (:data:`hugrgate.observability.alerts.SEVERITIES`) \u2014 one\n  vocabulary for \"how urgent is this\" across the system;\n- dedup keys suppress repeat notifications inside a window (the\n  escalation policy in slice 384 re-fires through here, so a\n  flapping agent pages once, not fifty times);\n- every decision is recorded with a machine-readable reason and\n  per-channel stats.\n\n``notify()`` decides; a pluggable ``sender`` callable performs the\nactual delivery (the gate never touches the network \u2014 same\nseparation as the memory gates).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 227,
+      "path": "hugrgate/agents/notify.py",
+      "public_defs": [
+        "Notification",
+        "ChannelConfig",
+        "NotifyDecision",
+        "NotificationGate",
+        "take",
+        "configure",
+        "notify",
+        "stats",
+        "decide"
+      ]
+    },
+    "hugrgate.agents.privacy": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent privacy routing.\n\nSlice 390.  Health picks who *deserves* traffic, cost picks who\n*we can afford* \u2014 privacy picks who *may see it*.  Every signal\ncarries a privacy class (payload key ``\"privacy_class\"``,\ndefault ``\"public\"``); :class:`PrivacyRouter` admits only agents\nwhose clearance covers it:\n\n``class_rank(signal_class) <= class_rank(agent_clearance)``\n\nClearance comes from explicit :meth:`set_clearance` or falls back\nto the agent's contract ``privacy_clearance`` (376) \u2014 one ladder,\none source of truth (:data:`hugrgate.privacy.PRIVACY_CLASS_ORDER`).\nRouting is fail-closed: unlisted agents and uncovered classes\nare excluded, never warned-and-passed.  When nothing qualifies,\n:meth:`route` raises :class:`AgentNotFound` with the required\nclass in details so the caller can escalate to a cleared agent\ninstead of leaking.\n\n:meth:`check` is the single-agent predicate for gates that need\na yes/no without candidate lists (memory gates, tool router).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 106,
+      "path": "hugrgate/agents/privacy.py",
+      "public_defs": [
+        "signal_privacy_class",
+        "PrivacyRouter",
+        "set_clearance",
+        "clearance_of",
+        "check",
+        "route",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.provenance": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent provenance graph.\n\nSlice 396.  Every nervous-system decision \u2014 routed intent,\ndispatched fan-out, fused vote, escalated ticket, gated memory\naccess, human verdict \u2014 should leave a traceable lineage.\n:class:`AgentProvenanceGraph` is that lineage: a DAG of decision\nnodes.\n\n- :meth:`add_decision` records a node (``kind``: ``\"route\"``,\n  ``\"dispatch\"``, ``\"fuse\"``, ``\"escalate\"``, ``\"tool_call\"``,\n  ``\"review\"``, ``\"gate\"``, ...) with ``agent_id``,\n  ``ticket_id``, and parent node ids; parents must already\n  exist and node ids must be new \u2014 the graph is acyclic *by\n  construction*, and :meth:`check_acyclic` verifies it for the\n  release gate (400);\n- :meth:`ancestors` / :meth:`descendants` walk the DAG;\n  :meth:`lineage` returns every root-to-node path (why did this\n  decision happen?);\n- :meth:`export` serializes nodes + edges in topological order\n  \u2014 plain dicts/lists, wire-safe for the replay slice (397).\n\nThis complements :mod:`hugrgate.provenance` (decision\nprovenance) rather than replacing it: that module tracks *what\na decision was*; this graph tracks *which agent decisions led\nto which* across the nervous system.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 199,
+      "path": "hugrgate/agents/provenance.py",
+      "public_defs": [
+        "ProvenanceNode",
+        "AgentProvenanceGraph",
+        "add_decision",
+        "get",
+        "roots",
+        "ancestors",
+        "descendants",
+        "lineage",
+        "check_acyclic",
+        "export",
+        "walk"
+      ]
+    },
+    "hugrgate.agents.registry": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent capability registry.\n\nSlice 387.  Every router in the nervous system asks the same\nquestions: *who exists, what can they do, are they healthy?*\n:class:`AgentRegistry` is the single directory:\n\n- :meth:`register` stores an agent's validated contract\n  (:func:`assert_contract` runs first \u2014 the registry never holds\n  an invalid contract) plus an opaque ``endpoint`` describing how\n  to reach it;\n- lookups: :meth:`get` (raises :class:`AgentNotFound`),\n  :meth:`find_by_capability`, :meth:`find_by_intent`,\n  :meth:`find_by_tool` \u2014 all with ``healthy_only=True`` default\n  so routers never select a known-sick agent by accident;\n- :meth:`set_health` flips the health flag with a note (the\n  health router in slice 388 drives this; operators can too).\n\nDuplicate registration is a ``ValueError`` \u2014 re-registering with\na new contract version goes through :meth:`unregister` first, so\nversion changes are explicit, never silent overwrites.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time"
+      ],
+      "loc": 145,
+      "path": "hugrgate/agents/registry.py",
+      "public_defs": [
+        "RegisteredAgent",
+        "AgentRegistry",
+        "agent_id",
+        "register",
+        "unregister",
+        "get",
+        "set_health",
+        "find_by_capability",
+        "find_by_intent",
+        "find_by_tool",
+        "agent_ids"
+      ]
+    },
+    "hugrgate.agents.release_gate": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 release gate.\n\nSlice 400.  The campaign's capstone: a single gate that refuses\nto ship a broken nervous system.  :class:`NervousSystemReleaseGate`\nruns eight checks over an assembled system:\n\n1. ``contracts-valid`` \u2014 every registered agent's contract\n   validates (376);\n2. ``registry-nonempty`` \u2014 at least one agent is registered;\n3. ``bus-alive`` \u2014 a probe signal publishes and delivers;\n4. ``triage-functional`` \u2014 a probe signal triages without\n   raising (377);\n5. ``budgets-allocated`` \u2014 every registered agent has a\n   decision budget (395);\n6. ``kill-switch-clear`` \u2014 the runaway guard is not tripped\n   (394);\n7. ``provenance-acyclic`` \u2014 the provenance graph is a DAG\n   (396);\n8. ``replay-deterministic`` \u2014 a probe ticket records and\n   replays deterministically (397).\n\n:class:`NervousSystem` bundles every campaign component with\n:func:`assemble` building a wired default (bus shared across\ntriage, escalation, review, dispatch, health, cost, breaker,\nguard).  :class:`ReleaseReport` carries per-check results,\n``passed``, a human ``summary()``, and a wire-safe\n:meth:`to_dict` for CI.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 289,
+      "path": "hugrgate/agents/release_gate.py",
+      "public_defs": [
+        "GateCheck",
+        "ReleaseReport",
+        "NervousSystem",
+        "assemble",
+        "NervousSystemReleaseGate",
+        "passed",
+        "failed",
+        "summary",
+        "to_dict",
+        "run"
+      ]
+    },
+    "hugrgate.agents.replay": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent replay.\n\nSlice 397.  \"It worked in prod\" is not a debugging strategy.\n:class:`AgentReplay` records a ticket's step inputs/outputs and\nre-runs them against an agent function to answer two questions:\n\n1. **fidelity** \u2014 does the agent still produce the recorded\n   outputs for the recorded inputs? (regression after a\n   contract version bump, slice 387);\n2. **determinism** \u2014 do two runs with the same seed produce\n   identical outputs? (required before any claim of\n   reproducibility, and an input to the release gate, 400).\n\nRecording is explicit: :meth:`record_step` appends\n``(kind, input, output)`` triples per ticket.  :meth:`replay`\nfeeds each recorded input back through ``agent_fn`` and diffs\noutputs with ``==`` (plus a ``repr`` fallback note on\nmismatch).  :meth:`check_determinism` runs the whole ticket\ntwice.  Event payloads must be JSON-safe \u2014 replay is a\ndebugging tool, not a second memory store.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
+      "loc": 178,
+      "path": "hugrgate/agents/replay.py",
+      "public_defs": [
+        "RecordedStep",
+        "ReplayReport",
+        "AgentReplay",
+        "fidelity",
+        "record_step",
+        "record",
+        "steps",
+        "replay",
+        "check_determinism",
+        "forget",
+        "run"
+      ]
+    },
+    "hugrgate.agents.runaway": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 runaway escalation guard.\n\nSlice 394.  The loop-breaker (393) catches *cycles*; the runaway\nguard catches *everything else that never ends*: escalation\nstorms, thousand-step tickets, token hemorrhages.  It is the\nlast line of defense, and it is deliberately terminal \u2014 a\nbreach raises :class:`AgentRunaway` (not recoverable: the ticket\nis dead, start a new one).\n\n- per-ticket counters: escalations, steps, tokens;\n  :meth:`check_escalation` / :meth:`consume` increment and\n  enforce ``max_escalations_per_ticket`` /\n  ``max_steps_per_ticket`` / ``max_tokens_per_ticket``;\n- :meth:`trip_kill_switch` halts *all* tickets immediately\n  (operator panic button); :meth:`reset_kill_switch` re-arms;\n- every breach and kill-switch event publishes ``agent.runaway``\n  (critical) on the bus with the counter values in the payload \u2014\n  triage routes it urgent, notification pages, provenance\n  records the kill.\n\nThe guard composes with the loop-breaker: wire the breaker's\n``agent.loop`` signal to ``check_escalation`` and cycles cost\nescalation budget too.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time"
+      ],
+      "loc": 204,
+      "path": "hugrgate/agents/runaway.py",
+      "public_defs": [
+        "RunawayLimits",
+        "TicketUsage",
+        "RunawayGuard",
+        "kill_switch_tripped",
+        "check_escalation",
+        "consume",
+        "usage",
+        "trip_kill_switch",
+        "reset_kill_switch",
+        "reset",
+        "stats"
+      ]
+    },
+    "hugrgate.agents.simulator": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 agent simulator.\n\nSlice 398.  You cannot chaos-test a nervous system against\nproduction agents.  :class:`AgentSimulator` runs *scripted*\nagents through the real nervous-system machinery \u2014 bus,\nloop-breaker, runaway guard, dispatcher \u2014 so failure modes can\nbe rehearsed deterministically:\n\n- behaviors: ``\"honest\"`` (delegates and completes),\n  ``\"slow\"`` (honest, high latency), ``\"faulty\"`` (raises),\n  ``\"looping\"`` (delegates back to its caller \u2014 trips the\n  loop-breaker), ``\"escalating\"`` (burns escalation budget \u2014\n  trips the runaway guard), or any custom callable;\n- a *script* is a list of ``{\"ticket\", \"from\", \"to\",\n  \"intent\"}`` delegation steps; the simulator plays each\n  through :class:`LoopBreaker` and dispatches on the\n  destination's behavior;\n- *faults* are callables ``(sim, step_index)`` invoked before\n  each step \u2014 the chaos hook (trip the kill switch at step N,\n  mute the bus, ...), reusing the chaos-experiment mindset\n  without duplicating :mod:`hugrgate.chaos`;\n- :class:`SimulationReport` counts successes, failures, loops,\n  runaways, and per-agent outcomes.  Seeded RNG: the same\n  script + seed replays identically.\n\nThe simulator is deterministic and in-process \u2014 a rehearsal\nstage, not a load generator.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "typing"
+      ],
+      "loc": 232,
+      "path": "hugrgate/agents/simulator.py",
+      "public_defs": [
+        "SimContext",
+        "SimulationReport",
+        "AgentSimulator",
+        "success_rate",
+        "bus",
+        "guard",
+        "add_agent",
+        "run",
+        "tally"
+      ]
+    },
+    "hugrgate.agents.tools": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 tool routing.\n\nSlice 379.  Agents act through tools; an agent invoking a tool it\nwas never granted is a privilege-escalation bug.  :class:`ToolRouter`\nis the choke point every tool call passes through:\n\n- per-agent :class:`ToolPolicy`: allowed tools, denied tools\n  (**deny always wins** over allow), per-ticket call budgets, and\n  per-tool argument schemas;\n- :meth:`ToolRouter.authorize` checks, in order: a policy exists\n  for the agent \u2192 the tool is allowed and not denied \u2192 the agent's\n  contract (when known) permits the tool \u2192 arguments match the\n  schema \u2192 the ticket still has call budget;\n- every grant mints a ``call_id``; :meth:`ToolRouter.record_result`\n  closes it with success/latency so per-tool reliability stats\n  accumulate for the health router (slice 388).\n\nFailures raise the taxonomy, never return ``None``: missing policy\nor denied tool \u2192 :class:`AgentContractViolation`, exhausted call\nbudget \u2192 :class:`AgentBudgetExhausted`, bad arguments \u2192\n:class:`AgentContractViolation` with the schema violations in\ndetails.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate"
+      ],
+      "loc": 190,
+      "path": "hugrgate/agents/tools.py",
+      "public_defs": [
+        "ToolPolicy",
+        "ToolGrant",
+        "ToolRouter",
+        "allows",
+        "register_policy",
+        "policy_for",
+        "authorize",
+        "record_result",
+        "tool_stats",
+        "calls_used"
+      ]
+    },
+    "hugrgate.agents.triage": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 event triage API.\n\nSlice 377.  The bus delivers *everything*; the nervous system must\nnot react to everything.  :class:`EventTriage` is the first\nprocessing stage after the bus: it classifies each\n:class:`AgentSignal` into one of three dispositions \u2014\n\n- ``route`` \u2014 hand to a named queue for downstream consumers\n  (intent routing, escalation, notification);\n- ``drop`` \u2014 noise the system must never react to (heartbeats,\n  duplicates that escaped dedup, known-benign chatter);\n- ``defer`` \u2014 legitimate but non-urgent work parked until the\n  attention budget allows it (slice 383 consumes the defer queue).\n\nRules are evaluated in insertion order; the first matching rule\nwins.  The default rule (always last, irremovable) routes to the\n``\"default\"`` queue at the signal's own priority.  A rule may boost\nor clamp priority so triage \u2014 not the producer \u2014 owns urgency.\n\nEvery decision is recorded in stats and, when a bus is attached,\npublished as a ``triage.decision`` signal (metadata only) so\nobservability tracing sees the classification path.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 240,
+      "path": "hugrgate/agents/triage.py",
+      "public_defs": [
+        "TriageRule",
+        "TriageDecision",
+        "EventTriage",
+        "add_rule",
+        "remove_rule",
+        "rules",
+        "triage",
+        "stats",
+        "with_defaults"
+      ]
+    },
+    "hugrgate.agents.types": {
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 shared nervous-system types.\n\nSlice 376.  The connective tissue for agentic loops: every agent,\nsignal, and decision ticket in the nervous system speaks this\nvocabulary.  Signals flow over :mod:`hugrgate.agents.bus`; tickets\ncarry budgets, trace context, and provenance through the routers,\ngates, and guards built in slices 377-400.\n\nThis module is stdlib-only and dependency-free inside ``hugrgate``\nso the whole campaign layer can share it without import cycles.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 130,
+      "path": "hugrgate/agents/types.py",
+      "public_defs": [
+        "new_trace_id",
+        "AgentSignal",
+        "AgentDelivery",
+        "AgentTicket",
+        "child"
       ]
     },
     "hugrgate.allocprof": {
@@ -4691,7 +5312,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 610,
+      "loc": 695,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4752,6 +5373,14 @@
         "DatasetError",
         "EvalError",
         "EvalGateError",
+        "AgentError",
+        "AgentContractViolation",
+        "AgentNotFound",
+        "AgentLoopDetected",
+        "AgentRunaway",
+        "AgentBudgetExhausted",
+        "AgentEscalationFailed",
+        "HumanReviewTimeout",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -9008,6 +9637,31 @@
     "test_adaptive_shadow.py",
     "test_adaptive_telemetry.py",
     "test_adaptive_versioning.py",
+    "test_agents_376_contract.py",
+    "test_agents_377_triage.py",
+    "test_agents_378_intent.py",
+    "test_agents_379_tools.py",
+    "test_agents_380_memory_write.py",
+    "test_agents_381_memory_read.py",
+    "test_agents_382_notify.py",
+    "test_agents_383_attention.py",
+    "test_agents_384_escalation.py",
+    "test_agents_385_human_review.py",
+    "test_agents_386_dispatch.py",
+    "test_agents_387_registry.py",
+    "test_agents_388_health.py",
+    "test_agents_389_cost.py",
+    "test_agents_390_privacy.py",
+    "test_agents_391_fusion.py",
+    "test_agents_392_disagreement.py",
+    "test_agents_393_loopbreak.py",
+    "test_agents_394_runaway.py",
+    "test_agents_395_budgets.py",
+    "test_agents_396_provenance.py",
+    "test_agents_397_replay.py",
+    "test_agents_398_simulator.py",
+    "test_agents_399_benchmark.py",
+    "test_agents_400_release.py",
     "test_api_inventory.py",
     "test_arch_map.py",
     "test_async_readiness.py",
@@ -9337,5 +9991,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 79153
+  "total_loc": 84263
 }
