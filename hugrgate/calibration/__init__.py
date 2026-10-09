@@ -30,11 +30,13 @@ from hugrgate.calibration.isotonic import IsotonicCalibrator    # noqa: E402
 from hugrgate.calibration.temperature import (                 # noqa: E402
     TemperatureCalibrator,
 )
-from . import metrics, pipeline, profiles                      # noqa: E402
+from . import metrics, perclass, pipeline, profiles            # noqa: E402
 
 CalibratorRegistry.register("platt", PlattCalibrator)
 CalibratorRegistry.register("isotonic", IsotonicCalibrator)
 CalibratorRegistry.register("temperature", TemperatureCalibrator)
+CalibratorRegistry.register("constant-prior",
+                             perclass._ConstantCalibrator)
 
 __all__ = [
     "Calibrator",
@@ -43,6 +45,7 @@ __all__ = [
     "IsotonicCalibrator",
     "TemperatureCalibrator",
     "metrics",
+    "perclass",
     "pipeline",
     "profiles",
 ]
