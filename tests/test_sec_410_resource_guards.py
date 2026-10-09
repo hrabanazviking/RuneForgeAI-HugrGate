@@ -52,7 +52,13 @@ def test_memory_hog_converted():
 def test_normal_work_passes_and_limits_restored():
     before_cpu = resource.getrlimit(resource.RLIMIT_CPU)
     before_as = resource.getrlimit(resource.RLIMIT_AS)
-    budget = ResourceBudget(max_cpu_seconds=60,
+    # RLIMIT_CPU counts the process's *total* consumed CPU, not time
+    # since the limit was armed. After a long suite run the process
+    # may already exceed a small absolute budget, so arm the budget
+    # relative to already-consumed CPU (slice 500 fix).
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    consumed = usage.ru_utime + usage.ru_stime
+    budget = ResourceBudget(max_cpu_seconds=consumed + 60,
                             max_rss_bytes=_rss() + 1024**3)
     with guarded(budget):
         assert sum(range(100_000)) == 4999950000

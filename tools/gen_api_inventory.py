@@ -14,7 +14,6 @@ from __future__ import annotations
 import importlib
 import inspect
 import os
-import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,13 +67,9 @@ def describe(module, name: str) -> tuple[str, str]:
     elif inspect.ismethoddescriptor(obj):
         kind = "method-descriptor"
     else:
-        # Determinism: sort set/frozenset constants (iteration order
-        # varies with hash seed) and sanitize memory addresses in reprs.
-        if isinstance(obj, (set, frozenset)):
-            shown = "{" + ", ".join(repr(x) for x in sorted(obj, key=repr)) + "}"
-        else:
-            shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
-        return "constant", shown[:60]
+        # Determinism: _stable_repr sorts nested sets/frozensets
+        # (iteration order varies with hash seed) and avoids memory
+        # addresses in reprs.
         return "constant", _stable_repr(obj)[:60]
     try:
         sig = str(inspect.signature(obj))

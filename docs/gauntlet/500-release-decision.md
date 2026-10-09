@@ -19,7 +19,7 @@ triaged and fixed:
 
 | Failure | Cause | Fix |
 |---|---|---|
-| `test_api_inventory::test_inventory_doc_is_fresh` | inventory doc stale after version bump (`NodeCapabilities.hugrgate_version` default) | regenerated via `tools/gen_api_inventory.py` (432 modules, 2613 names) |
+| `test_api_inventory::test_inventory_doc_is_fresh` | **generator nondeterminism**: `describe()` used raw `repr()` for dict constants, so nested frozensets (e.g. `ROLES`) rendered in hash order — the doc differed run to run | route constants through `_stable_repr` (dead code removed); proved byte-identical across `PYTHONHASHSEED` 0/1/42 |
 | `test_sec_423_secscan` | my `tools/docs_exec_audit.py` used `compile()` — flagged as dynamic code exec | hardened to `ast.parse()` (syntax check needs no code object) |
 | `test_repo_truth` | `docs/campaign-i/manifest.json` stale since before slice 476 (all gauntlet modules missing) | regenerated via `tools/audit_repo.py` |
 | `test_perf_283_async_api` (2) | **real regression from slice 490**: hostile-backend containment swallowed `asyncio.CancelledError`, breaking `asyncio.wait_for` timeouts | `CancelledError` now propagates in both containment sites; 2 regression tests added to `test_gauntlet_490_hostile.py` |
@@ -29,7 +29,7 @@ triaged and fixed:
 | `test_dependency_rules` | `select`/`py_compile` stdlib entries missing | added to `_STDLIB` |
 | `test_gauntlet_479_linux` | pinned count of guarded `resource` imports (3) missed slice 488's `soak.py` | count 3 → 4 |
 | `test_gauntlet_486_api_audit` | baseline recorded mid-campaign (slice 486); 10 gauntlet modules added since | re-recorded `api-baseline-1.0.json` at the 1.0 tree (432 modules, no drift, non-breaking) |
-| `test_sec_410_resource_guards` | passes 3/3 in isolation and under security-suite load; fails only in the 5000-test full run | load flake (RLIMIT-based test under full-suite CPU pressure); not caused by campaign changes |
+| `test_sec_410_resource_guards` | **real test bug (slice 410)**: `RLIMIT_CPU` counts total process CPU; after a long suite run the process had already exceeded the absolute 60s budget, so arming the guard fired `SIGXCPU` immediately | budget armed relative to already-consumed CPU (`consumed + 60`); proven passing with 65s pre-burned |
 
 After fixes, all affected suites re-run green; the release
 checklist (`test_gauntlet_500_release.py`) passes: version 1.0.0
