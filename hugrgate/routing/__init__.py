@@ -51,6 +51,11 @@ from hugrgate.routing.replay import (
     RouteRecording,
     replay,
 )
+from hugrgate.routing.simulate import (
+    SimulatedRung,
+    SimulationReport,
+    simulate,
+)
 from hugrgate.routing.cost import (
     CostAwarePlanner,
     CostLedger,
@@ -183,5 +188,8 @@ __all__ = [
     "RoutingOptions",
     "RoutingPlan",
     "SerialPlanExecutor",
+    "SimulatedRung",
+    "SimulationReport",
+    "simulate",
     "score_capability",
 ]
