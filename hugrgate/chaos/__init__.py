@@ -25,6 +25,7 @@ from hugrgate.chaos.backend_faults import (
     FaultSpec,
     FaultyBackend,
 )
+from hugrgate.chaos.bulkhead import BulkheadExecutor
 from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.clock import SkewedClock, audit_deadline_clocks
 from hugrgate.chaos.experiments import (
@@ -89,6 +90,7 @@ __all__ = [
     "UP",
     "WARN",
     "BlastRadius",
+    "BulkheadExecutor",
     "CPUStarvationSimulator",
     "CacheCorruptor",
     "ChaosExperiment",

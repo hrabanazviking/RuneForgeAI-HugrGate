@@ -17,6 +17,7 @@ from hugrgate.errors import (
     BackendError,
     BackendUnavailable,
     BenchmarkError,
+    BulkheadRejected,
     CalibrationError,
     ChaosError,
     ClusterAuthError,
@@ -55,6 +56,7 @@ ALL_ERRORS = [
     EdgeAffinityError, BenchmarkError, OfflineBootstrapError, EdgeCacheError,
     ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
     QuantError, RecoveryError, ResidencyError, RetryBudgetExhausted,
+    BulkheadRejected,
     StorageError, TelemetryError, WatchdogError,
     ClusterAuthError,
 ]
@@ -74,6 +76,7 @@ EXPECTED_CODES = {
     GGUFError: "gguf_error",
     EdgeAffinityError: "edge_affinity_error",
     BenchmarkError: "edge_benchmark_error",
+    BulkheadRejected: "bulkhead_rejected",
     OfflineBootstrapError: "edge_bootstrap_error",
     EdgeCacheError: "edge_cache_error",
     ChaosError: "edge_chaos_error",
@@ -110,6 +113,7 @@ EXPECTED_RECOVERABLE = {
     # request itself (invalid arguments, structural law violations).
     EdgeAffinityError: True,
     BenchmarkError: True,
+    BulkheadRejected: True,
     OfflineBootstrapError: False,
     EdgeCacheError: False,
     ChaosError: False,

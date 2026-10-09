@@ -22,7 +22,12 @@ import time
 from collections.abc import Callable
 from typing import Any, TypeVar
 
-from hugrgate.errors import HugrGateError, RetryBudgetExhausted, SpecError
+from hugrgate.errors import (
+    BulkheadRejected,
+    HugrGateError,
+    RetryBudgetExhausted,
+    SpecError,
+)
 
 __all__ = ["RetryBudget", "default_retry_policy", "retry_with_budget"]
 
@@ -34,11 +39,13 @@ def default_retry_policy(exc: BaseException) -> bool:
 
     ``RetryBudgetExhausted`` is excluded: a budget verdict is final at
     its own level (an outer budget may still retry the whole block).
+    ``BulkheadRejected`` is excluded: a fail-fast rejection is a
+    signal to shed load, not to spin against a full bulkhead.
     """
     return (
         isinstance(exc, HugrGateError)
         and exc.recoverable
-        and not isinstance(exc, RetryBudgetExhausted)
+        and not isinstance(exc, (RetryBudgetExhausted, BulkheadRejected))
     )
 
 

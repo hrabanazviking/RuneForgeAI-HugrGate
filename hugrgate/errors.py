@@ -20,6 +20,7 @@ __all__ = [
     "BackendError",
     "BackendUnavailable",
     "BenchmarkError",
+    "BulkheadRejected",
     "CalibrationError",
     "ChaosError",
     "ClusterAuthError",
@@ -114,6 +115,20 @@ class BackendUnavailable(BackendError):
 
 class CalibrationError(HugrGateError):
     code = "calibration_error"
+    recoverable = True
+
+
+class BulkheadRejected(BackendError):
+    """The per-backend bulkhead was full: the call was rejected fast
+    instead of queueing behind a stuck backend.
+
+    A backend-family failure so existing failover handlers apply
+    (shedding to another backend is the correct response).
+    Recoverable: capacity frees as in-flight calls finish.
+    Deliberately *not* retried by the default retry policy —
+    spinning against a full bulkhead with no backoff helps nobody.
+    """
+    code = "bulkhead_rejected"
     recoverable = True
 
 

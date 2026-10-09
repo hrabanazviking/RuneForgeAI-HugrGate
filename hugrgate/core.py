@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Union
 
 from hugrgate.backend import Backend, BackendRegistry
+from hugrgate.chaos.bulkhead import BulkheadExecutor
 from hugrgate.chaos.retry import RetryBudget, retry_with_budget
 from hugrgate.errors import (
     Abstention,
@@ -117,7 +118,8 @@ class HugrGate:
                policy: DecisionPolicy | None = None,
                context: Mapping[str, Any] | None = None,
                backend_name: str | None = None,
-               retry_budget: RetryBudget | None = None) -> DecisionResult:
+               retry_budget: RetryBudget | None = None,
+               bulkhead: BulkheadExecutor | None = None) -> DecisionResult:
         """Make a bounded machine judgment.
 
         Never returns a value outside the spec's decision space.
@@ -130,7 +132,10 @@ class HugrGate:
         ``retry_budget`` (slice 268) is optional: when given, the
         backend call retries recoverable failures within the budget
         and raises :class:`RetryBudgetExhausted` when it is spent.
-        ``None`` (default) keeps the single-attempt behavior.
+        ``bulkhead`` (slice 269) is optional: when given, the backend
+        call runs inside the backend's bulkhead lanes and a full
+        bulkhead raises :class:`BulkheadRejected` fast. ``None``
+        (default) keeps the single-attempt, uncapped behavior.
         """
         policy = policy or DecisionPolicy()
         validate_state(state)
@@ -149,12 +154,21 @@ class HugrGate:
             backend = self._select_backend(spec, policy)
 
         try:
-            if retry_budget is None:
+            if retry_budget is None and bulkhead is None:
                 result = backend.evaluate(state, spec, context)
             else:
-                result = retry_with_budget(
-                    lambda: backend.evaluate(state, spec, context),
-                    retry_budget)
+                def _call() -> DecisionResult:
+                    if retry_budget is None:
+                        return backend.evaluate(state, spec, context)
+                    return retry_with_budget(
+                        lambda: backend.evaluate(state, spec, context),
+                        retry_budget)
+                # Bulkhead outermost: one logical call holds one lane
+                # across its retries.
+                if bulkhead is None:
+                    result = _call()
+                else:
+                    result = bulkhead.execute(backend.name, _call)
         except Abstention:
             logger.debug("backend %r abstained (spec=%s)", backend.name,
                          spec.type)
@@ -208,7 +222,8 @@ class HugrGate:
                       policy: DecisionPolicy | None = None,
                       context: Mapping[str, Any] | None = None,
                       backend_name: str | None = None,
-                      retry_budget: RetryBudget | None = None) -> DecisionResult:
+                      retry_budget: RetryBudget | None = None,
+                      bulkhead: BulkheadExecutor | None = None) -> DecisionResult:
         """Async variant of :meth:`decide` (slice 018).
 
         Backend inference is synchronous and may block; this runs it in
@@ -217,4 +232,4 @@ class HugrGate:
         """
         return await asyncio.to_thread(
             self.decide, state, spec, policy, context, backend_name,
-            retry_budget)
+            retry_budget, bulkhead)
