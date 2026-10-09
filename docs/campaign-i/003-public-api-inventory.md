@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 64 · **public names:** 284
+**Modules:** 65 · **public names:** 292
 
 ## API stability policy
 
@@ -257,6 +257,7 @@ that this document never drifts from the code.
 | `inheritance` | constant | `<module 'hugrgate.contracts.inheritance' from '/home/hatch/w` |
 | `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
 | `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/hatch/wor` |
+| `migration` | constant | `<module 'hugrgate.contracts.migration' from '/home/hatch/wor` |
 
 ### `hugrgate.contracts.composite`
 
@@ -355,6 +356,18 @@ that this document never drifts from the code.
 | `derive_contract` | function | `(base: 'DecisionContract', contract_id: 'str', *, name: 'str' = '', description: 'str' = '', metadata: 'Optional[Dict[str, Any]]' = None, **overrides: 'Any') -> 'DecisionContract'` |
 | `is_compatible` | function | `(child: 'DecisionContract', base: 'DecisionContract') -> 'bool'` |
 | `DERIVED_FROM_KEY` | constant | `'derived_from'` |
+
+### `hugrgate.contracts.migration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MIGRATIONS` | constant | `{('1.0', '2.0'): <function _migrate_v1_dict_to_v2 at 0x…` |
+| `MigrationReport` | class | `(source_version: 'str', target_version: 'str', result: 'DecisionContract', warnings: 'List[str]' = <factory>, lossy: 'bool' = False) -> None` |
+| `contract_to_spec` | function | `(contract: 'DecisionContract') -> 'DecisionSpec'` |
+| `migrate` | function | `(d: 'Mapping[str, Any]', to_version: 'str' = '2.0') -> 'DecisionContract'` |
+| `migrate_spec_dict` | function | `(d: 'Mapping[str, Any]', contract_id: 'str', *, name: 'str' = '', description: 'str' = '') -> 'Tuple[DecisionContract, MigrationReport]'` |
+| `register_migration` | function | `(from_version: 'str', to_version: 'str', func: 'Callable[[Mapping[str, Any]], Mapping[str, Any]]') -> 'None'` |
+| `spec_to_contract` | function | `(spec: 'DecisionSpec', contract_id: 'str', *, name: 'str' = '', description: 'str' = '') -> 'Tuple[DecisionContract, MigrationReport]'` |
 
 ### `hugrgate.contracts.multilabel`
 

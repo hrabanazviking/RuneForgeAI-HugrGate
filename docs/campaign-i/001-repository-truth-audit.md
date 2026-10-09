@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T12:00:46.538555+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T12:04:50.918923+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 64 Python files under `hugrgate/`
-- **Total LOC:** 12665
+- **Modules:** 65 Python files under `hugrgate/`
+- **Total LOC:** 12905
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -36,7 +36,7 @@
 | `hugrgate.circuit` | 164 | Circuit breaker — per-backend failure containment. Slice 18. | — |
 | `hugrgate.cli` | 275 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 261 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
-| `hugrgate.contracts.__init__` | 76 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
+| `hugrgate.contracts.__init__` | 78 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
 | `hugrgate.contracts.composite` | 187 | Structured composite decisions. Gjallarbrú slice 030. | hugrgate |
 | `hugrgate.contracts.composition` | 167 | Contract composition — combining contracts. Gjallarbrú slice 045. | hugrgate |
 | `hugrgate.contracts.conditional` | 268 | Conditional decision fields. Gjallarbrú slice 031. | hugrgate |
@@ -49,6 +49,7 @@
 | `hugrgate.contracts.features` | 288 | Input feature contracts — what the model may assume. | hugrgate |
 | `hugrgate.contracts.hierarchy` | 370 | Hierarchical labels — label forests with ancestor semantics. | hugrgate |
 | `hugrgate.contracts.inheritance` | 375 | Contract inheritance — derive, specialize, and check compatibility. | hugrgate |
+| `hugrgate.contracts.migration` | 238 | Contract migration engine — v1 DecisionSpec ↔ v2 contracts. | hugrgate |
 | `hugrgate.contracts.multilabel` | 269 | Multilabel cardinality constraints — how many, which, with what. | hugrgate |
 | `hugrgate.contracts.negotiation` | 212 | Contract version negotiation. Gjallarbrú slice 027. | hugrgate |
 | `hugrgate.contracts.nested` | 195 | Nested categorical contracts — decision trees. Gjallarbrú slice 028. | hugrgate |
