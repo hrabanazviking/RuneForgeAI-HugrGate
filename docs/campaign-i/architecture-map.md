@@ -1160,6 +1160,7 @@ flowchart TD
     evlab --> evlab_bootstrap
     evlab --> evlab_crossval
     evlab --> evlab_dataset
+    evlab --> evlab_significance
     evlab --> evlab_splits
     evlab --> evlab_stratified
     evlab_api --> hugrgate
@@ -1182,6 +1183,8 @@ flowchart TD
     evlab_crossval --> evlab_splits
     evlab_crossval --> policy
     evlab_dataset --> errors
+    evlab_significance --> errors
+    evlab_significance --> result
     evlab_splits --> errors
     evlab_splits --> evlab_dataset
     evlab_stratified --> bench
@@ -2344,6 +2347,7 @@ flowchart TD
 | `evlab` | `evlab.bootstrap` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
 | `evlab` | `evlab.stratified` | no |
 | `evlab.api` | `hugrgate` | no |
@@ -2366,6 +2370,8 @@ flowchart TD
 | `evlab.crossval` | `evlab.splits` | no |
 | `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
+| `evlab.significance` | `errors` | no |
+| `evlab.significance` | `result` | no |
 | `evlab.splits` | `errors` | no |
 | `evlab.splits` | `evlab.dataset` | no |
 | `evlab.stratified` | `bench` | no |

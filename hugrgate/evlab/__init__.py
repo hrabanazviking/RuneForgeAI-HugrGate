@@ -59,6 +59,12 @@ from hugrgate.evlab.dataset import (
     TransformStep,
     fingerprint_items,
 )
+from hugrgate.evlab.significance import (
+    SignificanceResult,
+    compare_paired_correctness,
+    mcnemar_test,
+    paired_permutation_test,
+)
 from hugrgate.evlab.splits import (
     SplitPlan,
     kfold_indices,
@@ -83,15 +89,19 @@ __all__ = [
     "FoldResult",
     "MetricSet",
     "RunRecord",
+    "SignificanceResult",
     "SplitPlan",
     "StratifiedReport",
     "TransformStep",
     "bootstrap_backend_ci",
     "bootstrap_metric_ci",
+    "compare_paired_correctness",
     "cross_validate",
     "fingerprint_items",
     "kfold_indices",
     "make_splits",
     "manifest_splits",
+    "mcnemar_test",
+    "paired_permutation_test",
     "stratified_evaluate",
 ]

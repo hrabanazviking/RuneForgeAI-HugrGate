@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 296 · **public names:** 1793
+**Modules:** 297 · **public names:** 1801
 
 ## API stability policy
 
@@ -2269,16 +2269,20 @@ that this document never drifts from the code.
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+| `SignificanceResult` | class | `(test: 'str', statistic: 'float', p_value: 'float', alpha: 'float', n: 'int', details: 'dict[str, Any]') -> None` |
 | `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
 | `StratifiedReport` | class | `(stratify_key: 'str', strata: 'list[str]', stratum_sizes: 'dict[str, int]', per_stratum: 'dict[str, dict[str, dict[str, Any]]]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]', n_items: 'int' = 0) -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+| `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 | `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
+| `mcnemar_test` | function | `(b01: 'int', b10: 'int', *, alpha: 'float' = 0.05) -> 'SignificanceResult'` |
+| `paired_permutation_test` | function | `(scores_a: 'Sequence[float]', scores_b: 'Sequence[float]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alternative: 'str' = 'two-sided', alpha: 'float' = 0.05) -> 'SignificanceResult'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 
 ### `hugrgate.evlab.api`
@@ -2319,6 +2323,15 @@ that this document never drifts from the code.
 | `DatasetRegistry` | class | `() -> 'None'` |
 | `DatasetVersion` | class | `(major: 'int', minor: 'int', patch: 'int', prerelease: 'str' = '', build: 'str' = '') -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+
+### `hugrgate.evlab.significance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SignificanceResult` | class | `(test: 'str', statistic: 'float', p_value: 'float', alpha: 'float', n: 'int', details: 'dict[str, Any]') -> None` |
+| `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
+| `mcnemar_test` | function | `(b01: 'int', b10: 'int', *, alpha: 'float' = 0.05) -> 'SignificanceResult'` |
+| `paired_permutation_test` | function | `(scores_a: 'Sequence[float]', scores_b: 'Sequence[float]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alternative: 'str' = 'two-sided', alpha: 'float' = 0.05) -> 'SignificanceResult'` |
 
 ### `hugrgate.evlab.splits`
 
