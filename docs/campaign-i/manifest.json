@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:20:04.429672+00:00",
-  "module_count": 51,
+  "generated_utc": "2026-10-09T11:21:54.422900+00:00",
+  "module_count": 52,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 49,
+      "loc": 50,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -728,6 +728,32 @@
         "canonical_hash",
         "validate_value",
         "check_value",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.uncertainty": {
+      "docstring": "Numeric uncertainty intervals. Gjallarbr\u00fa slice 034.\n\nA v1 numeric spec holds a point value in ``[minimum, maximum]``. Real\nmeasurements carry uncertainty: an estimate, an interval around it, and\nthe confidence that the truth lies inside. This module adds:\n\n- :class:`UncertainValue`: frozen ``(estimate, lower, upper, confidence)``\n  with ``lower <= estimate <= upper`` and ``0 < confidence < 1``;\n- :class:`NumericIntervalContract` (kind ``\"numeric-interval\"``): the\n  allowed estimate range plus optional ``max_width`` and\n  ``min_confidence`` guards; plain numbers validate as zero-width\n  intervals (confidence 1.0), so point estimates stay first-class;\n- interval algebra: :func:`width`, :func:`contains`, :func:`covers`,\n  :func:`intersect` (None when disjoint), :func:`widen`.\n\nAll operations are pure and deterministic.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 232,
+      "path": "hugrgate/contracts/uncertainty.py",
+      "public_defs": [
+        "UncertainValue",
+        "width",
+        "contains",
+        "covers",
+        "intersect",
+        "widen",
+        "coerce",
+        "NumericIntervalContract",
+        "to_dict",
+        "from_dict",
+        "point",
+        "validate_value",
         "describe"
       ]
     },
@@ -1179,6 +1205,7 @@
     "test_contracts_031.py",
     "test_contracts_032.py",
     "test_contracts_033.py",
+    "test_contracts_034.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1189,5 +1216,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 9178
+  "total_loc": 9411
 }

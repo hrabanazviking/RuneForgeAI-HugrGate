@@ -29,6 +29,7 @@ flowchart TD
         contracts_conditional[contracts.conditional]
         contracts_crossfield[contracts.crossfield]
         contracts_ordinal[contracts.ordinal]
+        contracts_uncertainty[contracts.uncertainty]
     end
     subgraph runtime[runtime]
         core[core]
@@ -167,6 +168,8 @@ flowchart TD
     contracts_ordinal --> contracts_schema
     contracts_ordinal --> errors
     contracts_schema --> errors
+    contracts_uncertainty --> contracts_schema
+    contracts_uncertainty --> errors
     core --> backend
     core --> errors
     core --> policy
@@ -232,7 +235,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -332,6 +335,8 @@ flowchart TD
 | `contracts.ordinal` | `contracts.schema` | no |
 | `contracts.ordinal` | `errors` | no |
 | `contracts.schema` | `errors` | no |
+| `contracts.uncertainty` | `contracts.schema` | no |
+| `contracts.uncertainty` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `policy` | no |

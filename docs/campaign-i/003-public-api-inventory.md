@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 51 · **public names:** 220
+**Modules:** 52 · **public names:** 229
 
 ## API stability policy
 
@@ -243,6 +243,7 @@ that this document never drifts from the code.
 | `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/hatch/w` |
 | `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/hatch/wo` |
 | `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/hatch/works` |
+| `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/hatch/w` |
 
 ### `hugrgate.contracts.composite`
 
@@ -313,6 +314,19 @@ that this document never drifts from the code.
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+
+### `hugrgate.contracts.uncertainty`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `UncertainValue` | class | `(estimate: 'float', lower: 'float', upper: 'float', confidence: 'float' = 0.95) -> None` |
+| `NumericIntervalContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, minimum: 'float' = 0.0, maximum: 'float' = 1.0, max_width: 'Optional[float]' = None, min_confidence: 'Optional[float]' = None) -> None` |
+| `coerce` | function | `(value: 'Any') -> 'UncertainValue'` |
+| `width` | function | `(v: 'UncertainValue') -> 'float'` |
+| `contains` | function | `(v: 'UncertainValue', x: 'float') -> 'bool'` |
+| `covers` | function | `(a: 'UncertainValue', b: 'UncertainValue') -> 'bool'` |
+| `intersect` | function | `(a: 'UncertainValue', b: 'UncertainValue') -> 'Optional[UncertainValue]'` |
+| `widen` | function | `(v: 'UncertainValue', factor: 'float') -> 'UncertainValue'` |
 
 ### `hugrgate.core`
 
