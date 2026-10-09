@@ -1,4 +1,4 @@
-"""Disagreement detection and escalation. Slices 111-112.
+"""Disagreement detection, escalation, and minority reports. Slices 111-112, 114.
 
 :class:`DisagreementDetector` (111) turns the raw diversity metrics
 (slice 110) into a verdict — none / mild / strong — with the
@@ -33,6 +33,9 @@ __all__ = [
     "DisagreementDetector",
     "EscalationPolicy",
     "escalate",
+    "MinorityReport",
+    "minority_report",
+    "audit_minority_report",
 ]
 
 LEVEL_NONE = "none"
@@ -251,3 +254,42 @@ def minority_report(result: DecisionResult) -> List[MinorityReport]:
                            probability=float(r.get("probability", 0.0)),
                            weight=float(r.get("weight", 0.0)))
             for r in meta.get("minority_report", [])]
+
+
+def audit_minority_report(result: DecisionResult,
+                          votes: List[MemberVote]) -> List[str]:
+    """Verify the minority report is complete and honest.
+
+    Returns a list of problems (empty = the report faithfully
+    preserves every dissenting ballot): a dissenting ballot missing
+    from the report, a report entry with no matching ballot, or a
+    value mismatch between a ballot and its report entry.
+    Abstentions have no winner to dissent from and are skipped.
+    """
+    problems: List[str] = []
+    if result.value is None:
+        return problems
+    reported = {r.backend: r for r in minority_report(result)}
+    for v in votes:
+        if v.skipped or v.value is None:
+            continue
+        if v.value == result.value:
+            continue
+        entry = reported.get(v.backend)
+        if entry is None:
+            problems.append(
+                f"dissenting ballot by {v.backend!r} for "
+                f"{v.value!r} missing from the minority report")
+        elif entry.value != v.value:
+            problems.append(
+                f"minority report entry for {v.backend!r} says "
+                f"{entry.value!r} but the ballot was {v.value!r}")
+    dissenting = {v.backend for v in votes
+                  if not v.skipped and v.value is not None
+                  and v.value != result.value}
+    for backend in reported:
+        if backend not in dissenting:
+            problems.append(
+                f"minority report entry for {backend!r} has no "
+                f"matching dissenting ballot")
+    return problems

@@ -55,6 +55,9 @@ from hugrgate.ensemble.disagreement import (
     DisagreementThresholds,
     EscalationPolicy,
     escalate,
+    MinorityReport,
+    audit_minority_report,
+    minority_report,
 )
 from hugrgate.ensemble.diversity import (
     disagreement_rate,
@@ -129,6 +132,9 @@ __all__ = [
     "DisagreementDetector",
     "EscalationPolicy",
     "escalate",
+    "MinorityReport",
+    "minority_report",
+    "audit_minority_report",
     "ConsensusConfig",
     "winner_share",
     "apply_consensus",
