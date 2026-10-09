@@ -39,6 +39,10 @@ from hugrgate.routing.dag import (
     RoutingDAG,
     evaluate_condition,
 )
+from hugrgate.routing.dsl import (
+    RoutePolicy,
+    parse as parse_route_policy,
+)
 from hugrgate.routing.explain import (
     OUTCOME_PHRASES,
     explain_decision,
@@ -186,7 +190,9 @@ __all__ = [
     "RouterContext",
     "RoutingDecision",
     "RoutingOptions",
+    "RoutePolicy",
     "RoutingPlan",
+    "parse_route_policy",
     "SerialPlanExecutor",
     "SimulatedRung",
     "SimulationReport",
