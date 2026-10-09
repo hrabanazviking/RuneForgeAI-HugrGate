@@ -25,6 +25,12 @@ from hugrgate.cluster.protocol import (
     encode_message,
     new_trace_id,
 )
+from hugrgate.cluster.static_config import (
+    StaticDiscovery,
+    StaticPeerConfig,
+    example_config,
+    load_static_config,
+)
 
 __all__ = [
     "CLUSTER_RPC_PATH",
@@ -39,7 +45,11 @@ __all__ = [
     "NodeCapabilities",
     "NodeIdentity",
     "PeerRecord",
+    "StaticDiscovery",
+    "StaticPeerConfig",
     "decode_message",
     "encode_message",
+    "example_config",
+    "load_static_config",
     "new_trace_id",
 ]

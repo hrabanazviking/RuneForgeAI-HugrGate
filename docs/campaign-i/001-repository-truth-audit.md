@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T12:56:24.720635+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T12:57:18.395464+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 49 Python files under `hugrgate/`
-- **Total LOC:** 8711
+- **Modules:** 50 Python files under `hugrgate/`
+- **Total LOC:** 8903
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_cluster_capabilities.py, test_cluster_discovery.py, test_cluster_identity.py, test_cluster_protocol.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_cluster_capabilities.py, test_cluster_discovery.py, test_cluster_identity.py, test_cluster_protocol.py, test_cluster_static_config.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
 
 ## Module table
 
@@ -36,11 +36,12 @@
 | `hugrgate.circuit` | 174 | Circuit breaker — per-backend failure containment. Slice 18. | hugrgate |
 | `hugrgate.cli` | 277 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 220 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
-| `hugrgate.cluster.__init__` | 45 | Cluster package for distributed HugrGate. Campaign IX (slices 201-225). | hugrgate |
+| `hugrgate.cluster.__init__` | 55 | Cluster package for distributed HugrGate. Campaign IX (slices 201-225). | hugrgate |
 | `hugrgate.cluster.capabilities` | 168 | Node capability advertisement. Slice 203. | hugrgate |
 | `hugrgate.cluster.discovery` | 175 | Node discovery — finding peers. Slice 204. | hugrgate |
 | `hugrgate.cluster.identity` | 123 | Node identity — stable, unforgeable node ids. Slice 202. | hugrgate |
 | `hugrgate.cluster.protocol` | 196 | Gjallarbrú node wire protocol. Slice 201. | hugrgate |
+| `hugrgate.cluster.static_config` | 182 | Static peer configuration. Slice 205. | hugrgate |
 | `hugrgate.core` | 159 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
 | `hugrgate.daemon` | 494 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:56:24.720635+00:00",
-  "module_count": 49,
+  "generated_utc": "2026-10-09T12:57:18.395464+00:00",
+  "module_count": 50,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 45,
+      "loc": 55,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -649,6 +649,30 @@
         "message_id",
         "to_dict",
         "from_dict"
+      ]
+    },
+    "hugrgate.cluster.static_config": {
+      "docstring": "Static peer configuration. Slice 205.\n\nFor clusters with fixed membership \u2014 the common on-prem case \u2014 peers\nare declared in a file instead of discovered. The file is JSON or YAML::\n\n    peers:\n      - host: 10.0.0.2\n        port: 8377\n        node_id: \"<64-hex, optional: learned on first contact>\"\n        tls: true\n        display_name: \"norn-2\"\n\n:func:`load_static_config` validates the file loudly (unknown keys,\nbad ports, duplicate endpoints all raise :class:`SpecError` \u2014 a typo\nmust never silently drop a peer). :class:`StaticDiscovery` turns the\nloaded config into a pull-style :class:`Discovery` adapter for the\nregistry from slice 204.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "os",
+        "typing",
+        "yaml"
+      ],
+      "loc": 182,
+      "path": "hugrgate/cluster/static_config.py",
+      "public_defs": [
+        "StaticPeerConfig",
+        "load_static_config",
+        "example_config",
+        "StaticDiscovery",
+        "to_records",
+        "from_file",
+        "peers"
       ]
     },
     "hugrgate.core": {
@@ -1164,6 +1188,7 @@
     "test_cluster_discovery.py",
     "test_cluster_identity.py",
     "test_cluster_protocol.py",
+    "test_cluster_static_config.py",
     "test_config.py",
     "test_coverage_attack.py",
     "test_dead_code.py",
@@ -1191,5 +1216,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8711
+  "total_loc": 8903
 }

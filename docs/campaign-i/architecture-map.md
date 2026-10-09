@@ -72,6 +72,7 @@ flowchart TD
         cluster_identity[cluster.identity]
         cluster_capabilities[cluster.capabilities]
         cluster_discovery[cluster.discovery]
+        cluster_static_config[cluster.static_config]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -167,6 +168,7 @@ flowchart TD
     cluster --> cluster_discovery
     cluster --> cluster_identity
     cluster --> cluster_protocol
+    cluster --> cluster_static_config
     cluster_capabilities --> hugrgate
     cluster_capabilities --> backend
     cluster_capabilities --> cluster_identity
@@ -178,6 +180,8 @@ flowchart TD
     cluster_identity --> cluster_protocol
     cluster_identity --> errors
     cluster_protocol --> errors
+    cluster_static_config --> cluster_discovery
+    cluster_static_config --> errors
     core --> backend
     core --> errors
     core --> log
@@ -264,7 +268,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -361,6 +365,7 @@ flowchart TD
 | `cluster` | `cluster.discovery` | no |
 | `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster` | `cluster.static_config` | no |
 | `cluster.capabilities` | `hugrgate` | no |
 | `cluster.capabilities` | `backend` | no |
 | `cluster.capabilities` | `cluster.identity` | no |
@@ -372,6 +377,8 @@ flowchart TD
 | `cluster.identity` | `cluster.protocol` | no |
 | `cluster.identity` | `errors` | no |
 | `cluster.protocol` | `errors` | no |
+| `cluster.static_config` | `cluster.discovery` | no |
+| `cluster.static_config` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `log` | no |

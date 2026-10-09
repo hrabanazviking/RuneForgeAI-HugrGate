@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 49 · **public names:** 214
+**Modules:** 50 · **public names:** 222
 
 ## API stability policy
 
@@ -242,8 +242,12 @@ that this document never drifts from the code.
 | `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+| `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
+| `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `example_config` | function | `() -> 'dict[str, Any]'` |
+| `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 | `new_trace_id` | function | `() -> 'str'` |
 
 ### `hugrgate.cluster.capabilities`
@@ -280,6 +284,15 @@ that this document never drifts from the code.
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.static_config`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
+| `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
+| `example_config` | function | `() -> 'dict[str, Any]'` |
+| `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 
 ### `hugrgate.core`
 
