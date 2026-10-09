@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 54 · **public names:** 245
+**Modules:** 55 · **public names:** 251
 
 ## API stability policy
 
@@ -272,6 +272,17 @@ that this document never drifts from the code.
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
 | `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+
+### `hugrgate.edge.cachetune`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
+| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
+| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
 
 ### `hugrgate.edge.memory`
 

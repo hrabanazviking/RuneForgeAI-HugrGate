@@ -80,6 +80,7 @@ flowchart TD
         edge_quant[edge.quant]
         edge_npu[edge.npu]
         edge_residency[edge.residency]
+        edge_cachetune[edge.cachetune]
     end
 
     hugrgate --> backend
@@ -186,6 +187,13 @@ flowchart TD
     daemon -.-> server
     daemon -.-> spec
     edge_affinity --> errors
+    edge_cachetune --> cache
+    edge_cachetune --> edge_memory
+    edge_cachetune --> edge_platform
+    edge_cachetune --> errors
+    edge_cachetune --> policy
+    edge_cachetune --> result
+    edge_cachetune --> spec
     edge_memory --> errors
     edge_npu --> errors
     edge_power --> errors
@@ -266,7 +274,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune` |
 
 ## Internal dependency edges
 
@@ -376,6 +384,13 @@ flowchart TD
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `edge.affinity` | `errors` | no |
+| `edge.cachetune` | `cache` | no |
+| `edge.cachetune` | `edge.memory` | no |
+| `edge.cachetune` | `edge.platform` | no |
+| `edge.cachetune` | `errors` | no |
+| `edge.cachetune` | `policy` | no |
+| `edge.cachetune` | `result` | no |
+| `edge.cachetune` | `spec` | no |
 | `edge.memory` | `errors` | no |
 | `edge.npu` | `errors` | no |
 | `edge.power` | `errors` | no |
