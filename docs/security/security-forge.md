@@ -14,7 +14,7 @@ hash-chained provenance (slice 015), cluster mutual auth (slice
 |---|---|---|
 | 401 | `hugrgate/security/threat_model.py` — STRIDE threat model v2, executable + validated | done |
 | 402 | `hugrgate/security/attack_surface.py` — attack-surface inventory | done |
-| 403 | `hugrgate/security/depscan.py` — dependency security scan | pending |
+| 403 | `hugrgate/security/depscan.py` — dependency security scan | done |
 | 404 | `hugrgate/security/supply_chain.py` — supply-chain policy + SBOM | pending |
 | 405 | `hugrgate/security/model_signing.py` — signed model metadata | pending |
 | 406 | `hugrgate/security/checksums.py` — model checksum enforcement | pending |

@@ -61,6 +61,13 @@ from hugrgate.security.attack_surface import (
     enumerate_surface,
     find_unlisted,
 )
+from hugrgate.security.depscan import (
+    ADVISORIES,
+    Advisory,
+    Finding as DependencyFinding,
+    scan_project,
+    scan_requirements,
+)
 from hugrgate.security.threat_model import (
     STRIDE,
     Asset,
@@ -71,9 +78,12 @@ from hugrgate.security.threat_model import (
 )
 
 __all__ = [
+    "ADVISORIES",
     "STRIDE",
+    "Advisory",
     "Asset",
     "AttackSurface",
+    "DependencyFinding",
     "SurfaceEntry",
     "Threat",
     "ThreatModel",
@@ -82,4 +92,6 @@ __all__ = [
     "default_threat_model",
     "enumerate_surface",
     "find_unlisted",
+    "scan_project",
+    "scan_requirements",
 ]
