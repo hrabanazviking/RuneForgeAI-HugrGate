@@ -16,7 +16,6 @@ from hugrgate.contracts.schema import (
     is_supported_version,
     register_kind,
 )
-from hugrgate.contracts import negotiation
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -28,3 +27,16 @@ __all__ = [
     "register_kind",
     "negotiation",
 ]
+
+
+def __getattr__(name: str):
+    # Lazy submodule access: keeps the eager import graph acyclic
+    # (hugrgate.contracts -> hugrgate.contracts would be a self-edge).
+    # importlib.import_module is used instead of `from ... import ...`,
+    # which would re-enter __getattr__ and recurse forever.
+    if name in ("negotiation",):
+        import importlib
+        module = importlib.import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

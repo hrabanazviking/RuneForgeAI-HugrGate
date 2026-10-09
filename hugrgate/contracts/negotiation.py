@@ -17,7 +17,7 @@ Failure is loud: disjoint version sets raise :class:`ContractError`
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Mapping, Sequence, Tuple
+from typing import Dict, Sequence, Tuple
 
 from hugrgate.contracts.schema import (
     SUPPORTED_SCHEMA_VERSIONS,
