@@ -19,6 +19,7 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
+from hugrgate.memory.backend_history import BackendHistory, backend_histories
 from hugrgate.memory.conditioned import retrieve_conditioned
 from hugrgate.memory.decay import (
     decay_weight,
@@ -62,6 +63,7 @@ from hugrgate.memory.similarity import (
 
 __all__ = [
     "OUTCOME_KINDS",
+    "BackendHistory",
     "DecisionHistory",
     "Episode",
     "FrequencyEntry",
@@ -76,6 +78,7 @@ __all__ = [
     "RecencyFeatures",
     "RetrievalResult",
     "SimilarityHit",
+    "backend_histories",
     "by_backend",
     "by_backend_value",
     "by_model",

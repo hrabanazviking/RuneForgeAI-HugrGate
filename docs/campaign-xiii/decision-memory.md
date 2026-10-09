@@ -151,3 +151,11 @@ it into an opaque agent.
   conditioned (or otherwise pre-filtered) sets score without a second
   history scan; prior tests still green.
 - Tests: `tests/test_memory_conditioned.py` (9 tests).
+
+### Slice 312 — Backend history features
+- `hugrgate/memory/backend_history.py`: `backend_histories()` builds
+  per-backend `BackendHistory` records — decision/accepted counts and
+  rates, outcome distribution, success rate (`None`, not 0, when
+  unlabeled), raw + decay-weighted mean probability, mean latency,
+  first/last seen, observed models; query pre-filter and scan limit.
+- Tests: `tests/test_memory_backend_history.py` (7 tests).
