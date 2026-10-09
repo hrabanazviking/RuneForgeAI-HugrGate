@@ -414,6 +414,36 @@ flowchart TD
         evlab_report[evlab.report]
         evlab_release[evlab.release]
     end
+    subgraph agents[agents]
+        agents[agents]
+        agents_types[agents.types]
+        agents_bus[agents.bus]
+        agents_contract[agents.contract]
+        agents_triage[agents.triage]
+        agents_intent[agents.intent]
+        agents_tools[agents.tools]
+        agents_memory_write[agents.memory_write]
+        agents_memory_read[agents.memory_read]
+        agents_notify[agents.notify]
+        agents_attention[agents.attention]
+        agents_escalation[agents.escalation]
+        agents_human_review[agents.human_review]
+        agents_dispatch[agents.dispatch]
+        agents_registry[agents.registry]
+        agents_health[agents.health]
+        agents_cost[agents.cost]
+        agents_privacy[agents.privacy]
+        agents_fusion[agents.fusion]
+        agents_disagreement[agents.disagreement]
+        agents_loopbreak[agents.loopbreak]
+        agents_runaway[agents.runaway]
+        agents_budgets[agents.budgets]
+        agents_provenance[agents.provenance]
+        agents_replay[agents.replay]
+        agents_simulator[agents.simulator]
+        agents_benchmark[agents.benchmark]
+        agents_release_gate[agents.release_gate]
+    end
     subgraph security-forge[security-forge]
         security[security]
         security_threat_model[security.threat_model]
@@ -535,6 +565,84 @@ flowchart TD
     adaptive_shadow --> errors
     adaptive_telemetry --> errors
     adaptive_versioning --> errors
+    agents_attention --> agents_types
+    agents_benchmark --> agents_simulator
+    agents_budgets --> errors
+    agents_bus --> agents_types
+    agents_bus --> errors
+    agents_contract --> errors
+    agents_contract --> privacy
+    agents_cost --> agents_bus
+    agents_cost --> agents_types
+    agents_cost --> errors
+    agents_disagreement --> agents_fusion
+    agents_disagreement --> agents_human_review
+    agents_dispatch --> agents_bus
+    agents_dispatch --> agents_types
+    agents_escalation --> agents_bus
+    agents_escalation --> agents_contract
+    agents_escalation --> agents_types
+    agents_escalation --> errors
+    agents_health --> agents_bus
+    agents_health --> agents_registry
+    agents_health --> agents_types
+    agents_health --> errors
+    agents_human_review --> agents_bus
+    agents_human_review --> agents_types
+    agents_human_review --> errors
+    agents_human_review --> observability_alerts
+    agents_intent --> agents_contract
+    agents_intent --> errors
+    agents_loopbreak --> agents_bus
+    agents_loopbreak --> agents_types
+    agents_loopbreak --> errors
+    agents_memory_read --> memory_access
+    agents_memory_read --> privacy
+    agents_memory_write --> memory_access
+    agents_memory_write --> privacy
+    agents_notify --> agents_types
+    agents_notify --> observability_alerts
+    agents_privacy --> agents_contract
+    agents_privacy --> agents_types
+    agents_privacy --> errors
+    agents_privacy --> privacy
+    agents_registry --> agents_contract
+    agents_registry --> errors
+    agents_release_gate --> agents_attention
+    agents_release_gate --> agents_budgets
+    agents_release_gate --> agents_bus
+    agents_release_gate --> agents_contract
+    agents_release_gate --> agents_cost
+    agents_release_gate --> agents_dispatch
+    agents_release_gate --> agents_escalation
+    agents_release_gate --> agents_health
+    agents_release_gate --> agents_human_review
+    agents_release_gate --> agents_intent
+    agents_release_gate --> agents_loopbreak
+    agents_release_gate --> agents_memory_read
+    agents_release_gate --> agents_memory_write
+    agents_release_gate --> agents_notify
+    agents_release_gate --> agents_privacy
+    agents_release_gate --> agents_provenance
+    agents_release_gate --> agents_registry
+    agents_release_gate --> agents_replay
+    agents_release_gate --> agents_runaway
+    agents_release_gate --> agents_tools
+    agents_release_gate --> agents_triage
+    agents_release_gate --> agents_types
+    agents_runaway --> agents_bus
+    agents_runaway --> agents_types
+    agents_runaway --> errors
+    agents_simulator --> agents_bus
+    agents_simulator --> agents_dispatch
+    agents_simulator --> agents_loopbreak
+    agents_simulator --> agents_runaway
+    agents_simulator --> agents_types
+    agents_simulator --> errors
+    agents_tools --> agents_contract
+    agents_tools --> errors
+    agents_triage --> agents_bus
+    agents_triage -.-> agents_types
     allocprof --> errors
     allocprof --> log
     allocprof --> policy
@@ -1962,6 +2070,7 @@ flowchart TD
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 | observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
 | evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
+| agents | `agents`, `agents.types`, `agents.bus`, `agents.contract`, `agents.triage`, `agents.intent`, `agents.tools`, `agents.memory_write`, `agents.memory_read`, `agents.notify`, `agents.attention`, `agents.escalation`, `agents.human_review`, `agents.dispatch`, `agents.registry`, `agents.health`, `agents.cost`, `agents.privacy`, `agents.fusion`, `agents.disagreement`, `agents.loopbreak`, `agents.runaway`, `agents.budgets`, `agents.provenance`, `agents.replay`, `agents.simulator`, `agents.benchmark`, `agents.release_gate` |
 | security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.ratelimit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
 
 ## Internal dependency edges
@@ -2062,6 +2171,84 @@ flowchart TD
 | `adaptive.shadow` | `errors` | no |
 | `adaptive.telemetry` | `errors` | no |
 | `adaptive.versioning` | `errors` | no |
+| `agents.attention` | `agents.types` | no |
+| `agents.benchmark` | `agents.simulator` | no |
+| `agents.budgets` | `errors` | no |
+| `agents.bus` | `agents.types` | no |
+| `agents.bus` | `errors` | no |
+| `agents.contract` | `errors` | no |
+| `agents.contract` | `privacy` | no |
+| `agents.cost` | `agents.bus` | no |
+| `agents.cost` | `agents.types` | no |
+| `agents.cost` | `errors` | no |
+| `agents.disagreement` | `agents.fusion` | no |
+| `agents.disagreement` | `agents.human_review` | no |
+| `agents.dispatch` | `agents.bus` | no |
+| `agents.dispatch` | `agents.types` | no |
+| `agents.escalation` | `agents.bus` | no |
+| `agents.escalation` | `agents.contract` | no |
+| `agents.escalation` | `agents.types` | no |
+| `agents.escalation` | `errors` | no |
+| `agents.health` | `agents.bus` | no |
+| `agents.health` | `agents.registry` | no |
+| `agents.health` | `agents.types` | no |
+| `agents.health` | `errors` | no |
+| `agents.human_review` | `agents.bus` | no |
+| `agents.human_review` | `agents.types` | no |
+| `agents.human_review` | `errors` | no |
+| `agents.human_review` | `observability.alerts` | no |
+| `agents.intent` | `agents.contract` | no |
+| `agents.intent` | `errors` | no |
+| `agents.loopbreak` | `agents.bus` | no |
+| `agents.loopbreak` | `agents.types` | no |
+| `agents.loopbreak` | `errors` | no |
+| `agents.memory_read` | `memory.access` | no |
+| `agents.memory_read` | `privacy` | no |
+| `agents.memory_write` | `memory.access` | no |
+| `agents.memory_write` | `privacy` | no |
+| `agents.notify` | `agents.types` | no |
+| `agents.notify` | `observability.alerts` | no |
+| `agents.privacy` | `agents.contract` | no |
+| `agents.privacy` | `agents.types` | no |
+| `agents.privacy` | `errors` | no |
+| `agents.privacy` | `privacy` | no |
+| `agents.registry` | `agents.contract` | no |
+| `agents.registry` | `errors` | no |
+| `agents.release_gate` | `agents.attention` | no |
+| `agents.release_gate` | `agents.budgets` | no |
+| `agents.release_gate` | `agents.bus` | no |
+| `agents.release_gate` | `agents.contract` | no |
+| `agents.release_gate` | `agents.cost` | no |
+| `agents.release_gate` | `agents.dispatch` | no |
+| `agents.release_gate` | `agents.escalation` | no |
+| `agents.release_gate` | `agents.health` | no |
+| `agents.release_gate` | `agents.human_review` | no |
+| `agents.release_gate` | `agents.intent` | no |
+| `agents.release_gate` | `agents.loopbreak` | no |
+| `agents.release_gate` | `agents.memory_read` | no |
+| `agents.release_gate` | `agents.memory_write` | no |
+| `agents.release_gate` | `agents.notify` | no |
+| `agents.release_gate` | `agents.privacy` | no |
+| `agents.release_gate` | `agents.provenance` | no |
+| `agents.release_gate` | `agents.registry` | no |
+| `agents.release_gate` | `agents.replay` | no |
+| `agents.release_gate` | `agents.runaway` | no |
+| `agents.release_gate` | `agents.tools` | no |
+| `agents.release_gate` | `agents.triage` | no |
+| `agents.release_gate` | `agents.types` | no |
+| `agents.runaway` | `agents.bus` | no |
+| `agents.runaway` | `agents.types` | no |
+| `agents.runaway` | `errors` | no |
+| `agents.simulator` | `agents.bus` | no |
+| `agents.simulator` | `agents.dispatch` | no |
+| `agents.simulator` | `agents.loopbreak` | no |
+| `agents.simulator` | `agents.runaway` | no |
+| `agents.simulator` | `agents.types` | no |
+| `agents.simulator` | `errors` | no |
+| `agents.tools` | `agents.contract` | no |
+| `agents.tools` | `errors` | no |
+| `agents.triage` | `agents.bus` | no |
+| `agents.triage` | `agents.types` | yes |
 | `allocprof` | `errors` | no |
 | `allocprof` | `log` | no |
 | `allocprof` | `policy` | no |
