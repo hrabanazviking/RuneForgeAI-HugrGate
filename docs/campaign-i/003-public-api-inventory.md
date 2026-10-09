@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 57 · **public names:** 261
+**Modules:** 58 · **public names:** 264
 
 ## API stability policy
 
@@ -361,6 +361,14 @@ that this document never drifts from the code.
 | `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
 | `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
 | `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
+
+### `hugrgate.edge.recovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
+| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.edge.residency`
 
