@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 291 · **public names:** 1752
+**Modules:** 292 · **public names:** 1759
 
 ## API stability policy
 
@@ -2254,11 +2254,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `COLUMN_TYPES` | constant | `('string', 'number', 'boolean', 'categorical', 'list', 'mapp` |
 | `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
+| `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
+| `DatasetManifest` | class | `(name: 'str', version: 'str', columns: 'list[ColumnSpec]' = <factory>, description: 'str' = '', license: 'str' = 'unknown', spec: 'dict[str, Any]' = <factory>, sensitivity: 'str' = 'public', fingerprint: 'str' = '', created_at: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
 | `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+| `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 
 ### `hugrgate.evlab.api`
 
@@ -2269,6 +2273,14 @@ that this document never drifts from the code.
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+
+### `hugrgate.evlab.dataset`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `COLUMN_TYPES` | constant | `('string', 'number', 'boolean', 'categorical', 'list', 'mapp` |
+| `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
+| `DatasetManifest` | class | `(name: 'str', version: 'str', columns: 'list[ColumnSpec]' = <factory>, description: 'str' = '', license: 'str' = 'unknown', spec: 'dict[str, Any]' = <factory>, sensitivity: 'str' = 'public', fingerprint: 'str' = '', created_at: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
 
 ### `hugrgate.fallback`
 

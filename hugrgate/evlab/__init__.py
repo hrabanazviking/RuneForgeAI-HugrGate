@@ -42,11 +42,21 @@ from hugrgate.evlab.api import (
     MetricSet,
     RunRecord,
 )
+from hugrgate.evlab.dataset import (
+    COLUMN_TYPES,
+    ColumnSpec,
+    DatasetManifest,
+    fingerprint_items,
+)
 
 __all__ = [
+    "COLUMN_TYPES",
     "DEFAULT_METRICS",
+    "ColumnSpec",
+    "DatasetManifest",
     "EvaluationLab",
     "Experiment",
     "MetricSet",
     "RunRecord",
+    "fingerprint_items",
 ]
