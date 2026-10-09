@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 46 · **public names:** 189
+**Modules:** 46 · **public names:** 193
 
 ## API stability policy
 
@@ -269,9 +269,13 @@ that this document never drifts from the code.
 |---|---|---|
 | `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
 | `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
+| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
+| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
 | `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
 | `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
 | `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
+| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
+| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
 
 ### `hugrgate.errors`
 

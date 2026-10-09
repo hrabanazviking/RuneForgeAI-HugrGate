@@ -1,4 +1,6 @@
-"""Edge platform detection and ARM64 compatibility audit. Slice 176.
+"""Edge platform detection, ARM64 audit, and Raspberry Pi baselines.
+
+Slices 176-177.
 
 :class:`PlatformProbe` inspects the host (architecture, CPU features,
 OS, page size, Python build) without importing anything heavyweight.
@@ -7,9 +9,18 @@ OS, page size, Python build) without importing anything heavyweight.
 so a deployment script can decide whether this host is a sane HugrGate
 edge target.
 
+:class:`PiBoard` identifies Raspberry Pi hardware from
+``/proc/cpuinfo`` (``Revision``/``Model`` lines) and the device-tree
+model file; :func:`pi_baseline` maps a detected (or named) board to an
+:class:`EdgeBaseline` of conservative, published hardware specs that the
+rest of the edge runtime (memory modes, cache tuning, benchmarks)
+calibrates against.
+
 The audit never *claims* hardware compatibility it cannot prove: every
 finding records how it was derived (``source``) and whether the check
-ran against live host data or injected fixtures.
+ran against live host data or injected fixtures. Board specs are
+published manufacturer figures, not measurements; per-device validation
+is marked ``NEEDS_HARDWARE_VALIDATION``.
 """
 
 from __future__ import annotations
@@ -24,9 +35,13 @@ from typing import Any
 __all__ = [
     "Arm64AuditReport",
     "Arm64Finding",
+    "EdgeBaseline",
+    "PiBoard",
     "PlatformInfo",
     "PlatformProbe",
     "audit_arm64",
+    "detect_pi_board",
+    "pi_baseline",
 ]
 
 #: Severities, ordered. ``error`` means "do not deploy here";
@@ -277,3 +292,181 @@ def audit_arm64(platform_info: PlatformInfo | None = None,
             source="import numpy"))
 
     return Arm64AuditReport(platform=info, findings=findings)
+
+
+# --- Raspberry Pi baselines (slice 177) ------------------------------------
+
+#: New-style revision codes (bits 23+ flag) mapped to (model label, RAM MB).
+#: Source: Raspberry Pi documentation, "Raspberry Pi Revision Codes".
+_PI_REVISIONS: dict[str, tuple[str, int]] = {
+    "a020d3": ("Raspberry Pi 3 Model B+", 1024),
+    "a03111": ("Raspberry Pi 4 Model B", 1024),
+    "b03111": ("Raspberry Pi 4 Model B", 2048),
+    "b03112": ("Raspberry Pi 4 Model B", 2048),
+    "b03114": ("Raspberry Pi 4 Model B", 2048),
+    "c03111": ("Raspberry Pi 4 Model B", 4096),
+    "c03112": ("Raspberry Pi 4 Model B", 4096),
+    "c03114": ("Raspberry Pi 4 Model B", 4096),
+    "d03114": ("Raspberry Pi 4 Model B", 8192),
+    "902120": ("Raspberry Pi Zero 2 W", 512),
+    "c04170": ("Raspberry Pi 5", 4096),
+    "d04170": ("Raspberry Pi 5", 8192),
+    "e04170": ("Raspberry Pi 5", 16384),
+}
+
+
+@dataclass(frozen=True)
+class PiBoard:
+    """An identified Raspberry Pi board."""
+
+    model: str
+    revision: str
+    ram_mb: int
+    detected_live: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"model": self.model, "revision": self.revision,
+                "ram_mb": self.ram_mb, "detected_live": self.detected_live}
+
+
+@dataclass(frozen=True)
+class EdgeBaseline:
+    """Conservative published-spec baseline for an edge board.
+
+    These are *manufacturer figures*, not measurements — every other
+    edge subsystem treats them as calibration anchors and marks its own
+    numbers ``NEEDS_HARDWARE_VALIDATION`` until measured on the device.
+    """
+
+    board: str
+    cpu_count: int
+    cpu_desc: str
+    ram_mb: int
+    recommended_cache_entries: int
+    recommended_max_resident_models: int
+    recommended_power_budget_mw: int | None
+    notes: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "board": self.board,
+            "cpu_count": self.cpu_count,
+            "cpu_desc": self.cpu_desc,
+            "ram_mb": self.ram_mb,
+            "recommended_cache_entries": self.recommended_cache_entries,
+            "recommended_max_resident_models":
+                self.recommended_max_resident_models,
+            "recommended_power_budget_mw": self.recommended_power_budget_mw,
+            "notes": list(self.notes),
+        }
+
+
+def _baseline(board: str, cpu_count: int, cpu_desc: str, ram_mb: int,
+              cache_entries: int, resident_models: int,
+              power_mw: int | None, *notes: str) -> EdgeBaseline:
+    return EdgeBaseline(board=board, cpu_count=cpu_count, cpu_desc=cpu_desc,
+                        ram_mb=ram_mb,
+                        recommended_cache_entries=cache_entries,
+                        recommended_max_resident_models=resident_models,
+                        recommended_power_budget_mw=power_mw,
+                        notes=notes)
+
+
+#: Baselines keyed by canonical model label. Cache/model recommendations
+#: are deliberately conservative: a Pi 3B+ keeps 1/8th of its 1 GiB for
+#: the decision cache; a Pi 5 keeps a full 8 GiB headroom.
+PI_BASELINES: dict[str, EdgeBaseline] = {
+    "Raspberry Pi 5": _baseline(
+        "Raspberry Pi 5", 4, "BCM2712 quad Cortex-A76 @ 2.4 GHz", 8192,
+        2000, 4, 15000,
+        "16 k page-size kernel images exist; audit flags unusual page sizes",
+        "PCIe HATs (Hailo-8, NVMe) raise the power envelope"),
+    "Raspberry Pi 4 Model B": _baseline(
+        "Raspberry Pi 4 Model B", 4, "BCM2711 quad Cortex-A72 @ 1.8 GHz",
+        4096, 1000, 2, 7500,
+        "USB-C PD supply required for stable 4-core inference",
+        "thermal throttling common without a heatsink/fan"),
+    "Raspberry Pi 3 Model B+": _baseline(
+        "Raspberry Pi 3 Model B+", 4, "BCM2837B0 quad Cortex-A53 @ 1.4 GHz",
+        1024, 250, 1, 5000,
+        "32-bit userland historically common; require 64-bit OS for HugrGate",
+        "no USB boot quirks tolerated: keep model store on ext4"),
+    "Raspberry Pi Zero 2 W": _baseline(
+        "Raspberry Pi Zero 2 W", 4, "RP3A0 quad Cortex-A53 @ 1.0 GHz",
+        512, 100, 1, 2500,
+        "low-RAM operating mode is mandatory, not optional",
+        "single USB-OTG port: no high-draw peripherals during inference"),
+}
+
+
+def _parse_cpuinfo_kv(text: str, key: str) -> str | None:
+    # Exact key match: /proc/cpuinfo carries both per-CPU "model name"
+    # lines and the board summary "Model" line; startswith() would grab
+    # the wrong one.
+    for line in text.splitlines():
+        head, sep, rest = line.partition(":")
+        if sep and head.strip().lower() == key.lower():
+            value = rest.strip()
+            if value:
+                return value
+    return None
+
+
+def detect_pi_board(cpuinfo_text: str | None = None,
+                   model_text: str | None = None) -> PiBoard | None:
+    """Identify a Raspberry Pi board, or return None when not a Pi.
+
+    ``cpuinfo_text`` stands in for ``/proc/cpuinfo`` and ``model_text``
+    for ``/sys/firmware/devicetree/base/model``; both default to the
+    live host. Returns ``None`` for non-Pi hosts (never raises).
+    """
+    if cpuinfo_text is None:
+        try:
+            with open("/proc/cpuinfo", encoding="utf-8") as fh:
+                cpuinfo_text = fh.read()
+        except OSError:
+            return None
+    live = model_text is None
+    if model_text is None:
+        try:
+            with open("/sys/firmware/devicetree/base/model",
+                      encoding="utf-8") as fh:
+                model_text = fh.read().strip("\x00").strip()
+        except OSError:
+            model_text = ""
+
+    model_line = _parse_cpuinfo_kv(cpuinfo_text, "model")
+    revision = (_parse_cpuinfo_kv(cpuinfo_text, "revision") or "").lower()
+    model_name = model_text or model_line or ""
+    if "raspberry pi" not in model_name.lower():
+        return None
+
+    if revision in _PI_REVISIONS:
+        model, ram_mb = _PI_REVISIONS[revision]
+    else:
+        # Unknown revision: trust the model string, take the smallest
+        # known baseline for that family as the conservative RAM figure.
+        model = model_name.strip()
+        ram_mb = 512
+        for known, base in PI_BASELINES.items():
+            if known.lower() in model.lower():
+                ram_mb = base.ram_mb
+                break
+    return PiBoard(model=model, revision=revision, ram_mb=ram_mb,
+                   detected_live=live)
+
+
+def pi_baseline(board: PiBoard | str) -> EdgeBaseline:
+    """Return the :class:`EdgeBaseline` for a board or model label.
+
+    Raises ``ValueError`` naming the known models when the label is
+    unknown — guessing a baseline for unlisted hardware would silently
+    miscalibrate memory modes, cache tuning, and benchmarks.
+    """
+    label = board.model if isinstance(board, PiBoard) else board
+    for known, baseline in PI_BASELINES.items():
+        if known.lower() in label.lower():
+            return baseline
+    known_names = sorted(PI_BASELINES)
+    raise ValueError(
+        f"unknown Pi model {label!r}; known models: {known_names}")

@@ -115,3 +115,77 @@ def test_live_probe_runs_on_this_host():
     info = PlatformProbe().probe()
     assert info.arch  # non-empty on any host
     assert info.python_version >= (3, 10)
+
+
+# --- slice 177: Pi detection & baselines -----------------------------------
+
+from hugrgate.edge.platform import (
+    PI_BASELINES,
+    EdgeBaseline,
+    PiBoard,
+    detect_pi_board,
+    pi_baseline,
+)
+
+_PI4_CPUINFO = (
+    "processor\t: 0\n"
+    "model name\t: ARMv7 Processor rev 3 (v7l)\n"
+    "Model\t\t: Raspberry Pi 4 Model B Rev 1.4\n"
+    "Revision\t: c03114\n"
+    "Serial\t\t: 10000000abcdef12\n"
+)
+
+_PI5_MODEL = "Raspberry Pi 5 Model B Rev 1.0\x00"
+
+
+def test_detect_pi4_from_cpuinfo():
+    board = detect_pi_board(cpuinfo_text=_PI4_CPUINFO, model_text="")
+    assert board is not None
+    assert board.model == "Raspberry Pi 4 Model B"
+    assert board.ram_mb == 4096
+    assert board.revision == "c03114"
+    assert board.detected_live is False
+
+
+def test_detect_pi5_from_devicetree_model():
+    board = detect_pi_board(cpuinfo_text="processor: 0\n",
+                            model_text=_PI5_MODEL)
+    assert board is not None
+    assert "Raspberry Pi 5" in board.model
+
+
+def test_non_pi_host_returns_none():
+    cpuinfo = "processor\t: 0\nmodel name\t: Intel(R) Core(TM)\n"
+    assert detect_pi_board(cpuinfo_text=cpuinfo, model_text="") is None
+
+
+def test_unknown_revision_falls_back_to_family_ram():
+    cpuinfo = ("Model\t\t: Raspberry Pi 4 Model B Rev 9.9\n"
+               "Revision\t: deadbeef\n")
+    board = detect_pi_board(cpuinfo_text=cpuinfo, model_text="")
+    assert board is not None
+    assert board.ram_mb == 4096  # conservative: smallest Pi 4 family figure
+
+
+def test_pi_baseline_by_board_and_label():
+    board = PiBoard(model="Raspberry Pi 5", revision="d04170",
+                    ram_mb=8192, detected_live=False)
+    base = pi_baseline(board)
+    assert isinstance(base, EdgeBaseline)
+    assert base.cpu_count == 4 and base.ram_mb == 8192
+    assert pi_baseline("raspberry pi zero 2 w").ram_mb == 512
+    assert pi_baseline("Raspberry Pi 3 Model B+").recommended_cache_entries \
+        == 250
+
+
+def test_pi_baseline_unknown_label_raises_with_known_list():
+    with pytest.raises(ValueError, match="known models"):
+        pi_baseline("Raspberry Pi 400")
+
+
+def test_pi_baselines_are_conservative_and_jsonable():
+    import json
+    for base in PI_BASELINES.values():
+        assert base.recommended_cache_entries > 0
+        assert base.recommended_max_resident_models >= 1
+        json.dumps(base.to_dict())
