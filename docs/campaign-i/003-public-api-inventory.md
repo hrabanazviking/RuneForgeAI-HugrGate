@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 376 · **public names:** 2314
+**Modules:** 377 · **public names:** 2329
 
 ## API stability policy
 
@@ -3960,6 +3960,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
+| `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
@@ -3992,21 +3993,27 @@ that this document never drifts from the code.
 | `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
+| `detect_sqli` | function | `(text: 'str') -> 'bool'` |
 | `enforce_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
 | `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
+| `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
 | `register_safe_class` | function | `(cls: 'type') -> 'type'` |
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
+| `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
 | `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
+| `sanitize_filename` | function | `(text: 'str') -> 'str'` |
+| `sanitize_log` | function | `(text: 'str') -> 'str'` |
 | `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+| `shell_quote` | function | `(arg: 'str') -> 'str'` |
 | `sign_manifest` | function | `(manifest: 'PluginManifest', signer: 'ModelSigner') -> 'PluginManifest'` |
 | `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
 | `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
@@ -4045,6 +4052,19 @@ that this document never drifts from the code.
 | `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.injection_corpus`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
+| `Payload` | class | `(text: 'str', category: 'str', handling: 'str', note: 'str' = '') -> None` |
+| `detect_sqli` | function | `(text: 'str') -> 'bool'` |
+| `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
+| `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
+| `sanitize_filename` | function | `(text: 'str') -> 'str'` |
+| `sanitize_log` | function | `(text: 'str') -> 'str'` |
+| `shell_quote` | function | `(arg: 'str') -> 'str'` |
 
 ### `hugrgate.security.input_limits`
 

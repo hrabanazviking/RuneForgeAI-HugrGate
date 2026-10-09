@@ -1821,6 +1821,7 @@ flowchart TD
     security --> security_attack_surface
     security --> security_checksums
     security --> security_depscan
+    security --> security_injection_corpus
     security --> security_input_limits
     security --> security_model_signing
     security --> security_path_guards
@@ -3294,6 +3295,7 @@ flowchart TD
 | `security` | `security.attack_surface` | no |
 | `security` | `security.checksums` | no |
 | `security` | `security.depscan` | no |
+| `security` | `security.injection_corpus` | no |
 | `security` | `security.input_limits` | no |
 | `security` | `security.model_signing` | no |
 | `security` | `security.path_guards` | no |

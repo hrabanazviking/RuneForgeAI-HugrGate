@@ -78,6 +78,15 @@ from hugrgate.security.depscan import (
 from hugrgate.security.depscan import (
     Finding as DependencyFinding,
 )
+from hugrgate.security.injection_corpus import (
+    PAYLOADS,
+    detect_sqli,
+    neutralize,
+    run_corpus,
+    sanitize_filename,
+    sanitize_log,
+    shell_quote,
+)
 from hugrgate.security.input_limits import (
     InputLimits,
     check_batch,
@@ -134,6 +143,7 @@ from hugrgate.security.threat_model import (
 
 __all__ = [
     "ADVISORIES",
+    "PAYLOADS",
     "STRIDE",
     "Advisory",
     "Asset",
@@ -166,21 +176,27 @@ __all__ = [
     "check_state",
     "curated_surface",
     "default_threat_model",
+    "detect_sqli",
     "enforce_manifest",
     "enumerate_surface",
     "find_unlisted",
     "generate_sbom",
     "guarded",
     "is_within",
+    "neutralize",
     "register_safe_class",
     "restricted_loads",
+    "run_corpus",
     "run_sandboxed",
     "safe_join",
     "safe_read_text",
+    "sanitize_filename",
+    "sanitize_log",
     "sbom_from_installed",
     "scan_for_pickle",
     "scan_project",
     "scan_requirements",
+    "shell_quote",
     "sign_manifest",
     "verified_open",
     "verify_manifest",
