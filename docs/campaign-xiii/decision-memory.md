@@ -258,3 +258,16 @@ it into an opaque agent.
   with `chosen=None` when no candidate has enough labeled history.
   Memory advises; the caller decides what abstention means.
 - Tests: `tests/test_memory_assisted_routing.py` (9 tests).
+
+### Slice 322 — Memory-assisted calibration
+- `hugrgate/memory/assisted_calibration.py`: empirical recalibration
+  from labeled episodes — equal-width binning, PAVA isotonic
+  regression, piecewise-linear `CalibrationMap.correct()`; `brier_score`
+  and `expected_calibration_error` metrics; `assess_calibration()`
+  fits on the oldest 70% and validates on the newest 30%.
+- Statistical validation on controlled data (seeded, n=2000,
+  true rate = 0.3+0.4p, overconfident reporter): ECE 0.1497 -> 0.0541,
+  Brier 0.2693 -> 0.2395; learned map [0.327, 0.384, 0.446, 0.597,
+  0.724] vs truth [0.34, 0.42, 0.50, 0.58, 0.66]. Assumptions
+  documented in the module docstring.
+- Tests: `tests/test_memory_assisted_calibration.py` (8 tests).

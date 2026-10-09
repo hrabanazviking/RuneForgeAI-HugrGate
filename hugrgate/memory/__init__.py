@@ -24,6 +24,14 @@ from hugrgate.memory.access import (
     MemoryAccessPolicy,
     RolePermission,
 )
+from hugrgate.memory.assisted_calibration import (
+    CalibrationMap,
+    CalibrationValidation,
+    assess_calibration,
+    brier_score,
+    calibrate_from_memory,
+    expected_calibration_error,
+)
 from hugrgate.memory.assisted_routing import RoutingAdvice, advise_route
 from hugrgate.memory.backend_history import BackendHistory, backend_histories
 from hugrgate.memory.compaction import CompactionSummary, compact
@@ -101,6 +109,8 @@ __all__ = [
     "ROLE_PERMISSIONS",
     "BackendCounterfactual",
     "BackendHistory",
+    "CalibrationMap",
+    "CalibrationValidation",
     "CompactionSummary",
     "ContractHistory",
     "DecisionHistory",
@@ -131,11 +141,14 @@ __all__ = [
     "SimilarityHit",
     "ValueCounterfactual",
     "advise_route",
+    "assess_calibration",
     "backend_histories",
+    "brier_score",
     "by_backend",
     "by_backend_value",
     "by_model",
     "by_outcome_kind",
+    "calibrate_from_memory",
     "check_quota",
     "compact",
     "contract_histories",
@@ -153,6 +166,7 @@ __all__ = [
     "drop_unaccepted",
     "effective_count",
     "enforce_quotas",
+    "expected_calibration_error",
     "export_jsonl",
     "featurize_episode",
     "featurize_query",
