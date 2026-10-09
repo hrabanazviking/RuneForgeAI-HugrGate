@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:10:29.918877+00:00",
-  "module_count": 66,
+  "generated_utc": "2026-10-09T12:15:20.974687+00:00",
+  "module_count": 67,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -529,7 +529,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 78,
+      "loc": 82,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -761,6 +761,28 @@
         "describe"
       ]
     },
+    "hugrgate.contracts.fuzz": {
+      "docstring": "Contract fuzzing \u2014 seeded random contracts, invariant checking.\n\nGjallarbr\u00fa slice 049.\n\nHand-written tests prove the engine handles the cases we thought of.\nThe fuzzer hunts the ones we didn't: it builds random contracts from a\nseeded RNG, throws random values at them, and checks invariants that\nmust hold for *every* contract \u2014 dict round-trips, ``validate_value``\nsoundness on in-space values, canonical-hash stability, and a\nnon-empty ``describe()``.\n\nEverything is deterministic: the same seed always produces the same\ncontracts, the same values, and the same report, so a failure is a\nreproduction recipe, not a ghost.\n\n>>> from hugrgate.contracts.fuzz import fuzz\n>>> report = fuzz(seed=42, cases_per_kind=50)\n>>> report.failures\n[]",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "typing"
+      ],
+      "loc": 339,
+      "path": "hugrgate/contracts/fuzz.py",
+      "public_defs": [
+        "random_contract",
+        "random_valid_value",
+        "random_valid_distribution",
+        "random_invalid_value",
+        "FuzzReport",
+        "fuzz",
+        "passed",
+        "describe"
+      ]
+    },
     "hugrgate.contracts.hierarchy": {
       "docstring": "Hierarchical labels \u2014 label forests with ancestor semantics.\n\nGjallarbr\u00fa slice 029.\n\nFlat multilabel contracts treat ``\"siamese\"`` and ``\"animal\"`` as unrelated\nstrings. A hierarchical label contract organizes labels into a forest:\nselecting ``\"siamese\"`` *implies* ``\"cat\"``, ``\"mammal\"``, ``\"animal\"``.\nThis module provides:\n\n- :class:`LabelHierarchy`: an immutable label forest built from edges or a\n  nested mapping, with ancestor/descendant queries, depth, lowest common\n  ancestor, and ancestor closure;\n- :class:`HierarchicalLabelContract` (kind ``\"hierarchical-labels\"``): a\n  v2 contract whose values are label sets; validation requires every\n  label to be known, and :meth:`close_value` expands a set with all\n  implied ancestors;\n- hierarchical precision/recall over ancestor-closed sets, so partial\n  credit flows up the tree instead of all-or-nothing flat matching.\n\nThe forest is a true forest: every node has at most one parent, and\ncycles are rejected at construction.",
       "imports": [
@@ -819,6 +841,7 @@
         "__future__",
         "dataclasses",
         "hugrgate",
+        "time",
         "typing"
       ],
       "loc": 346,
@@ -1548,6 +1571,7 @@
     "test_contracts_046.py",
     "test_contracts_047.py",
     "test_contracts_048.py",
+    "test_contracts_049.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1558,5 +1582,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 13251
+  "total_loc": 13594
 }

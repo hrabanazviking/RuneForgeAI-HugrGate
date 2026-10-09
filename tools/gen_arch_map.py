@@ -52,6 +52,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.contracts.templates",
         "hugrgate.contracts.migration",
         "hugrgate.contracts.lint",
+        "hugrgate.contracts.fuzz",
     ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",

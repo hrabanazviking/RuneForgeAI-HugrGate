@@ -35,6 +35,7 @@ import hugrgate.contracts.composition
 import hugrgate.contracts.templates
 import hugrgate.contracts.migration
 import hugrgate.contracts.lint
+import hugrgate.contracts.fuzz
 
 from hugrgate.contracts.schema import (
     SCHEMA_VERSION,
@@ -77,4 +78,5 @@ __all__ = [
     "templates",
     "migration",
     "lint",
+    "fuzz",
 ]

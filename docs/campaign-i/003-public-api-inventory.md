@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 66 · **public names:** 303
+**Modules:** 67 · **public names:** 311
 
 ## API stability policy
 
@@ -259,6 +259,7 @@ that this document never drifts from the code.
 | `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/hatch/wor` |
 | `migration` | constant | `<module 'hugrgate.contracts.migration' from '/home/hatch/wor` |
 | `lint` | constant | `<module 'hugrgate.contracts.lint' from '/home/hatch/workspac` |
+| `fuzz` | constant | `<module 'hugrgate.contracts.fuzz' from '/home/hatch/workspac` |
 
 ### `hugrgate.contracts.composite`
 
@@ -340,6 +341,18 @@ that this document never drifts from the code.
 | `FEATURE_DTYPES` | constant | `('float', 'int', 'bool', 'category')` |
 | `FeatureSpec` | class | `(name: 'str', dtype: 'str' = 'float', required: 'bool' = True, minimum: 'Optional[float]' = None, maximum: 'Optional[float]' = None, categories: 'Tuple[str, ...]' = (), default: 'Any' = None) -> None` |
 | `FeatureContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, features: 'List[Dict[str, Any]]' = <factory>, allow_extra: 'bool' = True) -> None` |
+
+### `hugrgate.contracts.fuzz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FUZZ_KINDS` | constant | `('cost-sensitive', 'distribution', 'multilabel-cardinality',` |
+| `FuzzReport` | class | `(seed: 'int', cases: 'int', invariants: 'int', failures: 'List[str]' = <factory>, warnings: 'List[str]' = <factory>) -> None` |
+| `fuzz` | function | `(seed: 'int', cases_per_kind: 'int' = 25, values_per_case: 'int' = 5) -> 'FuzzReport'` |
+| `random_contract` | function | `(rng: 'random.Random', kind: 'Optional[str]' = None) -> 'DecisionContract'` |
+| `random_invalid_value` | function | `(rng: 'random.Random', contract: 'DecisionContract') -> 'Any'` |
+| `random_valid_distribution` | function | `(rng: 'random.Random', contract: 'DistributionContract') -> 'Dict[str, float]'` |
+| `random_valid_value` | function | `(rng: 'random.Random', contract: 'DecisionContract') -> 'Any'` |
 
 ### `hugrgate.contracts.hierarchy`
 

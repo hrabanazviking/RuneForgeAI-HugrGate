@@ -44,6 +44,7 @@ flowchart TD
         contracts_templates[contracts.templates]
         contracts_migration[contracts.migration]
         contracts_lint[contracts.lint]
+        contracts_fuzz[contracts.fuzz]
     end
     subgraph runtime[runtime]
         core[core]
@@ -173,6 +174,7 @@ flowchart TD
     contracts --> contracts_distributions
     contracts --> contracts_explanations
     contracts --> contracts_features
+    contracts --> contracts_fuzz
     contracts --> contracts_hierarchy
     contracts --> contracts_inheritance
     contracts --> contracts_lint
@@ -217,6 +219,14 @@ flowchart TD
     contracts_explanations --> result
     contracts_features --> contracts_schema
     contracts_features --> errors
+    contracts_fuzz --> contracts_cost
+    contracts_fuzz --> contracts_distributions
+    contracts_fuzz --> contracts_multilabel
+    contracts_fuzz --> contracts_nested
+    contracts_fuzz --> contracts_ordinal
+    contracts_fuzz --> contracts_schema
+    contracts_fuzz --> contracts_uncertainty
+    contracts_fuzz --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
     contracts_inheritance --> contracts_composite
@@ -342,7 +352,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -433,6 +443,7 @@ flowchart TD
 | `contracts` | `contracts.distributions` | no |
 | `contracts` | `contracts.explanations` | no |
 | `contracts` | `contracts.features` | no |
+| `contracts` | `contracts.fuzz` | no |
 | `contracts` | `contracts.hierarchy` | no |
 | `contracts` | `contracts.inheritance` | no |
 | `contracts` | `contracts.lint` | no |
@@ -477,6 +488,14 @@ flowchart TD
 | `contracts.explanations` | `result` | no |
 | `contracts.features` | `contracts.schema` | no |
 | `contracts.features` | `errors` | no |
+| `contracts.fuzz` | `contracts.cost` | no |
+| `contracts.fuzz` | `contracts.distributions` | no |
+| `contracts.fuzz` | `contracts.multilabel` | no |
+| `contracts.fuzz` | `contracts.nested` | no |
+| `contracts.fuzz` | `contracts.ordinal` | no |
+| `contracts.fuzz` | `contracts.schema` | no |
+| `contracts.fuzz` | `contracts.uncertainty` | no |
+| `contracts.fuzz` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
 | `contracts.inheritance` | `contracts.composite` | no |
