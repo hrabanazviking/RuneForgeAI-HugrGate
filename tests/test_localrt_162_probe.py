@@ -20,7 +20,7 @@ from hugrgate.runtimes import (
 from hugrgate.runtimes.probe import (
     PROBE_NAMES,
     CapabilityReport,
-    probe_runtime,
+    probe_capabilities,
 )
 
 
@@ -31,7 +31,7 @@ def _ref() -> ModelRef:
 # -- happy path ----------------------------------------------------------------------
 
 def test_probe_full_pass_on_fake_runtime():
-    report = probe_runtime(FakeRuntime(), model=_ref())
+    report = probe_capabilities(FakeRuntime(), model=_ref())
     assert report.ok
     assert report.failed == 0
     assert report.skipped == 0
@@ -40,7 +40,7 @@ def test_probe_full_pass_on_fake_runtime():
 
 
 def test_probe_without_model_skips_nothing_but_load_cycle():
-    report = probe_runtime(FakeRuntime())
+    report = probe_capabilities(FakeRuntime())
     assert report.ok
     load = report.by_name("load_cycle")
     assert load is not None and load.passed
@@ -48,21 +48,21 @@ def test_probe_without_model_skips_nothing_but_load_cycle():
 
 
 def test_probe_subset_selection():
-    report = probe_runtime(FakeRuntime(), probes=("generate",))
+    report = probe_capabilities(FakeRuntime(), probes=("generate",))
     assert [r.name for r in report.results] == ["generate"]
     assert report.ok
 
 
 def test_probe_unknown_name_raises():
     with pytest.raises(HugrGateError, match="unknown probes"):
-        probe_runtime(FakeRuntime(), probes=("teleport",))  # type: ignore[arg-type]
+        probe_capabilities(FakeRuntime(), probes=("teleport",))  # type: ignore[arg-type]
 
 
 # -- skips ------------------------------------------------------------------------------
 
 def test_unadvertised_capabilities_are_skipped_not_failed():
     rt = FakeRuntime(supports=frozenset({CAP_GENERATE}))
-    report = probe_runtime(rt)
+    report = probe_capabilities(rt)
     assert report.failed == 0
     assert report.ok  # skips don't fail the report
     for name in ("embed", "classify", "tokenize"):
@@ -84,7 +84,7 @@ class BrokenRuntime(FakeRuntime):
 
 
 def test_failures_recorded_not_raised():
-    report = probe_runtime(BrokenRuntime())
+    report = probe_capabilities(BrokenRuntime())
     assert not report.ok
     assert report.failed == 1
     gen = report.by_name("generate")
@@ -101,7 +101,7 @@ def test_load_cycle_failure_recorded():
         def load(self, model: ModelRef) -> None:
             raise BackendError("disk is lava")
 
-    report = probe_runtime(CantLoad(), model=_ref())
+    report = probe_capabilities(CantLoad(), model=_ref())
     load = report.by_name("load_cycle")
     assert load is not None and not load.passed
     assert "disk is lava" in load.detail
@@ -111,7 +111,7 @@ def test_load_cycle_failure_recorded():
 # -- report shape ------------------------------------------------------------------------------
 
 def test_summary_and_to_dict():
-    report = probe_runtime(FakeRuntime(), model=_ref())
+    report = probe_capabilities(FakeRuntime(), model=_ref())
     text = report.summary()
     assert "fake" in text and "passed" in text
     assert "[passed] generate" in text

@@ -20,6 +20,30 @@ flowchart TD
         validation[validation]
         serde[serde]
     end
+    subgraph local-runtimes[local-runtimes]
+        runtimes[runtimes]
+        runtimes_bench_matrix[runtimes.bench_matrix]
+        runtimes_conformance[runtimes.conformance]
+        runtimes_eviction[runtimes.eviction]
+        runtimes_gguf[runtimes.gguf]
+        runtimes_grammar[runtimes.grammar]
+        runtimes_health_probes[runtimes.health_probes]
+        runtimes_jsonschema[runtimes.jsonschema]
+        runtimes_llama_cpp[runtimes.llama_cpp]
+        runtimes_metadata[runtimes.metadata]
+        runtimes_mlx[runtimes.mlx]
+        runtimes_ollama[runtimes.ollama]
+        runtimes_onnx[runtimes.onnx]
+        runtimes_openvino[runtimes.openvino]
+        runtimes_packs[runtimes.packs]
+        runtimes_probe[runtimes.probe]
+        runtimes_residency[runtimes.residency]
+        runtimes_structured[runtimes.structured]
+        runtimes_tensorrt[runtimes.tensorrt]
+        runtimes_transformers_rt[runtimes.transformers_rt]
+        runtimes_vllm[runtimes.vllm]
+        runtimes_warmup[runtimes.warmup]
+    end
     subgraph runtime[runtime]
         core[core]
         abstain[abstain]
@@ -95,6 +119,8 @@ flowchart TD
     backends_llm --> backend
     backends_llm --> errors
     backends_llm --> result
+    backends_llm --> runtimes
+    backends_llm --> runtimes_llama_cpp
     backends_llm --> spec
     backends_logreg --> backend
     backends_logreg --> errors
@@ -205,6 +231,62 @@ flowchart TD
     provenance --> result
     provenance --> spec
     result --> errors
+    runtimes --> errors
+    runtimes_bench_matrix --> errors
+    runtimes_bench_matrix --> runtimes
+    runtimes_bench_matrix --> runtimes_conformance
+    runtimes_conformance --> errors
+    runtimes_conformance --> runtimes
+    runtimes_conformance --> runtimes_llama_cpp
+    runtimes_conformance --> runtimes_mlx
+    runtimes_conformance --> runtimes_ollama
+    runtimes_conformance --> runtimes_onnx
+    runtimes_conformance --> runtimes_openvino
+    runtimes_conformance --> runtimes_tensorrt
+    runtimes_conformance --> runtimes_transformers_rt
+    runtimes_conformance --> runtimes_vllm
+    runtimes_eviction --> errors
+    runtimes_eviction --> runtimes_residency
+    runtimes_gguf --> errors
+    runtimes_grammar --> errors
+    runtimes_grammar --> runtimes
+    runtimes_health_probes --> errors
+    runtimes_health_probes --> runtimes
+    runtimes_jsonschema --> errors
+    runtimes_jsonschema --> runtimes
+    runtimes_jsonschema --> runtimes_grammar
+    runtimes_jsonschema --> runtimes_structured
+    runtimes_llama_cpp --> errors
+    runtimes_llama_cpp --> runtimes
+    runtimes_metadata --> runtimes
+    runtimes_metadata -.-> runtimes_gguf
+    runtimes_mlx --> errors
+    runtimes_mlx --> runtimes
+    runtimes_ollama --> errors
+    runtimes_ollama --> runtimes
+    runtimes_onnx --> errors
+    runtimes_onnx --> runtimes
+    runtimes_openvino --> errors
+    runtimes_openvino --> runtimes
+    runtimes_openvino --> runtimes_onnx
+    runtimes_packs --> errors
+    runtimes_packs --> runtimes
+    runtimes_packs --> runtimes_transformers_rt
+    runtimes_probe --> errors
+    runtimes_probe --> runtimes
+    runtimes_residency --> runtimes
+    runtimes_structured --> errors
+    runtimes_structured --> runtimes
+    runtimes_tensorrt --> errors
+    runtimes_tensorrt --> runtimes
+    runtimes_tensorrt --> runtimes_onnx
+    runtimes_transformers_rt --> errors
+    runtimes_transformers_rt --> runtimes
+    runtimes_vllm --> errors
+    runtimes_vllm --> runtimes
+    runtimes_warmup --> backend
+    runtimes_warmup --> errors
+    runtimes_warmup --> runtimes
     serde --> errors
     serde --> policy
     serde --> result
@@ -237,6 +319,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
+| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -273,6 +356,8 @@ flowchart TD
 | `backends.llm` | `backend` | no |
 | `backends.llm` | `errors` | no |
 | `backends.llm` | `result` | no |
+| `backends.llm` | `runtimes` | no |
+| `backends.llm` | `runtimes.llama_cpp` | no |
 | `backends.llm` | `spec` | no |
 | `backends.logreg` | `backend` | no |
 | `backends.logreg` | `errors` | no |
@@ -383,6 +468,62 @@ flowchart TD
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
+| `runtimes` | `errors` | no |
+| `runtimes.bench_matrix` | `errors` | no |
+| `runtimes.bench_matrix` | `runtimes` | no |
+| `runtimes.bench_matrix` | `runtimes.conformance` | no |
+| `runtimes.conformance` | `errors` | no |
+| `runtimes.conformance` | `runtimes` | no |
+| `runtimes.conformance` | `runtimes.llama_cpp` | no |
+| `runtimes.conformance` | `runtimes.mlx` | no |
+| `runtimes.conformance` | `runtimes.ollama` | no |
+| `runtimes.conformance` | `runtimes.onnx` | no |
+| `runtimes.conformance` | `runtimes.openvino` | no |
+| `runtimes.conformance` | `runtimes.tensorrt` | no |
+| `runtimes.conformance` | `runtimes.transformers_rt` | no |
+| `runtimes.conformance` | `runtimes.vllm` | no |
+| `runtimes.eviction` | `errors` | no |
+| `runtimes.eviction` | `runtimes.residency` | no |
+| `runtimes.gguf` | `errors` | no |
+| `runtimes.grammar` | `errors` | no |
+| `runtimes.grammar` | `runtimes` | no |
+| `runtimes.health_probes` | `errors` | no |
+| `runtimes.health_probes` | `runtimes` | no |
+| `runtimes.jsonschema` | `errors` | no |
+| `runtimes.jsonschema` | `runtimes` | no |
+| `runtimes.jsonschema` | `runtimes.grammar` | no |
+| `runtimes.jsonschema` | `runtimes.structured` | no |
+| `runtimes.llama_cpp` | `errors` | no |
+| `runtimes.llama_cpp` | `runtimes` | no |
+| `runtimes.metadata` | `runtimes` | no |
+| `runtimes.metadata` | `runtimes.gguf` | yes |
+| `runtimes.mlx` | `errors` | no |
+| `runtimes.mlx` | `runtimes` | no |
+| `runtimes.ollama` | `errors` | no |
+| `runtimes.ollama` | `runtimes` | no |
+| `runtimes.onnx` | `errors` | no |
+| `runtimes.onnx` | `runtimes` | no |
+| `runtimes.openvino` | `errors` | no |
+| `runtimes.openvino` | `runtimes` | no |
+| `runtimes.openvino` | `runtimes.onnx` | no |
+| `runtimes.packs` | `errors` | no |
+| `runtimes.packs` | `runtimes` | no |
+| `runtimes.packs` | `runtimes.transformers_rt` | no |
+| `runtimes.probe` | `errors` | no |
+| `runtimes.probe` | `runtimes` | no |
+| `runtimes.residency` | `runtimes` | no |
+| `runtimes.structured` | `errors` | no |
+| `runtimes.structured` | `runtimes` | no |
+| `runtimes.tensorrt` | `errors` | no |
+| `runtimes.tensorrt` | `runtimes` | no |
+| `runtimes.tensorrt` | `runtimes.onnx` | no |
+| `runtimes.transformers_rt` | `errors` | no |
+| `runtimes.transformers_rt` | `runtimes` | no |
+| `runtimes.vllm` | `errors` | no |
+| `runtimes.vllm` | `runtimes` | no |
+| `runtimes.warmup` | `backend` | no |
+| `runtimes.warmup` | `errors` | no |
+| `runtimes.warmup` | `runtimes` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |

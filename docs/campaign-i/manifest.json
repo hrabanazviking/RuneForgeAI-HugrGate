@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-10-09T11:41:37.417406+00:00",
-  "module_count": 44,
+  "generated_utc": "2026-10-09T13:34:39.613278+00:00",
+  "module_count": 66,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
       "imports": [
         "hugrgate"
       ],
-      "loc": 25,
+      "loc": 45,
       "path": "hugrgate/__init__.py",
       "public_defs": []
     },
@@ -31,11 +31,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
         "threading",
         "typing"
       ],
-      "loc": 145,
+      "loc": 151,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -80,11 +81,11 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hashlib",
         "hugrgate",
         "numpy",
-        "re",
-        "typing"
+        "re"
       ],
       "loc": 260,
       "path": "hugrgate/backends/embedding.py",
@@ -125,17 +126,14 @@
       ]
     },
     "hugrgate.backends.llm": {
-      "docstring": "Local LLM backend \u2014 constrained decoding. Slice 35.\n\n:class:`LLMBackend` runs an open-weight local model through a small engine\ninterface and applies **constrained decoding**: the engine may only emit\nspec-valid values (categorical/ordinal \u2192 option tokens, binary \u2192 yes/no).\nWhatever the engine returns is re-validated against the spec \u2014 an\nout-of-spec emission is a :class:`BackendError`, never a result.\n\nThe ``llama_cpp`` dependency is optional and imported lazily; without an\nengine, evaluation raises :class:`BackendUnavailable`. Tests inject a mock\nengine \u2014 no model download required.",
+      "docstring": "Local LLM backend \u2014 constrained decoding. Slice 35; slice 152 rewire.\n\n:class:`LLMBackend` runs an open-weight local model through a small engine\ninterface and applies **constrained decoding**: the engine may only emit\nspec-valid values (categorical/ordinal \u2192 option tokens, binary \u2192 yes/no).\nWhatever the engine returns is re-validated against the spec \u2014 an\nout-of-spec emission is a :class:`BackendError`, never a result.\n\n:class:`LlamaCppEngine` is now a thin legacy-compat subclass of the v2\n:mod:`hugrgate.runtimes.llama_cpp` runtime: same constructor signature\nand :class:`LLMChoice` return type as slice 35, but with lazy model\nloading, GBNF grammar passthrough, timeouts, and lifecycle management\nunderneath. The ``llama_cpp`` dependency is optional and imported\nlazily; without an engine, evaluation raises :class:`BackendUnavailable`.\nTests inject a mock engine \u2014 no model download required.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
-        "hugrgate",
-        "llama_cpp",
-        "math",
-        "time",
-        "typing"
+        "hugrgate"
       ],
-      "loc": 247,
+      "loc": 237,
       "path": "hugrgate/backends/llm.py",
       "public_defs": [
         "LLMChoice",
@@ -143,7 +141,6 @@
         "LlamaCppEngine",
         "LLMBackend",
         "generate",
-        "available",
         "generate",
         "capabilities",
         "supports",
@@ -157,6 +154,7 @@
       "docstring": "Logistic regression backend. Slice 22.\n\nTrains on ``(state, label)`` pairs, emits ``predict_proba`` distributions,\nand round-trips through pickle + :class:`ModelManifest`.  This module also\ndefines :class:`SklearnClassifierBackend`, the shared contract base reused\nby the forest (slice 23) and boosting (slice 24) backends.",
       "imports": [
         "__future__",
+        "collections",
         "datetime",
         "hugrgate",
         "numpy",
@@ -165,7 +163,7 @@
         "time",
         "typing"
       ],
-      "loc": 303,
+      "loc": 304,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -189,9 +187,9 @@
       "docstring": "NLI backend \u2014 statement entailment as a binary decision. Slice 34.\n\n:class:`NLIBackend` answers one question: *is the spec's statement supported\nby the state?* A natural-language-inference model scores\n``P(entailment | premise, statement)`` and that becomes the probability of\n``\"true\"``. Constrained to ``binary`` specs only.\n\nThe ``transformers`` dependency is optional and imported lazily: without it\n(or without a model/engine), evaluation raises :class:`BackendUnavailable`\ninstead of failing at import time. Tests inject a plain callable\n``nli_fn(premise, statement) -> float`` \u2014 no downloads required.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "transformers",
-        "typing"
+        "transformers"
       ],
       "loc": 153,
       "path": "hugrgate/backends/nli.py",
@@ -209,13 +207,14 @@
       "docstring": "Rule backend \u2014 predicates, decision tables, confidence distributions.\n\nSlices 11-13: a deterministic backend that evaluates predicate rules\nagainst the decision state.\n\nSlice 11 \u2014 predicates:\n    {\"if\": {\"field\": \"temperature\", \"gt\": 90},\n     \"then\": \"critical\", \"confidence\": 0.99}\nOperators: eq, ne, gt, gte, lt, lte, in, contains, exists.\nFirst-match wins.\n\nSlice 12 \u2014 decision tables:\nRows of conditions -> outcome, explicit priority ordering, a default\nrule, and YAML-loadable rule sets::\n\n    rules:\n      - name: critical-malware\n        priority: 100\n        if:\n          all:\n            - {field: severity, gte: 8}\n            - {field: category, eq: malware}\n        then: escalate\n        confidence: 0.97\n      - {default: log, confidence: 0.5}\n\nSlice 13 \u2014 confidence & distribution:\nThe matched rule's confidence becomes the winner's probability; the\nremainder (1 - confidence) is split uniformly across the other options\nof the spec's value space. supports(): categorical, binary, ordinal.\n\nMissing-field semantics (documented, pinned by tests):\n  - eq / in / contains / gt / gte / lt / lte on a missing field -> False\n  - ne on a missing field -> True (\"not equal\" includes absent)\n  - exists -> True iff the field is present (or per explicit flag)\nComparison type errors (e.g. gt between str and int) never match.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing",
         "yaml"
       ],
-      "loc": 380,
+      "loc": 381,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -240,6 +239,7 @@
       "docstring": "Benchmark harness \u2014 datasets \u2192 backends \u2192 metrics. Slice 45.\n\nRuns a labeled (or unlabeled) dataset through one or more backends and\nreports:\n\n- ``accuracy`` \u2014 exact-match rate (categorical / ordinal / binary;\n  set-equality for multilabel; skipped for numeric)\n- ``brier_score`` \u2014 mean squared error of the full distribution\n  against the one-hot truth\n- ``ece`` \u2014 expected calibration error over 10 confidence bins\n- ``latency_p50_ms`` / ``latency_p99_ms`` \u2014 from ``result.latency_ms``\n- ``throughput_per_s`` \u2014 decisions per wall-clock second\n- ``abstention_rate`` \u2014 fraction of items the gate abstained on\n\nThe report is a plain JSON-serializable dict (see :func:`run_benchmark`),\nrenderable to markdown by :mod:`hugrgate.bench_report`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hashlib",
         "hugrgate",
@@ -248,7 +248,7 @@
         "time",
         "typing"
       ],
-      "loc": 344,
+      "loc": 345,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -266,9 +266,10 @@
       "docstring": "Benchmark report \u2014 markdown rendering of benchmark JSON. Slice 47.\n\nProduces a human-readable report with:\n\n- summary + per-backend metric tables,\n- ASCII reliability diagrams (accuracy vs confidence per bin),\n- a hardware / methodology block for reproducibility.",
       "imports": [
         "__future__",
+        "collections",
         "typing"
       ],
-      "loc": 145,
+      "loc": 146,
       "path": "hugrgate/bench_report.py",
       "public_defs": [
         "ascii_reliability_diagram",
@@ -290,7 +291,7 @@
         "time",
         "typing"
       ],
-      "loc": 180,
+      "loc": 181,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -318,11 +319,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 120,
+      "loc": 121,
       "path": "hugrgate/calibration/_base.py",
       "public_defs": [
         "Calibrator",
@@ -343,11 +345,12 @@
       "docstring": "Isotonic regression via the Pool Adjacent Violators (PAV) algorithm.\n\nSlice 27.  Fits a non-decreasing stepwise map from raw scores to empirical\nevent rates.  The PAV implementation below is written independently from the\ntextbook description: sort by score, greedily merge adjacent blocks whose\nmeans violate monotonicity, and predict with the resulting step function.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 111,
+      "loc": 112,
       "path": "hugrgate/calibration/isotonic.py",
       "public_defs": [
         "IsotonicCalibrator",
@@ -361,9 +364,9 @@
       "docstring": "Calibration metrics. Slice 28.\n\nBinary metrics \u2014 Brier score, log loss, expected/maximum calibration error\n(ECE/MCE) \u2014 plus reliability-diagram bin data and a multiclass ECE helper\n(max-probability confidence vs. correctness) for whole-distribution checks.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 149,
       "path": "hugrgate/calibration/metrics.py",
@@ -380,11 +383,12 @@
       "docstring": "Platt scaling. Slice 26.\n\nFits a sigmoid ``p = 1 / (1 + exp(A\u00b7s + B))`` to validation scores by\nminimizing the negative log-likelihood with Platt's target smoothing.\nThe Newton optimization below is an independent implementation written\nfrom the textbook formulation (gradient/Hessian of the logistic loss);\nno code is copied from scikit-learn or any other library.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/calibration/platt.py",
       "public_defs": [
         "PlattCalibrator",
@@ -398,6 +402,7 @@
       "docstring": "Calibration profiles. Slice 29.\n\nA :class:`CalibrationProfile` is a named, versioned record of a fitted\ncalibration: which backend + model it applies to, which calibrator with\nwhich per-class parameters, the metrics on the calibration set, and a hash\nof that dataset.  Profiles are stored *separately* from model weights, so\nrecalibration never touches the underlying model.\n\n:class:`CalibratedBackend` wraps any trained classifier backend, applies the\nprofile's per-class (one-vs-rest) calibrators to the raw distribution,\nrenormalizes, and stamps ``result.calibration_profile``.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -407,7 +412,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 263,
+      "loc": 264,
       "path": "hugrgate/calibration/profiles.py",
       "public_defs": [
         "hash_dataset",
@@ -436,14 +441,15 @@
       ]
     },
     "hugrgate.calibration.temperature": {
-      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = \u03c3(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
+      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = sigmoid(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 136,
+      "loc": 137,
       "path": "hugrgate/calibration/temperature.py",
       "public_defs": [
         "TemperatureCalibrator",
@@ -458,12 +464,13 @@
       "docstring": "Circuit breaker \u2014 per-backend failure containment. Slice 18.\n\nStates:\n\n- **closed**: traffic flows; consecutive failures are counted.\n- **open**: calls are rejected fast (``allow()`` -> False) until\n  ``reset_timeout_s`` has elapsed.\n- **half-open**: after the timeout, a limited number of probe calls\n  (``half_open_max_probes``) are let through. A probe success closes the\n  circuit; a probe failure re-opens it and restarts the timeout.\n\n:class:`CircuitRegistry` owns one breaker per backend name and creates\nthem on demand. :class:`~hugrgate.fallback.FallbackChain` accepts a\nregistry: open circuits are skipped (recorded in the fallback trace)\nand every attempt's outcome is reported back to its breaker.\n\nThe clock is injectable (``clock`` parameter) so tests can drive time\ndeterministically. All methods are thread-safe.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "threading",
         "time",
         "typing"
       ],
-      "loc": 173,
+      "loc": 174,
       "path": "hugrgate/circuit.py",
       "public_defs": [
         "CircuitBreaker",
@@ -491,7 +498,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 276,
+      "loc": 277,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -512,11 +519,12 @@
       "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.",
       "imports": [
         "__future__",
+        "collections",
         "httpx",
         "hugrgate",
         "typing"
       ],
-      "loc": 219,
+      "loc": 220,
       "path": "hugrgate/client.py",
       "public_defs": [
         "HugrGateClient",
@@ -531,11 +539,12 @@
       "imports": [
         "__future__",
         "asyncio",
+        "collections",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 158,
+      "loc": 159,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -552,6 +561,7 @@
         "__future__",
         "argparse",
         "asyncio",
+        "collections",
         "contextlib",
         "dataclasses",
         "fastapi",
@@ -563,7 +573,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 492,
+      "loc": 494,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -618,7 +628,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 142,
+      "loc": 154,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -631,6 +641,7 @@
         "PrivacyViolation",
         "QueueFull",
         "Abstention",
+        "GGUFError",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -641,10 +652,11 @@
       "docstring": "Fallback engine \u2014 ordered failover across backends. Slice 14.\n\n``FallbackChain`` is itself a :class:`~hugrgate.backend.Backend`, so it\ndrops straight into :class:`~hugrgate.core.HugrGate` and the provenance\ntrail. Backends are tried in order; on :class:`BackendError` (which\nincludes :class:`TimeoutError` and :class:`BackendUnavailable`) the next\nbackend is tried. When every backend has failed, the policy's\n``fallback_behavior`` decides:\n\n- ``\"abstain\"``   -> raise :class:`Abstention` (reason\n  ``all_backends_failed``)\n- ``\"safe_default\"`` -> return a ``DecisionResult`` for the configured\n  safe value (must lie inside the spec's value space)\n- ``\"escalate\"``  -> raise :class:`Abstention` with reason\n  ``escalation_required`` (a human must take the decision)\n\n``Abstention`` raised by an inner backend is *not* swallowed: abstaining\nis a decision, not a failure, and it propagates to the caller.\n\nEvery attempt is recorded in ``result.metadata[\"fallback_trace\"]`` and\n``result.fallback_used`` is set when any failover happened, so the\nprovenance record carries the full chain trace.\n\nA :class:`~hugrgate.circuit.CircuitRegistry` may be supplied; backends\nwhose circuit is open are skipped (recorded in the trace) and outcomes\nare reported back to their breakers.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
-      "loc": 170,
+      "loc": 171,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -659,13 +671,14 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "enum",
         "hugrgate",
         "math",
         "numpy",
         "typing"
       ],
-      "loc": 290,
+      "loc": 291,
       "path": "hugrgate/features.py",
       "public_defs": [
         "MissingValuePolicy",
@@ -699,10 +712,9 @@
         "__future__",
         "collections",
         "dataclasses",
-        "threading",
-        "typing"
+        "threading"
       ],
-      "loc": 141,
+      "loc": 140,
       "path": "hugrgate/health.py",
       "public_defs": [
         "BackendStats",
@@ -719,12 +731,13 @@
       "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 317,
+      "loc": 321,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -791,8 +804,8 @@
       "docstring": "Backend capability negotiation. Slice 36.\n\n:func:`select_backend` turns a registry into an ordered candidate list for\none decision: filter by capability, privacy, latency, cost and health, then\nrank the survivors by historical quality (accuracy + calibration) with\nlatency and name as deterministic tie-breakers.\n\nIt returns candidates \u2014 it never raises \u2014 so routers (ladder, fallback)\ncan decide what \"no candidate\" means for their policy.",
       "imports": [
         "__future__",
-        "hugrgate",
-        "typing"
+        "collections",
+        "hugrgate"
       ],
       "loc": 96,
       "path": "hugrgate/negotiate.py",
@@ -822,11 +835,12 @@
       "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/privacy.py",
       "public_defs": [
         "PrivacyGuard",
@@ -843,6 +857,7 @@
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
         "__future__",
+        "collections",
         "copy",
         "dataclasses",
         "hashlib",
@@ -852,7 +867,7 @@
         "time",
         "typing"
       ],
-      "loc": 217,
+      "loc": 218,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -883,14 +898,688 @@
         "to_dict"
       ]
     },
+    "hugrgate.runtimes.__init__": {
+      "docstring": "Local Model Fabric \u2014 runtime interface v2. Slice 151.\n\nCampaign VII unifies every local inference engine (llama.cpp, Ollama,\nONNX Runtime, Transformers, vLLM, MLX, OpenVINO, TensorRT) behind one\ncontract: :class:`LocalRuntime`. The older :class:`LLMEngine` interface in\n``hugrgate.backends.llm`` was generate-only with a legacy signature;\nthis interface adds embedding, classification, model lifecycle,\nstructured/grammar-constrained generation, health, and metadata.\n\nDesign rules, carried over from the backend layer:\n\n- Optional third-party engines are imported **lazily**; a module must\n  import cleanly when its engine is absent. :meth:`LocalRuntime.available`\n  reports whether the engine *could* run here, and every operation raises\n  :class:`BackendUnavailable` (never ``ImportError``) when it cannot.\n- Capabilities are advertised, never guessed: :meth:`LocalRuntime.info`\n  lists the capability strings the runtime truly implements, and\n  unsupported operations raise :class:`BackendError` with a clear message.\n- Local runtimes are never remote: :meth:`LocalRuntime.privacy` always\n  reports ``remote=False``.\n\n:class:`FakeRuntime` is a deterministic in-process runtime used by the\nconformance suite (slice 173), the benchmark matrix (slice 174), and\ndocumentation examples. It is a real implementation of the contract \u2014\ndeterministic, dependency-free, honest about being synthetic \u2014 not a stub.",
+      "imports": [
+        "__future__",
+        "abc",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "math",
+        "pathlib",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 540,
+      "path": "hugrgate/runtimes/__init__.py",
+      "public_defs": [
+        "format_from_path",
+        "ModelRef",
+        "GenerationOptions",
+        "GenerationResult",
+        "EmbeddingResult",
+        "ClassificationResult",
+        "RuntimeInfo",
+        "LocalRuntime",
+        "RuntimeRegistry",
+        "FakeRuntime",
+        "display",
+        "supports",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "tokenize",
+        "warmup",
+        "health",
+        "privacy",
+        "close",
+        "register",
+        "unregister",
+        "get",
+        "get_or_raise",
+        "list",
+        "available_runtimes",
+        "supporting",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "tokenize",
+        "health"
+      ]
+    },
+    "hugrgate.runtimes.bench_matrix": {
+      "docstring": "Local runtime benchmark matrix. Slice 174.\n\nMeasures per-operation latency (generate/embed/classify) for every\nruntime in a registry and writes a JSON artifact to\n``benchmarks/localrt-matrix.json``. Numbers are *measured*, never\ninvented:\n\n- :func:`bench_runtime` runs ``warmup_rounds`` untimed iterations\n  then ``rounds`` timed iterations per advertised capability;\n- unavailable adapters are recorded as ``ok: false`` results with\n  the honest error \u2014 they are not silently dropped;\n- the artifact carries full provenance: config, timestamp,\n  platform, and an explicit note about what was actually measured.\n\nIn CI (no engines installed) the matrix is a **synthetic baseline**:\nonly :class:`FakeRuntime` produces timings, and the artifact says\nso. Re-run :func:`main` on a host with engines installed to produce\na real matrix \u2014 the schema is identical.\n\nTests for this module write artifacts to ``tmp_path`` only and must\nnever rewrite ``benchmarks/localrt-matrix.json``; regenerate the\nreal artifact with ``python -m hugrgate.runtimes.bench_matrix``\nafter the final test run.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "platform",
+        "subprocess",
+        "time",
+        "typing"
+      ],
+      "loc": 284,
+      "path": "hugrgate/runtimes/bench_matrix.py",
+      "public_defs": [
+        "BenchConfig",
+        "BenchResult",
+        "bench_runtime",
+        "BenchMatrix",
+        "bench_all",
+        "write_artifact",
+        "build_default_registry",
+        "main",
+        "n",
+        "p50_s",
+        "p95_s",
+        "mean_s",
+        "to_dict",
+        "to_dict"
+      ]
+    },
+    "hugrgate.runtimes.conformance": {
+      "docstring": "Local runtime conformance suite. Slice 173.\n\nRuns every local runtime adapter (slices 152-159) against the v2\ncontract from slice 151, using injected fakes \u2014 no engines, models,\nor network required:\n\n- **contract checks** (all 8 adapters): ``available()`` returns a\n  bool without raising; ``info()`` is well-formed (known\n  capabilities, tuple devices/formats); ``health()`` never raises\n  with a valid status; ``unload()``/``warmup()``/``close()`` hooks\n  are safe; missing engines surface as :class:`HugrGateError`\n  (``BackendUnavailable``/``BackendError``), never a foreign\n  exception; ``privacy()`` reports ``remote=False``; adapter names\n  are unique in the registry;\n- **happy-path checks** (adapters with simple fakes): llama.cpp,\n  Ollama and transformers generate, ONNX embed \u2014 proving the\n  adapters' inference paths work when an engine *is* present.\n\n:func:`run_conformance` returns one :class:`ConformanceReport` per\nadapter. The pytest module ``tests/test_localrt_173_conformance.py``\nruns the suite as part of the normal test run, so contract drift\nfails CI.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 394,
+      "path": "hugrgate/runtimes/conformance.py",
+      "public_defs": [
+        "ConformanceCheck",
+        "ConformanceReport",
+        "check_adapter",
+        "run_conformance",
+        "conformance_summary",
+        "register_all_adapters",
+        "passed",
+        "failed",
+        "to_dict",
+        "close",
+        "get_inputs",
+        "get_outputs",
+        "run"
+      ]
+    },
+    "hugrgate.runtimes.eviction": {
+      "docstring": "Model eviction policy. Slice 171.\n\nWhen VRAM/RAM is finite, something must decide which resident models\nleave. This module provides the decision layer over the slice-170\nresidency table:\n\n- :class:`LRUPolicy` \u2014 evict least-recently-used idle residents;\n- :class:`TTLPolicy` \u2014 evict residents older than a time-to-live;\n- :class:`MemoryPressurePolicy` \u2014 while a memory reading is over a\n  high watermark, nominate LRU-first candidates (one pass evicts;\n  call :meth:`Evictor.run` again while\n  :meth:`MemoryPressurePolicy.under_pressure` holds);\n- :class:`CompositePolicy` \u2014 union of several policies, first\n  nominator wins per runtime.\n\n:class:`EvictionBudget` caps evictions per pass and protects named\nruntimes. Entries with live leases (``refcount > 0``) are skipped\nunless a policy opts into ``evict_in_use``. :class:`Evictor` applies\na policy to a :class:`ResidencyManager` and reports what left and\nwhy.\n\nMemory readings are injected callables (defaults: stdlib\n:mod:`resource` RSS of this process on Unix). Real VRAM measurement\nneeds a provider hook \u2014 see the module docstring of each policy.",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "resource",
+        "time",
+        "typing"
+      ],
+      "loc": 281,
+      "path": "hugrgate/runtimes/eviction.py",
+      "public_defs": [
+        "EvictionBudget",
+        "EvictionDecision",
+        "EvictionReport",
+        "EvictionPolicy",
+        "LRUPolicy",
+        "TTLPolicy",
+        "MemoryPressurePolicy",
+        "CompositePolicy",
+        "Evictor",
+        "to_dict",
+        "select",
+        "select",
+        "select",
+        "under_pressure",
+        "select",
+        "select",
+        "run"
+      ]
+    },
+    "hugrgate.runtimes.gguf": {
+      "docstring": "GGUF model discovery. Slice 160.\n\nFinds ``.gguf`` files on disk and reads their metadata with a\npure-python GGUF header parser \u2014 no ``llama.cpp`` required. Only the\nheader (magic, version, key/value store, tensor *infos*) is read; the\ntensor blobs are never touched, so scanning a directory of\nmulti-gigabyte files is cheap.\n\n:func:`discover_gguf_models` returns one :class:`GGUFModel` per file,\nwith ``error`` set (instead of raising) for corrupt/truncated files so\na single bad file never aborts a directory scan.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "pathlib",
+        "struct",
+        "typing"
+      ],
+      "loc": 310,
+      "path": "hugrgate/runtimes/gguf.py",
+      "public_defs": [
+        "parse_gguf_header",
+        "GGUFModel",
+        "find_gguf_files",
+        "discover_gguf_models",
+        "gguf_model_size_human",
+        "read",
+        "u8",
+        "u16",
+        "u32",
+        "u64",
+        "i8",
+        "i16",
+        "i32",
+        "i64",
+        "f32",
+        "f64",
+        "gguf_str",
+        "ok",
+        "display"
+      ]
+    },
+    "hugrgate.runtimes.grammar": {
+      "docstring": "Grammar-constrained decoding. Slice 164.\n\nGBNF grammars steer token-level decoding so the model can only emit\nstrings the grammar accepts. :class:`Grammar` builds and validates\nGBNF text; :class:`GrammarConstrainedRuntime` wraps any inner runtime\nand forwards ``GenerationOptions.grammar`` to engines that enforce it\nnatively (llama.cpp does \u2014 see :mod:`hugrgate.runtimes.llama_cpp`).\nEngines without native support get a clear :class:`BackendError`,\nnever silent unconstrained generation.\n\nBuilders:\n\n- :meth:`Grammar.from_gbnf` \u2014 explicit GBNF text (validated);\n- :meth:`Grammar.from_literals` \u2014 alternation over quoted literals\n  (the constrained-decoding workhorse for categorical choices);\n- :meth:`Grammar.from_choice` \u2014 ``from_literals`` plus optional\n  surrounding whitespace.\n\nValidation is syntactic honesty, not a full GBNF parser: balanced\nquotes/parens, exactly one root rule, no empty alternatives. It\ncatches malformed builder output and hand-written mistakes, not\ndeep grammar semantics \u2014 documented as such.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 271,
+      "path": "hugrgate/runtimes/grammar.py",
+      "public_defs": [
+        "gbnf_escape",
+        "Grammar",
+        "GrammarConstrainedRuntime",
+        "from_gbnf",
+        "from_literals",
+        "from_choice",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "generate_constrained",
+        "embed",
+        "classify",
+        "tokenize",
+        "warmup",
+        "health",
+        "privacy",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.health_probes": {
+      "docstring": "Model health probes. Slice 172.\n\n:func:`probe_runtime` runs a battery of health probes against one\n:class:`LocalRuntime` and returns a :class:`HealthReport`:\n\n- :class:`LivenessProbe` \u2014 the runtime's own ``health()`` report\n  (``ok``/``degraded``/``unavailable``);\n- :class:`ModelLoadedProbe` \u2014 a model is actually resident;\n- :class:`InferenceProbe` \u2014 a minimal real inference round-trip per\n  advertised capability (catches engines that report healthy but are\n  wedged);\n- :class:`LatencyProbe` \u2014 one timed inference against warn/crit\n  thresholds.\n\n:func:`probe_all` fans out over a :class:`RuntimeRegistry`\n(parallel, never raises \u2014 probe crashes are recorded as failed\nresults, not exceptions). Use with the warmup manager (169) for\nbring-up and with the eviction policy (171) to shed unhealthy\nresidents.",
+      "imports": [
+        "__future__",
+        "abc",
+        "concurrent",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 251,
+      "path": "hugrgate/runtimes/health_probes.py",
+      "public_defs": [
+        "ProbeResult",
+        "HealthReport",
+        "HealthProbe",
+        "LivenessProbe",
+        "ModelLoadedProbe",
+        "InferenceProbe",
+        "LatencyProbe",
+        "probe_runtime",
+        "probe_all",
+        "to_dict",
+        "ok",
+        "failed",
+        "to_dict",
+        "check",
+        "check",
+        "check",
+        "check",
+        "check"
+      ]
+    },
+    "hugrgate.runtimes.jsonschema": {
+      "docstring": "JSON-schema constrained decoding. Slice 165.\n\nCompiles a JSON schema (subset) to GBNF and enforces it through a\ngrammar-capable inner runtime, then re-validates the output with\nslice 163's validator \u2014 belt and suspenders:\n\n1. :func:`json_schema_to_gbnf` compiles the schema to GBNF text\n   (validated by :class:`Grammar`);\n2. :class:`JsonSchemaConstrainedRuntime` sets it as\n   ``GenerationOptions.grammar`` and delegates to the inner runtime\n   (which must advertise ``CAP_GRAMMAR``);\n3. the emitted text is extracted (:func:`extract_json`) and validated\n   (:func:`validate`); failure raises :class:`BackendError`.\n\nCompiler coverage (honest subset): ``type`` (object/array/string/\ninteger/number/boolean/null), ``properties`` + ``required``\n(optional properties become nested optional groups *in declaration\norder* \u2014 JSON objects are unordered but constrained decoding needs\ndeterminism; documented), ``items``, ``enum``, ``const``,\n``anyOf``/``oneOf``, local ``$ref``. NOT compiled to GBNF (still\nenforced post-hoc by the validator): ``pattern``, ``minLength``/\n``maxLength``, ``minimum``/``maximum``, ``minItems``/``maxItems``,\n``additionalProperties: true``. The compiler reports exactly which\nkeywords it skipped via :func:`uncompilable_keywords`.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "re",
+        "typing"
+      ],
+      "loc": 392,
+      "path": "hugrgate/runtimes/jsonschema.py",
+      "public_defs": [
+        "uncompilable_keywords",
+        "json_schema_to_gbnf",
+        "JsonSchemaConstrainedRuntime",
+        "new_name",
+        "add",
+        "render",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "generate_constrained",
+        "embed",
+        "classify",
+        "tokenize",
+        "warmup",
+        "health",
+        "privacy",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.llama_cpp": {
+      "docstring": "llama.cpp runtime adapter. Slice 152.\n\nCanonical GGUF inference runtime implementing :class:`LocalRuntime`.\nThis supersedes the first-generation ``LlamaCppEngine`` in\n``hugrgate.backends.llm`` (slice 35): same engine, but with the v2\ncontract \u2014 lazy model loading, embedding/tokenize support, GBNF grammar\npassthrough, timeouts, lifecycle, and capability advertisement. The old\nname survives as a thin legacy-compat subclass (see below) so\n``LLMBackend(engine=LlamaCppEngine(...))`` keeps working.\n\nThe ``llama_cpp`` dependency is optional and imported lazily; without\nit the module imports fine, :meth:`available` reports False, and every\noperation raises :class:`BackendUnavailable`. Tests inject a fake engine\nobject \u2014 no model download required.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "llama_cpp",
+        "math",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 297,
+      "path": "hugrgate/runtimes/llama_cpp.py",
+      "public_defs": [
+        "LlamaCppRuntime",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "tokenize",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.metadata": {
+      "docstring": "Model metadata scanner. Slice 161.\n\n:func:`scan_directory` walks directories for model artifacts in every\nformat the fabric understands and :func:`scan_model` extracts a\n:class:`ModelMetadata` record from each one:\n\n- ``.gguf`` \u2192 the pure-python header parser from\n  :mod:`hugrgate.runtimes.gguf` (architecture, context length,\n  quantization, parameter *estimate* from size x bits-per-weight);\n- ``.safetensors`` \u2192 the JSON header: ``__metadata__`` plus an exact\n  parameter count summed over tensor shapes (never estimated);\n- ``.onnx`` \u2192 shallow scan (path/format/size) unless the ``onnx``\n  package is importable, in which case producer + graph IO are read;\n- Hugging Face repo directories (``config.json`` present) \u2192\n  ``architectures``, ``model_type``, hidden size / layers / context\n  window, tokenizer class, and ``README.md`` frontmatter (license,\n  tags, languages, pipeline tag).\n\nEstimates are always labeled as estimates; unknown fields stay\n``\"\"``/``0``/``None`` instead of being guessed. Corrupt files yield\n``error`` rather than raising.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "onnx",
+        "pathlib",
+        "struct",
+        "typing"
+      ],
+      "loc": 330,
+      "path": "hugrgate/runtimes/metadata.py",
+      "public_defs": [
+        "ModelMetadata",
+        "scan_model",
+        "scan_directory",
+        "ok",
+        "parameters_human"
+      ]
+    },
+    "hugrgate.runtimes.mlx": {
+      "docstring": "MLX adapter boundary. Slice 157.\n\n:class:`MLXRuntime` is the fabric's boundary with Apple's MLX stack\n(``mlx-lm``): it runs on Apple silicon (Darwin/arm64) and nowhere\nelse. The boundary is explicit and testable:\n\n- :meth:`MLXRuntime.platform_supported` reports whether *this*\n  machine is in the supported envelope, honoring an injected\n  ``platform_info`` so tests can exercise both sides;\n- :meth:`available` additionally requires the ``mlx_lm`` package\n  (the ``mlx`` extra), imported lazily;\n- every operation raises :class:`BackendUnavailable` with a plain\n  message naming the missing side (wrong platform vs. missing\n  package) instead of an ``ImportError``.\n\nGeneration follows the ``mlx_lm`` calling convention\n(``load(repo) -> (model, tokenizer)``,\n``generate(model, tokenizer, prompt, ...)``). Tests inject the loaded\npair plus a generate callable \u2014 no Apple hardware required.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "mlx_lm",
+        "platform",
+        "sys",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 254,
+      "path": "hugrgate/runtimes/mlx.py",
+      "public_defs": [
+        "MLXRuntime",
+        "platform_supported",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "warmup",
+        "health",
+        "close",
+        "generate_fn"
+      ]
+    },
+    "hugrgate.runtimes.ollama": {
+      "docstring": "Ollama-compatible runtime adapter. Slice 153.\n\n:class:`OllamaRuntime` drives an Ollama server (or any server speaking\nthe Ollama HTTP API) through the v2 :class:`LocalRuntime` contract. It\nuses only the standard library (``urllib``) \u2014 Ollama is a *server*, not\na pip package, so there is no optional import to gate on. Availability\nis probed with a short ``GET /api/tags`` against the configured host.\n\nModel lifecycle note: :meth:`load` selects a model *tag*\n(``\"llama3.1:8b\"``); it does not pull weights. Pulling gigabytes as a\nside effect of ``load()`` would be hostile, so a 404 from the server\nsurfaces as a :class:`BackendError` telling the operator to run\n``ollama pull <tag>`` first. Tests inject a fake transport callable \u2014\nno server required.",
+      "imports": [
+        "__future__",
+        "builtins",
+        "collections",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing",
+        "urllib"
+      ],
+      "loc": 300,
+      "path": "hugrgate/runtimes/ollama.py",
+      "public_defs": [
+        "OllamaRuntime",
+        "transport",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "list_models",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.onnx": {
+      "docstring": "ONNX Runtime adapter. Slice 154.\n\n:class:`OnnxRuntime` serves ONNX graphs (embedding and classifier\nmodels) through the v2 :class:`LocalRuntime` contract. Scope is\ndeliberate and honest: a generic adapter cannot run autoregressive\n* generation* loops without model-specific I/O handling, so\n:meth:`generate` raises :class:`BackendError` directing the caller to\na generate-capable runtime. What this adapter does really well:\n\n- ``embed``: single-vector-output graphs (mean-pooled sentence\n  embeddings and the like);\n- ``classify``: single-logits-output graphs with a softmax over the\n  caller-supplied labels (label count must match the logits dim).\n\nText must be tokenized before it reaches the graph: pass\n``encode_fn(texts) -> {input_name: values}`` (e.g. a Hugging Face\ntokenizer ``__call__``), or inject a ready ``session`` in tests.\n``onnxruntime`` is optional and imported lazily.\n\nThis slice also retires the ``RESERVED_EXTRAS`` reservation for the\n``onnx`` extra in ``tests/test_dependency_rules.py`` \u2014 the future\nONNX backend it was reserved for is this one.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "math",
+        "onnxruntime",
+        "threading",
+        "typing"
+      ],
+      "loc": 318,
+      "path": "hugrgate/runtimes/onnx.py",
+      "public_defs": [
+        "softmax",
+        "OnnxRuntime",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.openvino": {
+      "docstring": "OpenVINO runtime adapter. Slice 158.\n\n:class:`OpenVINORuntime` serves OpenVINO IR graphs (``.xml`` + ``.bin``)\nfor embedding and classifier models through the v2\n:class:`LocalRuntime` contract. Same honest scope as the ONNX adapter\n(slice 154): a generic graph adapter cannot run autoregressive\ngeneration loops, so :meth:`generate` raises :class:`BackendError`\npointing at generate-capable runtimes.\n\nText reaches the graph through an injected ``encode_fn`` (e.g. a\nHugging Face tokenizer call). ``openvino`` is optional and imported\nlazily; tests inject a compiled-model double \u2014 no install, no IR\nfiles required.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "openvino",
+        "threading",
+        "typing"
+      ],
+      "loc": 289,
+      "path": "hugrgate/runtimes/openvino.py",
+      "public_defs": [
+        "OpenVINORuntime",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.packs": {
+      "docstring": "Local model packs. Slices 166-168.\n\nA *pack* is a curated, known-good model choice for one fabric job:\n\n- slice 166 \u2014 NLI packs: zero-shot entailment models;\n- slice 167 \u2014 embedding packs: sentence embedding models;\n- slice 168 \u2014 classifier packs: text-classification models.\n\nEach :class:`ModelPack` records the Hugging Face id, the runtime and\npipeline task that serve it, languages, license, and an honest size\nestimate. :func:`runtime_for_pack` builds the serving\n:class:`LocalRuntime` (no download happens until first inference \u2014\nand a missing ``transformers`` install surfaces as\n:class:`BackendUnavailable`, never an import error).\n\nThese are *recommendations*, not downloads: the fabric never fetches\nweights on its own. Pair with the metadata scanner (161) to confirm\nwhat is actually on disk.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 255,
+      "path": "hugrgate/runtimes/packs.py",
+      "public_defs": [
+        "ModelPack",
+        "packs_for",
+        "get_pack",
+        "default_pack",
+        "find_packs",
+        "runtime_for_pack",
+        "describe_packs",
+        "to_model_ref"
+      ]
+    },
+    "hugrgate.runtimes.probe": {
+      "docstring": "Model capability probing. Slice 162.\n\n:func:`probe_capabilities` exercises a :class:`LocalRuntime` against a\nfixed battery of probes and returns a :class:`CapabilityReport` \u2014\nper-probe pass/fail/skip, latency, and a human summary. Probes never\nraise: a failing probe is recorded with its error message, and probes\nfor unadvertised capabilities are *skipped* (not failed) so the report\ndistinguishes \"can't\" from \"broken\".\n\nThis is the fabric's acceptance test for a model+runtime pairing:\nrun it after :func:`discover_gguf_models` / :func:`scan_directory`\nfinds candidates, before promoting one to residency (slices 169-171).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 218,
+      "path": "hugrgate/runtimes/probe.py",
+      "public_defs": [
+        "ProbeResult",
+        "CapabilityReport",
+        "probe_capabilities",
+        "status",
+        "passed",
+        "failed",
+        "skipped",
+        "ok",
+        "by_name",
+        "summary",
+        "to_dict"
+      ]
+    },
+    "hugrgate.runtimes.residency": {
+      "docstring": "Model residency manager. Slice 170.\n\n:func:`ResidencyManager` tracks which models are loaded in which\nruntimes and how many live users each has: a ref-counted residency\ntable with leases.\n\n- :meth:`acquire` loads ``model`` into ``runtime`` when it isn't the\n  resident one, bumps the refcount, and returns a\n  :class:`ResidencyLease` (a context manager \u2014 exiting releases).\n- :meth:`release` drops the refcount. A model whose refcount reaches\n  zero *stays loaded* (warm cache); only :meth:`evict` unloads it.\n  This is the whole point of the fabric: leases track live users,\n  eviction tracks VRAM.\n- :meth:`evict` force-unloads a runtime regardless of refcount (the\n  eviction policy of slice 171 calls this).\n- :meth:`touch` refreshes last-use for LRU decisions.\n\nThread-safe (one ``RLock``). The manager never invents models: it\nonly tracks what callers asked to load.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "types",
+        "typing"
+      ],
+      "loc": 186,
+      "path": "hugrgate/runtimes/residency.py",
+      "public_defs": [
+        "ResidencyEntry",
+        "ResidencyLease",
+        "ResidencyManager",
+        "to_dict",
+        "release",
+        "resident",
+        "snapshot",
+        "is_resident",
+        "acquire",
+        "release",
+        "touch",
+        "evict"
+      ]
+    },
+    "hugrgate.runtimes.structured": {
+      "docstring": "Structured-output adapter. Slice 163.\n\n:class:`StructuredRuntime` wraps any :class:`LocalRuntime` and turns\nfree-text generation into *validated* structured data:\n\n1. the inner runtime generates (with the JSON schema attached to\n   :class:`GenerationOptions` when the inner runtime understands it);\n2. :func:`extract_json` pulls the JSON payload out of the raw text\n   (plain, fenced, or embedded);\n3. :func:`validate` checks it against the schema with a small\n   dependency-free validator (documented subset below);\n4. on failure the model is re-prompted with the validation errors,\n   up to ``max_retries``; persistent failure raises\n   :class:`BackendError` \u2014 never a silently invalid object.\n\nValidator subset (honest, no surprises): ``type`` (all six JSON\ntypes + ``integer``/``number`` distinction), ``properties``,\n``required``, ``additionalProperties`` (bool or schema),\n``items`` (schema or list), ``enum``, ``const``, ``minimum`` /\n``maximum`` (+ ``exclusiveMinimum``/``exclusiveMaximum``),\n``minLength``/``maxLength``, ``pattern``, ``anyOf``/``oneOf``/\n``allOf``, and local ``$ref`` (``#/...`` pointers only). Anything\nelse in a schema is *ignored with a note* in the validation report \u2014\nnever silently enforced, never silently dropped without mention.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "re",
+        "threading",
+        "typing"
+      ],
+      "loc": 468,
+      "path": "hugrgate/runtimes/structured.py",
+      "public_defs": [
+        "extract_json",
+        "validate",
+        "StructuredRuntime",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "tokenize",
+        "warmup",
+        "health",
+        "privacy",
+        "close",
+        "generate_structured"
+      ]
+    },
+    "hugrgate.runtimes.tensorrt": {
+      "docstring": "TensorRT adapter boundary. Slice 159.\n\n:class:`TensorRTRuntime` is the fabric's boundary with NVIDIA TensorRT:\nprebuilt inference engines (``.engine``/``.plan``) executed on CUDA\nGPUs. The boundary is explicit and testable:\n\n- :meth:`TensorRTRuntime.cuda_available` reports whether *this*\n  machine has a CUDA device, honoring an injected override so tests\n  exercise both sides (real detection tries ``torch.cuda`` when\n  torch is importable, else ``nvidia-smi``);\n- :meth:`available` additionally requires the ``tensorrt`` package\n  (the ``tensorrt`` extra), imported lazily;\n- every operation names the missing side (no CUDA vs. no package)\n  in its :class:`BackendUnavailable`.\n\nScope mirrors the other graph adapters (embed/classify over named\nI/O; text via an injected ``encode_fn``). Engine files are\ndeserialized with ``trt.Runtime`` for real; execution goes through\nan injected ``executor`` in tests, defaulting to\n:func:`default_trt_executor` \u2014 genuine synchronous buffer management\n(``struct``-packed host buffers, ``memcpy_htod``/``dtoh``,\n``execute_v2``) written against the TensorRT/pycuda APIs. That path\nis **not validated without an NVIDIA GPU** (rule 13); it is real\ncode awaiting hardware, not a stub.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "pycuda",
+        "shutil",
+        "struct",
+        "subprocess",
+        "tensorrt",
+        "threading",
+        "torch",
+        "typing"
+      ],
+      "loc": 452,
+      "path": "hugrgate/runtimes/tensorrt.py",
+      "public_defs": [
+        "default_trt_executor",
+        "TensorRTRuntime",
+        "cuda_available",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.transformers_rt": {
+      "docstring": "Transformers runtime adapter. Slice 155.\n\n:class:`TransformersRuntime` serves Hugging Face ``transformers``\npipelines through the v2 :class:`LocalRuntime` contract, one pipeline\n*task* per instance:\n\n- ``\"text-generation\"`` \u2192 :meth:`generate` (prompt prefix is stripped\n  from the pipeline output, honestly);\n- ``\"feature-extraction\"`` \u2192 :meth:`embed` (token vectors are\n  mean-pooled and L2-normalized into one vector per text);\n- ``\"zero-shot-classification\"`` \u2192 :meth:`classify` (candidate labels\n  scored per text);\n- ``\"text-classification\"`` \u2192 :meth:`classify` (model's own labels).\n\n``transformers`` is optional and imported lazily. Timeouts are\ncooperative \u2014 a blocking pipeline call cannot be interrupted, so a\nlate return surfaces as :class:`TimeoutError` after the fact rather\nthan as a silent overrun. :meth:`as_nli_fn` adapts a zero-shot\ninstance to the ``(premise, statement) -> float`` callable that\n``hugrgate.backends.nli.NLIBackend`` accepts, so the existing NLI\nbackend can run on this runtime without duplication.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "math",
+        "threading",
+        "time",
+        "transformers",
+        "typing"
+      ],
+      "loc": 376,
+      "path": "hugrgate/runtimes/transformers_rt.py",
+      "public_defs": [
+        "TransformersRuntime",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "classify",
+        "as_nli_fn",
+        "warmup",
+        "health",
+        "close",
+        "nli_fn"
+      ]
+    },
+    "hugrgate.runtimes.vllm": {
+      "docstring": "vLLM local adapter. Slice 156.\n\n:class:`VLLMRuntime` serves vLLM through the v2 :class:`LocalRuntime`\ncontract in two modes:\n\n- **server mode** (primary): talks to a ``vllm serve`` OpenAI-compatible\n  endpoint (``POST /v1/completions``) with only the standard library \u2014\n  no vLLM install needed in *this* process;\n- **in-process mode**: drives an injected ``vllm.LLM``-compatible\n  object, or builds one via :meth:`VLLMRuntime.in_process` (lazily\n  imports ``vllm``; install the ``vllm`` extra).\n\n``load()`` selects the served model id; it never starts a server.\n``embed`` is supported in server mode against ``/v1/embeddings`` when\nthe instance is created with ``embedding=True`` (a vLLM server started\nwith ``--task embed``).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing",
+        "urllib",
+        "vllm"
+      ],
+      "loc": 388,
+      "path": "hugrgate/runtimes/vllm.py",
+      "public_defs": [
+        "VLLMRuntime",
+        "in_process",
+        "available",
+        "info",
+        "load",
+        "unload",
+        "generate",
+        "embed",
+        "warmup",
+        "health",
+        "close"
+      ]
+    },
+    "hugrgate.runtimes.warmup": {
+      "docstring": "Model warmup manager. Slice 169.\n\n:func:`WarmupManager` brings local runtimes to serving temperature:\nload the model, run the runtime's own :meth:`warmup` hook, then a few\ntimed probe inferences to prime caches and establish a latency\nbaseline. Results are recorded as :class:`WarmupResult` \u2014 per-runtime\nsuccess, call count, and latency percentiles \u2014 and the manager is\nidempotent (already-warm runtimes are skipped unless ``rewarm``).\n\n:func:`WarmupManager.warmup_backend` covers the older\n:class:`Backend` interface (its ``warmup()`` hook, slice 019), so one\nmanager warms the whole stack. Failures are recorded, never raised,\nso a single cold model can't block a fleet warmup.",
+      "imports": [
+        "__future__",
+        "concurrent",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 222,
+      "path": "hugrgate/runtimes/warmup.py",
+      "public_defs": [
+        "WarmupResult",
+        "WarmupManager",
+        "latency_p50_s",
+        "latency_p95_s",
+        "to_dict",
+        "warmed",
+        "last_result",
+        "reset",
+        "warmup_runtime",
+        "warmup_all",
+        "warmup_backend"
+      ]
+    },
     "hugrgate.serde": {
       "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
-      "loc": 73,
+      "loc": 74,
       "path": "hugrgate/serde.py",
       "public_defs": [
         "policy_to_dict",
@@ -902,6 +1591,7 @@
       "docstring": "HugrGate local HTTP API \u2014 FastAPI service. Slice 41.\n\nExposes the in-process :class:`HugrGate` runtime over HTTP:\n\n- ``POST /decide`` \u2014 spec + state + policy JSON \u2192 result JSON\n- ``GET  /health`` \u2014 liveness probe\n- ``GET  /backends`` \u2014 registered backend capabilities\n- ``GET  /models`` \u2014 known model catalogue entries\n\nLocalhost-only by default: :func:`run` binds ``127.0.0.1`` unless the\noperator explicitly passes a different host.\n\nThis module also ships two small deterministic built-in backends\n(``uniform`` and ``keyword``) so the service, CLI, daemon and benchmark\nharness are usable end to end with zero ML dependencies. They are honest\nbaselines \u2014 not intelligent \u2014 and richer backends register through the\nsame :class:`BackendRegistry` contract.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "fastapi",
         "hugrgate",
@@ -912,7 +1602,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 368,
+      "loc": 370,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -957,11 +1647,12 @@
       "docstring": "Thresholding \u2014 per-option, ordinal-cumulative, and numeric-band gates.\n\nSlice 16. The policy's ``minimum_probability`` is a single global floor;\nthis module adds finer gates that the application configures per spec:\n\n- **per-option thresholds**: ``{\"escalate\": 0.9}`` \u2014 the winning option\n  must carry at least that much of the distribution mass.\n- **ordinal cumulative thresholds**: ``(\"moderate\", 0.8)`` \u2014 for ordinal\n  specs, P(level >= \"moderate\") must clear the bar (\"at least moderate\").\n- **numeric band thresholds**: the numeric value lands in a named band\n  (e.g. ``normal`` / ``watch`` / ``alert``); each band may demand its own\n  minimum probability.\n\n:func:`apply_thresholds` runs the policy floor first, then the\nconfigured gates. The first failing gate turns the result into an\nabstention (via :mod:`hugrgate.abstain`) whose reason names the gate.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 212,
+      "loc": 213,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -980,11 +1671,12 @@
       "docstring": "Timeouts \u2014 per-decision deadline enforcement via threads. Slice 19.\n\nThe decision function runs on a daemon worker thread while the caller\njoins with the deadline. On breach a :class:`TimeoutError` is raised;\nthe worker thread is daemonized so a hung backend can never block\nprocess exit (it may still finish in the background \u2014 threads cannot be\nkilled, a documented limitation).\n\nThe deadline for a backend is::\n\n    min(policy.maximum_latency_ms, backend.estimated_latency_ms * headroom)\n\nwhen the policy sets a latency cap, else\n``backend.estimated_latency_ms * headroom``.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "threading",
         "typing"
       ],
-      "loc": 138,
+      "loc": 139,
       "path": "hugrgate/timeout.py",
       "public_defs": [
         "run_with_deadline",
@@ -1004,12 +1696,13 @@
       "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7;\nhardened in slice 011.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "json",
         "math",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -1025,6 +1718,7 @@
     "test_async_readiness.py",
     "test_backend_registry.py",
     "test_config.py",
+    "test_coverage_attack.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_determinism_contract.py",
@@ -1033,19 +1727,46 @@
     "test_foundation.py",
     "test_import_cycles.py",
     "test_ladder.py",
+    "test_localrt_151_interface.py",
+    "test_localrt_152_llamacpp.py",
+    "test_localrt_153_ollama.py",
+    "test_localrt_154_onnx.py",
+    "test_localrt_155_transformers.py",
+    "test_localrt_156_vllm.py",
+    "test_localrt_157_mlx.py",
+    "test_localrt_158_openvino.py",
+    "test_localrt_159_tensorrt.py",
+    "test_localrt_160_gguf.py",
+    "test_localrt_161_metadata.py",
+    "test_localrt_162_probe.py",
+    "test_localrt_163_structured.py",
+    "test_localrt_164_grammar.py",
+    "test_localrt_165_jsonschema.py",
+    "test_localrt_166_nli_packs.py",
+    "test_localrt_167_embedding_packs.py",
+    "test_localrt_168_classifier_packs.py",
+    "test_localrt_169_warmup.py",
+    "test_localrt_170_residency.py",
+    "test_localrt_171_eviction.py",
+    "test_localrt_172_health_probes.py",
+    "test_localrt_173_conformance.py",
+    "test_localrt_174_bench_matrix.py",
     "test_logging.py",
     "test_ml_calibration.py",
     "test_package_boundaries.py",
     "test_policy_invariants.py",
     "test_provenance_integrity.py",
+    "test_release_gate.py",
     "test_repo_truth.py",
     "test_resource_lifecycle.py",
     "test_result_invariants.py",
     "test_serialization_contracts.py",
     "test_service.py",
     "test_state_validation.py",
+    "test_static_analysis.py",
+    "test_taxonomy.py",
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7952
+  "total_loc": 15085
 }

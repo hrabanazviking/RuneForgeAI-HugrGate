@@ -17,6 +17,7 @@ from hugrgate.errors import (
     BackendError,
     BackendUnavailable,
     CalibrationError,
+    GGUFError,
     HugrGateError,
     PolicyError,
     PrivacyViolation,
@@ -30,6 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ALL_ERRORS = [
     HugrGateError, SpecError, PolicyError, BackendError, BackendUnavailable,
     CalibrationError, TimeoutError, PrivacyViolation, QueueFull, Abstention,
+    GGUFError,
 ]
 
 EXPECTED_CODES = {
@@ -43,6 +45,7 @@ EXPECTED_CODES = {
     PrivacyViolation: "privacy_violation",
     QueueFull: "queue_full",
     Abstention: "abstention",
+    GGUFError: "gguf_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -56,6 +59,7 @@ EXPECTED_RECOVERABLE = {
     PrivacyViolation: False,
     QueueFull: True,
     Abstention: True,
+    GGUFError: True,
 }
 
 

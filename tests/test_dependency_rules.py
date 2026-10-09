@@ -142,6 +142,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "ruff": {"lint"},
     "coverage": {"lint"},
     "onnxruntime": {"onnx"},
+    "onnx": {"onnx"},
     "vllm": {"vllm"},
     "mlx_lm": {"mlx"},
     "openvino": {"openvino"},
@@ -162,6 +163,7 @@ _STDLIB = {
     "tempfile", "threading", "time", "tomllib", "traceback", "typing",
     "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib", "struct",
+    "resource", "concurrent", "types", "builtins",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build"}

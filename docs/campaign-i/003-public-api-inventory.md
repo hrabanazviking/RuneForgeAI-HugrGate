@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 44 · **public names:** 184
+**Modules:** 66 · **public names:** 295
 
 ## API stability policy
 
@@ -29,6 +29,7 @@ that this document never drifts from the code.
 | `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'float | None' = None, remote_inference: 'bool' = False, allowed_backends: 'list[str] | None' = None, preferred_backends: 'list[str] | None' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'float | None' = None, review_band: 'tuple | None' = None) -> None` |
 | `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
 | `DecisionSpec` | class | `(type: 'str', options: 'list[str] | None' = None, statement: 'str | None' = None, levels: 'list[str] | None' = None, minimum: 'float | None' = None, maximum: 'float | None' = None, labels: 'list[str] | None' = None, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGate` | class | `(registry: 'BackendRegistry | None' = None)` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -266,6 +267,7 @@ that this document never drifts from the code.
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -365,6 +367,225 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.runtimes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CAP_CLASSIFY` | constant | `'classify'` |
+| `CAP_EMBED` | constant | `'embed'` |
+| `CAP_GENERATE` | constant | `'generate'` |
+| `CAP_GRAMMAR` | constant | `'grammar'` |
+| `CAP_JSON_SCHEMA` | constant | `'json_schema'` |
+| `CAP_STREAM` | constant | `'stream'` |
+| `CAP_TOKENIZE` | constant | `'tokenize'` |
+| `KNOWN_FORMATS` | constant | `{'.bin': 'pytorch-bin', '.engine': 'tensorrt-engine', '.gguf` |
+| `ClassificationResult` | class | `(label: 'str', scores: 'dict[str, float]') -> None` |
+| `EmbeddingResult` | class | `(vectors: 'list[list[float]]', dim: 'int', model: 'str' = '') -> None` |
+| `FakeRuntime` | class | `(dim: 'int' = 64, latency_s: 'float' = 0.0, supports: 'frozenset[str] | None' = None) -> 'None'` |
+| `GenerationOptions` | class | `(max_tokens: 'int' = 128, temperature: 'float' = 0.0, top_p: 'float' = 1.0, stop: 'tuple[str, ...]' = (), seed: 'int | None' = None, grammar: 'str | None' = None, json_schema: 'dict[str, Any] | None' = None, timeout_s: 'float' = 60.0) -> None` |
+| `GenerationResult` | class | `(text: 'str', finish_reason: 'str', prompt_tokens: 'int' = 0, completion_tokens: 'int' = 0, latency_s: 'float' = 0.0) -> None` |
+| `LocalRuntime` | class | `()` |
+| `ModelRef` | class | `(runtime: 'str', path: 'str', format: 'str' = 'unknown', quant: 'str' = '', alias: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
+| `RuntimeInfo` | class | `(name: 'str', engine: 'str', engine_version: 'str', available: 'bool', devices: 'tuple[str, ...]', formats: 'tuple[str, ...]', capabilities: 'frozenset[str]', model: 'ModelRef | None' = None, remote: 'bool' = False, notes: 'str' = '') -> None` |
+| `RuntimeRegistry` | class | `() -> 'None'` |
+| `format_from_path` | function | `(path: 'str | Path') -> 'str'` |
+
+### `hugrgate.runtimes.bench_matrix`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ARTIFACT_PATH` | constant | `PosixPath('benchmarks/localrt-matrix.json')` |
+| `BenchConfig` | class | `(rounds: 'int' = 10, warmup_rounds: 'int' = 2, prompt: 'str' = 'The capital of Assyria was', max_tokens: 'int' = 8, classify_labels: 'tuple[str, ...]' = ('yes', 'no')) -> None` |
+| `BenchMatrix` | class | `(results: 'list[BenchResult]' = <factory>, config: 'BenchConfig' = <factory>, note: 'str' = '', timestamp: 'str' = <factory>) -> None` |
+| `BenchResult` | class | `(runtime: 'str', operation: 'str', ok: 'bool', latencies_s: 'list[float]' = <factory>, error: 'str | None' = None) -> None` |
+| `bench_all` | function | `(registry: 'RuntimeRegistry', config: 'BenchConfig') -> 'BenchMatrix'` |
+| `bench_runtime` | function | `(runtime: 'LocalRuntime', config: 'BenchConfig') -> 'list[BenchResult]'` |
+| `build_default_registry` | function | `() -> 'tuple[RuntimeRegistry, str]'` |
+| `main` | function | `() -> 'Path'` |
+| `write_artifact` | function | `(path: 'str | Path', matrix: 'BenchMatrix') -> 'Path'` |
+
+### `hugrgate.runtimes.conformance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ADAPTER_CLASSES` | constant | `(<class 'hugrgate.runtimes.llama_cpp.LlamaCppRuntime'>, <cla` |
+| `HAPPY_PATHS` | constant | `{'LlamaCppRuntime': <function _llama_cpp_happy>, 'OllamaRunt` |
+| `HAPPY_PROBES` | constant | `{'OnnxRuntime': <function _embed_probe>}` |
+| `ConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ConformanceReport` | class | `(adapter: 'str', runtime_name: 'str', available: 'bool', checks: 'list[ConformanceCheck]' = <factory>) -> None` |
+| `check_adapter` | function | `(cls: 'type[LocalRuntime]', happy_path: 'Callable[[], LocalRuntime] | None' = None, happy_probe: 'Callable[[LocalRuntime], str] | None' = None) -> 'ConformanceReport'` |
+| `conformance_summary` | function | `(reports: 'list[ConformanceReport]') -> 'dict[str, Any]'` |
+| `register_all_adapters` | function | `(registry: 'RuntimeRegistry | None' = None) -> 'RuntimeRegistry'` |
+| `run_conformance` | function | `() -> 'list[ConformanceReport]'` |
+
+### `hugrgate.runtimes.eviction`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CompositePolicy` | class | `(*policies: 'EvictionPolicy') -> 'None'` |
+| `EvictionBudget` | class | `(max_to_evict: 'int | None' = None, protected: 'frozenset[str]' = frozenset()) -> None` |
+| `EvictionDecision` | class | `(runtime_name: 'str', reason: 'str', policy: 'str') -> None` |
+| `EvictionPolicy` | class | `()` |
+| `EvictionReport` | class | `(evicted: 'list[EvictionDecision]' = <factory>, skipped_in_use: 'int' = 0, skipped_protected: 'int' = 0) -> None` |
+| `Evictor` | class | `(manager: 'ResidencyManager', policy: 'EvictionPolicy') -> 'None'` |
+| `LRUPolicy` | class | `(max_idle_s: 'float', evict_in_use: 'bool' = False) -> 'None'` |
+| `MemoryPressurePolicy` | class | `(high_watermark_bytes: 'int', used_bytes_fn: 'Callable[[], int] | None' = None, evict_in_use: 'bool' = False) -> 'None'` |
+| `TTLPolicy` | class | `(ttl_s: 'float', evict_in_use: 'bool' = False) -> 'None'` |
+
+### `hugrgate.runtimes.gguf`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GGUF_MAGIC` | constant | `b'GGUF'` |
+| `GGUF_VERSION` | constant | `3` |
+| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `GGUFModel` | class | `(path: 'Path', size_bytes: 'int', architecture: 'str' = 'unknown', name: 'str' = '', context_length: 'int' = 0, embedding_length: 'int' = 0, block_count: 'int' = 0, head_count: 'int' = 0, quantization: 'str' = 'unknown', tensor_count: 'int' = 0, metadata: 'dict[str, Any]' = <factory>, error: 'str | None' = None) -> None` |
+| `discover_gguf_models` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[GGUFModel]'` |
+| `find_gguf_files` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[Path]'` |
+| `gguf_model_size_human` | function | `(size_bytes: 'int') -> 'str'` |
+| `parse_gguf_header` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+
+### `hugrgate.runtimes.grammar`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Grammar` | class | `(source: 'str', root: 'str' = 'root') -> None` |
+| `GrammarConstrainedRuntime` | class | `(inner: 'LocalRuntime', name: 'str | None' = None) -> 'None'` |
+| `gbnf_escape` | function | `(text: 'str') -> 'str'` |
+
+### `hugrgate.runtimes.health_probes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HealthProbe` | class | `()` |
+| `HealthReport` | class | `(runtime: 'str', results: 'list[ProbeResult]' = <factory>) -> None` |
+| `InferenceProbe` | class | `()` |
+| `LatencyProbe` | class | `(warn_s: 'float' = 5.0, crit_s: 'float' = 30.0) -> 'None'` |
+| `LivenessProbe` | class | `()` |
+| `ModelLoadedProbe` | class | `()` |
+| `ProbeResult` | class | `(probe: 'str', runtime: 'str', ok: 'bool', latency_s: 'float' = 0.0, detail: 'str' = '', checked_at: 'float' = <factory>) -> None` |
+| `probe_all` | function | `(registry: 'RuntimeRegistry', probes: 'tuple[HealthProbe, ...] | None' = None, max_workers: 'int' = 4) -> 'list[HealthReport]'` |
+| `probe_runtime` | function | `(runtime: 'LocalRuntime', probes: 'tuple[HealthProbe, ...] | None' = None) -> 'HealthReport'` |
+
+### `hugrgate.runtimes.jsonschema`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `JsonSchemaConstrainedRuntime` | class | `(inner: 'LocalRuntime', name: 'str | None' = None) -> 'None'` |
+| `json_schema_to_gbnf` | function | `(schema: 'dict[str, Any]', root: 'str' = 'root') -> 'str'` |
+| `uncompilable_keywords` | function | `(schema: 'Any') -> 'list[str]'` |
+
+### `hugrgate.runtimes.llama_cpp`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LlamaCppRuntime` | class | `(model: 'ModelRef | str | None' = None, n_ctx: 'int' = 4096, n_gpu_layers: 'int' = 0, n_threads: 'int | None' = None, n_batch: 'int' = 512, embedding: 'bool' = False, llama: 'Any' = None) -> 'None'` |
+
+### `hugrgate.runtimes.metadata`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MODEL_SUFFIXES` | constant | `('.gguf', '.onnx', '.safetensors', '.bin', '.pt', '.pth', '.` |
+| `ModelMetadata` | class | `(path: 'Path', format: 'str', size_bytes: 'int', architecture: 'str' = 'unknown', name: 'str' = '', context_length: 'int' = 0, parameters: 'int' = 0, parameters_estimate: 'float' = 0.0, quantization: 'str' = 'unknown', license: 'str' = '', source: 'str' = '', tokenizer: 'str' = '', languages: 'list[str]' = <factory>, tags: 'list[str]' = <factory>, scan_depth: 'str' = 'full', extra: 'dict[str, Any]' = <factory>, error: 'str | None' = None) -> None` |
+| `scan_directory` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[ModelMetadata]'` |
+| `scan_model` | function | `(path: 'str | Path') -> 'ModelMetadata'` |
+
+### `hugrgate.runtimes.mlx`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SUPPORTED_PLATFORM` | constant | `('darwin', 'arm64')` |
+| `MLXRuntime` | class | `(model: 'ModelRef | str | None' = None, platform_info: 'tuple[str, str] | None' = None, engine: 'tuple[Any, Any, Any] | None' = None) -> 'None'` |
+
+### `hugrgate.runtimes.ollama`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_HOST` | constant | `'http://localhost:11434'` |
+| `OllamaRuntime` | class | `(model: 'ModelRef | str | None' = None, host: 'str' = 'http://localhost:11434', timeout_s: 'float' = 120.0, transport: 'Any' = None) -> 'None'` |
+| `TransportFn` | constant | `collections.abc.Callable[[str, str, 'dict[str, Any] | None']` |
+
+### `hugrgate.runtimes.onnx`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OnnxRuntime` | class | `(model: 'ModelRef | str | None' = None, providers: 'Sequence[str] | None' = None, input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, intra_op_num_threads: 'int' = 0, session: 'Any' = None) -> 'None'` |
+| `softmax` | function | `(logits: 'Sequence[float]') -> 'list[float]'` |
+
+### `hugrgate.runtimes.openvino`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OpenVINORuntime` | class | `(model: 'ModelRef | str | None' = None, device: 'str' = 'CPU', input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, num_streams: 'int' = 0, compiled: 'Any' = None) -> 'None'` |
+
+### `hugrgate.runtimes.packs`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CLASSIFIER_PACKS` | constant | `(ModelPack(kind='classifier', name='twitter-roberta-sentimen` |
+| `EMBEDDING_PACKS` | constant | `(ModelPack(kind='embedding', name='all-minilm-l6-v2', hf_id=` |
+| `NLI_PACKS` | constant | `(ModelPack(kind='nli', name='bart-large-mnli', hf_id='facebo` |
+| `ModelPack` | class | `(kind: 'str', name: 'str', hf_id: 'str', runtime: 'str' = 'transformers', task: 'str' = '', dims: 'int' = 0, languages: 'tuple[str, ...]' = (), license: 'str' = '', size_mb: 'float' = 0.0, description: 'str' = '', default: 'bool' = False, labels: 'tuple[str, ...]' = (), extra: 'dict[str, Any]' = <factory>) -> None` |
+| `default_pack` | function | `(kind: 'str') -> 'ModelPack'` |
+| `describe_packs` | function | `(kind: 'str | None' = None) -> 'str'` |
+| `find_packs` | function | `(query: 'str', kind: 'str | None' = None) -> 'list[ModelPack]'` |
+| `get_pack` | function | `(kind: 'str', name: 'str') -> 'ModelPack'` |
+| `packs_for` | function | `(kind: 'str') -> 'tuple[ModelPack, ...]'` |
+| `runtime_for_pack` | function | `(pack: 'ModelPack | str', kind: 'str | None' = None, **kwargs: 'Any') -> 'LocalRuntime'` |
+
+### `hugrgate.runtimes.probe`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CapabilityReport` | class | `(runtime: 'str', model: 'ModelRef | None', results: 'list[ProbeResult]' = <factory>, elapsed_s: 'float' = 0.0) -> None` |
+| `ProbeResult` | class | `(name: 'str', passed: 'bool', latency_s: 'float' = 0.0, detail: 'str' = '', skipped: 'bool' = False) -> None` |
+| `probe_capabilities` | function | `(runtime: 'LocalRuntime', model: 'ModelRef | None' = None, probes: 'tuple[str, ...]' = ('load_cycle', 'generate', 'embed', 'classify', 'tokenize'), timeout_s: 'float' = 60.0) -> 'CapabilityReport'` |
+
+### `hugrgate.runtimes.residency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ResidencyEntry` | class | `(runtime_name: 'str', model: 'ModelRef', refcount: 'int' = 0, acquired_at: 'float' = <factory>, last_used_at: 'float' = <factory>, touches: 'int' = 0) -> None` |
+| `ResidencyLease` | class | `(manager: 'ResidencyManager', runtime_name: 'str', model: 'ModelRef') -> 'None'` |
+| `ResidencyManager` | class | `() -> 'None'` |
+
+### `hugrgate.runtimes.structured`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `IGNORED_KEYWORDS` | constant | `frozenset({'$comment', '$id', '$schema', 'default', 'depreca` |
+| `StructuredRuntime` | class | `(inner: 'LocalRuntime', max_retries: 'int' = 2, name: 'str | None' = None) -> 'None'` |
+| `extract_json` | function | `(text: 'str') -> 'Any'` |
+| `validate` | function | `(instance: 'Any', schema: 'dict[str, Any]', path: 'str' = '$') -> 'list[str]'` |
+
+### `hugrgate.runtimes.tensorrt`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TensorRTRuntime` | class | `(model: 'ModelRef | str | None' = None, cuda_override: 'bool | None' = None, input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, executor: 'ExecutorFn | None' = None, engine: 'Any' = None) -> 'None'` |
+| `default_trt_executor` | function | `(engine: 'Any', feed: 'Mapping[str, Any]', input_names: 'Sequence[str]', output_name: 'str') -> 'dict[str, list[list[float]]]'` |
+
+### `hugrgate.runtimes.transformers_rt`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GENERATION_TASKS` | constant | `frozenset({'text-generation'})` |
+| `TransformersRuntime` | class | `(model: 'ModelRef | str | None' = None, task: 'str' = 'text-generation', device: 'int' = -1, trust_remote_code: 'bool' = False, pipe_kwargs: 'dict[str, Any] | None' = None, pipe: 'Any' = None) -> 'None'` |
+
+### `hugrgate.runtimes.vllm`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_VLLM_HOST` | constant | `'http://localhost:8000'` |
+| `VLLMRuntime` | class | `(model: 'ModelRef | str | None' = None, host: 'str' = 'http://localhost:8000', llm: 'Any' = None, embedding: 'bool' = False, timeout_s: 'float' = 120.0, transport: 'Any' = None) -> 'None'` |
+
+### `hugrgate.runtimes.warmup`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
+| `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
 ### `hugrgate.serde`
 

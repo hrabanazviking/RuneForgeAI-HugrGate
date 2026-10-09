@@ -23,7 +23,7 @@ ROOT_EXPORTS = {
     "Backend", "BackendRegistry", "HugrGate",
     "HugrGateError", "SpecError", "PolicyError", "BackendError",
     "BackendUnavailable", "CalibrationError", "TimeoutError",
-    "PrivacyViolation", "QueueFull", "Abstention",
+    "PrivacyViolation", "QueueFull", "Abstention", "GGUFError",
 }
 
 

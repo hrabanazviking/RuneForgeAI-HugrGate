@@ -272,3 +272,14 @@ def test_structured_unsupported_capability_propagates():
     rt = StructuredRuntime(_NoGenerate())
     with pytest.raises(BackendError):
         rt.embed(["a"])
+
+
+def test_generate_structured_rejects_grammar_plus_schema():
+    # Release-gate regression: grammar and json_schema are mutually
+    # exclusive in GenerationOptions, so a schema argument plus an
+    # options grammar is a conflict, not a merged request.
+    rt = StructuredRuntime(FakeRuntime())
+    schema = {"type": "object", "properties": {"a": {"type": "integer"}}}
+    opts = GenerationOptions(grammar='root ::= "a"')
+    with pytest.raises(SpecError, match="conflicts"):
+        rt.generate_structured("hi", schema, opts)

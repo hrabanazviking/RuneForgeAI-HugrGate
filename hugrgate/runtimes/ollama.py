@@ -16,6 +16,7 @@ no server required.
 
 from __future__ import annotations
 
+import builtins
 import json
 import threading
 import time
@@ -28,9 +29,7 @@ from hugrgate.errors import (
     BackendError,
     BackendUnavailable,
     SpecError,
-)
-from hugrgate.errors import (
-    TimeoutError as HugrTimeoutError,
+    TimeoutError,
 )
 from hugrgate.runtimes import (
     CAP_EMBED,
@@ -75,8 +74,10 @@ def _default_transport(host: str, timeout_s: float) -> TransportFn:
                 body = response.read().decode("utf-8")
                 return json.loads(body) if body.strip() else {}
         except urllib.error.HTTPError as e:
-            raise _http_error(e) from e
-        except (urllib.error.URLError, TimeoutError) as e:
+            raise BackendError(_http_error_message(e)) from e
+        except (urllib.error.URLError, builtins.TimeoutError) as e:
+            # builtins.TimeoutError: the name TimeoutError in this
+            # module is hugrgate.errors.TimeoutError (used below).
             raise BackendUnavailable(
                 f"ollama server not reachable at {host}: {e}",
                 backend="ollama") from e
@@ -84,16 +85,16 @@ def _default_transport(host: str, timeout_s: float) -> TransportFn:
     return transport
 
 
-def _http_error(e: urllib.error.HTTPError) -> BackendError:
+def _http_error_message(e: urllib.error.HTTPError) -> str:
+    """Human-readable message for an Ollama HTTP error response."""
     try:
         detail = json.loads(e.read().decode("utf-8")).get("error", "")
     except Exception:  # noqa: BLE001 - best-effort detail extraction
         detail = ""
     if e.code == 404:
-        return BackendError(
-            f"ollama model not found on server: {detail or e}. "
-            f"Run `ollama pull <tag>` first.")
-    return BackendError(f"ollama server error {e.code}: {detail or e}")
+        return (f"ollama model not found on server: {detail or e}. "
+                f"Run `ollama pull <tag>` first.")
+    return f"ollama server error {e.code}: {detail or e}"
 
 
 class OllamaRuntime(LocalRuntime):
@@ -140,8 +141,8 @@ class OllamaRuntime(LocalRuntime):
             transport = _default_transport(self.host, timeout_s)
         try:
             return transport(method, path, payload)
-        except TimeoutError as e:
-            raise HugrTimeoutError(
+        except builtins.TimeoutError as e:
+            raise TimeoutError(
                 f"ollama request timed out after {timeout_s}s",
                 timeout_s=timeout_s or self.timeout_s) from e
 

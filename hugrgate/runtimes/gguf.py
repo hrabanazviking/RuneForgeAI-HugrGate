@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from hugrgate.errors import GGUFError
+
 #: GGUF magic bytes.
 GGUF_MAGIC = b"GGUF"
 
@@ -58,10 +60,6 @@ FILE_TYPES = {
     31: "MOSTLY_IQ1_M",
     32: "MOSTLY_BF16",
 }
-
-
-class GGUFError(Exception):
-    """A GGUF file is corrupt, truncated, or not GGUF at all."""
 
 
 class _Reader:

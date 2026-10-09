@@ -1,6 +1,6 @@
 """Model capability probing. Slice 162.
 
-:func:`probe_runtime` exercises a :class:`LocalRuntime` against a
+:func:`probe_capabilities` exercises a :class:`LocalRuntime` against a
 fixed battery of probes and returns a :class:`CapabilityReport` —
 per-probe pass/fail/skip, latency, and a human summary. Probes never
 raise: a failing probe is recorded with its error message, and probes
@@ -32,10 +32,10 @@ from hugrgate.runtimes import (
 __all__ = [
     "CapabilityReport",
     "ProbeResult",
-    "probe_runtime",
+    "probe_capabilities",
 ]
 
-#: Probe names run by :func:`probe_runtime`, in order.
+#: Probe names run by :func:`probe_capabilities`, in order.
 PROBE_NAMES = ("load_cycle", "generate", "embed", "classify",
                "tokenize")
 
@@ -128,8 +128,6 @@ def _run_probe(name: str, fn: Any) -> ProbeResult:
     started = time.monotonic()
     try:
         detail = fn() or ""
-    except _SkipProbe:
-        raise
     except Exception as e:  # noqa: BLE001 - probes never raise
         return ProbeResult(name=name, passed=False,
                            latency_s=time.monotonic() - started,
@@ -139,7 +137,7 @@ def _run_probe(name: str, fn: Any) -> ProbeResult:
                        detail=str(detail))
 
 
-def probe_runtime(runtime: LocalRuntime,
+def probe_capabilities(runtime: LocalRuntime,
                   model: ModelRef | None = None,
                   probes: tuple[str, ...] = PROBE_NAMES,
                   timeout_s: float = 60.0) -> CapabilityReport:
@@ -168,8 +166,6 @@ def probe_runtime(runtime: LocalRuntime,
         return f"load/unload ok for {model.display}"
 
     def _generate() -> str:
-        if not info.supports(CAP_GENERATE):
-            raise _SkipProbe("capability not advertised")
         out = runtime.generate("The sky is", options)
         if not out.text.strip():
             raise AssertionError("empty completion")
@@ -177,8 +173,6 @@ def probe_runtime(runtime: LocalRuntime,
                 f"{out.completion_tokens} tok")
 
     def _embed() -> str:
-        if not info.supports(CAP_EMBED):
-            raise _SkipProbe("capability not advertised")
         out = runtime.embed(["hello world", "goodbye world"])
         if len(out.vectors) != 2 or out.dim < 1:
             raise AssertionError(
@@ -186,8 +180,6 @@ def probe_runtime(runtime: LocalRuntime,
         return f"2 texts -> dim {out.dim}"
 
     def _classify() -> str:
-        if not info.supports(CAP_CLASSIFY):
-            raise _SkipProbe("capability not advertised")
         (res,) = runtime.classify(["I love this"], ["good", "bad"])
         total = sum(res.scores.values())
         if abs(total - 1.0) > 1e-6:
@@ -195,8 +187,6 @@ def probe_runtime(runtime: LocalRuntime,
         return f"label={res.label}"
 
     def _tokenize() -> str:
-        if not info.supports(CAP_TOKENIZE):
-            raise _SkipProbe("capability not advertised")
         ids = runtime.tokenize("hello world")
         if not ids:
             raise AssertionError("empty token list")
@@ -209,14 +199,20 @@ def probe_runtime(runtime: LocalRuntime,
         "classify": _classify,
         "tokenize": _tokenize,
     }
+    # Capability needed for each probe; a probe whose capability is
+    # not advertised is *skipped*, not failed.
+    capability_of = {
+        "generate": CAP_GENERATE,
+        "embed": CAP_EMBED,
+        "classify": CAP_CLASSIFY,
+        "tokenize": CAP_TOKENIZE,
+    }
     for name in probes:
-        try:
-            report.results.append(_run_probe(name, handlers[name]))
-        except _SkipProbe as e:
-            report.results.append(_skip(name, str(e)))
+        capability = capability_of.get(name)
+        if capability is not None and not info.supports(capability):
+            report.results.append(
+                _skip(name, "capability not advertised"))
+            continue
+        report.results.append(_run_probe(name, handlers[name]))
     report.elapsed_s = time.monotonic() - started
     return report
-
-
-class _SkipProbe(Exception):
-    """Internal: a probe whose capability isn't advertised."""

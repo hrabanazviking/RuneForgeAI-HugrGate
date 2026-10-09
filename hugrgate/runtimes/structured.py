@@ -426,13 +426,18 @@ class StructuredRuntime(LocalRuntime):
         if not isinstance(schema, dict) or not schema:
             raise SpecError("schema must be a non-empty object")
         opts = options or GenerationOptions()
+        if opts.grammar is not None:
+            raise SpecError(
+                "options.grammar conflicts with the schema argument; "
+                "pass one")
         # Attach the schema so grammar-capable inner runtimes can
-        # constrain decoding natively (slice 165).
+        # constrain decoding natively (slice 165). The schema travels
+        # without grammar: GenerationOptions keeps the two mutually
+        # exclusive.
         opts = GenerationOptions(
             max_tokens=opts.max_tokens, temperature=opts.temperature,
             top_p=opts.top_p, stop=opts.stop, seed=opts.seed,
-            grammar=opts.grammar, json_schema=schema,
-            timeout_s=opts.timeout_s)
+            json_schema=schema, timeout_s=opts.timeout_s)
         current_prompt = self._check_prompt(prompt)
         last_errors: list[str] = []
         result = None
