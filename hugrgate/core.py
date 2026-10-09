@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from typing import Any, Mapping, Optional
 
@@ -36,6 +37,29 @@ class HugrGate:
 
     def register(self, backend: Backend, *, replace: bool = False) -> None:
         self.registry.register(backend, replace=replace)
+
+    def close(self) -> None:
+        """Release backend resources, best-effort (slice 019).
+
+        Calls :meth:`Backend.close` on every registered backend.
+        A backend whose ``close()`` raises is logged and skipped —
+        one leaking backend must not block the rest.
+        """
+        for name in self.registry.list():
+            backend = self.registry.get(name)
+            if backend is None:
+                continue
+            try:
+                backend.close()
+            except Exception as e:  # noqa: BLE001 - best effort
+                logger.warning("backend %r close() failed: %s", name, e)
+
+    def __enter__(self) -> "HugrGate":
+        return self
+
+    def __exit__(self, *exc: Any) -> None:
+        self.close()
+        return None
 
     def _select_backend(self, spec: DecisionSpec,
                         policy: DecisionPolicy) -> Backend:
@@ -118,3 +142,17 @@ class HugrGate:
     def decide_batch(self, states: list, spec: DecisionSpec,
                      policy: Optional[DecisionPolicy] = None) -> list:
         return [self.decide(s, spec, policy) for s in states]
+
+    async def adecide(self, state: Mapping[str, Any],
+                      spec: DecisionSpec,
+                      policy: Optional[DecisionPolicy] = None,
+                      context: Optional[Mapping[str, Any]] = None,
+                      backend_name: Optional[str] = None) -> DecisionResult:
+        """Async variant of :meth:`decide` (slice 018).
+
+        Backend inference is synchronous and may block; this runs it in
+        a worker thread via :func:`asyncio.to_thread` so the event loop
+        stays responsive. Same contract, same errors as ``decide``.
+        """
+        return await asyncio.to_thread(
+            self.decide, state, spec, policy, context, backend_name)

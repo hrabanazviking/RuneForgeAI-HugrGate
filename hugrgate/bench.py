@@ -25,13 +25,11 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from hugrgate import (
-    Abstention,
-    DecisionPolicy,
-    DecisionResult,
-    DecisionSpec,
-    HugrGate,
-)
+from hugrgate.core import HugrGate
+from hugrgate.errors import Abstention
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 from hugrgate import __version__ as HUGRGATE_VERSION
 
 __all__ = [

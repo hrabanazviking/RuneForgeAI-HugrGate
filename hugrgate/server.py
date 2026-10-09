@@ -28,17 +28,17 @@ from typing import Any, Dict, List, Mapping, Optional
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from hugrgate import (
+from hugrgate.backend import Backend
+from hugrgate.core import HugrGate
+from hugrgate.errors import (
     Abstention,
-    Backend,
     BackendError,
     BackendUnavailable,
-    DecisionResult,
-    DecisionSpec,
-    HugrGate,
     PolicyError,
     SpecError,
 )
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 from hugrgate import __version__ as HUGRGATE_VERSION
 from hugrgate.client import policy_from_dict
 from hugrgate.errors import HugrGateError

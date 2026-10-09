@@ -14,15 +14,12 @@ from typing import Any, Dict, List, Mapping, Optional
 
 import httpx
 
-from hugrgate import (
-    Abstention,
-    Backend,
-    BackendError,
-    DecisionPolicy,
-    DecisionResult,
-    DecisionSpec,
-    HugrGate,
-)
+from hugrgate.backend import Backend
+from hugrgate.core import HugrGate
+from hugrgate.errors import Abstention, BackendError
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 from hugrgate.errors import PolicyError
 
 __all__ = [
@@ -35,18 +32,7 @@ __all__ = [
 
 def policy_to_dict(policy: DecisionPolicy) -> Dict[str, Any]:
     """Serialize a :class:`DecisionPolicy` to plain JSON-compatible dict."""
-    return {
-        "minimum_probability": policy.minimum_probability,
-        "maximum_latency_ms": policy.maximum_latency_ms,
-        "remote_inference": policy.remote_inference,
-        "allowed_backends": policy.allowed_backends,
-        "preferred_backends": policy.preferred_backends,
-        "fallback_behavior": policy.fallback_behavior,
-        "privacy_class": policy.privacy_class,
-        "max_cost": policy.max_cost,
-        "review_band": list(policy.review_band)
-        if policy.review_band is not None else None,
-    }
+    return policy.to_dict()
 
 
 #: Keys accepted by :func:`policy_from_dict`. Unknown keys are rejected

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from hugrgate.errors import PolicyError
 from hugrgate.result import DecisionResult
@@ -54,6 +54,25 @@ class DecisionPolicy:
             lo, hi = band
             if not 0.0 <= lo <= hi <= 1.0:
                 raise PolicyError("review_band must be within [0,1]")
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to a plain JSON-compatible dict.
+
+        The canonical mapping; :func:`hugrgate.client.policy_to_dict`
+        delegates here.
+        """
+        return {
+            "minimum_probability": self.minimum_probability,
+            "maximum_latency_ms": self.maximum_latency_ms,
+            "remote_inference": self.remote_inference,
+            "allowed_backends": self.allowed_backends,
+            "preferred_backends": self.preferred_backends,
+            "fallback_behavior": self.fallback_behavior,
+            "privacy_class": self.privacy_class,
+            "max_cost": self.max_cost,
+            "review_band": list(self.review_band)
+            if self.review_band is not None else None,
+        }
 
     def evaluate(self, result: DecisionResult) -> str:
         """Return 'accept', 'review', or 'abstain'."""

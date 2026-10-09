@@ -30,7 +30,10 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from hugrgate import Abstention, DecisionPolicy, DecisionResult, HugrGate
+from hugrgate.core import HugrGate
+from hugrgate.errors import Abstention
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
 from hugrgate.client import policy_from_dict
 from hugrgate.errors import QueueFull
 from hugrgate.log import get_logger
@@ -141,27 +144,54 @@ class BatchingQueue:
         self._batches = 0
         self._decisions = 0
         self._max_batch_seen = 0
+        self._in_flight = 0  # batches pulled from the queue, not yet done
 
     async def start(self) -> None:
         self._task = asyncio.create_task(self._worker())
 
+    async def __aenter__(self) -> "BatchingQueue":
+        await self.start()
+        return self
+
+    async def __aexit__(self, *exc: object) -> None:
+        await self.stop()
+        return None
+
     async def stop(self, drain_timeout: float = 10.0) -> None:
-        """Stop accepting; drain what is queued, then halt the worker."""
+        """Stop accepting; drain what is queued, then halt the worker.
+
+        On a drain timeout the queued futures fail fast with
+        ``QueueFull`` instead of hanging forever.
+        """
         self._accepting = False
         if self._task is None:
             return
         try:
             await asyncio.wait_for(self._drain(), timeout=drain_timeout)
         except asyncio.TimeoutError:
-            pass
+            self._fail_pending("daemon stopped before the queue drained")
         self._task.cancel()
         try:
             await self._task
         except asyncio.CancelledError:
             pass
 
+    def _fail_pending(self, reason: str) -> None:
+        """Fail every still-queued future with QueueFull (no hangs)."""
+        while True:
+            try:
+                item = self._queue.get_nowait()
+            except asyncio.QueueEmpty:
+                return
+            if not item.future.done():
+                item.future.set_exception(QueueFull(reason))
+
     async def _drain(self) -> None:
-        while not self._queue.empty():
+        # Wait until the queue is empty AND every pulled batch has
+        # resolved its submitters' futures. Without the in-flight
+        # check, stop() could cancel the worker mid-batch and leave
+        # submitters hanging on never-resolved futures (slice 018).
+        while not (self._queue.empty() and self._in_flight == 0):
             await asyncio.sleep(0.01)
 
     async def submit(self, state: Mapping[str, Any],
@@ -190,20 +220,30 @@ class BatchingQueue:
                 first = await self._queue.get()
             except asyncio.CancelledError:
                 break
-            batch = [first]
-            deadline = time.perf_counter() + self.window_s
-            while len(batch) < self.max_batch:
-                remaining = deadline - time.perf_counter()
-                if remaining <= 0:
-                    break
-                try:
-                    batch.append(await asyncio.wait_for(
-                        self._queue.get(), timeout=remaining))
-                except asyncio.TimeoutError:
-                    break
-            await self._execute_batch(batch)
+            # Counted in-flight from the moment an item leaves the
+            # queue, so _drain() cannot observe "empty and idle"
+            # while a batch is being assembled (slice 018).
+            self._in_flight += 1
+            try:
+                batch = [first]
+                deadline = time.perf_counter() + self.window_s
+                while len(batch) < self.max_batch:
+                    remaining = deadline - time.perf_counter()
+                    if remaining <= 0:
+                        break
+                    try:
+                        batch.append(await asyncio.wait_for(
+                            self._queue.get(), timeout=remaining))
+                    except asyncio.TimeoutError:
+                        break
+                await self._execute_batch(batch)
+            finally:
+                self._in_flight -= 1
 
     async def _execute_batch(self, batch: List[_QueuedDecision]) -> None:
+        await self._run_batch(batch)
+
+    async def _run_batch(self, batch: List[_QueuedDecision]) -> None:
         from hugrgate.spec import DecisionSpec
 
         async def _one(item: _QueuedDecision) -> None:
@@ -216,6 +256,13 @@ class BatchingQueue:
                     item.context, item.backend_name)
                 if not item.future.done():
                     item.future.set_result(result)
+            except asyncio.CancelledError:
+                # Worker cancelled mid-batch (drain timeout): fail the
+                # submitter instead of leaving the future hanging.
+                if not item.future.done():
+                    item.future.set_exception(
+                        QueueFull("daemon is shutting down"))
+                raise
             except Exception as e:  # noqa: BLE001 - fan out to submitter
                 if not item.future.done():
                     item.future.set_exception(e)

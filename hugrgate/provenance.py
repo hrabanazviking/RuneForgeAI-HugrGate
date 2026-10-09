@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional
@@ -66,6 +67,61 @@ class DecisionRecord:
             metadata={} if redact_input else {"state_keys": list(state.keys())},
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "request_hash": self.request_hash,
+            "spec": dict(self.spec),
+            "backend": self.backend,
+            "model": self.model,
+            "model_version": self.model_version,
+            "calibration_profile": self.calibration_profile,
+            "value": self.value,
+            "probability": self.probability,
+            "policy_threshold": self.policy_threshold,
+            "accepted": self.accepted,
+            "fallback_used": self.fallback_used,
+            "fallback_trace": list(self.fallback_trace),
+            "latency_ms": self.latency_ms,
+            "timestamp": self.timestamp,
+            "metadata": dict(self.metadata),
+            "prev_hash": self.prev_hash,
+            "record_hash": self.record_hash,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "DecisionRecord":
+        """Rebuild a record from :meth:`to_dict` output.
+
+        Raises ``SpecError`` when required keys are missing.
+        """
+        from hugrgate.errors import SpecError
+        required = {"request_hash", "spec", "backend", "model", "value",
+                    "probability"}
+        missing = required - set(d)
+        if missing:
+            raise SpecError(
+                f"DecisionRecord.from_dict missing key(s): "
+                f"{sorted(missing)}")
+        return cls(
+            request_hash=d["request_hash"],
+            spec=dict(d["spec"]),
+            backend=d["backend"],
+            model=d["model"],
+            model_version=d.get("model_version", "unknown"),
+            calibration_profile=d.get("calibration_profile", "none"),
+            value=d["value"],
+            probability=d["probability"],
+            policy_threshold=d.get("policy_threshold", 0.0),
+            accepted=d.get("accepted", True),
+            fallback_used=d.get("fallback_used", False),
+            fallback_trace=list(d.get("fallback_trace") or []),
+            latency_ms=d.get("latency_ms", 0.0),
+            timestamp=d.get("timestamp", time.time()),
+            metadata=dict(d.get("metadata") or {}),
+            prev_hash=d.get("prev_hash", ""),
+            record_hash=d.get("record_hash", ""),
+        )
+
 
 class ProvenanceStore:
     """Append-only store of decision records.
@@ -75,10 +131,21 @@ class ProvenanceStore:
     Each stored record carries ``prev_hash`` / ``record_hash`` forming
     a hash chain over the canonical record content; ``verify_chain``
     detects any tampering with the stored list itself.
+
+    ``max_records`` bounds memory: when exceeded, the oldest records
+    are evicted, but the chain stays verifiable — ``_floor_hash``
+    checkpoints the hash of the last evicted record, and
+    ``verify_chain`` treats it as the valid starting link.
     """
 
-    def __init__(self):
+    def __init__(self, max_records: Optional[int] = None):
+        if max_records is not None and max_records < 1:
+            raise ValueError("max_records must be >= 1")
+        self._max_records = max_records
         self._records: List[DecisionRecord] = []
+        self._floor_hash = ""  # record_hash of the last evicted record
+        self._evicted = 0
+        self._lock = threading.RLock()
 
     @staticmethod
     def _canonical(record: DecisionRecord) -> str:
@@ -92,15 +159,28 @@ class ProvenanceStore:
                 f"ProvenanceStore only stores DecisionRecord, got "
                 f"{type(record).__name__}")
         stored = copy.deepcopy(record)
-        stored.prev_hash = (self._records[-1].record_hash
-                            if self._records else "")
-        stored.record_hash = hashlib.sha256(
-            (stored.prev_hash + self._canonical(stored)).encode()
-        ).hexdigest()
-        self._records.append(stored)
+        with self._lock:
+            stored.prev_hash = (self._records[-1].record_hash
+                                if self._records else self._floor_hash)
+            stored.record_hash = hashlib.sha256(
+                (stored.prev_hash + self._canonical(stored)).encode()
+            ).hexdigest()
+            self._records.append(stored)
+            while (self._max_records is not None
+                   and len(self._records) > self._max_records):
+                dropped = self._records.pop(0)
+                self._floor_hash = dropped.record_hash
+                self._evicted += 1
+
+    def evicted_count(self) -> int:
+        """How many oldest records were evicted by ``max_records``."""
+        with self._lock:
+            return self._evicted
 
     def by_hash(self, request_hash: str) -> Optional[DecisionRecord]:
-        for r in reversed(self._records):
+        with self._lock:
+            records = list(self._records)
+        for r in reversed(records):
             if r.request_hash == request_hash:
                 return copy.deepcopy(r)
         return None
@@ -110,15 +190,23 @@ class ProvenanceStore:
             raise ValueError(f"recent(n) needs n >= 0, got {n}")
         if n == 0:
             return []
-        return copy.deepcopy(self._records[-n:])
+        with self._lock:
+            return copy.deepcopy(self._records[-n:])
 
     def count(self) -> int:
-        return len(self._records)
+        with self._lock:
+            return len(self._records)
 
     def verify_chain(self) -> bool:
-        """Recompute every link. True iff the stored history is intact."""
-        prev = ""
-        for r in self._records:
+        """Recompute every link. True iff the stored history is intact.
+
+        After ``max_records`` evictions the chain starts at the
+        checkpoint ``_floor_hash`` instead of the empty string.
+        """
+        with self._lock:
+            records = list(self._records)
+            prev = self._floor_hash
+        for r in records:
             if r.prev_hash != prev:
                 return False
             body = self._canonical(r)

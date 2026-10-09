@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Mapping, Optional
+import threading
 
 from hugrgate.errors import BackendUnavailable, SpecError
 from hugrgate.result import DecisionResult
@@ -45,6 +46,14 @@ class Backend(ABC):
     def warmup(self) -> None:
         pass
 
+    def close(self) -> None:
+        """Release resources held by this backend (slice 019).
+
+        Default is a no-op. Backends holding model weights, file
+        handles, or subprocesses override this; :meth:`HugrGate.close`
+        calls it best-effort on every registered backend.
+        """
+
     def batch(self, states: List[Mapping[str, Any]], spec: DecisionSpec,
               context: Optional[Mapping[str, Any]] = None
               ) -> List[DecisionResult]:
@@ -78,6 +87,7 @@ class BackendRegistry:
 
     def __init__(self):
         self._backends: Dict[str, Backend] = {}
+        self._lock = threading.RLock()
 
     def register(self, backend: Backend, *, replace: bool = False) -> None:
         """Add ``backend`` under its ``name``.
@@ -94,34 +104,42 @@ class BackendRegistry:
         if not isinstance(name, str) or not name.strip():
             raise SpecError(
                 f"backend name must be a non-empty string, got {name!r}")
-        if name in self._backends and not replace:
-            raise SpecError(
-                f"backend {name!r} is already registered; "
-                f"pass replace=True to overwrite it")
-        self._backends[name] = backend
+        with self._lock:
+            if name in self._backends and not replace:
+                raise SpecError(
+                    f"backend {name!r} is already registered; "
+                    f"pass replace=True to overwrite it")
+            self._backends[name] = backend
 
     def unregister(self, name: str) -> bool:
         """Remove the backend called ``name``. Returns True if one was."""
-        return self._backends.pop(name, None) is not None
+        with self._lock:
+            return self._backends.pop(name, None) is not None
 
     def get(self, name: str) -> Optional[Backend]:
-        return self._backends.get(name)
+        with self._lock:
+            return self._backends.get(name)
 
     def get_or_raise(self, name: str) -> Backend:
         """Return the backend called ``name`` or raise BackendUnavailable."""
-        backend = self._backends.get(name)
+        with self._lock:
+            backend = self._backends.get(name)
         if backend is None:
             raise BackendUnavailable(f"unknown backend: {name}")
         return backend
 
     def list(self) -> List[str]:
-        return list(self._backends.keys())
+        with self._lock:
+            return list(self._backends.keys())
 
     def supporting(self, spec: DecisionSpec) -> List[Backend]:
-        return [b for b in self._backends.values() if b.supports(spec)]
+        with self._lock:
+            return [b for b in self._backends.values() if b.supports(spec)]
 
     def __contains__(self, name: object) -> bool:
-        return name in self._backends
+        with self._lock:
+            return name in self._backends
 
     def __len__(self) -> int:
-        return len(self._backends)
+        with self._lock:
+            return len(self._backends)
