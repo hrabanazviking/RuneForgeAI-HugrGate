@@ -149,14 +149,12 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "onnx": {"onnx"},
     "vllm": {"vllm"},
     "mlx_lm": {"mlx"},
-    "openvino": {"openvino"},
-    "tensorrt": {"tensorrt"},
+    "openvino": {"openvino", "npu"},
+    "tensorrt": {"tensorrt", "npu"},
     "pycuda": {"tensorrt"},
     # Campaign VIII (slice 185): lazy vendor SDK imports in
-    # hugrgate.edge.npu — absent here, provided by the npu extra.
+    # hugrgate.edge.npu — also provided by the npu extra.
     "hailo_platform": {"npu"},
-    "tensorrt": {"npu"},
-    "openvino": {"npu"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX

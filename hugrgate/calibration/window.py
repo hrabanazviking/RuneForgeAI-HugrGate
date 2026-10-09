@@ -145,7 +145,8 @@ class SlidingWindowCalibrator(Calibrator):
     def from_params(cls, params: Dict[str, Any]) -> "SlidingWindowCalibrator":
         # Imported late to avoid a hard dependency at module import time;
         # the factory is resolved through the registry by name.
-        from hugrgate.calibration import CalibratorRegistry
+        # (from ._base, not the package root — avoids an import cycle.)
+        from hugrgate.calibration._base import CalibratorRegistry
         factory_cls = CalibratorRegistry.get(params["factory_calibrator"])
         obj = cls(factory_cls,
                   window_size=int(params["window_size"]),

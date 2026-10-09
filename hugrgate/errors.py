@@ -216,6 +216,7 @@ class ChaosError(HugrGateError):
 class GateError(HugrGateError):
     """The release gate itself failed to execute (not a check failure)."""
     code = "edge_gate_error"
+    recoverable = False
 class EdgeMemoryError(HugrGateError):
     """A memory budget was exceeded or an allocation was invalid."""
     code = "edge_memory_error"
@@ -228,6 +229,7 @@ class PowerBudgetError(HugrGateError):
 class QuantError(HugrGateError):
     """A quantization profile or operation was invalid."""
     code = "edge_quant_error"
+    recoverable = False
 class RecoveryError(HugrGateError):
     """A checkpoint could not be written or recovered."""
     code = "edge_recovery_error"
@@ -240,6 +242,8 @@ class StorageError(HugrGateError):
 class TelemetryError(HugrGateError):
     """A telemetry invariant was violated."""
     code = "edge_telemetry_error"
+    recoverable = False
 class WatchdogError(HugrGateError):
     """A watchdog invariant was violated."""
     code = "edge_watchdog_error"
+    recoverable = False

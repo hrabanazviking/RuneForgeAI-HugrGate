@@ -12,7 +12,7 @@
       "gpu-hog",
       "gpu-hog"
     ],
-    "spent_j": 80.1411,
+    "spent_j": 80.1619,
     "per_backend_watts": {
       "gpu-hog": 250.0,
       "lean": 15.0
@@ -25,12 +25,12 @@
       "lean",
       "lean"
     ],
-    "spent_j": 4.8095,
+    "spent_j": 4.808,
     "per_backend_watts": {
       "gpu-hog": 250.0,
       "lean": 15.0
     }
   },
-  "joules_saved": 75.3316,
-  "savings_factor": 16.66
+  "joules_saved": 75.3539,
+  "savings_factor": 16.67
 }

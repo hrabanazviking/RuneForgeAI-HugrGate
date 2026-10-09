@@ -53,6 +53,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.contracts.migration",
         "hugrgate.contracts.lint",
         "hugrgate.contracts.fuzz",
+    ],
     "local-runtimes": [
         "hugrgate.runtimes", "hugrgate.runtimes.bench_matrix",
         "hugrgate.runtimes.conformance", "hugrgate.runtimes.eviction",
@@ -172,6 +173,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.adaptive.explanations",
         "hugrgate.adaptive.drift_detect",
         "hugrgate.adaptive.benchmark",
+    ],
     "cluster": [
         "hugrgate.cluster", "hugrgate.cluster.protocol",
         "hugrgate.cluster.identity",
