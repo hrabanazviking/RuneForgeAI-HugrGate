@@ -1820,6 +1820,7 @@ flowchart TD
     security --> security_depscan
     security --> security_model_signing
     security --> security_plugins
+    security --> security_sandbox
     security --> security_supply_chain
     security --> security_threat_model
     security_checksums --> errors
@@ -1827,6 +1828,10 @@ flowchart TD
     security_model_signing --> privacy_crypto
     security_plugins --> errors
     security_plugins --> security_model_signing
+    security_sandbox --> backend
+    security_sandbox --> errors
+    security_sandbox --> result
+    security_sandbox --> spec
     security_supply_chain --> errors
     serde --> errors
     serde --> policy
@@ -3275,6 +3280,7 @@ flowchart TD
 | `security` | `security.depscan` | no |
 | `security` | `security.model_signing` | no |
 | `security` | `security.plugins` | no |
+| `security` | `security.sandbox` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
 | `security.checksums` | `errors` | no |
@@ -3282,6 +3288,10 @@ flowchart TD
 | `security.model_signing` | `privacy_crypto` | no |
 | `security.plugins` | `errors` | no |
 | `security.plugins` | `security.model_signing` | no |
+| `security.sandbox` | `backend` | no |
+| `security.sandbox` | `errors` | no |
+| `security.sandbox` | `result` | no |
+| `security.sandbox` | `spec` | no |
 | `security.supply_chain` | `errors` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |

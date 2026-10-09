@@ -644,3 +644,14 @@ class PluginTrustError(HugrGateError):
     """
     code = "plugin_trust_error"
     recoverable = False
+
+
+class SandboxViolation(HugrGateError):
+    """A sandboxed backend attempted a forbidden operation.
+    Slice 408.  Raised by :mod:`hugrgate.security.sandbox` when an
+    audit hook observes a denied syscall-class event (subprocess,
+    network, filesystem write) inside a sandbox boundary.  Not
+    recoverable: the backend's behavior violates its policy.
+    """
+    code = "sandbox_violation"
+    recoverable = False

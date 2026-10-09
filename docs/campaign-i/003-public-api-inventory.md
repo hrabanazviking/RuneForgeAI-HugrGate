@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 371 · **public names:** 2275
+**Modules:** 372 · **public names:** 2282
 
 ## API stability policy
 
@@ -3971,6 +3971,8 @@ that this document never drifts from the code.
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+| `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
+| `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
 | `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
@@ -3986,6 +3988,7 @@ that this document never drifts from the code.
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
@@ -4047,6 +4050,15 @@ that this document never drifts from the code.
 | `TRUST_LEVELS` | constant | `('denied', 'sandboxed', 'signed', 'builtin')` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+
+### `hugrgate.security.sandbox`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
+| `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
+| `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Callable'` |
 
 ### `hugrgate.security.supply_chain`
 

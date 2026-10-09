@@ -88,6 +88,11 @@ from hugrgate.security.plugins import (
     PluginRegistry,
     sign_manifest,
 )
+from hugrgate.security.sandbox import (
+    SandboxedBackend,
+    SandboxPolicy,
+    run_sandboxed,
+)
 from hugrgate.security.supply_chain import (
     DependencyRecord,
     SupplyChainPolicy,
@@ -117,6 +122,8 @@ __all__ = [
     "ModelSigner",
     "PluginManifest",
     "PluginRegistry",
+    "SandboxPolicy",
+    "SandboxedBackend",
     "SignedMetadata",
     "SupplyChainPolicy",
     "SupplyVerdict",
@@ -132,6 +139,7 @@ __all__ = [
     "enumerate_surface",
     "find_unlisted",
     "generate_sbom",
+    "run_sandboxed",
     "sbom_from_installed",
     "scan_project",
     "scan_requirements",

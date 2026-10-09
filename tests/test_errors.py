@@ -59,6 +59,7 @@ from hugrgate.errors import (
     RecoveryError,
     ResidencyError,
     RetryBudgetExhausted,
+    SandboxViolation,
     SchedulerError,
     SealError,
     SecretDetected,
@@ -112,6 +113,7 @@ ALL_ERRORS = [
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
     # Campaign XVII security-forge errors (slice 404+).
     PluginTrustError,
+    SandboxViolation,
     SignatureVerificationFailed,
     SupplyChainViolation,
 ]

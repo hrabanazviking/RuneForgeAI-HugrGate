@@ -19,7 +19,7 @@ hash-chained provenance (slice 015), cluster mutual auth (slice
 | 405 | `hugrgate/security/model_signing.py` — signed model metadata | done |
 | 406 | `hugrgate/security/checksums.py` — model checksum enforcement | done |
 | 407 | `hugrgate/security/plugins.py` — plugin trust model | done |
-| 408 | `hugrgate/security/sandbox.py` — backend sandbox boundary | pending |
+| 408 | `hugrgate/security/sandbox.py` — backend sandbox boundary | done |
 | 409 | `hugrgate/security/input_limits.py` — input-size limits | pending |
 | 410 | `hugrgate/security/resource_guards.py` — resource-exhaustion guards | pending |
 | 411 | `hugrgate/security/serde_guards.py` — deserialization hardening | pending |
