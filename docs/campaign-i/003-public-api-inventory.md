@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 308 · **public names:** 1901
+**Modules:** 309 · **public names:** 1911
 
 ## API stability policy
 
@@ -2259,6 +2259,7 @@ that this document never drifts from the code.
 | `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
 | `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
 | `BootstrapCI` | class | `(metric: 'str', estimate: 'float', ci_low: 'float', ci_high: 'float', ci_level: 'float', n_boot: 'int', n_items: 'int', seed: 'int') -> None` |
+| `BundleReport` | class | `(path: 'str', name: 'str', files: 'int', ok: 'bool', problems: 'list[str]') -> None` |
 | `CVReport` | class | `(k: 'int', seed: 'int', n_items: 'int', folds: 'list[FoldResult]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]') -> None` |
 | `CalibrationComparison` | class | `(methods: 'dict[str, dict[str, float]]', n_calib: 'int', n_eval: 'int', n_bins: 'int' = 10) -> None` |
 | `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
@@ -2326,6 +2327,7 @@ that this document never drifts from the code.
 | `pareto_frontier` | function | `(points: 'Mapping[str, tuple[float, float]]') -> 'list[str]'` |
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
+| `read_bundle` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
 | `robustness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, perturbations: 'Sequence[Perturbation] | None' = None, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'RobustnessReport'` |
@@ -2334,6 +2336,9 @@ that this document never drifts from the code.
 | `series_summary` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str') -> 'dict[str, Any]'` |
 | `shift_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, shift_key: 'str' = 'period', source: 'Any' = 'source', target: 'Any' = 'target', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'ShiftReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
+| `verify_bundle` | function | `(path: 'str | Path') -> 'BundleReport'` |
+| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
+| `zip_bundle` | function | `(path: 'str | Path') -> 'Path'` |
 
 ### `hugrgate.evlab.api`
 
@@ -2344,6 +2349,16 @@ that this document never drifts from the code.
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+
+### `hugrgate.evlab.artifacts`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BundleReport` | class | `(path: 'str', name: 'str', files: 'int', ok: 'bool', problems: 'list[str]') -> None` |
+| `read_bundle` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `verify_bundle` | function | `(path: 'str | Path') -> 'BundleReport'` |
+| `write_bundle` | function | `(path: 'str | Path', name: 'str', run_record: 'RunRecord | None' = None, dataset_manifest: 'DatasetManifest | None' = None, reports: 'Mapping[str, Mapping[str, Any]] | None' = None, files: 'Mapping[str, str | bytes] | None' = None) -> 'Path'` |
+| `zip_bundle` | function | `(path: 'str | Path') -> 'Path'` |
 
 ### `hugrgate.evlab.bootstrap`
 

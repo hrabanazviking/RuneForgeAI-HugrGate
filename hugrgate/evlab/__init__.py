@@ -42,6 +42,13 @@ from hugrgate.evlab.api import (
     MetricSet,
     RunRecord,
 )
+from hugrgate.evlab.artifacts import (
+    BundleReport,
+    read_bundle,
+    verify_bundle,
+    write_bundle,
+    zip_bundle,
+)
 from hugrgate.evlab.bootstrap import (
     BootstrapCI,
     bootstrap_backend_ci,
@@ -138,6 +145,7 @@ __all__ = [
     "DEFAULT_METRICS",
     "BackendComparison",
     "BootstrapCI",
+    "BundleReport",
     "CVReport",
     "CalibrationComparison",
     "ColumnSpec",
@@ -205,6 +213,7 @@ __all__ = [
     "pareto_frontier",
     "privacy_utility_curve",
     "randomized_response_q",
+    "read_bundle",
     "risk_at_coverage",
     "risk_coverage_curve",
     "robustness_evaluate",
@@ -213,4 +222,7 @@ __all__ = [
     "series_summary",
     "shift_evaluate",
     "stratified_evaluate",
+    "verify_bundle",
+    "write_bundle",
+    "zip_bundle",
 ]

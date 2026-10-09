@@ -1157,6 +1157,7 @@ flowchart TD
     ensemble_voting --> errors
     ensemble_voting --> result
     evlab --> evlab_api
+    evlab --> evlab_artifacts
     evlab --> evlab_bootstrap
     evlab --> evlab_calibration
     evlab --> evlab_compare
@@ -1181,6 +1182,10 @@ flowchart TD
     evlab_api --> log
     evlab_api --> policy
     evlab_api --> spec
+    evlab_artifacts --> hugrgate
+    evlab_artifacts --> errors
+    evlab_artifacts --> evlab_api
+    evlab_artifacts --> evlab_dataset
     evlab_bootstrap --> hugrgate
     evlab_bootstrap --> core
     evlab_bootstrap --> errors
@@ -2416,6 +2421,7 @@ flowchart TD
 | `ensemble.voting` | `errors` | no |
 | `ensemble.voting` | `result` | no |
 | `evlab` | `evlab.api` | no |
+| `evlab` | `evlab.artifacts` | no |
 | `evlab` | `evlab.bootstrap` | no |
 | `evlab` | `evlab.calibration` | no |
 | `evlab` | `evlab.compare` | no |
@@ -2440,6 +2446,10 @@ flowchart TD
 | `evlab.api` | `log` | no |
 | `evlab.api` | `policy` | no |
 | `evlab.api` | `spec` | no |
+| `evlab.artifacts` | `hugrgate` | no |
+| `evlab.artifacts` | `errors` | no |
+| `evlab.artifacts` | `evlab.api` | no |
+| `evlab.artifacts` | `evlab.dataset` | no |
 | `evlab.bootstrap` | `hugrgate` | no |
 | `evlab.bootstrap` | `core` | no |
 | `evlab.bootstrap` | `errors` | no |
