@@ -60,6 +60,9 @@ from hugrgate.routing.memory import (
     MemoryAwarePlanner,
     MemoryModel,
 )
+from hugrgate.routing.parallel import (
+    ParallelPlanExecutor,
+)
 from hugrgate.routing.qos import (
     QOS_PROFILES,
     QoSClass,
@@ -112,6 +115,7 @@ __all__ = [
     "LatencyTracker",
     "MemoryAwarePlanner",
     "MemoryModel",
+    "ParallelPlanExecutor",
     "PrivacyAwarePlanner",
     "PrivacyTier",
     "BackendClearance",
