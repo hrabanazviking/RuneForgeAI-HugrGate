@@ -42,6 +42,12 @@ from hugrgate.chaos.model_faults import (
     MUST_REJECT_KINDS,
     ModelCorruptor,
 )
+from hugrgate.chaos.network import (
+    DOWN,
+    UP,
+    NetworkGuard,
+    NetworkSimulator,
+)
 from hugrgate.chaos.resources import (
     CRITICAL,
     OK,
@@ -56,12 +62,14 @@ __all__ = [
     "CORRUPTION_KINDS",
     "CRASH",
     "CRITICAL",
+    "DOWN",
     "ERROR_RATE",
     "HANG",
     "LATENCY",
     "MALFORMED",
     "MUST_REJECT_KINDS",
     "OK",
+    "UP",
     "WARN",
     "BlastRadius",
     "CPUStarvationSimulator",
@@ -76,6 +84,8 @@ __all__ = [
     "MemoryPressureSimulator",
     "MemoryReading",
     "ModelCorruptor",
+    "NetworkGuard",
+    "NetworkSimulator",
     "ProbeOutcome",
     "ResourceGuard",
     "SteadyStateProbe",
