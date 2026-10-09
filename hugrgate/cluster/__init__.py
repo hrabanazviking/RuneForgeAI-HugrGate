@@ -51,6 +51,11 @@ from hugrgate.cluster.protocol import (
     encode_message,
     new_trace_id,
 )
+from hugrgate.cluster.routing import (
+    DistributedRouter,
+    PeerScores,
+    RouteCandidate,
+)
 from hugrgate.cluster.rpc import (
     OutboundHook,
     RemoteBackend,
@@ -88,6 +93,7 @@ __all__ = [
     "ClusterNode",
     "Discovery",
     "DiscoveryRegistry",
+    "DistributedRouter",
     "InboundHook",
     "LANDiscoveryAdapter",
     "MessageType",
@@ -97,11 +103,13 @@ __all__ = [
     "NodeIdentity",
     "OutboundHook",
     "PeerRecord",
+    "PeerScores",
     "PolicyPropagator",
     "PolicyVersion",
     "PrivacyBoundary",
     "RPCClient",
     "RemoteBackend",
+    "RouteCandidate",
     "StaticDiscovery",
     "StaticPeerConfig",
     "TLSServer",

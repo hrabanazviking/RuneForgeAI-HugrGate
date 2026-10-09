@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:23:12.801122+00:00",
-  "module_count": 58,
+  "generated_utc": "2026-10-09T13:25:05.492831+00:00",
+  "module_count": 59,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 121,
+      "loc": 129,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -688,7 +688,7 @@
         "threading",
         "typing"
       ],
-      "loc": 400,
+      "loc": 403,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -794,6 +794,31 @@
         "cluster_rpc",
         "cluster_peers",
         "cluster_health"
+      ]
+    },
+    "hugrgate.cluster.routing": {
+      "docstring": "Distributed ladder routing. Slice 212.\n\nThe local ladder (``hugrgate.ladder``) walks backends cheapest-first;\nthe distributed router walks *nodes* best-first. A routing candidate is\neither \"decide locally\" or \"ask peer P\". Candidates are filtered, then\nscored, then walked in order \u2014 the same shape as ladder rungs, so the\ntwo compose: local ladder first, cluster walk after.\n\nFiltering (a candidate that fails any filter is never tried):\n\n- capability: the peer must advertise the spec type (or have no\n  advertisement, in which case the operator configured it explicitly);\n- privacy: remote candidates require ``policy.remote_inference`` and a\n  non-strict ``privacy_class`` (slice 211);\n- serve: the peer must serve remote decisions (``PeerRecord`` has no\n  serve flag \u2014 the RPC reports ``backend_unavailable``, which the walk\n  treats as an ordinary candidate failure).\n\nScoring: each peer carries :class:`PeerScores` (health/latency/cost in\n[0,1], maintained by slices 213-215; default 1.0 = perfect). The total\nis the weighted mean; the local candidate scores a flat 1.0 and wins\nties (no network hop).\n\nWalking (:func:`DistributedRouter.decide`): try candidates in order;\n``BackendError`` (incl. ``BackendUnavailable``, ``TimeoutError``)\nmoves to the next candidate; ``Abstention`` and ``PrivacyViolation``\npropagate \u2014 they are decisions, not transport failures.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 222,
+      "path": "hugrgate/cluster/routing.py",
+      "public_defs": [
+        "PeerScores",
+        "RouteCandidate",
+        "DistributedRouter",
+        "node_id",
+        "weights",
+        "set_scores",
+        "scores_for",
+        "route",
+        "best",
+        "decide",
+        "audit"
       ]
     },
     "hugrgate.cluster.rpc": {
@@ -1394,6 +1419,7 @@
     "test_cluster_policy_sync.py",
     "test_cluster_privacy_boundary.py",
     "test_cluster_protocol.py",
+    "test_cluster_routing.py",
     "test_cluster_rpc.py",
     "test_cluster_static_config.py",
     "test_cluster_transport.py",
@@ -1424,5 +1450,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10818
+  "total_loc": 11051
 }

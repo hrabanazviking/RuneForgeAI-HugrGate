@@ -81,6 +81,7 @@ flowchart TD
         cluster_transport[cluster.transport]
         cluster_policy_sync[cluster.policy_sync]
         cluster_privacy_boundary[cluster.privacy_boundary]
+        cluster_routing[cluster.routing]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -181,6 +182,7 @@ flowchart TD
     cluster --> cluster_policy_sync
     cluster --> cluster_privacy_boundary
     cluster --> cluster_protocol
+    cluster --> cluster_routing
     cluster --> cluster_rpc
     cluster --> cluster_static_config
     cluster --> cluster_transport
@@ -206,6 +208,7 @@ flowchart TD
     cluster_node --> cluster_identity
     cluster_node --> cluster_policy_sync
     cluster_node --> cluster_protocol
+    cluster_node --> cluster_routing
     cluster_node --> cluster_rpc
     cluster_node --> core
     cluster_node --> errors
@@ -222,6 +225,13 @@ flowchart TD
     cluster_routes --> cluster_node
     cluster_routes --> cluster_protocol
     cluster_routes --> errors
+    cluster_routing --> cluster_discovery
+    cluster_routing --> cluster_node
+    cluster_routing --> cluster_privacy_boundary
+    cluster_routing --> errors
+    cluster_routing --> policy
+    cluster_routing --> result
+    cluster_routing --> spec
     cluster_rpc --> backend
     cluster_rpc --> cluster_discovery
     cluster_rpc --> cluster_privacy_boundary
@@ -323,7 +333,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -425,6 +435,7 @@ flowchart TD
 | `cluster` | `cluster.policy_sync` | no |
 | `cluster` | `cluster.privacy_boundary` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster` | `cluster.routing` | no |
 | `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
 | `cluster` | `cluster.transport` | no |
@@ -450,6 +461,7 @@ flowchart TD
 | `cluster.node` | `cluster.identity` | no |
 | `cluster.node` | `cluster.policy_sync` | no |
 | `cluster.node` | `cluster.protocol` | no |
+| `cluster.node` | `cluster.routing` | no |
 | `cluster.node` | `cluster.rpc` | no |
 | `cluster.node` | `core` | no |
 | `cluster.node` | `errors` | no |
@@ -466,6 +478,13 @@ flowchart TD
 | `cluster.routes` | `cluster.node` | no |
 | `cluster.routes` | `cluster.protocol` | no |
 | `cluster.routes` | `errors` | no |
+| `cluster.routing` | `cluster.discovery` | no |
+| `cluster.routing` | `cluster.node` | no |
+| `cluster.routing` | `cluster.privacy_boundary` | no |
+| `cluster.routing` | `errors` | no |
+| `cluster.routing` | `policy` | no |
+| `cluster.routing` | `result` | no |
+| `cluster.routing` | `spec` | no |
 | `cluster.rpc` | `backend` | no |
 | `cluster.rpc` | `cluster.discovery` | no |
 | `cluster.rpc` | `cluster.privacy_boundary` | no |

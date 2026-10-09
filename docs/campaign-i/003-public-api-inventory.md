@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 58 · **public names:** 276
+**Modules:** 59 · **public names:** 282
 
 ## API stability policy
 
@@ -245,6 +245,7 @@ that this document never drifts from the code.
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
+| `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `MessageType` | class | `(*values)` |
@@ -254,11 +255,13 @@ that this document never drifts from the code.
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+| `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
 | `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
 | `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
+| `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
@@ -358,6 +361,14 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `build_cluster_router` | function | `(node: 'ClusterNode') -> 'APIRouter'` |
+
+### `hugrgate.cluster.routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
+| `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 
 ### `hugrgate.cluster.rpc`
 

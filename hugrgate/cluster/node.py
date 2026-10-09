@@ -25,6 +25,7 @@ from hugrgate.cluster.protocol import (
     MessageType,
     new_trace_id,
 )
+from hugrgate.cluster.routing import DistributedRouter
 from hugrgate.cluster.rpc import RPCClient, error_envelope
 from hugrgate.core import HugrGate
 from hugrgate.errors import (
@@ -107,6 +108,8 @@ class ClusterNode:
         }
         #: Cluster policy propagation (slice 210).
         self.policy_sync = PolicyPropagator(node_id=identity.node_id)
+        #: Distributed routing (slice 212).
+        self.router = DistributedRouter(self)
 
     # -- local facts --------------------------------------------------------
 
