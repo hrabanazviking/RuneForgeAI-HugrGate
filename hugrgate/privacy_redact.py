@@ -259,8 +259,6 @@ class RedactionPipeline:
         For each labeled leaf, the strictest (highest) level with a
         configured redactor at or below the field's level wins.
         """
-        if not self.level_redactors:
-            return copy.deepcopy(dict(state)), []
         labeled = labels.label_state(state)
         merged = dict(self.field_redactors)
         for path, level in labeled.items():
@@ -270,6 +268,8 @@ class RedactionPipeline:
                         if lvl <= level]
             if eligible:
                 merged[path] = self.level_redactors[max(eligible)]
+        if not merged and self.text_redactor is None:
+            return copy.deepcopy(dict(state)), []
         pipeline = RedactionPipeline(field_redactors=merged,
                                      text_redactor=self.text_redactor)
         return pipeline.apply_to_state(state)

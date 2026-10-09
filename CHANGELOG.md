@@ -13,6 +13,14 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 237)
+- Remote payload compiler (`hugrgate.privacy_payload`): the
+  eight-stage outbound chokepoint (`RemotePayloadCompiler` /
+  `RemotePayload` with audit manifest); `PrivacyGuard`
+  `payload_compiler` hook + `compile_outbound`;
+  `LadderRouter._attempt` compiles remote-bound state and audits
+  denials as privacy skips.
+
 ### Added (slice 236)
 - Prompt / data minimization (`hugrgate.privacy_minimize`):
   `minimize_state`, per-backend `MinimizationPolicy`, and

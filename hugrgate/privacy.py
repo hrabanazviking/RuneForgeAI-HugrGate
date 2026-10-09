@@ -195,6 +195,27 @@ class PrivacyGuard:
         self.jurisdictions_allowed = \
             frozenset(jurisdictions_allowed) \
             if jurisdictions_allowed is not None else None
+        #: Optional outbound chokepoint (slice 237): a
+        #: :class:`~hugrgate.privacy_payload.RemotePayloadCompiler`.
+        #: When set, remote-bound state is compiled through it before
+        #: reaching a backend (see :meth:`compile_outbound`). Stored
+        #: duck-typed — ``privacy_payload`` imports this module, so no
+        #: module-level import here.
+        self.payload_compiler: Any = None
+
+    def compile_outbound(self, state: Mapping[str, Any], backend: Backend,
+                         policy: DecisionPolicy) -> Any:
+        """Compile outbound state through the payload compiler.
+
+        Returns the :class:`~hugrgate.privacy_payload.RemotePayload`.
+        Raises ``AttributeError`` when no compiler is configured —
+        check :attr:`payload_compiler` first.
+        """
+        if self.payload_compiler is None:
+            raise AttributeError("no payload compiler configured on "
+                                 "this PrivacyGuard")
+        return self.payload_compiler.compile(state, backend=backend,
+                                             policy=policy)
 
     def _trust_level(self, backend: Backend) -> str:
         """Effective trust level, attested when a registry is present."""
@@ -202,9 +223,17 @@ class PrivacyGuard:
             return self.trust_registry.level_for(backend)
         return default_trust_level(backend)
 
+    def trust_level_for(self, backend: Backend) -> str:
+        """Public alias for the effective trust level (slice 237)."""
+        return self._trust_level(backend)
+
     def _jurisdiction(self, backend: Backend) -> str:
         """Jurisdiction code for a backend (declared or default)."""
         return self.jurisdiction_registry.jurisdiction_for(backend)
+
+    def jurisdiction_for(self, backend: Backend) -> str:
+        """Public alias for the jurisdiction code (slice 237)."""
+        return self._jurisdiction(backend)
 
     def _jurisdiction_blocked(self, backend: Backend) -> str | None:
         """Return a denial reason when jurisdiction blocks the backend."""

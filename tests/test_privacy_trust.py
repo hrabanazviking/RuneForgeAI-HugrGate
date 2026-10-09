@@ -119,8 +119,8 @@ def test_guard_uses_attested_trust():
 def test_guard_without_registry_keeps_defaults():
     guard = PrivacyGuard()
     assert guard.trust_registry is None
-    assert guard._trust_level(REMOTE) == "basic"
-    assert guard._trust_level(LOCAL) == "enclave"
+    assert guard.trust_level_for(REMOTE) == "basic"
+    assert guard.trust_level_for(LOCAL) == "enclave"
 
 
 def test_registry_round_trip():
