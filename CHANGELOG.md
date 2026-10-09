@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 244)
+- Policy violation audit (`hugrgate.privacy_audit`):
+  append-only hash-chained `PrivacyAuditLog` with `FileAuditSink`;
+  `PrivacyGuard(audit_log=...)` records every denial (backend
+  blocks, jurisdiction, local-only strict, secret detection).
+
 ### Added (slice 243)
 - Key-provider abstraction (`hugrgate.privacy_keys`):
   `KeyProvider` interface, env/file/ephemeral/rotating

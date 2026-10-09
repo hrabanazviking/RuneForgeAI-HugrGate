@@ -24,15 +24,20 @@ from dataclasses import replace
 from typing import Any
 
 from hugrgate.backend import Backend
-from hugrgate.errors import BackendUnavailable, PrivacyViolation
+from hugrgate.errors import BackendUnavailable, PrivacyViolation, SecretDetected
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
+from hugrgate.privacy_audit import PrivacyAuditLog
 from hugrgate.privacy_jurisdiction import (
     JurisdictionRegistry,
     JurisdictionViolation,
 )
 from hugrgate.privacy_labels import FieldLabels
-from hugrgate.privacy_localonly import LocalOnlyPolicy, LocalOnlyResult
+from hugrgate.privacy_localonly import (
+    LocalOnlyPolicy,
+    LocalOnlyResult,
+    LocalOnlyViolation,
+)
 from hugrgate.privacy_redact import redact_metadata
 from hugrgate.privacy_secrets import SecretScanner
 from hugrgate.privacy_trust import (
@@ -183,7 +188,8 @@ class PrivacyGuard:
                  redact_provenance: bool = True,
                  trust_registry: BackendTrustRegistry | None = None,
                  jurisdiction_registry: JurisdictionRegistry | None = None,
-                 jurisdictions_allowed: set[str] | frozenset[str] | None = None):
+                 jurisdictions_allowed: set[str] | frozenset[str] | None = None,
+                 audit_log: PrivacyAuditLog | None = None):
         if remote_inference not in REMOTE_MODES:
             raise ValueError(f"remote_inference must be one of {REMOTE_MODES}, "
                              f"got {remote_inference!r}")
@@ -202,6 +208,14 @@ class PrivacyGuard:
         #: duck-typed — ``privacy_payload`` imports this module, so no
         #: module-level import here.
         self.payload_compiler: Any = None
+        #: Optional policy-violation audit log (slice 244). When set,
+        #: every privacy denial is recorded as a hash-chained event.
+        self.audit_log = audit_log
+
+    def _audit(self, event: str, **details: Any) -> None:
+        """Record an audit event when a log is attached."""
+        if self.audit_log is not None:
+            self.audit_log.record(event, **details)
 
     def compile_outbound(self, state: Mapping[str, Any], backend: Backend,
                          policy: DecisionPolicy) -> Any:
@@ -291,6 +305,8 @@ class PrivacyGuard:
         if backend.is_remote and self.remote_inference == "forbidden":
             logger.warning("privacy: remote backend %r blocked (guard=forbidden)",
                            backend.name)
+            self._audit("backend_blocked", backend=backend.name,
+                        reason="remote_inference=forbidden")
             raise PrivacyViolation(
                 f"remote backend {backend.name!r} blocked: remote_inference "
                 f"is forbidden by the privacy guard",
@@ -299,6 +315,9 @@ class PrivacyGuard:
         if denial is not None:
             logger.warning("privacy: backend %r blocked (%s)",
                            backend.name, denial)
+            self._audit("backend_blocked", backend=backend.name,
+                        reason=denial,
+                        privacy_class=policy.privacy_class)
             raise PrivacyViolation(f"backend {backend.name!r} blocked: {denial}",
                                    backend=backend.name,
                                    privacy_class=policy.privacy_class)
@@ -306,6 +325,8 @@ class PrivacyGuard:
         if jdenial is not None:
             logger.warning("privacy: backend %r blocked (%s)",
                            backend.name, jdenial)
+            self._audit("jurisdiction_violation", backend=backend.name,
+                        reason=jdenial)
             raise JurisdictionViolation(
                 f"backend {backend.name!r} blocked: {jdenial}",
                 backend=backend.name,
@@ -334,8 +355,13 @@ class PrivacyGuard:
         copy and reported in ``result.stripped``; strict mode raises
         :class:`~hugrgate.errors.LocalOnlyViolation` instead.
         """
-        return LocalOnlyPolicy(strict=strict).enforce_for_backend(
-            state, labels, backend)
+        try:
+            return LocalOnlyPolicy(strict=strict).enforce_for_backend(
+                state, labels, backend)
+        except LocalOnlyViolation:
+            self._audit("local_only_violation", backend=backend.name,
+                        strict=strict)
+            raise
 
     # -- secret detection hook (slice 234) --------------------------------
 
@@ -346,7 +372,15 @@ class PrivacyGuard:
         Hook point for outbound paths; the remote payload compiler
         (slice 237) calls this before any state leaves the process.
         """
-        (scanner or SecretScanner()).assert_no_secrets(state)
+        try:
+            (scanner or SecretScanner()).assert_no_secrets(state)
+        except SecretDetected as e:
+            findings = e.details.get("findings", [])
+            self._audit("secret_detected", findings=len(findings),
+                        patterns=sorted({f.get("pattern", "?")
+                                         for f in findings
+                                         if isinstance(f, dict)}))
+            raise
 
     # -- cache policy ----------------------------------------------------
 
