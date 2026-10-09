@@ -44,6 +44,12 @@ from hugrgate.routing.latency import (
     LatencyAwarePlanner,
     LatencyTracker,
 )
+from hugrgate.routing.memory import (
+    DEFAULT_LOCAL_MEMORY_MB,
+    DEFAULT_REMOTE_MEMORY_MB,
+    MemoryAwarePlanner,
+    MemoryModel,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
@@ -76,6 +82,10 @@ __all__ = [
     "LadderSynthesizer",
     "LatencyAwarePlanner",
     "LatencyTracker",
+    "MemoryAwarePlanner",
+    "MemoryModel",
+    "DEFAULT_LOCAL_MEMORY_MB",
+    "DEFAULT_REMOTE_MEMORY_MB",
     "QOS_DEPTH_CAPS",
     "QOS_WEIGHTS",
     "RungBuilder",
