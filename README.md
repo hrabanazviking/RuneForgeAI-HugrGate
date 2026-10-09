@@ -796,6 +796,10 @@ And Yrsa apparently brought a very large hammer. 🔨ᚱ
 
 ---
 
+![yrsa-011-1.png](yrsa-011-1.png)
+
+---
+
 ![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/Apache2License_RuneForgeAI.jpg](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/Apache2License_RuneForgeAI.jpg)
 
 ---
