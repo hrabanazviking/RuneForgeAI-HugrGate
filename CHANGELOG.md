@@ -13,6 +13,11 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 235)
+- PII detector interface (`hugrgate.privacy_pii`): `PIIDetector`
+  interface, `RegexPIIDetector` with Luhn/SSN/IPv4 validators,
+  `CompositePIIDetector`, `PIIScrubber` mask/drop actions.
+
 ### Added (slice 234)
 - Secret detection hooks (`hugrgate.privacy_secrets`):
   `SecretScanner` with curated patterns + opt-in entropy heuristic,
