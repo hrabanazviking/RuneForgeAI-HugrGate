@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "label": "decide-baseline",
+  "hugrgate_version": "0.1.0",
+  "created_unix": 1791557860.8404937,
+  "host": {
+    "platform": "Linux-7.0.0-39-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "processor": "x86_64"
+  },
+  "note": "cumulative-ms profile flamegraph, not sampled; compare shapes, not absolute timings, across hosts"
+}

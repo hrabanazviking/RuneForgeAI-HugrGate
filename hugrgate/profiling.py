@@ -30,7 +30,6 @@ import time
 from collections.abc import Callable, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from io import StringIO
 from typing import Any
 
 from hugrgate.errors import ProfilingError
@@ -169,12 +168,14 @@ class DecisionProfiler:
         self.max_entries = max_entries
         self.attach_to_metadata = attach_to_metadata
 
-    def profile(self, fn: Callable[..., Any], *args: Any,
-                label: str = "", **kwargs: Any) -> tuple[Any, ProfileReport]:
-        """Run ``fn(*args, **kwargs)`` under cProfile.
+    def profile_raw(self, fn: Callable[..., Any], *args: Any,
+                    label: str = "", **kwargs: Any
+                    ) -> tuple[Any, Any, float]:
+        """Run ``fn`` under cProfile; return ``(result, pstats.Stats, wall_ms)``.
 
-        Returns ``(fn_result, report)``.  Exceptions from ``fn`` propagate
-        unchanged — the report is discarded, the error is not swallowed.
+        The raw stats object feeds consumers that need the true call
+        graph (e.g. :mod:`hugrgate.flame`); :meth:`profile` is the
+        friendlier wrapper around this.
         """
         profiler = cProfile.Profile()
         start = time.perf_counter()
@@ -184,8 +185,18 @@ class DecisionProfiler:
         finally:
             profiler.disable()
         wall_ms = (time.perf_counter() - start) * 1000.0
-        stream = StringIO()
-        stats = pstats.Stats(profiler, stream=stream).sort_stats(self.sort_by)
+        stats = pstats.Stats(profiler).sort_stats(self.sort_by)
+        return result, stats, wall_ms
+
+    def profile(self, fn: Callable[..., Any], *args: Any,
+                label: str = "", **kwargs: Any) -> tuple[Any, ProfileReport]:
+        """Run ``fn(*args, **kwargs)`` under cProfile.
+
+        Returns ``(fn_result, report)``.  Exceptions from ``fn`` propagate
+        unchanged — the report is discarded, the error is not swallowed.
+        """
+        result, stats, wall_ms = self.profile_raw(
+            fn, *args, label=label, **kwargs)
         report = _stats_to_report(stats, wall_ms, label or fn.__name__)
         if self.max_entries and len(report.entries) > self.max_entries:
             report.entries = sorted(
