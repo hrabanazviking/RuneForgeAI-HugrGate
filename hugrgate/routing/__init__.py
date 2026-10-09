@@ -33,6 +33,12 @@ from hugrgate.routing.confidence import (
     ConfidenceAwarePlanner,
     adjusted_gate,
 )
+from hugrgate.routing.dag import (
+    DAGExecutor,
+    DAGNode,
+    RoutingDAG,
+    evaluate_condition,
+)
 from hugrgate.routing.cost import (
     CostAwarePlanner,
     CostLedger,
@@ -133,7 +139,11 @@ __all__ = [
     "PrivacyAwarePlanner",
     "PrivacyTier",
     "BackendClearance",
+    "DAGExecutor",
+    "DAGNode",
     "DataClassifier",
+    "RoutingDAG",
+    "evaluate_condition",
     "QOS_PROFILES",
     "QoSClass",
     "QoSProfile",
