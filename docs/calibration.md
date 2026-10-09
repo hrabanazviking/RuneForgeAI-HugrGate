@@ -32,6 +32,27 @@ weights. Attached to results as `calibration_profile`.
 
 ## Drift
 
-`DriftMonitor`: PSI (population stability index) comparing live
-prediction distributions against calibration-time baselines. Alerts when
-drift exceeds threshold; issues recalibration advisories.
+`DriftMonitor` (`hugrgate.drift`): PSI (population stability index)
+comparing live prediction distributions against calibration-time
+baselines. Two modes:
+
+```python
+from hugrgate.drift import DriftMonitor, recalibration_advisory
+
+# Histogram mode: confidence distribution vs calibration time.
+monitor = DriftMonitor(alert_threshold=0.25)
+monitor.fit_reference(calibration_confidences)
+report = monitor.observe(live_confidences)   # DriftReport: psi, alert, severity
+if report.alert:
+    print(recalibration_advisory(report))    # concrete next steps
+
+# Streaming mode: per-prediction observations.
+monitor.observe("escalate", 0.92)
+...
+if monitor.check_drift():                    # PSI over label frequencies
+    print("label drift:", monitor.psi())
+```
+
+Thresholds follow the industry rule of thumb: PSI < 0.10 no drift,
+0.10–0.25 watch, ≥ 0.25 significant drift → recalibration advised.
+Alerts below `min_live_samples` (default 30) are suppressed.

@@ -49,9 +49,24 @@ router = LadderRouter([
 ## Local Server
 
 ```bash
-hugrgate serve --port 8000   # localhost only by default
-curl -X POST localhost:8000/decide -d '{"state": {...}, "spec": {...}}'
+hugrgate serve --port 8377   # localhost only by default
+curl -X POST localhost:8377/decide -d '{"state": {...}, "spec": {...}}'
 ```
+
+## Benchmarks
+
+Three original datasets ship in `benchmarks/` (500 items each, seeded
+and checksummed — see `benchmarks/README.md`):
+
+```bash
+hugrgate bench --dataset benchmarks/triage_500.json \
+    --backends keyword,uniform --out /tmp/bench.json
+hugrgate report --report /tmp/bench.json --out /tmp/bench.md
+```
+
+Metrics: accuracy, Brier score, ECE, latency p50/p99, throughput,
+abstention rate — plus ASCII reliability diagrams in the markdown
+report.
 
 ## Design Maxim
 

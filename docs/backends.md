@@ -39,3 +39,20 @@ tokens are ever emitted. Token budget, timeout, never invalid values.
 
 Subclass `Backend`, implement `capabilities()`, `supports()`,
 `evaluate()`, `health()`. Register with `BackendRegistry` or `HugrGate.register()`.
+
+## Built-in baselines (`hugrgate.server`)
+
+The service, CLI, daemon and benchmark harness ship two deterministic,
+dependency-free backends so everything works end to end with zero ML:
+
+- **`uniform`** — maximum-ignorance baseline: uniform distribution over
+  the spec space (numeric → midpoint). The accuracy floor every real
+  backend must beat.
+- **`keyword`** — keyword-overlap classifier: scores each label by token
+  overlap with the state's text (light prefix stemming), softmax to a
+  distribution. Transparent and honest; genuinely useful for routing
+  decisions where labels name the thing being detected.
+
+`build_gate(extra_backends=[...])` wires them into a `HugrGate`;
+`GET /models` exposes the model catalogue (`register_model()` adds
+entries for your own models).
