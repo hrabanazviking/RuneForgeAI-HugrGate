@@ -40,6 +40,24 @@ from hugrgate.ensemble.blending import (
     log_loss,
     project_simplex,
 )
+from hugrgate.ensemble.disagreement import (
+    LEVEL_MILD,
+    LEVEL_NONE,
+    LEVEL_STRONG,
+    DisagreementDetector,
+    DisagreementReport,
+    DisagreementThresholds,
+)
+from hugrgate.ensemble.diversity import (
+    disagreement_rate,
+    diversity_summary,
+    double_fault_rate,
+    error_correlation,
+    error_disagreement_rate,
+    q_statistic,
+    vote_entropy,
+    winner_margin,
+)
 from hugrgate.ensemble.moe import ExpertRouter, moe_combine
 from hugrgate.ensemble.stacking import (
     SoftmaxRegression,
@@ -87,4 +105,18 @@ __all__ = [
     "log_loss",
     "ExpertRouter",
     "moe_combine",
+    "vote_entropy",
+    "disagreement_rate",
+    "winner_margin",
+    "q_statistic",
+    "double_fault_rate",
+    "error_disagreement_rate",
+    "error_correlation",
+    "diversity_summary",
+    "LEVEL_NONE",
+    "LEVEL_MILD",
+    "LEVEL_STRONG",
+    "DisagreementThresholds",
+    "DisagreementReport",
+    "DisagreementDetector",
 ]

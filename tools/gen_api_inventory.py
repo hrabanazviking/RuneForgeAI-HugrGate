@@ -14,6 +14,7 @@ from __future__ import annotations
 import importlib
 import inspect
 import os
+import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +45,11 @@ def describe(module, name: str) -> tuple[str, str]:
     elif inspect.ismethoddescriptor(obj):
         kind = "method-descriptor"
     else:
-        return "constant", repr(obj)[:60]
+        # Memory addresses make the doc non-deterministic across runs
+        # (e.g. dicts of functions like ensemble.STRATEGIES); scrub them
+        # so re-running on an unchanged tree stays byte-identical.
+        scrubbed = re.sub(r"0x[0-9a-fA-F]+", "0xADDR", repr(obj))
+        return "constant", scrubbed[:60]
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):

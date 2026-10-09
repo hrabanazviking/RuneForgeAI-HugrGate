@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 47 · **public names:** 217
+**Modules:** 53 · **public names:** 270
 
 ## API stability policy
 
@@ -262,13 +262,13 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None, fitted: 'Any' = None)` |
 | `EnsembleConfig` | class | `(weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
-| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x7fade2729260>, 'hard': <` |
+| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0xADDR>, 'hard': <function` |
 | `register_strategy` | function | `(name: 'str', combiner: 'Combiner') -> 'None'` |
 | `get_strategy` | function | `(name: 'str') -> 'Combiner'` |
 | `MemberVote` | class | `(backend: 'str', value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, weight: 'float' = 1.0, skipped: 'bool' = False, skip_reason: 'str' = '', latency_ms: 'float' = 0.0) -> None` |
-| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None) -> None` |
+| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None, state: 'Optional[Mapping[str, Any]]' = None) -> None` |
 | `Combiner` | constant | `typing.Callable[[typing.List[hugrgate.ensemble.base.MemberVo` |
 | `DISCRETE_SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal')` |
 | `normalize_weights` | function | `(weights: 'Mapping[str, float]', members: 'List[str]') -> 'Dict[str, float]'` |
@@ -276,27 +276,59 @@ that this document never drifts from the code.
 | `normalized_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
 | `break_tie` | function | `(candidates: 'List[str]', scores: 'Mapping[str, float]', first_seen: 'Mapping[str, int]') -> 'str'` |
 | `require_discrete_spec` | function | `(spec: 'DecisionSpec', strategy: 'str') -> 'None'` |
+| `complete_distribution` | function | `(vote: 'MemberVote', space: 'List[str]') -> 'Dict[str, float]'` |
 | `collect_votes` | function | `(members: 'List[Backend]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Optional[Mapping[str, Any]]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, ensemble_name: 'str' = 'ensemble') -> 'List[MemberVote]'` |
 | `finalize_result` | function | `(*, strategy: 'str', spec: 'DecisionSpec', votes: 'List[MemberVote]', weights: 'Mapping[str, float]', value: 'Any', probability: 'float', distribution: 'Dict[str, float]', uncertainty: 'float', winner_share: 'Optional[float]' = None, extra: 'Optional[Dict[str, Any]]' = None, model: 'str' = 'ensemble', latency_ms: 'float' = 0.0, backend: 'str' = 'ensemble') -> 'DecisionResult'` |
 | `soft_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 | `hard_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `weighted_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `confidence_weighted_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `BayesianModelAverager` | class | `(members: 'List[str]', priors: 'Optional[Mapping[str, float]]' = None)` |
+| `bma_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `predictive_log_likelihood` | function | `(distribution: 'Mapping[str, float]', true_label: 'str') -> 'float'` |
+| `SoftmaxRegression` | class | `(n_features: 'int', n_classes: 'int', l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `StackingEngine` | class | `(members: 'List[str]', l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `stacking_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `Blender` | class | `(members: 'List[str]', lr: 'float' = 0.5, iters: 'int' = 500)` |
+| `blending_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `project_simplex` | function | `(v: 'List[float]') -> 'List[float]'` |
+| `log_loss` | function | `(blended: 'Dict[str, float]', true_label: 'str') -> 'float'` |
+| `ExpertRouter` | class | `(members: 'List[str]', feature_names: 'List[str]', top_k: 'Optional[int]' = None, l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `moe_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `vote_entropy` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `disagreement_rate` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `winner_margin` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `q_statistic` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `double_fault_rate` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `error_disagreement_rate` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `error_correlation` | function | `(probs_a: 'List[float]', probs_b: 'List[float]') -> 'float'` |
+| `diversity_summary` | function | `(votes: 'List[MemberVote]') -> 'Dict[str, float]'` |
 
 ### `hugrgate.ensemble.api`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x7fade2729260>, 'hard': <` |
+| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0xADDR>, 'hard': <function` |
 | `register_strategy` | function | `(name: 'str', combiner: 'Combiner') -> 'None'` |
 | `get_strategy` | function | `(name: 'str') -> 'Combiner'` |
-| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+| `Ensemble` | class | `(members: 'List[Backend]', strategy: 'str' = 'soft', name: 'Optional[str]' = None, config: 'Optional[EnsembleConfig]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'Optional[int]' = None, strategy_options: 'Optional[Dict[str, Any]]' = None, fitted: 'Any' = None)` |
 | `EnsembleConfig` | class | `(weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, strategy_options: 'Optional[Dict[str, Any]]' = None)` |
+
+### `hugrgate.ensemble.averaging`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LOG_EPS` | constant | `1e-12` |
+| `BayesianModelAverager` | class | `(members: 'List[str]', priors: 'Optional[Mapping[str, float]]' = None)` |
+| `predictive_log_likelihood` | function | `(distribution: 'Mapping[str, float]', true_label: 'str') -> 'float'` |
+| `bma_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 
 ### `hugrgate.ensemble.base`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `MemberVote` | class | `(backend: 'str', value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, weight: 'float' = 1.0, skipped: 'bool' = False, skip_reason: 'str' = '', latency_ms: 'float' = 0.0) -> None` |
-| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None) -> None` |
+| `StrategyContext` | class | `(spec: 'DecisionSpec', options: 'Dict[str, Any]' = <factory>, fitted: 'Any' = None, state: 'Optional[Mapping[str, Any]]' = None) -> None` |
 | `Combiner` | constant | `typing.Callable[[typing.List[hugrgate.ensemble.base.MemberVo` |
 | `DISCRETE_SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal')` |
 | `normalize_weights` | function | `(weights: 'Mapping[str, float]', members: 'List[str]') -> 'Dict[str, float]'` |
@@ -304,8 +336,57 @@ that this document never drifts from the code.
 | `normalized_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
 | `break_tie` | function | `(candidates: 'List[str]', scores: 'Mapping[str, float]', first_seen: 'Mapping[str, int]') -> 'str'` |
 | `require_discrete_spec` | function | `(spec: 'DecisionSpec', strategy: 'str') -> 'None'` |
+| `complete_distribution` | function | `(vote: 'MemberVote', space: 'List[str]') -> 'Dict[str, float]'` |
 | `collect_votes` | function | `(members: 'List[Backend]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Optional[Mapping[str, Any]]' = None, weights: 'Optional[Mapping[str, float]]' = None, min_members: 'int' = 1, ensemble_name: 'str' = 'ensemble') -> 'List[MemberVote]'` |
 | `finalize_result` | function | `(*, strategy: 'str', spec: 'DecisionSpec', votes: 'List[MemberVote]', weights: 'Mapping[str, float]', value: 'Any', probability: 'float', distribution: 'Dict[str, float]', uncertainty: 'float', winner_share: 'Optional[float]' = None, extra: 'Optional[Dict[str, Any]]' = None, model: 'str' = 'ensemble', latency_ms: 'float' = 0.0, backend: 'str' = 'ensemble') -> 'DecisionResult'` |
+
+### `hugrgate.ensemble.blending`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `project_simplex` | function | `(v: 'List[float]') -> 'List[float]'` |
+| `log_loss` | function | `(blended: 'Dict[str, float]', true_label: 'str') -> 'float'` |
+| `Blender` | class | `(members: 'List[str]', lr: 'float' = 0.5, iters: 'int' = 500)` |
+| `blending_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+
+### `hugrgate.ensemble.disagreement`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LEVEL_NONE` | constant | `'none'` |
+| `LEVEL_MILD` | constant | `'mild'` |
+| `LEVEL_STRONG` | constant | `'strong'` |
+| `DisagreementThresholds` | class | `(strong_disagreement: 'float' = 0.5, mild_disagreement: 'float' = 0.2, strong_entropy: 'float' = 1.0, mild_entropy: 'float' = 0.5, mild_margin: 'float' = 0.3) -> None` |
+| `DisagreementReport` | class | `(level: 'str', disagree: 'bool', vote_entropy: 'float', disagreement_rate: 'float', winner_margin: 'float', plurality_value: 'Optional[str]', dissenters: 'List[str]' = <factory>, ballots: 'int' = 0) -> None` |
+| `DisagreementDetector` | class | `(thresholds: 'Optional[DisagreementThresholds]' = None)` |
+
+### `hugrgate.ensemble.diversity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `vote_entropy` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `disagreement_rate` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `winner_margin` | function | `(votes: 'List[MemberVote]') -> 'float'` |
+| `q_statistic` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `double_fault_rate` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `error_disagreement_rate` | function | `(correct_a: 'List[bool]', correct_b: 'List[bool]') -> 'float'` |
+| `error_correlation` | function | `(probs_a: 'List[float]', probs_b: 'List[float]') -> 'float'` |
+| `diversity_summary` | function | `(votes: 'List[MemberVote]') -> 'Dict[str, float]'` |
+
+### `hugrgate.ensemble.moe`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ExpertRouter` | class | `(members: 'List[str]', feature_names: 'List[str]', top_k: 'Optional[int]' = None, l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `moe_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+
+### `hugrgate.ensemble.stacking`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SoftmaxRegression` | class | `(n_features: 'int', n_classes: 'int', l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `StackingEngine` | class | `(members: 'List[str]', l2: 'float' = 0.01, lr: 'float' = 1.0, iters: 'int' = 1000)` |
+| `stacking_combine` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 
 ### `hugrgate.ensemble.voting`
 
@@ -313,6 +394,8 @@ that this document never drifts from the code.
 |---|---|---|
 | `soft_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 | `hard_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `weighted_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
+| `confidence_weighted_voting` | function | `(votes: 'List[MemberVote]', ctx: 'StrategyContext') -> 'DecisionResult'` |
 
 ### `hugrgate.errors`
 
