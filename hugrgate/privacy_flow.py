@@ -163,7 +163,7 @@ class DataFlowPolicy:
             for fname, level in request.field_levels.items():
                 if fname in request.local_only_fields:
                     continue  # handled by rule 5
-                if level > self.max_remote_level:
+                if _coerce_level(level) > self.max_remote_level:
                     if self.redact_instead_of_deny:
                         redactions.append(fname)
                         reasons.append(

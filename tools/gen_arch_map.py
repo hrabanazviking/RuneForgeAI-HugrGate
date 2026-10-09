@@ -73,6 +73,18 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.negotiate", "hugrgate.fallback", "hugrgate.timeout",
         "hugrgate.circuit", "hugrgate.privacy", "hugrgate.ladder",
     ],
+    "privacy-fortress": [  # Campaign X — data sovereignty controls
+        "hugrgate.privacy_audit", "hugrgate.privacy_crypto",
+        "hugrgate.privacy_deletion", "hugrgate.privacy_dryrun",
+        "hugrgate.privacy_exfil", "hugrgate.privacy_explain",
+        "hugrgate.privacy_flow", "hugrgate.privacy_jurisdiction",
+        "hugrgate.privacy_keys", "hugrgate.privacy_labels",
+        "hugrgate.privacy_localonly", "hugrgate.privacy_minimize",
+        "hugrgate.privacy_payload", "hugrgate.privacy_pii",
+        "hugrgate.privacy_provenance", "hugrgate.privacy_redact",
+        "hugrgate.privacy_retention", "hugrgate.privacy_secrets",
+        "hugrgate.privacy_tokens", "hugrgate.privacy_trust",
+    ],
     "routing": [  # Campaign III — Ladder II plan/execute routing subsystem
         "hugrgate.routing", "hugrgate.routing.architecture",
         "hugrgate.routing.rungs", "hugrgate.routing.synthesis",

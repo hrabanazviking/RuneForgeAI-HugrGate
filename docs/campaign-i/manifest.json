@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T14:34:32.013249+00:00",
-  "module_count": 234,
+  "generated_utc": "2026-10-09T15:45:49.568674+00:00",
+  "module_count": 254,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -31,20 +31,21 @@
       "imports": [
         "hugrgate"
       ],
-      "loc": 201,
+      "loc": 211,
       "path": "hugrgate/adaptive/__init__.py",
       "public_defs": []
     },
     "hugrgate.adaptive.bandit": {
-      "docstring": "Contextual bandit adapter. Slice 130.\n\nThe learning heart of adaptive routing: :class:`ContextualBanditAdapter`\nmaps router context features (slice 129) to a choice of backend arm using\n**LinUCB** \u2014 one ridge-regression model per arm, with an upper-confidence\nbound that explores arms whose reward is uncertain.\n\nDesign decisions:\n\n- **Pure standard library.** Feature dimensions here are small (tens),\n  so the linear solves use Gaussian elimination with partial pivoting\n  instead of numpy. This keeps the adaptive package importable on the\n  base install, honoring the repo's stdlib-only contract.\n- **Deterministic.** No randomness inside the adapter: given the same\n  weights and features, ``select`` returns the same arm. Exploration\n  policy (epsilon schedules, kill switches) lives in slice 141.\n- **Serializable.** :meth:`to_dict` / :meth:`from_dict` round-trip the\n  full learned state, which is what policy versioning (slice 146) and\n  rollback (slice 145) checkpoint.\n- **Numerically guarded.** The ridge term keeps every ``A`` matrix\n  positive-definite; the solver raises\n  :class:`~hugrgate.errors.BackendError` on a singular system rather\n  than returning garbage.\n\nThe adapter does not know about backends, policies, or telemetry \u2014 it\nlearns ``features -> reward`` per named arm. Wiring (propensities,\nobjectives, safety) is layered on top by slices 131\u2013142.",
+      "docstring": "Contextual bandit adapter. Slice 130.\n\nThe learning heart of adaptive routing: :class:`ContextualBanditAdapter`\nmaps router context features (slice 129) to a choice of backend arm using\n**LinUCB** - one ridge-regression model per arm, with an upper-confidence\nbound that explores arms whose reward is uncertain.\n\nDesign decisions:\n\n- **Pure standard library.** Feature dimensions here are small (tens),\n  so the linear solves use Gaussian elimination with partial pivoting\n  instead of numpy. This keeps the adaptive package importable on the\n  base install, honoring the repo's stdlib-only contract.\n- **Deterministic.** No randomness inside the adapter: given the same\n  weights and features, ``select`` returns the same arm. Exploration\n  policy (epsilon schedules, kill switches) lives in slice 141.\n- **Serializable.** :meth:`to_dict` / :meth:`from_dict` round-trip the\n  full learned state, which is what policy versioning (slice 146) and\n  rollback (slice 145) checkpoint.\n- **Numerically guarded.** The ridge term keeps every ``A`` matrix\n  positive-definite; the solver raises\n  :class:`~hugrgate.errors.BackendError` on a singular system rather\n  than returning garbage.\n\nThe adapter does not know about backends, policies, or telemetry - it\nlearns ``features -> reward`` per named arm. Wiring (propensities,\nobjectives, safety) is layered on top by slices 131-142.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "math",
         "typing"
       ],
-      "loc": 277,
+      "loc": 278,
       "path": "hugrgate/adaptive/bandit.py",
       "public_defs": [
         "BanditDecision",
@@ -61,9 +62,10 @@
       ]
     },
     "hugrgate.adaptive.benchmark": {
-      "docstring": "Adaptive routing benchmark. Slice 149.\n\nClaims about adaptive routing need a reproducible arena, not anecdotes.\n:class:`AdaptiveRoutingBenchmark` replays a synthetic-but-deterministic\ncontextual scenario for ``rounds`` rounds and compares four policies:\n\n- ``uniform`` \u2014 random arm each round (the \"no learning\" floor);\n- ``round_robin`` \u2014 deterministic rotation (the naive-fair baseline);\n- ``static_first`` \u2014 always the first arm (the \"don't bother\" baseline);\n- ``adaptive`` \u2014 the LinUCB :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter`\n  (slice 130) learning online from observed rewards.\n\nThe scenario is a callable ``(rng, round_idx) -> (features, rewards)``\nreturning the context features and the *true* per-arm rewards for that\nround; a default context-dependent scenario is provided\n(:func:`default_scenario`) where the best arm depends on the context, so\na learning policy can genuinely beat the static baselines.\n\n:func:`run` returns a :class:`BenchmarkArtifact` \u2014 every number computed\nfrom the replay, with the baselines' mean rewards stated explicitly so\n\"adaptive beats X\" is checkable, never asserted. :meth:`save` writes it\nas JSON; the checked-in artifact at\n``docs/campaign-vi/artifacts/adaptive-routing-benchmark.json`` is\nregenerated at full rounds after the test suite runs (tests use reduced\nrounds for speed).",
+      "docstring": "Adaptive routing benchmark. Slice 149.\n\nClaims about adaptive routing need a reproducible arena, not anecdotes.\n:class:`AdaptiveRoutingBenchmark` replays a synthetic-but-deterministic\ncontextual scenario for ``rounds`` rounds and compares four policies:\n\n- ``uniform`` - random arm each round (the \"no learning\" floor);\n- ``round_robin`` - deterministic rotation (the naive-fair baseline);\n- ``static_first`` - always the first arm (the \"don't bother\" baseline);\n- ``adaptive`` - the LinUCB :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter`\n  (slice 130) learning online from observed rewards.\n\nThe scenario is a callable ``(rng, round_idx) -> (features, rewards)``\nreturning the context features and the *true* per-arm rewards for that\nround; a default context-dependent scenario is provided\n(:func:`default_scenario`) where the best arm depends on the context, so\na learning policy can genuinely beat the static baselines.\n\n:func:`run` returns a :class:`BenchmarkArtifact` - every number computed\nfrom the replay, with the baselines' mean rewards stated explicitly so\n\"adaptive beats X\" is checkable, never asserted. :meth:`save` writes it\nas JSON; the checked-in artifact at\n``docs/campaign-vi/artifacts/adaptive-routing-benchmark.json`` is\nregenerated at full rounds after the test suite runs (tests use reduced\nrounds for speed).",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "json",
@@ -88,6 +90,7 @@
       "docstring": "Cold-start routing. Slice 140.\n\nA brand-new backend (or a new domain, contract, or deployment) has no\nhistory, and \"no history\" must not mean \"never tried\" \u2014 nor \"blindly\ntrusted\". :class:`ColdStartRouting` gives newcomers a fair, conservative\nstart:\n\n- **Shrinkage priors.** A backend with ``n`` observations gets its mean\n  shrunk toward the fleet-wide global mean with strength\n  ``prior_strength``: ``(n\u00b7mean + k\u00b7global) / (n + k)``. At ``n = 0``\n  the prior *is* the estimate; as evidence accumulates, the backend's\n  own record takes over.\n- **Bandit seeding.** :meth:`seed_bandit` translates the shrunk prior\n  into :meth:`~hugrgate.adaptive.bandit.ContextualBanditAdapter.seed_prior`\n  calls, so LinUCB starts exploring from \"average\" rather than zero \u2014\n  zero would systematically under-explore newcomers when rewards are\n  positive.\n- **Prioritized maiden voyages.** :meth:`recommend` picks the arm with\n  the best shrunk prior mean among arms with fewer than\n  ``maiden_voyages`` observations, guaranteeing newcomers get their\n  first real trials instead of starving behind incumbents.\n\nThe global prior is honest about ignorance: it is the fleet mean, not a\nmarketing number, and every shrinkage is auditable via\n:meth:`prior_report`.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
@@ -104,9 +107,10 @@
       ]
     },
     "hugrgate.adaptive.competence": {
-      "docstring": "Backend competence profiles. Slice 137.\n\nThe bandit learns online; competence profiles remember *offline*. A\n:class:`CompetenceProfile` is the long-run report card for one backend:\nattempts, quality-weighted successes, mean latency, mean cost \u2014 plus a\n**Wilson score lower bound** on the success rate, so ranking prefers\n\"10/10\" over \"1/1\" and a battle-tested 85% over a lucky 100% on three\nsamples.\n\n:class:`BackendCompetenceProfiles` is the registry:\n\n- :meth:`observe` folds one labeled outcome in (online path);\n- :meth:`update_from_telemetry` rebuilds from a telemetry store's\n  labeled events (batch path, slice 126);\n- :meth:`ranked` orders backends by Wilson lower bound \u2014 the\n  exploitation-safe ordering;\n- profiles serialize for versioning/rollback (slices 145\u2013146).\n\n\"Success\" is quality \u2265 ``success_threshold``; quality itself is averaged\nseparately so near-misses still inform the mean.",
+      "docstring": "Backend competence profiles. Slice 137.\n\nThe bandit learns online; competence profiles remember *offline*. A\n:class:`CompetenceProfile` is the long-run report card for one backend:\nattempts, quality-weighted successes, mean latency, mean cost - plus a\n**Wilson score lower bound** on the success rate, so ranking prefers\n\"10/10\" over \"1/1\" and a battle-tested 85% over a lucky 100% on three\nsamples.\n\n:class:`BackendCompetenceProfiles` is the registry:\n\n- :meth:`observe` folds one labeled outcome in (online path);\n- :meth:`update_from_telemetry` rebuilds from a telemetry store's\n  labeled events (batch path, slice 126);\n- :meth:`ranked` orders backends by Wilson lower bound - the\n  exploitation-safe ordering;\n- profiles serialize for versioning/rollback (slices 145-146).\n\n\"Success\" is quality \u2265 ``success_threshold``; quality itself is averaged\nseparately so near-misses still inform the mean.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "math",
@@ -137,6 +141,7 @@
       "docstring": "Per-contract competence. Slice 139.\n\nDomains (slice 138) are coarse: \"numeric\" covers everything from\nthermostat readings to derivatives pricing. *Contracts* are finer \u2014 the\napplication's declared agreement about a decision: ``spec.metadata``\nmay carry ``\"contract\"`` (e.g. ``\"fraud-score/v3\"``) and ``\"version\"``.\n:class:`PerContractCompetence` tracks ``(backend, contract)`` profiles so\nthe router learns that backend B is superb at ``fraud-score/v3`` while\nmediocre at ``fraud-score/v4`` \u2014 a distinction a domain average would\nerase.\n\nContract resolution for an event:\n\n1. ``spec.metadata[\"contract\"]`` when present (plus ``\"/v\" + version``\n   when ``metadata[\"version\"]`` is present);\n2. otherwise the spec ``type`` \u2014 degrading gracefully to slice-138\n   behavior rather than inventing a contract.\n\nLike domains, contracts fall back: exact ``(backend, contract)`` \u2192\nbackend global \u2192 ``None``.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
@@ -157,7 +162,7 @@
       ]
     },
     "hugrgate.adaptive.cost_quality": {
-      "docstring": "Cost-quality objective. Slice 132.\n\nAlso home to Campaign VI's shared routing contracts: :class:`RoutingCandidate`\n(the per-arm estimate every objective scores) and :class:`RouteObjective`\n(the scoring interface slices 133\u2013136 implement).\n\nA router that maximizes quality alone will happily spend a fortune; one\nthat minimizes cost alone will route everything to the cheapest broken\nbackend. :class:`CostQualityObjective` scalarizes the trade-off:\n\n    score = quality_weight * quality - cost_weight * (cost / cost_scale)\n\n``cost_scale`` keeps the two terms commensurable (dollars and quality\nlive on different planets); the weights let the application declare how\nmuch quality a unit of money is worth. Both weights must be\nnon-negative, and at least one must be positive \u2014 an objective that\nscores everything zero routes at random, which is a bug, not a policy.",
+      "docstring": "Cost-quality objective. Slice 132.\n\nAlso home to Campaign VI's shared routing contracts: :class:`RoutingCandidate`\n(the per-arm estimate every objective scores) and :class:`RouteObjective`\n(the scoring interface slices 133-136 implement).\n\nA router that maximizes quality alone will happily spend a fortune; one\nthat minimizes cost alone will route everything to the cheapest broken\nbackend. :class:`CostQualityObjective` scalarizes the trade-off:\n\n    score = quality_weight * quality - cost_weight * (cost / cost_scale)\n\n``cost_scale`` keeps the two terms commensurable (dollars and quality\nlive on different planets); the weights let the application declare how\nmuch quality a unit of money is worth. Both weights must be\nnon-negative, and at least one must be positive - an objective that\nscores everything zero routes at random, which is a bug, not a policy.",
       "imports": [
         "__future__",
         "abc",
@@ -183,6 +188,7 @@
       "docstring": "Counterfactual route evaluation. Slice 144.\n\n\"What would policy \u03c0 have earned on the traffic we actually served?\"\n:class:`CounterfactualEvaluator` answers from logged telemetry \u2014\n``(features, candidates, chosen, propensity, reward)`` tuples \u2014 without\nserving \u03c0 to a single live request.\n\nEstimators:\n\n- ``\"ips\"`` \u2014 inverse propensity scoring: ``\u03a3 (\u03c0(x)=a) \u00b7 r / \u03bc(a|x) / n``.\n  Unbiased but high-variance when \u03c0 and the logging policy \u03bc disagree.\n- ``\"snips\"`` \u2014 self-normalized IPS: divides by ``\u03a3 1/\u03bc(a|x) / n``.\n  Slightly biased, much calmer; the default.\n- ``\"dr\"`` \u2014 doubly robust: IPS on the *residual* of a reward model\n  plus the model's direct prediction. Unbiased if *either* the\n  propensities or the reward model are right. The reward model here is\n  a :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter` trained\n  on the same log (or supplied by the caller).\n\nOnly labeled, non-shadow events with positive propensities participate;\neverything skipped is counted in the report. The evaluator never invents\nrewards: an event without a usable reward is excluded, not imputed.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -206,7 +212,7 @@
         "time",
         "typing"
       ],
-      "loc": 172,
+      "loc": 171,
       "path": "hugrgate/adaptive/delayed.py",
       "public_defs": [
         "DelayedLabel",
@@ -224,6 +230,7 @@
       "docstring": "Per-domain competence. Slice 138.\n\nA backend that shines at categorical classification may fumble numeric\nregression. :class:`PerDomainCompetence` keeps one\n:class:`~hugrgate.adaptive.competence.CompetenceProfile` per\n``(backend, domain)`` pair, so the router can ask \"how good is *this*\nbackend at *this kind* of work?\" instead of averaging over everything.\n\nDomain resolution order for an event:\n\n1. ``spec.metadata[\"domain\"]`` \u2014 the application knows best;\n2. the spec ``type`` (``\"categorical\"``, ``\"numeric\"``, \u2026) as fallback;\n3. ``\"unknown\"`` \u2014 never crash routing for lack of a label.\n\n:meth:`get_with_fallback` implements the graceful-degradation ladder:\nexact ``(backend, domain)`` \u2192 backend's global profile \u2192 ``None``. The\nrouter therefore always has *some* evidence, and cold domains inherit\nthe backend's overall reputation until they earn their own.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
@@ -244,9 +251,10 @@
       ]
     },
     "hugrgate.adaptive.drift_detect": {
-      "docstring": "Adaptive-route drift detection. Slice 148.\n\nLearning never stops, and neither does the world changing underneath\nit. :class:`AdaptiveRouteDriftDetector` watches two signals for\ndistribution shift against a reference window:\n\n- **route drift** \u2014 the share of traffic each arm receives (a policy\n  that suddenly routes 90% to one backend is telling you something);\n- **reward drift** \u2014 the distribution of observed outcome quality\n  (the world getting harder, or easier, for everyone).\n\nBoth use the Population Stability Index from :mod:`hugrgate.drift`\n(``PSI = \u03a3 (live% \u2212 ref%) \u00b7 ln(live% / ref%)``) with the same\nindustry-standard thresholds the calibration monitor uses\n(``PSI_WATCH = 0.10``, ``PSI_ALERT = 0.25``): one drift language across\nthe whole gate.\n\n:meth:`fit_reference` snapshots the reference window;\n:meth:`observe` compares a live window and returns an\n:class:`AdaptiveDriftReport` with per-signal PSI, severity, and an\nactionable advisory. Empty windows are refused \u2014 drift over nothing is\nnot \"no drift\", it's \"no data\".",
+      "docstring": "Adaptive-route drift detection. Slice 148.\n\nLearning never stops, and neither does the world changing underneath\nit. :class:`AdaptiveRouteDriftDetector` watches two signals for\ndistribution shift against a reference window:\n\n- **route drift** - the share of traffic each arm receives (a policy\n  that suddenly routes 90% to one backend is telling you something);\n- **reward drift** - the distribution of observed outcome quality\n  (the world getting harder, or easier, for everyone).\n\nBoth use the Population Stability Index from :mod:`hugrgate.drift`\n(``PSI = \u03a3 (live% - ref%) \u00b7 ln(live% / ref%)``) with the same\nindustry-standard thresholds the calibration monitor uses\n(``PSI_WATCH = 0.10``, ``PSI_ALERT = 0.25``): one drift language across\nthe whole gate.\n\n:meth:`fit_reference` snapshots the reference window;\n:meth:`observe` compares a live window and returns an\n:class:`AdaptiveDriftReport` with per-signal PSI, severity, and an\nactionable advisory. Empty windows are refused - drift over nothing is\nnot \"no drift\", it's \"no data\".",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -266,6 +274,7 @@
       "docstring": "Energy-quality objective. Slice 134.\n\nLocal inference is not free: every millisecond of GPU/CPU time burns\nwatt-hours. :class:`EnergyQualityObjective` scalarizes\n\n    score = quality_weight * quality - energy_weight * (energy_wh / energy_scale)\n\nand :func:`estimate_energy_wh` turns a latency measurement into a\nwatt-hour estimate from a host power model, so energy claims rest on\nmeasured latency rather than vibes:\n\n    energy_wh = watts * latency_s / 3600\n\nThe default power draws are conservative, documented estimates for\ntypical hardware classes \u2014 callers with real power telemetry should\npass their own ``watts``. Like slice 133, this module ships\n:func:`measure_energy`, which pairs :func:`measure_latency` with the\npower model to produce a reproducible energy artifact.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -283,9 +292,10 @@
       ]
     },
     "hugrgate.adaptive.explanations": {
-      "docstring": "Adaptive-route explanations. Slice 147.\n\nA router that cannot say *why* it chose an arm is a liability in\nreview, incident response, and regulated settings.\n:class:`AdaptiveRouteExplainer` turns a routing decision's internals \u2014\nper-arm scores, feature contributions, competence profiles, objective\nweights \u2014 into a structured :class:`RouteExplanation` with both\nmachine-readable fields and a human-readable narrative.\n\nExplanation sources, in order of specificity:\n\n1. **Feature contributions** \u2014 when the caller supplies per-feature\n   weights (e.g. the bandit's learned ``theta`` for the chosen arm),\n   ``contribution = weight \u00d7 feature_value`` ranks what the context\n   actually pushed on.\n2. **Score margins** \u2014 how far ahead the winner was, and who the\n   runner-up was.\n3. **Competence context** \u2014 the winner's Wilson lower bound vs the\n   field, when profiles are supplied.\n4. **Objective weights** \u2014 the value judgments behind the scores, when\n   a multi-objective router is supplied.\n\nThe explainer never invents causes: every sentence in ``text`` cites a\nnumber present in the explanation. Unknowns are stated as unknowns.",
+      "docstring": "Adaptive-route explanations. Slice 147.\n\nA router that cannot say *why* it chose an arm is a liability in\nreview, incident response, and regulated settings.\n:class:`AdaptiveRouteExplainer` turns a routing decision's internals -\nper-arm scores, feature contributions, competence profiles, objective\nweights - into a structured :class:`RouteExplanation` with both\nmachine-readable fields and a human-readable narrative.\n\nExplanation sources, in order of specificity:\n\n1. **Feature contributions** - when the caller supplies per-feature\n   weights (e.g. the bandit's learned ``theta`` for the chosen arm),\n   ``contribution = weight x feature_value`` ranks what the context\n   actually pushed on.\n2. **Score margins** - how far ahead the winner was, and who the\n   runner-up was.\n3. **Competence context** - the winner's Wilson lower bound vs the\n   field, when profiles are supplied.\n4. **Objective weights** - the value judgments behind the scores, when\n   a multi-objective router is supplied.\n\nThe explainer never invents causes: every sentence in ``text`` cites a\nnumber present in the explanation. Unknowns are stated as unknowns.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -306,12 +316,13 @@
       "docstring": "Exploration controls. Slice 141.\n\nLearning requires trying arms that are not currently the best \u2014 but\nunbounded exploration in production is how routers cause incidents.\n:class:`ExplorationControls` is the throttle between the bandit's\ncuriosity and the operator's nerves:\n\n- **Epsilon schedule.** ``epsilon`` decays geometrically per decision\n  toward ``epsilon_min``: explore eagerly while young, exploit when\n  seasoned.\n- **Under-pulled priority.** Arms with fewer than ``min_pulls_per_arm``\n  observations are always exploration-eligible, so no arm starves.\n- **Budget cap.** Exploration never exceeds ``max_exploration_share``\n  of recent decisions \u2014 a hard ceiling on how much traffic curiosity\n  may spend.\n- **Kill switch.** :meth:`disable` stops all exploration immediately\n  (and :meth:`enable` resumes); the state is explicit and auditable, not\n  a comment in a config file.\n\nDeterministic given a seeded :class:`random.Random`: the same seed and\nhistory produce the same explore/exploit sequence, which keeps tests\nand replays honest.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "random",
         "typing"
       ],
-      "loc": 170,
+      "loc": 171,
       "path": "hugrgate/adaptive/exploration.py",
       "public_defs": [
         "ExplorationConfig",
@@ -334,6 +345,7 @@
       "docstring": "Outcome feedback API. Slice 127.\n\nRoute decisions are only half the story: the router needs to know how\nthe chosen backend *did*. :class:`OutcomeFeedbackAPI` is the single\nwrite path for outcome labels \u2014 human grades, downstream success flags,\nor automated checks \u2014 onto telemetry events (slice 126).\n\nContract:\n\n- ``quality`` is required and must lie in ``[0, 1]``; ``label`` is an\n  optional categorical verdict (``\"success\"`` / ``\"failure\"`` /\n  ``\"partial\"`` \u2014 the only accepted labels, so a typo can never sneak\n  in as a new class, mirroring ``DecisionPolicy``'s privacy-class rule).\n- Unknown ``request_id`` raises ``KeyError`` \u2014 feedback for a decision\n  the router never logged is a bug, not a guess.\n- Outcomes are immutable once attached: overwriting history would poison\n  offline learning (slice 131). Pass ``allow_overwrite=True`` only when\n  the caller explicitly takes responsibility.\n- Every outcome carries its ``source`` and ``received_at`` timestamp, so\n  learners can weight or filter by provenance.\n\nThe API also offers :meth:`record_immediate`, which logs a route\ndecision *and* its immediately-known quality (e.g. the result's\nprobability and policy verdict) in one call \u2014 the common case for\nonline bandit updates (slice 130).",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
@@ -353,6 +365,7 @@
       "docstring": "Latency-quality objective. Slice 133.\n\nSame scalarization shape as slice 132, with wall-clock latency as the\nprice of quality:\n\n    score = quality_weight * quality - latency_weight * (latency_ms / latency_scale)\n\nPlus the slice's required measurement discipline:\n:func:`measure_latency` runs a callable ``n_runs`` times and returns a\n:class:`LatencyMeasurement` (mean/p50/p95/min/max \u2014 computed, never\ninvented), and :func:`compare_to_baseline` turns a measurement and an\nexplicit baseline number into a delta/ratio report. The benchmark in\nslice 149 reuses these so every latency claim in Campaign VI is backed\nby a reproducible artifact.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "statistics",
@@ -372,9 +385,10 @@
       ]
     },
     "hugrgate.adaptive.multiobjective": {
-      "docstring": "Multi-objective routing. Slice 136.\n\nSlices 132\u2013135 each optimize one trade-off; real routing cares about\nall of them at once. :class:`MultiObjectiveRouter` composes objectives\ntwo ways:\n\n- **Weighted sum** \u2014 ``score = \u03a3 w\u1d62 \u00b7 objective\u1d62(candidate)``. Simple,\n  differentiable-ish, and honest about its value judgments: the weights\n  *are* the policy.\n- **Lexicographic** \u2014 objectives ordered by priority; the first\n  objective that distinguishes the candidates decides. For \"never trade\n  X for Y\" requirements that weights can't express.\n\nPlus :func:`pareto_frontier`, which finds the non-dominated set over\n(quality, \u2212cost, \u2212latency, \u2212energy): the candidates no other candidate\nbeats on every axis. The frontier is the honest answer to \"what are my\nreal options?\" before any scalarization picks a winner.",
+      "docstring": "Multi-objective routing. Slice 136.\n\nSlices 132-135 each optimize one trade-off; real routing cares about\nall of them at once. :class:`MultiObjectiveRouter` composes objectives\ntwo ways:\n\n- **Weighted sum** - ``score = \u03a3 w\u1d62 \u00b7 objective\u1d62(candidate)``. Simple,\n  differentiable-ish, and honest about its value judgments: the weights\n  *are* the policy.\n- **Lexicographic** - objectives ordered by priority; the first\n  objective that distinguishes the candidates decides. For \"never trade\n  X for Y\" requirements that weights can't express.\n\nPlus :func:`pareto_frontier`, which finds the non-dominated set over\n(quality, -cost, -latency, -energy): the candidates no other candidate\nbeats on every axis. The frontier is the honest answer to \"what are my\nreal options?\" before any scalarization picks a winner.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
@@ -394,6 +408,7 @@
       "docstring": "Offline policy learning. Slice 131.\n\nOnline bandit updates (slice 130) learn from the live stream, but the\ntelemetry log (slice 126) is also a training set. :class:`OfflinePolicyLearning`\nfits a fresh :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter`\nfrom logged events *without* touching production:\n\n- Only **labeled, non-shadow** events are used. Unlabeled events carry\n  no reward signal; shadow records (slice 143) were never served, so\n  training on them would learn a policy for traffic that never existed.\n- Rewards come from the attached outcome's ``quality`` (falling back to\n  ``immediate_quality``); the logging policy's propensities correct for\n  selection bias via **inverse-propensity weighting**, clipped to\n  ``[propensity_clip]`` so one lucky rare event can't dominate.\n- :meth:`diagnostics` reports the effective sample size and how many\n  events were skipped and why \u2014 an offline fit that silently trains on\n  twelve events is worse than no fit at all.\n\nThis is the batch complement to the online adapter: retrain nightly (or\non drift alerts, slice 148), validate counterfactually (slice 144),\nthen promote through versioning (slice 146) and shadow mode (slice 143)\nbefore serving.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -416,7 +431,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 115,
+      "loc": 114,
       "path": "hugrgate/adaptive/privacy_objective.py",
       "public_defs": [
         "PrivacyConstrainedObjective",
@@ -432,6 +447,7 @@
       "docstring": "Router rollback. Slice 145.\n\nLearning systems change their minds; operators need yesterday's mind\nback. :class:`RouterRollback` is a bounded checkpoint stack for\nadaptive-policy state (bandit weights, competence profiles, exploration\ncounters \u2014 anything JSON-serializable):\n\n- :meth:`checkpoint` snapshots a state dict with a note and returns its\n  id (``ckpt-<n>``);\n- :meth:`rollback` restores the state from ``steps`` checkpoints back,\n  returning a deep copy;\n- the audit log records every checkpoint *and* every rollback \u2014 and the\n  audit log itself is append-only: rolling back never erases the fact\n  that a rollback happened.\n\nGuardrails: ``steps < 1`` is rejected; rolling back past the oldest\ncheckpoint is rejected (there is no \"before the beginning\"); the\nreturned state is deep-copied so the caller cannot mutate the archive.\nStates must be JSON-serializable \u2014 checked at checkpoint time, loudly,\nbecause a checkpoint that cannot round-trip is a lie.",
       "imports": [
         "__future__",
+        "collections",
         "copy",
         "dataclasses",
         "hugrgate",
@@ -439,7 +455,7 @@
         "time",
         "typing"
       ],
-      "loc": 145,
+      "loc": 146,
       "path": "hugrgate/adaptive/rollback.py",
       "public_defs": [
         "Checkpoint",
@@ -456,11 +472,12 @@
       "docstring": "Router feature extraction. Slice 129.\n\nThe contextual bandit (slice 130) chooses arms from *context*, so the\nquality of adaptive routing stands or falls on the features it sees.\n:class:`RouterFeatureExtractor` turns a routing decision's raw context \u2014\nthe :class:`~hugrgate.spec.DecisionSpec`, the state, the\n:class:`~hugrgate.policy.DecisionPolicy`, and the candidate backends \u2014\ninto a fixed, documented, numeric feature vector.\n\nIt implements the slice-21 :class:`~hugrgate.features.FeatureExtractor`\ncontract (``extract`` / ``feature_names`` / ``transform_batch`` via the\nABC), so it plugs into any tooling built for that interface. It is\nstateless \u2014 the column set is fixed at construction \u2014 so it is fitted\nfrom birth and safe to share across threads.\n\nFeature groups:\n\n- ``spec_type__*`` \u2014 one-hot over the five spec types;\n- ``state__*`` \u2014 size/shape of the raw state (key count, text length);\n- ``policy__*`` \u2014 the application's routing constraints, normalized;\n- ``cand__*`` \u2014 candidate-set shape and the competence summary of the\n  field (best/mean/spread of expected quality, latency, cost).\n\nAll features are finite floats; missing context degrades to zeros, never\nNaN, because a NaN feature would silently poison the bandit's linear\nmodel downstream.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "math",
         "typing"
       ],
-      "loc": 191,
+      "loc": 192,
       "path": "hugrgate/adaptive/router_features.py",
       "public_defs": [
         "RouteContext",
@@ -474,6 +491,7 @@
       "docstring": "Safe exploration. Slice 142.\n\nSlice 141 decides *when* to explore; this module decides *where it is\nsafe to*. :class:`SafeExploration` guarantees the exploration arm is\ndrawn only from candidates the application's policy already permits:\n\n- :meth:`eligible` filters :class:`~hugrgate.adaptive.cost_quality.RoutingCandidate`\n  arms through ``DecisionPolicy.backend_allowed`` (allowed-list, remote\n  flag), the latency budget, the cost budget, and the strict-privacy\n  gate (no remote, no data retention). The advisory ``privacy_ok`` flag\n  is not consulted \u2014 same rule as slice 135.\n- :meth:`choose` takes an ``exploit_arm`` (the incumbent best) and, when\n  exploration is warranted, returns a *different* eligible arm uniformly\n  at random \u2014 never the exploit arm (re-pulling the incumbent is not\n  exploration), never an ineligible one.\n- When no arm is eligible, it raises\n  :class:`~hugrgate.errors.BackendUnavailable` instead of gambling:\n  failing closed beats exploring blind.\n\nThe safety invariant is structural, not advisory: there is no code path\nin :meth:`choose` that can return an ineligible arm, so tests can assert\nit by construction rather than by sampling luck.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "random",
@@ -494,6 +512,7 @@
       "docstring": "Router shadow mode. Slice 143.\n\nNew policies should earn traffic, not be granted it.\n:class:`RouterShadowMode` runs a candidate policy *alongside* the\nserving policy: for each decision it records what the candidate *would*\nhave chosen \u2014 with its features, candidates, propensities, and the\nserved choice \u2014 into the telemetry store flagged ``shadow=True``.\n\nShadow records:\n\n- never affect the served decision (the method returns the served arm;\n  the shadow arm is only logged);\n- are excluded from offline training (slice 131 skips ``shadow``);\n- feed the divergence report: how often would the candidate have\n  disagreed, and on which arms?\n\nPromotion rule of thumb (enforced by process, reported here): a\ncandidate graduates from shadow when its divergence is understood and\nits counterfactual value (slice 144) beats the incumbent.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
@@ -524,7 +543,7 @@
         "typing",
         "uuid"
       ],
-      "loc": 359,
+      "loc": 360,
       "path": "hugrgate/adaptive/telemetry.py",
       "public_defs": [
         "RouteEvent",
@@ -550,6 +569,7 @@
       "docstring": "Adaptive policy versioning. Slice 146.\n\nCheckpoints (slice 145) are anonymous snapshots; *versions* are named,\nlineaged releases. :class:`AdaptivePolicyVersioning` tracks the\nlifecycle of adaptive routing policies:\n\n- :meth:`create_version` mints ``v<n>`` with an optional parent,\n  a human note, and a SHA-256 digest of the canonical policy state \u2014\n  so \"which policy served request X?\" (telemetry's ``policy_version``,\n  slice 126) always resolves to exact bytes.\n- :meth:`activate` flips the serving pointer; only one version is\n  active at a time, and activation is recorded in history.\n- :meth:`lineage` walks parent links back to the root, exposing the\n  promotion chain for audit.\n- :meth:`verify` recomputes a version's digest from a candidate state\n  dict \u2014 the integrity check rollback (slice 145) and promotion flows\n  use before trusting archived bytes.\n\nVersions are immutable once created: there is no \"edit v3\", only \"mint\nv4 with v3 as parent\". Mutable history is how incidents become\nmysteries.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hashlib",
         "hugrgate",
@@ -557,7 +577,7 @@
         "time",
         "typing"
       ],
-      "loc": 174,
+      "loc": 175,
       "path": "hugrgate/adaptive/versioning.py",
       "public_defs": [
         "digest_state",
@@ -840,7 +860,7 @@
         "time",
         "typing"
       ],
-      "loc": 181,
+      "loc": 189,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -859,7 +879,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 90,
+      "loc": 106,
       "path": "hugrgate/calibration/__init__.py",
       "public_defs": []
     },
@@ -894,12 +914,13 @@
       "docstring": "Calibration adversarial tests. Slice 098.\n\nCalibration is usually evaluated on the same distribution it was fit on \u2014\nthe kindest possible test.  This module attacks it instead:\n\n- :func:`overconfidence_attack` \u2014 pushes scores toward the extremes\n  (the classic \"model gets cocky\" failure);\n- :func:`underconfidence_attack` \u2014 pulls scores toward 0.5;\n- :func:`label_flip_attack` \u2014 random label noise (seeded);\n- :func:`bias_shift_attack` \u2014 systematic additive score bias, clipped;\n- :func:`stress_test` \u2014 fits a calibrator on clean data, then reports\n  Brier/ECE degradation under each attack in a JSON-serializable\n  :class:`StressReport`.\n\nUse it in CI or before promoting a calibration profile: a map that\ncollapses under mild attacks shouldn't ship.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 169,
+      "loc": 170,
       "path": "hugrgate/calibration/adversarial.py",
       "public_defs": [
         "overconfidence_attack",
@@ -913,15 +934,16 @@
       ]
     },
     "hugrgate.calibration.aleatoric": {
-      "docstring": "Aleatoric uncertainty adapters. Slice 096.\n\nAleatoric uncertainty = noise inherent in the data-generating process: no\namount of modeling removes it.  These adapters *estimate* it from\nobservables:\n\n- :func:`predictive_entropy` \u2014 entropy of one predictive distribution\n  (with a single model, the working aleatoric estimate);\n- :func:`bernoulli_noise` \u2014 ``p(1\u2212p)``, the variance of a Bernoulli\n  outcome: the irreducible noise at calibrated probability ``p``;\n- :func:`label_noise_estimate` \u2014 binned ``E[p(1\u2212p)]`` over a labeled fit\n  set: the data's own noise floor as the calibrator sees it;\n- :func:`noise_floor_report` \u2014 bundles the estimate with the per-bin\n  detail into a JSON-serializable :class:`AleatoricReport`.\n\nCompanion to slice 095 (epistemic adapters): together they cover both\nhalves of slice 094's decomposition from measurable quantities.",
+      "docstring": "Aleatoric uncertainty adapters. Slice 096.\n\nAleatoric uncertainty = noise inherent in the data-generating process: no\namount of modeling removes it.  These adapters *estimate* it from\nobservables:\n\n- :func:`predictive_entropy` - entropy of one predictive distribution\n  (with a single model, the working aleatoric estimate);\n- :func:`bernoulli_noise` - ``p(1-p)``, the variance of a Bernoulli\n  outcome: the irreducible noise at calibrated probability ``p``;\n- :func:`label_noise_estimate` - binned ``E[p(1-p)]`` over a labeled fit\n  set: the data's own noise floor as the calibrator sees it;\n- :func:`noise_floor_report` - bundles the estimate with the per-bin\n  detail into a JSON-serializable :class:`AleatoricReport`.\n\nCompanion to slice 095 (epistemic adapters): together they cover both\nhalves of slice 094's decomposition from measurable quantities.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 132,
+      "loc": 133,
       "path": "hugrgate/calibration/aleatoric.py",
       "public_defs": [
         "AleatoricReport",
@@ -936,12 +958,13 @@
       "docstring": "Calibration auto-selection. Slice 092.\n\nInstead of tribal knowledge (\"always use isotonic\"), pick the calibrator by\nseeded K-fold cross-validation on the actual fit data.  :func:`auto_select`\nevaluates candidate calibrators from the slice-091 catalog on a proper\nscoring rule (Brier, log-loss) or ECE, ranks them by held-out mean, and\nreturns the winner *refit on the full data*.\n\nCandidate defaults: the non-streaming, non-fallback, non-deprecated catalog\nentries (platt, isotonic, temperature, beta-binomial).  Streaming calibrators\nare excluded by default because fold semantics differ for them \u2014 pass them\nexplicitly if you want them compared.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 154,
+      "loc": 155,
       "path": "hugrgate/calibration/autoselect.py",
       "public_defs": [
         "SelectionResult",
@@ -953,12 +976,13 @@
       "docstring": "Bayesian calibration research adapter. Slice 081.\n\nRESEARCH ADAPTER \u2014 not a production default.  :class:`BetaBinomialCalibrator`\ntreats each score bin as a Binomial experiment with a Beta prior and returns\nthe posterior predictive mean as the calibrated probability, *plus* a\ncredible interval so downstream code can see how much data backs the map.\nUseful for low-data regimes and for studying prior sensitivity; prefer\nPlatt/isotonic/temperature when you have ample data and want a point map.\n\nThe Beta quantiles use an independent implementation of the regularized\nincomplete beta function (continued fraction, Numerical Recipes ``betacf``)\nwith bisection inversion \u2014 no scipy dependency.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "math",
         "numpy",
         "typing"
       ],
-      "loc": 180,
+      "loc": 181,
       "path": "hugrgate/calibration/bayes.py",
       "public_defs": [
         "beta_quantile",
@@ -971,14 +995,15 @@
       ]
     },
     "hugrgate.calibration.bench": {
-      "docstring": "Calibration benchmark suite. Slice 099.\n\nCompares the calibration methods head-to-head on controlled synthetic\ndatasets with known miscalibration shapes.  Every dataset is generated from\na seeded PRNG, so the artifact is byte-identical on every run for a fixed\nseed \u2014 no invented numbers, ever.\n\nDatasets (``n`` samples each):\n- ``overconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(2z)``;\n- ``underconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(0.5z)``;\n- ``label-noise`` \u2014 well-shaped scores, 15% flipped labels;\n- ``well-calibrated`` \u2014 reported == true (control: calibration should be\n  ~neutral here).\n\nEntries: ``raw`` (identity baseline \u2014 the explicit baseline the slice\nrequires) plus every batch calibrator in the catalog.  Metrics: Brier,\nlog-loss, ECE, before \u2192 after.",
+      "docstring": "Calibration benchmark suite. Slice 099.\n\nCompares the calibration methods head-to-head on controlled synthetic\ndatasets with known miscalibration shapes.  Every dataset is generated from\na seeded PRNG, so the artifact is byte-identical on every run for a fixed\nseed - no invented numbers, ever.\n\nDatasets (``n`` samples each):\n- ``overconfident`` - true ``p = sigma(z)``, reported ``sigma(2z)``;\n- ``underconfident`` - true ``p = sigma(z)``, reported ``sigma(0.5z)``;\n- ``label-noise`` - well-shaped scores, 15% flipped labels;\n- ``well-calibrated`` - reported == true (control: calibration should be\n  ~neutral here).\n\nEntries: ``raw`` (identity baseline - the explicit baseline the slice\nrequires) plus every batch calibrator in the catalog.  Metrics: Brier,\nlog-loss, ECE, before \u2192 after.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 156,
+      "loc": 157,
       "path": "hugrgate/calibration/bench.py",
       "public_defs": [
         "generate_dataset",
@@ -990,13 +1015,13 @@
       ]
     },
     "hugrgate.calibration.conformal": {
-      "docstring": "Split-conformal classification. Slice 082.\n\nWhere calibration asks \"is 0.8 really 80%?\", conformal prediction asks \"which\nset of labels covers the truth with probability \u2265 1\u2212\u03b1?\"  :class:`ConformalClassifier`\nimplements split (inductive) conformal prediction for classifiers:\n\n- nonconformity score ``s(x, y) = 1 \u2212 p\u0302(y | x)`` on a held-out calibration\n  fold;\n- threshold ``q\u0302`` = the ``\u2308(n+1)(1\u2212\u03b1)\u2309/n`` quantile of those scores;\n- prediction set ``{c : p\u0302(c | x) \u2265 1 \u2212 q\u0302}``.\n\nUnder exchangeability of calibration and test data, the set covers the true\nlabel with probability at least ``1 \u2212 \u03b1`` (finite-sample guarantee).  An\noptional Mondrian (group-conditional) mode fits one threshold per group for\ngroup-conditional coverage.\n\nThis module returns plain ``frozenset`` prediction sets; slice 084's\n:class:`~hugrgate.calibration.sets.PredictionSet` adds the set-metric\nabstraction on top.",
+      "docstring": "Split-conformal classification. Slice 082.\n\nWhere calibration asks \"is 0.8 really 80%?\", conformal prediction asks \"which\nset of labels covers the truth with probability \u2265 1-alpha?\"  :class:`ConformalClassifier`\nimplements split (inductive) conformal prediction for classifiers:\n\n- nonconformity score ``s(x, y) = 1 - p\u0302(y | x)`` on a held-out calibration\n  fold;\n- threshold ``q\u0302`` = the ``\u2308(n+1)(1-alpha)\u2309/n`` quantile of those scores;\n- prediction set ``{c : p\u0302(c | x) \u2265 1 - q\u0302}``.\n\nUnder exchangeability of calibration and test data, the set covers the true\nlabel with probability at least ``1 - alpha`` (finite-sample guarantee).  An\noptional Mondrian (group-conditional) mode fits one threshold per group for\ngroup-conditional coverage.\n\nThis module returns plain ``frozenset`` prediction sets; slice 084's\n:class:`~hugrgate.calibration.sets.PredictionSet` adds the set-metric\nabstraction on top.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "math",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 156,
       "path": "hugrgate/calibration/conformal.py",
@@ -1012,13 +1037,13 @@
       ]
     },
     "hugrgate.calibration.conformal_regression": {
-      "docstring": "Split-conformal regression. Slice 083.\n\nCompanion to :mod:`hugrgate.calibration.conformal`: finite-sample prediction\n*intervals* for real-valued predictions.  :class:`ConformalRegressor`\nimplements split conformal prediction with\n\n- absolute-residual nonconformity ``s = |y \u2212 \u0177|`` (constant-width intervals), or\n- normalized residuals ``s = |y \u2212 \u0177| / difficulty`` when a difficulty\n  estimate is supplied (locally adaptive widths: easy points get tight\n  intervals, hard points get wide ones).\n\nUnder exchangeability, ``[\u0177 \u2212 q\u0302\u00b7d, \u0177 + q\u0302\u00b7d]`` covers the true value with\nprobability at least ``1 \u2212 \u03b1``.  Operates on plain floats, so it works with\nany point-prediction source, including HugrGate numeric backends.",
+      "docstring": "Split-conformal regression. Slice 083.\n\nCompanion to :mod:`hugrgate.calibration.conformal`: finite-sample prediction\n*intervals* for real-valued predictions.  :class:`ConformalRegressor`\nimplements split conformal prediction with\n\n- absolute-residual nonconformity ``s = |y - \u0177|`` (constant-width intervals), or\n- normalized residuals ``s = |y - \u0177| / difficulty`` when a difficulty\n  estimate is supplied (locally adaptive widths: easy points get tight\n  intervals, hard points get wide ones).\n\nUnder exchangeability, ``[\u0177 - q\u0302\u00b7d, \u0177 + q\u0302\u00b7d]`` covers the true value with\nprobability at least ``1 - alpha``.  Operates on plain floats, so it works with\nany point-prediction source, including HugrGate numeric backends.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "math",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 143,
       "path": "hugrgate/calibration/conformal_regression.py",
@@ -1034,9 +1059,10 @@
       ]
     },
     "hugrgate.calibration.coverage": {
-      "docstring": "Coverage guarantees tooling. Slice 085.\n\nConformal prediction promises *marginal* coverage \u2265 1\u2212\u03b1, but on any finite\ntest set the empirical hit rate is just an estimate.  This module turns that\nestimate into a checkable claim:\n\n- :func:`clopper_pearson` \u2014 exact two-sided binomial confidence interval\n  (built on the slice-081 ``beta_quantile``, no scipy);\n- :func:`hoeffding_lower_bound` \u2014 one-sided Hoeffding lower bound, the\n  distribution-free quick check;\n- :class:`CoverageCertificate` \u2014 bundles n, hits, empirical coverage, the\n  interval, and a ``holds`` verdict against a target coverage;\n- :func:`validate_coverage` \u2014 certify a batch of\n  :class:`~hugrgate.calibration.sets.PredictionSet` outcomes;\n- :func:`required_n` \u2014 how many test points you need before a\n  Clopper-Pearson interval of a given width is even possible.",
+      "docstring": "Coverage guarantees tooling. Slice 085.\n\nConformal prediction promises *marginal* coverage \u2265 1-alpha, but on any finite\ntest set the empirical hit rate is just an estimate.  This module turns that\nestimate into a checkable claim:\n\n- :func:`clopper_pearson` - exact two-sided binomial confidence interval\n  (built on the slice-081 ``beta_quantile``, no scipy);\n- :func:`hoeffding_lower_bound` - one-sided Hoeffding lower bound, the\n  distribution-free quick check;\n- :class:`CoverageCertificate` - bundles n, hits, empirical coverage, the\n  interval, and a ``holds`` verdict against a target coverage;\n- :func:`validate_coverage` - certify a batch of\n  :class:`~hugrgate.calibration.sets.PredictionSet` outcomes;\n- :func:`required_n` - how many test points you need before a\n  Clopper-Pearson interval of a given width is even possible.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "math",
@@ -1044,7 +1070,7 @@
         "statistics",
         "typing"
       ],
-      "loc": 167,
+      "loc": 168,
       "path": "hugrgate/calibration/coverage.py",
       "public_defs": [
         "clopper_pearson",
@@ -1059,15 +1085,16 @@
       ]
     },
     "hugrgate.calibration.decomposition": {
-      "docstring": "Uncertainty decomposition. Slice 094.\n\nTotal predictive uncertainty splits into two principled parts (Depeweg et\nal.; Kendall & Gal):\n\n- **aleatoric** \u2014 expected entropy of the members: noise inherent in the\n  data, irreducible by more modeling;\n- **epistemic** \u2014 mutual information between the prediction and the model\n  identity: disagreement *between* members, reducible with more data or\n  better models;\n\nwith ``total = entropy(mean distribution) = aleatoric + epistemic``.\n\n:func:`decompose` takes an ensemble's predictive distributions (one\nprobability vector per member) and returns an :class:`UncertaintyBreakdown`.\nFeed it members' calibrated outputs \u2014 e.g. per-class vectors from\n:class:`~hugrgate.calibration.perclass.PerClassCalibrator` variants or\nbackend ensembles \u2014 and the epistemic term tells you when the system is\nguessing *about its own knowledge*.",
+      "docstring": "Uncertainty decomposition. Slice 094.\n\nTotal predictive uncertainty splits into two principled parts (Depeweg et\nal.; Kendall & Gal):\n\n- **aleatoric** - expected entropy of the members: noise inherent in the\n  data, irreducible by more modeling;\n- **epistemic** - mutual information between the prediction and the model\n  identity: disagreement *between* members, reducible with more data or\n  better models;\n\nwith ``total = entropy(mean distribution) = aleatoric + epistemic``.\n\n:func:`decompose` takes an ensemble's predictive distributions (one\nprobability vector per member) and returns an :class:`UncertaintyBreakdown`.\nFeed it members' calibrated outputs - e.g. per-class vectors from\n:class:`~hugrgate.calibration.perclass.PerClassCalibrator` variants or\nbackend ensembles - and the epistemic term tells you when the system is\nguessing *about its own knowledge*.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 112,
+      "loc": 113,
       "path": "hugrgate/calibration/decomposition.py",
       "public_defs": [
         "UncertaintyBreakdown",
@@ -1080,11 +1107,12 @@
       "docstring": "Calibration under drift. Slice 088.\n\nA calibration map is a bet that the future resembles the fit set.  When the\nscore\u2192outcome relationship drifts, the bet goes bad silently \u2014 live ECE\nclimbs while nobody watches.  :class:`CalibrationDriftMonitor` watches the\n*calibrated* outputs in production:\n\n- each observed batch contributes Brier and ECE;\n- the first ``baseline_batches`` batches establish the in-control mean and\n  standard deviation of each metric;\n- afterwards EWMAs of both metrics are compared against\n  ``mean + k\u00b7std`` control limits (with a ``min_std`` floor so a\n  suspiciously quiet baseline can't arm a hair-trigger) \u2014 crossing either\n  limit raises an alarm and the monitor recommends ``\"recalibrate\"``.\n\nPair it with :class:`~hugrgate.calibration.online.OnlineCalibrator` or\n:class:`~hugrgate.calibration.window.SlidingWindowCalibrator`: the monitor\nsays *when*, the adaptive calibrator does the *what*.  After recalibrating,\ncall :meth:`reset_alarm` to re-arm.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 181,
+      "loc": 182,
       "path": "hugrgate/calibration/drift.py",
       "public_defs": [
         "DriftReport",
@@ -1104,14 +1132,15 @@
       ]
     },
     "hugrgate.calibration.ensemble": {
-      "docstring": "Calibration ensemble. Slice 093.\n\nNo single calibrator wins everywhere: Platt is stable but rigid, isotonic\nis flexible but data-hungry, temperature is minimal.  :class:`CalibratorEnsemble`\nfits several member calibrators on the same data and averages their maps \u2014\nmean (default), median, or custom weights.\n\nBy Jensen's inequality the Brier score of a convex combination is at most\nthe average of the members' Brier scores, so the ensemble never pays more\nthan the *average* member \u2014 and in practice it lands near the best one\nwithout requiring the choice up front (see also slice 092's auto-selection).",
+      "docstring": "Calibration ensemble. Slice 093.\n\nNo single calibrator wins everywhere: Platt is stable but rigid, isotonic\nis flexible but data-hungry, temperature is minimal.  :class:`CalibratorEnsemble`\nfits several member calibrators on the same data and averages their maps -\nmean (default), median, or custom weights.\n\nBy Jensen's inequality the Brier score of a convex combination is at most\nthe average of the members' Brier scores, so the ensemble never pays more\nthan the *average* member - and in practice it lands near the best one\nwithout requiring the choice up front (see also slice 092's auto-selection).",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 133,
+      "loc": 134,
       "path": "hugrgate/calibration/ensemble.py",
       "public_defs": [
         "CalibratorEnsemble",
@@ -1127,12 +1156,13 @@
       "docstring": "Epistemic uncertainty adapters. Slice 095.\n\nEpistemic uncertainty = \"the model doesn't know what it doesn't know\".\nThese adapters *produce* epistemic estimates from HugrGate components and\nwire them into the existing abstention machinery:\n\n- :func:`ensemble_epistemic` \u2014 mutual information across an ensemble's\n  predictive distributions (slice 094's decomposition);\n- :func:`distance_epistemic` \u2014 out-of-distribution proxy: how far a score\n  sits from the calibration fit-score cloud, normalized to [0, 1];\n- :func:`combine_epistemic` \u2014 conservative (max) combination of adapters;\n- :func:`review_on_epistemic` \u2014 marks a\n  :class:`~hugrgate.result.DecisionResult` for human review via\n  :func:`hugrgate.abstain.mark_for_review` when epistemic uncertainty\n  exceeds a threshold.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 137,
+      "loc": 138,
       "path": "hugrgate/calibration/epistemic.py",
       "public_defs": [
         "EpistemicReport",
@@ -1145,14 +1175,15 @@
       ]
     },
     "hugrgate.calibration.group": {
-      "docstring": "Group calibration. Slice 078.\n\nA single global calibrator can hide per-group miscalibration: group A is\noverconfident while group B is underconfident and the average looks fine.\n:class:`GroupCalibrator` fits one binary calibrator per group value (plus a\nglobal fallback for unseen groups), and reports per-group Brier/ECE together\nwith the *calibration disparity* ``max_g ECE_g \u2212 min_g ECE_g``.\n\nGroup labels are opaque strings supplied by the caller (e.g. a segment,\ncohort, or backend name).  HugrGate never invents them \u2014 see the privacy\nmodule before using real demographic attributes.",
+      "docstring": "Group calibration. Slice 078.\n\nA single global calibrator can hide per-group miscalibration: group A is\noverconfident while group B is underconfident and the average looks fine.\n:class:`GroupCalibrator` fits one binary calibrator per group value (plus a\nglobal fallback for unseen groups), and reports per-group Brier/ECE together\nwith the *calibration disparity* ``max_g ECE_g - min_g ECE_g``.\n\nGroup labels are opaque strings supplied by the caller (e.g. a segment,\ncohort, or backend name).  HugrGate never invents them - see the privacy\nmodule before using real demographic attributes.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 156,
+      "loc": 157,
       "path": "hugrgate/calibration/group.py",
       "public_defs": [
         "GroupCalibrator",
@@ -1167,15 +1198,16 @@
       ]
     },
     "hugrgate.calibration.imbalance": {
-      "docstring": "Calibration under class imbalance. Slice 089.\n\nHeavy imbalance breaks naive calibration two ways: the fit is dominated by\nthe majority class, and the deployment prior often differs from the fit\nprior anyway.  This module provides the standard, honest toolkit:\n\n- :func:`rebalance` \u2014 resample a fit set to a target positive rate\n  (minority oversampling / majority undersampling, seeded);\n- :func:`saerens_prior_correction` \u2014 Saerens\u2013Latinne\u2013Decaestecker prior\n  correction: transport calibrated probabilities from the fit prior to the\n  deployment prior without refitting;\n- :func:`fit_balanced` \u2014 rebalance + fit any :class:`Calibrator`, returning\n  the fitted unit and an :class:`ImbalanceReport`;\n- :func:`stratified_metrics` \u2014 Brier/ECE computed separately on the\n  positive and negative strata, so minority-class miscalibration can't hide\n  behind a good-looking average.",
+      "docstring": "Calibration under class imbalance. Slice 089.\n\nHeavy imbalance breaks naive calibration two ways: the fit is dominated by\nthe majority class, and the deployment prior often differs from the fit\nprior anyway.  This module provides the standard, honest toolkit:\n\n- :func:`rebalance` - resample a fit set to a target positive rate\n  (minority oversampling / majority undersampling, seeded);\n- :func:`saerens_prior_correction` - Saerens-Latinne-Decaestecker prior\n  correction: transport calibrated probabilities from the fit prior to the\n  deployment prior without refitting;\n- :func:`fit_balanced` - rebalance + fit any :class:`Calibrator`, returning\n  the fitted unit and an :class:`ImbalanceReport`;\n- :func:`stratified_metrics` - Brier/ECE computed separately on the\n  positive and negative strata, so minority-class miscalibration can't hide\n  behind a good-looking average.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 177,
+      "loc": 178,
       "path": "hugrgate/calibration/imbalance.py",
       "public_defs": [
         "ImbalanceReport",
@@ -1228,11 +1260,12 @@
       "docstring": "Online (incremental) calibration. Slice 079.\n\nBatch calibrators assume the world stands still while you collect a fit set.\n:class:`OnlineCalibrator` instead maintains binned (score \u2192 empirical rate)\nstatistics that update with every :meth:`partial_fit` call and slowly forget\nold data via exponential decay, so the map tracks a drifting relationship\nbetween scores and outcomes.\n\n- Each of ``n_bins`` bins keeps decayed ``(positives, total)`` counts.\n- The calibrated value for a score is the Laplace-smoothed empirical rate\n  of its bin, passed through a weighted pool-adjacent-violators (PAV) pass\n  so the map stays monotone non-decreasing in the score.\n- ``decay=1.0`` disables forgetting (pure cumulative counts);\n  ``decay<1.0`` down-weights older batches per :meth:`partial_fit` call.\n\nIt subclasses :class:`Calibrator` (``fit`` = reset + one ``partial_fit``)\nso it works with the pipeline, registry, and auto-selection.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 178,
+      "loc": 179,
       "path": "hugrgate/calibration/online.py",
       "public_defs": [
         "OnlineCalibrator",
@@ -1249,11 +1282,12 @@
       "docstring": "Per-class calibration. Slice 077.\n\n``CalibratedBackend`` already applied one-vs-rest calibrators per class, but\nthere was no principled *fitting* side: callers had to hand-roll the per-class\nloop and hand-assemble ``CalibrationProfile.calibrator_params``.  This module\nprovides :class:`PerClassCalibrator`, which:\n\n- fits one binary calibrator per class (one-vs-rest) from multiclass\n  probability dicts + labels, via any :class:`Calibrator` factory;\n- records per-class fit diagnostics (Brier/ECE before/after) so a single\n  badly-calibrated class is visible instead of being averaged away;\n- handles classes absent from the fit data with a constant-prior fallback\n  instead of crashing (a class unseen during calibration still needs a\n  prediction at serving time);\n- renormalizes the calibrated distribution and exports/imports\n  :class:`~hugrgate.calibration.profiles.CalibrationProfile` parameter dicts.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 232,
+      "loc": 233,
       "path": "hugrgate/calibration/perclass.py",
       "public_defs": [
         "PerClassCalibrator",
@@ -1273,16 +1307,17 @@
       ]
     },
     "hugrgate.calibration.pipeline": {
-      "docstring": "Calibration pipeline (architecture v2). Slice 076.\n\nWhat existed before this slice: three binary calibrators (Platt, isotonic,\ntemperature), bare metrics, and versioned profiles \u2014 but no lifecycle around\n* fitting a calibrator: no fit-data diagnostics, no before/after comparison,\nno refusal to deploy a calibration that made things worse.\n\nThis module adds that lifecycle without touching the existing calibrators:\n\n- :func:`validate_fit_data` \u2014 diagnostics + hard validation of a\n  (scores, labels) fit set (both classes present, finite scores, sane size).\n- :class:`CalibrationPipeline` \u2014 wraps a calibrator factory, fits it,\n  records before/after Brier / log-loss / ECE / MCE, and produces a\n  :class:`CalibrationReport` carrying provenance, the dataset hash, and an\n  ``improved`` verdict.\n- :class:`CalibrationReport` \u2014 JSON-serializable, round-trippable; can seed\n  a :class:`~hugrgate.calibration.profiles.CalibrationProfile` via\n  :meth:`CalibrationReport.as_profile_kwargs`.\n\nThe pipeline *warns* (does not raise) when calibration fails to improve the\nmetrics, because on near-perfect scores any map is noise \u2014 but\n:meth:`CalibrationPipeline.fit_strict` raises in that case for pipelines that\nwant a hard gate.",
+      "docstring": "Calibration pipeline (architecture v2). Slice 076.\n\nWhat existed before this slice: three binary calibrators (Platt, isotonic,\ntemperature), bare metrics, and versioned profiles - but no lifecycle around\n* fitting a calibrator: no fit-data diagnostics, no before/after comparison,\nno refusal to deploy a calibration that made things worse.\n\nThis module adds that lifecycle without touching the existing calibrators:\n\n- :func:`validate_fit_data` - diagnostics + hard validation of a\n  (scores, labels) fit set (both classes present, finite scores, sane size).\n- :class:`CalibrationPipeline` - wraps a calibrator factory, fits it,\n  records before/after Brier / log-loss / ECE / MCE, and produces a\n  :class:`CalibrationReport` carrying provenance, the dataset hash, and an\n  ``improved`` verdict.\n- :class:`CalibrationReport` - JSON-serializable, round-trippable; can seed\n  a :class:`~hugrgate.calibration.profiles.CalibrationProfile` via\n  :meth:`CalibrationReport.as_profile_kwargs`.\n\nThe pipeline *warns* (does not raise) when calibration fails to improve the\nmetrics, because on near-perfect scores any map is noise - but\n:meth:`CalibrationPipeline.fit_strict` raises in that case for pipelines that\nwant a hard gate.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "datetime",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 244,
+      "loc": 245,
       "path": "hugrgate/calibration/pipeline.py",
       "public_defs": [
         "FitDiagnostics",
@@ -1380,12 +1415,12 @@
       ]
     },
     "hugrgate.calibration.risk_coverage": {
-      "docstring": "Risk-coverage curves. Slice 087.\n\nThe loss-based sibling of slice 086's selective (accuracy) curves.  Given\nper-decision confidences and *losses* (0/1 error by default, but any bounded\nloss works \u2014 e.g. a cost-weighted error), the risk-coverage (RC) curve shows\nthe mean loss over the kept decisions as coverage shrinks toward the most\nconfident sliver.\n\n- :func:`risk_coverage_curve` \u2014 rows ``{threshold, coverage, risk, n}``;\n- :func:`aurc` \u2014 area under the RC curve (lower is better), with the oracle\n  curve (sorted by true loss) as the reference: ``excess = aurc \u2212 aurc*``\n  measures how much the confidence ranking leaves on the table;\n- :func:`coverage_at_risk` \u2014 the abstention-policy lookup: largest coverage\n  with risk \u2264 target;\n- :func:`risk_at_coverage` \u2014 interpolated risk at a target coverage.",
+      "docstring": "Risk-coverage curves. Slice 087.\n\nThe loss-based sibling of slice 086's selective (accuracy) curves.  Given\nper-decision confidences and *losses* (0/1 error by default, but any bounded\nloss works - e.g. a cost-weighted error), the risk-coverage (RC) curve shows\nthe mean loss over the kept decisions as coverage shrinks toward the most\nconfident sliver.\n\n- :func:`risk_coverage_curve` - rows ``{threshold, coverage, risk, n}``;\n- :func:`aurc` - area under the RC curve (lower is better), with the oracle\n  curve (sorted by true loss) as the reference: ``excess = aurc - aurc*``\n  measures how much the confidence ranking leaves on the table;\n- :func:`coverage_at_risk` - the abstention-policy lookup: largest coverage\n  with risk \u2264 target;\n- :func:`risk_at_coverage` - interpolated risk at a target coverage.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 147,
       "path": "hugrgate/calibration/risk_coverage.py",
@@ -1401,9 +1436,9 @@
       "docstring": "Selective prediction curves. Slice 086.\n\nSelective prediction: answer only when confident, abstain otherwise.  Given\nper-decision confidences and correctness flags, this module builds the\n*selective accuracy curve* \u2014 accuracy as a function of the fraction of\ndecisions kept (coverage) \u2014 plus the area under it and coverage lookup at a\ntarget accuracy.\n\nSlice 087's risk-coverage curves are the loss-based sibling; this module is\nthe accuracy-based one.  Both consume the same ``(confidence, correct)``\npairs, so either can be derived from HugrGate decision logs.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 125,
       "path": "hugrgate/calibration/selective.py",
@@ -1418,12 +1453,13 @@
       "docstring": "Prediction sets. Slice 084.\n\nSlice 082 produced raw ``frozenset`` prediction sets with a coverage\nguarantee.  This module adds the *abstraction* on top:\n\n- :class:`PredictionSet` \u2014 an immutable set with its construction method,\n  parameters, and provenance attached, so a set can be audited later;\n- construction strategies: fixed ``threshold``, ``top_k``, cumulative-mass\n  (APS-lite), and wrapping a fitted\n  :class:`~hugrgate.calibration.conformal.ConformalClassifier`;\n- set metrics: coverage, mean size, and *size-stratified* coverage, which\n  catches the classic failure where large sets cover fine but singletons\n  (the \"confident\" predictions) systematically miss.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 187,
+      "loc": 188,
       "path": "hugrgate/calibration/sets.py",
       "public_defs": [
         "PredictionSet",
@@ -1439,12 +1475,12 @@
       ]
     },
     "hugrgate.calibration.shift": {
-      "docstring": "Calibration under distribution shift. Slice 090.\n\nTwo shift flavors, two tools:\n\n**Covariate shift** (``P(x)`` changes, ``P(y|x)`` doesn't): detect it with\nthe population stability index (:func:`psi`), then correct with binned\ndensity-ratio weights (:func:`density_ratio_weights`) and\n:func:`resample_for_shift`, which resamples the source fit set so it mimics\nthe target covariate distribution before fitting.\n\n**Label shift** (``P(y)`` changes, ``P(x|y)`` doesn't): estimate the target\nprior with the Saerens\u2013Latinne\u2013Decaestecker EM algorithm\n(:func:`em_target_prior`), then transport with the slice-089\n:func:`~hugrgate.calibration.imbalance.saerens_prior_correction`.\n\nAll density estimates are binned histograms over the score axis \u2014 honest,\ndependency-free, and adequate for one-dimensional calibration scores.",
+      "docstring": "Calibration under distribution shift. Slice 090.\n\nTwo shift flavors, two tools:\n\n**Covariate shift** (``P(x)`` changes, ``P(y|x)`` doesn't): detect it with\nthe population stability index (:func:`psi`), then correct with binned\ndensity-ratio weights (:func:`density_ratio_weights`) and\n:func:`resample_for_shift`, which resamples the source fit set so it mimics\nthe target covariate distribution before fitting.\n\n**Label shift** (``P(y)`` changes, ``P(x|y)`` doesn't): estimate the target\nprior with the Saerens-Latinne-Decaestecker EM algorithm\n(:func:`em_target_prior`), then transport with the slice-089\n:func:`~hugrgate.calibration.imbalance.saerens_prior_correction`.\n\nAll density estimates are binned histograms over the score axis - honest,\ndependency-free, and adequate for one-dimensional calibration scores.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 165,
       "path": "hugrgate/calibration/shift.py",
@@ -1480,12 +1516,13 @@
       "docstring": "Calibration visualization data. Slice 097.\n\nFrontends need *data*, not plots: this module produces JSON-serializable\npayloads for the standard calibration visuals, with no plotting dependency:\n\n- :func:`reliability_curve_data` \u2014 reliability-diagram points\n  (mean predicted vs. mean actual per bin) plus the ideal diagonal;\n- :func:`confidence_histogram` \u2014 histogram of top-class confidences;\n- :func:`per_class_ece_bars` \u2014 one-vs-rest ECE per class;\n- :func:`risk_coverage_points` / :func:`selective_curve_points` \u2014\n  normalized pass-throughs of the slice-086/087 curves;\n- :func:`calibration_dashboard` \u2014 the combined payload: summary metrics,\n  reliability curve, histogram, per-class bars, and data-quality notes.\n\nEvery payload passes ``json.dumps`` \u2014 that invariant is tested.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "json",
         "numpy",
         "typing"
       ],
-      "loc": 170,
+      "loc": 171,
       "path": "hugrgate/calibration/viz.py",
       "public_defs": [
         "reliability_curve_data",
@@ -1505,7 +1542,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 158,
+      "loc": 160,
       "path": "hugrgate/calibration/window.py",
       "public_defs": [
         "SlidingWindowCalibrator",
@@ -4077,7 +4114,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 245,
+      "loc": 337,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4088,6 +4125,12 @@
         "CalibrationError",
         "TimeoutError",
         "PrivacyViolation",
+        "DataFlowDenied",
+        "JurisdictionViolation",
+        "LocalOnlyViolation",
+        "SecretDetected",
+        "SealError",
+        "KeyProviderError",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -4203,7 +4246,7 @@
         "time",
         "typing"
       ],
-      "loc": 343,
+      "loc": 368,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -4289,7 +4332,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 96,
+      "loc": 101,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -4299,7 +4342,7 @@
       ]
     },
     "hugrgate.privacy": {
-      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
+      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.\n\nSlice 226 (privacy classification v2) promotes the old binary\n``standard``/``strict`` classes to a five-rung ordered ladder \u2014\n``public`` < ``standard`` < ``sensitive`` < ``strict`` < ``forbidden`` \u2014\neach with machine-enforceable semantics (minimum backend trust, cache\nretention, remote eligibility, provenance mode). The ladder is defined\nhere; :class:`DecisionPolicy` accepts exactly these classes.",
       "imports": [
         "__future__",
         "collections",
@@ -4307,17 +4350,550 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 131,
+      "loc": 416,
       "path": "hugrgate/privacy.py",
       "public_defs": [
+        "class_rank",
+        "at_least",
+        "semantics_for",
+        "provenance_mode_for",
         "PrivacyGuard",
+        "compile_outbound",
+        "trust_level_for",
+        "jurisdiction_for",
         "remote_allowed",
         "check_backend",
         "filter_backends",
+        "enforce_local_only",
+        "check_no_secrets",
         "cache_allowed",
         "redact_state",
         "redact_record",
         "provenance_redaction_needed"
+      ]
+    },
+    "hugrgate.privacy_audit": {
+      "docstring": "Policy violation audit log. Slice 244.\n\nEvery privacy denial should leave a trace. :class:`PrivacyAuditLog`\nis an append-only, hash-chained log of privacy-relevant events\n(backend blocks, flow denials, secret detections, jurisdiction and\nlocal-only violations, key rotations, purges). Each event commits\nto the previous event's hash, so silent edits or deletions break\n:meth:`PrivacyAuditLog.verify`.\n\nThe log is in-memory by default; attach a sink (e.g.\n:class:`FileAuditSink`) for durability. Sinks receive the event\ndict and must not raise \u2014 a failing sink would otherwise turn an\naudit trail into a denial of service; sink errors are logged and\nswallowed deliberately (documented).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 151,
+      "path": "hugrgate/privacy_audit.py",
+      "public_defs": [
+        "PrivacyAuditEvent",
+        "FileAuditSink",
+        "PrivacyAuditLog",
+        "to_dict",
+        "from_dict",
+        "record",
+        "verify",
+        "events",
+        "count",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_crypto": {
+      "docstring": "Authenticated encryption (stdlib only) + encrypted cache. Slice 241.\n\nNo third-party crypto dependency: :class:`SealedBox` is an\nencrypt-then-MAC construction from ``hashlib``/``hmac``/``secrets``:\n\n- key derivation: HKDF-SHA256 (RFC 5869);\n- encryption: HMAC-SHA256 in counter mode as a keystream (a\n  well-studied PRF-based stream cipher), random 128-bit nonce per\n  message;\n- authentication: HMAC-SHA256 over ``domain || nonce || associated\n  || ciphertext``; verification is constant-time and any tampering\n  raises :class:`SealError`.\n\nThis is a deliberately small, auditable construction \u2014 not a\nreplacement for libsodium where available. The threat model:\nprotect cached decisions at rest from offline disk theft and from\ncross-tenant reads in shared storage. It does not protect against\nan attacker who already holds the key.\n\n:class:`EncryptedDecisionCache` wraps :class:`DecisionCache`:\nentries are pickled, sealed, and stored as opaque blobs. The\nprivacy-class cache rules still apply first (``strict`` /\n``forbidden`` are never cached, sealed or not).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "pickle",
+        "secrets",
+        "typing"
+      ],
+      "loc": 230,
+      "path": "hugrgate/privacy_crypto.py",
+      "public_defs": [
+        "hkdf",
+        "require_key",
+        "SealedBox",
+        "EncryptedDecisionCache",
+        "seal",
+        "open",
+        "put",
+        "get",
+        "key_id_hint"
+      ]
+    },
+    "hugrgate.privacy_deletion": {
+      "docstring": "Secure deletion hooks. Slice 240.\n\nDeleting a record should mean it is *gone* \u2014 not merely\nunreferenced. This module provides:\n\n- :func:`shred_bytes` \u2014 multi-pass overwrite of a ``bytearray``\n  (zeros, ones, CSPRNG), plus :class:`SecureBuffer`, a context\n  manager that shreds on exit. Secrets should live in\n  ``bytearray``\\ s, never in immutable ``str`` (which cannot be\n  overwritten).\n- :class:`SecureDeleter` \u2014 a hook registry fired per deleted\n  record: each hook runs, bytearray values in the record's metadata\n  are shredded best-effort, and a :class:`DeletionReceipt` is\n  returned as auditable proof of deletion.\n- :class:`CryptoShredder` \u2014 for encrypted stores: dropping the\n  data-encryption key cryptographically shreds everything sealed\n  under it, without touching the ciphertext.\n\nHonesty note: overwriting reduces a secret's lifetime in memory; it\ncannot guarantee against copies the interpreter, OS paging, or\nhardware already made. The receipt records what *was* done, not a\nforensic guarantee. Encrypted-at-rest data + key destruction\n(crypto-shredding) is the stronger primitive \u2014 prefer it for\nhigh-sensitivity stores (slices 241-242).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "secrets",
+        "time",
+        "typing"
+      ],
+      "loc": 202,
+      "path": "hugrgate/privacy_deletion.py",
+      "public_defs": [
+        "shred_bytes",
+        "SecureBuffer",
+        "DeletionReceipt",
+        "SecureDeleter",
+        "CryptoShredder",
+        "shred",
+        "shredded",
+        "walk",
+        "to_dict",
+        "register",
+        "unregister",
+        "hooks",
+        "shred_key",
+        "shredded_keys"
+      ]
+    },
+    "hugrgate.privacy_dryrun": {
+      "docstring": "Privacy dry-run mode. Slice 245.\n\n:func:`PrivacyDryRun.evaluate` simulates the entire outbound\nprivacy pipeline for a decision \u2014 attempt gate, local-only\nstripping, the remote payload compiler (flow policy,\nminimization, clearance, secret scan, PII scrub, redaction) \u2014\nwithout executing it: nothing is sent, nothing is cached, the\ninput state is not mutated. The returned :class:`DryRunReport`\nsays exactly what *would* happen, stage by stage, so operators\ncan preview the effect of policy changes before they bite.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 172,
+      "path": "hugrgate/privacy_dryrun.py",
+      "public_defs": [
+        "DryRunStage",
+        "DryRunReport",
+        "PrivacyDryRun",
+        "to_dict",
+        "to_dict",
+        "summary",
+        "evaluate"
+      ]
+    },
+    "hugrgate.privacy_exfil": {
+      "docstring": "Exfiltration simulation. Slice 248.\n\nThe fortress claims to stop data exfiltration; this module\nattacks that claim. :class:`ExfilSimulator` runs a suite of\nattacker scenarios against a configured :class:`PrivacyGuard`\n\u2014 direct remote calls, secret smuggling, local-only exfil,\nPII in free text, jurisdiction hops, untrusted backends \u2014\nand reports, per scenario, whether the attempt was\n**blocked** (refused outright), **neutralized** (the data was\nsanitized before leaving), or **allowed** (it got out).\n\nEach scenario declares what it *expects*; the report fails\nwhen reality disagrees. A red-team operator runs the default\nsuite against their production guard configuration: any\n``allowed`` where ``blocked`` was expected is a live hole.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 268,
+      "path": "hugrgate/privacy_exfil.py",
+      "public_defs": [
+        "ExfilAttempt",
+        "ExfilOutcome",
+        "ExfilReport",
+        "default_attacks",
+        "ExfilSimulator",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "passed",
+        "to_dict",
+        "passed",
+        "failures",
+        "to_dict",
+        "summary",
+        "attempt",
+        "run_suite"
+      ]
+    },
+    "hugrgate.privacy_explain": {
+      "docstring": "Privacy explanation reports. Slice 246.\n\nPrivacy denials are cryptic by default \u2014 a bare error code tells\nan operator nothing actionable. :class:`PrivacyExplainer` turns\nany privacy error (or dry-run report, or redacted provenance\nrecord) into a plain-language explanation: what happened, why\nthe policy requires it, and what the operator can do about it.\n\nRemediation advice is advisory only \u2014 it never bypasses the\npolicy; every suggested action goes *through* the policy\n(change the flow, the classification, or the configuration, not\naround it).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 207,
+      "path": "hugrgate/privacy_explain.py",
+      "public_defs": [
+        "PrivacyExplainer",
+        "explain_denial",
+        "explain_denial",
+        "explain_dry_run",
+        "explain_record"
+      ]
+    },
+    "hugrgate.privacy_flow": {
+      "docstring": "Data-flow policy engine. Slice 228.\n\nWhere should data be allowed to move? :class:`DataFlowPolicy`\nanswers that for a single planned flow \u2014 a :class:`FlowRequest`\ndescribing *what* (privacy class, field sensitivity levels,\nlocal-only fields) moves *where* (destination backend, its trust\nlevel, remoteness, jurisdiction) \u2014 and returns a :class:`FlowDecision`\n(``allow`` / ``redact`` / ``deny``) with machine-readable reasons.\nDenials raise :class:`~hugrgate.errors.DataFlowDenied`.\n\nRules are evaluated in a fixed, documented order so decisions are\ndeterministic and explainable (slice 246 renders them):\n\n1. class eligibility \u2014 a ``forbidden``-class payload never flows remote;\n2. trust floor \u2014 destination trust must meet the class minimum;\n3. jurisdiction \u2014 remote destinations outside the allowed set are denied;\n4. field levels \u2014 fields above the remote clearance are stripped\n   (``redact`` mode) or deny the flow (strict mode);\n5. local-only fields are always stripped from remote flows.\n\nThe engine takes abstract inputs (trust levels, jurisdictions) so\nslices 229-230 can supply attested values without changing the rules.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 206,
+      "path": "hugrgate/privacy_flow.py",
+      "public_defs": [
+        "FlowRequest",
+        "FlowDecision",
+        "DataFlowPolicy",
+        "raise_if_denied",
+        "check",
+        "to_dict"
+      ]
+    },
+    "hugrgate.privacy_jurisdiction": {
+      "docstring": "Jurisdiction metadata. Slice 230.\n\nData has a passport: where it is processed matters. This module\ntracks which jurisdiction each backend operates in and enforces\noperator-declared allowed jurisdictions at selection and attempt\ntime.\n\n- :class:`JurisdictionRegistry` maps backend names to jurisdiction\n  codes (``\"local\"``, ``\"EU\"``, ``\"US\"``, ...). Unlisted local\n  backends default to ``\"local\"``; unlisted remote backends default\n  to ``\"unknown\"`` \u2014 and ``\"unknown\"`` is never in an allowed set,\n  so undeclared remotes are denied by default under a jurisdiction\n  policy (fail closed).\n- :class:`JurisdictionPolicy` holds the allowed set (``None`` = no\n  restriction) and raises :class:`JurisdictionViolation` on breach.\n- :class:`~hugrgate.privacy.PrivacyGuard` accepts\n  ``jurisdiction_registry=`` and ``jurisdictions_allowed=`` and\n  enforces them in ``remote_allowed`` / ``check_backend`` /\n  ``filter_backends``.\n\nLocal backends are always jurisdiction-clean: data never crosses a\nborder when it never leaves the process.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 128,
+      "path": "hugrgate/privacy_jurisdiction.py",
+      "public_defs": [
+        "JurisdictionRegistry",
+        "JurisdictionPolicy",
+        "declare",
+        "jurisdiction_for",
+        "to_dict",
+        "from_dict",
+        "check",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_keys": {
+      "docstring": "Key-provider abstraction. Slice 243.\n\nEncryption is only as good as key management. :class:`KeyProvider`\nis the interface every key consumer (encrypted cache, sealed\nprovenance, token vaults) uses; implementations:\n\n- :class:`EnvKeyProvider` \u2014 32-byte key from an environment\n  variable (hex or base64);\n- :class:`FileKeyProvider` \u2014 key from a file (hex, base64, or raw\n  32 bytes; the file should be mode ``0o600`` \u2014 warn otherwise);\n- :class:`EphemeralKeyProvider` \u2014 in-memory CSPRNG keys, generated\n  on first use; gone when the process exits;\n- :class:`RotatingKeyProvider` \u2014 a primary provider plus retired\n  providers: encryption always uses the primary, decryption tries\n  each in turn, so rotation never strands sealed data.\n\n:func:`derive_key` derives per-context subkeys via HKDF, so one\nmaster key safely serves many namespaces (cache vs provenance vs\ntoken vault).",
+      "imports": [
+        "__future__",
+        "abc",
+        "base64",
+        "binascii",
+        "hugrgate",
+        "os",
+        "pathlib",
+        "secrets",
+        "stat",
+        "typing",
+        "warnings"
+      ],
+      "loc": 254,
+      "path": "hugrgate/privacy_keys.py",
+      "public_defs": [
+        "KeyProvider",
+        "EnvKeyProvider",
+        "FileKeyProvider",
+        "EphemeralKeyProvider",
+        "RotatingKeyProvider",
+        "derive_key",
+        "cache_from_provider",
+        "provenance_store_from_provider",
+        "get_key",
+        "key_ids",
+        "forget",
+        "get_key",
+        "key_ids",
+        "get_key",
+        "key_ids",
+        "get_key",
+        "key_ids",
+        "forget",
+        "get_key",
+        "key_ids",
+        "retire_primary",
+        "get_key_any"
+      ]
+    },
+    "hugrgate.privacy_labels": {
+      "docstring": "Field-level sensitivity labels. Slice 227.\n\nThe privacy-class ladder (slice 226) classifies a whole *decision*.\nThis module classifies the *fields inside the state*: each field gets\na :class:`Sensitivity` level, consumers get a clearance, and\n:func:`filter_by_clearance` drops everything above it. Fields can\nalso be marked *local-only* \u2014 they may be processed in-process but\nmust never be compiled into a remote payload (enforced in slice 231).\n\nLabels support dotted paths (``\"user.ssn\"``) for nested mappings; a\nlabel on a parent (``\"user\"``) covers its children unless a more\nspecific dotted label overrides it.",
+      "imports": [
+        "__future__",
+        "collections",
+        "enum",
+        "typing"
+      ],
+      "loc": 190,
+      "path": "hugrgate/privacy_labels.py",
+      "public_defs": [
+        "Sensitivity",
+        "FieldLabels",
+        "filter_by_clearance",
+        "label",
+        "is_local_only",
+        "label_state",
+        "fields_at_or_above",
+        "to_dict",
+        "from_dict",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_localonly": {
+      "docstring": "Local-only field enforcement. Slice 231.\n\nSlice 227 lets operators *mark* fields local-only; this module\n*enforces* the marking. :class:`LocalOnlyPolicy` inspects an\noutbound state against :class:`~hugrgate.privacy_labels.FieldLabels`\nand guarantees no local-only field reaches a remote destination:\n\n- strip mode (default): local-only fields are removed from the\n  outbound copy and reported;\n- strict mode: the mere presence of a local-only field in a\n  remote-bound payload raises :class:`LocalOnlyViolation` \u2014 a hard\n  guarantee for callers that must never silently drop data.\n\nIn-process (local backend) flows are untouched: local-only means\n\"never leaves the process\", not \"never used\".",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 129,
+      "path": "hugrgate/privacy_localonly.py",
+      "public_defs": [
+        "LocalOnlyResult",
+        "LocalOnlyPolicy",
+        "enforce_local_only",
+        "clean",
+        "enforce",
+        "enforce_for_backend",
+        "to_dict"
+      ]
+    },
+    "hugrgate.privacy_minimize": {
+      "docstring": "Prompt / data minimization. Slice 236.\n\nSend the least data that still answers the question. This module\nprovides two mechanisms:\n\n- :func:`minimize_state` \u2014 project a state mapping down to an\n  explicit keep-list (top-level names or dotted paths); everything\n  else is dropped. Nested-aware, non-mutating.\n- :class:`MinimizationPolicy` \u2014 per-backend keep-lists; backends\n  declare the fields they actually need and every outbound payload\n  is projected before compilation.\n- :class:`PromptMinimizer` \u2014 renders the minimized state into a\n  compact prompt string under a character budget, so prompt\n  construction itself can't smuggle undeclared fields.\n\nA backend with no declared keep-list passes state through unchanged\n(documented): minimization is only as good as the declarations, so\ndeclare them.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
+      "loc": 185,
+      "path": "hugrgate/privacy_minimize.py",
+      "public_defs": [
+        "MinimizationReport",
+        "minimize_state",
+        "MinimizationPolicy",
+        "PromptMinimizer",
+        "leaf_paths",
+        "keep_for",
+        "declare",
+        "minimize",
+        "to_dict",
+        "from_dict",
+        "render"
+      ]
+    },
+    "hugrgate.privacy_payload": {
+      "docstring": "Remote payload compiler \u2014 the outbound chokepoint. Slice 237.\n\nEvery byte that leaves the process for a remote backend passes\nthrough :class:`RemotePayloadCompiler.compile`. The compilation is\na fixed, ordered pipeline; each stage is recorded in the\n:attr:`RemotePayload.manifest` so any payload is auditable\nafter the fact:\n\n1. **attempt gate** \u2014 ``PrivacyGuard.check_backend`` (guard mode,\n   class trust floor, jurisdiction); raises on denial;\n2. **local-only enforcement** \u2014 strip (or strict-raise) local-only\n   fields first, so strict mode fires before any other stage can\n   silently drop them;\n3. **data-flow policy** \u2014 ``DataFlowPolicy.check`` on the planned\n   flow; ``redact`` decisions strip the named fields;\n4. **minimization** \u2014 project to the backend's keep-list;\n5. **clearance filter** \u2014 drop fields above the remote clearance;\n6. **secret scan** \u2014 raise ``SecretDetected`` on any hit;\n7. **PII scrub** \u2014 mask/drop PII findings;\n8. **redaction pipeline** \u2014 per-field / per-level strategies.\n\nLocal backends bypass compilation (the data never leaves the\nprocess) and get a passthrough manifest. Compilation is\ndeterministic: the same inputs always produce the same payload and\nmanifest.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 270,
+      "path": "hugrgate/privacy_payload.py",
+      "public_defs": [
+        "RemotePayload",
+        "RemotePayloadCompiler",
+        "to_dict",
+        "compile",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_pii": {
+      "docstring": "PII detector interface. Slice 235.\n\nPluggable personally-identifiable-information detection for outbound\ndata. :class:`PIIDetector` is the interface \u2014 implement\n:meth:`PIIDetector.scan_text` and you get nested state scanning for\nfree. :class:`RegexPIIDetector` is the built-in default with\nvalidated patterns (Luhn-checked credit cards, area-validated SSNs);\n:class:`PIIScrubber` applies mask/drop actions to state.\n\nDesign notes:\n\n- Detectors are *precision-first*: every pattern carries a\n  confidence, and expensive validators (Luhn, SSN area rules) run\n  before a finding is reported, so \"order 1234\" doesn't become a\n  credit-card finding.\n- Findings never carry the raw value \u2014 only a redacted preview.\n- Custom detectors compose: :class:`CompositePIIDetector` unions any\n  set of detectors.",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "dataclasses",
+        "re",
+        "typing"
+      ],
+      "loc": 246,
+      "path": "hugrgate/privacy_pii.py",
+      "public_defs": [
+        "PIIFinding",
+        "PIIDetector",
+        "RegexPIIDetector",
+        "CompositePIIDetector",
+        "PIIScrubber",
+        "to_dict",
+        "scan_text",
+        "scan_state",
+        "scan_text",
+        "scan_text",
+        "scrub_state",
+        "walk",
+        "scrub"
+      ]
+    },
+    "hugrgate.privacy_provenance": {
+      "docstring": "Privacy-preserving provenance. Slice 238.\n\nProvenance must explain a decision without leaking the data behind\nit. :func:`privacy_preserving_record` builds a\n:class:`DecisionRecord` whose state-derived metadata follows the\nprivacy-class ladder (slice 226):\n\n- ``public`` / ``standard`` \u2014 state keys (never values);\n- ``sensitive`` \u2014 state keys, plus optional per-field value\n  fingerprints (prove *what* the input was without storing it);\n- ``strict`` \u2014 fully redacted (deep-scrubbed);\n- ``forbidden`` \u2014 no state-derived metadata at all.\n\nEvery record carries its ``privacy_class`` marker, so the policy is\nauditable from the record alone. The integrity chain\n(``prev_hash``/``record_hash``) is computed over the canonical\nrecord *including* whatever metadata survived, so redacted and\nfingerprinted records verify exactly like full ones.\n\n:class:`PrivacyAwareProvenanceStore` wraps :class:`ProvenanceStore`\nwith a one-call ``append_decision`` entry point, and\n:class:`SealedProvenanceStore` additionally seals every record body\nat rest (slice 242): the on-disk/in-memory chain commits to\n*ciphertext*, while the plaintext record (with its own hashes) rides\ninside the sealed body.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "pickle",
+        "typing"
+      ],
+      "loc": 261,
+      "path": "hugrgate/privacy_provenance.py",
+      "public_defs": [
+        "fingerprint_state",
+        "privacy_preserving_record",
+        "PrivacyAwareProvenanceStore",
+        "SealedProvenanceStore",
+        "append_decision",
+        "append",
+        "recent",
+        "by_hash",
+        "verify_chain",
+        "purge",
+        "key_id_hint"
+      ]
+    },
+    "hugrgate.privacy_redact": {
+      "docstring": "Redaction pipeline v2. Slice 232.\n\nSlice 40's redaction was shallow: ``redact_state`` masked whole\nvalues and ``redact_record`` dropped three top-level metadata keys.\nAnything nested \u2014 a ``{\"state\": {...}}`` dict *inside* metadata, a\nsecret embedded in a longer string \u2014 sailed through.\n\nThis module is a composable redaction pipeline:\n\n- :class:`Redactor` strategies: :class:`MaskRedactor`,\n  :class:`PatternRedactor` (regexes over strings, including nested\n  ones), :class:`HashRedactor` (deterministic salted hash, keeps\n  joinability without reversibility), :class:`DropRedactor` (removes\n  the field), :class:`TokenRedactor` (reversible via a token vault,\n  slice 233).\n- :class:`RedactionPipeline`: per-field redactors, per-\n  :class:`Sensitivity` level strategies applied with\n  :meth:`apply_with_labels`, and free-text scrubbing.\n- :func:`redact_metadata`: deep scrub of provenance metadata \u2014\n  drops ``state``/``state_keys``/``raw_state`` keys at *any* depth\n  and pattern-scrubs string values. :class:`PrivacyGuard.redact_record`\n  now uses it (superset of the old behavior).",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 320,
+      "path": "hugrgate/privacy_redact.py",
+      "public_defs": [
+        "Redactor",
+        "MaskRedactor",
+        "PatternRedactor",
+        "HashRedactor",
+        "DropRedactor",
+        "TokenRedactor",
+        "RedactionPipeline",
+        "redact_metadata",
+        "redact_record_deep",
+        "redact",
+        "redact",
+        "redact",
+        "scrub",
+        "redact",
+        "redact",
+        "redact",
+        "apply_to_state",
+        "apply_with_labels",
+        "apply_to_text",
+        "scrub",
+        "leaf_paths"
+      ]
+    },
+    "hugrgate.privacy_retention": {
+      "docstring": "Retention policies. Slice 239.\n\nData should not outlive its purpose. :class:`RetentionPolicy`\ndeclares per-privacy-class maximum ages; :func:`purge_expired`\nremoves overdue records from a :class:`ProvenanceStore` (via the\nchain-safe :meth:`ProvenanceStore.purge`), and\n:meth:`RetentionPolicy.cache_ttl_for` caps decision-cache TTLs.\n\nDefaults (seconds; ``None`` = unbounded):\n\n- ``public`` \u2014 unbounded;\n- ``standard`` \u2014 30 days;\n- ``sensitive`` \u2014 7 days;\n- ``strict`` \u2014 24 hours;\n- ``forbidden`` \u2014 0: never persist (purged on the next sweep).\n\n``forbidden`` records are still *created* (the decision happened and\nthe chain binds it) but must not be *retained* \u2014 the next purge\nremoves them. Operators wanting zero creation should not log at all.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 118,
+      "path": "hugrgate/privacy_retention.py",
+      "public_defs": [
+        "RetentionPolicy",
+        "purge_expired",
+        "max_age_for",
+        "is_expired",
+        "cache_ttl_for",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_secrets": {
+      "docstring": "Secret detection hooks. Slice 234.\n\nLast line of defense before data leaves the process: scan outbound\nstate (or free text) for secret-shaped values \u2014 API keys, tokens,\nprivate keys, credentials \u2014 and raise :class:`SecretDetected` instead\nof transmitting them.\n\n:class:`SecretScanner` combines:\n\n- curated high-precision patterns (AWS keys, GitHub/Slack tokens,\n  PEM private keys, bearer tokens, credential assignments);\n- a conservative high-entropy heuristic for opaque tokens with no\n  known prefix (off by default \u2014 see below).\n\nFindings carry the dotted field path, the pattern name, a redacted\npreview (never the full secret), and a confidence level. The scanner\nis deliberately *not* a DLP oracle: it catches accidents, not\nadversaries. High-entropy detection stays opt-in because natural\ntext (hashes in logs, base64 blobs) triggers it.\n\nHook points:\n\n- :func:`assert_no_secrets` \u2014 one-shot check; raises on any finding;\n- :meth:`PrivacyGuard.check_no_secrets <hugrgate.privacy.PrivacyGuard.check_no_secrets>` \u2014\n  guard-level convenience used by the remote payload compiler\n  (slice 237).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "re",
+        "typing"
+      ],
+      "loc": 199,
+      "path": "hugrgate/privacy_secrets.py",
+      "public_defs": [
+        "SecretFinding",
+        "SecretScanner",
+        "assert_no_secrets",
+        "to_dict",
+        "scan_text",
+        "scan_state",
+        "assert_no_secrets",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_tokens": {
+      "docstring": "Tokenization / pseudonymization vault. Slice 233.\n\nReversible redaction: :class:`TokenVault` replaces sensitive values\nwith opaque random tokens (``hgptok_...``) and keeps the\ntoken\u2192value mapping in memory. Tokens reveal nothing without vault\naccess; only the vault holder can detokenize. This is the vault\nbehind :class:`~hugrgate.privacy_redact.TokenRedactor`.\n\nSecurity properties (documented, tested):\n\n- tokens are 192-bit CSPRNG outputs \u2014 unguessable, no structure to\n  exploit;\n- the mapping (the actual secret) never leaves the vault except via\n  explicit ``export``/``import`` for encrypted persistence (slices\n  241-242 seal the export);\n- namespaces isolate token spaces: a token minted in one namespace\n  never detokenizes in another vault;\n- values are deep-copied on the way in and out, so callers cannot\n  mutate vault contents through a reference.\n\nThis is pseudonymization, not anonymization: anyone holding the\nvault (or its export) can reverse it. Treat the vault like a key.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "pickle",
+        "secrets",
+        "typing"
+      ],
+      "loc": 122,
+      "path": "hugrgate/privacy_tokens.py",
+      "public_defs": [
+        "TokenVault",
+        "tokenize",
+        "detokenize",
+        "revoke",
+        "clear",
+        "tokenize_state",
+        "export",
+        "import_vault"
+      ]
+    },
+    "hugrgate.privacy_trust": {
+      "docstring": "Backend trust levels. Slice 229.\n\nNot all backends deserve the same data. :class:`BackendTrustRegistry`\nholds *attestations*: operator-signed claims that a backend meets a\ntrust level (``untrusted`` < ``basic`` < ``verified`` < ``enclave``).\nUnattested backends fall back to :func:`default_trust_level`\n(in-process = ``enclave``, remote = ``basic``). Attestations expire\nand can be revoked; an expired or revoked attestation silently drops\nback to the default \u2014 never to a higher level.\n\nThe registry plugs into :class:`~hugrgate.privacy.PrivacyGuard`\n(``trust_registry=``), so the slice-226 class trust floors are\nevaluated against attested trust rather than bare defaults.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 169,
+      "path": "hugrgate/privacy_trust.py",
+      "public_defs": [
+        "trust_rank",
+        "default_trust_level",
+        "TrustAttestation",
+        "BackendTrustRegistry",
+        "expired",
+        "to_dict",
+        "from_dict",
+        "attest",
+        "revoke",
+        "attestation_for",
+        "level_for",
+        "rank_for",
+        "meets",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.provenance": {
@@ -4334,7 +4910,7 @@
         "time",
         "typing"
       ],
-      "loc": 218,
+      "loc": 239,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -4344,6 +4920,7 @@
         "from_dict",
         "append",
         "evicted_count",
+        "purge",
         "by_hash",
         "recent",
         "count",
@@ -4387,7 +4964,7 @@
         "time",
         "typing"
       ],
-      "loc": 403,
+      "loc": 404,
       "path": "hugrgate/routing/architecture.py",
       "public_defs": [
         "RungMode",
@@ -5845,6 +6422,31 @@
     "test_ml_calibration.py",
     "test_package_boundaries.py",
     "test_policy_invariants.py",
+    "test_privacy_audit.py",
+    "test_privacy_bench_249.py",
+    "test_privacy_classification.py",
+    "test_privacy_crypto.py",
+    "test_privacy_deletion.py",
+    "test_privacy_dryrun.py",
+    "test_privacy_exfil.py",
+    "test_privacy_explain.py",
+    "test_privacy_flow.py",
+    "test_privacy_fortress_gate.py",
+    "test_privacy_fuzz.py",
+    "test_privacy_jurisdiction.py",
+    "test_privacy_keys.py",
+    "test_privacy_labels.py",
+    "test_privacy_localonly.py",
+    "test_privacy_minimize.py",
+    "test_privacy_payload.py",
+    "test_privacy_pii.py",
+    "test_privacy_provenance.py",
+    "test_privacy_redact.py",
+    "test_privacy_retention.py",
+    "test_privacy_sealed.py",
+    "test_privacy_secrets.py",
+    "test_privacy_tokens.py",
+    "test_privacy_trust.py",
     "test_provenance_integrity.py",
     "test_release_gate.py",
     "test_repo_truth.py",
@@ -5882,5 +6484,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 49966
+  "total_loc": 54479
 }
