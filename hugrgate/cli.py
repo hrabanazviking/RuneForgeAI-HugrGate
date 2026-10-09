@@ -35,6 +35,7 @@ __all__ = [
     "cmd_init",
     "cmd_inspect",
     "cmd_models",
+    "cmd_new",
     "cmd_openapi",
     "cmd_report",
     "cmd_serve",
@@ -450,6 +451,22 @@ def cmd_completion(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_new(args: argparse.Namespace) -> int:
+    """Scaffold a new HugrGate project (slice 438)."""
+    from hugrgate.errors import ScaffoldError
+    from hugrgate.scaffold import scaffold_project
+    try:
+        written = scaffold_project(args.name, args.dir, force=args.force)
+    except ScaffoldError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    print(f"scaffolded project '{args.name}':")
+    for path in written:
+        print(f"  {path}")
+    print("next: cd", args.name, "&& pytest")
+    return 0
+
+
 def cmd_inspect(args: argparse.Namespace) -> int:
     """Drop into the interactive inspector REPL (slice 436)."""
     from hugrgate.inspect import run_inspect
@@ -607,6 +624,14 @@ def build_parser() -> argparse.ArgumentParser:
                        help="print a shell completion script")
     p.add_argument("shell", choices=["bash", "zsh", "fish"])
     p.set_defaults(func=cmd_completion)
+
+    p = sub.add_parser("new", help="scaffold a new HugrGate project")
+    p.add_argument("name", help="project name (lowercase, valid package)")
+    p.add_argument("--dir", default=".",
+                   help="parent directory (default: .)")
+    p.add_argument("--force", action="store_true",
+                   help="scaffold into a non-empty directory")
+    p.set_defaults(func=cmd_new)
 
     p = sub.add_parser("inspect",
                        help="interactive inspector REPL")
