@@ -59,6 +59,7 @@ from hugrgate.evlab.splits import (
     make_splits,
     manifest_splits,
 )
+from hugrgate.evlab.stratified import StratifiedReport, stratified_evaluate
 
 __all__ = [
     "ACQUISITIONS",
@@ -74,9 +75,11 @@ __all__ = [
     "MetricSet",
     "RunRecord",
     "SplitPlan",
+    "StratifiedReport",
     "TransformStep",
     "fingerprint_items",
     "kfold_indices",
     "make_splits",
     "manifest_splits",
+    "stratified_evaluate",
 ]

@@ -1159,6 +1159,7 @@ flowchart TD
     evlab --> evlab_api
     evlab --> evlab_dataset
     evlab --> evlab_splits
+    evlab --> evlab_stratified
     evlab_api --> hugrgate
     evlab_api --> bench
     evlab_api --> core
@@ -1169,6 +1170,11 @@ flowchart TD
     evlab_dataset --> errors
     evlab_splits --> errors
     evlab_splits --> evlab_dataset
+    evlab_stratified --> bench
+    evlab_stratified --> core
+    evlab_stratified --> errors
+    evlab_stratified --> evlab_api
+    evlab_stratified --> policy
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -2323,6 +2329,7 @@ flowchart TD
 | `evlab` | `evlab.api` | no |
 | `evlab` | `evlab.dataset` | no |
 | `evlab` | `evlab.splits` | no |
+| `evlab` | `evlab.stratified` | no |
 | `evlab.api` | `hugrgate` | no |
 | `evlab.api` | `bench` | no |
 | `evlab.api` | `core` | no |
@@ -2333,6 +2340,11 @@ flowchart TD
 | `evlab.dataset` | `errors` | no |
 | `evlab.splits` | `errors` | no |
 | `evlab.splits` | `evlab.dataset` | no |
+| `evlab.stratified` | `bench` | no |
+| `evlab.stratified` | `core` | no |
+| `evlab.stratified` | `errors` | no |
+| `evlab.stratified` | `evlab.api` | no |
+| `evlab.stratified` | `policy` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
