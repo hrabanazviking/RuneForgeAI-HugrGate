@@ -129,9 +129,12 @@ def cmd_backends(args: argparse.Namespace) -> int:
 
 def cmd_models(args: argparse.Namespace) -> int:
     if args.url:
-        import httpx
-        with httpx.Client(trust_env=False) as _http:
-            response = _http.get(f"{args.url.rstrip('/')}/models", timeout=10.0)
+        from hugrgate.pool import shared_http_client_pool
+        # Slice 290: acquire from the process-wide pooled clients instead
+        # of minting (and TLS-handshaking) a throwaway client per command.
+        with shared_http_client_pool().acquire() as handle:
+            response = handle.resource.get(
+                f"{args.url.rstrip('/')}/models", timeout=10.0)
         response.raise_for_status()
         _print_json(response.json())
     else:

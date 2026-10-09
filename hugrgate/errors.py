@@ -34,6 +34,7 @@ __all__ = [
     "NPUError",
     "OfflineBootstrapError",
     "PolicyError",
+    "PoolError",
     "PowerBudgetError",
     "PrivacyViolation",
     "ProfilingError",
@@ -299,4 +300,14 @@ class BackpressureError(HugrGateError):
     when the rate limiter can compute one, ``retry_after_s``.
     """
     code = "backpressure_error"
+    recoverable = True
+
+
+class PoolError(HugrGateError):
+    """A resource pool was misconfigured, exhausted, or unhealthy.
+
+    Slice 290.  Exhaustion is transient — retrying after load sheds can
+    succeed; a poisoned factory is a caller/ops problem.
+    """
+    code = "pool_error"
     recoverable = True
