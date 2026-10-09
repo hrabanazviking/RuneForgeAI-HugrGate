@@ -1,0 +1,47 @@
+# HugrGate service unit. Gjallarbrú slice 447.
+#
+# Install:
+#   sudo cp deploy/systemd/hugrgate.service /etc/systemd/system/
+#   sudo cp deploy/docker/hugrgate.yaml /etc/hugrgate/hugrgate.yaml  # or your own
+#   sudo useradd -r -s /usr/sbin/nologin hugr   # if missing
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now hugrgate
+#
+# Logs: journalctl -u hugrgate -f
+
+[Unit]
+Description=HugrGate decision service
+Documentation=https://github.com/hrabanazviking/RuneForgeAI-HugrGate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hugr
+Group=hugr
+WorkingDirectory=/var/lib/hugrgate
+ExecStart=/usr/local/bin/hugrgate serve --config /etc/hugrgate/hugrgate.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+
+# Hardening: the daemon needs no privileges, no shell, no new mounts.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+
+# /health is the readiness signal; give slow backends time to warm up.
+# (Poll ExecStartPre is intentionally absent: the daemon binds fast and
+# backends load lazily.)
+
+[Install]
+WantedBy=multi-user.target
