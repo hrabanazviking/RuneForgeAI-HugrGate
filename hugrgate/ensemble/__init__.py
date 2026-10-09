@@ -34,6 +34,12 @@ from hugrgate.ensemble.base import (
     require_discrete_spec,
     shannon_entropy,
 )
+from hugrgate.ensemble.blending import (
+    Blender,
+    blending_combine,
+    log_loss,
+    project_simplex,
+)
 from hugrgate.ensemble.stacking import (
     SoftmaxRegression,
     StackingEngine,
@@ -74,4 +80,8 @@ __all__ = [
     "SoftmaxRegression",
     "StackingEngine",
     "stacking_combine",
+    "Blender",
+    "blending_combine",
+    "project_simplex",
+    "log_loss",
 ]
