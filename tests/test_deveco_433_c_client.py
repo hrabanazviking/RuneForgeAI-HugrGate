@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import shutil
-import socket
 import subprocess
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
