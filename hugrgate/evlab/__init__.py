@@ -110,6 +110,7 @@ from hugrgate.evlab.selective import (
     risk_coverage_curve,
     selective_evaluate,
 )
+from hugrgate.evlab.shift import ShiftReport, label_psi, shift_evaluate
 from hugrgate.evlab.significance import (
     SignificanceResult,
     compare_paired_correctness,
@@ -159,6 +160,7 @@ __all__ = [
     "RunRecord",
     "SelectivePoint",
     "SelectiveReport",
+    "ShiftReport",
     "SignificanceResult",
     "SplitPlan",
     "StateDropout",
@@ -181,6 +183,7 @@ __all__ = [
     "expected_calibration_error",
     "fingerprint_items",
     "kfold_indices",
+    "label_psi",
     "latency_aware_evaluate",
     "make_splits",
     "manifest_splits",
@@ -195,5 +198,6 @@ __all__ = [
     "robustness_evaluate",
     "scan_dataset_pii",
     "selective_evaluate",
+    "shift_evaluate",
     "stratified_evaluate",
 ]

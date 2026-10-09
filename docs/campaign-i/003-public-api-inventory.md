@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 305 · **public names:** 1883
+**Modules:** 306 · **public names:** 1889
 
 ## API stability policy
 
@@ -2288,6 +2288,7 @@ that this document never drifts from the code.
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 | `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
 | `SelectiveReport` | class | `(backends: 'dict[str, dict[str, Any]]', n_items: 'int', policy_threshold: 'float | None' = None) -> None` |
+| `ShiftReport` | class | `(backends: 'dict[str, dict[str, Any]]', shift_key: 'str', source_label: 'str', target_label: 'str', n_source: 'int', n_target: 'int', label_psi: 'float') -> None` |
 | `SignificanceResult` | class | `(test: 'str', statistic: 'float', p_value: 'float', alpha: 'float', n: 'int', details: 'dict[str, Any]') -> None` |
 | `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
 | `StateDropout` | class | `(p: 'float') -> 'None'` |
@@ -2310,6 +2311,7 @@ that this document never drifts from the code.
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
+| `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
 | `latency_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, slo_ms: 'float' = 100.0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'LatencyReport'` |
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 | `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
@@ -2324,6 +2326,7 @@ that this document never drifts from the code.
 | `robustness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, perturbations: 'Sequence[Perturbation] | None' = None, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'RobustnessReport'` |
 | `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
 | `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
+| `shift_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, shift_key: 'str' = 'period', source: 'Any' = 'source', target: 'Any' = 'target', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'ShiftReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 
 ### `hugrgate.evlab.api`
@@ -2445,6 +2448,14 @@ that this document never drifts from the code.
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
 | `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
+
+### `hugrgate.evlab.shift`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ShiftReport` | class | `(backends: 'dict[str, dict[str, Any]]', shift_key: 'str', source_label: 'str', target_label: 'str', n_source: 'int', n_target: 'int', label_psi: 'float') -> None` |
+| `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
+| `shift_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, shift_key: 'str' = 'period', source: 'Any' = 'source', target: 'Any' = 'target', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'ShiftReport'` |
 
 ### `hugrgate.evlab.significance`
 

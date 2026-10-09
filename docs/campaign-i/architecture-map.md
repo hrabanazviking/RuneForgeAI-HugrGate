@@ -1168,6 +1168,7 @@ flowchart TD
     evlab --> evlab_privacy
     evlab --> evlab_robustness
     evlab --> evlab_selective
+    evlab --> evlab_shift
     evlab --> evlab_significance
     evlab --> evlab_splits
     evlab --> evlab_stratified
@@ -1239,6 +1240,11 @@ flowchart TD
     evlab_selective --> errors
     evlab_selective --> policy
     evlab_selective --> spec
+    evlab_shift --> bench
+    evlab_shift --> core
+    evlab_shift --> errors
+    evlab_shift --> evlab_api
+    evlab_shift --> policy
     evlab_significance --> errors
     evlab_significance --> result
     evlab_splits --> errors
@@ -2411,6 +2417,7 @@ flowchart TD
 | `evlab` | `evlab.privacy` | no |
 | `evlab` | `evlab.robustness` | no |
 | `evlab` | `evlab.selective` | no |
+| `evlab` | `evlab.shift` | no |
 | `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
 | `evlab` | `evlab.stratified` | no |
@@ -2482,6 +2489,11 @@ flowchart TD
 | `evlab.selective` | `errors` | no |
 | `evlab.selective` | `policy` | no |
 | `evlab.selective` | `spec` | no |
+| `evlab.shift` | `bench` | no |
+| `evlab.shift` | `core` | no |
+| `evlab.shift` | `errors` | no |
+| `evlab.shift` | `evlab.api` | no |
+| `evlab.shift` | `policy` | no |
 | `evlab.significance` | `errors` | no |
 | `evlab.significance` | `result` | no |
 | `evlab.splits` | `errors` | no |
