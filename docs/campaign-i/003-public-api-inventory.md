@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 306 · **public names:** 1889
+**Modules:** 307 · **public names:** 1893
 
 ## API stability policy
 
@@ -2272,6 +2272,7 @@ that this document never drifts from the code.
 | `EnergyReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', n_items: 'int') -> None` |
 | `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
+| `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
 | `HistogramBinningCalibrator` | class | `(n_bins: 'int' = 10) -> 'None'` |
 | `IdentityCalibrator` | class | `()` |
@@ -2309,6 +2310,7 @@ that this document never drifts from the code.
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
 | `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
+| `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
 | `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
@@ -2407,6 +2409,13 @@ that this document never drifts from the code.
 | `EnergyReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', n_items: 'int') -> None` |
 | `co2e_grams` | function | `(energy_mj: 'float', grid_intensity_g_per_kwh: 'float' = 400.0) -> 'float'` |
 | `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
+
+### `hugrgate.evlab.fairness`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
+| `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
 
 ### `hugrgate.evlab.latency`
 

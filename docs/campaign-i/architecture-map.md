@@ -1164,6 +1164,7 @@ flowchart TD
     evlab --> evlab_crossval
     evlab --> evlab_dataset
     evlab --> evlab_energy
+    evlab --> evlab_fairness
     evlab --> evlab_latency
     evlab --> evlab_privacy
     evlab --> evlab_robustness
@@ -1218,6 +1219,12 @@ flowchart TD
     evlab_energy --> policy
     evlab_energy --> result
     evlab_energy --> spec
+    evlab_fairness --> core
+    evlab_fairness --> errors
+    evlab_fairness --> evlab_api
+    evlab_fairness --> evlab_stratified
+    evlab_fairness --> policy
+    evlab_fairness --> spec
     evlab_latency --> core
     evlab_latency --> errors
     evlab_latency --> policy
@@ -2413,6 +2420,7 @@ flowchart TD
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
 | `evlab` | `evlab.energy` | no |
+| `evlab` | `evlab.fairness` | no |
 | `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.privacy` | no |
 | `evlab` | `evlab.robustness` | no |
@@ -2467,6 +2475,12 @@ flowchart TD
 | `evlab.energy` | `policy` | no |
 | `evlab.energy` | `result` | no |
 | `evlab.energy` | `spec` | no |
+| `evlab.fairness` | `core` | no |
+| `evlab.fairness` | `errors` | no |
+| `evlab.fairness` | `evlab.api` | no |
+| `evlab.fairness` | `evlab.stratified` | no |
+| `evlab.fairness` | `policy` | no |
+| `evlab.fairness` | `spec` | no |
 | `evlab.latency` | `core` | no |
 | `evlab.latency` | `errors` | no |
 | `evlab.latency` | `policy` | no |

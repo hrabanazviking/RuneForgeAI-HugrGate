@@ -84,6 +84,7 @@ from hugrgate.evlab.energy import (
     co2e_grams,
     energy_aware_evaluate,
 )
+from hugrgate.evlab.fairness import FairnessReport, fairness_evaluate
 from hugrgate.evlab.latency import LatencyReport, latency_aware_evaluate
 from hugrgate.evlab.privacy import (
     PIIReport,
@@ -144,6 +145,7 @@ __all__ = [
     "EnergyReport",
     "EvaluationLab",
     "Experiment",
+    "FairnessReport",
     "FoldResult",
     "HistogramBinningCalibrator",
     "IdentityCalibrator",
@@ -181,6 +183,7 @@ __all__ = [
     "cross_validate",
     "energy_aware_evaluate",
     "expected_calibration_error",
+    "fairness_evaluate",
     "fingerprint_items",
     "kfold_indices",
     "label_psi",
