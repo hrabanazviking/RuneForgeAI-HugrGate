@@ -7,8 +7,7 @@ episodes against current context with a transparent three-part score
 :func:`recall` is the one-call convenience: hand it the current
 decision's attributes, get back the most relevant precedents.
 
-The recency term uses a private exponential decay; slice 308 promotes
-it to the shared :mod:`hugrgate.memory.decay` module.
+The recency term uses :mod:`hugrgate.memory.decay`.
 """
 
 from __future__ import annotations
@@ -17,6 +16,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+from hugrgate.memory.decay import decay_weight
 from hugrgate.memory.query import MemoryQuery
 from hugrgate.memory.similarity import (
     featurize_query,
@@ -29,15 +29,6 @@ __all__ = [
     "recall",
     "retrieve",
 ]
-
-
-def _decay_weight(age_seconds: float, half_life_seconds: float) -> float:
-    """Exponential decay weight in (0, 1]; 1.0 for a fresh episode."""
-    if half_life_seconds <= 0:
-        raise ValueError(
-            f"half_life_seconds must be > 0, got {half_life_seconds}")
-    age = max(0.0, age_seconds)
-    return 0.5 ** (age / half_life_seconds)
 
 
 def _outcome_bonus(episode: EpisodeLike) -> float:
@@ -106,7 +97,7 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
                               exclude_ids=exclude_ids)
     results = []
     for hit in candidates:
-        recency = _decay_weight(
+        recency = decay_weight(
             current - hit.episode.recorded_at, half_life_seconds)
         bonus = _outcome_bonus(hit.episode)
         score = (alpha * hit.score + beta * recency + gamma * bonus)

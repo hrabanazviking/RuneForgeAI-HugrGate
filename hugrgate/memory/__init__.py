@@ -19,6 +19,12 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
+from hugrgate.memory.decay import (
+    decay_weight,
+    decayed_mean,
+    effective_count,
+    half_life_for_horizon,
+)
 from hugrgate.memory.groundtruth import GroundTruth, outcome_agrees
 from hugrgate.memory.history import DecisionHistory, Episode
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
@@ -57,12 +63,16 @@ __all__ = [
     "RetrievalResult",
     "SimilarityHit",
     "cosine",
+    "decay_weight",
+    "decayed_mean",
     "drop_backend",
     "drop_forbidden",
     "drop_unaccepted",
+    "effective_count",
     "featurize_episode",
     "featurize_query",
     "find_in_provenance",
+    "half_life_for_horizon",
     "most_similar",
     "outcome_agrees",
     "recall",

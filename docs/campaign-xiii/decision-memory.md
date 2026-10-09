@@ -113,3 +113,13 @@ it into an opaque agent.
   moved onto `DecisionHistory` as a method; `MemoryQuery.apply`
   made generic to preserve concrete episode types).
 - Tests: `tests/test_memory_policies.py` (14 tests).
+
+### Slice 308 — Time-decay weighting
+- `hugrgate/memory/decay.py`: shared exponential-decay math —
+  `decay_weight` (0.5 at one half-life, negative ages clamped,
+  underflow documented as exactly 0.0), `half_life_for_horizon`,
+  `effective_count`, `decayed_mean` (explicit error when all weights
+  underflow instead of a silent NaN).
+- `retrieval.py` refactored onto the shared module (as its docstring
+  promised); regression test keeps half-life behavior pinned.
+- Tests: `tests/test_memory_decay.py` (7 tests).
