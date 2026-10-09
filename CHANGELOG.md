@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 238)
+- Privacy-preserving provenance (`hugrgate.privacy_provenance`):
+  per-class record builder, opt-in value fingerprints,
+  `PrivacyAwareProvenanceStore`; core/ladder use it instead of
+  ad-hoc redaction branches.
+
 ### Added (slice 237)
 - Remote payload compiler (`hugrgate.privacy_payload`): the
   eight-stage outbound chokepoint (`RemotePayloadCompiler` /
