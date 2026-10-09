@@ -1,0 +1,16 @@
+[freeze]
+version = "1.0.0rc1"
+frozen_at = "2026-10-09"
+# Change kinds that may land while the freeze is active. Anything else
+# (new features, public API additions, new dependencies) is denied
+# unless it carries a recorded waiver.
+allowed_kinds = ["bugfix", "security", "docs", "tests", "refactor", "perf"]
+
+# Waivers are recorded here as [[waivers]] tables, never invented in
+# code. Empty during the 1.0 freeze: no feature work was waived in.
+# Example:
+# [[waivers]]
+# id = "W-001"
+# change = "feat(gjallarbu-4xx): ..."
+# reason = "..."
+# approved_by = "Volmarr"
