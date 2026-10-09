@@ -77,3 +77,12 @@ it into an opaque agent.
   immutable once set; supersede preserves the displaced truth in
   `annotations["ground_truth_revisions"]`.
 - Tests: `tests/test_memory_groundtruth.py` (12 tests).
+
+### Slice 305 — Historical similarity search
+- `hugrgate/memory/similarity.py`: auditable sparse feature vectors
+  (`featurize_episode`/`featurize_query`: spec shape, backend, model,
+  probability bucket, acceptance, fallback, latency band, state keys
+  capped at 32, domain), exact `cosine`, `most_similar` top-k with
+  `SimilarityHit` (score + shared features explaining the match),
+  recency tie-break, `exclude_ids`.
+- Tests: `tests/test_memory_similarity.py` (10 tests).
