@@ -137,6 +137,13 @@ class HugrGate:
         Shared by :meth:`decide` (sync) and :meth:`adecide` (async):
         Abstention propagates, BackendError propagates, anything else
         becomes BackendError.
+
+        Slice 490: *anything* includes ``BaseException``. A hostile
+        backend raising ``KeyboardInterrupt``/``SystemExit``/raw
+        ``BaseException`` must not escape the gate and kill the
+        host's control flow — it becomes a chained ``BackendError``.
+        The host's own signals still work: this only contains
+        exceptions raised *by the backend callable*.
         """
         try:
             return evaluate()
@@ -152,6 +159,12 @@ class HugrGate:
             logger.warning("backend %r raised unexpected %s",
                            backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}") from e
+        except BaseException as e:
+            logger.warning("backend %r raised hostile %s; contained",
+                           backend.name, type(e).__name__)
+            raise BackendError(
+                f"backend {backend.name} raised {type(e).__name__}; "
+                f"contained") from e
 
     def _finalize_result(self, result: DecisionResult, backend: Backend,
                          state: Mapping[str, Any], spec: DecisionSpec,
@@ -163,6 +176,13 @@ class HugrGate:
         gate, and records provenance.  Identical semantics whichever
         path evaluated the backend.
         """
+        # Slice 490: a hostile backend may return garbage instead of a
+        # DecisionResult. Fail closed with BackendError before touching
+        # attributes — never let AttributeError/TypeError escape.
+        if not isinstance(result, DecisionResult):
+            raise BackendError(
+                f"backend {backend.name} returned "
+                f"{type(result).__name__}, not a DecisionResult")
         result.latency_ms = (time.perf_counter() - start) * 1000
         result.backend = backend.name
 
@@ -298,6 +318,12 @@ class HugrGate:
             logger.warning("backend %r raised unexpected %s",
                            backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}") from e
+        except BaseException as e:
+            logger.warning("backend %r raised hostile %s; contained",
+                           backend.name, type(e).__name__)
+            raise BackendError(
+                f"backend {backend.name} raised {type(e).__name__}; "
+                f"contained") from e
 
         return self._finalize_result(result, backend, state, spec, policy,
                                      contract_id, start)
