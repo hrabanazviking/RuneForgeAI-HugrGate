@@ -1,0 +1,15 @@
+{
+  "slice": 336,
+  "recorded_at": 1791564428.211302,
+  "host": "htch-runtime",
+  "python": "3.12.3",
+  "result": {
+    "n": 20000,
+    "seed": 336,
+    "p50_us": 6.319998647086322,
+    "p99_us": 14.220999219105579,
+    "max_us": 531.6380011208821,
+    "baseline_p99_us": 50.0,
+    "within_baseline": true
+  }
+}

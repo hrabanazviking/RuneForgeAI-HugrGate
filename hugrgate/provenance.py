@@ -53,6 +53,15 @@ class DecisionRecord:
                       result: DecisionResult,
                       policy_threshold: float = 0.0,
                       redact_input: bool = False) -> DecisionRecord:
+        # Slice 346 hardening: the record used to drop result.metadata,
+        # losing the machine-readable verdict ("policy_verdict") and
+        # abstention reason ("abstain_reason") that downstream
+        # observability (explanation reports, dashboards) needs.  The
+        # result metadata is operational, not input payload, so it is
+        # merged in both modes; "state_keys" stays provenance-owned.
+        metadata: dict[str, Any] = dict(result.metadata)
+        if not redact_input:
+            metadata["state_keys"] = list(state.keys())
         return cls(
             request_hash=_hash_request(state, spec),
             spec=spec.to_dict(),
@@ -65,7 +74,7 @@ class DecisionRecord:
             accepted=result.accepted,
             fallback_used=result.fallback_used,
             latency_ms=result.latency_ms,
-            metadata={} if redact_input else {"state_keys": list(state.keys())},
+            metadata=metadata,
         )
 
     def to_dict(self) -> dict[str, Any]:
