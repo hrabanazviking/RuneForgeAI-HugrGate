@@ -16,6 +16,15 @@ domain-specific fault sources; the framework here is the shared
 experiment harness they can run inside.
 """
 
+from hugrgate.chaos.backend_faults import (
+    CRASH,
+    ERROR_RATE,
+    HANG,
+    LATENCY,
+    MALFORMED,
+    FaultSpec,
+    FaultyBackend,
+)
 from hugrgate.chaos.framework import (
     BlastRadius,
     ChaosExperiment,
@@ -28,12 +37,19 @@ from hugrgate.chaos.framework import (
 )
 
 __all__ = [
+    "CRASH",
+    "ERROR_RATE",
+    "HANG",
+    "LATENCY",
+    "MALFORMED",
     "BlastRadius",
     "ChaosExperiment",
     "ExperimentReport",
     "ExperimentRunner",
     "Fault",
     "FaultResult",
+    "FaultSpec",
+    "FaultyBackend",
     "ProbeOutcome",
     "SteadyStateProbe",
 ]
