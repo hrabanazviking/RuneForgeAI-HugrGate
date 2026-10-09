@@ -90,6 +90,33 @@ flowchart TD
         client[client]
         cli[cli]
     end
+    subgraph adaptive[adaptive]
+        adaptive[adaptive]
+        adaptive_telemetry[adaptive.telemetry]
+        adaptive_feedback[adaptive.feedback]
+        adaptive_delayed[adaptive.delayed]
+        adaptive_router_features[adaptive.router_features]
+        adaptive_bandit[adaptive.bandit]
+        adaptive_offline[adaptive.offline]
+        adaptive_cost_quality[adaptive.cost_quality]
+        adaptive_latency_quality[adaptive.latency_quality]
+        adaptive_energy_quality[adaptive.energy_quality]
+        adaptive_privacy_objective[adaptive.privacy_objective]
+        adaptive_multiobjective[adaptive.multiobjective]
+        adaptive_competence[adaptive.competence]
+        adaptive_domain_competence[adaptive.domain_competence]
+        adaptive_contract_competence[adaptive.contract_competence]
+        adaptive_coldstart[adaptive.coldstart]
+        adaptive_exploration[adaptive.exploration]
+        adaptive_safe_exploration[adaptive.safe_exploration]
+        adaptive_shadow[adaptive.shadow]
+        adaptive_counterfactual[adaptive.counterfactual]
+        adaptive_rollback[adaptive.rollback]
+        adaptive_versioning[adaptive.versioning]
+        adaptive_explanations[adaptive.explanations]
+        adaptive_drift_detect[adaptive.drift_detect]
+        adaptive_benchmark[adaptive.benchmark]
+    end
     subgraph api[api]
         hugrgate[hugrgate]
     end
@@ -103,6 +130,91 @@ flowchart TD
     abstain --> policy
     abstain --> result
     abstain --> spec
+    adaptive --> adaptive_bandit
+    adaptive --> adaptive_benchmark
+    adaptive --> adaptive_coldstart
+    adaptive --> adaptive_competence
+    adaptive --> adaptive_contract_competence
+    adaptive --> adaptive_cost_quality
+    adaptive --> adaptive_counterfactual
+    adaptive --> adaptive_delayed
+    adaptive --> adaptive_domain_competence
+    adaptive --> adaptive_drift_detect
+    adaptive --> adaptive_energy_quality
+    adaptive --> adaptive_explanations
+    adaptive --> adaptive_exploration
+    adaptive --> adaptive_feedback
+    adaptive --> adaptive_latency_quality
+    adaptive --> adaptive_multiobjective
+    adaptive --> adaptive_offline
+    adaptive --> adaptive_privacy_objective
+    adaptive --> adaptive_rollback
+    adaptive --> adaptive_router_features
+    adaptive --> adaptive_safe_exploration
+    adaptive --> adaptive_shadow
+    adaptive --> adaptive_telemetry
+    adaptive --> adaptive_versioning
+    adaptive_bandit --> errors
+    adaptive_benchmark --> adaptive_bandit
+    adaptive_benchmark --> errors
+    adaptive_coldstart --> adaptive_bandit
+    adaptive_coldstart --> adaptive_competence
+    adaptive_coldstart --> errors
+    adaptive_competence --> adaptive_telemetry
+    adaptive_competence --> errors
+    adaptive_contract_competence --> adaptive_competence
+    adaptive_contract_competence --> adaptive_telemetry
+    adaptive_contract_competence --> errors
+    adaptive_contract_competence --> spec
+    adaptive_cost_quality --> errors
+    adaptive_counterfactual --> adaptive_bandit
+    adaptive_counterfactual --> adaptive_offline
+    adaptive_counterfactual --> adaptive_telemetry
+    adaptive_counterfactual --> errors
+    adaptive_delayed --> adaptive_feedback
+    adaptive_delayed --> errors
+    adaptive_domain_competence --> adaptive_competence
+    adaptive_domain_competence --> adaptive_telemetry
+    adaptive_domain_competence --> errors
+    adaptive_domain_competence --> spec
+    adaptive_drift_detect --> adaptive_telemetry
+    adaptive_drift_detect --> drift
+    adaptive_drift_detect --> errors
+    adaptive_energy_quality --> adaptive_cost_quality
+    adaptive_energy_quality --> adaptive_latency_quality
+    adaptive_energy_quality --> errors
+    adaptive_explanations --> adaptive_competence
+    adaptive_explanations --> adaptive_cost_quality
+    adaptive_explanations --> errors
+    adaptive_exploration --> errors
+    adaptive_feedback --> adaptive_telemetry
+    adaptive_feedback --> errors
+    adaptive_feedback --> policy
+    adaptive_feedback --> result
+    adaptive_feedback --> spec
+    adaptive_latency_quality --> adaptive_cost_quality
+    adaptive_latency_quality --> errors
+    adaptive_multiobjective --> adaptive_cost_quality
+    adaptive_multiobjective --> errors
+    adaptive_offline --> adaptive_bandit
+    adaptive_offline --> adaptive_telemetry
+    adaptive_offline --> errors
+    adaptive_privacy_objective --> adaptive_cost_quality
+    adaptive_privacy_objective --> errors
+    adaptive_privacy_objective --> policy
+    adaptive_rollback --> errors
+    adaptive_router_features --> errors
+    adaptive_router_features --> features
+    adaptive_router_features --> policy
+    adaptive_router_features --> spec
+    adaptive_safe_exploration --> adaptive_cost_quality
+    adaptive_safe_exploration --> adaptive_exploration
+    adaptive_safe_exploration --> errors
+    adaptive_safe_exploration --> policy
+    adaptive_shadow --> adaptive_telemetry
+    adaptive_shadow --> errors
+    adaptive_telemetry --> errors
+    adaptive_versioning --> errors
     backend --> errors
     backend --> result
     backend --> spec
@@ -383,6 +495,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
 | service | `server`, `daemon`, `client`, `cli` |
+| adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -398,6 +511,91 @@ flowchart TD
 | `abstain` | `policy` | no |
 | `abstain` | `result` | no |
 | `abstain` | `spec` | no |
+| `adaptive` | `adaptive.bandit` | no |
+| `adaptive` | `adaptive.benchmark` | no |
+| `adaptive` | `adaptive.coldstart` | no |
+| `adaptive` | `adaptive.competence` | no |
+| `adaptive` | `adaptive.contract_competence` | no |
+| `adaptive` | `adaptive.cost_quality` | no |
+| `adaptive` | `adaptive.counterfactual` | no |
+| `adaptive` | `adaptive.delayed` | no |
+| `adaptive` | `adaptive.domain_competence` | no |
+| `adaptive` | `adaptive.drift_detect` | no |
+| `adaptive` | `adaptive.energy_quality` | no |
+| `adaptive` | `adaptive.explanations` | no |
+| `adaptive` | `adaptive.exploration` | no |
+| `adaptive` | `adaptive.feedback` | no |
+| `adaptive` | `adaptive.latency_quality` | no |
+| `adaptive` | `adaptive.multiobjective` | no |
+| `adaptive` | `adaptive.offline` | no |
+| `adaptive` | `adaptive.privacy_objective` | no |
+| `adaptive` | `adaptive.rollback` | no |
+| `adaptive` | `adaptive.router_features` | no |
+| `adaptive` | `adaptive.safe_exploration` | no |
+| `adaptive` | `adaptive.shadow` | no |
+| `adaptive` | `adaptive.telemetry` | no |
+| `adaptive` | `adaptive.versioning` | no |
+| `adaptive.bandit` | `errors` | no |
+| `adaptive.benchmark` | `adaptive.bandit` | no |
+| `adaptive.benchmark` | `errors` | no |
+| `adaptive.coldstart` | `adaptive.bandit` | no |
+| `adaptive.coldstart` | `adaptive.competence` | no |
+| `adaptive.coldstart` | `errors` | no |
+| `adaptive.competence` | `adaptive.telemetry` | no |
+| `adaptive.competence` | `errors` | no |
+| `adaptive.contract_competence` | `adaptive.competence` | no |
+| `adaptive.contract_competence` | `adaptive.telemetry` | no |
+| `adaptive.contract_competence` | `errors` | no |
+| `adaptive.contract_competence` | `spec` | no |
+| `adaptive.cost_quality` | `errors` | no |
+| `adaptive.counterfactual` | `adaptive.bandit` | no |
+| `adaptive.counterfactual` | `adaptive.offline` | no |
+| `adaptive.counterfactual` | `adaptive.telemetry` | no |
+| `adaptive.counterfactual` | `errors` | no |
+| `adaptive.delayed` | `adaptive.feedback` | no |
+| `adaptive.delayed` | `errors` | no |
+| `adaptive.domain_competence` | `adaptive.competence` | no |
+| `adaptive.domain_competence` | `adaptive.telemetry` | no |
+| `adaptive.domain_competence` | `errors` | no |
+| `adaptive.domain_competence` | `spec` | no |
+| `adaptive.drift_detect` | `adaptive.telemetry` | no |
+| `adaptive.drift_detect` | `drift` | no |
+| `adaptive.drift_detect` | `errors` | no |
+| `adaptive.energy_quality` | `adaptive.cost_quality` | no |
+| `adaptive.energy_quality` | `adaptive.latency_quality` | no |
+| `adaptive.energy_quality` | `errors` | no |
+| `adaptive.explanations` | `adaptive.competence` | no |
+| `adaptive.explanations` | `adaptive.cost_quality` | no |
+| `adaptive.explanations` | `errors` | no |
+| `adaptive.exploration` | `errors` | no |
+| `adaptive.feedback` | `adaptive.telemetry` | no |
+| `adaptive.feedback` | `errors` | no |
+| `adaptive.feedback` | `policy` | no |
+| `adaptive.feedback` | `result` | no |
+| `adaptive.feedback` | `spec` | no |
+| `adaptive.latency_quality` | `adaptive.cost_quality` | no |
+| `adaptive.latency_quality` | `errors` | no |
+| `adaptive.multiobjective` | `adaptive.cost_quality` | no |
+| `adaptive.multiobjective` | `errors` | no |
+| `adaptive.offline` | `adaptive.bandit` | no |
+| `adaptive.offline` | `adaptive.telemetry` | no |
+| `adaptive.offline` | `errors` | no |
+| `adaptive.privacy_objective` | `adaptive.cost_quality` | no |
+| `adaptive.privacy_objective` | `errors` | no |
+| `adaptive.privacy_objective` | `policy` | no |
+| `adaptive.rollback` | `errors` | no |
+| `adaptive.router_features` | `errors` | no |
+| `adaptive.router_features` | `features` | no |
+| `adaptive.router_features` | `policy` | no |
+| `adaptive.router_features` | `spec` | no |
+| `adaptive.safe_exploration` | `adaptive.cost_quality` | no |
+| `adaptive.safe_exploration` | `adaptive.exploration` | no |
+| `adaptive.safe_exploration` | `errors` | no |
+| `adaptive.safe_exploration` | `policy` | no |
+| `adaptive.shadow` | `adaptive.telemetry` | no |
+| `adaptive.shadow` | `errors` | no |
+| `adaptive.telemetry` | `errors` | no |
+| `adaptive.versioning` | `errors` | no |
 | `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
