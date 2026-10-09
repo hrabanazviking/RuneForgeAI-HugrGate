@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:25:28.668568+00:00",
-  "module_count": 54,
+  "generated_utc": "2026-10-09T11:27:49.115471+00:00",
+  "module_count": 55,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 53,
+      "loc": 54,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -573,6 +573,33 @@
         "validate_value",
         "describe",
         "visit"
+      ]
+    },
+    "hugrgate.contracts.cost": {
+      "docstring": "Cost-sensitive decisions \u2014 when mistakes have different prices.\n\nGjallarbr\u00fa slice 037.\n\nHugrGate policies maximize probability: the most likely outcome wins.\nReality prices mistakes differently \u2014 clearing a fraudulent transaction\ncosts far more than flagging a legitimate one. This module adds the\ndecision-theoretic core:\n\n- :class:`CostMatrix`: ``cost[predicted][true]`` over an outcome list\n  (non-negative; zero diagonal is conventional but not required \u2014 some\n  domains charge even for correct-but-expensive actions);\n- :func:`expected_cost` \u2014 \u03a3 p(true) \u00b7 cost[predicted][true];\n- :func:`min_cost_decision` \u2014 the Bayes rule for costs: the label with\n  minimum expected cost, which can *differ* from the most probable label;\n- :class:`CostSensitiveContract` (kind ``\"cost-sensitive\"``): outcomes +\n  cost matrix, with :meth:`decide` and :meth:`regret` (how much worse a\n  chosen label is than optimal).\n\nSlices 038 (utility) and 039 (risk) build on this foundation.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 256,
+      "path": "hugrgate/contracts/cost.py",
+      "public_defs": [
+        "CostMatrix",
+        "expected_cost",
+        "min_cost_decision",
+        "CostSensitiveContract",
+        "outcomes",
+        "cost",
+        "row",
+        "to_dict",
+        "from_dict",
+        "matrix",
+        "validate_value",
+        "decide",
+        "regret",
+        "describe"
       ]
     },
     "hugrgate.contracts.crossfield": {
@@ -1251,6 +1278,7 @@
     "test_contracts_034.py",
     "test_contracts_035.py",
     "test_contracts_036.py",
+    "test_contracts_037.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1261,5 +1289,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10003
+  "total_loc": 10260
 }

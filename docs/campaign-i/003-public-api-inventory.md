@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 54 · **public names:** 237
+**Modules:** 55 · **public names:** 242
 
 ## API stability policy
 
@@ -246,6 +246,7 @@ that this document never drifts from the code.
 | `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/hatch/w` |
 | `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/hatch` |
 | `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/hatch/wo` |
+| `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/hatch/workspac` |
 
 ### `hugrgate.contracts.composite`
 
@@ -261,6 +262,15 @@ that this document never drifts from the code.
 | `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
 | `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
 | `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, conditions: 'Dict[str, FieldCondition]' = <factory>) -> None` |
+
+### `hugrgate.contracts.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostMatrix` | class | `(outcomes: 'List[str]', costs: 'Mapping[str, Mapping[str, float]]') -> 'None'` |
+| `CostSensitiveContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, costs: 'Dict[str, Dict[str, float]]' = <factory>) -> None` |
+| `expected_cost` | function | `(matrix: 'CostMatrix', distribution: 'Mapping[str, float]', predicted: 'str') -> 'float'` |
+| `min_cost_decision` | function | `(matrix: 'CostMatrix', distribution: 'Mapping[str, float]') -> 'Tuple[str, float]'` |
 
 ### `hugrgate.contracts.crossfield`
 
