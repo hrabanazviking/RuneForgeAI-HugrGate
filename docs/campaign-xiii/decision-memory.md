@@ -240,3 +240,13 @@ it into an opaque agent.
   errors. Specs are deep-copied so a misbehaving policy cannot mutate
   history. Query pre-filter and limit supported.
 - Tests: `tests/test_memory_replay.py` (9 tests).
+
+### Slice 320 — Historical counterfactuals
+- `hugrgate/memory/counterfactuals.py`: `counterfactual_backends()`
+  ("what if backend X had served these?") and `counterfactual_value()`
+  ("what if we had chosen V?") over similarity-gated episodes, each
+  with Wilson score intervals and `sufficient_data` flags instead of
+  dressed-up small samples. Assumptions stated explicitly
+  (exchangeability, no unmeasured confounding); propensity-based
+  off-policy evaluation stays in `adaptive.counterfactual`.
+- Tests: `tests/test_memory_counterfactuals.py` (8 tests).

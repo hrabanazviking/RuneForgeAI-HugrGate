@@ -32,6 +32,13 @@ from hugrgate.memory.contract_history import (
     contract_histories,
     contract_key_for,
 )
+from hugrgate.memory.counterfactuals import (
+    BackendCounterfactual,
+    ValueCounterfactual,
+    counterfactual_backends,
+    counterfactual_value,
+    wilson_interval,
+)
 from hugrgate.memory.decay import (
     decay_weight,
     decayed_mean,
@@ -91,6 +98,7 @@ __all__ = [
     "DEFAULT_DOMAIN",
     "OUTCOME_KINDS",
     "ROLE_PERMISSIONS",
+    "BackendCounterfactual",
     "BackendHistory",
     "CompactionSummary",
     "ContractHistory",
@@ -119,6 +127,7 @@ __all__ = [
     "RetrievalResult",
     "RolePermission",
     "SimilarityHit",
+    "ValueCounterfactual",
     "backend_histories",
     "by_backend",
     "by_backend_value",
@@ -130,6 +139,8 @@ __all__ = [
     "contract_key_for",
     "cosine",
     "count_by",
+    "counterfactual_backends",
+    "counterfactual_value",
     "decay_weight",
     "decayed_mean",
     "domain_for",
@@ -154,4 +165,5 @@ __all__ = [
     "replay",
     "retrieve",
     "retrieve_conditioned",
+    "wilson_interval",
 ]
