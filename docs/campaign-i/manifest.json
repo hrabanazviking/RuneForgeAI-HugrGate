@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:10:14.120136+00:00",
-  "module_count": 46,
+  "generated_utc": "2026-10-09T11:12:46.691732+00:00",
+  "module_count": 47,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,9 +530,45 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 43,
+      "loc": 44,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
+    },
+    "hugrgate.contracts.hierarchy": {
+      "docstring": "Hierarchical labels \u2014 label forests with ancestor semantics.\n\nGjallarbr\u00fa slice 029.\n\nFlat multilabel contracts treat ``\"siamese\"`` and ``\"animal\"`` as unrelated\nstrings. A hierarchical label contract organizes labels into a forest:\nselecting ``\"siamese\"`` *implies* ``\"cat\"``, ``\"mammal\"``, ``\"animal\"``.\nThis module provides:\n\n- :class:`LabelHierarchy`: an immutable label forest built from edges or a\n  nested mapping, with ancestor/descendant queries, depth, lowest common\n  ancestor, and ancestor closure;\n- :class:`HierarchicalLabelContract` (kind ``\"hierarchical-labels\"``): a\n  v2 contract whose values are label sets; validation requires every\n  label to be known, and :meth:`close_value` expands a set with all\n  implied ancestors;\n- hierarchical precision/recall over ancestor-closed sets, so partial\n  credit flows up the tree instead of all-or-nothing flat matching.\n\nThe forest is a true forest: every node has at most one parent, and\ncycles are rejected at construction.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 370,
+      "path": "hugrgate/contracts/hierarchy.py",
+      "public_defs": [
+        "LabelHierarchy",
+        "hierarchical_precision",
+        "hierarchical_recall",
+        "HierarchicalLabelContract",
+        "from_edges",
+        "from_nested",
+        "labels",
+        "roots",
+        "leaves",
+        "parent_of",
+        "children_of",
+        "ancestors",
+        "descendants",
+        "depth_of",
+        "lowest_common_ancestor",
+        "close",
+        "edges",
+        "hierarchy",
+        "validate_value",
+        "close_value",
+        "describe",
+        "visit",
+        "walk"
+      ]
     },
     "hugrgate.contracts.negotiation": {
       "docstring": "Contract version negotiation. Gjallarbr\u00fa slice 027.\n\nTwo parties (a contract producer and consumer, client and server, two\nservices) each support a set of contract schema versions. This module\nlets them agree on one version \u2014 and, for full sessions, on the\ncontract kinds they both understand \u2014 without silent downgrades.\n\nSelection rule: among the versions every party supports, the winner\nminimizes the sum of preference ranks across parties (each party lists\nversions most-preferred first); ties break toward the highest version.\nThe rule is deterministic and symmetric \u2014 no party is privileged.\n\nFailure is loud: disjoint version sets raise :class:`ContractError`\n(``no_common_version``); disjoint kind sets raise ``no_common_kind``.",
@@ -1051,6 +1087,7 @@
     "test_contracts_026.py",
     "test_contracts_027.py",
     "test_contracts_028.py",
+    "test_contracts_029.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1061,5 +1098,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7865
+  "total_loc": 8236
 }

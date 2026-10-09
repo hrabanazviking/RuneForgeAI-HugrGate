@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 46 · **public names:** 202
+**Modules:** 47 · **public names:** 207
 
 ## API stability policy
 
@@ -238,6 +238,16 @@ that this document never drifts from the code.
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
 | `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
 | `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
+| `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
+
+### `hugrgate.contracts.hierarchy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LabelHierarchy` | class | `(edges: 'Iterable[Tuple[str, str]]', nodes: 'Iterable[str]' = ()) -> 'None'` |
+| `HierarchicalLabelContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, edges: 'List[Tuple[str, str]]' = <factory>, labels: 'List[str]' = <factory>) -> None` |
+| `hierarchical_precision` | function | `(predicted: 'Collection[str]', truth: 'Collection[str]', hierarchy: 'LabelHierarchy') -> 'float'` |
+| `hierarchical_recall` | function | `(predicted: 'Collection[str]', truth: 'Collection[str]', hierarchy: 'LabelHierarchy') -> 'float'` |
 
 ### `hugrgate.contracts.negotiation`
 

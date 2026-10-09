@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T11:10:14.120136+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T11:12:46.691732+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 46 Python files under `hugrgate/`
-- **Total LOC:** 7865
+- **Modules:** 47 Python files under `hugrgate/`
+- **Total LOC:** 8236
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -36,7 +36,8 @@
 | `hugrgate.circuit` | 164 | Circuit breaker — per-backend failure containment. Slice 18. | — |
 | `hugrgate.cli` | 275 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 261 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
-| `hugrgate.contracts.__init__` | 43 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
+| `hugrgate.contracts.__init__` | 44 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
+| `hugrgate.contracts.hierarchy` | 370 | Hierarchical labels — label forests with ancestor semantics. | hugrgate |
 | `hugrgate.contracts.negotiation` | 212 | Contract version negotiation. Gjallarbrú slice 027. | hugrgate |
 | `hugrgate.contracts.nested` | 195 | Nested categorical contracts — decision trees. Gjallarbrú slice 028. | hugrgate |
 | `hugrgate.contracts.schema` | 243 | Decision contract schema v2. Gjallarbrú slice 026. | hugrgate |
