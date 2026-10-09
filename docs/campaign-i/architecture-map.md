@@ -186,7 +186,23 @@ flowchart TD
     contracts_features --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
+    contracts_inheritance --> contracts_composite
+    contracts_inheritance --> contracts_conditional
+    contracts_inheritance --> contracts_context
+    contracts_inheritance --> contracts_cost
+    contracts_inheritance --> contracts_crossfield
+    contracts_inheritance --> contracts_deadlines
+    contracts_inheritance --> contracts_distributions
+    contracts_inheritance --> contracts_explanations
+    contracts_inheritance --> contracts_features
+    contracts_inheritance --> contracts_hierarchy
+    contracts_inheritance --> contracts_multilabel
+    contracts_inheritance --> contracts_nested
+    contracts_inheritance --> contracts_ordinal
+    contracts_inheritance --> contracts_risk
     contracts_inheritance --> contracts_schema
+    contracts_inheritance --> contracts_uncertainty
+    contracts_inheritance --> contracts_utility
     contracts_inheritance --> errors
     contracts_inheritance -.-> spec
     contracts_multilabel --> contracts_schema
@@ -379,7 +395,23 @@ flowchart TD
 | `contracts.features` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
+| `contracts.inheritance` | `contracts.composite` | no |
+| `contracts.inheritance` | `contracts.conditional` | no |
+| `contracts.inheritance` | `contracts.context` | no |
+| `contracts.inheritance` | `contracts.cost` | no |
+| `contracts.inheritance` | `contracts.crossfield` | no |
+| `contracts.inheritance` | `contracts.deadlines` | no |
+| `contracts.inheritance` | `contracts.distributions` | no |
+| `contracts.inheritance` | `contracts.explanations` | no |
+| `contracts.inheritance` | `contracts.features` | no |
+| `contracts.inheritance` | `contracts.hierarchy` | no |
+| `contracts.inheritance` | `contracts.multilabel` | no |
+| `contracts.inheritance` | `contracts.nested` | no |
+| `contracts.inheritance` | `contracts.ordinal` | no |
+| `contracts.inheritance` | `contracts.risk` | no |
 | `contracts.inheritance` | `contracts.schema` | no |
+| `contracts.inheritance` | `contracts.uncertainty` | no |
+| `contracts.inheritance` | `contracts.utility` | no |
 | `contracts.inheritance` | `errors` | no |
 | `contracts.inheritance` | `spec` | yes |
 | `contracts.multilabel` | `contracts.schema` | no |

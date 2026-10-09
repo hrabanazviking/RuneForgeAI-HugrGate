@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-09T11:44:24.583961+00:00",
+  "generated_utc": "2026-10-09T11:53:01.098705+00:00",
   "module_count": 62,
   "modules": {
     "hugrgate.__init__": {
@@ -792,7 +792,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 339,
+      "loc": 375,
       "path": "hugrgate/contracts/inheritance.py",
       "public_defs": [
         "derive_contract",
@@ -1463,5 +1463,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 12119
+  "total_loc": 12155
 }

@@ -22,13 +22,33 @@ from __future__ import annotations
 
 import copy
 import dataclasses
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 from hugrgate.contracts.schema import (
     CONTRACT_KINDS,
     DecisionContract,
 )
 from hugrgate.errors import ContractError
+
+if TYPE_CHECKING:
+    from hugrgate.contracts.composite import CompositeContract
+    from hugrgate.contracts.conditional import ConditionalCompositeContract
+    from hugrgate.contracts.context import ContextContract
+    from hugrgate.contracts.crossfield import ConstrainedCompositeContract
+    from hugrgate.contracts.deadlines import TimedContract
+    from hugrgate.contracts.distributions import DistributionContract
+    from hugrgate.contracts.explanations import ExplanationContract
+    from hugrgate.contracts.features import FeatureContract
+    from hugrgate.contracts.hierarchy import HierarchicalLabelContract
+    from hugrgate.contracts.multilabel import MultilabelContract
+    from hugrgate.contracts.nested import NestedCategoricalContract
+    from hugrgate.contracts.ordinal import OrdinalContract
+    from hugrgate.contracts.uncertainty import NumericIntervalContract
+    from hugrgate.contracts.cost import CostSensitiveContract
+    from hugrgate.contracts.utility import UtilityContract
+    from hugrgate.contracts.risk import RiskContract
+    OutcomeContract = Union[DistributionContract, CostSensitiveContract,
+                            UtilityContract, RiskContract]
 
 __all__ = [
     "derive_contract",
@@ -96,15 +116,15 @@ def _as_list(x: Any) -> List[str]:
     return list(x) if isinstance(x, (list, tuple)) else [x]
 
 
-def _ordinal_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _ordinal_ok(child: "OrdinalContract", base: "OrdinalContract") -> bool:
     order = [base.levels.index(l) for l in child.levels
              if l in base.levels]
     return (len(order) == len(child.levels)
             and all(b > a for a, b in zip(order, order[1:])))
 
 
-def _numeric_interval_ok(child: DecisionContract, base: DecisionContract
-                         ) -> bool:
+def _numeric_interval_ok(child: "NumericIntervalContract",
+                             base: "NumericIntervalContract") -> bool:
     if not (base.minimum <= child.minimum
             and child.maximum <= base.maximum):
         return False
@@ -118,7 +138,8 @@ def _numeric_interval_ok(child: DecisionContract, base: DecisionContract
     return True
 
 
-def _multilabel_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _multilabel_ok(child: "MultilabelContract",
+                        base: "MultilabelContract") -> bool:
     if not set(child.labels) <= set(base.labels):
         return False
     if base.exact_count != -1:
@@ -150,21 +171,25 @@ def _multilabel_ok(child: DecisionContract, base: DecisionContract) -> bool:
                for a, b in base_ex if a in child.labels and b in child.labels)
 
 
-def _outcomes_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _outcomes_ok(child: "OutcomeContract",
+                       base: "OutcomeContract") -> bool:
     return set(child.outcomes) <= set(base.outcomes)
 
 
-def _nested_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _nested_ok(child: "NestedCategoricalContract",
+                     base: "NestedCategoricalContract") -> bool:
     # Accepted values are exactly the leaf paths.
     return set(child.leaf_paths()) <= set(base.leaf_paths())
 
 
-def _hierarchy_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _hierarchy_ok(child: "HierarchicalLabelContract",
+                        base: "HierarchicalLabelContract") -> bool:
     # Value validity is label membership; structure may refine.
     return set(child.hierarchy.labels) <= set(base.hierarchy.labels)
 
 
-def _composite_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _composite_ok(child: "CompositeContract",
+                        base: "CompositeContract") -> bool:
     # Exact-keys semantics: same fields, each compatible.
     if set(child.fields) != set(base.fields):
         return False
@@ -195,7 +220,8 @@ def _spec_ok(child: Any, base: Any) -> bool:
     return set(space_c) <= set(space_b)
 
 
-def _conditional_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _conditional_ok(child: "ConditionalCompositeContract",
+                          base: "ConditionalCompositeContract") -> bool:
     if not _composite_ok(child, base):
         return False
     # Conditions must agree exactly: any divergence changes which values
@@ -203,7 +229,8 @@ def _conditional_ok(child: DecisionContract, base: DecisionContract) -> bool:
     return child.conditions == base.conditions
 
 
-def _constrained_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _constrained_ok(child: "ConstrainedCompositeContract",
+                          base: "ConstrainedCompositeContract") -> bool:
     if not _composite_ok(child, base):
         return False
     # Conservative: every base constraint must appear among the child's
@@ -212,7 +239,7 @@ def _constrained_ok(child: DecisionContract, base: DecisionContract) -> bool:
                for bc in base.constraints)
 
 
-def _timed_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _timed_ok(child: "TimedContract", base: "TimedContract") -> bool:
     if not _field_ok(child.inner, base.inner):
         return False
     if base.budget_ms is not None:
@@ -279,7 +306,16 @@ def _typed_mapping_ok(child: Any, base: Any, *, kind: str) -> bool:
     return True
 
 
-def _explanation_ok(child: DecisionContract, base: DecisionContract) -> bool:
+def _context_ok(child: "ContextContract", base: "ContextContract") -> bool:
+    return _typed_mapping_ok(child, base, kind="context")
+
+
+def _features_ok(child: "FeatureContract", base: "FeatureContract") -> bool:
+    return _typed_mapping_ok(child, base, kind="features")
+
+
+def _explanation_ok(child: "ExplanationContract",
+                          base: "ExplanationContract") -> bool:
     if child.text_field != base.text_field:
         return False
     if child.reasons_field != base.reasons_field:
@@ -295,7 +331,7 @@ def _explanation_ok(child: DecisionContract, base: DecisionContract) -> bool:
     return set(base.forbidden_phrases) <= set(child.forbidden_phrases)
 
 
-_HANDLERS = {
+_HANDLERS: Dict[str, Callable[..., bool]] = {
     "ordinal": _ordinal_ok,
     "numeric-interval": _numeric_interval_ok,
     "multilabel-cardinality": _multilabel_ok,
@@ -309,8 +345,8 @@ _HANDLERS = {
     "conditional-composite": _conditional_ok,
     "constrained-composite": _constrained_ok,
     "timed": _timed_ok,
-    "context-schema": lambda c, b: _typed_mapping_ok(c, b, kind="context"),
-    "input-features": lambda c, b: _typed_mapping_ok(c, b, kind="features"),
+    "context-schema": _context_ok,
+    "input-features": _features_ok,
     "explanation": _explanation_ok,
 }
 
