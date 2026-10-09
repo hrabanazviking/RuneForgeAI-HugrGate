@@ -142,6 +142,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "ruff": {"lint"},
     "coverage": {"lint"},
     "onnxruntime": {"onnx"},
+    "vllm": {"vllm"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
