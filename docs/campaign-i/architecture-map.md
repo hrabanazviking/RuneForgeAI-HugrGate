@@ -87,6 +87,7 @@ flowchart TD
         edge_watchdog[edge.watchdog]
         edge_telemetry[edge.telemetry]
         edge_bench[edge.bench]
+        edge_chaos[edge.chaos]
     end
 
     hugrgate --> backend
@@ -217,6 +218,18 @@ flowchart TD
     edge_cachetune --> policy
     edge_cachetune --> result
     edge_cachetune --> spec
+    edge_chaos -.-> backend
+    edge_chaos -.-> edge_cachetune
+    edge_chaos -.-> edge_memory
+    edge_chaos -.-> edge_npu
+    edge_chaos -.-> edge_recovery
+    edge_chaos -.-> edge_residency
+    edge_chaos -.-> edge_routing
+    edge_chaos -.-> edge_storage
+    edge_chaos -.-> edge_thermal
+    edge_chaos -.-> edge_watchdog
+    edge_chaos --> errors
+    edge_chaos -.-> result
     edge_memory --> errors
     edge_npu --> errors
     edge_power --> errors
@@ -301,7 +314,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos` |
 
 ## Internal dependency edges
 
@@ -435,6 +448,18 @@ flowchart TD
 | `edge.cachetune` | `policy` | no |
 | `edge.cachetune` | `result` | no |
 | `edge.cachetune` | `spec` | no |
+| `edge.chaos` | `backend` | yes |
+| `edge.chaos` | `edge.cachetune` | yes |
+| `edge.chaos` | `edge.memory` | yes |
+| `edge.chaos` | `edge.npu` | yes |
+| `edge.chaos` | `edge.recovery` | yes |
+| `edge.chaos` | `edge.residency` | yes |
+| `edge.chaos` | `edge.routing` | yes |
+| `edge.chaos` | `edge.storage` | yes |
+| `edge.chaos` | `edge.thermal` | yes |
+| `edge.chaos` | `edge.watchdog` | yes |
+| `edge.chaos` | `errors` | no |
+| `edge.chaos` | `result` | yes |
 | `edge.memory` | `errors` | no |
 | `edge.npu` | `errors` | no |
 | `edge.power` | `errors` | no |

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 61 · **public names:** 282
+**Modules:** 62 · **public names:** 287
 
 ## API stability policy
 
@@ -310,6 +310,16 @@ that this document never drifts from the code.
 | `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
 | `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+
+### `hugrgate.edge.chaos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
+| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ChaosRunner` | class | `()` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
 
 ### `hugrgate.edge.memory`
 

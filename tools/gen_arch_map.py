@@ -71,6 +71,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.edge.watchdog",
         "hugrgate.edge.telemetry",
         "hugrgate.edge.bench",
+        "hugrgate.edge.chaos",
     ],
 }
 
