@@ -32,8 +32,10 @@ from pathlib import Path
 __all__ = [
     "POSIX_ONLY_MODULES",
     "VALIDATED_PLATFORMS",
+    "MacOSFinding",
     "PlatformInfo",
     "PosixFinding",
+    "check_macos_assumptions",
     "check_windows_import_safety",
     "current_platform",
     "is_validated",
@@ -221,6 +223,76 @@ def check_windows_import_safety(
     offending findings (empty means the tree is import-safe).
     """
     return tuple(f for f in scan_posix_only(root) if not f.guarded)
+
+
+@dataclass(frozen=True)
+class MacOSFinding:
+    """One macOS-hostile assumption: a Linux-only facility used
+    without a fallback."""
+
+    path: str
+    lineno: int
+    what: str
+
+    def __str__(self) -> str:
+        return f"{self.path}:{self.lineno}: {self.what}"
+
+
+def check_macos_assumptions(root: str | Path) -> tuple[MacOSFinding, ...]:
+    """Scan ``root`` for assumptions that break on macOS.
+
+    Flags: unguarded ``open("/proc/...")`` reads (no ``/proc`` on
+    macOS — every one must degrade, as ``edge/memory.py`` does),
+    ``select.epoll`` uses (macOS has kqueue, not epoll), and any
+    forced ``multiprocessing`` ``"fork"`` start method (macOS
+    defaults to ``spawn``; fork-with-threads is unsafe).
+    """
+    findings: list[MacOSFinding] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        rel = str(path)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "open"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+                and node.args[0].value.startswith("/proc/")
+                and not _is_guarded(tree, node)
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno,
+                                 f"unguarded {node.args[0].value} read")
+                )
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "select"
+                and node.attr == "epoll"
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno, "select.epoll (no epoll on macOS)")
+                )
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "set_start_method"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value == "fork"
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno,
+                                 'forced multiprocessing "fork" start method')
+                )
+    return tuple(findings)
 
 
 def linux_live_checks() -> dict[str, bool]:
