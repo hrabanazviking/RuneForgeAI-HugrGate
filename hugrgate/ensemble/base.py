@@ -220,6 +220,11 @@ def collect_votes(members: List[Backend],
                 member.name, w,
                 f"unexpected_{type(e).__name__}: {e}"))
             continue
+        if result.value is None:
+            # An abstention-shaped result is an abstention, not a vote
+            # for "None" (slice 102 hardening: None is not countable).
+            votes.append(_skip_vote(member.name, w, "abstained_result"))
+            continue
         latency_ms = (time.perf_counter() - start) * 1000.0
         votes.append(MemberVote(
             backend=member.name,
