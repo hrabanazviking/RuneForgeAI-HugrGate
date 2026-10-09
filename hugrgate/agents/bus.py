@@ -51,12 +51,19 @@ Handler = Callable[[AgentSignal], Any]
 
 
 def matches(pattern: str, topic: str) -> bool:
-    """Return True when a subscription ``pattern`` matches ``topic``."""
+    """Return True when a subscription ``pattern`` matches ``topic``.
+
+    Patterns: exact (``"a.b"``), prefix (``"a.*"`` matches ``"a"``
+    and everything below it), suffix (``"*.heartbeat"`` matches any
+    topic ending in ``".heartbeat"``), or catch-all (``"*"``).
+    """
     if pattern == "*" or pattern == topic:
         return True
     if pattern.endswith(".*"):
         prefix = pattern[:-2]
         return topic == prefix or topic.startswith(prefix + ".")
+    if pattern.startswith("*."):
+        return topic.endswith(pattern[1:])
     return False
 
 
