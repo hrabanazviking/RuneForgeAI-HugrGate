@@ -34,7 +34,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from hugrgate.backend import Backend
-from hugrgate.errors import BackendUnavailable, SpecError
+from hugrgate.errors import BackendError, BackendUnavailable, SpecError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
@@ -58,7 +58,9 @@ ERROR_RATE = "error_rate"
 #: Fault mode: out-of-spec result (slice 256).
 MALFORMED = "malformed"
 
-_ALL_MODES = (CRASH, HANG, LATENCY, ERROR_RATE, MALFORMED)
+#: All fault modes, in priority order: when several modes fire on one
+#: call, the earliest in this tuple wins.
+_ALL_MODES = (CRASH, HANG, ERROR_RATE, MALFORMED, LATENCY)
 
 
 @dataclass(frozen=True)
@@ -94,7 +96,7 @@ class FaultyBackend(Backend):
     """
 
     #: Fault modes with working injectors in this build.
-    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG, LATENCY)
+    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG, LATENCY, ERROR_RATE)
 
     def __init__(self, backend: Backend):
         if not isinstance(backend, Backend):
@@ -186,10 +188,11 @@ class FaultyBackend(Backend):
             return self._inject_hang(state, spec, context)
         if mode == LATENCY:
             return self._inject_latency(state, spec, context)
-        # Further modes (error_rate, malformed) are wired by slices
-        # 255-256, which extend _WIRED_MODES and add their branch here.
-        # _roll_fault can only return a wired mode because arm() rejects
-        # the rest.
+        if mode == ERROR_RATE:
+            self._inject_error_rate()
+        # The last mode (malformed) is wired by slice 256, which extends
+        # _WIRED_MODES and adds its branch here. _roll_fault can only
+        # return a wired mode because arm() rejects the rest.
         return self._backend.evaluate(state, spec, context)
 
     def _roll_fault(self) -> str | None:
@@ -228,6 +231,12 @@ class FaultyBackend(Backend):
                 raise SpecError(
                     f"latency fault param 'delay_s' is required and must "
                     f"be >= 0, got {delay_s!r}")
+        if spec.mode == ERROR_RATE:
+            message = spec.params.get("message", "chaos: injected backend error")
+            if not isinstance(message, str) or not message.strip():
+                raise SpecError(
+                    f"error_rate fault param 'message' must be a non-empty "
+                    f"string, got {message!r}")
 
     def _inject_hang(self, state: Mapping[str, Any], spec: DecisionSpec,
                      context: Mapping[str, Any] | None) -> DecisionResult:
@@ -258,3 +267,13 @@ class FaultyBackend(Backend):
         if delay_s:
             time.sleep(delay_s)
         return self._backend.evaluate(state, spec, context)
+
+    def _inject_error_rate(self) -> None:
+        """Raise :class:`~hugrgate.errors.BackendError`: the backend
+        answered, but with a failure. Unlike a crash (the process is
+        gone) or a hang (no answer at all), an error is the backend
+        *reporting* its own inability — recoverable, routable, and
+        counted by the circuit breaker."""
+        message = self._spec_for(ERROR_RATE).params.get(
+            "message", "chaos: injected backend error")
+        raise BackendError(f"{message} (backend {self.name!r})")
