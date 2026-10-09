@@ -76,6 +76,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.cluster.distributed_batch",
         "hugrgate.cluster.backpressure",
         "hugrgate.cluster.partition",
+        "hugrgate.cluster.recovery",
     ],
     "api": ["hugrgate"],
 }

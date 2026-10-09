@@ -34,6 +34,7 @@ from hugrgate.cluster.protocol import (
     MessageType,
     new_trace_id,
 )
+from hugrgate.cluster.recovery import RecoveryManager
 from hugrgate.cluster.routing import DistributedRouter, PeerScores
 from hugrgate.cluster.rpc import RPCClient, error_envelope
 from hugrgate.cluster.work_stealing import (
@@ -147,6 +148,8 @@ class ClusterNode:
         #: majority the node serves and routes local-only.
         self.partition = PartitionDetector()
         self.enforce_quorum = enforce_quorum
+        #: Offline peer recovery (slice 220).
+        self.recovery = RecoveryManager()
 
     # -- local facts --------------------------------------------------------
 
@@ -202,9 +205,11 @@ class ClusterNode:
                                      trace_id=trace_id or new_trace_id())
         except BackendError:
             self.health.record_failure(peer.node_id)
+            self.recovery.note_failure(peer.node_id)
             raise
         rtt_ms = (time.perf_counter() - start) * 1000.0
         self.health.record_success(peer.node_id)
+        self.recovery.note_success(peer.node_id)
         self.latency.record(peer.node_id, rtt_ms)
         return result
 
@@ -244,6 +249,36 @@ class ClusterNode:
                                    trace_id=trace_id or new_trace_id())
         self.partition.note_heartbeat(peer.node_id)
         return reply
+
+    def recover_peer(self, peer: PeerRecord,
+                     trace_id: str | None = None) -> bool:
+        """Rejoin handshake for a dark peer (slice 220).
+
+        Respects the recovery backoff: returns False immediately when
+        no retry is due. Otherwise pings the peer; on success resets
+        every per-peer monitor (health, latency, cost, liveness,
+        backoff) so it rejoins with a clean slate, re-pushes the
+        cluster policy, and returns True. On failure the backoff
+        lengthens and False is returned. Never raises.
+        """
+        node_id = peer.node_id
+        if not self.recovery.should_retry(node_id):
+            return False
+        self.recovery.mark_attempt(node_id)
+        try:
+            self.ping(peer, trace_id=trace_id)
+        except BackendError:
+            self.recovery.note_failure(node_id)
+            self.health.record_failure(node_id)
+            return False
+        self.recovery.note_success(node_id)
+        self.health.reset(node_id)
+        self.latency.reset(node_id)
+        self.costs.reset(node_id)
+        self.partition.forget(node_id)
+        self.partition.note_heartbeat(node_id)
+        self.push_policy_to(peer)  # best effort; outcome ignored
+        return True
 
     # -- inbound ------------------------------------------------------------
 
@@ -360,35 +395,35 @@ class ClusterNode:
         return self._respond(message, MessageType.POLICY_RESPONSE,
                              snapshot)
 
+    def push_policy_to(self, peer: PeerRecord) -> str:
+        """Push the cluster policy to one peer; ``"ok"`` or an error."""
+        snapshot = self.policy_sync.snapshot()
+        message = ClusterMessage(
+            msg_type=MessageType.POLICY_PUSH,
+            sender=self.node_id,
+            seq=self.rpc.next_seq(),
+            trace_id=new_trace_id(),
+            payload=dict(snapshot),
+        )
+        try:
+            reply = self.rpc.send(peer, message)
+        except HugrGateError as e:
+            return f"{e.code}: {e.message}"
+        if reply.msg_type is MessageType.ERROR:
+            raw = reply.payload.get("error", {})
+            code = raw.get("code", "unknown") if isinstance(
+                raw, dict) else "unknown"
+            return f"peer error: {code}"
+        return "ok"
+
     def propagate_policy(self) -> dict[str, str]:
         """Push the cluster policy to every known peer.
 
         Returns ``{node_id: "ok" | error}`` — best effort per peer;
         one unreachable peer never blocks the rest.
         """
-        snapshot = self.policy_sync.snapshot()
-        outcomes: dict[str, str] = {}
-        for peer in self.peers():
-            message = ClusterMessage(
-                msg_type=MessageType.POLICY_PUSH,
-                sender=self.node_id,
-                seq=self.rpc.next_seq(),
-                trace_id=new_trace_id(),
-                payload=dict(snapshot),
-            )
-            try:
-                reply = self.rpc.send(peer, message)
-            except HugrGateError as e:
-                outcomes[peer.node_id] = f"{e.code}: {e.message}"
-                continue
-            if reply.msg_type is MessageType.ERROR:
-                raw = reply.payload.get("error", {})
-                code = raw.get("code", "unknown") if isinstance(
-                    raw, dict) else "unknown"
-                outcomes[peer.node_id] = f"peer error: {code}"
-            else:
-                outcomes[peer.node_id] = "ok"
-        return outcomes
+        return {peer.node_id: self.push_policy_to(peer)
+                for peer in self.peers()}
 
     # -- decide ---------------------------------------------------------------
 

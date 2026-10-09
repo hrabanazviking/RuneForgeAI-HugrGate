@@ -77,6 +77,11 @@ from hugrgate.cluster.protocol import (
     encode_message,
     new_trace_id,
 )
+from hugrgate.cluster.recovery import (
+    DEFAULT_RECOVERY_BASE_DELAY_S,
+    DEFAULT_RECOVERY_MAX_DELAY_S,
+    RecoveryManager,
+)
 from hugrgate.cluster.routing import (
     DistributedRouter,
     PeerScores,
@@ -119,6 +124,8 @@ __all__ = [
     "DEFAULT_MAX_BATCH_SIZE",
     "DEFAULT_PARTITION_STALE_AFTER_S",
     "DEFAULT_QUARANTINE_THRESHOLD",
+    "DEFAULT_RECOVERY_BASE_DELAY_S",
+    "DEFAULT_RECOVERY_MAX_DELAY_S",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
@@ -156,6 +163,7 @@ __all__ = [
     "PolicyVersion",
     "PrivacyBoundary",
     "RPCClient",
+    "RecoveryManager",
     "RemoteBackend",
     "RouteCandidate",
     "StaticDiscovery",

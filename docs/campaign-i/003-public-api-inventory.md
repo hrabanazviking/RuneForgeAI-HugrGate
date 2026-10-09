@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 66 · **public names:** 320
+**Modules:** 67 · **public names:** 326
 
 ## API stability policy
 
@@ -240,6 +240,8 @@ that this document never drifts from the code.
 | `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
 | `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
+| `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
+| `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
@@ -277,6 +279,7 @@ that this document never drifts from the code.
 | `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
 | `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
@@ -420,6 +423,14 @@ that this document never drifts from the code.
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.recovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
+| `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
+| `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 
 ### `hugrgate.cluster.routes`
 
