@@ -62,7 +62,10 @@ CONTRACTS = {
     "hugrgate.errors", "hugrgate.spec", "hugrgate.result",
     "hugrgate.backend", "hugrgate.policy", "hugrgate.validation",
 }
-SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client"}
+SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client",
+           # Campaign XVIII (slice 428): the v2 SDK is client-side
+           # service-layer code — it builds on hugrgate.client.
+           "hugrgate.sdk"}
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
@@ -141,6 +144,9 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "fastapi": {"server"},
     "uvicorn": {"server"},
     "httpx": {"server"},
+    # Campaign XVIII (slice 427): the documented OpenAPI contract
+    # models import pydantic directly; provided by the server extra.
+    "pydantic": {"server"},
     "pytest": {"test"},
     "mypy": {"typecheck"},
     "ruff": {"lint"},
