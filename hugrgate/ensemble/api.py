@@ -147,9 +147,11 @@ class Ensemble(Backend):
             cfg.strategy_options = dict(strategy_options)
         self.config = cfg
         # Validate weights eagerly so a typo fails at construction,
-        # not at 3am during the first decide().
+        # not at 3am during the first decide(); store the normalized
+        # map so every downstream consumer sees one semantic.
         if self.config.weights:
-            normalize_weights(self.config.weights, names)
+            self.config.weights = normalize_weights(
+                self.config.weights, names)
 
     def capabilities(self) -> Dict[str, Any]:
         return {

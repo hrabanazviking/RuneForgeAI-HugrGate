@@ -103,8 +103,9 @@ def normalize_weights(weights: Mapping[str, float],
                       members: List[str]) -> Dict[str, float]:
     """Validate and normalize member weights to sum to 1.
 
-    Raises :class:`PolicyError` for unknown members, negative or
-    non-finite weights, or a total weight of zero.
+    Members missing from the map get weight 0: a weights map names the
+    members that count. Raises :class:`PolicyError` for unknown
+    members, negative or non-finite weights, or a total weight of zero.
     """
     unknown = [k for k in weights if k not in members]
     if unknown:
@@ -195,7 +196,12 @@ def collect_votes(members: List[Backend],
             f"min_members must be >= 1, got {min_members}")
     votes: List[MemberVote] = []
     for member in members:
-        w = float(weights.get(member.name, 1.0)) if weights else 1.0
+        if weights is None:
+            w = 1.0
+        else:
+            # A weights map names the members that count; unnamed
+            # members get weight 0 (see normalize_weights).
+            w = float(weights.get(member.name, 0.0))
         if not member.supports(spec):
             votes.append(_skip_vote(member.name, w, "unsupported_spec"))
             continue

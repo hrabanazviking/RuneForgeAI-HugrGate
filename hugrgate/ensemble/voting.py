@@ -1,7 +1,11 @@
 """Voting combiners — many ballots, one decision. Slices 101-105.
 
-- **soft** (101): average the members' probability distributions,
-  elect the argmax.
+- **soft** (101, hardened 103): weight-aware average of the members'
+  probability distributions, elect the argmax. A member that votes a
+  value with an empty distribution gets it *completed* — its reported
+  probability on the voted value, the remainder split uniformly (the
+  slice-13 rules-backend semantics) — so an incomplete ballot never
+  silently dilutes the average.
 - **hard** (102): one ballot per member; majority wins, ties broken
   deterministically (most confident tied camp, then earliest ballot,
   then lexicographic).
@@ -33,6 +37,83 @@ __all__ = [
     "soft_voting",
     "hard_voting",
 ]
+
+
+def _complete_distribution(vote: MemberVote,
+                           space: List[str]) -> Dict[str, float]:
+    """Complete an empty member distribution.
+
+    The member's reported probability goes on the voted value; the
+    remainder is split uniformly across the other options (mirrors the
+    rules backend, slice 13). A non-empty distribution is returned
+    unchanged — its missing keys are genuine zeros, since a valid
+    distribution always sums to 1.
+    """
+    if vote.distribution:
+        return dict(vote.distribution)
+    if vote.value is None or vote.value not in space:
+        raise BackendError(
+            f"soft voting: cannot complete an empty distribution for "
+            f"member {vote.backend!r} with value {vote.value!r}")
+    others = [o for o in space if o != vote.value]
+    if not others:
+        return {str(vote.value): 1.0}
+    rest = (1.0 - vote.probability) / len(others)
+    completed = {o: rest for o in others}
+    completed[str(vote.value)] = vote.probability
+    return completed
+
+
+def soft_voting(votes: List[MemberVote],
+                ctx: StrategyContext) -> DecisionResult:
+    """Weight-aware average of member distributions; elect the argmax.
+
+    ``p(v) = Σᵢ wᵢ·distᵢ(v) / Σᵢ wᵢ`` over usable votes, after
+    completing empty member distributions. The winner is the value
+    with the highest averaged mass; its probability is that mass and
+    the uncertainty is the normalized entropy of the averaged
+    distribution.
+    """
+    require_discrete_spec(ctx.spec, "soft")
+    usable = [v for v in votes if not v.skipped]
+    if not usable:
+        raise BackendError("soft voting: no usable votes")
+    space = ctx.spec.value_space()
+    total_w = sum(v.weight for v in usable)
+    if total_w <= 0:
+        raise BackendError(
+            "soft voting: total member weight must be positive, "
+            f"got {total_w}")
+    averaged: Dict[str, float] = {}
+    completed: List[str] = []
+    for v in usable:
+        dist = _complete_distribution(v, space)
+        if not v.distribution:
+            completed.append(v.backend)
+        w = v.weight / total_w
+        for key, p in dist.items():
+            averaged[key] = averaged.get(key, 0.0) + w * p
+    first_seen: Dict[str, int] = {}
+    for i, v in enumerate(usable):
+        if v.value is not None and str(v.value) not in first_seen:
+            first_seen[str(v.value)] = i
+    peak = max(averaged.values())
+    tied = [k for k, p in averaged.items() if p == peak]
+    winner = break_tie(tied, averaged, first_seen)
+    return finalize_result(
+        strategy="soft",
+        spec=ctx.spec,
+        votes=votes,
+        weights={v.backend: v.weight for v in usable},
+        value=winner,
+        probability=averaged[winner],
+        distribution=averaged,
+        uncertainty=normalized_entropy(averaged),
+        winner_share=averaged[winner],
+        extra={"averaged_distribution": dict(averaged),
+               "completed_distributions": completed},
+        model="ensemble:soft",
+    )
 
 
 def _ballots(votes: List[MemberVote]) -> List[MemberVote]:
@@ -90,46 +171,4 @@ def hard_voting(votes: List[MemberVote],
         winner_share=share,
         extra={"tally": dict(tally), "tie_broken_by": tie_broken_by},
         model="ensemble:hard",
-    )
-
-
-def soft_voting(votes: List[MemberVote],
-                ctx: StrategyContext) -> DecisionResult:
-    """Average member distributions; elect the argmax.
-
-    ``p(v) = mean_i dist_i(v)`` over usable votes (missing keys count
-    as 0, so the average still sums to 1). The winner is the value with
-    the highest averaged mass; its probability is that mass and the
-    uncertainty is the normalized entropy of the averaged distribution.
-    """
-    require_discrete_spec(ctx.spec, "soft")
-    usable = [v for v in votes if not v.skipped]
-    averaged: Dict[str, float] = {}
-    for v in usable:
-        for key, p in v.distribution.items():
-            averaged[key] = averaged.get(key, 0.0) + p
-    n = len(usable)
-    averaged = {k: p / n for k, p in averaged.items()}
-    first_seen: Dict[str, int] = {}
-    for i, v in enumerate(usable):
-        if v.value is not None and str(v.value) not in first_seen:
-            first_seen[str(v.value)] = i
-    # Candidates are the averaged keys; every usable vote's value is
-    # among them (validate_result guarantees distribution keys cover
-    # the value space members claim).
-    peak = max(averaged.values())
-    tied = [k for k, p in averaged.items() if p == peak]
-    winner = break_tie(tied, averaged, first_seen)
-    return finalize_result(
-        strategy="soft",
-        spec=ctx.spec,
-        votes=votes,
-        weights={v.backend: v.weight for v in usable},
-        value=winner,
-        probability=averaged[winner],
-        distribution=averaged,
-        uncertainty=normalized_entropy(averaged),
-        winner_share=averaged[winner],
-        extra={"averaged_distribution": dict(averaged)},
-        model="ensemble:soft",
     )
