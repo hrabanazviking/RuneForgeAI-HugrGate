@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-10-09T12:17:49.993461+00:00",
-  "module_count": 67,
+  "generated_utc": "2026-10-09T14:15:47.580786+00:00",
+  "module_count": 69,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
       "imports": [
         "hugrgate"
       ],
-      "loc": 25,
+      "loc": 43,
       "path": "hugrgate/__init__.py",
       "public_defs": []
     },
@@ -31,10 +31,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
+        "threading",
         "typing"
       ],
-      "loc": 84,
+      "loc": 151,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -44,6 +46,7 @@
         "evaluate",
         "health",
         "warmup",
+        "close",
         "batch",
         "calibration_info",
         "estimated_latency",
@@ -51,7 +54,9 @@
         "privacy_properties",
         "hardware_requirements",
         "register",
+        "unregister",
         "get",
+        "get_or_raise",
         "list",
         "supporting"
       ]
@@ -76,11 +81,11 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hashlib",
         "hugrgate",
         "numpy",
-        "re",
-        "typing"
+        "re"
       ],
       "loc": 260,
       "path": "hugrgate/backends/embedding.py",
@@ -124,12 +129,12 @@
       "docstring": "Local LLM backend \u2014 constrained decoding. Slice 35.\n\n:class:`LLMBackend` runs an open-weight local model through a small engine\ninterface and applies **constrained decoding**: the engine may only emit\nspec-valid values (categorical/ordinal \u2192 option tokens, binary \u2192 yes/no).\nWhatever the engine returns is re-validated against the spec \u2014 an\nout-of-spec emission is a :class:`BackendError`, never a result.\n\nThe ``llama_cpp`` dependency is optional and imported lazily; without an\nengine, evaluation raises :class:`BackendUnavailable`. Tests inject a mock\nengine \u2014 no model download required.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "llama_cpp",
         "math",
-        "time",
-        "typing"
+        "time"
       ],
       "loc": 247,
       "path": "hugrgate/backends/llm.py",
@@ -153,6 +158,7 @@
       "docstring": "Logistic regression backend. Slice 22.\n\nTrains on ``(state, label)`` pairs, emits ``predict_proba`` distributions,\nand round-trips through pickle + :class:`ModelManifest`.  This module also\ndefines :class:`SklearnClassifierBackend`, the shared contract base reused\nby the forest (slice 23) and boosting (slice 24) backends.",
       "imports": [
         "__future__",
+        "collections",
         "datetime",
         "hugrgate",
         "numpy",
@@ -161,7 +167,7 @@
         "time",
         "typing"
       ],
-      "loc": 303,
+      "loc": 304,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -185,9 +191,9 @@
       "docstring": "NLI backend \u2014 statement entailment as a binary decision. Slice 34.\n\n:class:`NLIBackend` answers one question: *is the spec's statement supported\nby the state?* A natural-language-inference model scores\n``P(entailment | premise, statement)`` and that becomes the probability of\n``\"true\"``. Constrained to ``binary`` specs only.\n\nThe ``transformers`` dependency is optional and imported lazily: without it\n(or without a model/engine), evaluation raises :class:`BackendUnavailable`\ninstead of failing at import time. Tests inject a plain callable\n``nli_fn(premise, statement) -> float`` \u2014 no downloads required.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "transformers",
-        "typing"
+        "transformers"
       ],
       "loc": 153,
       "path": "hugrgate/backends/nli.py",
@@ -205,13 +211,14 @@
       "docstring": "Rule backend \u2014 predicates, decision tables, confidence distributions.\n\nSlices 11-13: a deterministic backend that evaluates predicate rules\nagainst the decision state.\n\nSlice 11 \u2014 predicates:\n    {\"if\": {\"field\": \"temperature\", \"gt\": 90},\n     \"then\": \"critical\", \"confidence\": 0.99}\nOperators: eq, ne, gt, gte, lt, lte, in, contains, exists.\nFirst-match wins.\n\nSlice 12 \u2014 decision tables:\nRows of conditions -> outcome, explicit priority ordering, a default\nrule, and YAML-loadable rule sets::\n\n    rules:\n      - name: critical-malware\n        priority: 100\n        if:\n          all:\n            - {field: severity, gte: 8}\n            - {field: category, eq: malware}\n        then: escalate\n        confidence: 0.97\n      - {default: log, confidence: 0.5}\n\nSlice 13 \u2014 confidence & distribution:\nThe matched rule's confidence becomes the winner's probability; the\nremainder (1 - confidence) is split uniformly across the other options\nof the spec's value space. supports(): categorical, binary, ordinal.\n\nMissing-field semantics (documented, pinned by tests):\n  - eq / in / contains / gt / gte / lt / lte on a missing field -> False\n  - ne on a missing field -> True (\"not equal\" includes absent)\n  - exists -> True iff the field is present (or per explicit flag)\nComparison type errors (e.g. gt between str and int) never match.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing",
         "yaml"
       ],
-      "loc": 380,
+      "loc": 381,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -236,6 +243,7 @@
       "docstring": "Benchmark harness \u2014 datasets \u2192 backends \u2192 metrics. Slice 45.\n\nRuns a labeled (or unlabeled) dataset through one or more backends and\nreports:\n\n- ``accuracy`` \u2014 exact-match rate (categorical / ordinal / binary;\n  set-equality for multilabel; skipped for numeric)\n- ``brier_score`` \u2014 mean squared error of the full distribution\n  against the one-hot truth\n- ``ece`` \u2014 expected calibration error over 10 confidence bins\n- ``latency_p50_ms`` / ``latency_p99_ms`` \u2014 from ``result.latency_ms``\n- ``throughput_per_s`` \u2014 decisions per wall-clock second\n- ``abstention_rate`` \u2014 fraction of items the gate abstained on\n\nThe report is a plain JSON-serializable dict (see :func:`run_benchmark`),\nrenderable to markdown by :mod:`hugrgate.bench_report`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hashlib",
         "hugrgate",
@@ -244,7 +252,7 @@
         "time",
         "typing"
       ],
-      "loc": 346,
+      "loc": 345,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -262,9 +270,10 @@
       "docstring": "Benchmark report \u2014 markdown rendering of benchmark JSON. Slice 47.\n\nProduces a human-readable report with:\n\n- summary + per-backend metric tables,\n- ASCII reliability diagrams (accuracy vs confidence per bin),\n- a hardware / methodology block for reproducibility.",
       "imports": [
         "__future__",
+        "collections",
         "typing"
       ],
-      "loc": 145,
+      "loc": 146,
       "path": "hugrgate/bench_report.py",
       "public_defs": [
         "ascii_reliability_diagram",
@@ -282,10 +291,11 @@
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 161,
+      "loc": 181,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -313,11 +323,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 120,
+      "loc": 121,
       "path": "hugrgate/calibration/_base.py",
       "public_defs": [
         "Calibrator",
@@ -338,11 +349,12 @@
       "docstring": "Isotonic regression via the Pool Adjacent Violators (PAV) algorithm.\n\nSlice 27.  Fits a non-decreasing stepwise map from raw scores to empirical\nevent rates.  The PAV implementation below is written independently from the\ntextbook description: sort by score, greedily merge adjacent blocks whose\nmeans violate monotonicity, and predict with the resulting step function.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 111,
+      "loc": 112,
       "path": "hugrgate/calibration/isotonic.py",
       "public_defs": [
         "IsotonicCalibrator",
@@ -356,9 +368,9 @@
       "docstring": "Calibration metrics. Slice 28.\n\nBinary metrics \u2014 Brier score, log loss, expected/maximum calibration error\n(ECE/MCE) \u2014 plus reliability-diagram bin data and a multiclass ECE helper\n(max-probability confidence vs. correctness) for whole-distribution checks.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 149,
       "path": "hugrgate/calibration/metrics.py",
@@ -375,11 +387,12 @@
       "docstring": "Platt scaling. Slice 26.\n\nFits a sigmoid ``p = 1 / (1 + exp(A\u00b7s + B))`` to validation scores by\nminimizing the negative log-likelihood with Platt's target smoothing.\nThe Newton optimization below is an independent implementation written\nfrom the textbook formulation (gradient/Hessian of the logistic loss);\nno code is copied from scikit-learn or any other library.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/calibration/platt.py",
       "public_defs": [
         "PlattCalibrator",
@@ -393,6 +406,7 @@
       "docstring": "Calibration profiles. Slice 29.\n\nA :class:`CalibrationProfile` is a named, versioned record of a fitted\ncalibration: which backend + model it applies to, which calibrator with\nwhich per-class parameters, the metrics on the calibration set, and a hash\nof that dataset.  Profiles are stored *separately* from model weights, so\nrecalibration never touches the underlying model.\n\n:class:`CalibratedBackend` wraps any trained classifier backend, applies the\nprofile's per-class (one-vs-rest) calibrators to the raw distribution,\nrenormalizes, and stamps ``result.calibration_profile``.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -402,7 +416,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 263,
+      "loc": 264,
       "path": "hugrgate/calibration/profiles.py",
       "public_defs": [
         "hash_dataset",
@@ -431,14 +445,15 @@
       ]
     },
     "hugrgate.calibration.temperature": {
-      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = \u03c3(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
+      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = sigmoid(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 136,
+      "loc": 137,
       "path": "hugrgate/calibration/temperature.py",
       "public_defs": [
         "TemperatureCalibrator",
@@ -453,11 +468,13 @@
       "docstring": "Circuit breaker \u2014 per-backend failure containment. Slice 18.\n\nStates:\n\n- **closed**: traffic flows; consecutive failures are counted.\n- **open**: calls are rejected fast (``allow()`` -> False) until\n  ``reset_timeout_s`` has elapsed.\n- **half-open**: after the timeout, a limited number of probe calls\n  (``half_open_max_probes``) are let through. A probe success closes the\n  circuit; a probe failure re-opens it and restarts the timeout.\n\n:class:`CircuitRegistry` owns one breaker per backend name and creates\nthem on demand. :class:`~hugrgate.fallback.FallbackChain` accepts a\nregistry: open circuits are skipped (recorded in the fallback trace)\nand every attempt's outcome is reported back to its breaker.\n\nThe clock is injectable (``clock`` parameter) so tests can drive time\ndeterministically. All methods are thread-safe.",
       "imports": [
         "__future__",
+        "collections",
+        "hugrgate",
         "threading",
         "time",
         "typing"
       ],
-      "loc": 164,
+      "loc": 174,
       "path": "hugrgate/circuit.py",
       "public_defs": [
         "CircuitBreaker",
@@ -485,7 +502,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 275,
+      "loc": 277,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -503,19 +520,17 @@
       ]
     },
     "hugrgate.client": {
-      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nAlso home to the JSON serde helpers shared by the server, daemon and CLI:\n:func:`policy_to_dict`, :func:`policy_from_dict`, :func:`result_from_dict`.",
+      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.",
       "imports": [
         "__future__",
+        "collections",
         "httpx",
         "hugrgate",
         "typing"
       ],
-      "loc": 261,
+      "loc": 220,
       "path": "hugrgate/client.py",
       "public_defs": [
-        "policy_to_dict",
-        "policy_from_dict",
-        "result_from_dict",
         "HugrGateClient",
         "decide",
         "health",
@@ -529,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 82,
+      "loc": 81,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -537,11 +552,12 @@
       "docstring": "Structured composite decisions. Gjallarbr\u00fa slice 030.\n\nA composite contract is one structured judgment made of named fields,\neach field governed by its own contract: e.g. ``{\"severity\": <ordinal>,\n\"department\": <categorical>, \"eta_minutes\": <numeric>}``.\n\nFields may be v2 :class:`DecisionContract`s *or* v1\n:class:`hugrgate.spec.DecisionSpec`s \u2014 the composite bridges both\ngenerations of the contract system (full v1\u2192v2 migration is slice 047).\nValues are mappings with exactly the declared fields: missing and\nunknown fields are both rejected, so typos never slip through silently.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 187,
+      "loc": 188,
       "path": "hugrgate/contracts/composite.py",
       "public_defs": [
         "CompositeContract",
@@ -552,7 +568,7 @@
       ]
     },
     "hugrgate.contracts.composition": {
-      "docstring": "Contract composition \u2014 combining contracts. Gjallarbr\u00fa slice 045.\n\nInheritance (slice 044) is *is-a* specialization of one base. Composition\nis *and*: merging, producting, and stacking contracts.\n\n- :func:`merge`: union the fields of several composites of the *same*\n  concrete sub-kind (``composite``, ``conditional-composite``,\n  ``constrained-composite``). Field conflicts resolve by policy\n  (``error`` | ``left`` | ``right``); conditions union; constraints\n  concatenate. Cross-sub-kind merges are rejected \u2014 silently dropping\n  conditions or constraints would lie about the result.\n- :func:`product`: the joint decision \u2014 any two contracts as two named\n  fields of one composite (``A \u00d7 B``).\n- :func:`with_deadline`: stack a temporal bound onto any contract via\n  :class:`TimedContract`.\n\n``derive_contract`` (044) is single-base override; ``merge`` is its\nmulti-base union sibling.",
+      "docstring": "Contract composition \u2014 combining contracts. Gjallarbr\u00fa slice 045.\n\nInheritance (slice 044) is *is-a* specialization of one base. Composition\nis *and*: merging, producting, and stacking contracts.\n\n- :func:`merge`: union the fields of several composites of the *same*\n  concrete sub-kind (``composite``, ``conditional-composite``,\n  ``constrained-composite``). Field conflicts resolve by policy\n  (``error`` | ``left`` | ``right``); conditions union; constraints\n  concatenate. Cross-sub-kind merges are rejected \u2014 silently dropping\n  conditions or constraints would lie about the result.\n- :func:`product`: the joint decision \u2014 any two contracts as two named\n  fields of one composite (``A x B``).\n- :func:`with_deadline`: stack a temporal bound onto any contract via\n  :class:`TimedContract`.\n\n``derive_contract`` (044) is single-base override; ``merge`` is its\nmulti-base union sibling.",
       "imports": [
         "__future__",
         "hugrgate",
@@ -570,11 +586,12 @@
       "docstring": "Conditional decision fields. Gjallarbr\u00fa slice 031.\n\nA composite contract (slice 030) requires every field, always. Real\ndecisions are conditional: ``allergy_details`` only matters when\n``has_allergy`` is true; ``dosage`` only when ``medication`` is not\n``\"none\"``.\n\n:class:`ConditionalCompositeContract` (kind ``\"conditional-composite\"``)\nextends :class:`CompositeContract` with per-field\n:class:`FieldCondition`s. Given a value mapping, activation is computed\nto a fixpoint \u2014 conditions may chain (a field conditional on another\nconditional field cascades). Only active fields are required and\nvalidated; providing a value for an *inactive* field is rejected as a\ncontradiction. Condition cycles and self-references are rejected at\nconstruction.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 268,
+      "loc": 269,
       "path": "hugrgate/contracts/conditional.py",
       "public_defs": [
         "FieldCondition",
@@ -593,11 +610,12 @@
       "docstring": "Context schemas \u2014 typed contracts for decision context.\n\nGjallarbr\u00fa slice 041.\n\n``HugrGate.decide(state, spec, policy, context)`` accepts an opaque\n``context`` mapping that nothing validates: a backend expecting\n``context[\"locale\"]`` to be a string gets whatever the caller passed.\nThis module adds:\n\n- :class:`ContextField`: one named field \u2014 ``type`` (``string``,\n  ``number``, ``integer``, ``boolean``, ``array``, ``object``, ``any``)\n  plus ``required``;\n- :class:`ContextSchema`: an ordered field set with ``allow_extra``\n  control; :meth:`violations` aggregates every problem, :meth:`validate`\n  raises one error;\n- :class:`ContextContract` (kind ``\"context-schema\"``): the schema as a\n  v2 contract, so context requirements travel, negotiate, and compose\n  like any other contract.\n\n(``hugrgate/validation.py`` is deliberately untouched: the contracts\nlayer may not import the contract-engine layer per the slice-004\nlayering rules. Runtime wiring of context schemas into ``decide()``\nlands in slice 050.)",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 274,
+      "loc": 275,
       "path": "hugrgate/contracts/context.py",
       "public_defs": [
         "ContextField",
@@ -623,11 +641,12 @@
       "docstring": "Cost-sensitive decisions \u2014 when mistakes have different prices.\n\nGjallarbr\u00fa slice 037.\n\nHugrGate policies maximize probability: the most likely outcome wins.\nReality prices mistakes differently \u2014 clearing a fraudulent transaction\ncosts far more than flagging a legitimate one. This module adds the\ndecision-theoretic core:\n\n- :class:`CostMatrix`: ``cost[predicted][true]`` over an outcome list\n  (non-negative; zero diagonal is conventional but not required \u2014 some\n  domains charge even for correct-but-expensive actions);\n- :func:`expected_cost` \u2014 \u03a3 p(true) \u00b7 cost[predicted][true];\n- :func:`min_cost_decision` \u2014 the Bayes rule for costs: the label with\n  minimum expected cost, which can *differ* from the most probable label;\n- :class:`CostSensitiveContract` (kind ``\"cost-sensitive\"``): outcomes +\n  cost matrix, with :meth:`decide` and :meth:`regret` (how much worse a\n  chosen label is than optimal).\n\nSlices 038 (utility) and 039 (risk) build on this foundation.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 256,
+      "loc": 257,
       "path": "hugrgate/contracts/cost.py",
       "public_defs": [
         "CostMatrix",
@@ -650,6 +669,7 @@
       "docstring": "Cross-field constraints \u2014 invariants over whole decisions.\n\nGjallarbr\u00fa slice 032.\n\nConditional fields (slice 031) decide *whether* a field is active. They\ncannot state *invariants* spanning fields: ``start < end``,\n``a + b <= 100``, \"these three codes are pairwise distinct\". This module\nadds declarative, serializable constraints evaluated after per-field\nvalidation:\n\n- :class:`FieldConstraint`: one invariant \u2014 ``fields`` involved, an\n  ``op``, and a ``target`` (a literal, or ``{\"field\": name}`` to compare\n  against another field's value);\n- :class:`ConstrainedCompositeContract` (kind ``\"constrained-composite\"``):\n  a composite with a ``constraints`` list; :meth:`validate_value`\n  aggregates *every* violation into one error instead of failing fast.\n\nConstraints are data, not callables: they serialize, describe\nthemselves, and stay auditable (law 14: bounded, typed, auditable).",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
@@ -672,12 +692,13 @@
       "docstring": "Decision deadlines \u2014 temporal bounds on decisions. Gjallarbr\u00fa slice 040.\n\nBackend latency has a policy knob (`maximum_latency_ms`), but the\n*decision itself* carries no temporal contract: nothing says \"decide\nwithin 500 ms of the request\" or \"this decision is only valid during the\ntrading window\". :class:`TimedContract` (kind ``\"timed\"``) wraps any\ninner contract with:\n\n- ``budget_ms`` \u2014 the decision must be produced within this many\n  milliseconds of the request;\n- ``not_before`` / ``not_after`` \u2014 absolute unix-timestamp window in\n  which the decision may be made (and remains valid).\n\nValue validation delegates to the inner contract; temporal validation is\nexplicit and clock-injectable (``now`` parameters default to\n``time.time()``), so every rule is deterministically testable.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 208,
+      "loc": 209,
       "path": "hugrgate/contracts/deadlines.py",
       "public_defs": [
         "TimedContract",
@@ -693,12 +714,13 @@
       "docstring": "Distribution constraints \u2014 what a healthy distribution looks like.\n\nGjallarbr\u00fa slice 035.\n\n``validate_result`` (and slice 033's ordinal check) verify that a\ndistribution is *well-formed*: keys in the outcome space, values in\n[0,1], sum \u2248 1. They say nothing about whether it is *sane*: a backend\nthat always emits ``{\"a\": 1.0}`` is well-formed and useless. This module\nadds declarative, serializable constraints over distributions:\n\n- ``min_top1`` / ``max_top1`` \u2014 decisiveness floor / overconfidence cap;\n- ``min_margin`` \u2014 gap between the top two probabilities;\n- ``min_entropy`` / ``max_entropy`` \u2014 Shannon entropy bounds (nats);\n- ``max_support`` \u2014 at most *k* outcomes with mass above \u03b5;\n- ``min_mass`` \u2014 a label set must carry at least *p* combined mass.\n\n:class:`DistributionContract` (kind ``\"distribution\"``) binds an outcome\nspace to a constraint list: values validate against the outcomes,\ndistributions validate against the constraints.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "math",
         "typing"
       ],
-      "loc": 320,
+      "loc": 321,
       "path": "hugrgate/contracts/distributions.py",
       "public_defs": [
         "shannon_entropy",
@@ -719,12 +741,13 @@
       "docstring": "Output explanation contracts \u2014 decisions must show their work.\n\nGjallarbr\u00fa slice 043.\n\nExplanations currently live as ad-hoc ``DecisionResult.metadata`` keys:\nnothing requires one, nothing checks its shape, and nothing verifies it\neven mentions the decided value. :class:`ExplanationContract` (kind\n``\"explanation\"``) contracts the explanation itself:\n\n- ``required_fields`` \u2014 keys the explanation mapping must carry;\n- ``text_field`` / ``min_length`` \u2014 the narrative and its minimum length;\n- ``reasons_field`` / ``min_reasons`` \u2014 a structured reason list with a\n  minimum count;\n- ``must_mention_value`` \u2014 faithfulness: the text must name the decided\n  value (every element, for collection values), case-insensitively;\n- ``forbidden_phrases`` \u2014 strings that must not appear (case-insensitive).\n\n:func:`check_result` / :meth:`ExplanationContract.check_result` pull the\nvalue and the explanation (``metadata[\"explanation\"]``) straight off a\n:class:`DecisionResult`, so existing results validate without modification.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "re",
         "typing"
       ],
-      "loc": 227,
+      "loc": 228,
       "path": "hugrgate/contracts/explanations.py",
       "public_defs": [
         "ExplanationContract",
@@ -740,11 +763,12 @@
       "docstring": "Input feature contracts \u2014 what the model may assume.\n\nGjallarbr\u00fa slice 042.\n\n``hugrgate/features.py`` extractors turn raw state into flat\n``{name: float}`` dicts, but nothing contracts the *input* side: which\nfeatures must be present, their dtypes, valid ranges, or what happens\nwith missing/extra keys. :class:`FeatureContract` (kind\n``\"input-features\"``) declares:\n\n- :class:`FeatureSpec`: ``name``, ``dtype`` (``float`` | ``int`` |\n  ``bool`` | ``category``), ``required``, numeric ``minimum``/``maximum``,\n  ``categories`` for categoricals, and a ``default`` for optional fields;\n- validation with aggregated violations (missing, mistyped,\n  out-of-range, unknown category);\n- :meth:`select`: project a raw mapping onto the declared feature order \u2014\n  filling defaults, dropping or rejecting extras per ``allow_extra`` \u2014\n  producing the clean, ordered feature dict a backend can consume.\n\n(This is ``hugrgate.contracts.features``; the existing\n``hugrgate.features`` extractor module is untouched.)",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 288,
+      "loc": 289,
       "path": "hugrgate/contracts/features.py",
       "public_defs": [
         "FeatureSpec",
@@ -765,12 +789,13 @@
       "docstring": "Contract fuzzing \u2014 seeded random contracts, invariant checking.\n\nGjallarbr\u00fa slice 049.\n\nHand-written tests prove the engine handles the cases we thought of.\nThe fuzzer hunts the ones we didn't: it builds random contracts from a\nseeded RNG, throws random values at them, and checks invariants that\nmust hold for *every* contract \u2014 dict round-trips, ``validate_value``\nsoundness on in-space values, canonical-hash stability, and a\nnon-empty ``describe()``.\n\nEverything is deterministic: the same seed always produces the same\ncontracts, the same values, and the same report, so a failure is a\nreproduction recipe, not a ghost.\n\n>>> from hugrgate.contracts.fuzz import fuzz\n>>> report = fuzz(seed=42, cases_per_kind=50)\n>>> report.failures\n[]",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "random",
         "typing"
       ],
-      "loc": 339,
+      "loc": 340,
       "path": "hugrgate/contracts/fuzz.py",
       "public_defs": [
         "random_contract",
@@ -787,11 +812,12 @@
       "docstring": "Hierarchical labels \u2014 label forests with ancestor semantics.\n\nGjallarbr\u00fa slice 029.\n\nFlat multilabel contracts treat ``\"siamese\"`` and ``\"animal\"`` as unrelated\nstrings. A hierarchical label contract organizes labels into a forest:\nselecting ``\"siamese\"`` *implies* ``\"cat\"``, ``\"mammal\"``, ``\"animal\"``.\nThis module provides:\n\n- :class:`LabelHierarchy`: an immutable label forest built from edges or a\n  nested mapping, with ancestor/descendant queries, depth, lowest common\n  ancestor, and ancestor closure;\n- :class:`HierarchicalLabelContract` (kind ``\"hierarchical-labels\"``): a\n  v2 contract whose values are label sets; validation requires every\n  label to be known, and :meth:`close_value` expands a set with all\n  implied ancestors;\n- hierarchical precision/recall over ancestor-closed sets, so partial\n  credit flows up the tree instead of all-or-nothing flat matching.\n\nThe forest is a true forest: every node has at most one parent, and\ncycles are rejected at construction.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 370,
+      "loc": 371,
       "path": "hugrgate/contracts/hierarchy.py",
       "public_defs": [
         "LabelHierarchy",
@@ -823,12 +849,14 @@
       "docstring": "Contract inheritance \u2014 derive, specialize, and check compatibility.\n\nGjallarbr\u00fa slice 044.\n\nContracts are standalone: there is no way to say \"a triage contract is\nthe base clinical contract with tighter bounds\". This module adds:\n\n- :func:`derive_contract`: build a child contract of the same kind from\n  a base, overriding fields by name. Metadata deep-merges (child wins);\n  the base's canonical hash is recorded as ``derived_from`` (provenance).\n- :func:`is_compatible`: the Liskov check \u2014 is every value the child\n  accepts also accepted by the base? Implemented per kind over the\n  *value space* (what ``validate_value`` accepts), with conservative\n  fallbacks where implication is undecidable.\n\nCompatibility is about values, not matrices: a cost-sensitive child with\ndifferent prices but the same outcomes is compatible, because any label\nit can decide is a label the base can decide.",
       "imports": [
         "__future__",
+        "collections",
         "copy",
         "dataclasses",
         "hugrgate",
+        "itertools",
         "typing"
       ],
-      "loc": 375,
+      "loc": 377,
       "path": "hugrgate/contracts/inheritance.py",
       "public_defs": [
         "derive_contract",
@@ -839,10 +867,10 @@
       "docstring": "Contract linting \u2014 static checks with severities.\n\nGjallarbr\u00fa slice 048.\n\nValidation proves a contract is *well-formed*; linting judges whether it\nis *well-built*. Degenerate configs slip past construction \u2014 a zero cost\nmatrix, an ordinal whose anchors all sit at one position, a\nsingle-field composite, anchors that never span the scale \u2014 and then\nsilently do nothing in production. :func:`lint_contract` runs every\nregistered check and returns a :class:`LintReport` of :class:`LintFinding`\\ s\ngraded info / warning / error.\n\nChecks are plain functions appended to :data:`LINT_CHECKS`, so teams can\nadd their own house rules:\n\n>>> from hugrgate.contracts.lint import LINT_CHECKS, lint_contract\n>>> LINT_CHECKS.append(lambda c: [])  # a no-op house rule\n\n:func:`lint_template` applies the same discipline to contract templates\n(unused parameters, undocumented parameters); :func:`lint_all` lints a\nwhole fleet of contracts at once.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
-        "time",
-        "typing"
+        "time"
       ],
       "loc": 346,
       "path": "hugrgate/contracts/lint.py",
@@ -866,11 +894,12 @@
       "docstring": "Contract migration engine \u2014 v1 DecisionSpec \u2194 v2 contracts.\n\nGjallarbr\u00fa slice 047.\n\n``DecisionSpec`` (v1) and ``DecisionContract`` (v2) have lived side by\nside since slice 026, and ``from_dict``'s version error has pointed at\nthis module since then. The migration engine bridges them:\n\n- :func:`spec_to_contract`: v1 \u2192 v2. categorical \u2192 flat\n  nested-categorical; binary \u2192 nested-categorical ``[\"true\", \"false\"]``\n  (statement preserved in ``description``); ordinal \u2192 ordinal (default\n  anchors); numeric \u2192 numeric-interval; multilabel \u2192 multilabel-cardinality\n  (no rules). Metadata carries over.\n- :func:`contract_to_spec`: v2 \u2192 v1 for the four unambiguous kinds\n  (flat nested \u2192 categorical, ordinal, numeric-interval, rule-free\n  multilabel); anything else raises \u2014 no silent lossy downgrades.\n- :class:`MigrationReport`: the result plus ``warnings`` and a ``lossy``\n  flag, so callers know exactly what changed.\n- :data:`MIGRATIONS`: the ``(from_version, to_version) \u2192 function``\n  registry; :func:`migrate` dispatches a raw dict on its\n  ``schema_version`` (absent = ``\"1.0\"``).\n\nMigrations are total on their documented domain and loud everywhere else.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 238,
+      "loc": 239,
       "path": "hugrgate/contracts/migration.py",
       "public_defs": [
         "register_migration",
@@ -883,14 +912,15 @@
       ]
     },
     "hugrgate.contracts.multilabel": {
-      "docstring": "Multilabel cardinality constraints \u2014 how many, which, with what.\n\nGjallarbr\u00fa slice 036.\n\nHierarchical contracts (slice 029) validate *membership* of label sets.\nThey say nothing about *shape*: \"pick 1\u20133\", \"exactly 2\", \"'urgent' is\nmandatory\", \"'a' and 'c' never co-occur\", \"'x' implies 'y'\".\n:class:`MultilabelContract` (kind ``\"multilabel-cardinality\"``) adds:\n\n- ``min_count`` / ``max_count`` / ``exact_count`` (exact wins when set);\n- ``required`` / ``forbidden`` label lists;\n- ``implies``: selecting a label requires its consequents;\n- ``excludes``: selecting a label forbids its antagonists (symmetrized at\n  construction \u2014 exclusion is inherently mutual).\n\nAll violations aggregate into a single error; construction rejects\nincoherent rule sets (e.g. a label both required and forbidden).",
+      "docstring": "Multilabel cardinality constraints \u2014 how many, which, with what.\n\nGjallarbr\u00fa slice 036.\n\nHierarchical contracts (slice 029) validate *membership* of label sets.\nThey say nothing about *shape*: \"pick 1-3\", \"exactly 2\", \"'urgent' is\nmandatory\", \"'a' and 'c' never co-occur\", \"'x' implies 'y'\".\n:class:`MultilabelContract` (kind ``\"multilabel-cardinality\"``) adds:\n\n- ``min_count`` / ``max_count`` / ``exact_count`` (exact wins when set);\n- ``required`` / ``forbidden`` label lists;\n- ``implies``: selecting a label requires its consequents;\n- ``excludes``: selecting a label forbids its antagonists (symmetrized at\n  construction \u2014 exclusion is inherently mutual).\n\nAll violations aggregate into a single error; construction rejects\nincoherent rule sets (e.g. a label both required and forbidden).",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 269,
+      "loc": 270,
       "path": "hugrgate/contracts/multilabel.py",
       "public_defs": [
         "MultilabelContract",
@@ -903,9 +933,9 @@
       "docstring": "Contract version negotiation. Gjallarbr\u00fa slice 027.\n\nTwo parties (a contract producer and consumer, client and server, two\nservices) each support a set of contract schema versions. This module\nlets them agree on one version \u2014 and, for full sessions, on the\ncontract kinds they both understand \u2014 without silent downgrades.\n\nSelection rule: among the versions every party supports, the winner\nminimizes the sum of preference ranks across parties (each party lists\nversions most-preferred first); ties break toward the highest version.\nThe rule is deterministic and symmetric \u2014 no party is privileged.\n\nFailure is loud: disjoint version sets raise :class:`ContractError`\n(``no_common_version``); disjoint kind sets raise ``no_common_kind``.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
-        "hugrgate",
-        "typing"
+        "hugrgate"
       ],
       "loc": 212,
       "path": "hugrgate/contracts/negotiation.py",
@@ -930,11 +960,12 @@
       "docstring": "Nested categorical contracts \u2014 decision trees. Gjallarbr\u00fa slice 028.\n\nA flat categorical contract picks one of N options. A nested categorical\ncontract picks an option, and that option may refine into another nested\ncategorical contract: ``(\"animal\", \"mammal\", \"dog\")``. Values are paths \u2014\ntuples of strings or dotted strings (``\"animal.mammal.dog\"``) \u2014 validated\nby walking the tree. A valid decision is always a root-to-leaf path.\n\nInvariants: options are unique non-empty dot-free strings; child keys are\na subset of options; every child is itself a nested categorical contract;\nnesting depth is bounded (:data:`MAX_NESTING_DEPTH`).",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 195,
+      "loc": 196,
       "path": "hugrgate/contracts/nested.py",
       "public_defs": [
         "parse_path",
@@ -948,14 +979,16 @@
       ]
     },
     "hugrgate.contracts.ordinal": {
-      "docstring": "Rich ordinal semantics \u2014 ordinals you can measure. Gjallarbr\u00fa slice 033.\n\nA v1 ordinal spec is pure order: ``low < medium < high``, but nothing says\n*how far apart* they are. :class:`OrdinalContract` (kind ``\"ordinal\"``)\npins every level to a numeric anchor on a scale (default: 0, 1, \u2026, n\u22121),\nwhich unlocks:\n\n- :meth:`distance` \u2014 how far apart two levels are;\n- :meth:`interpolate` \u2014 map a numeric model output to the nearest level;\n- :meth:`expected_anchor` \u2014 the expected scale position of a distribution;\n- :meth:`validate_distribution` \u2014 ordered-distribution sanity (keys \u2286\n  levels, values \u2208 [0,1], sum \u2248 1).\n\nAnchors must be strictly increasing in level order: the scale never folds\nback on itself.",
+      "docstring": "Rich ordinal semantics \u2014 ordinals you can measure. Gjallarbr\u00fa slice 033.\n\nA v1 ordinal spec is pure order: ``low < medium < high``, but nothing says\n*how far apart* they are. :class:`OrdinalContract` (kind ``\"ordinal\"``)\npins every level to a numeric anchor on a scale (default: 0, 1, \u2026, n-1),\nwhich unlocks:\n\n- :meth:`distance` \u2014 how far apart two levels are;\n- :meth:`interpolate` \u2014 map a numeric model output to the nearest level;\n- :meth:`expected_anchor` \u2014 the expected scale position of a distribution;\n- :meth:`validate_distribution` \u2014 ordered-distribution sanity (keys \u2286\n  levels, values \u2208 [0,1], sum \u2248 1).\n\nAnchors must be strictly increasing in level order: the scale never folds\nback on itself.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
+        "itertools",
         "typing"
       ],
-      "loc": 193,
+      "loc": 195,
       "path": "hugrgate/contracts/ordinal.py",
       "public_defs": [
         "OrdinalContract",
@@ -972,14 +1005,15 @@
       ]
     },
     "hugrgate.contracts.risk": {
-      "docstring": "Risk matrices \u2014 deciding under risk aversion. Gjallarbr\u00fa slice 039.\n\nSlices 037\u2013038 optimize *expectation*: minimum expected cost, maximum\nexpected utility. A risk-averse decision maker cares about the *worst\ncase*, not the average. This module reuses :class:`CostMatrix` as the\nloss matrix (law 2: reuse sound architecture) and adds three\nrisk-sensitive decision rules:\n\n- :func:`minimax_decision` \u2014 minimize the worst-case loss. Needs no\n  distribution: pure robustness;\n- :func:`minimax_regret_decision` \u2014 minimize the worst-case *regret*,\n  where ``regret[d][o] = loss[d][o] \u2212 min_d\u2032 loss[d\u2032][o]``;\n- :func:`cvar_decision` \u2014 minimize CVaR_\u03b1: the expected loss in the\n  worst (1\u2212\u03b1) tail of the loss distribution (\u03b1=0 recovers expectation).\n\n:class:`RiskContract` (kind ``\"risk\"``) binds outcomes + loss matrix +\n``attitude`` (``minimax`` | ``minimax_regret`` | ``cvar``) with\n``cvar_alpha`` for the tail rule.",
+      "docstring": "Risk matrices \u2014 deciding under risk aversion. Gjallarbr\u00fa slice 039.\n\nSlices 037-038 optimize *expectation*: minimum expected cost, maximum\nexpected utility. A risk-averse decision maker cares about the *worst\ncase*, not the average. This module reuses :class:`CostMatrix` as the\nloss matrix (law 2: reuse sound architecture) and adds three\nrisk-sensitive decision rules:\n\n- :func:`minimax_decision` \u2014 minimize the worst-case loss. Needs no\n  distribution: pure robustness;\n- :func:`minimax_regret_decision` \u2014 minimize the worst-case *regret*,\n  where ``regret[d][o] = loss[d][o] - min_d' loss[d'][o]``;\n- :func:`cvar_decision` \u2014 minimize CVaR_alpha: the expected loss in the\n  worst (1-alpha) tail of the loss distribution (alpha=0 recovers expectation).\n\n:class:`RiskContract` (kind ``\"risk\"``) binds outcomes + loss matrix +\n``attitude`` (``minimax`` | ``minimax_regret`` | ``cvar``) with\n``cvar_alpha`` for the tail rule.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 241,
+      "loc": 242,
       "path": "hugrgate/contracts/risk.py",
       "public_defs": [
         "minimax_decision",
@@ -999,13 +1033,14 @@
       "docstring": "Decision contract schema v2. Gjallarbr\u00fa slice 026.\n\nThe v1 decision contract is :class:`hugrgate.spec.DecisionSpec`: an\nunversioned dataclass with five fixed types, no identity, and no\ncanonical form. Schema v2 introduces :class:`DecisionContract`:\n\n- every contract carries a ``schema_version`` (``\"2.0\"``) and a unique\n  ``contract_id``;\n- the ``kind`` string is drawn from an explicit registry\n  (:data:`CONTRACT_KINDS`), so new decision shapes are discoverable and\n  deserializable without touching this module;\n- serialization is canonical JSON with a sha256 content hash\n  (:meth:`DecisionContract.canonical_hash`), giving contracts a stable\n  identity for caching, provenance, and negotiation;\n- :meth:`DecisionContract.validate_value` is the validation hook every\n  later Campaign II slice extends.\n\n``DecisionSpec`` is untouched: v2 contracts live alongside it and\nmigration between the two is slice 047's job.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hashlib",
         "hugrgate",
         "json",
         "typing"
       ],
-      "loc": 243,
+      "loc": 242,
       "path": "hugrgate/contracts/schema.py",
       "public_defs": [
         "is_supported_version",
@@ -1025,12 +1060,13 @@
       "docstring": "Contract templates \u2014 reusable parameterized contracts.\n\nGjallarbr\u00fa slice 046.\n\nEvery deployment writes its fraud contract by hand, copying outcomes and\ncost shapes and hoping the amounts are right. :class:`ContractTemplate`\ncaptures the shape once, with ``${param}`` placeholders, and\n:meth:`instantiate` fills them with validated parameters:\n\n- :class:`TemplateParameter`: ``type`` (``string`` | ``number`` |\n  ``integer`` | ``boolean`` | ``array`` | ``object`` | ``any``),\n  ``required``, ``default``, and optional ``allowed`` values;\n- substitution is recursive over the body dict: a string that is exactly\n  ``${name}`` injects the raw value (numbers, lists, dicts survive);\n  ``${name}`` inside a larger string interpolates textually;\n- strictness both ways: undeclared placeholders are rejected at template\n  construction; unknown parameters are rejected at instantiation;\n- :class:`TemplateLibrary`: a named registry of templates.\n\nThe instantiated dict goes through :func:`contract_from_dict`, so the\nresult is a fully validated v2 contract, never a half-substituted dict.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "re",
         "typing"
       ],
-      "loc": 330,
+      "loc": 331,
       "path": "hugrgate/contracts/templates.py",
       "public_defs": [
         "find_placeholders",
@@ -1056,11 +1092,12 @@
       "docstring": "Numeric uncertainty intervals. Gjallarbr\u00fa slice 034.\n\nA v1 numeric spec holds a point value in ``[minimum, maximum]``. Real\nmeasurements carry uncertainty: an estimate, an interval around it, and\nthe confidence that the truth lies inside. This module adds:\n\n- :class:`UncertainValue`: frozen ``(estimate, lower, upper, confidence)``\n  with ``lower <= estimate <= upper`` and ``0 < confidence < 1``;\n- :class:`NumericIntervalContract` (kind ``\"numeric-interval\"``): the\n  allowed estimate range plus optional ``max_width`` and\n  ``min_confidence`` guards; plain numbers validate as zero-width\n  intervals (confidence 1.0), so point estimates stay first-class;\n- interval algebra: :func:`width`, :func:`contains`, :func:`covers`,\n  :func:`intersect` (None when disjoint), :func:`widen`.\n\nAll operations are pure and deterministic.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 232,
+      "loc": 233,
       "path": "hugrgate/contracts/uncertainty.py",
       "public_defs": [
         "UncertainValue",
@@ -1079,15 +1116,16 @@
       ]
     },
     "hugrgate.contracts.utility": {
-      "docstring": "Utility matrices \u2014 decisions as gains, not just losses.\n\nGjallarbr\u00fa slice 038.\n\nSlice 037 prices mistakes (losses \u2265 0, minimized). The dual prices\n*outcomes* (gains, possibly negative, maximized): a medical treatment\nhas benefit when right and harm when wrong; a bid has profit and loss.\nThis module adds:\n\n- :class:`UtilityMatrix`: ``utility[decision][outcome]``, finite reals\n  (negatives allowed), square over the outcome list;\n- :func:`expected_utility` and :func:`max_utility_decision` (ties \u2192 outcome\n  order);\n- :class:`UtilityContract` (kind ``\"utility\"``): outcomes + matrix, with\n  :meth:`decide`, :meth:`regret` (optimal EU \u2212 EU(chosen) \u2265 0), and\n  :meth:`as_cost_matrix` \u2014 the duality bridge: ``C = max(U) \u2212 U`` is a\n  valid cost matrix whose min-cost decision equals the max-utility one.\n\nUtility and cost are two faces of one decision rule; the bridge is tested,\nnot just claimed.",
+      "docstring": "Utility matrices \u2014 decisions as gains, not just losses.\n\nGjallarbr\u00fa slice 038.\n\nSlice 037 prices mistakes (losses \u2265 0, minimized). The dual prices\n*outcomes* (gains, possibly negative, maximized): a medical treatment\nhas benefit when right and harm when wrong; a bid has profit and loss.\nThis module adds:\n\n- :class:`UtilityMatrix`: ``utility[decision][outcome]``, finite reals\n  (negatives allowed), square over the outcome list;\n- :func:`expected_utility` and :func:`max_utility_decision` (ties \u2192 outcome\n  order);\n- :class:`UtilityContract` (kind ``\"utility\"``): outcomes + matrix, with\n  :meth:`decide`, :meth:`regret` (optimal EU - EU(chosen) \u2265 0), and\n  :meth:`as_cost_matrix` \u2014 the duality bridge: ``C = max(U) - U`` is a\n  valid cost matrix whose min-cost decision equals the max-utility one.\n\nUtility and cost are two faces of one decision rule; the bridge is tested,\nnot just claimed.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "math",
         "typing"
       ],
-      "loc": 273,
+      "loc": 274,
       "path": "hugrgate/contracts/utility.py",
       "public_defs": [
         "UtilityMatrix",
@@ -1112,17 +1150,21 @@
       "docstring": "HugrGate core runtime \u2014 decide(). Slice 8.",
       "imports": [
         "__future__",
+        "asyncio",
+        "collections",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 153,
+      "loc": 201,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
         "register",
+        "close",
         "decide",
-        "decide_batch"
+        "decide_batch",
+        "adecide"
       ]
     },
     "hugrgate.daemon": {
@@ -1131,6 +1173,7 @@
         "__future__",
         "argparse",
         "asyncio",
+        "collections",
         "contextlib",
         "dataclasses",
         "fastapi",
@@ -1142,17 +1185,18 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 394,
+      "loc": 494,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
-        "QueueFull",
         "BatchingQueue",
         "load_client_policies",
         "create_daemon_app",
         "Daemon",
         "serve_forever",
         "main",
+        "to_dict",
+        "from_dict",
         "start",
         "stop",
         "submit",
@@ -1191,11 +1235,12 @@
       ]
     },
     "hugrgate.errors": {
-      "docstring": "Error taxonomy for HugrGate. Slice 10.",
+      "docstring": "Error taxonomy for HugrGate. Slice 10; hardened in slice 007.\n\nEvery HugrGate error carries:\n\n- ``code`` \u2014 a stable machine-readable string (unique across the taxonomy;\n  enforced by ``tests/test_errors.py``), also used on the HTTP wire;\n- ``recoverable`` \u2014 whether retrying the operation can plausibly succeed;\n- ``message`` + ``details`` \u2014 human text and structured context.\n\n``to_dict()`` / ``from_dict()`` give a lossless wire round-trip so a\nclient can reconstruct the exact error class from an HTTP error body.",
       "imports": [
-        "__future__"
+        "__future__",
+        "typing"
       ],
-      "loc": 83,
+      "loc": 152,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -1206,18 +1251,24 @@
         "CalibrationError",
         "TimeoutError",
         "PrivacyViolation",
+        "QueueFull",
         "ContractError",
-        "Abstention"
+        "Abstention",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.fallback": {
       "docstring": "Fallback engine \u2014 ordered failover across backends. Slice 14.\n\n``FallbackChain`` is itself a :class:`~hugrgate.backend.Backend`, so it\ndrops straight into :class:`~hugrgate.core.HugrGate` and the provenance\ntrail. Backends are tried in order; on :class:`BackendError` (which\nincludes :class:`TimeoutError` and :class:`BackendUnavailable`) the next\nbackend is tried. When every backend has failed, the policy's\n``fallback_behavior`` decides:\n\n- ``\"abstain\"``   -> raise :class:`Abstention` (reason\n  ``all_backends_failed``)\n- ``\"safe_default\"`` -> return a ``DecisionResult`` for the configured\n  safe value (must lie inside the spec's value space)\n- ``\"escalate\"``  -> raise :class:`Abstention` with reason\n  ``escalation_required`` (a human must take the decision)\n\n``Abstention`` raised by an inner backend is *not* swallowed: abstaining\nis a decision, not a failure, and it propagates to the caller.\n\nEvery attempt is recorded in ``result.metadata[\"fallback_trace\"]`` and\n``result.fallback_used`` is set when any failover happened, so the\nprovenance record carries the full chain trace.\n\nA :class:`~hugrgate.circuit.CircuitRegistry` may be supplied; backends\nwhose circuit is open are skipped (recorded in the trace) and outcomes\nare reported back to their breakers.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
-      "loc": 165,
+      "loc": 171,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -1232,13 +1283,14 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "enum",
         "hugrgate",
         "math",
         "numpy",
         "typing"
       ],
-      "loc": 290,
+      "loc": 291,
       "path": "hugrgate/features.py",
       "public_defs": [
         "MissingValuePolicy",
@@ -1272,10 +1324,9 @@
         "__future__",
         "collections",
         "dataclasses",
-        "threading",
-        "typing"
+        "threading"
       ],
-      "loc": 141,
+      "loc": 140,
       "path": "hugrgate/health.py",
       "public_defs": [
         "BackendStats",
@@ -1292,20 +1343,41 @@
       "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 289,
+      "loc": 321,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
         "LadderAuditEntry",
         "LadderRouter",
         "to_dict",
+        "from_dict",
+        "to_dict",
         "ladder_for",
         "decide"
+      ]
+    },
+    "hugrgate.log": {
+      "docstring": "Structured logging for HugrGate (slice 009).\n\nLibrary policy:\n\n- Every module logs through ``get_logger(__name__)`` (a child of the\n  ``hugrgate`` logger). The ``hugrgate`` logger carries a\n  :class:`logging.NullHandler` and configures **no** handlers itself, so\n  importing the library never emits output and never hijacks the host\n  application's logging.\n- :func:`configure_logging` is the one explicit opt-in: it sets the\n  level on the ``hugrgate`` logger and attaches a single stream handler\n  (plain or JSON). It is idempotent \u2014 repeated calls do not duplicate\n  handlers.\n- **Privacy rule:** log metadata, never payload. Decision ``state``\n  dicts, raw inputs, and result ``value``\\ s may contain PII; log only\n  backend names, spec types, latencies, probabilities, and error codes.\n\nLevels used across the package:\n\n- ``DEBUG`` \u2014 per-decision internals (backend selection, cache hit/miss,\n  abstention verdicts);\n- ``INFO`` \u2014 lifecycle (daemon start/stop, backend registration,\n  circuit-breaker transitions, fallback engagement);\n- ``WARNING`` \u2014 recoverable failures (backend error, privacy-blocked\n  backend, queue back-pressure);\n- ``ERROR`` \u2014 unrecoverable internal faults.",
+      "imports": [
+        "__future__",
+        "json",
+        "logging",
+        "sys",
+        "typing"
+      ],
+      "loc": 101,
+      "path": "hugrgate/log.py",
+      "public_defs": [
+        "get_logger",
+        "JsonFormatter",
+        "configure_logging",
+        "format"
       ]
     },
     "hugrgate.models": {
@@ -1344,8 +1416,8 @@
       "docstring": "Backend capability negotiation. Slice 36.\n\n:func:`select_backend` turns a registry into an ordered candidate list for\none decision: filter by capability, privacy, latency, cost and health, then\nrank the survivors by historical quality (accuracy + calibration) with\nlatency and name as deterministic tie-breakers.\n\nIt returns candidates \u2014 it never raises \u2014 so routers (ladder, fallback)\ncan decide what \"no candidate\" means for their policy.",
       "imports": [
         "__future__",
-        "hugrgate",
-        "typing"
+        "collections",
+        "hugrgate"
       ],
       "loc": 96,
       "path": "hugrgate/negotiate.py",
@@ -1362,10 +1434,11 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 59,
+      "loc": 96,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
+        "to_dict",
         "evaluate",
         "backend_allowed"
       ]
@@ -1374,11 +1447,12 @@
       "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 123,
+      "loc": 131,
       "path": "hugrgate/privacy.py",
       "public_defs": [
         "PrivacyGuard",
@@ -1395,23 +1469,30 @@
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
         "__future__",
+        "collections",
+        "copy",
         "dataclasses",
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 84,
+      "loc": 218,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
         "ProvenanceStore",
         "from_decision",
+        "to_dict",
+        "from_dict",
         "append",
+        "evicted_count",
         "by_hash",
         "recent",
-        "count"
+        "count",
+        "verify_chain"
       ]
     },
     "hugrgate.result": {
@@ -1422,17 +1503,34 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 64,
+      "loc": 82,
       "path": "hugrgate/result.py",
       "public_defs": [
         "DecisionResult",
         "to_dict"
       ]
     },
+    "hugrgate.serde": {
+      "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 74,
+      "path": "hugrgate/serde.py",
+      "public_defs": [
+        "policy_to_dict",
+        "policy_from_dict",
+        "result_from_dict"
+      ]
+    },
     "hugrgate.server": {
       "docstring": "HugrGate local HTTP API \u2014 FastAPI service. Slice 41.\n\nExposes the in-process :class:`HugrGate` runtime over HTTP:\n\n- ``POST /decide`` \u2014 spec + state + policy JSON \u2192 result JSON\n- ``GET  /health`` \u2014 liveness probe\n- ``GET  /backends`` \u2014 registered backend capabilities\n- ``GET  /models`` \u2014 known model catalogue entries\n\nLocalhost-only by default: :func:`run` binds ``127.0.0.1`` unless the\noperator explicitly passes a different host.\n\nThis module also ships two small deterministic built-in backends\n(``uniform`` and ``keyword``) so the service, CLI, daemon and benchmark\nharness are usable end to end with zero ML dependencies. They are honest\nbaselines \u2014 not intelligent \u2014 and richer backends register through the\nsame :class:`BackendRegistry` contract.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "fastapi",
         "hugrgate",
@@ -1443,7 +1541,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 368,
+      "loc": 370,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -1475,7 +1573,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 114,
+      "loc": 127,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -1488,11 +1586,12 @@
       "docstring": "Thresholding \u2014 per-option, ordinal-cumulative, and numeric-band gates.\n\nSlice 16. The policy's ``minimum_probability`` is a single global floor;\nthis module adds finer gates that the application configures per spec:\n\n- **per-option thresholds**: ``{\"escalate\": 0.9}`` \u2014 the winning option\n  must carry at least that much of the distribution mass.\n- **ordinal cumulative thresholds**: ``(\"moderate\", 0.8)`` \u2014 for ordinal\n  specs, P(level >= \"moderate\") must clear the bar (\"at least moderate\").\n- **numeric band thresholds**: the numeric value lands in a named band\n  (e.g. ``normal`` / ``watch`` / ``alert``); each band may demand its own\n  minimum probability.\n\n:func:`apply_thresholds` runs the policy floor first, then the\nconfigured gates. The first failing gate turns the result into an\nabstention (via :mod:`hugrgate.abstain`) whose reason names the gate.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 167,
+      "loc": 213,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -1500,18 +1599,23 @@
         "ordinal_cumulative_probability",
         "classify_numeric_band",
         "apply_thresholds",
-        "contains"
+        "contains",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.timeout": {
       "docstring": "Timeouts \u2014 per-decision deadline enforcement via threads. Slice 19.\n\nThe decision function runs on a daemon worker thread while the caller\njoins with the deadline. On breach a :class:`TimeoutError` is raised;\nthe worker thread is daemonized so a hung backend can never block\nprocess exit (it may still finish in the background \u2014 threads cannot be\nkilled, a documented limitation).\n\nThe deadline for a backend is::\n\n    min(policy.maximum_latency_ms, backend.estimated_latency_ms * headroom)\n\nwhen the policy sets a latency cap, else\n``backend.estimated_latency_ms * headroom``.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "threading",
         "typing"
       ],
-      "loc": 138,
+      "loc": 139,
       "path": "hugrgate/timeout.py",
       "public_defs": [
         "run_with_deadline",
@@ -1528,14 +1632,16 @@
       ]
     },
     "hugrgate.validation": {
-      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7.",
+      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7;\nhardened in slice 011.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "json",
+        "math",
         "typing"
       ],
-      "loc": 60,
+      "loc": 131,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -1548,6 +1654,9 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_async_readiness.py",
+    "test_backend_registry.py",
+    "test_config.py",
     "test_contracts_026.py",
     "test_contracts_027.py",
     "test_contracts_028.py",
@@ -1573,15 +1682,31 @@
     "test_contracts_048.py",
     "test_contracts_049.py",
     "test_contracts_050.py",
+    "test_coverage_attack.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
+    "test_determinism_contract.py",
     "test_deterministic.py",
+    "test_errors.py",
     "test_foundation.py",
+    "test_import_cycles.py",
     "test_ladder.py",
+    "test_logging.py",
     "test_ml_calibration.py",
+    "test_package_boundaries.py",
+    "test_policy_invariants.py",
+    "test_provenance_integrity.py",
+    "test_release_gate.py",
     "test_repo_truth.py",
+    "test_resource_lifecycle.py",
+    "test_result_invariants.py",
+    "test_serialization_contracts.py",
     "test_service.py",
+    "test_state_validation.py",
+    "test_static_analysis.py",
+    "test_taxonomy.py",
+    "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 13636
+  "total_loc": 14498
 }

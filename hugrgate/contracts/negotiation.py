@@ -16,8 +16,8 @@ Failure is loud: disjoint version sets raise :class:`ContractError`
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Dict, Sequence, Tuple
 
 from hugrgate.contracts.schema import (
     SUPPORTED_SCHEMA_VERSIONS,
@@ -26,17 +26,17 @@ from hugrgate.contracts.schema import (
 from hugrgate.errors import ContractError
 
 __all__ = [
-    "VersionOffer",
-    "NegotiationResult",
     "ContractEndpoint",
+    "NegotiationResult",
     "SessionAgreement",
-    "parse_version",
-    "negotiate_version",
+    "VersionOffer",
     "negotiate_session",
+    "negotiate_version",
+    "parse_version",
 ]
 
 
-def parse_version(version: str) -> Tuple[int, ...]:
+def parse_version(version: str) -> tuple[int, ...]:
     """Parse ``"major.minor[.patch...]"`` into a comparable int tuple."""
     if not isinstance(version, str):
         raise ContractError(f"version must be a string, got {type(version).__name__}",
@@ -48,7 +48,7 @@ def parse_version(version: str) -> Tuple[int, ...]:
     return tuple(int(p) for p in parts)
 
 
-def _check_versions(versions: Sequence[str], *, what: str) -> Tuple[str, ...]:
+def _check_versions(versions: Sequence[str], *, what: str) -> tuple[str, ...]:
     vs = tuple(versions)
     if not vs:
         raise ContractError(f"{what} must list at least one version",
@@ -65,7 +65,7 @@ def _check_versions(versions: Sequence[str], *, what: str) -> Tuple[str, ...]:
 class VersionOffer:
     """One party's ordered offer: schema versions, most-preferred first."""
     party: str
-    versions: Tuple[str, ...] = field(default_factory=tuple)
+    versions: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         if not isinstance(self.party, str) or not self.party:
@@ -86,10 +86,10 @@ class VersionOffer:
 class NegotiationResult:
     """The outcome of a successful version negotiation."""
     version: str
-    common: Tuple[str, ...]  # every mutually supported version, best first
-    parties: Tuple[str, ...]
+    common: tuple[str, ...]  # every mutually supported version, best first
+    parties: tuple[str, ...]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {"version": self.version, "common": list(self.common),
                 "parties": list(self.parties)}
 
@@ -118,7 +118,7 @@ def negotiate_version(*offers: VersionOffer) -> NegotiationResult:
             offers=[{"party": o.party, "versions": list(o.versions)}
                     for o in offers])
 
-    def score(v: str) -> Tuple[int, Tuple[int, ...]]:
+    def score(v: str) -> tuple[int, tuple[int, ...]]:
         # Lower total rank wins; on ties the higher version wins, hence
         # the negated version tuple as the second key.
         return (sum(o.rank_of(v) for o in offers),
@@ -132,8 +132,8 @@ def negotiate_version(*offers: VersionOffer) -> NegotiationResult:
 class ContractEndpoint:
     """Everything one party brings to a contract session."""
     party: str
-    schema_versions: Tuple[str, ...] = field(default_factory=tuple)
-    kinds: Tuple[str, ...] = field(default_factory=tuple)
+    schema_versions: tuple[str, ...] = field(default_factory=tuple)
+    kinds: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         if not isinstance(self.party, str) or not self.party:
@@ -153,7 +153,7 @@ class ContractEndpoint:
 
     @classmethod
     def local(cls, kinds: Sequence[str],
-              party: str = "local") -> "ContractEndpoint":
+              party: str = "local") -> ContractEndpoint:
         """An endpoint for this codebase: supported versions + given kinds."""
         return cls(party=party,
                    schema_versions=SUPPORTED_SCHEMA_VERSIONS,
@@ -168,14 +168,14 @@ class ContractEndpoint:
 class SessionAgreement:
     """A negotiated contract session: one version, shared kinds."""
     schema_version: str
-    kinds: Tuple[str, ...]  # shared kinds, in client preference order
+    kinds: tuple[str, ...]  # shared kinds, in client preference order
     client: str
     server: str
 
     def supports_kind(self, kind: str) -> bool:
         return kind in self.kinds
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {"schema_version": self.schema_version,
                 "kinds": list(self.kinds),
                 "client": self.client, "server": self.server}

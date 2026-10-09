@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Mapping
-from typing import Any, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.errors import (
@@ -34,7 +34,7 @@ __all__ = [
 SpecLike = Union[DecisionSpec, "DecisionContract"]
 
 
-def _ensure_spec(spec: SpecLike) -> tuple[DecisionSpec, Optional[str]]:
+def _ensure_spec(spec: SpecLike) -> tuple[DecisionSpec, str | None]:
     """Accept a v1 DecisionSpec or a v2 DecisionContract.
 
     Returns the v1 spec the runtime understands plus the originating
@@ -47,8 +47,8 @@ def _ensure_spec(spec: SpecLike) -> tuple[DecisionSpec, Optional[str]]:
         return spec, None
     # Imported lazily: the contracts package is large and core must stay
     # importable without it.
-    from hugrgate.contracts.schema import DecisionContract
     from hugrgate.contracts.migration import contract_to_spec
+    from hugrgate.contracts.schema import DecisionContract
     if isinstance(spec, DecisionContract):
         return contract_to_spec(spec), spec.contract_id
     raise SpecError(

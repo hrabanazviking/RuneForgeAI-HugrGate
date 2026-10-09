@@ -10,7 +10,7 @@ is *and*: merging, producting, and stacking contracts.
   concatenate. Cross-sub-kind merges are rejected — silently dropping
   conditions or constraints would lie about the result.
 - :func:`product`: the joint decision — any two contracts as two named
-  fields of one composite (``A × B``).
+  fields of one composite (``A x B``).
 - :func:`with_deadline`: stack a temporal bound onto any contract via
   :class:`TimedContract`.
 
@@ -20,7 +20,7 @@ multi-base union sibling.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from hugrgate.contracts.composite import CompositeContract
 from hugrgate.contracts.conditional import (
@@ -47,7 +47,7 @@ MERGE_POLICIES = ("error", "left", "right")
 
 
 def _check_merge_inputs(
-        contracts: Tuple[CompositeContract, ...]) -> type:
+        contracts: tuple[CompositeContract, ...]) -> type:
     if len(contracts) < 2:
         raise ContractError("merge needs ≥2 contracts", code="bad_merge")
     for c in contracts:
@@ -78,7 +78,7 @@ def _resolve_conflict(name: str, existing: Any, incoming: Any,
 
 def merge(*contracts: CompositeContract, contract_id: str,
           on_conflict: str = "error", name: str = "",
-          description: str = "", metadata: Optional[Dict[str, Any]] = None,
+          description: str = "", metadata: dict[str, Any] | None = None,
           ) -> CompositeContract:
     """Union the fields of same-sub-kind composites.
 
@@ -90,7 +90,7 @@ def merge(*contracts: CompositeContract, contract_id: str,
                             f"policies: {list(MERGE_POLICIES)}",
                             code="bad_merge_policy")
     kind = _check_merge_inputs(contracts)
-    fields: Dict[str, Any] = {}
+    fields: dict[str, Any] = {}
     for c in contracts:
         for fname, fcontract in c.fields.items():
             if fname in fields:
@@ -98,13 +98,13 @@ def merge(*contracts: CompositeContract, contract_id: str,
                     fname, fields[fname], fcontract, on_conflict)
             else:
                 fields[fname] = fcontract
-    kwargs: Dict[str, Any] = {
+    kwargs: dict[str, Any] = {
         "contract_id": contract_id, "name": name,
         "description": description, "metadata": dict(metadata or {}),
         "fields": fields,
     }
     if kind is ConditionalCompositeContract:
-        conditions: Dict[str, FieldCondition] = {}
+        conditions: dict[str, FieldCondition] = {}
         for c in contracts:
             assert isinstance(c, ConditionalCompositeContract)
             for fname, cond in c.conditions.items():
@@ -117,7 +117,7 @@ def merge(*contracts: CompositeContract, contract_id: str,
         kwargs["conditions"] = conditions
         return ConditionalCompositeContract(**kwargs)
     if kind is ConstrainedCompositeContract:
-        constraints: List[FieldConstraint] = []
+        constraints: list[FieldConstraint] = []
         for c in contracts:
             assert isinstance(c, ConstrainedCompositeContract)
             constraints.extend(c.constraints)
@@ -129,7 +129,7 @@ def merge(*contracts: CompositeContract, contract_id: str,
 def product(a: DecisionContract, b: DecisionContract, *, contract_id: str,
             name_a: str = "first", name_b: str = "second", name: str = "",
             description: str = "",
-            metadata: Optional[Dict[str, Any]] = None) -> CompositeContract:
+            metadata: dict[str, Any] | None = None) -> CompositeContract:
     """The joint decision: ``a`` and ``b`` as two named composite fields."""
     for obj, label in ((a, "a"), (b, "b")):
         if not isinstance(obj, (DecisionContract, DecisionSpec)):
@@ -151,11 +151,11 @@ def product(a: DecisionContract, b: DecisionContract, *, contract_id: str,
 
 
 def with_deadline(contract: DecisionContract, *, contract_id: str,
-                  budget_ms: Optional[float] = None,
-                  not_before: Optional[float] = None,
-                  not_after: Optional[float] = None, name: str = "",
+                  budget_ms: float | None = None,
+                  not_before: float | None = None,
+                  not_after: float | None = None, name: str = "",
                   description: str = "",
-                  metadata: Optional[Dict[str, Any]] = None) -> TimedContract:
+                  metadata: dict[str, Any] | None = None) -> TimedContract:
     """Stack a temporal bound onto any contract (slice 040)."""
     if not isinstance(contract, (DecisionContract, DecisionSpec)):
         raise ContractError(

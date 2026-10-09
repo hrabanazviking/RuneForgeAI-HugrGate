@@ -18,8 +18,9 @@ All operations are pure and deterministic.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, ClassVar, Dict, Mapping, Optional
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -28,14 +29,14 @@ from hugrgate.contracts.schema import (
 from hugrgate.errors import ContractError
 
 __all__ = [
-    "UncertainValue",
     "NumericIntervalContract",
+    "UncertainValue",
     "coerce",
-    "width",
     "contains",
     "covers",
     "intersect",
     "widen",
+    "width",
 ]
 
 
@@ -69,12 +70,12 @@ class UncertainValue:
                 f"confidence must be in (0, 1], got {self.confidence}",
                 code="bad_confidence")
 
-    def to_dict(self) -> Dict[str, float]:
+    def to_dict(self) -> dict[str, float]:
         return {"estimate": self.estimate, "lower": self.lower,
                 "upper": self.upper, "confidence": self.confidence}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "UncertainValue":
+    def from_dict(cls, d: Mapping[str, Any]) -> UncertainValue:
         if not isinstance(d, Mapping):
             raise ContractError("UncertainValue needs a mapping",
                                 code="bad_uncertain_value")
@@ -87,13 +88,13 @@ class UncertainValue:
                                 code="bad_uncertain_value") from None
 
     @classmethod
-    def point(cls, x: float) -> "UncertainValue":
+    def point(cls, x: float) -> UncertainValue:
         """A degenerate zero-width interval: a plain point estimate."""
         return cls(estimate=x, lower=x, upper=x, confidence=1.0)
 
 
 def width(v: UncertainValue) -> float:
-    """Interval width (upper − lower)."""
+    """Interval width (upper - lower)."""
     return v.upper - v.lower
 
 
@@ -110,7 +111,7 @@ def covers(a: UncertainValue, b: UncertainValue) -> bool:
     return bool(a.lower <= b.lower and b.upper <= a.upper)
 
 
-def intersect(a: UncertainValue, b: UncertainValue) -> Optional[UncertainValue]:
+def intersect(a: UncertainValue, b: UncertainValue) -> UncertainValue | None:
     """Interval intersection, or None when disjoint.
 
     The estimate is ``a``'s estimate clipped into the overlap; confidence
@@ -157,8 +158,8 @@ class NumericIntervalContract(DecisionContract):
 
     minimum: float = 0.0
     maximum: float = 1.0
-    max_width: Optional[float] = None
-    min_confidence: Optional[float] = None
+    max_width: float | None = None
+    min_confidence: float | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -202,8 +203,8 @@ class NumericIntervalContract(DecisionContract):
                 f"confidence {v.confidence} below min_confidence "
                 f"{self.min_confidence}", code="confidence_too_low")
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"minimum": self.minimum,
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"minimum": self.minimum,
                              "maximum": self.maximum}
         if self.max_width is not None:
             d["max_width"] = self.max_width
@@ -213,7 +214,7 @@ class NumericIntervalContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "NumericIntervalContract":
+                      common: dict[str, Any]) -> NumericIntervalContract:
         try:
             return cls(minimum=d["minimum"], maximum=d["maximum"],
                        max_width=d.get("max_width"),

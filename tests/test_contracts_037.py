@@ -61,7 +61,7 @@ def test_tie_break_is_outcome_order():
 
 def test_contract_decide_and_regret():
     c = _c()
-    label, cost = c.decide({"legit": 0.8, "fraud": 0.2})
+    label, _cost = c.decide({"legit": 0.8, "fraud": 0.2})
     assert label == "fraud"
     assert c.regret({"legit": 0.8, "fraud": 0.2}, "legit") == \
         pytest.approx(12.0)
@@ -99,7 +99,7 @@ def test_nonzero_diagonal_allowed():
 
 
 def test_describe():
-    assert "2×2 cost matrix" in _c().describe()
+    assert "2x2 cost matrix" in _c().describe()
 
 
 # --- failure ---------------------------------------------------------------

@@ -25,7 +25,7 @@ def _plain() -> OrdinalContract:
 
 def test_default_anchors_are_ranks():
     c = _plain()
-    assert [c.anchor_of(l) for l in ("a", "b", "c")] == [0.0, 1.0, 2.0]
+    assert [c.anchor_of(lbl) for lbl in ("a", "b", "c")] == [0.0, 1.0, 2.0]
 
 
 def test_custom_anchors():

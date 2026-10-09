@@ -23,8 +23,9 @@ with missing/extra keys. :class:`FeatureContract` (kind
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -34,8 +35,8 @@ from hugrgate.errors import ContractError
 
 __all__ = [
     "FEATURE_DTYPES",
-    "FeatureSpec",
     "FeatureContract",
+    "FeatureSpec",
 ]
 
 #: Dtypes a feature may declare.
@@ -53,9 +54,9 @@ class FeatureSpec:
     name: str
     dtype: str = "float"
     required: bool = True
-    minimum: Optional[float] = None
-    maximum: Optional[float] = None
-    categories: Tuple[str, ...] = ()
+    minimum: float | None = None
+    maximum: float | None = None
+    categories: tuple[str, ...] = ()
     default: Any = None
 
     def __post_init__(self) -> None:
@@ -109,7 +110,7 @@ class FeatureSpec:
                     f"default for {self.name!r} is invalid: {msg}",
                     code="bad_feature_default")
 
-    def check(self, value: Any) -> Optional[str]:
+    def check(self, value: Any) -> str | None:
         """Violation message for one value, or None when it fits."""
         if self.dtype == "float":
             if not _is_num(value):
@@ -133,8 +134,8 @@ class FeatureSpec:
                         f"{self.maximum}")
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"name": self.name, "dtype": self.dtype}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"name": self.name, "dtype": self.dtype}
         if not self.required:
             d["required"] = False
         if self.minimum is not None:
@@ -148,7 +149,7 @@ class FeatureSpec:
         return d
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "FeatureSpec":
+    def from_dict(cls, d: Mapping[str, Any]) -> FeatureSpec:
         if not isinstance(d, Mapping):
             raise ContractError("feature spec must be a mapping",
                                 code="bad_feature")
@@ -178,9 +179,9 @@ class FeatureContract(DecisionContract):
 
     kind: ClassVar[str] = "input-features"
 
-    features: List[Dict[str, Any]] = field(default_factory=list)
+    features: list[dict[str, Any]] = field(default_factory=list)
     allow_extra: bool = True
-    _specs: Tuple[FeatureSpec, ...] = field(init=False, repr=False,
+    _specs: tuple[FeatureSpec, ...] = field(init=False, repr=False,
                                            compare=False)
 
     def __post_init__(self) -> None:
@@ -192,7 +193,7 @@ class FeatureContract(DecisionContract):
             specs = tuple(FeatureSpec.from_dict(v) for v in self.features)
         except ContractError as e:
             raise ContractError(f"invalid feature spec: {e.message}",
-                                code=e.details.get("code", "bad_feature"))
+                                code=e.details.get("code", "bad_feature")) from e
         names = [s.name for s in specs]
         if len(set(names)) != len(names):
             raise ContractError(f"duplicate feature names: {names}",
@@ -204,25 +205,25 @@ class FeatureContract(DecisionContract):
         self.features = [s.to_dict() for s in specs]
 
     @property
-    def specs(self) -> Tuple[FeatureSpec, ...]:
+    def specs(self) -> tuple[FeatureSpec, ...]:
         """Declared feature specs in order."""
         return self._specs
 
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Declared feature names in order (the column order)."""
         return [s.name for s in self._specs]
 
     @property
-    def required_names(self) -> Tuple[str, ...]:
+    def required_names(self) -> tuple[str, ...]:
         """Names of required features."""
         return tuple(s.name for s in self._specs if s.required)
 
-    def violations(self, values: Any) -> List[str]:
+    def violations(self, values: Any) -> list[str]:
         """Every problem with a raw feature mapping (possibly empty)."""
         if isinstance(values, str) or not isinstance(values, Mapping):
             return [f"features must be a mapping, got "
                     f"{type(values).__name__}"]
-        problems: List[str] = []
+        problems: list[str] = []
         for spec in self._specs:
             if spec.name not in values:
                 if spec.required:
@@ -247,7 +248,7 @@ class FeatureContract(DecisionContract):
                 "\n".join(f"  - {p}" for p in problems),
                 code="feature_violation", violations=problems)
 
-    def select(self, values: Mapping[str, Any]) -> Dict[str, Any]:
+    def select(self, values: Mapping[str, Any]) -> dict[str, Any]:
         """Project a raw mapping onto the declared, ordered feature dict.
 
         Missing optional features are filled from their defaults (None
@@ -256,7 +257,7 @@ class FeatureContract(DecisionContract):
         """
         self.validate_value(values)
         assert isinstance(values, Mapping)
-        out: Dict[str, Any] = {}
+        out: dict[str, Any] = {}
         for spec in self._specs:
             if spec.name in values:
                 out[spec.name] = values[spec.name]
@@ -264,13 +265,13 @@ class FeatureContract(DecisionContract):
                 out[spec.name] = spec.default
         return out
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {"features": [dict(v) for v in self.features],
                 "allow_extra": self.allow_extra}
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "FeatureContract":
+                      common: dict[str, Any]) -> FeatureContract:
         raw = d.get("features")
         if not isinstance(raw, list):
             raise ContractError("input-features payload needs a 'features' "

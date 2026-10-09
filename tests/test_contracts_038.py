@@ -98,7 +98,7 @@ def test_negative_utilities_allowed():
 
 
 def test_describe():
-    assert "2×2 utility matrix" in _c().describe()
+    assert "2x2 utility matrix" in _c().describe()
 
 
 # --- failure ---------------------------------------------------------------

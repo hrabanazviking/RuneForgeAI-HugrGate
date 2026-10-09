@@ -23,8 +23,9 @@ value and the explanation (``metadata["explanation"]``) straight off a
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -42,7 +43,7 @@ __all__ = [
 EXPLANATION_METADATA_KEY = "explanation"
 
 
-def _as_list(value: Any) -> List[str]:
+def _as_list(value: Any) -> list[str]:
     if isinstance(value, str):
         return [value]
     if isinstance(value, (list, tuple)):
@@ -67,13 +68,13 @@ class ExplanationContract(DecisionContract):
 
     kind: ClassVar[str] = "explanation"
 
-    required_fields: List[str] = field(default_factory=list)
+    required_fields: list[str] = field(default_factory=list)
     text_field: str = "text"
     min_length: int = 0
     reasons_field: str = "reasons"
     min_reasons: int = 0
     must_mention_value: bool = True
-    forbidden_phrases: List[str] = field(default_factory=list)
+    forbidden_phrases: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -102,9 +103,9 @@ class ExplanationContract(DecisionContract):
 
     # -- validation ----------------------------------------------------------
 
-    def violations(self, value: Any, explanation: Any) -> List[str]:
+    def violations(self, value: Any, explanation: Any) -> list[str]:
         """Every explanation problem (possibly empty)."""
-        problems: List[str] = []
+        problems: list[str] = []
         if isinstance(explanation, str) or not isinstance(
                 explanation, Mapping):
             return [f"explanation must be a mapping, got "
@@ -164,7 +165,7 @@ class ExplanationContract(DecisionContract):
         # JSON-serializable value is acceptable here.
         super().validate_value(value)
 
-    def check_result(self, result: DecisionResult) -> List[str]:
+    def check_result(self, result: DecisionResult) -> list[str]:
         """Validate the explanation attached to a DecisionResult."""
         if not isinstance(result, DecisionResult):
             raise ContractError(
@@ -184,8 +185,8 @@ class ExplanationContract(DecisionContract):
 
     # -- serialization -----------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {}
         if self.required_fields:
             d["required_fields"] = list(self.required_fields)
         if self.text_field != "text":
@@ -204,7 +205,7 @@ class ExplanationContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "ExplanationContract":
+                      common: dict[str, Any]) -> ExplanationContract:
         return cls(
             required_fields=d.get("required_fields", []),
             text_field=d.get("text_field", "text"),

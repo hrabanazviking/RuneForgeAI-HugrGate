@@ -15,7 +15,6 @@ import pytest
 from hugrgate import (
     Backend,
     BackendUnavailable,
-    DecisionPolicy,
     DecisionResult,
     DecisionSpec,
     HugrGate,

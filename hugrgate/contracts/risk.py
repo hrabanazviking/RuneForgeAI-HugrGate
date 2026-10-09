@@ -1,6 +1,6 @@
 """Risk matrices — deciding under risk aversion. Gjallarbrú slice 039.
 
-Slices 037–038 optimize *expectation*: minimum expected cost, maximum
+Slices 037-038 optimize *expectation*: minimum expected cost, maximum
 expected utility. A risk-averse decision maker cares about the *worst
 case*, not the average. This module reuses :class:`CostMatrix` as the
 loss matrix (law 2: reuse sound architecture) and adds three
@@ -9,9 +9,9 @@ risk-sensitive decision rules:
 - :func:`minimax_decision` — minimize the worst-case loss. Needs no
   distribution: pure robustness;
 - :func:`minimax_regret_decision` — minimize the worst-case *regret*,
-  where ``regret[d][o] = loss[d][o] − min_d′ loss[d′][o]``;
-- :func:`cvar_decision` — minimize CVaR_α: the expected loss in the
-  worst (1−α) tail of the loss distribution (α=0 recovers expectation).
+  where ``regret[d][o] = loss[d][o] - min_d' loss[d'][o]``;
+- :func:`cvar_decision` — minimize CVaR_alpha: the expected loss in the
+  worst (1-alpha) tail of the loss distribution (alpha=0 recovers expectation).
 
 :class:`RiskContract` (kind ``"risk"``) binds outcomes + loss matrix +
 ``attitude`` (``minimax`` | ``minimax_regret`` | ``cvar``) with
@@ -20,8 +20,9 @@ risk-sensitive decision rules:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.cost import CostMatrix, expected_cost
 from hugrgate.contracts.schema import (
@@ -33,8 +34,8 @@ from hugrgate.errors import ContractError
 __all__ = [
     "RISK_ATTITUDES",
     "RiskContract",
-    "cvar_of_decision",
     "cvar_decision",
+    "cvar_of_decision",
     "minimax_decision",
     "minimax_regret_decision",
     "regret_table",
@@ -45,7 +46,7 @@ RISK_ATTITUDES = ("minimax", "minimax_regret", "cvar")
 
 
 def _check_distribution(distribution: Any,
-                        outcomes: Tuple[str, ...]) -> Dict[str, float]:
+                        outcomes: tuple[str, ...]) -> dict[str, float]:
     if not isinstance(distribution, Mapping) or not distribution:
         raise ContractError("distribution must be a non-empty mapping",
                             code="bad_distribution")
@@ -67,7 +68,7 @@ def _check_distribution(distribution: Any,
     return {o: float(distribution.get(o, 0.0)) for o in outcomes}
 
 
-def minimax_decision(matrix: CostMatrix) -> Tuple[str, float]:
+def minimax_decision(matrix: CostMatrix) -> tuple[str, float]:
     """Label minimizing worst-case loss; returns (label, worst-case loss).
 
     Distribution-free: pure robustness. Ties → outcome order.
@@ -81,8 +82,8 @@ def minimax_decision(matrix: CostMatrix) -> Tuple[str, float]:
     return best, best_worst
 
 
-def regret_table(matrix: CostMatrix) -> Dict[str, Dict[str, float]]:
-    """``regret[d][o] = loss[d][o] − min_d′ loss[d′][o]`` (all ≥ 0)."""
+def regret_table(matrix: CostMatrix) -> dict[str, dict[str, float]]:
+    """``regret[d][o] = loss[d][o] - min_d' loss[d'][o]`` (all ≥ 0)."""
     outcomes = matrix.outcomes
     best_loss = {o: min(matrix.cost(d, o) for d in outcomes)
                  for o in outcomes}
@@ -90,7 +91,7 @@ def regret_table(matrix: CostMatrix) -> Dict[str, Dict[str, float]]:
             for d in outcomes}
 
 
-def minimax_regret_decision(matrix: CostMatrix) -> Tuple[str, float]:
+def minimax_regret_decision(matrix: CostMatrix) -> tuple[str, float]:
     """Label minimizing worst-case regret; returns (label, max regret)."""
     table = regret_table(matrix)
     best, best_worst = matrix.outcomes[0], 0.0
@@ -105,11 +106,11 @@ def minimax_regret_decision(matrix: CostMatrix) -> Tuple[str, float]:
 def cvar_of_decision(matrix: CostMatrix,
                      distribution: Mapping[str, float],
                      decision: str, alpha: float) -> float:
-    """CVaR_α of the loss distribution for ``decision``.
+    """CVaR_alpha of the loss distribution for ``decision``.
 
     Sort outcomes by loss descending, walk the worst outcomes until
-    (1−α) mass is covered (splitting the boundary outcome), and average.
-    α=0 recovers the expected loss.
+    (1-alpha) mass is covered (splitting the boundary outcome), and average.
+    alpha=0 recovers the expected loss.
     """
     if not 0.0 <= alpha < 1.0:
         raise ContractError(f"cvar alpha must be in [0, 1), got {alpha}",
@@ -135,8 +136,8 @@ def cvar_of_decision(matrix: CostMatrix,
 
 def cvar_decision(matrix: CostMatrix,
                   distribution: Mapping[str, float],
-                  alpha: float = 0.9) -> Tuple[str, float]:
-    """Label minimizing CVaR_α; returns (label, cvar). Ties → outcome order."""
+                  alpha: float = 0.9) -> tuple[str, float]:
+    """Label minimizing CVaR_alpha; returns (label, cvar). Ties → outcome order."""
     best, best_cvar = matrix.outcomes[0], 0.0
     first = True
     for dec in matrix.outcomes:
@@ -153,8 +154,8 @@ class RiskContract(DecisionContract):
 
     kind: ClassVar[str] = "risk"
 
-    outcomes: List[str] = field(default_factory=list)
-    costs: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    outcomes: list[str] = field(default_factory=list)
+    costs: dict[str, dict[str, float]] = field(default_factory=dict)
     attitude: str = "minimax"
     cvar_alpha: float = 0.9
     _matrix: CostMatrix = field(init=False, repr=False, compare=False)
@@ -165,7 +166,7 @@ class RiskContract(DecisionContract):
             matrix = CostMatrix(self.outcomes, self.costs)
         except ContractError as e:
             raise ContractError(f"invalid loss matrix: {e.message}",
-                                code=e.details.get("code", "bad_costs"))
+                                code=e.details.get("code", "bad_costs")) from e
         if self.attitude not in RISK_ATTITUDES:
             raise ContractError(
                 f"unknown risk attitude {self.attitude!r}; attitudes: "
@@ -189,8 +190,8 @@ class RiskContract(DecisionContract):
                 f"{value!r} not in outcomes {list(self._matrix.outcomes)}",
                 code="value_outside_outcomes")
 
-    def decide(self, distribution: Optional[Mapping[str, float]] = None
-               ) -> Tuple[str, float]:
+    def decide(self, distribution: Mapping[str, float] | None = None
+               ) -> tuple[str, float]:
         """Decide per the contract's risk attitude.
 
         ``minimax`` and ``minimax_regret`` ignore the distribution;
@@ -210,8 +211,8 @@ class RiskContract(DecisionContract):
         """Expected loss — the risk-neutral baseline for comparison."""
         return expected_cost(self._matrix, distribution, decision)
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {
             "outcomes": list(self._matrix.outcomes),
             "costs": {p: dict(r)
                       for p, r in self._matrix.to_dict()["costs"].items()},
@@ -223,7 +224,7 @@ class RiskContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "RiskContract":
+                      common: dict[str, Any]) -> RiskContract:
         costs = d.get("costs")
         outcomes = d.get("outcomes")
         if not isinstance(costs, dict) or not isinstance(outcomes, list):
@@ -234,7 +235,7 @@ class RiskContract(DecisionContract):
                    cvar_alpha=d.get("cvar_alpha", 0.9), **common)
 
     def describe(self) -> str:
-        extra = (f", α={self.cvar_alpha:g}"
+        extra = (f", alpha={self.cvar_alpha:g}"
                  if self.attitude == "cvar" else "")
         return (f"risk contract {self.name or self.contract_id!r}: "
                 f"{len(self._matrix.outcomes)} outcomes, "

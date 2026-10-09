@@ -22,8 +22,9 @@ distributions validate against the constraints.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -58,7 +59,7 @@ def shannon_entropy(distribution: Mapping[str, float]) -> float:
     return h
 
 
-def _sorted_probs(distribution: Mapping[str, float]) -> List[float]:
+def _sorted_probs(distribution: Mapping[str, float]) -> list[float]:
     return sorted(distribution.values(), reverse=True)
 
 
@@ -68,7 +69,7 @@ class DistributionConstraint:
 
     op: str
     threshold: float = 0.0
-    labels: Tuple[str, ...] = ()
+    labels: tuple[str, ...] = ()
     description: str = ""
 
     def __post_init__(self) -> None:
@@ -108,7 +109,7 @@ class DistributionConstraint:
         if self.labels and self.op != "min_mass":
             raise ContractError(f"op {self.op!r} takes no labels",
                                 code="bad_distribution_labels")
-        if any(not isinstance(l, str) or not l for l in self.labels):
+        if any(not isinstance(lbl, str) or not lbl for lbl in self.labels):
             raise ContractError("constraint labels must be non-empty strings",
                                 code="bad_distribution_labels")
         if not isinstance(self.description, str):
@@ -118,7 +119,7 @@ class DistributionConstraint:
     # -- evaluation --------------------------------------------------------
 
     def _base_problems(self, distribution: Any,
-                       ) -> Optional[List[str]]:
+                       ) -> list[str] | None:
         """Well-formedness problems, or None when the mapping is sane."""
         if not isinstance(distribution, Mapping) or not distribution:
             return ["distribution must be a non-empty mapping"]
@@ -134,7 +135,7 @@ class DistributionConstraint:
             problems.append(f"distribution sums to {total}, not 1")
         return problems or None
 
-    def check(self, distribution: Any) -> Optional[str]:
+    def check(self, distribution: Any) -> str | None:
         """Violation message, or None when the constraint holds.
 
         Never raises on malformed input — malformed distributions are
@@ -171,7 +172,7 @@ class DistributionConstraint:
             ok = support <= int(self.threshold)
             detail = f"support={support} > {int(self.threshold)}"
         else:  # min_mass
-            mass = sum(distribution.get(l, 0.0) for l in self.labels)
+            mass = sum(distribution.get(lbl, 0.0) for lbl in self.labels)
             ok = mass >= self.threshold
             detail = (f"mass({list(self.labels)})={mass:.4f} "
                       f"< {self.threshold}")
@@ -188,8 +189,8 @@ class DistributionConstraint:
             return f"min_mass({list(self.labels)}, {self.threshold})"
         return f"{self.op}({self.threshold:g})"
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"op": self.op, "threshold": self.threshold}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"op": self.op, "threshold": self.threshold}
         if self.labels:
             d["labels"] = list(self.labels)
         if self.description:
@@ -197,7 +198,7 @@ class DistributionConstraint:
         return d
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "DistributionConstraint":
+    def from_dict(cls, d: Mapping[str, Any]) -> DistributionConstraint:
         if not isinstance(d, Mapping):
             raise ContractError("distribution constraint must be a mapping",
                                 code="bad_distribution_constraint")
@@ -219,8 +220,8 @@ class DistributionContract(DecisionContract):
 
     kind: ClassVar[str] = "distribution"
 
-    outcomes: List[str] = field(default_factory=list)
-    constraints: List[DistributionConstraint] = field(default_factory=list)
+    outcomes: list[str] = field(default_factory=list)
+    constraints: list[DistributionConstraint] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -243,7 +244,7 @@ class DistributionContract(DecisionContract):
                     "constraints must be DistributionConstraint instances",
                     code="bad_constraint")
             if c.op == "min_mass":
-                unknown = [l for l in c.labels if l not in self.outcomes]
+                unknown = [lbl for lbl in c.labels if lbl not in self.outcomes]
                 if unknown:
                     raise ContractError(
                         f"min_mass labels unknown to outcomes: {unknown}",
@@ -258,9 +259,9 @@ class DistributionContract(DecisionContract):
                 code="value_outside_outcomes")
 
     def distribution_violations(
-            self, distribution: Mapping[str, float]) -> List[str]:
+            self, distribution: Mapping[str, float]) -> list[str]:
         """Well-formedness + constraint violations (possibly empty)."""
-        problems: List[str] = []
+        problems: list[str] = []
         if not isinstance(distribution, Mapping):
             return ["distribution must be a mapping"]
         bad_keys = [k for k in distribution if k not in self.outcomes]
@@ -282,7 +283,7 @@ class DistributionContract(DecisionContract):
                 "\n".join(f"  - {p}" for p in problems),
                 code="distribution_violation", violations=problems)
 
-    def check_distribution(self, distribution: Any) -> List[str]:
+    def check_distribution(self, distribution: Any) -> list[str]:
         """Non-raising distribution validation."""
         try:
             self.validate_distribution(distribution)
@@ -292,15 +293,15 @@ class DistributionContract(DecisionContract):
 
     # -- serialization ---------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"outcomes": list(self.outcomes)}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"outcomes": list(self.outcomes)}
         if self.constraints:
             d["constraints"] = [c.to_dict() for c in self.constraints]
         return d
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "DistributionContract":
+                      common: dict[str, Any]) -> DistributionContract:
         outcomes = d.get("outcomes")
         if not isinstance(outcomes, list):
             raise ContractError("distribution payload needs an 'outcomes' "

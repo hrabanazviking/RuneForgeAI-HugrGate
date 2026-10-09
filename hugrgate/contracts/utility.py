@@ -12,8 +12,8 @@ This module adds:
 - :func:`expected_utility` and :func:`max_utility_decision` (ties → outcome
   order);
 - :class:`UtilityContract` (kind ``"utility"``): outcomes + matrix, with
-  :meth:`decide`, :meth:`regret` (optimal EU − EU(chosen) ≥ 0), and
-  :meth:`as_cost_matrix` — the duality bridge: ``C = max(U) − U`` is a
+  :meth:`decide`, :meth:`regret` (optimal EU - EU(chosen) ≥ 0), and
+  :meth:`as_cost_matrix` — the duality bridge: ``C = max(U) - U`` is a
   valid cost matrix whose min-cost decision equals the max-utility one.
 
 Utility and cost are two faces of one decision rule; the bridge is tested,
@@ -23,8 +23,9 @@ not just claimed.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.cost import CostMatrix
 from hugrgate.contracts.schema import (
@@ -34,14 +35,14 @@ from hugrgate.contracts.schema import (
 from hugrgate.errors import ContractError
 
 __all__ = [
-    "UtilityMatrix",
     "UtilityContract",
+    "UtilityMatrix",
     "expected_utility",
     "max_utility_decision",
 ]
 
 
-def _check_outcomes(outcomes: Any) -> List[str]:
+def _check_outcomes(outcomes: Any) -> list[str]:
     if not isinstance(outcomes, list) or not outcomes:
         raise ContractError("utility matrix needs a non-empty outcomes list",
                             code="bad_outcomes")
@@ -69,13 +70,13 @@ class UtilityMatrix:
 
     __slots__ = ("_outcomes", "_utils")
 
-    def __init__(self, outcomes: List[str],
+    def __init__(self, outcomes: list[str],
                  utilities: Mapping[str, Mapping[str, float]]) -> None:
         self._outcomes = _check_outcomes(outcomes)
         if not isinstance(utilities, Mapping):
             raise ContractError("utilities must be a mapping",
                                 code="bad_utilities")
-        table: Dict[str, Dict[str, float]] = {}
+        table: dict[str, dict[str, float]] = {}
         for dec in self._outcomes:
             if dec not in utilities:
                 raise ContractError(f"utility matrix missing row: {dec!r}",
@@ -100,7 +101,7 @@ class UtilityMatrix:
         self._utils = table
 
     @property
-    def outcomes(self) -> Tuple[str, ...]:
+    def outcomes(self) -> tuple[str, ...]:
         """Outcome labels in matrix order."""
         return tuple(self._outcomes)
 
@@ -113,7 +114,7 @@ class UtilityMatrix:
                 f"unknown (decision, outcome) pair: {(decision, outcome)!r}",
                 code="unknown_outcome") from None
 
-    def row(self, decision: str) -> Dict[str, float]:
+    def row(self, decision: str) -> dict[str, float]:
         """Copy of the utility row for one decision."""
         if decision not in self._utils:
             raise ContractError(f"unknown decision: {decision!r}",
@@ -121,7 +122,7 @@ class UtilityMatrix:
         return dict(self._utils[decision])
 
     def as_cost_matrix(self) -> CostMatrix:
-        """Dual cost matrix: ``C = max(U) − U`` (all costs ≥ 0).
+        """Dual cost matrix: ``C = max(U) - U`` (all costs ≥ 0).
 
         Minimizing expected cost under ``C`` chooses the same label as
         maximizing expected utility under this matrix.
@@ -131,13 +132,13 @@ class UtilityMatrix:
                  for d, row in self._utils.items()}
         return CostMatrix(list(self._outcomes), costs)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"outcomes": list(self._outcomes),
                 "utilities": {d: dict(r)
                               for d, r in self._utils.items()}}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "UtilityMatrix":
+    def from_dict(cls, d: Mapping[str, Any]) -> UtilityMatrix:
         if not isinstance(d, Mapping):
             raise ContractError("utility matrix needs a mapping",
                                 code="bad_utilities")
@@ -157,7 +158,7 @@ class UtilityMatrix:
 
 
 def _check_distribution(distribution: Any,
-                        outcomes: Tuple[str, ...]) -> Dict[str, float]:
+                        outcomes: tuple[str, ...]) -> dict[str, float]:
     if not isinstance(distribution, Mapping) or not distribution:
         raise ContractError("distribution must be a non-empty mapping",
                             code="bad_distribution")
@@ -190,7 +191,7 @@ def expected_utility(matrix: UtilityMatrix,
 
 def max_utility_decision(matrix: UtilityMatrix,
                          distribution: Mapping[str, float]
-                         ) -> Tuple[str, float]:
+                         ) -> tuple[str, float]:
     """The decision with maximum expected utility, and that utility.
 
     Deterministic tie-break: earliest in outcome order.
@@ -212,8 +213,8 @@ class UtilityContract(DecisionContract):
 
     kind: ClassVar[str] = "utility"
 
-    outcomes: List[str] = field(default_factory=list)
-    utilities: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    outcomes: list[str] = field(default_factory=list)
+    utilities: dict[str, dict[str, float]] = field(default_factory=dict)
     _matrix: UtilityMatrix = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -222,7 +223,7 @@ class UtilityContract(DecisionContract):
             matrix = UtilityMatrix(self.outcomes, self.utilities)
         except ContractError as e:
             raise ContractError(f"invalid utility matrix: {e.message}",
-                                code=e.details.get("code", "bad_utilities"))
+                                code=e.details.get("code", "bad_utilities")) from e
         self._matrix = matrix
         self.outcomes = list(matrix.outcomes)
         self.utilities = matrix.to_dict()["utilities"]
@@ -238,7 +239,7 @@ class UtilityContract(DecisionContract):
                 f"{value!r} not in outcomes {list(self._matrix.outcomes)}",
                 code="value_outside_outcomes")
 
-    def decide(self, distribution: Mapping[str, float]) -> Tuple[str, float]:
+    def decide(self, distribution: Mapping[str, float]) -> tuple[str, float]:
         """Maximum-expected-utility decision and its expected utility."""
         return max_utility_decision(self._matrix, distribution)
 
@@ -252,14 +253,14 @@ class UtilityContract(DecisionContract):
         """This contract's dual cost matrix (slice 037)."""
         return self._matrix.as_cost_matrix()
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {"outcomes": list(self._matrix.outcomes),
                 "utilities": {d: dict(r) for d, r in
                               self._matrix.to_dict()["utilities"].items()}}
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "UtilityContract":
+                      common: dict[str, Any]) -> UtilityContract:
         utilities = d.get("utilities")
         outcomes = d.get("outcomes")
         if not isinstance(utilities, dict) or not isinstance(outcomes, list):
@@ -270,4 +271,4 @@ class UtilityContract(DecisionContract):
     def describe(self) -> str:
         n = len(self._matrix.outcomes)
         return (f"utility contract {self.name or self.contract_id!r}: "
-                f"{n} outcomes, {n}×{n} utility matrix")
+                f"{n} outcomes, {n}x{n} utility matrix")

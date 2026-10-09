@@ -13,8 +13,9 @@ unknown fields are both rejected, so typos never slip through silently.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Union
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -25,12 +26,12 @@ from hugrgate.errors import ContractError
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "FieldContract",
     "CompositeContract",
+    "FieldContract",
 ]
 
 #: What may govern one composite field.
-FieldContract = Union[DecisionContract, DecisionSpec]
+FieldContract = DecisionContract | DecisionSpec
 
 
 def _check_name(name: object) -> str:
@@ -80,14 +81,14 @@ class CompositeContract(DecisionContract):
 
     kind: ClassVar[str] = "composite"
 
-    fields: Dict[str, FieldContract] = field(default_factory=dict)
+    fields: dict[str, FieldContract] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         super().__post_init__()
         if not isinstance(self.fields, dict) or not self.fields:
             raise ContractError("composite contract needs ≥1 field",
                                 code="no_fields")
-        clean: Dict[str, FieldContract] = {}
+        clean: dict[str, FieldContract] = {}
         for name, sub in self.fields.items():
             _check_name(name)
             if not isinstance(sub, (DecisionContract, DecisionSpec)):
@@ -100,7 +101,7 @@ class CompositeContract(DecisionContract):
 
     # -- structure ---------------------------------------------------------
 
-    def field_names(self) -> List[str]:
+    def field_names(self) -> list[str]:
         """Declared field names in definition order."""
         return list(self.fields)
 
@@ -144,7 +145,7 @@ class CompositeContract(DecisionContract):
     # -- serialization ---------------------------------------------------------
 
     @staticmethod
-    def _field_to_dict(sub: FieldContract) -> Dict[str, Any]:
+    def _field_to_dict(sub: FieldContract) -> dict[str, Any]:
         if isinstance(sub, DecisionContract):
             return sub.to_dict()
         return {"decision_spec": sub.to_dict()}
@@ -165,13 +166,13 @@ class CompositeContract(DecisionContract):
             "field payload needs 'kind' (v2 contract) or 'decision_spec'/'type' "
             f"(v1 spec), got keys {sorted(d)}", code="bad_field_payload")
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {"fields": {n: self._field_to_dict(s)
                            for n, s in self.fields.items()}}
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "CompositeContract":
+                      common: dict[str, Any]) -> CompositeContract:
         raw = d.get("fields")
         if not isinstance(raw, dict) or not raw:
             raise ContractError("composite payload needs a non-empty "

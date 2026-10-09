@@ -21,8 +21,9 @@ themselves, and stay auditable (law 14: bounded, typed, auditable).
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.composite import CompositeContract
 from hugrgate.contracts.schema import register_kind
@@ -30,8 +31,8 @@ from hugrgate.errors import ContractError
 
 __all__ = [
     "CONSTRAINT_OPS",
-    "FieldConstraint",
     "ConstrainedCompositeContract",
+    "FieldConstraint",
 ]
 
 #: Comparison ops take exactly one field; sum ops take ≥1; distinct takes ≥2.
@@ -51,7 +52,7 @@ def _is_field_ref(target: Any) -> bool:
 class FieldConstraint:
     """One declarative invariant over a composite decision's fields."""
 
-    fields: Tuple[str, ...]
+    fields: tuple[str, ...]
     op: str
     target: Any = None
     description: str = ""
@@ -96,15 +97,20 @@ class FieldConstraint:
 
     # -- evaluation --------------------------------------------------------
 
-    def _resolve_target(self, value: Mapping[str, Any]) -> Any:
+    def _resolve_target(self, value: Mapping[str, Any]) -> tuple[bool, Any]:
+        """Resolve the target to a concrete value.
+
+        Returns ``(True, resolved)`` or ``(False, missing_field_name)`` —
+        never raises on bad data (control flow via return, not exceptions).
+        """
         if _is_field_ref(self.target):
             name = self.target["field"]
             if name not in value:
-                raise _Missing(name)
-            return value[name]
-        return self.target
+                return False, name
+            return True, value[name]
+        return True, self.target
 
-    def check(self, value: Mapping[str, Any]) -> Optional[str]:
+    def check(self, value: Mapping[str, Any]) -> str | None:
         """Return a violation message, or None when satisfied.
 
         Never raises on bad data — missing fields and type mismatches
@@ -114,15 +120,14 @@ class FieldConstraint:
         if missing:
             return (f"constraint {self.describe()}: missing fields "
                     f"{missing}")
-        try:
-            target = self._resolve_target(value)
-        except _Missing as e:
+        found, target = self._resolve_target(value)
+        if not found:
             return (f"constraint {self.describe()}: referenced field "
-                    f"{e.field!r} missing")
+                    f"{target!r} missing")
         try:
             if self.op == "all_distinct":
                 vals = [value[f] for f in self.fields]
-                seen: List[Any] = []
+                seen: list[Any] = []
                 for v in vals:
                     if any(v == s and type(v) is type(s) for s in seen):
                         return (f"constraint {self.describe()}: fields "
@@ -171,8 +176,8 @@ class FieldConstraint:
             s = f"{self.fields[0]} {self._symbol()} {t}"
         return f"{s} — {self.description}" if self.description else s
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"fields": list(self.fields), "op": self.op}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"fields": list(self.fields), "op": self.op}
         if self.target is not None:
             d["target"] = self.target
         if self.description:
@@ -180,7 +185,7 @@ class FieldConstraint:
         return d
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "FieldConstraint":
+    def from_dict(cls, d: Mapping[str, Any]) -> FieldConstraint:
         if not isinstance(d, Mapping):
             raise ContractError("constraint must be a mapping",
                                 code="bad_constraint")
@@ -192,11 +197,6 @@ class FieldConstraint:
             raise ContractError(f"constraint missing key: {e}",
                                 code="bad_constraint") from None
 
-
-class _Missing(Exception):
-    def __init__(self, field: str):
-        super().__init__(field)
-        self.field = field
 
 
 def _compare(op: str, left: Any, right: Any) -> bool:
@@ -213,7 +213,7 @@ class ConstrainedCompositeContract(CompositeContract):
 
     kind: ClassVar[str] = "constrained-composite"
 
-    constraints: List[FieldConstraint] = field(default_factory=list)
+    constraints: list[FieldConstraint] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -238,7 +238,7 @@ class ConstrainedCompositeContract(CompositeContract):
 
     # -- validation ----------------------------------------------------------
 
-    def violations(self, value: Mapping[str, Any]) -> List[str]:
+    def violations(self, value: Mapping[str, Any]) -> list[str]:
         """Every constraint violation message for ``value`` (possibly empty)."""
         out = []
         for c in self.constraints:
@@ -259,7 +259,7 @@ class ConstrainedCompositeContract(CompositeContract):
 
     # -- serialization ---------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         d = super()._payload_dict()
         if self.constraints:
             d["constraints"] = [c.to_dict() for c in self.constraints]
@@ -267,7 +267,7 @@ class ConstrainedCompositeContract(CompositeContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "ConstrainedCompositeContract":
+                      common: dict[str, Any]) -> ConstrainedCompositeContract:
         raw_fields = d.get("fields")
         if not isinstance(raw_fields, dict) or not raw_fields:
             raise ContractError("composite payload needs a non-empty "

@@ -23,10 +23,11 @@ cycles are rejected at construction.
 
 from __future__ import annotations
 
+from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import (
-    Any, ClassVar, Collection, Dict, FrozenSet, Iterable, List, Mapping,
-    Optional, Set, Tuple,
+    Any,
+    ClassVar,
 )
 
 from hugrgate.contracts.schema import (
@@ -36,8 +37,8 @@ from hugrgate.contracts.schema import (
 from hugrgate.errors import ContractError
 
 __all__ = [
-    "LabelHierarchy",
     "HierarchicalLabelContract",
+    "LabelHierarchy",
     "hierarchical_precision",
     "hierarchical_recall",
 ]
@@ -53,12 +54,12 @@ def _check_name(name: object, *, what: str = "label") -> str:
 class LabelHierarchy:
     """An immutable forest of labels with ancestor semantics."""
 
-    __slots__ = ("_parent", "_children", "_depth")
+    __slots__ = ("_children", "_depth", "_parent")
 
-    def __init__(self, edges: Iterable[Tuple[str, str]],
+    def __init__(self, edges: Iterable[tuple[str, str]],
                  nodes: Iterable[str] = ()) -> None:
-        parent: Dict[str, str] = {}
-        children: Dict[str, List[str]] = {}
+        parent: dict[str, str] = {}
+        children: dict[str, list[str]] = {}
         for raw_p, raw_c in edges:
             p = _check_name(raw_p, what="parent label")
             c = _check_name(raw_c, what="child label")
@@ -82,20 +83,20 @@ class LabelHierarchy:
 
     @staticmethod
     def _detect_cycles(parent: Mapping[str, str],
-                       children: Mapping[str, List[str]]) -> None:
+                       children: Mapping[str, list[str]]) -> None:
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {n: WHITE for n in children}
 
-        def visit(node: str, stack: List[str]) -> None:
+        def visit(node: str, stack: list[str]) -> None:
             color[node] = GRAY
             for nxt in children.get(node, []):
                 if color[nxt] == GRAY:
-                    cycle = " -> ".join(stack + [node, nxt])
+                    cycle = " -> ".join([*stack, node, nxt])
                     raise ContractError(
                         f"label hierarchy contains a cycle: {cycle}",
                         code="label_cycle")
                 if color[nxt] == WHITE:
-                    visit(nxt, stack + [node])
+                    visit(nxt, [*stack, node])
             color[node] = BLACK
 
         for node in sorted(children):
@@ -112,18 +113,18 @@ class LabelHierarchy:
     # -- constructors ------------------------------------------------------
 
     @classmethod
-    def from_edges(cls, edges: Iterable[Tuple[str, str]],
-                   nodes: Iterable[str] = ()) -> "LabelHierarchy":
+    def from_edges(cls, edges: Iterable[tuple[str, str]],
+                   nodes: Iterable[str] = ()) -> LabelHierarchy:
         """Build from ``(parent, child)`` pairs plus isolated ``nodes``."""
         return cls(list(edges), nodes)
 
     @classmethod
-    def from_nested(cls, nested: Mapping[str, Any]) -> "LabelHierarchy":
+    def from_nested(cls, nested: Mapping[str, Any]) -> LabelHierarchy:
         """Build from a nested mapping: ``{"a": {"b": {"c": {}}}}``."""
-        edges: List[Tuple[str, str]] = []
-        seen: List[str] = []
+        edges: list[tuple[str, str]] = []
+        seen: list[str] = []
 
-        def walk(sub: Mapping[str, Any], parent: Optional[str]) -> None:
+        def walk(sub: Mapping[str, Any], parent: str | None) -> None:
             for key, kids in sub.items():
                 name = _check_name(key)
                 seen.append(name)
@@ -152,22 +153,22 @@ class LabelHierarchy:
         return len(self._children)
 
     @property
-    def labels(self) -> FrozenSet[str]:
+    def labels(self) -> frozenset[str]:
         """Every label in the forest."""
         return frozenset(self._children)
 
     @property
-    def roots(self) -> Tuple[str, ...]:
+    def roots(self) -> tuple[str, ...]:
         """Labels with no parent, in sorted order."""
         return tuple(sorted(n for n in self._children
                             if n not in self._parent))
 
     @property
-    def leaves(self) -> Tuple[str, ...]:
+    def leaves(self) -> tuple[str, ...]:
         """Labels with no children, in sorted order."""
         return tuple(sorted(n for n, ch in self._children.items() if not ch))
 
-    def parent_of(self, label: str) -> Optional[str]:
+    def parent_of(self, label: str) -> str | None:
         """The parent of ``label``, or None for roots."""
         _check_name(label)
         if label not in self._children:
@@ -175,7 +176,7 @@ class LabelHierarchy:
                                 code="unknown_label")
         return self._parent.get(label)
 
-    def children_of(self, label: str) -> Tuple[str, ...]:
+    def children_of(self, label: str) -> tuple[str, ...]:
         """Direct children of ``label``."""
         _check_name(label)
         if label not in self._children:
@@ -183,26 +184,26 @@ class LabelHierarchy:
                                 code="unknown_label")
         return self._children[label]
 
-    def ancestors(self, label: str) -> Tuple[str, ...]:
+    def ancestors(self, label: str) -> tuple[str, ...]:
         """Ancestors from the root down to the parent."""
         _check_name(label)
         if label not in self._children:
             raise ContractError(f"unknown label: {label!r}",
                                 code="unknown_label")
-        chain: List[str] = []
+        chain: list[str] = []
         cur = self._parent.get(label)
         while cur is not None:
             chain.append(cur)
             cur = self._parent.get(cur)
         return tuple(reversed(chain))
 
-    def descendants(self, label: str) -> FrozenSet[str]:
+    def descendants(self, label: str) -> frozenset[str]:
         """All labels strictly below ``label``."""
         _check_name(label)
         if label not in self._children:
             raise ContractError(f"unknown label: {label!r}",
                                 code="unknown_label")
-        out: Set[str] = set()
+        out: set[str] = set()
         stack = list(self._children[label])
         while stack:
             node = stack.pop()
@@ -219,23 +220,23 @@ class LabelHierarchy:
                                 code="unknown_label")
         return self._depth[label]
 
-    def lowest_common_ancestor(self, a: str, b: str) -> Optional[str]:
+    def lowest_common_ancestor(self, a: str, b: str) -> str | None:
         """Deepest label that is an ancestor of (or equal to) both."""
         for label in (a, b):
             _check_name(label)
             if label not in self._children:
                 raise ContractError(f"unknown label: {label!r}",
                                     code="unknown_label")
-        a_chain = (a,) + tuple(reversed(self.ancestors(a)))
-        b_set = frozenset((b,) + tuple(reversed(self.ancestors(b))))
+        a_chain = (a, *tuple(reversed(self.ancestors(a))))
+        b_set = frozenset((b, *tuple(reversed(self.ancestors(b)))))
         for node in a_chain:
             if node in b_set:
                 return node
         return None
 
-    def close(self, labels: Iterable[str]) -> FrozenSet[str]:
+    def close(self, labels: Iterable[str]) -> frozenset[str]:
         """Ancestor closure: ``labels`` plus every implied ancestor."""
-        out: Set[str] = set()
+        out: set[str] = set()
         for label in labels:
             _check_name(label)
             if label not in self._children:
@@ -245,7 +246,7 @@ class LabelHierarchy:
             out.update(self.ancestors(label))
         return frozenset(out)
 
-    def edges(self) -> List[Tuple[str, str]]:
+    def edges(self) -> list[tuple[str, str]]:
         """The ``(parent, child)`` edge list, sorted."""
         return sorted((p, c) for c, p in self._parent.items())
 
@@ -282,8 +283,8 @@ class HierarchicalLabelContract(DecisionContract):
 
     kind: ClassVar[str] = "hierarchical-labels"
 
-    edges: List[Tuple[str, str]] = field(default_factory=list)
-    labels: List[str] = field(default_factory=list)  # isolated roots
+    edges: list[tuple[str, str]] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)  # isolated roots
     _hierarchy: LabelHierarchy = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -291,7 +292,7 @@ class HierarchicalLabelContract(DecisionContract):
         if not isinstance(self.edges, list):
             raise ContractError("'edges' must be a list of (parent, child) "
                                 "pairs", code="bad_edges")
-        clean: List[Tuple[str, str]] = []
+        clean: list[tuple[str, str]] = []
         for e in self.edges:
             if (not isinstance(e, (list, tuple)) or len(e) != 2):
                 raise ContractError(f"edge must be a (parent, child) pair, "
@@ -301,7 +302,7 @@ class HierarchicalLabelContract(DecisionContract):
         if not isinstance(self.labels, list):
             raise ContractError("'labels' must be a list of label names",
                                 code="bad_labels")
-        clean_labels = [_check_name(l) for l in self.labels]
+        clean_labels = [_check_name(lbl) for lbl in self.labels]
         if len(set(clean_labels)) != len(clean_labels):
             raise ContractError("isolated labels must be unique",
                                 code="duplicate_labels")
@@ -310,7 +311,7 @@ class HierarchicalLabelContract(DecisionContract):
             hierarchy = LabelHierarchy.from_edges(clean, clean_labels)
         except ContractError as e:
             raise ContractError(f"invalid label hierarchy: {e.message}",
-                                code=e.details.get("code", "bad_hierarchy"))
+                                code=e.details.get("code", "bad_hierarchy")) from e
         if not len(hierarchy):
             raise ContractError("hierarchical label contract needs ≥1 label",
                                 code="empty_hierarchy")
@@ -321,7 +322,7 @@ class HierarchicalLabelContract(DecisionContract):
         """The label forest (rebuilt on deserialization)."""
         return self._hierarchy
 
-    def _check_labels(self, value: Any) -> List[str]:
+    def _check_labels(self, value: Any) -> list[str]:
         if isinstance(value, str) or not isinstance(value, Collection):
             raise ContractError(
                 "hierarchical label value must be a collection of labels, "
@@ -340,19 +341,19 @@ class HierarchicalLabelContract(DecisionContract):
     def validate_value(self, value: Any) -> None:
         self._check_labels(value)
 
-    def close_value(self, value: Collection[str]) -> FrozenSet[str]:
+    def close_value(self, value: Collection[str]) -> frozenset[str]:
         """The value's ancestor closure — every implied ancestor included."""
         return self.hierarchy.close(self._check_labels(value))
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"edges": [[p, c] for p, c in self.edges]}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"edges": [[p, c] for p, c in self.edges]}
         if self.labels:
             d["labels"] = list(self.labels)
         return d
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "HierarchicalLabelContract":
+                      common: dict[str, Any]) -> HierarchicalLabelContract:
         edges = d.get("edges")
         if not isinstance(edges, list):
             raise ContractError("hierarchical label payload needs an "

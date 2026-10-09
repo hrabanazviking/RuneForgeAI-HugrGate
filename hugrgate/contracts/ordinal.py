@@ -2,7 +2,7 @@
 
 A v1 ordinal spec is pure order: ``low < medium < high``, but nothing says
 *how far apart* they are. :class:`OrdinalContract` (kind ``"ordinal"``)
-pins every level to a numeric anchor on a scale (default: 0, 1, …, n−1),
+pins every level to a numeric anchor on a scale (default: 0, 1, …, n-1),
 which unlocks:
 
 - :meth:`distance` — how far apart two levels are;
@@ -17,8 +17,10 @@ back on itself.
 
 from __future__ import annotations
 
+import itertools
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -38,10 +40,10 @@ class OrdinalContract(DecisionContract):
 
     kind: ClassVar[str] = "ordinal"
 
-    levels: List[str] = field(default_factory=list)
-    anchors: Dict[str, float] = field(default_factory=dict)
-    _positions: List[float] = field(init=False, repr=False, compare=False)
-    _rank: Dict[str, int] = field(init=False, repr=False, compare=False)
+    levels: list[str] = field(default_factory=list)
+    anchors: dict[str, float] = field(default_factory=dict)
+    _positions: list[float] = field(init=False, repr=False, compare=False)
+    _rank: dict[str, int] = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -51,7 +53,7 @@ class OrdinalContract(DecisionContract):
         if len(set(self.levels)) != len(self.levels):
             raise ContractError("ordinal levels must be unique",
                                 code="duplicate_levels")
-        if any(not isinstance(l, str) or not l for l in self.levels):
+        if any(not isinstance(lbl, str) or not lbl for lbl in self.levels):
             raise ContractError("ordinal levels must be non-empty strings",
                                 code="bad_level")
         if not isinstance(self.anchors, dict):
@@ -63,7 +65,7 @@ class OrdinalContract(DecisionContract):
                 raise ContractError(
                     f"anchors for unknown levels: {unknown}",
                     code="anchor_for_unknown_level")
-            missing = [l for l in self.levels if l not in self.anchors]
+            missing = [lbl for lbl in self.levels if lbl not in self.anchors]
             if missing:
                 raise ContractError(
                     f"anchors missing for levels: {missing} "
@@ -74,15 +76,15 @@ class OrdinalContract(DecisionContract):
                     raise ContractError(
                         f"anchor for {level!r} must be numeric, got {pos!r}",
                         code="bad_anchor")
-            positions = [float(self.anchors[l]) for l in self.levels]
-            if any(b <= a for a, b in zip(positions, positions[1:])):
+            positions = [float(self.anchors[lbl]) for lbl in self.levels]
+            if any(b <= a for a, b in itertools.pairwise(positions)):
                 raise ContractError(
                     f"anchors must be strictly increasing in level order, "
                     f"got {positions}", code="anchors_not_increasing")
             self._positions = positions
         else:
             self._positions = [float(i) for i in range(len(self.levels))]
-        self._rank = {l: i for i, l in enumerate(self.levels)}
+        self._rank = {lbl: i for i, lbl in enumerate(self.levels)}
 
     # -- order ---------------------------------------------------------------
 
@@ -107,7 +109,7 @@ class OrdinalContract(DecisionContract):
         """Absolute anchor distance between two levels."""
         return abs(self.anchor_of(a) - self.anchor_of(b))
 
-    def levels_between(self, a: str, b: str) -> List[str]:
+    def levels_between(self, a: str, b: str) -> list[str]:
         """Levels strictly between ``a`` and ``b`` (order-independent)."""
         lo, hi = sorted((self.rank_of(a), self.rank_of(b)))
         return self.levels[lo + 1:hi]
@@ -120,7 +122,7 @@ class OrdinalContract(DecisionContract):
             raise ContractError(f"interpolate needs a number, got {x!r}",
                                 code="bad_interpolate_arg")
         best, best_d = self.levels[0], abs(x - self._positions[0])
-        for level, pos in zip(self.levels[1:], self._positions[1:]):
+        for level, pos in zip(self.levels[1:], self._positions[1:], strict=True):
             d = abs(x - pos)
             if d < best_d:  # strict: earlier (lower) level wins ties
                 best, best_d = level, d
@@ -167,15 +169,15 @@ class OrdinalContract(DecisionContract):
 
     # -- serialization -----------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"levels": list(self.levels)}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"levels": list(self.levels)}
         if self.anchors:
-            d["anchors"] = {l: self.anchors[l] for l in self.levels}
+            d["anchors"] = {lbl: self.anchors[lbl] for lbl in self.levels}
         return d
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "OrdinalContract":
+                      common: dict[str, Any]) -> OrdinalContract:
         levels = d.get("levels")
         if not isinstance(levels, list):
             raise ContractError("ordinal payload needs a 'levels' list",
@@ -187,7 +189,7 @@ class OrdinalContract(DecisionContract):
         return cls(levels=levels, anchors=dict(anchors), **common)
 
     def describe(self) -> str:
-        pairs = ", ".join(f"{l}@{p:g}" for l, p in
-                          zip(self.levels, self._positions))
+        pairs = ", ".join(f"{lbl}@{p:g}" for lbl, p in
+                          zip(self.levels, self._positions, strict=True))
         return (f"ordinal contract {self.name or self.contract_id!r}: "
                 f"{len(self.levels)} levels ({pairs})")

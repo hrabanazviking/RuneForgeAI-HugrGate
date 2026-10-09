@@ -20,13 +20,13 @@ __all__ = [
     "BackendError",
     "BackendUnavailable",
     "CalibrationError",
+    "ContractError",
     "HugrGateError",
     "PolicyError",
     "PrivacyViolation",
     "QueueFull",
     "SpecError",
     "TimeoutError",
-    "ContractError",
 ]
 
 

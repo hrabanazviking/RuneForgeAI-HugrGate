@@ -24,8 +24,9 @@ result is a fully validated v2 contract, never a half-substituted dict.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -35,9 +36,9 @@ from hugrgate.errors import ContractError
 
 __all__ = [
     "TEMPLATE_PARAM_TYPES",
-    "TemplateParameter",
     "ContractTemplate",
     "TemplateLibrary",
+    "TemplateParameter",
 ]
 
 #: Types a template parameter may declare.
@@ -67,9 +68,9 @@ def _type_ok(declared: str, value: Any) -> bool:
     return False  # pragma: no cover - guarded by constructor
 
 
-def find_placeholders(node: Any) -> List[str]:
+def find_placeholders(node: Any) -> list[str]:
     """Every ``${name}`` placeholder in a body, in order of appearance."""
-    found: List[str] = []
+    found: list[str] = []
 
     def walk(n: Any) -> None:
         if isinstance(n, str):
@@ -91,7 +92,7 @@ def _substitute(node: Any, params: Mapping[str, Any]) -> Any:
         full = _FULL_PLACEHOLDER.match(node)
         if full:
             return params[full.group(1)]
-        def repl(m: "re.Match[str]") -> str:
+        def repl(m: re.Match[str]) -> str:
             return str(params[m.group(1)])
         return _PLACEHOLDER.sub(repl, node)
     if isinstance(node, Mapping):
@@ -110,7 +111,7 @@ class TemplateParameter:
     type: str = "any"
     required: bool = True
     default: Any = None
-    allowed: Tuple[Any, ...] = ()
+    allowed: tuple[Any, ...] = ()
     description: str = ""
 
     def __post_init__(self) -> None:
@@ -137,7 +138,7 @@ class TemplateParameter:
                     f"default {self.default!r} not in allowed values",
                     code="bad_template_parameter")
 
-    def check(self, value: Any) -> Optional[str]:
+    def check(self, value: Any) -> str | None:
         """Violation message for one provided value, or None."""
         if not _type_ok(self.type, value):
             return (f"parameter must be {self.type}, got "
@@ -147,8 +148,8 @@ class TemplateParameter:
                     f"{list(self.allowed)}")
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"type": self.type}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"type": self.type}
         if not self.required:
             d["required"] = False
         if self.default is not None:
@@ -160,7 +161,7 @@ class TemplateParameter:
         return d
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "TemplateParameter":
+    def from_dict(cls, d: Mapping[str, Any]) -> TemplateParameter:
         if not isinstance(d, Mapping):
             raise ContractError("template parameter must be a mapping",
                                 code="bad_template_parameter")
@@ -176,8 +177,8 @@ class ContractTemplate:
     """A parameterized contract body ready to instantiate."""
 
     template_id: str
-    body: Dict[str, Any] = field(default_factory=dict)
-    parameters: Dict[str, TemplateParameter] = field(default_factory=dict)
+    body: dict[str, Any] = field(default_factory=dict)
+    parameters: dict[str, TemplateParameter] = field(default_factory=dict)
     description: str = ""
 
     def __post_init__(self) -> None:
@@ -215,7 +216,7 @@ class ContractTemplate:
                 code="dangling_placeholder")
 
     @property
-    def parameter_names(self) -> List[str]:
+    def parameter_names(self) -> list[str]:
         """Declared parameter names."""
         return list(self.parameters)
 
@@ -226,7 +227,7 @@ class ContractTemplate:
             raise ContractError(
                 f"unknown template parameters: {unknown}; declared: "
                 f"{self.parameter_names}", code="unknown_template_parameter")
-        filled: Dict[str, Any] = {}
+        filled: dict[str, Any] = {}
         for name, spec in self.parameters.items():
             if name in params:
                 msg = spec.check(params[name])
@@ -260,7 +261,7 @@ class ContractTemplate:
                 f"instantiated template is not a valid contract: "
                 f"{e.message}", code="bad_template_body") from None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"template_id": self.template_id,
                 "description": self.description,
                 "parameters": {k: v.to_dict()
@@ -268,7 +269,7 @@ class ContractTemplate:
                 "body": self.body}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "ContractTemplate":
+    def from_dict(cls, d: Mapping[str, Any]) -> ContractTemplate:
         if not isinstance(d, Mapping):
             raise ContractError("template must be a mapping",
                                 code="bad_template")
@@ -290,7 +291,7 @@ class TemplateLibrary:
     __slots__ = ("_templates",)
 
     def __init__(self) -> None:
-        self._templates: Dict[str, ContractTemplate] = {}
+        self._templates: dict[str, ContractTemplate] = {}
 
     def register(self, template: ContractTemplate) -> None:
         """Add a template; duplicate ids are rejected."""
@@ -320,7 +321,7 @@ class TemplateLibrary:
     def __len__(self) -> int:
         return len(self._templates)
 
-    def template_ids(self) -> List[str]:
+    def template_ids(self) -> list[str]:
         """Registered template ids in registration order."""
         return list(self._templates)
 

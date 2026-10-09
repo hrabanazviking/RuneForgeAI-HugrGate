@@ -25,8 +25,9 @@ Migrations are total on their documented domain and loud everywhere else.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Mapping, Tuple
+from typing import Any
 
 from hugrgate.contracts.multilabel import MultilabelContract
 from hugrgate.contracts.nested import NestedCategoricalContract
@@ -51,7 +52,7 @@ __all__ = [
 ]
 
 #: (from_version, to_version) -> migration function over raw dicts.
-MIGRATIONS: Dict[Tuple[str, str], Callable[[Mapping[str, Any]],
+MIGRATIONS: dict[tuple[str, str], Callable[[Mapping[str, Any]],
                                            Mapping[str, Any]]] = {}
 
 
@@ -79,7 +80,7 @@ class MigrationReport:
     source_version: str
     target_version: str
     result: DecisionContract
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     lossy: bool = False
 
     def describe(self) -> str:
@@ -92,13 +93,13 @@ class MigrationReport:
 
 def spec_to_contract(spec: DecisionSpec, contract_id: str, *,
                      name: str = "", description: str = "",
-                     ) -> Tuple[DecisionContract, MigrationReport]:
+                     ) -> tuple[DecisionContract, MigrationReport]:
     """Migrate a v1 DecisionSpec to the equivalent v2 contract."""
     if not isinstance(spec, DecisionSpec):
         raise ContractError(f"spec_to_contract needs a DecisionSpec, got "
                             f"{type(spec).__name__}",
                             code="bad_migration_source")
-    warnings: List[str] = []
+    warnings: list[str] = []
     lossy = False
     metadata = dict(spec.metadata)
 
@@ -192,7 +193,7 @@ def contract_to_spec(contract: DecisionContract) -> DecisionSpec:
 
 def migrate_spec_dict(d: Mapping[str, Any], contract_id: str, *,
                       name: str = "", description: str = "",
-                      ) -> Tuple[DecisionContract, MigrationReport]:
+                      ) -> tuple[DecisionContract, MigrationReport]:
     """Migrate a raw v1 spec dict to a v2 contract."""
     try:
         spec = DecisionSpec.from_dict(dict(d))

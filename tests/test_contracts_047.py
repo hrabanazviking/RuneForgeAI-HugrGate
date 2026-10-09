@@ -9,18 +9,15 @@ from hugrgate.contracts.migration import (
     MigrationReport,
     contract_to_spec,
     migrate,
-    migrate_spec_dict,
     register_migration,
     spec_to_contract,
 )
 from hugrgate.contracts.multilabel import MultilabelContract
 from hugrgate.contracts.nested import NestedCategoricalContract
 from hugrgate.contracts.ordinal import OrdinalContract
-from hugrgate.contracts.schema import contract_from_dict
 from hugrgate.contracts.uncertainty import NumericIntervalContract
 from hugrgate.errors import ContractError
 from hugrgate.spec import DecisionSpec
-
 
 # --- spec -> contract ----------------------------------------------------------
 

@@ -23,9 +23,9 @@ whole fleet of contracts at once.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, List
 import time
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass, field
 
 from hugrgate.contracts.composite import CompositeContract
 from hugrgate.contracts.cost import CostSensitiveContract
@@ -42,10 +42,10 @@ from hugrgate.contracts.uncertainty import NumericIntervalContract
 from hugrgate.errors import ContractError
 
 __all__ = [
-    "INFO",
-    "WARNING",
     "ERROR",
+    "INFO",
     "LINT_CHECKS",
+    "WARNING",
     "LintFinding",
     "LintReport",
     "lint_all",
@@ -59,10 +59,10 @@ WARNING = "warning"
 ERROR = "error"
 _SEVERITIES = (INFO, WARNING, ERROR)
 
-LintCheck = Callable[[DecisionContract], List["LintFinding"]]
+LintCheck = Callable[[DecisionContract], list["LintFinding"]]
 
 #: Registered lint checks; append your own house rules.
-LINT_CHECKS: List[LintCheck] = []
+LINT_CHECKS: list[LintCheck] = []
 
 
 def register_check(func: LintCheck) -> LintCheck:
@@ -97,18 +97,18 @@ class LintFinding:
 class LintReport:
     """The findings of linting one contract (or many)."""
 
-    findings: List[LintFinding] = field(default_factory=list)
+    findings: list[LintFinding] = field(default_factory=list)
 
     @property
-    def errors(self) -> List[LintFinding]:
+    def errors(self) -> list[LintFinding]:
         return [f for f in self.findings if f.severity == ERROR]
 
     @property
-    def warnings(self) -> List[LintFinding]:
+    def warnings(self) -> list[LintFinding]:
         return [f for f in self.findings if f.severity == WARNING]
 
     @property
-    def infos(self) -> List[LintFinding]:
+    def infos(self) -> list[LintFinding]:
         return [f for f in self.findings if f.severity == INFO]
 
     @property
@@ -119,7 +119,7 @@ class LintReport:
     def clean(self) -> bool:
         return not self.findings
 
-    def by_severity(self) -> Dict[str, List[LintFinding]]:
+    def by_severity(self) -> dict[str, list[LintFinding]]:
         return {INFO: self.infos, WARNING: self.warnings,
                 ERROR: self.errors}
 
@@ -141,14 +141,14 @@ def _find(cid: str, severity: str, code: str, message: str) -> LintFinding:
 
 # --- generic checks ------------------------------------------------------------
 
-def _check_documented(c: DecisionContract) -> List[LintFinding]:
+def _check_documented(c: DecisionContract) -> list[LintFinding]:
     if not c.name and not c.description:
         return [_find(c.contract_id, WARNING, "undocumented",
                       "contract has neither name nor description")]
     return []
 
 
-def _check_metadata(c: DecisionContract) -> List[LintFinding]:
+def _check_metadata(c: DecisionContract) -> list[LintFinding]:
     if not c.metadata:
         return [_find(c.contract_id, INFO, "no_metadata",
                       "contract carries no metadata (owner, version, "
@@ -156,10 +156,10 @@ def _check_metadata(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_nested(c: DecisionContract) -> List[LintFinding]:
+def _check_nested(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, NestedCategoricalContract):
         return []
-    out: List[LintFinding] = []
+    out: list[LintFinding] = []
     if len(c.options or []) == 1:
         out.append(_find(c.contract_id, WARNING, "single_option",
                          "categorical contract has a single option — "
@@ -167,10 +167,10 @@ def _check_nested(c: DecisionContract) -> List[LintFinding]:
     return out
 
 
-def _check_ordinal(c: DecisionContract) -> List[LintFinding]:
+def _check_ordinal(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, OrdinalContract):
         return []
-    out: List[LintFinding] = []
+    out: list[LintFinding] = []
     anchors = c.anchors or {}
     if anchors:
         vals = sorted(anchors.values())
@@ -188,10 +188,10 @@ def _check_ordinal(c: DecisionContract) -> List[LintFinding]:
     return out
 
 
-def _check_numeric(c: DecisionContract) -> List[LintFinding]:
+def _check_numeric(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, NumericIntervalContract):
         return []
-    out: List[LintFinding] = []
+    out: list[LintFinding] = []
     width = c.maximum - c.minimum
     if c.max_width is not None and c.max_width >= width:
         out.append(_find(c.contract_id, WARNING, "vacuous_width_guard",
@@ -200,10 +200,10 @@ def _check_numeric(c: DecisionContract) -> List[LintFinding]:
     return out
 
 
-def _check_cost(c: DecisionContract) -> List[LintFinding]:
+def _check_cost(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, CostSensitiveContract):
         return []
-    out: List[LintFinding] = []
+    out: list[LintFinding] = []
     costs = [c.matrix.cost(a, b)
              for a in c.outcomes for b in c.outcomes]
     if all(v == 0 for v in costs):
@@ -217,7 +217,7 @@ def _check_cost(c: DecisionContract) -> List[LintFinding]:
     return out
 
 
-def _check_multilabel(c: DecisionContract) -> List[LintFinding]:
+def _check_multilabel(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, MultilabelContract):
         return []
     d = c.to_dict()
@@ -230,7 +230,7 @@ def _check_multilabel(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_composite(c: DecisionContract) -> List[LintFinding]:
+def _check_composite(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, CompositeContract):
         return []
     if len(c.fields) < 2:
@@ -240,7 +240,7 @@ def _check_composite(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_features(c: DecisionContract) -> List[LintFinding]:
+def _check_features(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, FeatureContract):
         return []
     feats = c.features or []
@@ -251,7 +251,7 @@ def _check_features(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_distribution(c: DecisionContract) -> List[LintFinding]:
+def _check_distribution(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, DistributionContract):
         return []
     if not c.constraints:
@@ -261,7 +261,7 @@ def _check_distribution(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_explanation(c: DecisionContract) -> List[LintFinding]:
+def _check_explanation(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, ExplanationContract):
         return []
     if (not c.required_fields and c.min_length == 0
@@ -272,10 +272,10 @@ def _check_explanation(c: DecisionContract) -> List[LintFinding]:
     return []
 
 
-def _check_timed(c: DecisionContract) -> List[LintFinding]:
+def _check_timed(c: DecisionContract) -> list[LintFinding]:
     if not isinstance(c, TimedContract):
         return []
-    out: List[LintFinding] = []
+    out: list[LintFinding] = []
     now = time.time()
     if c.not_after is not None and c.not_after < now:
         out.append(_find(c.contract_id, WARNING, "window_in_past",
@@ -311,7 +311,7 @@ def lint_contract(contract: DecisionContract) -> LintReport:
     if not isinstance(contract, DecisionContract):
         raise ContractError("lint_contract needs a DecisionContract",
                             code="bad_lint_target")
-    findings: List[LintFinding] = []
+    findings: list[LintFinding] = []
     for check in LINT_CHECKS:
         findings.extend(check(contract))
     return LintReport(findings=findings)
@@ -322,7 +322,7 @@ def lint_template(template: ContractTemplate) -> LintReport:
     if not isinstance(template, ContractTemplate):
         raise ContractError("lint_template needs a ContractTemplate",
                             code="bad_lint_target")
-    findings: List[LintFinding] = []
+    findings: list[LintFinding] = []
     used = set(find_placeholders(template.body))
     for name, param in template.parameters.items():
         if name not in used:
@@ -340,7 +340,7 @@ def lint_template(template: ContractTemplate) -> LintReport:
 
 def lint_all(contracts: Iterable[DecisionContract]) -> LintReport:
     """Lint a fleet of contracts into one report."""
-    findings: List[LintFinding] = []
+    findings: list[LintFinding] = []
     for contract in contracts:
         findings.extend(lint_contract(contract).findings)
     return LintReport(findings=findings)

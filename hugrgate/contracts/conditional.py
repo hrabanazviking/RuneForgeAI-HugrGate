@@ -17,8 +17,9 @@ construction.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Set
+from typing import Any, ClassVar
 
 from hugrgate.contracts.composite import (
     CompositeContract,
@@ -30,8 +31,8 @@ from hugrgate.errors import ContractError
 
 __all__ = [
     "CONDITION_OPS",
-    "FieldCondition",
     "ConditionalCompositeContract",
+    "FieldCondition",
 ]
 
 #: Supported condition operators.
@@ -85,7 +86,7 @@ class FieldCondition:
                 f"{field_value!r} with {self.expected!r}: {e}",
                 code="condition_type_mismatch") from None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         expected = self.expected
         if isinstance(expected, (set, frozenset)):
             expected = sorted(expected)
@@ -93,7 +94,7 @@ class FieldCondition:
                 "expected": expected}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "FieldCondition":
+    def from_dict(cls, d: Mapping[str, Any]) -> FieldCondition:
         if not isinstance(d, Mapping):
             raise ContractError("condition must be a mapping",
                                 code="bad_condition")
@@ -113,7 +114,7 @@ class ConditionalCompositeContract(CompositeContract):
 
     kind: ClassVar[str] = "conditional-composite"
 
-    conditions: Dict[str, FieldCondition] = field(default_factory=dict)
+    conditions: dict[str, FieldCondition] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -143,17 +144,17 @@ class ConditionalCompositeContract(CompositeContract):
         WHITE, GRAY, BLACK = 0, 1, 2
         color = {n: WHITE for n in self.fields}
 
-        def visit(node: str, stack: List[str]) -> None:
+        def visit(node: str, stack: list[str]) -> None:
             color[node] = GRAY
             cond = self.conditions.get(node)
             if cond is not None:
                 nxt = cond.on_field
                 if color[nxt] == GRAY:
                     raise ContractError(
-                        "condition cycle: " + " -> ".join(stack + [node, nxt]),
+                        "condition cycle: " + " -> ".join([*stack, node, nxt]),
                         code="condition_cycle")
                 if color[nxt] == WHITE:
-                    visit(nxt, stack + [node])
+                    visit(nxt, [*stack, node])
             color[node] = BLACK
 
         for name in self.fields:
@@ -162,14 +163,14 @@ class ConditionalCompositeContract(CompositeContract):
 
     # -- activation --------------------------------------------------------
 
-    def active_fields(self, value: Mapping[str, Any]) -> List[str]:
+    def active_fields(self, value: Mapping[str, Any]) -> list[str]:
         """Field names active under a (possibly partial) value mapping.
 
         A conditional field is active iff its referenced field is present
         in ``value`` and the condition holds; activation cascades through
         chains of conditional fields to a fixpoint.
         """
-        active: Set[str] = {n for n in self.fields
+        active: set[str] = {n for n in self.fields
                             if n not in self.conditions}
         changed = True
         while changed:
@@ -182,7 +183,7 @@ class ConditionalCompositeContract(CompositeContract):
                     changed = True
         return [n for n in self.fields if n in active]
 
-    def activation_report(self, value: Mapping[str, Any]) -> Dict[str, bool]:
+    def activation_report(self, value: Mapping[str, Any]) -> dict[str, bool]:
         """``{field: is_active}`` for every field — explanation support."""
         active = set(self.active_fields(value))
         return {n: (n in active) for n in self.fields}
@@ -236,7 +237,7 @@ class ConditionalCompositeContract(CompositeContract):
 
     # -- serialization ---------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         d = super()._payload_dict()
         if self.conditions:
             d["conditions"] = {n: c.to_dict()
@@ -245,7 +246,7 @@ class ConditionalCompositeContract(CompositeContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "ConditionalCompositeContract":
+                      common: dict[str, Any]) -> ConditionalCompositeContract:
         raw_fields = d.get("fields")
         if not isinstance(raw_fields, dict) or not raw_fields:
             raise ContractError("composite payload needs a non-empty "

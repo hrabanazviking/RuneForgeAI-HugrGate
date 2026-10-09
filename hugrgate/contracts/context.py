@@ -25,8 +25,9 @@ lands in slice 050.)
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -36,9 +37,9 @@ from hugrgate.errors import ContractError
 
 __all__ = [
     "CONTEXT_FIELD_TYPES",
+    "ContextContract",
     "ContextField",
     "ContextSchema",
-    "ContextContract",
 ]
 
 #: Types a context field may declare.
@@ -86,21 +87,21 @@ class ContextField:
             raise ContractError("'required' must be a bool",
                                 code="bad_context_field")
 
-    def check(self, value: Any) -> Optional[str]:
+    def check(self, value: Any) -> str | None:
         """Violation message for one value, or None when it fits."""
         if not _type_ok(self.type, value):
             return (f"context field {self.name!r} must be "
                     f"{self.type}, got {type(value).__name__}")
         return None
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"name": self.name, "type": self.type}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"name": self.name, "type": self.type}
         if self.required:
             d["required"] = True
         return d
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "ContextField":
+    def from_dict(cls, d: Mapping[str, Any]) -> ContextField:
         if not isinstance(d, Mapping):
             raise ContractError("context field must be a mapping",
                                 code="bad_context_field")
@@ -115,9 +116,9 @@ class ContextField:
 class ContextSchema:
     """An ordered set of context fields with extra-key control."""
 
-    __slots__ = ("_fields", "_allow_extra")
+    __slots__ = ("_allow_extra", "_fields")
 
-    def __init__(self, fields: List[ContextField],
+    def __init__(self, fields: list[ContextField],
                  allow_extra: bool = True) -> None:
         if not isinstance(fields, list):
             raise ContractError("'fields' must be a list",
@@ -138,7 +139,7 @@ class ContextSchema:
         self._allow_extra = allow_extra
 
     @property
-    def fields(self) -> Tuple[ContextField, ...]:
+    def fields(self) -> tuple[ContextField, ...]:
         """Declared fields in order."""
         return self._fields
 
@@ -148,16 +149,16 @@ class ContextSchema:
         return self._allow_extra
 
     @property
-    def required_fields(self) -> Tuple[str, ...]:
+    def required_fields(self) -> tuple[str, ...]:
         """Names of required fields."""
         return tuple(f.name for f in self._fields if f.required)
 
-    def violations(self, context: Any) -> List[str]:
+    def violations(self, context: Any) -> list[str]:
         """Every schema problem with ``context`` (possibly empty)."""
         if isinstance(context, str) or not isinstance(context, Mapping):
             return [f"context must be a mapping, got "
                     f"{type(context).__name__}"]
-        problems: List[str] = []
+        problems: list[str] = []
         for f in self._fields:
             if f.name not in context:
                 if f.required:
@@ -183,12 +184,12 @@ class ContextSchema:
                 "\n".join(f"  - {p}" for p in problems),
                 code="context_violation", violations=problems)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"fields": [f.to_dict() for f in self._fields],
                 "allow_extra": self._allow_extra}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "ContextSchema":
+    def from_dict(cls, d: Mapping[str, Any]) -> ContextSchema:
         if not isinstance(d, Mapping):
             raise ContractError("context schema must be a mapping",
                                 code="bad_context_schema")
@@ -219,7 +220,7 @@ class ContextContract(DecisionContract):
 
     kind: ClassVar[str] = "context-schema"
 
-    fields: List[Dict[str, Any]] = field(default_factory=list)
+    fields: list[dict[str, Any]] = field(default_factory=list)
     allow_extra: bool = True
     _schema: ContextSchema = field(init=False, repr=False, compare=False)
 
@@ -232,7 +233,7 @@ class ContextContract(DecisionContract):
         except ContractError as e:
             raise ContractError(f"invalid context schema: {e.message}",
                                 code=e.details.get("code",
-                                                   "bad_context_schema"))
+                                                   "bad_context_schema")) from e
         self._schema = schema
         # Normalize stored form through the schema.
         self.fields = [f.to_dict() for f in schema.fields]
@@ -246,17 +247,17 @@ class ContextContract(DecisionContract):
     def validate_value(self, value: Any) -> None:
         self._schema.validate(value)
 
-    def violations(self, value: Any) -> List[str]:
+    def violations(self, value: Any) -> list[str]:
         """Non-raising validation of a context mapping."""
         return self._schema.violations(value)
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {"fields": [dict(v) for v in self.fields],
                 "allow_extra": self.allow_extra}
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "ContextContract":
+                      common: dict[str, Any]) -> ContextContract:
         raw = d.get("fields", [])
         if not isinstance(raw, list):
             raise ContractError("context-schema payload needs a 'fields' "

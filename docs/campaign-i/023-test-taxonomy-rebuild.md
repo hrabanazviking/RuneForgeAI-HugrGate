@@ -13,7 +13,7 @@ now explicit and enforced.
 
 | Category | Marker | Meaning | Files |
 |---|---|---|---|
-| unit | *(none)* | fast, single-component, no I/O | test_config, test_errors, test_foundation, test_logging, test_policy_invariants, test_provenance_integrity, test_resource_lifecycle, test_result_invariants, test_serialization_contracts, test_state_validation, test_backend_registry, test_coverage_attack |
+| unit | *(none)* | fast, single-component, no I/O | test_config, test_errors, test_foundation, test_logging, test_policy_invariants, test_provenance_integrity, test_resource_lifecycle, test_result_invariants, test_serialization_contracts, test_state_validation, test_backend_registry, test_coverage_attack, test_contracts_026, test_contracts_027, test_contracts_028, test_contracts_029, test_contracts_030, test_contracts_031, test_contracts_032, test_contracts_033, test_contracts_034, test_contracts_035, test_contracts_036, test_contracts_037, test_contracts_038, test_contracts_039, test_contracts_040, test_contracts_041, test_contracts_042, test_contracts_043, test_contracts_044, test_contracts_045, test_contracts_046, test_contracts_047, test_contracts_048, test_contracts_049, test_contracts_050 |
 | integration | `pytest.mark.integration` | multi-component behavior | test_ladder, test_deterministic, test_ml_calibration |
 | slow | `pytest.mark.slow` | spawns servers/threads, sleeps | test_service, test_thread_safety, test_async_readiness |
 | gate | `pytest.mark.gate` | meta-tests shelling out to tools | test_typecheck, test_static_analysis, test_arch_map, test_api_inventory, test_repo_truth, test_dependency_rules, test_import_cycles, test_package_boundaries, test_dead_code, test_determinism_contract, test_taxonomy, test_release_gate |

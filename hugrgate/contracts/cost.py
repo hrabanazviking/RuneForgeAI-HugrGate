@@ -22,8 +22,9 @@ Slices 038 (utility) and 039 (risk) build on this foundation.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -39,7 +40,7 @@ __all__ = [
 ]
 
 
-def _check_outcomes(outcomes: Any) -> List[str]:
+def _check_outcomes(outcomes: Any) -> list[str]:
     if not isinstance(outcomes, list) or not outcomes:
         raise ContractError("cost matrix needs a non-empty outcomes list",
                             code="bad_outcomes")
@@ -58,9 +59,9 @@ def _is_num(x: Any) -> bool:
 class CostMatrix:
     """``cost[predicted][true]`` — the price of each (decision, truth) pair."""
 
-    __slots__ = ("_outcomes", "_costs")
+    __slots__ = ("_costs", "_outcomes")
 
-    def __init__(self, outcomes: List[str],
+    def __init__(self, outcomes: list[str],
                  costs: Mapping[str, Mapping[str, float]]) -> None:
         self._outcomes = _check_outcomes(outcomes)
         if not isinstance(costs, Mapping):
@@ -74,7 +75,7 @@ class CostMatrix:
         if extra_rows:
             raise ContractError(f"cost matrix has extra rows: {extra_rows}",
                                 code="bad_costs")
-        table: Dict[str, Dict[str, float]] = {}
+        table: dict[str, dict[str, float]] = {}
         for pred in self._outcomes:
             row = costs[pred]
             if not isinstance(row, Mapping):
@@ -102,7 +103,7 @@ class CostMatrix:
         self._costs = table
 
     @property
-    def outcomes(self) -> Tuple[str, ...]:
+    def outcomes(self) -> tuple[str, ...]:
         """Outcome labels in matrix order."""
         return tuple(self._outcomes)
 
@@ -115,19 +116,19 @@ class CostMatrix:
                 f"unknown (predicted, true) pair: {(predicted, true)!r}",
                 code="unknown_outcome") from None
 
-    def row(self, predicted: str) -> Dict[str, float]:
+    def row(self, predicted: str) -> dict[str, float]:
         """Copy of the cost row for one predicted label."""
         if predicted not in self._costs:
             raise ContractError(f"unknown predicted label: {predicted!r}",
                                 code="unknown_outcome")
         return dict(self._costs[predicted])
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"outcomes": list(self._outcomes),
                 "costs": {p: dict(r) for p, r in self._costs.items()}}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "CostMatrix":
+    def from_dict(cls, d: Mapping[str, Any]) -> CostMatrix:
         if not isinstance(d, Mapping):
             raise ContractError("cost matrix needs a mapping",
                                 code="bad_costs")
@@ -147,7 +148,7 @@ class CostMatrix:
 
 
 def _check_distribution(distribution: Any,
-                        outcomes: Tuple[str, ...]) -> Dict[str, float]:
+                        outcomes: tuple[str, ...]) -> dict[str, float]:
     if not isinstance(distribution, Mapping) or not distribution:
         raise ContractError("distribution must be a non-empty mapping",
                             code="bad_distribution")
@@ -176,7 +177,7 @@ def expected_cost(matrix: CostMatrix, distribution: Mapping[str, float],
 
 def min_cost_decision(matrix: CostMatrix,
                       distribution: Mapping[str, float]
-                      ) -> Tuple[str, float]:
+                      ) -> tuple[str, float]:
     """The label with minimum expected cost, and that cost.
 
     Deterministic tie-break: earliest in outcome order.
@@ -198,8 +199,8 @@ class CostSensitiveContract(DecisionContract):
 
     kind: ClassVar[str] = "cost-sensitive"
 
-    outcomes: List[str] = field(default_factory=list)
-    costs: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    outcomes: list[str] = field(default_factory=list)
+    costs: dict[str, dict[str, float]] = field(default_factory=dict)
     _matrix: CostMatrix = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
@@ -208,7 +209,7 @@ class CostSensitiveContract(DecisionContract):
             matrix = CostMatrix(self.outcomes, self.costs)
         except ContractError as e:
             raise ContractError(f"invalid cost matrix: {e.message}",
-                                code=e.details.get("code", "bad_costs"))
+                                code=e.details.get("code", "bad_costs")) from e
         self._matrix = matrix
         # Normalize stored form through the matrix (ordering, float casts).
         self.outcomes = list(matrix.outcomes)
@@ -225,7 +226,7 @@ class CostSensitiveContract(DecisionContract):
                 f"{value!r} not in outcomes {list(self._matrix.outcomes)}",
                 code="value_outside_outcomes")
 
-    def decide(self, distribution: Mapping[str, float]) -> Tuple[str, float]:
+    def decide(self, distribution: Mapping[str, float]) -> tuple[str, float]:
         """Minimum-expected-cost label and its expected cost."""
         return min_cost_decision(self._matrix, distribution)
 
@@ -235,14 +236,14 @@ class CostSensitiveContract(DecisionContract):
         _, best = self.decide(distribution)
         return expected_cost(self._matrix, distribution, chosen) - best
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {"outcomes": list(self._matrix.outcomes),
                 "costs": {p: dict(r)
                           for p, r in self._matrix.to_dict()["costs"].items()}}
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "CostSensitiveContract":
+                      common: dict[str, Any]) -> CostSensitiveContract:
         costs = d.get("costs")
         outcomes = d.get("outcomes")
         if not isinstance(costs, dict) or not isinstance(outcomes, list):
@@ -253,4 +254,4 @@ class CostSensitiveContract(DecisionContract):
     def describe(self) -> str:
         n = len(self._matrix.outcomes)
         return (f"cost-sensitive contract {self.name or self.contract_id!r}: "
-                f"{n} outcomes, {n}×{n} cost matrix")
+                f"{n} outcomes, {n}x{n} cost matrix")

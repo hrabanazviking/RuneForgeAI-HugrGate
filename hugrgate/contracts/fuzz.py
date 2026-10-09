@@ -22,8 +22,9 @@ reproduction recipe, not a ghost.
 from __future__ import annotations
 
 import random
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from hugrgate.contracts.cost import CostSensitiveContract
 from hugrgate.contracts.distributions import (
@@ -51,7 +52,7 @@ _WORDS = ("alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta",
           "theta", "iota", "kappa")
 
 
-def _words(rng: random.Random, lo: int, hi: int) -> List[str]:
+def _words(rng: random.Random, lo: int, hi: int) -> list[str]:
     n = rng.randint(lo, hi)
     return rng.sample(list(_WORDS), n)
 
@@ -72,17 +73,17 @@ def _fuzz_nested(rng: random.Random, _depth: int = 0) -> NestedCategoricalContra
 
 def _fuzz_ordinal(rng: random.Random) -> OrdinalContract:
     levels = _words(rng, 2, 5)
-    kw: Dict[str, Any] = {}
+    kw: dict[str, Any] = {}
     if rng.random() < 0.5:
         pos = sorted(rng.random() for _ in levels)
-        kw["anchors"] = {l: p for l, p in zip(levels, pos)}
+        kw["anchors"] = {lbl: p for lbl, p in zip(levels, pos, strict=True)}
     return OrdinalContract(contract_id=_cid(rng), levels=levels, **kw)
 
 
 def _fuzz_numeric(rng: random.Random) -> NumericIntervalContract:
     lo = rng.uniform(-100.0, 100.0)
     hi = lo + rng.uniform(0.01, 200.0)
-    kw: Dict[str, Any] = {}
+    kw: dict[str, Any] = {}
     if rng.random() < 0.4:
         kw["max_width"] = rng.uniform(0.01, hi - lo)
     return NumericIntervalContract(contract_id=_cid(rng), minimum=lo,
@@ -91,7 +92,7 @@ def _fuzz_numeric(rng: random.Random) -> NumericIntervalContract:
 
 def _fuzz_multilabel(rng: random.Random) -> MultilabelContract:
     labels = _words(rng, 2, 5)
-    kw: Dict[str, Any] = {}
+    kw: dict[str, Any] = {}
     if rng.random() < 0.5:
         kw["min_count"] = rng.randint(0, len(labels) - 1)
     if rng.random() < 0.5:
@@ -120,7 +121,7 @@ def _fuzz_distribution(rng: random.Random) -> DistributionContract:
                                 constraints=constraints)
 
 
-_GENERATORS: Dict[str, Callable[[random.Random], DecisionContract]] = {
+_GENERATORS: dict[str, Callable[[random.Random], DecisionContract]] = {
     "nested-categorical": _fuzz_nested,
     "ordinal": _fuzz_ordinal,
     "numeric-interval": _fuzz_numeric,
@@ -134,7 +135,7 @@ FUZZ_KINDS = tuple(sorted(_GENERATORS))
 
 
 def random_contract(rng: random.Random,
-                    kind: Optional[str] = None) -> DecisionContract:
+                    kind: str | None = None) -> DecisionContract:
     """Build one random contract; ``kind`` pins the generator."""
     if kind is None:
         kind = rng.choice(FUZZ_KINDS)
@@ -144,7 +145,7 @@ def random_contract(rng: random.Random,
     return _GENERATORS[kind](rng)
 
 
-def _nested_leaves(c: NestedCategoricalContract) -> List[str]:
+def _nested_leaves(c: NestedCategoricalContract) -> list[str]:
     return [".".join(path) for path in c.leaf_paths()]
 
 
@@ -174,7 +175,7 @@ def random_valid_value(rng: random.Random,
 
 
 def random_valid_distribution(rng: random.Random,
-                              contract: DistributionContract) -> Dict[str, float]:
+                              contract: DistributionContract) -> dict[str, float]:
     """Draw a full distribution satisfying the contract's constraints."""
     outcomes = list(contract.outcomes)
     weights = {o: rng.random() + 0.01 for o in outcomes}
@@ -210,7 +211,7 @@ def random_invalid_value(rng: random.Random,
     Best-effort: acceptance of one of these is recorded as a warning,
     not a failure — the generator is heuristic, the contract is truth.
     """
-    cands: List[Any] = [None, object(),  object, ["nested", "list"],
+    cands: list[Any] = [None, object(),  object, ["nested", "list"],
                         {"a": "dict"}, "zzz-no-such-outcome",
                         -1e18, 1e18, float("nan")]
     if isinstance(contract, NumericIntervalContract):
@@ -227,8 +228,8 @@ class FuzzReport:
     seed: int
     cases: int
     invariants: int
-    failures: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    failures: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     @property
     def passed(self) -> bool:
@@ -304,7 +305,7 @@ def fuzz(seed: int, cases_per_kind: int = 25,
             report.cases += 1
             _check_invariants(contract, label, report)
             # 4. validate_value soundness on in-space values
-            for j in range(values_per_case):
+            for _ in range(values_per_case):
                 try:
                     value = random_valid_value(rng, contract)
                 except (ContractError, SpecError) as e:

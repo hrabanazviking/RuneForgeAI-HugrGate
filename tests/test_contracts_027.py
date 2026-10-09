@@ -6,7 +6,6 @@ import pytest
 
 from hugrgate.contracts.negotiation import (
     ContractEndpoint,
-    NegotiationResult,
     SessionAgreement,
     VersionOffer,
     negotiate_session,

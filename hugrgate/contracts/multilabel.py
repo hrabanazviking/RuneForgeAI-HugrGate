@@ -3,7 +3,7 @@
 Gjallarbrú slice 036.
 
 Hierarchical contracts (slice 029) validate *membership* of label sets.
-They say nothing about *shape*: "pick 1–3", "exactly 2", "'urgent' is
+They say nothing about *shape*: "pick 1-3", "exactly 2", "'urgent' is
 mandatory", "'a' and 'c' never co-occur", "'x' implies 'y'".
 :class:`MultilabelContract` (kind ``"multilabel-cardinality"``) adds:
 
@@ -19,8 +19,9 @@ incoherent rule sets (e.g. a label both required and forbidden).
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -33,7 +34,7 @@ __all__ = [
 ]
 
 
-def _label_list(values: Any, *, what: str) -> List[str]:
+def _label_list(values: Any, *, what: str) -> list[str]:
     if not isinstance(values, list):
         raise ContractError(f"'{what}' must be a list", code="bad_label_list")
     for v in values:
@@ -53,14 +54,14 @@ class MultilabelContract(DecisionContract):
 
     kind: ClassVar[str] = "multilabel-cardinality"
 
-    labels: List[str] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)
     min_count: int = 0
     max_count: int = 0  # 0 = no upper bound... see __post_init__
     exact_count: int = -1  # -1 = unset
-    required: List[str] = field(default_factory=list)
-    forbidden: List[str] = field(default_factory=list)
-    implies: Dict[str, List[str]] = field(default_factory=dict)
-    excludes: Dict[str, List[str]] = field(default_factory=dict)
+    required: list[str] = field(default_factory=list)
+    forbidden: list[str] = field(default_factory=list)
+    implies: dict[str, list[str]] = field(default_factory=dict)
+    excludes: dict[str, list[str]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -92,13 +93,13 @@ class MultilabelContract(DecisionContract):
                                     code="bad_cardinality")
         self.required = _label_list(self.required, what="required")
         self.forbidden = _label_list(self.forbidden, what="forbidden")
-        for l in self.required:
-            if l not in self.labels:
-                raise ContractError(f"required label {l!r} not in labels",
+        for lbl in self.required:
+            if lbl not in self.labels:
+                raise ContractError(f"required label {lbl!r} not in labels",
                                     code="rule_on_unknown_label")
-        for l in self.forbidden:
-            if l not in self.labels:
-                raise ContractError(f"forbidden label {l!r} not in labels",
+        for lbl in self.forbidden:
+            if lbl not in self.labels:
+                raise ContractError(f"forbidden label {lbl!r} not in labels",
                                     code="rule_on_unknown_label")
         clash = set(self.required) & set(self.forbidden)
         if clash:
@@ -115,19 +116,19 @@ class MultilabelContract(DecisionContract):
                     "more required labels than exact_count",
                     code="required_exceeds_exact")
         # required labels must not exclude each other
-        for l in self.required:
-            bad = [e for e in self.excludes.get(l, []) if e in self.required]
+        for lbl in self.required:
+            bad = [e for e in self.excludes.get(lbl, []) if e in self.required]
             if bad:
                 raise ContractError(
-                    f"required label {l!r} excludes required {bad}",
+                    f"required label {lbl!r} excludes required {bad}",
                     code="required_excludes_required")
 
     def _check_map(self, m: Any, what: str,
-                   allow_self: bool) -> Dict[str, List[str]]:
+                   allow_self: bool) -> dict[str, list[str]]:
         if not isinstance(m, dict):
             raise ContractError(f"'{what}' must be a dict",
                                 code="bad_rule_map")
-        out: Dict[str, List[str]] = {}
+        out: dict[str, list[str]] = {}
         for k, vs in m.items():
             if k not in self.labels:
                 raise ContractError(
@@ -147,7 +148,7 @@ class MultilabelContract(DecisionContract):
         return out
 
     @staticmethod
-    def _symmetrize(m: Dict[str, List[str]]) -> Dict[str, List[str]]:
+    def _symmetrize(m: dict[str, list[str]]) -> dict[str, list[str]]:
         """Exclusion is mutual: a→b implies b→a."""
         out = {k: list(v) for k, v in m.items()}
         for k, vs in m.items():
@@ -159,19 +160,19 @@ class MultilabelContract(DecisionContract):
 
     # -- validation ----------------------------------------------------------
 
-    def violations(self, value: Any) -> List[str]:
+    def violations(self, value: Any) -> list[str]:
         """Every cardinality/co-occurrence problem (possibly empty)."""
-        problems: List[str] = []
+        problems: list[str] = []
         if isinstance(value, str) or not isinstance(value, (list, tuple)):
             return [f"multilabel value must be a list, got "
                     f"{type(value).__name__}"]
         labels = list(value)
-        unknown = [l for l in labels if l not in self.labels]
+        unknown = [lbl for lbl in labels if lbl not in self.labels]
         if unknown:
             problems.append(f"unknown labels: {unknown}")
         if len(set(labels)) != len(labels):
             problems.append(f"duplicate labels: {labels}")
-        known = [l for l in labels if l in self.labels]
+        known = [lbl for lbl in labels if lbl in self.labels]
         count = len(known)
         if self.exact_count != -1:
             if count != self.exact_count:
@@ -184,22 +185,22 @@ class MultilabelContract(DecisionContract):
             if self.max_count and count > self.max_count:
                 problems.append(
                     f"need ≤{self.max_count} labels, got {count}")
-        missing_req = [l for l in self.required if l not in known]
+        missing_req = [lbl for lbl in self.required if lbl not in known]
         if missing_req:
             problems.append(f"missing required labels: {missing_req}")
-        present_forbidden = [l for l in self.forbidden if l in known]
+        present_forbidden = [lbl for lbl in self.forbidden if lbl in known]
         if present_forbidden:
             problems.append(
                 f"forbidden labels present: {present_forbidden}")
         seen_pairs = set()
-        for l in known:
-            for need in self.implies.get(l, []):
+        for lbl in known:
+            for need in self.implies.get(lbl, []):
                 if need not in known:
                     problems.append(
-                        f"{l!r} implies {need!r}, which is missing")
-            for foe in self.excludes.get(l, []):
+                        f"{lbl!r} implies {need!r}, which is missing")
+            for foe in self.excludes.get(lbl, []):
                 if foe in known:
-                    pair = tuple(sorted((l, foe)))
+                    pair = tuple(sorted((lbl, foe)))
                     if pair not in seen_pairs:
                         seen_pairs.add(pair)
                         problems.append(
@@ -216,8 +217,8 @@ class MultilabelContract(DecisionContract):
 
     # -- serialization ---------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"labels": list(self.labels)}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"labels": list(self.labels)}
         if self.exact_count != -1:
             d["exact_count"] = self.exact_count
         else:
@@ -238,12 +239,12 @@ class MultilabelContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "MultilabelContract":
+                      common: dict[str, Any]) -> MultilabelContract:
         labels = d.get("labels")
         if not isinstance(labels, list):
             raise ContractError("multilabel payload needs a 'labels' list",
                                 code="missing_labels")
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "labels": labels,
             "min_count": d.get("min_count", 0),
             "max_count": d.get("max_count", 0),

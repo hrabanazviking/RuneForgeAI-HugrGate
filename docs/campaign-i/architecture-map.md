@@ -18,6 +18,7 @@ flowchart TD
         backend[backend]
         policy[policy]
         validation[validation]
+        serde[serde]
     end
     subgraph contract-engine[contract-engine]
         contracts[contracts]
@@ -66,6 +67,7 @@ flowchart TD
         features[features]
         bench[bench]
         bench_report[bench_report]
+        log[log]
     end
     subgraph backends[backends]
         backends_rules[backends.rules]
@@ -104,6 +106,7 @@ flowchart TD
     abstain --> policy
     abstain --> result
     abstain --> spec
+    backend --> errors
     backend --> result
     backend --> spec
     backends_boosting --> backends_logreg
@@ -135,6 +138,12 @@ flowchart TD
     backends_rules --> result
     backends_rules --> spec
     bench --> hugrgate
+    bench --> core
+    bench --> errors
+    bench --> policy
+    bench --> result
+    bench --> spec
+    cache --> log
     cache --> policy
     cache --> privacy
     cache --> result
@@ -156,14 +165,24 @@ flowchart TD
     calibration_profiles --> spec
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
-    cli -.-> hugrgate
+    circuit --> log
     cli -.-> bench
     cli -.-> bench_report
     cli -.-> client
     cli -.-> daemon
+    cli -.-> errors
+    cli --> policy
+    cli -.-> serde
     cli -.-> server
-    client --> hugrgate
+    cli --> spec
+    client --> backend
+    client --> core
+    client --> errors
+    client --> policy
+    client --> result
+    client --> serde
     client -.-> server
+    client --> spec
     contracts --> contracts_composite
     contracts --> contracts_composition
     contracts --> contracts_conditional
@@ -291,19 +310,25 @@ flowchart TD
     core -.-> contracts_migration
     core -.-> contracts_schema
     core --> errors
+    core --> log
     core --> policy
     core --> provenance
     core --> result
     core --> spec
     core --> validation
-    daemon --> hugrgate
     daemon -.-> client
+    daemon --> core
     daemon -.-> errors
+    daemon -.-> log
+    daemon --> policy
+    daemon --> result
+    daemon --> serde
     daemon -.-> server
     daemon -.-> spec
     fallback --> backend
     fallback --> circuit
     fallback --> errors
+    fallback --> log
     fallback --> policy
     fallback --> result
     fallback --> spec
@@ -325,16 +350,26 @@ flowchart TD
     policy --> result
     privacy --> backend
     privacy --> errors
+    privacy --> log
     privacy --> policy
     privacy --> provenance
+    provenance -.-> errors
     provenance --> result
     provenance --> spec
     result --> errors
+    serde --> errors
+    serde --> policy
+    serde --> result
     server --> hugrgate
-    server --> client
+    server --> backend
+    server --> core
     server --> errors
+    server --> result
+    server --> serde
+    server --> spec
     spec --> errors
     threshold --> abstain
+    threshold --> errors
     threshold --> policy
     threshold --> result
     threshold --> spec
@@ -353,10 +388,10 @@ flowchart TD
 | Layer | Modules |
 |---|---|
 | foundation | `errors` |
-| contracts | `spec`, `result`, `backend`, `policy`, `validation` |
+| contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
 | contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
-| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
+| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
@@ -375,6 +410,7 @@ flowchart TD
 | `abstain` | `policy` | no |
 | `abstain` | `result` | no |
 | `abstain` | `spec` | no |
+| `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
 | `backends.boosting` | `backends.logreg` | no |
@@ -406,6 +442,12 @@ flowchart TD
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
 | `bench` | `hugrgate` | no |
+| `bench` | `core` | no |
+| `bench` | `errors` | no |
+| `bench` | `policy` | no |
+| `bench` | `result` | no |
+| `bench` | `spec` | no |
+| `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
 | `cache` | `result` | no |
@@ -427,14 +469,24 @@ flowchart TD
 | `calibration.profiles` | `spec` | no |
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
-| `cli` | `hugrgate` | yes |
+| `circuit` | `log` | no |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
 | `cli` | `client` | yes |
 | `cli` | `daemon` | yes |
+| `cli` | `errors` | yes |
+| `cli` | `policy` | no |
+| `cli` | `serde` | yes |
 | `cli` | `server` | yes |
-| `client` | `hugrgate` | no |
+| `cli` | `spec` | no |
+| `client` | `backend` | no |
+| `client` | `core` | no |
+| `client` | `errors` | no |
+| `client` | `policy` | no |
+| `client` | `result` | no |
+| `client` | `serde` | no |
 | `client` | `server` | yes |
+| `client` | `spec` | no |
 | `contracts` | `contracts.composite` | no |
 | `contracts` | `contracts.composition` | no |
 | `contracts` | `contracts.conditional` | no |
@@ -562,19 +614,25 @@ flowchart TD
 | `core` | `contracts.migration` | yes |
 | `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |
+| `core` | `log` | no |
 | `core` | `policy` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
 | `core` | `spec` | no |
 | `core` | `validation` | no |
-| `daemon` | `hugrgate` | no |
 | `daemon` | `client` | yes |
+| `daemon` | `core` | no |
 | `daemon` | `errors` | yes |
+| `daemon` | `log` | yes |
+| `daemon` | `policy` | no |
+| `daemon` | `result` | no |
+| `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
+| `fallback` | `log` | no |
 | `fallback` | `policy` | no |
 | `fallback` | `result` | no |
 | `fallback` | `spec` | no |
@@ -596,16 +654,26 @@ flowchart TD
 | `policy` | `result` | no |
 | `privacy` | `backend` | no |
 | `privacy` | `errors` | no |
+| `privacy` | `log` | no |
 | `privacy` | `policy` | no |
 | `privacy` | `provenance` | no |
+| `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
+| `serde` | `errors` | no |
+| `serde` | `policy` | no |
+| `serde` | `result` | no |
 | `server` | `hugrgate` | no |
-| `server` | `client` | no |
+| `server` | `backend` | no |
+| `server` | `core` | no |
 | `server` | `errors` | no |
+| `server` | `result` | no |
+| `server` | `serde` | no |
+| `server` | `spec` | no |
 | `spec` | `errors` | no |
 | `threshold` | `abstain` | no |
+| `threshold` | `errors` | no |
 | `threshold` | `policy` | no |
 | `threshold` | `result` | no |
 | `threshold` | `spec` | no |

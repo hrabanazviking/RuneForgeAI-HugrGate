@@ -5,7 +5,6 @@ from __future__ import annotations
 import pytest
 
 from hugrgate.contracts.ordinal import OrdinalContract
-from hugrgate.contracts.schema import contract_from_dict
 from hugrgate.contracts.templates import (
     ContractTemplate,
     TemplateLibrary,

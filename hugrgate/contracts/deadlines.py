@@ -19,8 +19,9 @@ explicit and clock-injectable (``now`` parameters default to
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, ClassVar, Dict, List, Mapping, Optional, Union
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -35,7 +36,7 @@ __all__ = [
 ]
 
 #: What may sit inside a TimedContract.
-InnerContract = Union[DecisionContract, DecisionSpec]
+InnerContract = DecisionContract | DecisionSpec
 
 
 def _check_ts(value: Any, *, what: str) -> float:
@@ -53,9 +54,9 @@ class TimedContract(DecisionContract):
     kind: ClassVar[str] = "timed"
 
     inner: InnerContract = None  # type: ignore[assignment]
-    budget_ms: Optional[float] = None
-    not_before: Optional[float] = None
-    not_after: Optional[float] = None
+    budget_ms: float | None = None
+    not_before: float | None = None
+    not_after: float | None = None
 
     def __post_init__(self) -> None:
         super().__post_init__()
@@ -100,9 +101,9 @@ class TimedContract(DecisionContract):
     # -- temporal validation ---------------------------------------------------
 
     def timing_violations(self, request_ts: float,
-                          decided_ts: float) -> List[str]:
+                          decided_ts: float) -> list[str]:
         """Was the decision *made* within its temporal bounds?"""
-        problems: List[str] = []
+        problems: list[str] = []
         request_ts = _check_ts(request_ts, what="request_ts")
         decided_ts = _check_ts(decided_ts, what="decided_ts")
         if decided_ts < request_ts:
@@ -132,7 +133,7 @@ class TimedContract(DecisionContract):
                 "\n".join(f"  - {p}" for p in problems),
                 code="deadline_violation", violations=problems)
 
-    def is_valid_at(self, now: Optional[float] = None) -> bool:
+    def is_valid_at(self, now: float | None = None) -> bool:
         """Is a decision still *valid* at ``now`` (window check)?"""
         now = time.time() if now is None else _check_ts(now, what="now")
         if self.not_before is not None and now < self.not_before:
@@ -142,7 +143,7 @@ class TimedContract(DecisionContract):
         return True
 
     def remaining_budget_ms(self, request_ts: float,
-                            now: Optional[float] = None) -> Optional[float]:
+                            now: float | None = None) -> float | None:
         """Milliseconds of budget left at ``now`` (None when no budget)."""
         if self.budget_ms is None:
             return None
@@ -153,7 +154,7 @@ class TimedContract(DecisionContract):
     # -- serialization -----------------------------------------------------------
 
     @staticmethod
-    def _inner_to_dict(inner: InnerContract) -> Dict[str, Any]:
+    def _inner_to_dict(inner: InnerContract) -> dict[str, Any]:
         if isinstance(inner, DecisionContract):
             return inner.to_dict()
         return {"decision_spec": inner.to_dict()}
@@ -173,8 +174,8 @@ class TimedContract(DecisionContract):
             f"inner payload needs 'kind' or 'decision_spec'/'type', got "
             f"{sorted(d)}", code="bad_inner_contract")
 
-    def _payload_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"inner": self._inner_to_dict(self.inner)}
+    def _payload_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"inner": self._inner_to_dict(self.inner)}
         if self.budget_ms is not None:
             d["budget_ms"] = self.budget_ms
         if self.not_before is not None:
@@ -185,7 +186,7 @@ class TimedContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "TimedContract":
+                      common: dict[str, Any]) -> TimedContract:
         raw = d.get("inner")
         if raw is None:
             raise ContractError("timed payload needs 'inner'",

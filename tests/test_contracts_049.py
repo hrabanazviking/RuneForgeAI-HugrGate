@@ -20,7 +20,6 @@ from hugrgate.contracts.multilabel import MultilabelContract
 from hugrgate.contracts.nested import NestedCategoricalContract
 from hugrgate.errors import ContractError
 
-
 # --- the fuzzer finds nothing (the engine holds) -------------------------------
 
 @pytest.mark.parametrize("seed", [42, 7, 1234, 99, 2026])

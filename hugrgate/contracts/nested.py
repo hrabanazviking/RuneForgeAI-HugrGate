@@ -13,8 +13,9 @@ nesting depth is bounded (:data:`MAX_NESTING_DEPTH`).
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Sequence, Tuple
+from typing import Any, ClassVar
 
 from hugrgate.contracts.schema import (
     DecisionContract,
@@ -33,7 +34,7 @@ __all__ = [
 MAX_NESTING_DEPTH = 8
 
 
-def parse_path(value: Any) -> Tuple[str, ...]:
+def parse_path(value: Any) -> tuple[str, ...]:
     """Normalize a decision path to a tuple of non-empty strings."""
     if isinstance(value, str):
         parts = tuple(value.split("."))
@@ -59,8 +60,8 @@ class NestedCategoricalContract(DecisionContract):
 
     kind: ClassVar[str] = "nested-categorical"
 
-    options: List[str] = field(default_factory=list)
-    children: Dict[str, "NestedCategoricalContract"] = field(
+    options: list[str] = field(default_factory=list)
+    children: dict[str, NestedCategoricalContract] = field(
         default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -104,22 +105,22 @@ class NestedCategoricalContract(DecisionContract):
             return 1
         return 1 + max(c.depth() for c in self.children.values())
 
-    def leaf_paths(self) -> List[Tuple[str, ...]]:
+    def leaf_paths(self) -> list[tuple[str, ...]]:
         """Every root-to-leaf path in the tree, in option order."""
-        paths: List[Tuple[str, ...]] = []
+        paths: list[tuple[str, ...]] = []
         for opt in self.options:
             child = self.children.get(opt)
             if child is None:
                 paths.append((opt,))
             else:
-                paths.extend((opt,) + rest for rest in child.leaf_paths())
+                paths.extend((opt, *rest) for rest in child.leaf_paths())
         return paths
 
     def is_leaf(self, option: str) -> bool:
         """True when ``option`` has no refining child contract."""
         return option in self.options and option not in self.children
 
-    def subcontract_at(self, path: Sequence[str]) -> "NestedCategoricalContract":
+    def subcontract_at(self, path: Sequence[str]) -> NestedCategoricalContract:
         """The subtree contract rooted at ``path`` (path may end at a leaf)."""
         parts = parse_path(path)
         node = self
@@ -160,7 +161,7 @@ class NestedCategoricalContract(DecisionContract):
 
     # -- serialization ---------------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         return {
             "options": list(self.options),
             "children": {k: v.to_dict() for k, v in self.children.items()},
@@ -168,7 +169,7 @@ class NestedCategoricalContract(DecisionContract):
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "NestedCategoricalContract":
+                      common: dict[str, Any]) -> NestedCategoricalContract:
         options = d.get("options")
         if not isinstance(options, list):
             raise ContractError("nested categorical payload needs an "

@@ -23,15 +23,16 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar, Dict, List, Mapping, Type
+from typing import Any, ClassVar
 
 from hugrgate.errors import ContractError
 
 __all__ = [
+    "CONTRACT_KINDS",
     "SCHEMA_VERSION",
     "SUPPORTED_SCHEMA_VERSIONS",
-    "CONTRACT_KINDS",
     "DecisionContract",
     "contract_from_dict",
     "is_supported_version",
@@ -45,7 +46,7 @@ SCHEMA_VERSION = "2.0"
 SUPPORTED_SCHEMA_VERSIONS = ("2.0",)
 
 #: kind string -> DecisionContract subclass. Populated by @register_kind.
-CONTRACT_KINDS: Dict[str, Type["DecisionContract"]] = {}
+CONTRACT_KINDS: dict[str, type[DecisionContract]] = {}
 
 
 def is_supported_version(version: object) -> bool:
@@ -53,7 +54,7 @@ def is_supported_version(version: object) -> bool:
     return isinstance(version, str) and version in SUPPORTED_SCHEMA_VERSIONS
 
 
-def register_kind(cls: Type["DecisionContract"]) -> Type["DecisionContract"]:
+def register_kind(cls: type[DecisionContract]) -> type[DecisionContract]:
     """Class decorator registering a contract ``kind`` for deserialization.
 
     The class must define a non-empty ``kind`` ClassVar unique in the
@@ -94,7 +95,7 @@ class DecisionContract:
     contract_id: str
     name: str = ""
     description: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.contract_id, str) or not self.contract_id:
@@ -114,7 +115,7 @@ class DecisionContract:
         except (TypeError, ValueError) as e:
             raise ContractError(
                 f"contract metadata must be JSON-serializable: {e}",
-                code="metadata_not_serializable")
+                code="metadata_not_serializable") from e
 
     @property
     def schema_version(self) -> str:
@@ -123,13 +124,13 @@ class DecisionContract:
 
     # -- serialization ----------------------------------------------------
 
-    def _payload_dict(self) -> Dict[str, Any]:
+    def _payload_dict(self) -> dict[str, Any]:
         """Kind-specific payload. Base contracts carry no payload."""
         return {}
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Full versioned serialization of this contract."""
-        d: Dict[str, Any] = {
+        d: dict[str, Any] = {
             "schema_version": self.schema_version,
             "kind": self.kind,
             "contract_id": self.contract_id,
@@ -145,12 +146,12 @@ class DecisionContract:
 
     @classmethod
     def _from_payload(cls, d: Mapping[str, Any],
-                      common: Dict[str, Any]) -> "DecisionContract":
+                      common: dict[str, Any]) -> DecisionContract:
         """Build from a kind payload dict plus common fields."""
         return cls(**common)
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "DecisionContract":
+    def from_dict(cls, d: Mapping[str, Any]) -> DecisionContract:
         """Deserialize any registered contract kind from a dict.
 
         Raises ContractError on unknown kinds or unsupported schema
@@ -190,12 +191,10 @@ class DecisionContract:
         }
         try:
             return sub._from_payload(d, common)
-        except ContractError:
-            raise
         except (TypeError, ValueError, KeyError) as e:
             raise ContractError(
                 f"malformed {kind!r} contract payload: {e}",
-                code="malformed_contract_payload", kind=kind)
+                code="malformed_contract_payload", kind=kind) from e
 
     def canonical_hash(self) -> str:
         """sha256 of the canonical JSON form — the contract's stable id."""
@@ -215,9 +214,9 @@ class DecisionContract:
         except (TypeError, ValueError) as e:
             raise ContractError(
                 f"contract value is not JSON-serializable: {e}",
-                code="value_not_serializable")
+                code="value_not_serializable") from e
 
-    def check_value(self, value: Any) -> List[str]:
+    def check_value(self, value: Any) -> list[str]:
         """Non-raising validation: return a list of violation messages."""
         try:
             self.validate_value(value)
