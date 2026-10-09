@@ -18,6 +18,7 @@ flowchart TD
         backend[backend]
         policy[policy]
         validation[validation]
+        serde[serde]
     end
     subgraph runtime[runtime]
         core[core]
@@ -144,6 +145,7 @@ flowchart TD
     cli -.-> daemon
     cli -.-> errors
     cli --> policy
+    cli -.-> serde
     cli -.-> server
     cli --> spec
     client --> backend
@@ -151,6 +153,7 @@ flowchart TD
     client --> errors
     client --> policy
     client --> result
+    client --> serde
     client -.-> server
     client --> spec
     core --> backend
@@ -167,6 +170,7 @@ flowchart TD
     daemon -.-> log
     daemon --> policy
     daemon --> result
+    daemon --> serde
     daemon -.-> server
     daemon -.-> spec
     fallback --> backend
@@ -201,12 +205,15 @@ flowchart TD
     provenance --> result
     provenance --> spec
     result --> errors
+    serde --> errors
+    serde --> policy
+    serde --> result
     server --> hugrgate
     server --> backend
-    server --> client
     server --> core
     server --> errors
     server --> result
+    server --> serde
     server --> spec
     spec --> errors
     threshold --> abstain
@@ -229,7 +236,7 @@ flowchart TD
 | Layer | Modules |
 |---|---|
 | foundation | `errors` |
-| contracts | `spec`, `result`, `backend`, `policy`, `validation` |
+| contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -316,6 +323,7 @@ flowchart TD
 | `cli` | `daemon` | yes |
 | `cli` | `errors` | yes |
 | `cli` | `policy` | no |
+| `cli` | `serde` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
 | `client` | `backend` | no |
@@ -323,6 +331,7 @@ flowchart TD
 | `client` | `errors` | no |
 | `client` | `policy` | no |
 | `client` | `result` | no |
+| `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
 | `core` | `backend` | no |
@@ -339,6 +348,7 @@ flowchart TD
 | `daemon` | `log` | yes |
 | `daemon` | `policy` | no |
 | `daemon` | `result` | no |
+| `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `fallback` | `backend` | no |
@@ -373,12 +383,15 @@ flowchart TD
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
+| `serde` | `errors` | no |
+| `serde` | `policy` | no |
+| `serde` | `result` | no |
 | `server` | `hugrgate` | no |
 | `server` | `backend` | no |
-| `server` | `client` | no |
 | `server` | `core` | no |
 | `server` | `errors` | no |
 | `server` | `result` | no |
+| `server` | `serde` | no |
 | `server` | `spec` | no |
 | `spec` | `errors` | no |
 | `threshold` | `abstain` | no |

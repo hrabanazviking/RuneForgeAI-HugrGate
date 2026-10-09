@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 43 · **public names:** 181
+**Modules:** 44 · **public names:** 184
 
 ## API stability policy
 
@@ -365,6 +365,14 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionResult` | class | `(value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.serde`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'Dict[str, Any]'` |
+| `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
+| `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
 
 ### `hugrgate.server`
 

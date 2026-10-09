@@ -40,7 +40,7 @@ from hugrgate.errors import (
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate import __version__ as HUGRGATE_VERSION
-from hugrgate.client import policy_from_dict
+from hugrgate.serde import policy_from_dict
 from hugrgate.errors import HugrGateError
 
 __all__ = [

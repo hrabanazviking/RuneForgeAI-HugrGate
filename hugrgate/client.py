@@ -4,8 +4,10 @@
 interface over HTTP, with automatic fallback to an in-process gate when
 the service is unreachable.
 
-Also home to the JSON serde helpers shared by the server, daemon and CLI:
-:func:`policy_to_dict`, :func:`policy_from_dict`, :func:`result_from_dict`.
+The JSON serde helpers (:func:`policy_to_dict`,
+:func:`policy_from_dict`, :func:`result_from_dict`) live in
+:mod:`hugrgate.serde` and are re-exported here for backward
+compatibility.
 """
 
 from __future__ import annotations
@@ -19,8 +21,12 @@ from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, BackendError
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
+from hugrgate.serde import (
+    policy_from_dict,
+    policy_to_dict,
+    result_from_dict,
+)
 from hugrgate.spec import DecisionSpec
-from hugrgate.errors import PolicyError
 
 __all__ = [
     "policy_to_dict",
@@ -28,59 +34,6 @@ __all__ = [
     "result_from_dict",
     "HugrGateClient",
 ]
-
-
-def policy_to_dict(policy: DecisionPolicy) -> Dict[str, Any]:
-    """Serialize a :class:`DecisionPolicy` to plain JSON-compatible dict."""
-    return policy.to_dict()
-
-
-#: Keys accepted by :func:`policy_from_dict`. Unknown keys are rejected
-#: loudly (slice 008): a misspelled key must never silently fall back
-#: to its default.
-_POLICY_KEYS = frozenset({
-    "minimum_probability", "maximum_latency_ms", "remote_inference",
-    "allowed_backends", "preferred_backends", "fallback_behavior",
-    "privacy_class", "max_cost", "review_band",
-})
-
-
-def policy_from_dict(d: Mapping[str, Any]) -> DecisionPolicy:
-    """Rebuild a :class:`DecisionPolicy` from :func:`policy_to_dict` output."""
-    unknown = set(d) - _POLICY_KEYS
-    if unknown:
-        raise PolicyError(
-            f"unknown policy key(s): {sorted(unknown)}; "
-            f"expected keys: {sorted(_POLICY_KEYS)}")
-    review_band = d.get("review_band")
-    return DecisionPolicy(
-        minimum_probability=d.get("minimum_probability", 0.0),
-        maximum_latency_ms=d.get("maximum_latency_ms"),
-        remote_inference=d.get("remote_inference", False),
-        allowed_backends=d.get("allowed_backends"),
-        preferred_backends=d.get("preferred_backends"),
-        fallback_behavior=d.get("fallback_behavior", "abstain"),
-        privacy_class=d.get("privacy_class", "standard"),
-        max_cost=d.get("max_cost"),
-        review_band=tuple(review_band) if review_band is not None else None,
-    )
-
-
-def result_from_dict(d: Mapping[str, Any]) -> DecisionResult:
-    """Rebuild a :class:`DecisionResult` from ``to_dict()`` output."""
-    return DecisionResult(
-        value=d.get("value"),
-        probability=d["probability"],
-        distribution=dict(d.get("distribution") or {}),
-        uncertainty=d.get("uncertainty", 0.0),
-        accepted=d.get("accepted", True),
-        backend=d.get("backend", "unknown"),
-        model=d.get("model", "unknown"),
-        latency_ms=d.get("latency_ms", 0.0),
-        calibration_profile=d.get("calibration_profile", "none"),
-        fallback_used=d.get("fallback_used", False),
-        metadata=dict(d.get("metadata") or {}),
-    )
 
 
 class HugrGateClient:
@@ -129,7 +82,10 @@ class HugrGateClient:
     # -- in-process fallback ------------------------------------------------
     def _inprocess_gate(self) -> HugrGate:
         if self._gate is None:
-            from hugrgate.server import build_gate  # lazy: avoid cycle
+            # Lazy: importing server at module level would drag the
+            # FastAPI/uvicorn server dependencies into the lightweight
+            # SDK import (slice 021).
+            from hugrgate.server import build_gate
             self._gate = build_gate(self._extra_backends)
         return self._gate
 

@@ -64,8 +64,11 @@ def test_every_module_has_an_explicit_layer():
 def test_eager_import_graph_is_acyclic():
     """Import-time edges (lazy edges excluded) must form a DAG.
 
-    The known client<->server tangle is safe only because the
-    client->server edge is lazy; this test fails if anyone makes it eager.
+    Slice 021 eliminated the former client<->server tangle by moving
+    the shared serde helpers to hugrgate.serde; the client's only
+    remaining server edge is a lazy import kept out of the module
+    level to avoid dragging FastAPI into the SDK. This test fails if
+    anyone reintroduces an eager cycle.
     """
     gen = _load_gen()
     edges: dict[str, set[str]] = {}

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:09:45.835129+00:00",
-  "module_count": 43,
+  "generated_utc": "2026-10-09T11:41:37.417406+00:00",
+  "module_count": 44,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -32,9 +32,10 @@
         "__future__",
         "abc",
         "hugrgate",
+        "threading",
         "typing"
       ],
-      "loc": 84,
+      "loc": 145,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -44,6 +45,7 @@
         "evaluate",
         "health",
         "warmup",
+        "close",
         "batch",
         "calibration_info",
         "estimated_latency",
@@ -51,7 +53,9 @@
         "privacy_properties",
         "hardware_requirements",
         "register",
+        "unregister",
         "get",
+        "get_or_raise",
         "list",
         "supporting"
       ]
@@ -244,7 +248,7 @@
         "time",
         "typing"
       ],
-      "loc": 346,
+      "loc": 344,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -282,10 +286,11 @@
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 167,
+      "loc": 180,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -486,7 +491,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 275,
+      "loc": 276,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -504,19 +509,16 @@
       ]
     },
     "hugrgate.client": {
-      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nAlso home to the JSON serde helpers shared by the server, daemon and CLI:\n:func:`policy_to_dict`, :func:`policy_from_dict`, :func:`result_from_dict`.",
+      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.",
       "imports": [
         "__future__",
         "httpx",
         "hugrgate",
         "typing"
       ],
-      "loc": 277,
+      "loc": 219,
       "path": "hugrgate/client.py",
       "public_defs": [
-        "policy_to_dict",
-        "policy_from_dict",
-        "result_from_dict",
         "HugrGateClient",
         "decide",
         "health",
@@ -528,17 +530,20 @@
       "docstring": "HugrGate core runtime \u2014 decide(). Slice 8.",
       "imports": [
         "__future__",
+        "asyncio",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 120,
+      "loc": 158,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
         "register",
+        "close",
         "decide",
-        "decide_batch"
+        "decide_batch",
+        "adecide"
       ]
     },
     "hugrgate.daemon": {
@@ -558,7 +563,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 445,
+      "loc": 492,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -719,12 +724,14 @@
         "time",
         "typing"
       ],
-      "loc": 289,
+      "loc": 317,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
         "LadderAuditEntry",
         "LadderRouter",
+        "to_dict",
+        "from_dict",
         "to_dict",
         "ladder_for",
         "decide"
@@ -802,10 +809,11 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 72,
+      "loc": 96,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
+        "to_dict",
         "evaluate",
         "backend_allowed"
       ]
@@ -835,23 +843,29 @@
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
         "__future__",
+        "copy",
         "dataclasses",
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 84,
+      "loc": 217,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
         "ProvenanceStore",
         "from_decision",
+        "to_dict",
+        "from_dict",
         "append",
+        "evicted_count",
         "by_hash",
         "recent",
-        "count"
+        "count",
+        "verify_chain"
       ]
     },
     "hugrgate.result": {
@@ -862,11 +876,26 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 64,
+      "loc": 82,
       "path": "hugrgate/result.py",
       "public_defs": [
         "DecisionResult",
         "to_dict"
+      ]
+    },
+    "hugrgate.serde": {
+      "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 73,
+      "path": "hugrgate/serde.py",
+      "public_defs": [
+        "policy_to_dict",
+        "policy_from_dict",
+        "result_from_dict"
       ]
     },
     "hugrgate.server": {
@@ -932,7 +961,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 167,
+      "loc": 212,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -940,7 +969,11 @@
         "ordinal_cumulative_probability",
         "classify_numeric_band",
         "apply_thresholds",
-        "contains"
+        "contains",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.timeout": {
@@ -968,14 +1001,15 @@
       ]
     },
     "hugrgate.validation": {
-      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7.",
+      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7;\nhardened in slice 011.",
       "imports": [
         "__future__",
         "hugrgate",
         "json",
+        "math",
         "typing"
       ],
-      "loc": 60,
+      "loc": 130,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -988,18 +1022,30 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_async_readiness.py",
+    "test_backend_registry.py",
     "test_config.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
+    "test_determinism_contract.py",
     "test_deterministic.py",
     "test_errors.py",
     "test_foundation.py",
+    "test_import_cycles.py",
     "test_ladder.py",
     "test_logging.py",
     "test_ml_calibration.py",
+    "test_package_boundaries.py",
+    "test_policy_invariants.py",
+    "test_provenance_integrity.py",
     "test_repo_truth.py",
+    "test_resource_lifecycle.py",
+    "test_result_invariants.py",
+    "test_serialization_contracts.py",
     "test_service.py",
+    "test_state_validation.py",
+    "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7461
+  "total_loc": 7952
 }

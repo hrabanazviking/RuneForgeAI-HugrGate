@@ -26,7 +26,7 @@ LAYERS: dict[str, list[str]] = {
     "foundation": ["hugrgate.errors"],
     "contracts": [
         "hugrgate.spec", "hugrgate.result", "hugrgate.backend",
-        "hugrgate.policy", "hugrgate.validation",
+        "hugrgate.policy", "hugrgate.validation", "hugrgate.serde",
     ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",

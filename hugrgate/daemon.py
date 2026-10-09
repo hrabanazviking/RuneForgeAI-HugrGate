@@ -34,7 +34,7 @@ from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
-from hugrgate.client import policy_from_dict
+from hugrgate.serde import policy_from_dict
 from hugrgate.errors import QueueFull
 from hugrgate.log import get_logger
 from hugrgate.server import build_gate, create_app

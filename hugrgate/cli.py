@@ -61,7 +61,7 @@ def load_state(path: str) -> Dict[str, Any]:
 
 
 def load_policy(path: str) -> DecisionPolicy:
-    from hugrgate.client import policy_from_dict
+    from hugrgate.serde import policy_from_dict
     doc = _load_doc(path)
     if not isinstance(doc, dict):
         raise ValueError(f"policy file {path} must contain a mapping")
