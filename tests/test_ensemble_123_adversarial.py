@@ -9,6 +9,7 @@ corrupt.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import (
     AbstainBackend,
@@ -21,7 +22,6 @@ from hugrgate.ensemble import (
     tie_storm_members,
 )
 from hugrgate.errors import PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

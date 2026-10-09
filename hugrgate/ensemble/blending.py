@@ -21,7 +21,6 @@ combiner needs a fitted blender in ``ctx.fitted``.
 from __future__ import annotations
 
 import math
-from typing import Dict, List
 
 from hugrgate.ensemble.base import (
     MemberVote,
@@ -37,17 +36,17 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "project_simplex",
-    "log_loss",
     "Blender",
     "blending_combine",
+    "log_loss",
+    "project_simplex",
 ]
 
 #: Floor for blended probabilities inside a log.
 BLEND_EPS = 1e-12
 
 
-def project_simplex(v: List[float]) -> List[float]:
+def project_simplex(v: list[float]) -> list[float]:
     """Euclidean projection of ``v`` onto the probability simplex."""
     n = len(v)
     if n == 0:
@@ -63,7 +62,7 @@ def project_simplex(v: List[float]) -> List[float]:
     return [max(x - theta, 0.0) for x in v]
 
 
-def log_loss(blended: Dict[str, float], true_label: str) -> float:
+def log_loss(blended: dict[str, float], true_label: str) -> float:
     """Multiclass log-loss of one blended distribution."""
     return -math.log(max(blended.get(true_label, 0.0), BLEND_EPS))
 
@@ -71,7 +70,7 @@ def log_loss(blended: Dict[str, float], true_label: str) -> float:
 class Blender:
     """Learns convex member weights on holdout predictions."""
 
-    def __init__(self, members: List[str], lr: float = 0.5,
+    def __init__(self, members: list[str], lr: float = 0.5,
                  iters: int = 500):
         if not members:
             raise PolicyError("Blender needs at least one member")
@@ -85,8 +84,8 @@ class Blender:
         self.members = list(members)
         self.lr = lr
         self.iters = iters
-        self.classes: List[str] = []
-        self._weights: List[float] = []
+        self.classes: list[str] = []
+        self._weights: list[float] = []
         self.holdout_log_loss: float = math.inf
 
     @property
@@ -94,16 +93,15 @@ class Blender:
         return bool(self._weights)
 
     @property
-    def weights(self) -> Dict[str, float]:
+    def weights(self) -> dict[str, float]:
         if not self.fitted:
             raise BackendError("Blender used before fit")
-        return dict(zip(self.members, self._weights))
+        return dict(zip(self.members, self._weights, strict=True))
 
-    def _matrix(self, votes_per_sample: List[List[MemberVote]],
-                space: List[str]) -> List[List[List[float]]]:
+    def _matrix(self, votes_per_sample: list[list[MemberVote]],
+                space: list[str]) -> list[list[list[float]]]:
         """Per-sample, per-member, per-class probability tensor."""
-        by_member_index = {m: i for i, m in enumerate(self.members)}
-        tensor: List[List[List[float]]] = []
+        tensor: list[list[list[float]]] = []
         for votes in votes_per_sample:
             by_member = {v.backend: v for v in votes if not v.skipped}
             rows = []
@@ -117,8 +115,8 @@ class Blender:
             tensor.append(rows)
         return tensor
 
-    def fit(self, votes_per_sample: List[List[MemberVote]],
-            labels: List[str], spec: DecisionSpec) -> "Blender":
+    def fit(self, votes_per_sample: list[list[MemberVote]],
+            labels: list[str], spec: DecisionSpec) -> Blender:
         """Learn the convex weight vector on holdout predictions."""
         require_discrete_spec(spec, "blending")
         if len(votes_per_sample) != len(labels):
@@ -128,18 +126,18 @@ class Blender:
         if not labels:
             raise PolicyError("Blender.fit needs labeled samples")
         space = spec.value_space()
-        unknown = [l for l in labels if l not in space]
+        unknown = [label for label in labels if label not in space]
         if unknown:
             raise PolicyError(
                 f"labels outside the spec space: {sorted(set(unknown))}")
         tensor = self._matrix(votes_per_sample, space)
-        truth_idx = [space.index(l) for l in labels]
+        truth_idx = [space.index(label) for label in labels]
         m = len(self.members)
         w = [1.0 / m] * m  # uniform init: deterministic
         n = len(labels)
         for _ in range(self.iters):
             grad = [0.0] * m
-            for rows, t in zip(tensor, truth_idx):
+            for rows, t in zip(tensor, truth_idx, strict=True):
                 blended_t = sum(w[i] * rows[i][t] for i in range(m))
                 denom = max(blended_t, BLEND_EPS)
                 for i in range(m):
@@ -157,8 +155,8 @@ class Blender:
             for s, rows in enumerate(tensor)) / n
         return self
 
-    def blend(self, votes: List[MemberVote],
-              spec: DecisionSpec) -> Dict[str, float]:
+    def blend(self, votes: list[MemberVote],
+              spec: DecisionSpec) -> dict[str, float]:
         if not self.fitted:
             raise BackendError("Blender used before fit")
         space = spec.value_space()
@@ -177,7 +175,7 @@ class Blender:
                 blended[c] += self._weights[i] * dist.get(c, 0.0)
         return blended
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "members": list(self.members),
             "classes": list(self.classes),
@@ -187,7 +185,7 @@ class Blender:
         }
 
 
-def blending_combine(votes: List[MemberVote],
+def blending_combine(votes: list[MemberVote],
                      ctx: StrategyContext) -> DecisionResult:
     """Combine votes with the fitted blender's convex weights."""
     require_discrete_spec(ctx.spec, "blending")
@@ -201,7 +199,7 @@ def blending_combine(votes: List[MemberVote],
     if not usable:
         raise BackendError("blending: no usable votes")
     distribution = blender.blend(votes, ctx.spec)
-    first_seen: Dict[str, int] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(usable):
         if v.value is not None and str(v.value) not in first_seen:
             first_seen[str(v.value)] = i

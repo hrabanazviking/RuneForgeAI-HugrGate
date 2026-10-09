@@ -25,15 +25,16 @@ import copy
 import json
 import time
 from collections import OrderedDict
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import PolicyError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "EnsembleCache",
     "CachedEnsemble",
+    "EnsembleCache",
 ]
 
 _PRIVACY_LEVELS = ("standard", "strict")
@@ -59,7 +60,7 @@ class EnsembleCache:
         self.maxsize = maxsize
         self.ttl_seconds = ttl_seconds
         # key -> (stored_at, member_names, result)
-        self._entries: "OrderedDict[str, Tuple[float, List[str], DecisionResult]]" = \
+        self._entries: OrderedDict[str, tuple[float, list[str], DecisionResult]] = \
             OrderedDict()
         self.hits = 0
         self.misses = 0
@@ -68,7 +69,7 @@ class EnsembleCache:
     def _expired(self, stored_at: float) -> bool:
         return (time.monotonic() - stored_at) >= self.ttl_seconds
 
-    def get(self, key: str) -> Optional[DecisionResult]:
+    def get(self, key: str) -> DecisionResult | None:
         entry = self._entries.get(key)
         if entry is None:
             self.misses += 1
@@ -83,7 +84,7 @@ class EnsembleCache:
         return copy.deepcopy(result)
 
     def put(self, key: str, result: DecisionResult,
-            member_names: List[str]) -> None:
+            member_names: list[str]) -> None:
         self._entries[key] = (time.monotonic(), list(member_names),
                               copy.deepcopy(result))
         self._entries.move_to_end(key)
@@ -104,7 +105,7 @@ class EnsembleCache:
         self._entries.clear()
         return n
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {"size": len(self._entries),
                 "maxsize": self.maxsize,
                 "ttl_seconds": self.ttl_seconds,
@@ -119,7 +120,7 @@ class EnsembleCache:
 class CachedEnsemble:
     """An :class:`Ensemble` with a caching policy around ``evaluate``."""
 
-    def __init__(self, ensemble, cache: Optional[EnsembleCache] = None):
+    def __init__(self, ensemble, cache: EnsembleCache | None = None):
         from hugrgate.ensemble.api import Ensemble
         if not isinstance(ensemble, Ensemble):
             raise PolicyError(
@@ -137,7 +138,7 @@ class CachedEnsemble:
         return self.ensemble.members
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None,
+                 context: Mapping[str, Any] | None = None,
                  privacy: str = "standard") -> DecisionResult:
         """Evaluate, caching unless ``privacy="strict"``."""
         if privacy not in _PRIVACY_LEVELS:
@@ -161,5 +162,5 @@ class CachedEnsemble:
     def invalidate(self) -> int:
         return self.cache.invalidate()
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return self.cache.stats()

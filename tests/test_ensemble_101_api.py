@@ -8,6 +8,14 @@ and boundary behavior.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import (
+    CAT_SPEC,
+    AbstainingBackend,
+    ConstantBackend,
+    FailingBackend,
+    ScriptedBackend,
+    make_result,
+)
 
 from hugrgate import DecisionPolicy, DecisionResult, DecisionSpec, HugrGate
 from hugrgate.ensemble import (
@@ -19,16 +27,8 @@ from hugrgate.ensemble import (
     register_strategy,
     soft_voting,
 )
-from hugrgate.ensemble.base import MemberVote, StrategyContext, break_tie
+from hugrgate.ensemble.base import MemberVote, break_tie
 from hugrgate.errors import BackendError, PolicyError
-from ensemble_fakes import (
-    CAT_SPEC,
-    AbstainingBackend,
-    ConstantBackend,
-    FailingBackend,
-    ScriptedBackend,
-    make_result,
-)
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

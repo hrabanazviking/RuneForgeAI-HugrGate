@@ -21,7 +21,8 @@ state in ``ctx.state`` (wired by :meth:`Ensemble.evaluate`).
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.ensemble.base import (
     MemberVote,
@@ -42,9 +43,9 @@ __all__ = [
 ]
 
 
-def _softmax(logits: List[float]) -> List[float]:
+def _softmax(logits: list[float]) -> list[float]:
     peak = max(logits)
-    exps = [math.exp(l - peak) for l in logits]
+    exps = [math.exp(logit - peak) for logit in logits]
     total = sum(exps)
     return [e / total for e in exps]
 
@@ -52,8 +53,8 @@ def _softmax(logits: List[float]) -> List[float]:
 class ExpertRouter:
     """Gating network routing states to experts."""
 
-    def __init__(self, members: List[str], feature_names: List[str],
-                 top_k: Optional[int] = None,
+    def __init__(self, members: list[str], feature_names: list[str],
+                 top_k: int | None = None,
                  l2: float = 0.01, lr: float = 1.0,
                  iters: int = 1000):
         if not members:
@@ -78,15 +79,15 @@ class ExpertRouter:
         self.l2 = l2
         self.lr = lr
         self.iters = iters
-        self.classes: List[str] = []
-        self._w: List[List[float]] = []  # [feature][member]
-        self._b: List[float] = []
+        self.classes: list[str] = []
+        self._w: list[list[float]] = []  # [feature][member]
+        self._b: list[float] = []
 
     @property
     def fitted(self) -> bool:
         return bool(self._w)
 
-    def extract(self, state: Mapping[str, Any]) -> List[float]:
+    def extract(self, state: Mapping[str, Any]) -> list[float]:
         """Numeric feature vector; missing/non-numeric → 0.0."""
         feats = []
         for name in self.feature_names:
@@ -95,16 +96,16 @@ class ExpertRouter:
                          and math.isfinite(raw) else 0.0)
         return feats
 
-    def _gates(self, x: List[float]) -> List[float]:
+    def _gates(self, x: list[float]) -> list[float]:
         logits = [
             sum(x[j] * self._w[j][i] for j in range(len(x))) + self._b[i]
             for i in range(len(self.members))
         ]
         return _softmax(logits)
 
-    def fit(self, states: List[Mapping[str, Any]],
-            votes_per_sample: List[List[MemberVote]],
-            labels: List[str], spec: DecisionSpec) -> "ExpertRouter":
+    def fit(self, states: list[Mapping[str, Any]],
+            votes_per_sample: list[list[MemberVote]],
+            labels: list[str], spec: DecisionSpec) -> ExpertRouter:
         """Train the gating network.
 
         The target for each sample is uniform over the experts that
@@ -119,7 +120,7 @@ class ExpertRouter:
         if n == 0:
             raise PolicyError("ExpertRouter.fit needs labeled samples")
         space = spec.value_space()
-        unknown = [l for l in labels if l not in space]
+        unknown = [label for label in labels if label not in space]
         if unknown:
             raise PolicyError(
                 f"labels outside the spec space: {sorted(set(unknown))}")
@@ -127,8 +128,8 @@ class ExpertRouter:
         m = len(self.members)
         d = len(self.feature_names)
         # Soft targets: uniform over the experts that were right.
-        targets: List[List[float]] = []
-        for votes, label in zip(votes_per_sample, labels):
+        targets: list[list[float]] = []
+        for votes, label in zip(votes_per_sample, labels, strict=True):
             by_member = {v.backend: v for v in votes if not v.skipped}
             correct = [i for i, name in enumerate(self.members)
                        if name in by_member
@@ -144,7 +145,7 @@ class ExpertRouter:
         for _ in range(self.iters):
             gw = [[0.0] * m for _ in range(d)]
             gb = [0.0] * m
-            for x, t in zip(X, targets):
+            for x, t in zip(X, targets, strict=True):
                 logits = [sum(x[j] * w[j][i] for j in range(d)) + b[i]
                           for i in range(m)]
                 probs = _softmax(logits)
@@ -163,7 +164,7 @@ class ExpertRouter:
         return self
 
     def route(self, state: Mapping[str, Any],
-              candidates: Optional[List[str]] = None) -> Dict[str, float]:
+              candidates: list[str] | None = None) -> dict[str, float]:
         """Gate distribution over (optionally restricted) members."""
         if not self.fitted:
             raise BackendError("ExpertRouter used before fit")
@@ -174,9 +175,9 @@ class ExpertRouter:
         gates = self._gates(self.extract(state))
         return {name: gates[self.members.index(name)] for name in names}
 
-    def route_topk(self, state: Mapping[str, Any], k: Optional[int] = None,
-                   candidates: Optional[List[str]] = None
-                   ) -> Dict[str, float]:
+    def route_topk(self, state: Mapping[str, Any], k: int | None = None,
+                   candidates: list[str] | None = None
+                   ) -> dict[str, float]:
         """Top-k gates, renormalized to sum to 1."""
         gates = self.route(state, candidates)
         k = self.top_k if k is None else k
@@ -188,7 +189,7 @@ class ExpertRouter:
             raise BackendError("ExpertRouter: top-k gates sum to zero")
         return {n: gates[n] / total for n in top}
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "members": list(self.members),
             "feature_names": list(self.feature_names),
@@ -198,7 +199,7 @@ class ExpertRouter:
         }
 
 
-def moe_combine(votes: List[MemberVote],
+def moe_combine(votes: list[MemberVote],
                 ctx: StrategyContext) -> DecisionResult:
     """Route the input state to the top-k experts and combine."""
     require_discrete_spec(ctx.spec, "moe")
@@ -220,12 +221,12 @@ def moe_combine(votes: List[MemberVote],
                               [v.backend for v in usable])
     by_member = {v.backend: v for v in usable}
     space = ctx.spec.value_space()
-    averaged: Dict[str, float] = {}
+    averaged: dict[str, float] = {}
     for name, gate in gates.items():
         for key, p in complete_distribution(by_member[name],
                                             space).items():
             averaged[key] = averaged.get(key, 0.0) + gate * p
-    first_seen: Dict[str, int] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(usable):
         if v.value is not None and str(v.value) not in first_seen:
             first_seen[str(v.value)] = i

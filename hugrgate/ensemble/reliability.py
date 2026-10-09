@@ -25,8 +25,6 @@ Usage::
 
 from __future__ import annotations
 
-from typing import Dict, List
-
 from hugrgate.ensemble.correlation import CorrelatedErrorReport
 from hugrgate.errors import PolicyError
 
@@ -38,7 +36,7 @@ __all__ = [
 class ReliabilityTracker:
     """Track per-member accuracy and convert it to ensemble weights."""
 
-    def __init__(self, members: List[str], smoothing: float = 1.0):
+    def __init__(self, members: list[str], smoothing: float = 1.0):
         if not members:
             raise PolicyError(
                 "ReliabilityTracker needs at least one member")
@@ -50,9 +48,9 @@ class ReliabilityTracker:
                 f"smoothing must be > 0, got {smoothing}")
         self.members = list(members)
         self.smoothing = float(smoothing)
-        self._successes: Dict[str, int] = {m: 0 for m in members}
-        self._totals: Dict[str, int] = {m: 0 for m in members}
-        self._penalties: Dict[str, float] = {m: 1.0 for m in members}
+        self._successes: dict[str, int] = {m: 0 for m in members}
+        self._totals: dict[str, int] = {m: 0 for m in members}
+        self._penalties: dict[str, float] = {m: 1.0 for m in members}
 
     def _check(self, member: str) -> None:
         if member not in self._totals:
@@ -66,7 +64,7 @@ class ReliabilityTracker:
         if correct:
             self._successes[member] += 1
 
-    def observe_many(self, member: str, correct: List[bool]) -> None:
+    def observe_many(self, member: str, correct: list[bool]) -> None:
         for c in correct:
             self.observe(member, c)
 
@@ -113,8 +111,8 @@ class ReliabilityTracker:
             for member in ranked[1:]:
                 self.penalize(member, factor)
 
-    def weights(self) -> Dict[str, float]:
-        """Normalized reliability × penalty weights (sum to 1)."""
+    def weights(self) -> dict[str, float]:
+        """Normalized reliability x penalty weights (sum to 1)."""
         raw = {m: self.reliability(m) * self._penalties[m]
                for m in self.members}
         total = sum(raw.values())
@@ -124,10 +122,10 @@ class ReliabilityTracker:
                 "clear penalties or add observations")
         return {m: v / total for m, v in raw.items()}
 
-    def observation_counts(self) -> Dict[str, int]:
+    def observation_counts(self) -> dict[str, int]:
         return dict(self._totals)
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "members": list(self.members),
             "smoothing": self.smoothing,

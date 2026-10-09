@@ -9,8 +9,9 @@ abstain with a named reason, or fall back to a designated backend.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.abstain import abstain, mark_for_review
 from hugrgate.backend import Backend
@@ -25,17 +26,17 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "LEVEL_NONE",
     "LEVEL_MILD",
+    "LEVEL_NONE",
     "LEVEL_STRONG",
-    "DisagreementThresholds",
-    "DisagreementReport",
     "DisagreementDetector",
+    "DisagreementReport",
+    "DisagreementThresholds",
     "EscalationPolicy",
-    "escalate",
     "MinorityReport",
-    "minority_report",
     "audit_minority_report",
+    "escalate",
+    "minority_report",
 ]
 
 LEVEL_NONE = "none"
@@ -80,11 +81,11 @@ class DisagreementReport:
     vote_entropy: float
     disagreement_rate: float
     winner_margin: float
-    plurality_value: Optional[str]
-    dissenters: List[str] = field(default_factory=list)
+    plurality_value: str | None
+    dissenters: list[str] = field(default_factory=list)
     ballots: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "level": self.level,
             "disagree": self.disagree,
@@ -101,10 +102,10 @@ class DisagreementDetector:
     """Classify member disagreement as none / mild / strong."""
 
     def __init__(self,
-                 thresholds: Optional[DisagreementThresholds] = None):
+                 thresholds: DisagreementThresholds | None = None):
         self.thresholds = thresholds or DisagreementThresholds()
 
-    def detect(self, votes: List[MemberVote]) -> DisagreementReport:
+    def detect(self, votes: list[MemberVote]) -> DisagreementReport:
         ballots = [(v.backend, str(v.value)) for v in votes
                    if not v.skipped and v.value is not None]
         if len(ballots) < 2:
@@ -119,8 +120,8 @@ class DisagreementDetector:
         entropy = vote_entropy(votes)
         rate = disagreement_rate(votes)
         margin = winner_margin(votes)
-        counts: Dict[str, int] = {}
-        first_seen: Dict[str, int] = {}
+        counts: dict[str, int] = {}
+        first_seen: dict[str, int] = {}
         for i, (_, value) in enumerate(ballots):
             counts[value] = counts.get(value, 0) + 1
             if value not in first_seen:
@@ -155,7 +156,7 @@ class EscalationPolicy:
 
     mild_action: str = "none"
     strong_action: str = "review"
-    fallback_backend: Optional[Backend] = None
+    fallback_backend: Backend | None = None
 
     ACTIONS = ("none", "review", "abstain", "fallback")
 
@@ -179,8 +180,8 @@ class EscalationPolicy:
 def escalate(result: DecisionResult, spec: DecisionSpec,
              report: DisagreementReport,
              policy: EscalationPolicy,
-             state: Optional[Mapping[str, Any]] = None,
-             context: Optional[Mapping[str, Any]] = None
+             state: Mapping[str, Any] | None = None,
+             context: Mapping[str, Any] | None = None
              ) -> DecisionResult:
     """Apply the escalation policy to a disagreed-upon result.
 
@@ -218,7 +219,7 @@ def escalate(result: DecisionResult, spec: DecisionSpec,
     except Exception as e:
         raise BackendError(
             f"disagreement fallback backend "
-            f"{policy.fallback_backend.name!r} failed: {e}")
+            f"{policy.fallback_backend.name!r} failed: {e}") from e
     fb_result.fallback_used = True
     fb_result.metadata["disagreement_fallback"] = reason
     fb_result.metadata.setdefault("ensemble", {})[
@@ -241,7 +242,7 @@ class MinorityReport:
                 f"(weight {self.weight:.3f})")
 
 
-def minority_report(result: DecisionResult) -> List[MinorityReport]:
+def minority_report(result: DecisionResult) -> list[MinorityReport]:
     """Extract the preserved minority opinions from a result.
 
     Always returns a list (possibly empty) — the key is present on
@@ -257,7 +258,7 @@ def minority_report(result: DecisionResult) -> List[MinorityReport]:
 
 
 def audit_minority_report(result: DecisionResult,
-                          votes: List[MemberVote]) -> List[str]:
+                          votes: list[MemberVote]) -> list[str]:
     """Verify the minority report is complete and honest.
 
     Returns a list of problems (empty = the report faithfully
@@ -266,7 +267,7 @@ def audit_minority_report(result: DecisionResult,
     value mismatch between a ballot and its report entry.
     Abstentions have no winner to dissent from and are skipped.
     """
-    problems: List[str] = []
+    problems: list[str] = []
     if result.value is None:
         return problems
     reported = {r.backend: r for r in minority_report(result)}

@@ -20,8 +20,9 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.bench import (
@@ -37,11 +38,11 @@ from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "STRATEGIES_BENCHMARKED",
-    "benchmark_strategies",
     "benchmark_scaling",
-    "write_benchmark_report",
+    "benchmark_strategies",
     "demo_council",
     "regenerate_ensemble_benchmarks",
+    "write_benchmark_report",
 ]
 
 STRATEGIES_BENCHMARKED = ("hard", "soft", "weighted", "confidence")
@@ -49,8 +50,8 @@ STRATEGIES_BENCHMARKED = ("hard", "soft", "weighted", "confidence")
 ARTIFACT = Path("benchmarks/ensemble.json")
 
 
-def _metrics(pairs: List[tuple], spec: DecisionSpec,
-             wall_ms: float) -> Dict[str, Any]:
+def _metrics(pairs: list[tuple], spec: DecisionSpec,
+             wall_ms: float) -> dict[str, Any]:
     latencies = [r.latency_ms for _, r in pairs]
     return {
         "n": len(pairs),
@@ -64,14 +65,16 @@ def _metrics(pairs: List[tuple], spec: DecisionSpec,
 
 
 def benchmark_strategies(
-        member_factory: Callable[[], List[Backend]],
-        states: List[Mapping[str, Any]],
+        member_factory: Callable[[], list[Backend]],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
-        labels: List[Any],
-        strategies: List[str] = list(STRATEGIES_BENCHMARKED),
-        ensemble_kwargs: Optional[Dict[str, Any]] = None
-        ) -> Dict[str, Dict[str, Any]]:
+        labels: list[Any],
+        strategies: list[str] | None = None,
+        ensemble_kwargs: dict[str, Any] | None = None
+        ) -> dict[str, dict[str, Any]]:
     """One fresh council per strategy; same states, same labels."""
+    if strategies is None:
+        strategies = list(STRATEGIES_BENCHMARKED)
     if len(states) != len(labels):
         raise PolicyError(
             f"{len(states)} states but {len(labels)} labels")
@@ -80,7 +83,7 @@ def benchmark_strategies(
     if not strategies:
         raise PolicyError("benchmark_strategies needs strategies")
     ensemble_kwargs = ensemble_kwargs or {}
-    report: Dict[str, Dict[str, Any]] = {}
+    report: dict[str, dict[str, Any]] = {}
     for strategy in strategies:
         members = member_factory()
         if not members:
@@ -89,21 +92,23 @@ def benchmark_strategies(
         start = time.perf_counter()
         results = ens.decide_batch(states, spec)
         wall_ms = (time.perf_counter() - start) * 1000.0
-        pairs = list(zip(labels, results))
+        pairs = list(zip(labels, results, strict=True))
         report[strategy] = _metrics(pairs, spec, wall_ms)
     return report
 
 
 def benchmark_scaling(
-        member_factory: Callable[[int], List[Backend]],
-        states: List[Mapping[str, Any]],
+        member_factory: Callable[[int], list[Backend]],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
-        sizes: List[int] = [1, 2, 3, 5],
-        strategy: str = "soft") -> Dict[str, Dict[str, Any]]:
+        sizes: list[int] | None = None,
+        strategy: str = "soft") -> dict[str, dict[str, Any]]:
     """Wall time vs council size (same strategy throughout)."""
+    if sizes is None:
+        sizes = [1, 2, 3, 5]
     if not sizes:
         raise PolicyError("benchmark_scaling needs sizes")
-    table: Dict[str, Dict[str, Any]] = {}
+    table: dict[str, dict[str, Any]] = {}
     for n in sizes:
         members = member_factory(n)
         if len(members) != n:
@@ -123,7 +128,7 @@ def benchmark_scaling(
     return table
 
 
-def write_benchmark_report(report: Dict[str, Any],
+def write_benchmark_report(report: dict[str, Any],
                            path: Path | str) -> Path:
     """Write the JSON artifact (pretty, sorted keys)."""
     out = Path(path)
@@ -144,21 +149,21 @@ class _DemoBackend(Backend):
     """
 
     def __init__(self, name: str, skill_num: int, skill_den: int,
-                 classes: List[str]):
+                 classes: list[str]):
         self.name = name
         self._num = skill_num
         self._den = skill_den
         self._classes = classes
         self._calls = 0
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {"demo": True}
 
     def supports(self, spec: DecisionSpec) -> bool:
         return spec.type in ("categorical", "binary", "ordinal")
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         label = state["label"]
         self._calls += 1
@@ -176,7 +181,7 @@ class _DemoBackend(Backend):
                               backend=self.name)
 
 
-def demo_council(n: int = 3) -> List[Backend]:
+def demo_council(n: int = 3) -> list[Backend]:
     """Three demo voters of descending skill (artifact use only)."""
     skills = [(4, 5), (3, 5), (3, 5), (2, 5), (2, 5)]
     classes = ["alpha", "beta", "gamma"]
@@ -189,7 +194,7 @@ def regenerate_ensemble_benchmarks() -> Path:
     """Regenerate the committed artifact. Run from the repo root."""
     classes = ["alpha", "beta", "gamma"]
     spec = DecisionSpec(type="categorical", options=classes)
-    states: List[Mapping[str, Any]] = [
+    states: list[Mapping[str, Any]] = [
         {"x": i, "label": classes[i % 3]} for i in range(60)]
     labels = [s["label"] for s in states]
     dataset = {"items": [{"x": s["x"], "label": s["label"]}

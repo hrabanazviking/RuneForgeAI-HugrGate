@@ -9,12 +9,12 @@ voting misses.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import ConstantBackend
 
 from hugrgate import DecisionSpec
 from hugrgate.ensemble import Ensemble, confidence_weighted_voting
 from hugrgate.ensemble.base import MemberVote, StrategyContext
 from hugrgate.errors import BackendError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 TWO = DecisionSpec(type="categorical", options=["alpha", "beta"])
 BIN = DecisionSpec(type="binary", statement="s")

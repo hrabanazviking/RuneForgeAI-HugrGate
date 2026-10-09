@@ -22,8 +22,9 @@ from __future__ import annotations
 
 import math
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.errors import (
@@ -39,18 +40,18 @@ from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result
 
 __all__ = [
+    "DISCRETE_SPEC_TYPES",
+    "Combiner",
     "MemberVote",
     "StrategyContext",
-    "Combiner",
-    "DISCRETE_SPEC_TYPES",
-    "normalize_weights",
-    "shannon_entropy",
-    "normalized_entropy",
     "break_tie",
-    "require_discrete_spec",
-    "complete_distribution",
     "collect_votes",
+    "complete_distribution",
     "finalize_result",
+    "normalize_weights",
+    "normalized_entropy",
+    "require_discrete_spec",
+    "shannon_entropy",
 ]
 
 #: Spec types the voting-family strategies can combine. Numeric specs
@@ -64,15 +65,15 @@ class MemberVote:
     """One member's ballot (or its recorded failure to vote)."""
 
     backend: str
-    value: Optional[Any]
+    value: Any | None
     probability: float
-    distribution: Dict[str, float] = field(default_factory=dict)
+    distribution: dict[str, float] = field(default_factory=dict)
     weight: float = 1.0
     skipped: bool = False
     skip_reason: str = ""
     latency_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend": self.backend,
             "value": self.value,
@@ -90,19 +91,19 @@ class StrategyContext:
     """What a combiner needs beyond the raw votes."""
 
     spec: DecisionSpec
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
     fitted: Any = None  # learned meta-model (stacking/blending/MoE/BMA)
-    state: Optional[Mapping[str, Any]] = None  # input state (MoE routing)
+    state: Mapping[str, Any] | None = None  # input state (MoE routing)
 
 
 #: A combiner turns member votes into one decision. It must return a
 #: fully-formed :class:`DecisionResult` (or an abstention result); it
 #: must never raise for ordinary disagreement between members.
-Combiner = Callable[[List[MemberVote], StrategyContext], DecisionResult]
+Combiner = Callable[[list[MemberVote], StrategyContext], DecisionResult]
 
 
 def normalize_weights(weights: Mapping[str, float],
-                      members: List[str]) -> Dict[str, float]:
+                      members: list[str]) -> dict[str, float]:
     """Validate and normalize member weights to sum to 1.
 
     Members missing from the map get weight 0: a weights map names the
@@ -146,7 +147,7 @@ def normalized_entropy(distribution: Mapping[str, float]) -> float:
     return shannon_entropy(distribution) / math.log2(n)
 
 
-def break_tie(candidates: List[str], scores: Mapping[str, float],
+def break_tie(candidates: list[str], scores: Mapping[str, float],
               first_seen: Mapping[str, int]) -> str:
     """Deterministic winner among tied candidates.
 
@@ -173,7 +174,7 @@ def require_discrete_spec(spec: DecisionSpec, strategy: str) -> None:
 
 
 def complete_distribution(vote: MemberVote,
-                          space: List[str]) -> Dict[str, float]:
+                          space: list[str]) -> dict[str, float]:
     """Complete an empty member distribution.
 
     The member's reported probability goes on the voted value; the
@@ -203,13 +204,13 @@ def _skip_vote(backend: str, weight: float, reason: str) -> MemberVote:
                       skip_reason=reason)
 
 
-def collect_votes(members: List[Backend],
+def collect_votes(members: list[Backend],
                   state: Mapping[str, Any],
                   spec: DecisionSpec,
-                  context: Optional[Mapping[str, Any]] = None,
-                  weights: Optional[Mapping[str, float]] = None,
+                  context: Mapping[str, Any] | None = None,
+                  weights: Mapping[str, float] | None = None,
                   min_members: int = 1,
-                  ensemble_name: str = "ensemble") -> List[MemberVote]:
+                  ensemble_name: str = "ensemble") -> list[MemberVote]:
     """Evaluate every member with per-member fault isolation.
 
     A member that abstains, fails, violates the result contract, does
@@ -221,7 +222,7 @@ def collect_votes(members: List[Backend],
     if min_members < 1:
         raise PolicyError(
             f"min_members must be >= 1, got {min_members}")
-    votes: List[MemberVote] = []
+    votes: list[MemberVote] = []
     for member in members:
         if weights is None:
             w = 1.0
@@ -277,13 +278,13 @@ def collect_votes(members: List[Backend],
 
 
 def finalize_result(*, strategy: str, spec: DecisionSpec,
-                    votes: List[MemberVote],
+                    votes: list[MemberVote],
                     weights: Mapping[str, float],
                     value: Any, probability: float,
-                    distribution: Dict[str, float],
+                    distribution: dict[str, float],
                     uncertainty: float,
-                    winner_share: Optional[float] = None,
-                    extra: Optional[Dict[str, Any]] = None,
+                    winner_share: float | None = None,
+                    extra: dict[str, Any] | None = None,
                     model: str = "ensemble",
                     latency_ms: float = 0.0,
                     backend: str = "ensemble") -> DecisionResult:
@@ -303,7 +304,7 @@ def finalize_result(*, strategy: str, spec: DecisionSpec,
          "probability": v.probability, "weight": norm[v.backend]}
         for v in usable if v.value != value
     ]
-    meta: Dict[str, Any] = {
+    meta: dict[str, Any] = {
         "strategy": strategy,
         "members": [v.backend for v in votes],
         "member_votes": [v.to_dict() for v in votes],

@@ -8,6 +8,7 @@ slice-015 integrity chain.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import (
     Ensemble,
@@ -17,7 +18,6 @@ from hugrgate.ensemble import (
 )
 from hugrgate.errors import PolicyError
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

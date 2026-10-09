@@ -23,8 +23,9 @@ Built-in check factories (all real measurements, no stubs):
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.ensemble.adversarial import (
@@ -40,17 +41,17 @@ from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "CheckResult",
-    "ReleaseVerdict",
     "ReleaseGate",
+    "ReleaseVerdict",
+    "adversarial_clean",
     "benchmark_thresholds",
     "diversity_floor",
-    "no_correlated_cliques",
-    "adversarial_clean",
     "evidence_check",
+    "no_correlated_cliques",
 ]
 
 #: A check: zero-arg callable returning (passed, detail).
-Check = Callable[[], Tuple[bool, str]]
+Check = Callable[[], tuple[bool, str]]
 
 
 @dataclass
@@ -59,7 +60,7 @@ class CheckResult:
     passed: bool
     detail: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"name": self.name, "passed": self.passed,
                 "detail": self.detail}
 
@@ -67,17 +68,17 @@ class CheckResult:
 @dataclass
 class ReleaseVerdict:
     gate: str
-    checks: List[CheckResult] = field(default_factory=list)
+    checks: list[CheckResult] = field(default_factory=list)
 
     @property
     def passed(self) -> bool:
         return bool(self.checks) and all(c.passed for c in self.checks)
 
     @property
-    def failures(self) -> List[CheckResult]:
+    def failures(self) -> list[CheckResult]:
         return [c for c in self.checks if not c.passed]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"gate": self.gate, "passed": self.passed,
                 "checks": [c.to_dict() for c in self.checks]}
 
@@ -99,9 +100,9 @@ class ReleaseGate:
         if not name:
             raise PolicyError("ReleaseGate needs a name")
         self.name = name
-        self._checks: List[Tuple[str, Check]] = []
+        self._checks: list[tuple[str, Check]] = []
 
-    def add(self, name: str, check: Check) -> "ReleaseGate":
+    def add(self, name: str, check: Check) -> ReleaseGate:
         if not callable(check):
             raise PolicyError(
                 f"check {name!r} must be callable")
@@ -129,14 +130,14 @@ class ReleaseGate:
 
 
 def benchmark_thresholds(
-        member_factory: Callable[[], List[Backend]],
-        states: List[Mapping[str, Any]],
+        member_factory: Callable[[], list[Backend]],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
-        labels: List[Any],
+        labels: list[Any],
         strategy: str = "soft",
         min_accuracy: float = 0.5,
         max_ece: float = 0.25,
-        max_brier: Optional[float] = None) -> Check:
+        max_brier: float | None = None) -> Check:
     """Accuracy/ECE/Brier floors on labeled states."""
     for label, bound in (("min_accuracy", min_accuracy),
                          ("max_ece", max_ece)):
@@ -147,7 +148,7 @@ def benchmark_thresholds(
         raise PolicyError(
             f"max_brier must be in [0, 2], got {max_brier}")
 
-    def check() -> Tuple[bool, str]:
+    def check() -> tuple[bool, str]:
         report = benchmark_strategies(
             member_factory, states, spec, labels,
             strategies=[strategy])
@@ -173,8 +174,8 @@ def benchmark_thresholds(
 
 
 def diversity_floor(
-        member_factory: Callable[[], List[Backend]],
-        states: List[Mapping[str, Any]],
+        member_factory: Callable[[], list[Backend]],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
         min_disagreement_rate: float = 0.1) -> Check:
     """The council must actually disagree sometimes."""
@@ -183,7 +184,7 @@ def diversity_floor(
             f"min_disagreement_rate must be in [0, 1], got "
             f"{min_disagreement_rate}")
 
-    def check() -> Tuple[bool, str]:
+    def check() -> tuple[bool, str]:
         votes_by_state = batch_collect_votes(
             member_factory(), states, spec)
         rates = [diversity_summary(v)["disagreement_rate"]
@@ -200,19 +201,19 @@ def diversity_floor(
 
 
 def no_correlated_cliques(
-        member_factory: Callable[[], List[Backend]],
-        states: List[Mapping[str, Any]],
+        member_factory: Callable[[], list[Backend]],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
-        labels: List[Any],
+        labels: list[Any],
         threshold: float = 0.7) -> Check:
     """No error cliques on the labeled states."""
 
-    def check() -> Tuple[bool, str]:
+    def check() -> tuple[bool, str]:
         members = member_factory()
         votes_by_state = batch_collect_votes(members, states, spec)
-        correct: Dict[str, List[bool]] = {
+        correct: dict[str, list[bool]] = {
             m.name: [] for m in members}
-        for votes, label in zip(votes_by_state, labels):
+        for votes, label in zip(votes_by_state, labels, strict=True):
             for v in votes:
                 if not v.skipped:
                     correct[v.backend].append(v.value == label)
@@ -227,11 +228,11 @@ def no_correlated_cliques(
     return check
 
 
-def adversarial_clean(cases: List[AdversarialCase],
-                      may_refuse: Tuple[str, ...] = ()) -> Check:
+def adversarial_clean(cases: list[AdversarialCase],
+                      may_refuse: tuple[str, ...] = ()) -> Check:
     """The suite: nothing unexpected, full decisions where required."""
 
-    def check() -> Tuple[bool, str]:
+    def check() -> tuple[bool, str]:
         report = run_adversarial_suite(cases)
         problems = []
         for name, summary in report.items():
@@ -253,9 +254,9 @@ def adversarial_clean(cases: List[AdversarialCase],
 
 
 def evidence_check(name: str, passed: bool, detail: str = ""
-                   ) -> Tuple[str, Check]:
+                   ) -> tuple[str, Check]:
     """Wrap caller-supplied evidence (CI results, docs) as a check."""
-    def check() -> Tuple[bool, str]:
+    def check() -> tuple[bool, str]:
         return passed, detail or ("evidence accepted"
                                   if passed else "evidence missing")
 

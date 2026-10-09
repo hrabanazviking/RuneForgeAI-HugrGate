@@ -24,8 +24,9 @@ so suites are reproducible.
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.ensemble.api import Ensemble
@@ -34,14 +35,14 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "SaboteurBackend",
-    "DropoutBackend",
-    "CorruptBackend",
     "AbstainBackend",
-    "SlowBackend",
-    "tie_storm_members",
     "AdversarialCase",
+    "CorruptBackend",
+    "DropoutBackend",
+    "SaboteurBackend",
+    "SlowBackend",
     "run_adversarial_suite",
+    "tie_storm_members",
 ]
 
 
@@ -63,7 +64,7 @@ class SaboteurBackend(Backend):
         self.sabotaged = 0
         self.name = wrapped.name
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return self.wrapped.capabilities()
 
     def supports(self, spec: DecisionSpec) -> bool:
@@ -71,11 +72,11 @@ class SaboteurBackend(Backend):
 
     def _sabotage(self, state: Mapping[str, Any],
                   spec: DecisionSpec,
-                  context: Optional[Mapping[str, Any]]) -> DecisionResult:
+                  context: Mapping[str, Any] | None) -> DecisionResult:
         raise NotImplementedError
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         self.calls += 1
         if self.calls % self.every == 0:
@@ -129,21 +130,21 @@ class SlowBackend(Backend):
         self.delay_seconds = delay_seconds
         self.name = wrapped.name
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return self.wrapped.capabilities()
 
     def supports(self, spec: DecisionSpec) -> bool:
         return self.wrapped.supports(spec)
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         time.sleep(self.delay_seconds)
         return self.wrapped.evaluate(state, spec, context)
 
 
-def tie_storm_members(n: int, values: List[str],
-                      distribution: Dict[str, float]) -> List[Backend]:
+def tie_storm_members(n: int, values: list[str],
+                      distribution: dict[str, float]) -> list[Backend]:
     """An electorate split as evenly as possible across ``values``."""
     if n < 2:
         raise PolicyError(f"tie storm needs >= 2 members, got {n}")
@@ -155,7 +156,7 @@ def tie_storm_members(n: int, values: List[str],
             self.name = name
             self._value = value
 
-        def capabilities(self) -> Dict[str, Any]:
+        def capabilities(self) -> dict[str, Any]:
             return {"fixed_vote": True}
 
         def supports(self, spec: DecisionSpec) -> bool:
@@ -163,7 +164,7 @@ def tie_storm_members(n: int, values: List[str],
 
         def evaluate(self, state: Mapping[str, Any],
                      spec: DecisionSpec,
-                     context: Optional[Mapping[str, Any]] = None
+                     context: Mapping[str, Any] | None = None
                      ) -> DecisionResult:
             return DecisionResult(
                 value=self._value,
@@ -171,7 +172,7 @@ def tie_storm_members(n: int, values: List[str],
                 distribution=dict(distribution),
                 backend=self.name)
 
-    members: List[Backend] = []
+    members: list[Backend] = []
     for i in range(n):
         members.append(
             _FixedVoteBackend(f"m{i}", values[i % len(values)]))
@@ -182,15 +183,15 @@ def tie_storm_members(n: int, values: List[str],
 class AdversarialCase:
     name: str
     ensemble: Ensemble
-    states: List[Mapping[str, Any]]
+    states: list[Mapping[str, Any]]
     spec: DecisionSpec
 
 
-def _summarize(case: AdversarialCase) -> Dict[str, Any]:
-    values: List[Any] = []
-    errors: List[str] = []
-    usable_votes: List[int] = []
-    skip_reasons: Dict[str, int] = {}
+def _summarize(case: AdversarialCase) -> dict[str, Any]:
+    values: list[Any] = []
+    errors: list[str] = []
+    usable_votes: list[int] = []
+    skip_reasons: dict[str, int] = {}
     for state in case.states:
         try:
             result = case.ensemble.evaluate(state, case.spec)
@@ -218,8 +219,8 @@ def _summarize(case: AdversarialCase) -> Dict[str, Any]:
     }
 
 
-def run_adversarial_suite(cases: List[AdversarialCase]
-                          ) -> Dict[str, Dict[str, Any]]:
+def run_adversarial_suite(cases: list[AdversarialCase]
+                          ) -> dict[str, dict[str, Any]]:
     """Run each case; return ``{name: summary}``."""
     if not cases:
         raise PolicyError("run_adversarial_suite needs cases")

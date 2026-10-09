@@ -9,12 +9,12 @@ and the MoE decision follows the routed expert.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import ConstantBackend
 
 from hugrgate import DecisionSpec
 from hugrgate.ensemble import Ensemble, ExpertRouter, moe_combine
 from hugrgate.ensemble.base import MemberVote, StrategyContext
 from hugrgate.errors import BackendError, PolicyError
-from ensemble_fakes import ConstantBackend, FnBackend
 
 BIN = DecisionSpec(type="binary", statement="s")
 

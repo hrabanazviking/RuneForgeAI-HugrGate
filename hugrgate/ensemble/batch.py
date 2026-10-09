@@ -25,7 +25,8 @@ Returns ``votes_by_state[i]`` — the ballots for ``states[i]``.
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.ensemble.base import MemberVote
@@ -45,7 +46,7 @@ __all__ = [
 ]
 
 
-def _weight(weights: Optional[Mapping[str, float]],
+def _weight(weights: Mapping[str, float] | None,
             member: Backend) -> float:
     if weights is None:
         return 1.0
@@ -80,7 +81,7 @@ def _coerce(member_name: str, w: float, result: DecisionResult,
 
 def _evaluate_one(member: Backend, w: float, state: Mapping[str, Any],
                   spec: DecisionSpec,
-                  context: Optional[Mapping[str, Any]]) -> MemberVote:
+                  context: Mapping[str, Any] | None) -> MemberVote:
     """Per-state isolation, mirroring collect_votes."""
     if not member.supports(spec):
         return _skip(member.name, w, "unsupported_spec")
@@ -110,16 +111,16 @@ def _evaluate_one(member: Backend, w: float, state: Mapping[str, Any],
 
 
 def _member_ballots(member: Backend, w: float,
-                    states: List[Mapping[str, Any]],
+                    states: list[Mapping[str, Any]],
                     spec: DecisionSpec,
-                    context: Optional[Mapping[str, Any]]
-                    ) -> List[MemberVote]:
+                    context: Mapping[str, Any] | None
+                    ) -> list[MemberVote]:
     if not member.supports(spec):
         return [_skip(member.name, w, "unsupported_spec")
                 for _ in states]
     try:
         results = member.batch(states, spec, context)
-    except Exception:
+    except Exception:  # noqa: BLE001 - any batch failure falls back
         # The batch path failed; per-state isolation still holds.
         return [_evaluate_one(member, w, s, spec, context)
                 for s in states]
@@ -131,13 +132,13 @@ def _member_ballots(member: Backend, w: float,
 
 
 def batch_collect_votes(
-        members: List[Backend],
-        states: List[Mapping[str, Any]],
+        members: list[Backend],
+        states: list[Mapping[str, Any]],
         spec: DecisionSpec,
-        context: Optional[Mapping[str, Any]] = None,
-        weights: Optional[Mapping[str, float]] = None,
+        context: Mapping[str, Any] | None = None,
+        weights: Mapping[str, float] | None = None,
         min_members: int = 1,
-        ensemble_name: str = "ensemble") -> List[List[MemberVote]]:
+        ensemble_name: str = "ensemble") -> list[list[MemberVote]]:
     """Collect ballots for every state via members' batch fast paths."""
     if min_members < 1:
         raise PolicyError(
@@ -149,8 +150,8 @@ def batch_collect_votes(
     per_member = [_member_ballots(m, _weight(weights, m), states,
                                   spec, context)
                   for m in members]
-    votes_by_state: List[List[MemberVote]] = []
-    for i, state in enumerate(states):
+    votes_by_state: list[list[MemberVote]] = []
+    for i, _ in enumerate(states):
         votes = [ballots[i] for ballots in per_member]
         usable = [v for v in votes if not v.skipped]
         if len(usable) < min_members:

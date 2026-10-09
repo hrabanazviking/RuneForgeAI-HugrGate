@@ -7,10 +7,10 @@ metadata: the explanation can never drift from the decision.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import Ensemble, explain_ensemble
 from hugrgate.errors import PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}
@@ -75,8 +75,7 @@ def test_explanation_narrates_consensus_failure():
 
 
 def test_explanation_narrates_disagreement_escalation():
-    from hugrgate.ensemble import (DisagreementDetector, EscalationPolicy,
-                                   escalate)
+    from hugrgate.ensemble import DisagreementDetector, EscalationPolicy, escalate
     from hugrgate.ensemble.base import collect_votes
     members = [ConstantBackend("a", "alpha", ALPHA),
                ConstantBackend("b", "beta", BETA)]

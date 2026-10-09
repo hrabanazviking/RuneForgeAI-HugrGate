@@ -197,21 +197,119 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    ensemble --> ensemble_adversarial
     ensemble --> ensemble_api
+    ensemble --> ensemble_averaging
     ensemble --> ensemble_base
+    ensemble --> ensemble_batch
+    ensemble --> ensemble_benchmarks
+    ensemble --> ensemble_blending
+    ensemble --> ensemble_cache
+    ensemble --> ensemble_calibration
+    ensemble --> ensemble_consensus
+    ensemble --> ensemble_correlation
+    ensemble --> ensemble_disagreement
+    ensemble --> ensemble_diversity
+    ensemble --> ensemble_explanations
+    ensemble --> ensemble_membership
+    ensemble --> ensemble_moe
+    ensemble --> ensemble_provenance
+    ensemble --> ensemble_release
+    ensemble --> ensemble_reliability
+    ensemble --> ensemble_stacking
     ensemble --> ensemble_voting
+    ensemble_adversarial --> backend
+    ensemble_adversarial --> ensemble_api
+    ensemble_adversarial --> errors
+    ensemble_adversarial --> result
+    ensemble_adversarial --> spec
     ensemble_api --> backend
+    ensemble_api --> ensemble_averaging
     ensemble_api --> ensemble_base
+    ensemble_api --> ensemble_batch
+    ensemble_api --> ensemble_blending
+    ensemble_api --> ensemble_consensus
+    ensemble_api --> ensemble_moe
+    ensemble_api --> ensemble_stacking
     ensemble_api --> ensemble_voting
     ensemble_api --> errors
     ensemble_api --> result
     ensemble_api --> spec
     ensemble_api --> validation
+    ensemble_averaging --> ensemble_base
+    ensemble_averaging --> errors
+    ensemble_averaging --> result
     ensemble_base --> backend
     ensemble_base --> errors
     ensemble_base --> result
     ensemble_base --> spec
     ensemble_base --> validation
+    ensemble_batch --> backend
+    ensemble_batch --> ensemble_base
+    ensemble_batch --> errors
+    ensemble_batch --> result
+    ensemble_batch --> spec
+    ensemble_batch --> validation
+    ensemble_benchmarks --> backend
+    ensemble_benchmarks --> bench
+    ensemble_benchmarks --> ensemble_api
+    ensemble_benchmarks --> errors
+    ensemble_benchmarks --> result
+    ensemble_benchmarks --> spec
+    ensemble_blending --> ensemble_base
+    ensemble_blending --> errors
+    ensemble_blending --> result
+    ensemble_blending --> spec
+    ensemble_cache -.-> ensemble_api
+    ensemble_cache --> errors
+    ensemble_cache --> result
+    ensemble_cache --> spec
+    ensemble_calibration --> ensemble_base
+    ensemble_calibration --> errors
+    ensemble_calibration --> result
+    ensemble_consensus --> abstain
+    ensemble_consensus --> errors
+    ensemble_consensus --> result
+    ensemble_consensus --> spec
+    ensemble_correlation --> ensemble_diversity
+    ensemble_correlation --> errors
+    ensemble_disagreement --> abstain
+    ensemble_disagreement --> backend
+    ensemble_disagreement --> ensemble_base
+    ensemble_disagreement --> ensemble_diversity
+    ensemble_disagreement --> errors
+    ensemble_disagreement --> result
+    ensemble_disagreement --> spec
+    ensemble_diversity --> ensemble_base
+    ensemble_diversity --> errors
+    ensemble_explanations --> errors
+    ensemble_explanations --> result
+    ensemble_membership --> backend
+    ensemble_membership -.-> ensemble_api
+    ensemble_membership --> ensemble_reliability
+    ensemble_membership --> errors
+    ensemble_moe --> ensemble_base
+    ensemble_moe --> errors
+    ensemble_moe --> result
+    ensemble_moe --> spec
+    ensemble_provenance --> errors
+    ensemble_provenance --> provenance
+    ensemble_provenance --> result
+    ensemble_provenance --> spec
+    ensemble_release --> backend
+    ensemble_release --> ensemble_adversarial
+    ensemble_release --> ensemble_batch
+    ensemble_release --> ensemble_benchmarks
+    ensemble_release --> ensemble_correlation
+    ensemble_release --> ensemble_diversity
+    ensemble_release --> errors
+    ensemble_release --> spec
+    ensemble_reliability --> ensemble_correlation
+    ensemble_reliability --> errors
+    ensemble_stacking --> ensemble_base
+    ensemble_stacking --> errors
+    ensemble_stacking --> result
+    ensemble_stacking --> spec
     ensemble_voting --> ensemble_base
     ensemble_voting --> errors
     ensemble_voting --> result
@@ -394,21 +492,119 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `ensemble` | `ensemble.adversarial` | no |
 | `ensemble` | `ensemble.api` | no |
+| `ensemble` | `ensemble.averaging` | no |
 | `ensemble` | `ensemble.base` | no |
+| `ensemble` | `ensemble.batch` | no |
+| `ensemble` | `ensemble.benchmarks` | no |
+| `ensemble` | `ensemble.blending` | no |
+| `ensemble` | `ensemble.cache` | no |
+| `ensemble` | `ensemble.calibration` | no |
+| `ensemble` | `ensemble.consensus` | no |
+| `ensemble` | `ensemble.correlation` | no |
+| `ensemble` | `ensemble.disagreement` | no |
+| `ensemble` | `ensemble.diversity` | no |
+| `ensemble` | `ensemble.explanations` | no |
+| `ensemble` | `ensemble.membership` | no |
+| `ensemble` | `ensemble.moe` | no |
+| `ensemble` | `ensemble.provenance` | no |
+| `ensemble` | `ensemble.release` | no |
+| `ensemble` | `ensemble.reliability` | no |
+| `ensemble` | `ensemble.stacking` | no |
 | `ensemble` | `ensemble.voting` | no |
+| `ensemble.adversarial` | `backend` | no |
+| `ensemble.adversarial` | `ensemble.api` | no |
+| `ensemble.adversarial` | `errors` | no |
+| `ensemble.adversarial` | `result` | no |
+| `ensemble.adversarial` | `spec` | no |
 | `ensemble.api` | `backend` | no |
+| `ensemble.api` | `ensemble.averaging` | no |
 | `ensemble.api` | `ensemble.base` | no |
+| `ensemble.api` | `ensemble.batch` | no |
+| `ensemble.api` | `ensemble.blending` | no |
+| `ensemble.api` | `ensemble.consensus` | no |
+| `ensemble.api` | `ensemble.moe` | no |
+| `ensemble.api` | `ensemble.stacking` | no |
 | `ensemble.api` | `ensemble.voting` | no |
 | `ensemble.api` | `errors` | no |
 | `ensemble.api` | `result` | no |
 | `ensemble.api` | `spec` | no |
 | `ensemble.api` | `validation` | no |
+| `ensemble.averaging` | `ensemble.base` | no |
+| `ensemble.averaging` | `errors` | no |
+| `ensemble.averaging` | `result` | no |
 | `ensemble.base` | `backend` | no |
 | `ensemble.base` | `errors` | no |
 | `ensemble.base` | `result` | no |
 | `ensemble.base` | `spec` | no |
 | `ensemble.base` | `validation` | no |
+| `ensemble.batch` | `backend` | no |
+| `ensemble.batch` | `ensemble.base` | no |
+| `ensemble.batch` | `errors` | no |
+| `ensemble.batch` | `result` | no |
+| `ensemble.batch` | `spec` | no |
+| `ensemble.batch` | `validation` | no |
+| `ensemble.benchmarks` | `backend` | no |
+| `ensemble.benchmarks` | `bench` | no |
+| `ensemble.benchmarks` | `ensemble.api` | no |
+| `ensemble.benchmarks` | `errors` | no |
+| `ensemble.benchmarks` | `result` | no |
+| `ensemble.benchmarks` | `spec` | no |
+| `ensemble.blending` | `ensemble.base` | no |
+| `ensemble.blending` | `errors` | no |
+| `ensemble.blending` | `result` | no |
+| `ensemble.blending` | `spec` | no |
+| `ensemble.cache` | `ensemble.api` | yes |
+| `ensemble.cache` | `errors` | no |
+| `ensemble.cache` | `result` | no |
+| `ensemble.cache` | `spec` | no |
+| `ensemble.calibration` | `ensemble.base` | no |
+| `ensemble.calibration` | `errors` | no |
+| `ensemble.calibration` | `result` | no |
+| `ensemble.consensus` | `abstain` | no |
+| `ensemble.consensus` | `errors` | no |
+| `ensemble.consensus` | `result` | no |
+| `ensemble.consensus` | `spec` | no |
+| `ensemble.correlation` | `ensemble.diversity` | no |
+| `ensemble.correlation` | `errors` | no |
+| `ensemble.disagreement` | `abstain` | no |
+| `ensemble.disagreement` | `backend` | no |
+| `ensemble.disagreement` | `ensemble.base` | no |
+| `ensemble.disagreement` | `ensemble.diversity` | no |
+| `ensemble.disagreement` | `errors` | no |
+| `ensemble.disagreement` | `result` | no |
+| `ensemble.disagreement` | `spec` | no |
+| `ensemble.diversity` | `ensemble.base` | no |
+| `ensemble.diversity` | `errors` | no |
+| `ensemble.explanations` | `errors` | no |
+| `ensemble.explanations` | `result` | no |
+| `ensemble.membership` | `backend` | no |
+| `ensemble.membership` | `ensemble.api` | yes |
+| `ensemble.membership` | `ensemble.reliability` | no |
+| `ensemble.membership` | `errors` | no |
+| `ensemble.moe` | `ensemble.base` | no |
+| `ensemble.moe` | `errors` | no |
+| `ensemble.moe` | `result` | no |
+| `ensemble.moe` | `spec` | no |
+| `ensemble.provenance` | `errors` | no |
+| `ensemble.provenance` | `provenance` | no |
+| `ensemble.provenance` | `result` | no |
+| `ensemble.provenance` | `spec` | no |
+| `ensemble.release` | `backend` | no |
+| `ensemble.release` | `ensemble.adversarial` | no |
+| `ensemble.release` | `ensemble.batch` | no |
+| `ensemble.release` | `ensemble.benchmarks` | no |
+| `ensemble.release` | `ensemble.correlation` | no |
+| `ensemble.release` | `ensemble.diversity` | no |
+| `ensemble.release` | `errors` | no |
+| `ensemble.release` | `spec` | no |
+| `ensemble.reliability` | `ensemble.correlation` | no |
+| `ensemble.reliability` | `errors` | no |
+| `ensemble.stacking` | `ensemble.base` | no |
+| `ensemble.stacking` | `errors` | no |
+| `ensemble.stacking` | `result` | no |
+| `ensemble.stacking` | `spec` | no |
 | `ensemble.voting` | `ensemble.base` | no |
 | `ensemble.voting` | `errors` | no |
 | `ensemble.voting` | `result` | no |

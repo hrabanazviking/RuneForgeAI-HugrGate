@@ -20,7 +20,8 @@ experts) plug in without touching this module. The built-in set:
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.ensemble.averaging import bma_combine
@@ -49,15 +50,15 @@ from hugrgate.validation import validate_result, validate_state
 
 __all__ = [
     "STRATEGIES",
-    "register_strategy",
-    "get_strategy",
     "Ensemble",
     "EnsembleConfig",
+    "get_strategy",
+    "register_strategy",
 ]
 
 #: strategy name -> combiner. Populated at import with the built-ins;
 #: extended by later slices and by applications via register_strategy.
-STRATEGIES: Dict[str, Combiner] = {}
+STRATEGIES: dict[str, Combiner] = {}
 
 
 def register_strategy(name: str, combiner: Combiner) -> None:
@@ -81,10 +82,10 @@ def get_strategy(name: str) -> Combiner:
     """Return the combiner registered under ``name``."""
     try:
         return STRATEGIES[name]
-    except KeyError:
+    except KeyError as e:
         raise BackendError(
             f"unknown ensemble strategy {name!r}; "
-            f"registered: {sorted(STRATEGIES)}")
+            f"registered: {sorted(STRATEGIES)}") from e
 
 
 register_strategy("soft", soft_voting)
@@ -101,9 +102,9 @@ class EnsembleConfig:
     """Tunable knobs for :class:`Ensemble` (beyond strategy choice)."""
 
     def __init__(self,
-                 weights: Optional[Mapping[str, float]] = None,
+                 weights: Mapping[str, float] | None = None,
                  min_members: int = 1,
-                 strategy_options: Optional[Dict[str, Any]] = None):
+                 strategy_options: dict[str, Any] | None = None):
         if min_members < 1:
             raise PolicyError(
                 f"min_members must be >= 1, got {min_members}")
@@ -126,13 +127,13 @@ class Ensemble(Backend):
     is_remote = False
 
     def __init__(self,
-                 members: List[Backend],
+                 members: list[Backend],
                  strategy: str = "soft",
-                 name: Optional[str] = None,
-                 config: Optional[EnsembleConfig] = None,
-                 weights: Optional[Mapping[str, float]] = None,
-                 min_members: Optional[int] = None,
-                 strategy_options: Optional[Dict[str, Any]] = None,
+                 name: str | None = None,
+                 config: EnsembleConfig | None = None,
+                 weights: Mapping[str, float] | None = None,
+                 min_members: int | None = None,
+                 strategy_options: dict[str, Any] | None = None,
                  fitted: Any = None):
         if not members:
             raise PolicyError("Ensemble needs at least one member backend")
@@ -174,7 +175,7 @@ class Ensemble(Backend):
         #: blending, mixture-of-experts); rides into StrategyContext.
         self.fitted = fitted
 
-    def attach(self, fitted: Any) -> "Ensemble":
+    def attach(self, fitted: Any) -> Ensemble:
         """Attach a fitted meta-model (BMA/stacking/blending/MoE).
 
         Returns self for fluent chaining.
@@ -182,7 +183,7 @@ class Ensemble(Backend):
         self.fitted = fitted
         return self
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "ensemble": True,
             "strategy": self.strategy,
@@ -195,7 +196,7 @@ class Ensemble(Backend):
         return any(m.supports(spec) for m in self.members)
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         validate_state(state)
         start = time.perf_counter()
@@ -219,10 +220,10 @@ class Ensemble(Backend):
         validate_result(result, spec)
         return result
 
-    def decide_batch(self, states: List[Mapping[str, Any]],
+    def decide_batch(self, states: list[Mapping[str, Any]],
                      spec: DecisionSpec,
-                     context: Optional[Mapping[str, Any]] = None
-                     ) -> List[DecisionResult]:
+                     context: Mapping[str, Any] | None = None
+                     ) -> list[DecisionResult]:
         """Decide a batch of states via members' batch fast paths.
 
         Ballots are collected with :func:`batch_collect_votes` — one
@@ -238,7 +239,7 @@ class Ensemble(Backend):
             ensemble_name=self.name)
         combiner = get_strategy(self.strategy)
         results = []
-        for state, votes in zip(states, votes_by_state):
+        for state, votes in zip(states, votes_by_state, strict=True):
             start = time.perf_counter()
             ctx = StrategyContext(
                 spec=spec,
@@ -257,8 +258,8 @@ class Ensemble(Backend):
 
     def member_votes(self, state: Mapping[str, Any],
                      spec: DecisionSpec,
-                     context: Optional[Mapping[str, Any]] = None
-                     ) -> List[MemberVote]:
+                     context: Mapping[str, Any] | None = None
+                     ) -> list[MemberVote]:
         """Collect member ballots without combining (introspection)."""
         validate_state(state)
         return collect_votes(

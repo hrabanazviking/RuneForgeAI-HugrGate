@@ -8,10 +8,10 @@ isolation and the consensus option.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend, ScriptedBackend
 
 from hugrgate.ensemble import Ensemble, batch_collect_votes
 from hugrgate.errors import BackendError, PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend, ScriptedBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}
@@ -67,7 +67,7 @@ def test_batch_matches_single_evaluates():
     states = _states(3)
     batched = ens.decide_batch(states, CAT_SPEC())
     singles = [ens.evaluate(s, CAT_SPEC()) for s in states]
-    for b, s in zip(batched, singles):
+    for b, s in zip(batched, singles, strict=True):
         assert b.value == s.value
         assert b.probability == pytest.approx(s.probability)
         assert b.distribution == pytest.approx(s.distribution)

@@ -20,7 +20,7 @@ punishes a member for not having been scored.
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Mapping, Optional
+from collections.abc import Mapping
 
 from hugrgate.ensemble.base import (
     MemberVote,
@@ -37,8 +37,8 @@ from hugrgate.result import DecisionResult
 __all__ = [
     "LOG_EPS",
     "BayesianModelAverager",
-    "predictive_log_likelihood",
     "bma_combine",
+    "predictive_log_likelihood",
 ]
 
 #: Floor for predictive probabilities inside a log: a member that put
@@ -56,8 +56,8 @@ def predictive_log_likelihood(distribution: Mapping[str, float],
 class BayesianModelAverager:
     """Accumulates per-member evidence and reports posterior weights."""
 
-    def __init__(self, members: List[str],
-                 priors: Optional[Mapping[str, float]] = None):
+    def __init__(self, members: list[str],
+                 priors: Mapping[str, float] | None = None):
         if not members:
             raise PolicyError(
                 "BayesianModelAverager needs at least one member")
@@ -85,8 +85,8 @@ class BayesianModelAverager:
                 raise PolicyError("priors must sum to a positive value")
             self.priors = {m: priors.get(m, 0.0) / total
                            for m in members}
-        self._log_evidence: Dict[str, float] = {m: 0.0 for m in members}
-        self._observations: Dict[str, int] = {m: 0 for m in members}
+        self._log_evidence: dict[str, float] = {m: 0.0 for m in members}
+        self._observations: dict[str, int] = {m: 0 for m in members}
 
     def observe(self, member: str, log_likelihood: float) -> None:
         """Accumulate one predictive log-likelihood for ``member``."""
@@ -109,23 +109,23 @@ class BayesianModelAverager:
         return ll
 
     @property
-    def log_evidences(self) -> Dict[str, float]:
+    def log_evidences(self) -> dict[str, float]:
         return dict(self._log_evidence)
 
     @property
-    def observation_counts(self) -> Dict[str, int]:
+    def observation_counts(self) -> dict[str, int]:
         return dict(self._observations)
 
-    def posterior_weights(self) -> Dict[str, float]:
+    def posterior_weights(self) -> dict[str, float]:
         """Softmax over ``log(prior) + log_evidence`` (numerically stable)."""
         log_post = [math.log(max(self.priors[m], LOG_EPS))
                     + self._log_evidence[m] for m in self.members]
         peak = max(log_post)
         exps = [math.exp(lp - peak) for lp in log_post]
         total = sum(exps)
-        return {m: e / total for m, e in zip(self.members, exps)}
+        return {m: e / total for m, e in zip(self.members, exps, strict=True)}
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "members": list(self.members),
             "priors": dict(self.priors),
@@ -135,7 +135,7 @@ class BayesianModelAverager:
         }
 
 
-def bma_combine(votes: List[MemberVote],
+def bma_combine(votes: list[MemberVote],
                 ctx: StrategyContext) -> DecisionResult:
     """Average member distributions with BMA posterior weights.
 
@@ -162,14 +162,14 @@ def bma_combine(votes: List[MemberVote],
         raise BackendError("bma: voting members carry no posterior mass")
     weights = {v.backend: posterior.get(v.backend, 0.0) / voted_mass
                for v in usable}
-    averaged: Dict[str, float] = {}
+    averaged: dict[str, float] = {}
     for v in usable:
         w = weights[v.backend]
         for key, p in complete_distribution(v, space).items():
             averaged[key] = averaged.get(key, 0.0) + w * p
     if not averaged:
         raise BackendError("bma: posterior weights are all zero")
-    first_seen: Dict[str, int] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(usable):
         if v.value is not None and str(v.value) not in first_seen:
             first_seen[str(v.value)] = i

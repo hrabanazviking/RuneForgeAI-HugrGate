@@ -7,6 +7,7 @@ privacy bypass, member invalidation, and deep-copy isolation.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import (
     CachedEnsemble,
@@ -14,7 +15,6 @@ from hugrgate.ensemble import (
     EnsembleCache,
 )
 from hugrgate.errors import PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 
@@ -124,7 +124,7 @@ def test_wrapper_keeps_supplied_empty_cache():
 
 
 def test_wrapper_exposes_ensemble_surface():
-    cached, members = _cached(strategy="hard")
+    cached, _members = _cached(strategy="hard")
     assert cached.name == "ensemble[hard]"
     assert [m.name for m in cached.members] == ["a", "b"]
 
@@ -145,7 +145,7 @@ def test_validation():
 # --- boundary -----------------------------------------------------------------
 
 def test_maxsize_one_keeps_latest():
-    cached, members = _cached(maxsize=1)
+    cached, _members = _cached(maxsize=1)
     cached.evaluate({"x": 1}, CAT_SPEC())
     cached.evaluate({"x": 1}, CAT_SPEC())
     assert cached.stats()["hits"] == 1

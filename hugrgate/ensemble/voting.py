@@ -24,8 +24,6 @@ block, and break ties deterministically.
 
 from __future__ import annotations
 
-from typing import Dict, List
-
 from hugrgate.ensemble.base import (
     MemberVote,
     StrategyContext,
@@ -39,14 +37,14 @@ from hugrgate.errors import BackendError
 from hugrgate.result import DecisionResult
 
 __all__ = [
-    "soft_voting",
-    "hard_voting",
-    "weighted_voting",
     "confidence_weighted_voting",
+    "hard_voting",
+    "soft_voting",
+    "weighted_voting",
 ]
 
 
-def soft_voting(votes: List[MemberVote],
+def soft_voting(votes: list[MemberVote],
                 ctx: StrategyContext) -> DecisionResult:
     """Weight-aware average of member distributions; elect the argmax.
 
@@ -66,8 +64,8 @@ def soft_voting(votes: List[MemberVote],
         raise BackendError(
             "soft voting: total member weight must be positive, "
             f"got {total_w}")
-    averaged: Dict[str, float] = {}
-    completed: List[str] = []
+    averaged: dict[str, float] = {}
+    completed: list[str] = []
     for v in usable:
         dist = complete_distribution(v, space)
         if not v.distribution:
@@ -75,7 +73,7 @@ def soft_voting(votes: List[MemberVote],
         w = v.weight / total_w
         for key, p in dist.items():
             averaged[key] = averaged.get(key, 0.0) + w * p
-    first_seen: Dict[str, int] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(usable):
         if v.value is not None and str(v.value) not in first_seen:
             first_seen[str(v.value)] = i
@@ -98,7 +96,7 @@ def soft_voting(votes: List[MemberVote],
     )
 
 
-def weighted_voting(votes: List[MemberVote],
+def weighted_voting(votes: list[MemberVote],
                     ctx: StrategyContext) -> DecisionResult:
     """Ballots counted with their member weights.
 
@@ -117,8 +115,8 @@ def weighted_voting(votes: List[MemberVote],
         raise BackendError(
             "weighted voting: total member weight must be positive, "
             f"got {total_w}")
-    scores: Dict[str, float] = {}
-    first_seen: Dict[str, int] = {}
+    scores: dict[str, float] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(ballots):
         key = str(v.value)
         scores[key] = scores.get(key, 0.0) + v.weight
@@ -145,11 +143,11 @@ def weighted_voting(votes: List[MemberVote],
     )
 
 
-def confidence_weighted_voting(votes: List[MemberVote],
+def confidence_weighted_voting(votes: list[MemberVote],
                                ctx: StrategyContext) -> DecisionResult:
     """Ballots weighted by each member's own reported confidence.
 
-    Effective weight ``eᵢ = base_weightᵢ × pᵢ`` where ``pᵢ`` is the
+    Effective weight ``e_i = base_weight_i * p_i`` where ``pᵢ`` is the
     member's self-reported probability for its voted value; the winner
     is the argmax of ``Σ eᵢ·[valueᵢ == v]`` and its probability is the
     confidence-weighted share. A confident minority can overrule an
@@ -171,8 +169,8 @@ def confidence_weighted_voting(votes: List[MemberVote],
         raise BackendError(
             "confidence voting: total confidence weight must be "
             f"positive, got {total_e}")
-    scores: Dict[str, float] = {}
-    first_seen: Dict[str, int] = {}
+    scores: dict[str, float] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(ballots):
         key = str(v.value)
         scores[key] = scores.get(key, 0.0) + effective[i]
@@ -201,12 +199,12 @@ def confidence_weighted_voting(votes: List[MemberVote],
     )
 
 
-def _ballots(votes: List[MemberVote]) -> List[MemberVote]:
+def _ballots(votes: list[MemberVote]) -> list[MemberVote]:
     """Usable votes with an actual value to count."""
     return [v for v in votes if not v.skipped and v.value is not None]
 
 
-def hard_voting(votes: List[MemberVote],
+def hard_voting(votes: list[MemberVote],
                 ctx: StrategyContext) -> DecisionResult:
     """One member, one ballot; the majority value wins.
 
@@ -219,9 +217,9 @@ def hard_voting(votes: List[MemberVote],
     ballots = _ballots(votes)
     if not ballots:
         raise BackendError("hard voting: no countable ballots")
-    tally: Dict[str, int] = {}
-    confidence: Dict[str, float] = {}
-    first_seen: Dict[str, int] = {}
+    tally: dict[str, int] = {}
+    confidence: dict[str, float] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(ballots):
         key = str(v.value)
         tally[key] = tally.get(key, 0) + 1

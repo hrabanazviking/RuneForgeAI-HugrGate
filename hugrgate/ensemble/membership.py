@@ -20,7 +20,7 @@ backends, it only curates the roster.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.ensemble.reliability import ReliabilityTracker
@@ -28,8 +28,8 @@ from hugrgate.errors import PolicyError
 
 __all__ = [
     "STATUS_ACTIVE",
-    "STATUS_STANDBY",
     "STATUS_RETIRED",
+    "STATUS_STANDBY",
     "MembershipManager",
 ]
 
@@ -42,8 +42,8 @@ STATUSES = (STATUS_ACTIVE, STATUS_STANDBY, STATUS_RETIRED)
 class MembershipManager:
     """Curates the ensemble roster on observed reliability."""
 
-    def __init__(self, members: List[Backend],
-                 initial_standby: Optional[List[str]] = None,
+    def __init__(self, members: list[Backend],
+                 initial_standby: list[str] | None = None,
                  retire_below: float = 0.4,
                  promote_above: float = 0.65,
                  min_observations: int = 10,
@@ -68,17 +68,17 @@ class MembershipManager:
                 f"min_observations must be >= 1, got {min_observations}")
         if min_active < 1:
             raise PolicyError(f"min_active must be >= 1, got {min_active}")
-        self._backends: Dict[str, Backend] = {m.name: m for m in members}
+        self._backends: dict[str, Backend] = {m.name: m for m in members}
         self.tracker = ReliabilityTracker(names, smoothing=smoothing)
         self.retire_below = retire_below
         self.promote_above = promote_above
         self.min_observations = min_observations
         self.min_active = min_active
-        self._status: Dict[str, str] = {n: STATUS_ACTIVE for n in names}
+        self._status: dict[str, str] = {n: STATUS_ACTIVE for n in names}
         for name in initial_standby or []:
             self._check(name)
             self._status[name] = STATUS_STANDBY
-        self._events: List[Dict[str, Any]] = []
+        self._events: list[dict[str, Any]] = []
         self._seq = 0
 
     def _check(self, member: str) -> None:
@@ -103,16 +103,16 @@ class MembershipManager:
         self._check(member)
         return self._status[member]
 
-    def active_members(self) -> List[str]:
+    def active_members(self) -> list[str]:
         return [n for n, s in self._status.items() if s == STATUS_ACTIVE]
 
-    def standby_members(self) -> List[str]:
+    def standby_members(self) -> list[str]:
         return [n for n, s in self._status.items() if s == STATUS_STANDBY]
 
-    def retired_members(self) -> List[str]:
+    def retired_members(self) -> list[str]:
         return [n for n, s in self._status.items() if s == STATUS_RETIRED]
 
-    def events(self) -> List[Dict[str, Any]]:
+    def events(self) -> list[dict[str, Any]]:
         return [dict(e) for e in self._events]
 
     def observe(self, member: str, correct: bool) -> None:
@@ -169,7 +169,7 @@ class MembershipManager:
             raise PolicyError("no active members to build an ensemble")
         return Ensemble(actives, strategy=strategy, **kwargs)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "statuses": dict(self._status),
             "retire_below": self.retire_below,

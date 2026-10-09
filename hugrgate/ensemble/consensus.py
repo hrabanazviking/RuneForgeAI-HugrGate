@@ -18,7 +18,7 @@ Wire it into an ensemble via the ``consensus`` strategy option::
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from hugrgate.abstain import abstain
 from hugrgate.errors import PolicyError
@@ -27,9 +27,9 @@ from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "ConsensusConfig",
-    "winner_share",
     "apply_consensus",
     "maybe_apply_consensus",
+    "winner_share",
 ]
 
 
@@ -43,18 +43,18 @@ class ConsensusConfig:
         self.min_agreement = float(min_agreement)
 
     @classmethod
-    def majority(cls) -> "ConsensusConfig":
+    def majority(cls) -> ConsensusConfig:
         return cls(0.5)
 
     @classmethod
-    def supermajority(cls) -> "ConsensusConfig":
+    def supermajority(cls) -> ConsensusConfig:
         return cls(2.0 / 3.0)
 
     @classmethod
-    def unanimity(cls) -> "ConsensusConfig":
+    def unanimity(cls) -> ConsensusConfig:
         return cls(1.0)
 
-    def to_dict(self) -> Dict[str, float]:
+    def to_dict(self) -> dict[str, float]:
         return {"min_agreement": self.min_agreement}
 
     def __repr__(self) -> str:
@@ -75,7 +75,7 @@ def winner_share(result: DecisionResult) -> float:
 
 
 def apply_consensus(result: DecisionResult, spec: DecisionSpec,
-                    config: Optional[ConsensusConfig] = None
+                    config: ConsensusConfig | None = None
                     ) -> DecisionResult:
     """Accept the result iff the winner's share clears the bar.
 
@@ -105,8 +105,7 @@ def apply_consensus(result: DecisionResult, spec: DecisionSpec,
 
 
 def maybe_apply_consensus(result: DecisionResult, spec: DecisionSpec,
-                          setting: Union[None, float, ConsensusConfig,
-                                         Dict[str, Any]] = None
+                          setting: float | ConsensusConfig | dict[str, Any] | None = None
                           ) -> DecisionResult:
     """Apply the consensus gate when configured, else pass through.
 
@@ -123,7 +122,7 @@ def maybe_apply_consensus(result: DecisionResult, spec: DecisionSpec,
         except (TypeError, ValueError) as e:
             raise PolicyError(
                 f"consensus min_agreement must be a number, got "
-                f"{setting.get('min_agreement')!r}: {e}")
+                f"{setting.get('min_agreement')!r}: {e}") from e
         config = ConsensusConfig(min_agreement=bar)
     else:
         try:
@@ -131,6 +130,6 @@ def maybe_apply_consensus(result: DecisionResult, spec: DecisionSpec,
         except (TypeError, ValueError) as e:
             raise PolicyError(
                 f"consensus setting must be a number, a dict, or a "
-                f"ConsensusConfig, got {setting!r}: {e}")
+                f"ConsensusConfig, got {setting!r}: {e}") from e
         config = ConsensusConfig(min_agreement=bar)
     return apply_consensus(result, spec, config)

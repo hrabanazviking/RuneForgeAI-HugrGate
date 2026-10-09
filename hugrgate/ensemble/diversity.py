@@ -28,29 +28,28 @@ than useless.
 from __future__ import annotations
 
 import math
-from typing import Dict, List
 
 from hugrgate.ensemble.base import MemberVote, shannon_entropy
 from hugrgate.errors import PolicyError
 
 __all__ = [
-    "vote_entropy",
     "disagreement_rate",
-    "winner_margin",
-    "q_statistic",
-    "double_fault_rate",
-    "error_disagreement_rate",
-    "error_correlation",
     "diversity_summary",
+    "double_fault_rate",
+    "error_correlation",
+    "error_disagreement_rate",
+    "q_statistic",
+    "vote_entropy",
+    "winner_margin",
 ]
 
 
-def _ballot_values(votes: List[MemberVote]) -> List[str]:
+def _ballot_values(votes: list[MemberVote]) -> list[str]:
     return [str(v.value) for v in votes
             if not v.skipped and v.value is not None]
 
 
-def vote_entropy(votes: List[MemberVote]) -> float:
+def vote_entropy(votes: list[MemberVote]) -> float:
     """Entropy (bits) of the ballot distribution.
 
     0 = unanimous; log2(#distinct ballots) = maximally split.
@@ -58,14 +57,14 @@ def vote_entropy(votes: List[MemberVote]) -> float:
     values = _ballot_values(votes)
     if not values:
         raise PolicyError("vote_entropy needs at least one ballot")
-    counts: Dict[str, int] = {}
+    counts: dict[str, int] = {}
     for v in values:
         counts[v] = counts.get(v, 0) + 1
     n = len(values)
     return shannon_entropy({k: c / n for k, c in counts.items()})
 
 
-def disagreement_rate(votes: List[MemberVote]) -> float:
+def disagreement_rate(votes: list[MemberVote]) -> float:
     """Fraction of member pairs casting different ballots."""
     values = _ballot_values(votes)
     n = len(values)
@@ -76,12 +75,12 @@ def disagreement_rate(votes: List[MemberVote]) -> float:
     return disagree / (n * (n - 1) / 2)
 
 
-def winner_margin(votes: List[MemberVote]) -> float:
+def winner_margin(votes: list[MemberVote]) -> float:
     """Winner's ballot share minus the runner-up's (0 when tied)."""
     values = _ballot_values(votes)
     if not values:
         raise PolicyError("winner_margin needs at least one ballot")
-    counts: Dict[str, int] = {}
+    counts: dict[str, int] = {}
     for v in values:
         counts[v] = counts.get(v, 0) + 1
     shares = sorted((c / len(values) for c in counts.values()),
@@ -89,11 +88,11 @@ def winner_margin(votes: List[MemberVote]) -> float:
     return shares[0] - (shares[1] if len(shares) > 1 else 0.0)
 
 
-def q_statistic(correct_a: List[bool],
-                correct_b: List[bool]) -> float:
+def q_statistic(correct_a: list[bool],
+                correct_b: list[bool]) -> float:
     """Pairwise Q statistic in [-1, 1].
 
-    ``(N11·N00 − N01·N10) / (N11·N00 + N01·N10)`` where N11 = both
+    ``(N11*N00 - N01*N10) / (N11*N00 + N01*N10)`` where N11 = both
     right, N00 = both wrong, N01/N10 = exactly one right. Returns 0.0
     when the denominator is 0 (no evidence of (in)dependence, e.g.
     both members never err).
@@ -105,7 +104,7 @@ def q_statistic(correct_a: List[bool],
     if not correct_a:
         raise PolicyError("q_statistic needs a non-empty history")
     n11 = n00 = n01 = n10 = 0
-    for a, b in zip(correct_a, correct_b):
+    for a, b in zip(correct_a, correct_b, strict=True):
         if a and b:
             n11 += 1
         elif not a and not b:
@@ -120,8 +119,8 @@ def q_statistic(correct_a: List[bool],
     return (n11 * n00 - n01 * n10) / denom
 
 
-def double_fault_rate(correct_a: List[bool],
-                      correct_b: List[bool]) -> float:
+def double_fault_rate(correct_a: list[bool],
+                      correct_b: list[bool]) -> float:
     """Fraction of samples both members get wrong."""
     if len(correct_a) != len(correct_b):
         raise PolicyError(
@@ -129,13 +128,13 @@ def double_fault_rate(correct_a: List[bool],
             f"{len(correct_b)}")
     if not correct_a:
         raise PolicyError("double_fault_rate needs a non-empty history")
-    both_wrong = sum(1 for a, b in zip(correct_a, correct_b)
+    both_wrong = sum(1 for a, b in zip(correct_a, correct_b, strict=True)
                      if not a and not b)
     return both_wrong / len(correct_a)
 
 
-def error_disagreement_rate(correct_a: List[bool],
-                            correct_b: List[bool]) -> float:
+def error_disagreement_rate(correct_a: list[bool],
+                            correct_b: list[bool]) -> float:
     """Fraction of samples exactly one member gets wrong."""
     if len(correct_a) != len(correct_b):
         raise PolicyError(
@@ -144,12 +143,12 @@ def error_disagreement_rate(correct_a: List[bool],
     if not correct_a:
         raise PolicyError(
             "error_disagreement_rate needs a non-empty history")
-    split = sum(1 for a, b in zip(correct_a, correct_b) if a != b)
+    split = sum(1 for a, b in zip(correct_a, correct_b, strict=True) if a != b)
     return split / len(correct_a)
 
 
-def error_correlation(probs_a: List[float],
-                      probs_b: List[float]) -> float:
+def error_correlation(probs_a: list[float],
+                      probs_b: list[float]) -> float:
     """Pearson correlation of probability-for-truth vectors.
 
     Returns 0.0 when either vector has zero variance (no signal to
@@ -164,7 +163,7 @@ def error_correlation(probs_a: List[float],
         raise PolicyError("error_correlation needs data")
     ma = sum(probs_a) / n
     mb = sum(probs_b) / n
-    cov = sum((a - ma) * (b - mb) for a, b in zip(probs_a, probs_b))
+    cov = sum((a - ma) * (b - mb) for a, b in zip(probs_a, probs_b, strict=True))
     va = sum((a - ma) ** 2 for a in probs_a)
     vb = sum((b - mb) ** 2 for b in probs_b)
     if va <= 0 or vb <= 0:
@@ -172,7 +171,7 @@ def error_correlation(probs_a: List[float],
     return cov / math.sqrt(va * vb)
 
 
-def diversity_summary(votes: List[MemberVote]) -> Dict[str, float]:
+def diversity_summary(votes: list[MemberVote]) -> dict[str, float]:
     """One-call label-free diversity snapshot for a decision."""
     return {
         "vote_entropy_bits": vote_entropy(votes),

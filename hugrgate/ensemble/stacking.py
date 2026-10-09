@@ -19,7 +19,6 @@ regression; the ``"stacking"`` combiner needs a fitted engine in
 from __future__ import annotations
 
 import math
-from typing import Dict, List
 
 from hugrgate.ensemble.base import (
     MemberVote,
@@ -41,9 +40,9 @@ __all__ = [
 ]
 
 
-def _softmax(logits: List[float]) -> List[float]:
+def _softmax(logits: list[float]) -> list[float]:
     peak = max(logits)
-    exps = [math.exp(l - peak) for l in logits]
+    exps = [math.exp(logit - peak) for logit in logits]
     total = sum(exps)
     return [e / total for e in exps]
 
@@ -70,24 +69,24 @@ class SoftmaxRegression:
         self.lr = lr
         self.iters = iters
         # Zero init: the entire fit is a deterministic function of data.
-        self.weights: List[List[float]] = [
+        self.weights: list[list[float]] = [
             [0.0] * n_classes for _ in range(n_features)]
-        self.bias: List[float] = [0.0] * n_classes
+        self.bias: list[float] = [0.0] * n_classes
         self._fitted = False
 
     @property
     def fitted(self) -> bool:
         return self._fitted
 
-    def _logits(self, x: List[float]) -> List[float]:
+    def _logits(self, x: list[float]) -> list[float]:
         return [
             sum(x[j] * self.weights[j][k] for j in range(self.n_features))
             + self.bias[k]
             for k in range(self.n_classes)
         ]
 
-    def fit(self, X: List[List[float]],
-            y: List[int]) -> "SoftmaxRegression":
+    def fit(self, X: list[list[float]],
+            y: list[int]) -> SoftmaxRegression:
         n = len(X)
         if n == 0:
             raise PolicyError("SoftmaxRegression.fit needs data")
@@ -107,7 +106,7 @@ class SoftmaxRegression:
             grad_w = [[0.0] * self.n_classes
                       for _ in range(self.n_features)]
             grad_b = [0.0] * self.n_classes
-            for row, label in zip(X, y):
+            for row, label in zip(X, y, strict=True):
                 probs = _softmax(self._logits(row))
                 for k in range(self.n_classes):
                     err = probs[k] - (1.0 if k == label else 0.0)
@@ -123,7 +122,7 @@ class SoftmaxRegression:
         self._fitted = True
         return self
 
-    def predict_proba(self, x: List[float]) -> List[float]:
+    def predict_proba(self, x: list[float]) -> list[float]:
         if not self._fitted:
             raise BackendError(
                 "SoftmaxRegression used before fit")
@@ -132,7 +131,7 @@ class SoftmaxRegression:
                 f"expected {self.n_features} features, got {len(x)}")
         return _softmax(self._logits(x))
 
-    def predict(self, x: List[float]) -> int:
+    def predict(self, x: list[float]) -> int:
         probs = self.predict_proba(x)
         return max(range(len(probs)), key=lambda k: probs[k])
 
@@ -140,7 +139,7 @@ class SoftmaxRegression:
 class StackingEngine:
     """Meta-learner over member prediction vectors."""
 
-    def __init__(self, members: List[str],
+    def __init__(self, members: list[str],
                  l2: float = 0.01, lr: float = 1.0,
                  iters: int = 1000):
         if not members:
@@ -152,17 +151,17 @@ class StackingEngine:
         self.l2 = l2
         self.lr = lr
         self.iters = iters
-        self.classes: List[str] = []
+        self.classes: list[str] = []
         self.regression: SoftmaxRegression | None = None
 
     @property
     def fitted(self) -> bool:
         return self.regression is not None and self.regression.fitted
 
-    def _features(self, votes: List[MemberVote],
-                  space: List[str]) -> List[float]:
+    def _features(self, votes: list[MemberVote],
+                  space: list[str]) -> list[float]:
         by_member = {v.backend: v for v in votes if not v.skipped}
-        feats: List[float] = []
+        feats: list[float] = []
         for name in self.members:
             vote = by_member.get(name)
             if vote is None:
@@ -172,8 +171,8 @@ class StackingEngine:
                 feats.extend(dist.get(o, 0.0) for o in space)
         return feats
 
-    def fit(self, votes_per_sample: List[List[MemberVote]],
-            labels: List[str], spec: DecisionSpec) -> "StackingEngine":
+    def fit(self, votes_per_sample: list[list[MemberVote]],
+            labels: list[str], spec: DecisionSpec) -> StackingEngine:
         """Train the meta-learner.
 
         ``votes_per_sample[i]`` holds every member's vote on sample
@@ -187,12 +186,12 @@ class StackingEngine:
         if not labels:
             raise PolicyError("StackingEngine.fit needs labeled samples")
         space = spec.value_space()
-        unknown = [l for l in labels if l not in space]
+        unknown = [label for label in labels if label not in space]
         if unknown:
             raise PolicyError(
                 f"labels outside the spec space: {sorted(set(unknown))}")
         X = [self._features(votes, space) for votes in votes_per_sample]
-        y = [space.index(l) for l in labels]
+        y = [space.index(label) for label in labels]
         self.classes = list(space)
         self.regression = SoftmaxRegression(
             len(self.members) * len(space), len(space),
@@ -200,8 +199,8 @@ class StackingEngine:
         self.regression.fit(X, y)
         return self
 
-    def predict_proba(self, votes: List[MemberVote],
-                      spec: DecisionSpec) -> Dict[str, float]:
+    def predict_proba(self, votes: list[MemberVote],
+                      spec: DecisionSpec) -> dict[str, float]:
         if not self.fitted or self.regression is None:
             raise BackendError("StackingEngine used before fit")
         space = spec.value_space()
@@ -211,9 +210,9 @@ class StackingEngine:
                 f"{self.classes}")
         probs = self.regression.predict_proba(
             self._features(votes, space))
-        return {c: p for c, p in zip(self.classes, probs)}
+        return {c: p for c, p in zip(self.classes, probs, strict=True)}
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "members": list(self.members),
             "classes": list(self.classes),
@@ -224,7 +223,7 @@ class StackingEngine:
         }
 
 
-def stacking_combine(votes: List[MemberVote],
+def stacking_combine(votes: list[MemberVote],
                      ctx: StrategyContext) -> DecisionResult:
     """Combine votes through the fitted stacking meta-learner."""
     require_discrete_spec(ctx.spec, "stacking")
@@ -238,7 +237,7 @@ def stacking_combine(votes: List[MemberVote],
     if not usable:
         raise BackendError("stacking: no usable votes")
     distribution = engine.predict_proba(votes, ctx.spec)
-    first_seen: Dict[str, int] = {}
+    first_seen: dict[str, int] = {}
     for i, v in enumerate(usable):
         if v.value is not None and str(v.value) not in first_seen:
             first_seen[str(v.value)] = i

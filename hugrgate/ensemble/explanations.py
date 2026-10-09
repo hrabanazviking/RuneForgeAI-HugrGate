@@ -16,7 +16,7 @@ explanation can never drift from the recorded decision.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
 from hugrgate.errors import PolicyError
 from hugrgate.result import DecisionResult
@@ -32,7 +32,7 @@ def _pct(x: float) -> str:
     return f"{x:.0%}"
 
 
-def _ballot_lines(ens: Dict[str, Any]) -> List[str]:
+def _ballot_lines(ens: dict[str, Any]) -> list[str]:
     lines = []
     weights = ens.get("weights", {})
     for ballot in ens.get("member_votes", []):
@@ -52,7 +52,7 @@ def _ballot_lines(ens: Dict[str, Any]) -> List[str]:
     return lines
 
 
-def _dissent_sentence(ens: Dict[str, Any]) -> str:
+def _dissent_sentence(ens: dict[str, Any]) -> str:
     dissenters = ens.get("minority_report") or []
     if not dissenters:
         return ""
@@ -62,7 +62,7 @@ def _dissent_sentence(ens: Dict[str, Any]) -> str:
 
 
 def _outcome_sentence(result: DecisionResult,
-                      ens: Dict[str, Any]) -> str:
+                      ens: dict[str, Any]) -> str:
     """What happened after the vote (escalation / consensus)."""
     bits = []
     disagreement = ens.get("disagreement") or {}
@@ -102,7 +102,7 @@ def _outcome_sentence(result: DecisionResult,
     return (" " + " ".join(b + "." for b in bits)) if bits else ""
 
 
-def _concise(result: DecisionResult, ens: Dict[str, Any]) -> str:
+def _concise(result: DecisionResult, ens: dict[str, Any]) -> str:
     if result.value is None:
         text = "The council declined to decide."
         return text + _outcome_sentence(result, ens)
@@ -120,7 +120,7 @@ def _concise(result: DecisionResult, ens: Dict[str, Any]) -> str:
     return text
 
 
-def _verbose(result: DecisionResult, ens: Dict[str, Any]) -> str:
+def _verbose(result: DecisionResult, ens: dict[str, Any]) -> str:
     lines = []
     if result.value is None:
         lines.append("Verdict: the council declined to decide.")

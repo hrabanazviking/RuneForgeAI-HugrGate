@@ -8,26 +8,24 @@ a designated backend.
 from __future__ import annotations
 
 import pytest
-
-from hugrgate import DecisionSpec
-from hugrgate.ensemble import (
-    LEVEL_MILD,
-    LEVEL_NONE,
-    LEVEL_STRONG,
-    DisagreementDetector,
-    DisagreementReport,
-    Ensemble,
-    EscalationPolicy,
-    escalate,
-)
-from hugrgate.ensemble.base import MemberVote
-from hugrgate.errors import BackendError, PolicyError
 from ensemble_fakes import (
     CAT_SPEC,
     ConstantBackend,
     FailingBackend,
     make_result,
 )
+
+from hugrgate.ensemble import (
+    LEVEL_MILD,
+    LEVEL_NONE,
+    LEVEL_STRONG,
+    DisagreementDetector,
+    Ensemble,
+    EscalationPolicy,
+    escalate,
+)
+from hugrgate.ensemble.base import MemberVote
+from hugrgate.errors import BackendError, PolicyError
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

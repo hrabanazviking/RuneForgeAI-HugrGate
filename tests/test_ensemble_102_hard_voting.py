@@ -8,11 +8,6 @@ result hardening in collect_votes.
 from __future__ import annotations
 
 import pytest
-
-from hugrgate import DecisionSpec
-from hugrgate.ensemble import Ensemble, hard_voting
-from hugrgate.ensemble.base import StrategyContext, collect_votes
-from hugrgate.errors import BackendError
 from ensemble_fakes import (
     CAT_SPEC,
     AbstainingBackend,
@@ -21,6 +16,11 @@ from ensemble_fakes import (
     FnBackend,
     make_result,
 )
+
+from hugrgate import DecisionSpec
+from hugrgate.ensemble import Ensemble, hard_voting
+from hugrgate.ensemble.base import StrategyContext, collect_votes
+from hugrgate.errors import BackendError
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

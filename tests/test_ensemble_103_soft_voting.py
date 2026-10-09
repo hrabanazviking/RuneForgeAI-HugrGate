@@ -7,12 +7,12 @@ incomplete ballot must never silently dilute the average.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend, FnBackend
 
 from hugrgate import DecisionResult, DecisionSpec
 from hugrgate.ensemble import Ensemble, soft_voting
 from hugrgate.ensemble.base import MemberVote, StrategyContext
 from hugrgate.errors import BackendError
-from ensemble_fakes import CAT_SPEC, ConstantBackend, FnBackend
 
 TWO = DecisionSpec(type="categorical", options=["alpha", "beta"])
 

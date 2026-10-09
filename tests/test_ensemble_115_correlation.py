@@ -10,11 +10,9 @@ from __future__ import annotations
 import pytest
 
 from hugrgate.ensemble import (
-    CorrelatedErrorReport,
     detect_correlated_errors,
 )
 from hugrgate.errors import PolicyError
-
 
 # --- success -----------------------------------------------------------------
 

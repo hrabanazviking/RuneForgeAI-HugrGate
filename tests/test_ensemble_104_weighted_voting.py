@@ -8,12 +8,12 @@ Distinct from hard voting (one member one ballot) and soft voting
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate import DecisionSpec
 from hugrgate.ensemble import Ensemble, weighted_voting
 from hugrgate.ensemble.base import MemberVote, StrategyContext
 from hugrgate.errors import BackendError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}

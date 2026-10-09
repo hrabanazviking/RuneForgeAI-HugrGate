@@ -21,7 +21,8 @@ ensemble ruling breaks ``verify_chain()``.
 from __future__ import annotations
 
 import copy
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 from hugrgate.errors import PolicyError
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
@@ -29,8 +30,8 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "record_ensemble_decision",
     "find_ensemble_records",
+    "record_ensemble_decision",
 ]
 
 
@@ -38,8 +39,7 @@ def record_ensemble_decision(store: ProvenanceStore,
                              state: Mapping[str, Any],
                              spec: DecisionSpec,
                              result: DecisionResult,
-                             membership_events: Optional[
-                                 Sequence[Dict[str, Any]]] = None,
+                             membership_events: Sequence[dict[str, Any]] | None = None,
                              policy_threshold: float = 0.0,
                              redact_input: bool = False
                              ) -> DecisionRecord:
@@ -56,7 +56,7 @@ def record_ensemble_decision(store: ProvenanceStore,
         state, spec, result,
         policy_threshold=policy_threshold,
         redact_input=redact_input)
-    ensemble_block: Dict[str, Any] = copy.deepcopy(
+    ensemble_block: dict[str, Any] = copy.deepcopy(
         result.metadata.get("ensemble", {}))
     ensemble_block["recorded"] = bool(result.metadata.get("ensemble"))
     if membership_events is not None:
@@ -69,8 +69,8 @@ def record_ensemble_decision(store: ProvenanceStore,
 
 
 def find_ensemble_records(store: ProvenanceStore,
-                          strategy: Optional[str] = None,
-                          n: int = 100) -> List[DecisionRecord]:
+                          strategy: str | None = None,
+                          n: int = 100) -> list[DecisionRecord]:
     """Recent records that carry ensemble detail, newest last.
 
     With ``strategy`` set, only records from that strategy match.

@@ -8,11 +8,12 @@ combine into one PASS/FAIL verdict.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import (
+    AbstainBackend,
     AdversarialCase,
     DropoutBackend,
-    AbstainBackend,
     Ensemble,
     ReleaseGate,
     adversarial_clean,
@@ -22,7 +23,6 @@ from hugrgate.ensemble import (
     no_correlated_cliques,
 )
 from hugrgate.errors import PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 BETA = {"alpha": 0.2, "beta": 0.6, "gamma": 0.2}
@@ -118,8 +118,9 @@ def test_diversity_failure_blocks_release():
 
 
 def test_clique_failure_blocks_release():
-    from hugrgate.result import DecisionResult
     from ensemble_fakes import ScriptedBackend
+
+    from hugrgate.result import DecisionResult
 
     def _res(value, dist):
         return DecisionResult(value=value, probability=dist[value],
@@ -167,7 +168,7 @@ def test_missing_evidence_blocks_release():
 
 def test_raising_check_fails_gracefully():
     gate = ReleaseGate("g")
-    gate.add("boom", lambda: 1 / 0)  # noqa: B018
+    gate.add("boom", lambda: 1 / 0)
     name, check = evidence_check("ok", True)
     gate.add(name, check)
     verdict = gate.run()

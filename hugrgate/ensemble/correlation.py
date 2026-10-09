@@ -18,14 +18,13 @@ see :mod:`hugrgate.ensemble.diversity` for the underlying metrics.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
 
 from hugrgate.ensemble.diversity import q_statistic
 from hugrgate.errors import PolicyError
 
 __all__ = [
-    "CorrelatedPair",
     "CorrelatedErrorReport",
+    "CorrelatedPair",
     "detect_correlated_errors",
 ]
 
@@ -38,7 +37,7 @@ class CorrelatedPair:
     member_b: str
     q: float
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {"member_a": self.member_a, "member_b": self.member_b,
                 "q": self.q}
 
@@ -47,16 +46,16 @@ class CorrelatedPair:
 class CorrelatedErrorReport:
     """The detection verdict."""
 
-    pairs: List[CorrelatedPair] = field(default_factory=list)
-    cliques: List[List[str]] = field(default_factory=list)
+    pairs: list[CorrelatedPair] = field(default_factory=list)
+    cliques: list[list[str]] = field(default_factory=list)
     threshold: float = 0.7
-    members: List[str] = field(default_factory=list)
+    members: list[str] = field(default_factory=list)
 
     @property
     def correlated(self) -> bool:
         return bool(self.pairs)
 
-    def recommendations(self) -> List[str]:
+    def recommendations(self) -> list[str]:
         return [
             f"members {sorted(clique)} err together (Q >= "
             f"{self.threshold}); consider keeping one and dropping or "
@@ -64,7 +63,7 @@ class CorrelatedErrorReport:
             for clique in self.cliques
         ]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "pairs": [p.to_dict() for p in self.pairs],
             "cliques": [sorted(c) for c in self.cliques],
@@ -75,8 +74,8 @@ class CorrelatedErrorReport:
         }
 
 
-def _cliques(members: List[str],
-             edges: List[Tuple[str, str]]) -> List[List[str]]:
+def _cliques(members: list[str],
+             edges: list[tuple[str, str]]) -> list[list[str]]:
     """Connected components over the flagged pairs (union-find)."""
     parent = {m: m for m in members}
 
@@ -93,13 +92,13 @@ def _cliques(members: List[str],
 
     for a, b in edges:
         union(a, b)
-    groups: Dict[str, List[str]] = {}
+    groups: dict[str, list[str]] = {}
     for m in members:
         groups.setdefault(find(m), []).append(m)
     return [sorted(g) for g in groups.values() if len(g) > 1]
 
 
-def detect_correlated_errors(correct: Dict[str, List[bool]],
+def detect_correlated_errors(correct: dict[str, list[bool]],
                              threshold: float = 0.7
                              ) -> CorrelatedErrorReport:
     """Flag member pairs whose errors are correlated (Q >= threshold).
@@ -122,8 +121,8 @@ def detect_correlated_errors(correct: Dict[str, List[bool]],
     if not next(iter(correct.values())):
         raise PolicyError(
             "detect_correlated_errors needs a non-empty history")
-    pairs: List[CorrelatedPair] = []
-    edges: List[Tuple[str, str]] = []
+    pairs: list[CorrelatedPair] = []
+    edges: list[tuple[str, str]] = []
     for i, a in enumerate(members):
         for b in members[i + 1:]:
             q = q_statistic(correct[a], correct[b])

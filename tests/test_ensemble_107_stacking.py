@@ -9,6 +9,7 @@ can do.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import ConstantBackend
 
 from hugrgate import DecisionSpec
 from hugrgate.ensemble import (
@@ -19,7 +20,6 @@ from hugrgate.ensemble import (
 )
 from hugrgate.ensemble.base import MemberVote, StrategyContext
 from hugrgate.errors import BackendError, PolicyError
-from ensemble_fakes import ConstantBackend
 
 BIN = DecisionSpec(type="binary", statement="s")
 TWO = DecisionSpec(type="categorical", options=["yes", "no"])

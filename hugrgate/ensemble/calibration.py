@@ -22,15 +22,14 @@ metadata preserved.
 from __future__ import annotations
 
 import math
-from typing import Dict, List
 
 from hugrgate.ensemble.base import normalized_entropy
 from hugrgate.errors import BackendError, PolicyError
 from hugrgate.result import DecisionResult
 
 __all__ = [
-    "expected_calibration_error",
     "EnsembleCalibrator",
+    "expected_calibration_error",
 ]
 
 #: Temperature search bounds. Below 0.05 the map explodes; above 10 it
@@ -39,10 +38,10 @@ _T_MIN = 0.05
 _T_MAX = 10.0
 
 
-def expected_calibration_error(distributions: List[Dict[str, float]],
-                               labels: List[str],
+def expected_calibration_error(distributions: list[dict[str, float]],
+                               labels: list[str],
                                n_bins: int = 10) -> float:
-    """ECE = Σ_b |acc_b − conf_b| · (n_b / n) over confidence bins."""
+    """ECE = sum_b |acc_b - conf_b| * (n_b / n) over confidence bins."""
     if len(distributions) != len(labels):
         raise PolicyError(
             f"{len(distributions)} distributions but {len(labels)} "
@@ -52,10 +51,10 @@ def expected_calibration_error(distributions: List[Dict[str, float]],
             "expected_calibration_error needs labeled data")
     if n_bins < 1:
         raise PolicyError(f"n_bins must be >= 1, got {n_bins}")
-    bins: List[Dict[str, float]] = [
+    bins: list[dict[str, float]] = [
         {"n": 0.0, "correct": 0.0, "conf": 0.0}
         for _ in range(n_bins)]
-    for dist, label in zip(distributions, labels):
+    for dist, label in zip(distributions, labels, strict=True):
         if not dist:
             continue
         winner = max(dist, key=lambda k: dist[k])
@@ -75,8 +74,8 @@ def expected_calibration_error(distributions: List[Dict[str, float]],
     return ece
 
 
-def _apply_temperature(distribution: Dict[str, float],
-                       temperature: float) -> Dict[str, float]:
+def _apply_temperature(distribution: dict[str, float],
+                       temperature: float) -> dict[str, float]:
     inv = 1.0 / temperature
     scaled = {k: p ** inv for k, p in distribution.items()}
     total = sum(scaled.values())
@@ -86,17 +85,17 @@ def _apply_temperature(distribution: Dict[str, float],
     return {k: v / total for k, v in scaled.items()}
 
 
-def _nll(distributions: List[Dict[str, float]], labels: List[str],
+def _nll(distributions: list[dict[str, float]], labels: list[str],
          temperature: float) -> float:
     total = 0.0
-    for dist, label in zip(distributions, labels):
+    for dist, label in zip(distributions, labels, strict=True):
         cal = _apply_temperature(dist, temperature)
         total += -math.log(max(cal.get(label, 0.0), 1e-12))
     return total / len(distributions)
 
 
-def _golden_section(distributions: List[Dict[str, float]],
-                    labels: List[str]) -> float:
+def _golden_section(distributions: list[dict[str, float]],
+                    labels: list[str]) -> float:
     """Minimize NLL over temperature in [_T_MIN, _T_MAX]."""
     gr = (math.sqrt(5) - 1) / 2
     a, b = _T_MIN, _T_MAX
@@ -121,7 +120,7 @@ class EnsembleCalibrator:
 
     def __init__(self):
         self.temperature = 1.0
-        self.classes: List[str] = []
+        self.classes: list[str] = []
         self.ece_before = math.inf
         self.ece_after = math.inf
         self.nll_before = math.inf
@@ -132,9 +131,9 @@ class EnsembleCalibrator:
     def fitted(self) -> bool:
         return self._fitted
 
-    def fit(self, distributions: List[Dict[str, float]],
-            labels: List[str],
-            classes: List[str]) -> "EnsembleCalibrator":
+    def fit(self, distributions: list[dict[str, float]],
+            labels: list[str],
+            classes: list[str]) -> EnsembleCalibrator:
         """Learn the temperature on held-out ensemble outputs."""
         if len(distributions) != len(labels):
             raise PolicyError(
@@ -145,7 +144,7 @@ class EnsembleCalibrator:
         if len(set(classes)) != len(classes) or len(classes) < 2:
             raise PolicyError(
                 f"classes must be ≥2 unique labels, got {classes}")
-        unknown = [l for l in labels if l not in classes]
+        unknown = [label for label in labels if label not in classes]
         if unknown:
             raise PolicyError(
                 f"labels outside classes: {sorted(set(unknown))}")
@@ -160,8 +159,8 @@ class EnsembleCalibrator:
         self.nll_after = _nll(distributions, labels, self.temperature)
         return self
 
-    def calibrate(self, distribution: Dict[str, float]
-                  ) -> Dict[str, float]:
+    def calibrate(self, distribution: dict[str, float]
+                  ) -> dict[str, float]:
         if not self._fitted:
             raise BackendError("EnsembleCalibrator used before fit")
         return _apply_temperature(distribution, self.temperature)
@@ -202,7 +201,7 @@ class EnsembleCalibrator:
             metadata=meta,
         )
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "temperature": self.temperature,
             "classes": list(self.classes),

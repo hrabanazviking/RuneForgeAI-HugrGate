@@ -8,6 +8,7 @@ logged for provenance.
 from __future__ import annotations
 
 import pytest
+from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 from hugrgate.ensemble import (
     STATUS_ACTIVE,
@@ -17,7 +18,6 @@ from hugrgate.ensemble import (
     MembershipManager,
 )
 from hugrgate.errors import PolicyError
-from ensemble_fakes import CAT_SPEC, ConstantBackend
 
 ALPHA = {"alpha": 0.7, "beta": 0.2, "gamma": 0.1}
 
