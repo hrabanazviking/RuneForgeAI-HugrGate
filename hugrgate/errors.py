@@ -31,6 +31,7 @@ __all__ = [
     "GGUFError",
     "GateError",
     "HugrGateError",
+    "MultiprocError",
     "NPUError",
     "OfflineBootstrapError",
     "PolicyError",
@@ -310,4 +311,16 @@ class PoolError(HugrGateError):
     succeed; a poisoned factory is a caller/ops problem.
     """
     code = "pool_error"
+    recoverable = True
+
+
+class MultiprocError(HugrGateError):
+    """A multiprocess task could not be executed.
+
+    Slice 294.  Unpicklable tasks are caller errors; worker crashes and
+    timeouts are transient — the pool replaces the worker and the caller
+    may retry.  Recoverable, because one bad task must never take down
+    the gate.
+    """
+    code = "multiproc_error"
     recoverable = True
