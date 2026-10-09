@@ -13,6 +13,11 @@ from hugrgate.cluster.auth import (
     ClusterKey,
     enable_mutual_auth,
 )
+from hugrgate.cluster.backpressure import (
+    DEFAULT_ADMISSION_CAPACITY,
+    DEFAULT_ADMISSION_REFILL_PER_SECOND,
+    AdmissionController,
+)
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import (
     DEFAULT_STALE_AFTER_S,
@@ -102,6 +107,8 @@ from hugrgate.cluster.work_stealing import (
 __all__ = [
     "AUTH_HEADER",
     "CLUSTER_RPC_PATH",
+    "DEFAULT_ADMISSION_CAPACITY",
+    "DEFAULT_ADMISSION_REFILL_PER_SECOND",
     "DEFAULT_LAN_GROUP",
     "DEFAULT_LAN_PORT",
     "DEFAULT_LATENCY_TARGET_MS",
@@ -113,6 +120,7 @@ __all__ = [
     "MAX_STEAL_BATCH",
     "PROTOCOL_VERSION",
     "SENSITIVE_PREFIX",
+    "AdmissionController",
     "Authenticator",
     "BatchJob",
     "BatchOutcome",

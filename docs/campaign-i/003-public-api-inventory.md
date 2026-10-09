@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 64 · **public names:** 310
+**Modules:** 65 · **public names:** 315
 
 ## API stability policy
 
@@ -232,6 +232,8 @@ that this document never drifts from the code.
 |---|---|---|
 | `AUTH_HEADER` | constant | `'x-cluster-mac'` |
 | `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
+| `DEFAULT_ADMISSION_CAPACITY` | constant | `128` |
+| `DEFAULT_ADMISSION_REFILL_PER_SECOND` | constant | `64.0` |
 | `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
 | `DEFAULT_LAN_PORT` | constant | `18377` |
 | `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
@@ -302,6 +304,14 @@ that this document never drifts from the code.
 | `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
+
+### `hugrgate.cluster.backpressure`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_ADMISSION_CAPACITY` | constant | `128` |
+| `DEFAULT_ADMISSION_REFILL_PER_SECOND` | constant | `64.0` |
+| `AdmissionController` | class | `(capacity: 'int' = 128, refill_per_second: 'float' = 64.0) -> 'None'` |
 
 ### `hugrgate.cluster.capabilities`
 

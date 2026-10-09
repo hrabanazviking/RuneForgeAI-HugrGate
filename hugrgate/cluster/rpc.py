@@ -42,6 +42,7 @@ from hugrgate.errors import (
     BackendUnavailable,
     HugrGateError,
     PrivacyViolation,
+    QueueFull,
     SpecError,
     TimeoutError,
 )
@@ -165,6 +166,21 @@ class RPCClient:
             raise SpecError(
                 f"peer {peer.node_id[:12]}… rejected the envelope: "
                 f"{response.text[:200]}")
+        if response.status_code == 429:
+            # Backpressure (slice 218): the peer is shedding load.
+            # Recoverable — the caller should back off and retry.
+            try:
+                body = response.json()
+            except ValueError:
+                body = {}
+            raw: Any = {}
+            if isinstance(body, dict):
+                envelope = body.get("envelope", {})
+                if isinstance(envelope, dict):
+                    raw = envelope.get("error", {})
+            if isinstance(raw, dict) and raw.get("code") == "queue_full":
+                raise HugrGateError.from_dict(raw)
+            raise QueueFull(f"peer {peer.node_id[:12]}… is shedding load")
         if response.status_code != 200:
             raise BackendError(
                 f"peer {peer.node_id[:12]}… HTTP {response.status_code}")

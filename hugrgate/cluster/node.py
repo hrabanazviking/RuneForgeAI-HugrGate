@@ -16,6 +16,10 @@ import threading
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, Protocol
 
+from hugrgate.cluster.backpressure import (
+    WORK_MESSAGE_TYPES,
+    AdmissionController,
+)
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
 from hugrgate.cluster.distributed_batch import DistributedBatcher
@@ -46,6 +50,7 @@ from hugrgate.errors import (
     HugrGateError,
     PolicyError,
     PrivacyViolation,
+    QueueFull,
     SpecError,
 )
 from hugrgate.policy import DecisionPolicy
@@ -132,6 +137,8 @@ class ClusterNode:
         self.router = DistributedRouter(self)
         #: Distributed batching (slice 217).
         self.batcher = DistributedBatcher(self)
+        #: Backpressure (slice 218).
+        self.admission = AdmissionController()
 
     # -- local facts --------------------------------------------------------
 
@@ -271,6 +278,15 @@ class ClusterNode:
             return error_envelope(
                 SpecError(f"unsupported message type "
                           f"{message.msg_type.value}"),
+                self.node_id, self.next_seq(), message.trace_id)
+        # Backpressure (slice 218): the work plane is admission-
+        # controlled; the control plane never is.
+        if (message.msg_type.value in WORK_MESSAGE_TYPES
+                and not self.admission.try_acquire()):
+            return error_envelope(
+                QueueFull("node is shedding load",
+                          retry_after_ms=round(
+                              self.admission.retry_after_ms(), 1)),
                 self.node_id, self.next_seq(), message.trace_id)
         try:
             return handler(message)

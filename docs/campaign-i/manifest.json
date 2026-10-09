@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:31:54.188991+00:00",
-  "module_count": 64,
+  "generated_utc": "2026-10-09T13:34:18.175679+00:00",
+  "module_count": 65,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 165,
+      "loc": 172,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -574,6 +574,24 @@
         "seal",
         "verify",
         "mac_provider"
+      ]
+    },
+    "hugrgate.cluster.backpressure": {
+      "docstring": "Backpressure protocol. Slice 218.\n\nA node sheds load instead of dying under it. :class:`AdmissionController`\nis a token bucket in front of every work-bearing inbound message\n(``DECIDE_REQUEST``, ``BATCH_REQUEST``, ``STEAL_REQUEST``): when no\ntoken is available the message is refused with a typed ``QueueFull``\n(``code=\"queue_full\"``, recoverable) carrying ``retry_after_ms``.\n\n- Control-plane messages (``HEARTBEAT``, ``GOODBYE``, policy,\n  auth) are never shed \u2014 shedding the signal that would heal the\n  overload is how cascades start.\n- The HTTP route maps ``queue_full`` envelopes to **429** with a\n  ``Retry-After`` header (slice 218's wire contract); the RPC client\n  turns 429 back into ``QueueFull`` so callers can back off and retry.\n- The taxonomy error is reused from slice 007 (Anti-Checkbox Rule:\n  improve, don't duplicate).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "threading",
+        "time"
+      ],
+      "loc": 103,
+      "path": "hugrgate/cluster/backpressure.py",
+      "public_defs": [
+        "AdmissionController",
+        "capacity",
+        "try_acquire",
+        "retry_after_ms",
+        "stats"
       ]
     },
     "hugrgate.cluster.capabilities": {
@@ -710,7 +728,7 @@
         "time",
         "typing"
       ],
-      "loc": 497,
+      "loc": 513,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -877,7 +895,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 84,
+      "loc": 99,
       "path": "hugrgate/cluster/routes.py",
       "public_defs": [
         "build_cluster_router",
@@ -921,7 +939,7 @@
         "threading",
         "typing"
       ],
-      "loc": 395,
+      "loc": 411,
       "path": "hugrgate/cluster/rpc.py",
       "public_defs": [
         "error_envelope",
@@ -1528,6 +1546,7 @@
     "test_async_readiness.py",
     "test_backend_registry.py",
     "test_cluster_auth.py",
+    "test_cluster_backpressure.py",
     "test_cluster_capabilities.py",
     "test_cluster_discovery.py",
     "test_cluster_distributed_batch.py",
@@ -1571,5 +1590,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11886
+  "total_loc": 12043
 }

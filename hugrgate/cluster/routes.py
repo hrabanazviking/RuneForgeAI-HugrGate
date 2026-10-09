@@ -27,6 +27,7 @@ from fastapi.routing import APIRouter
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     ClusterMessage,
+    MessageType,
     decode_message,
 )
 from hugrgate.errors import SpecError
@@ -60,6 +61,20 @@ def build_cluster_router(node: ClusterNode) -> APIRouter:
         tag = request.headers.get("x-cluster-mac")
         reply: ClusterMessage = node.dispatch(message, auth_tag=tag,
                                               raw=body)
+        # Backpressure (slice 218): shed load is HTTP 429 with a
+        # Retry-After hint, not a 200 — caches and load balancers
+        # understand it, and the client turns it back into QueueFull.
+        if reply.msg_type is MessageType.ERROR:
+            raw_err = reply.payload.get("error", {})
+            if (isinstance(raw_err, dict)
+                    and raw_err.get("code") == "queue_full"):
+                details = raw_err.get("details", {})
+                retry_ms = details.get("retry_after_ms", 1000)
+                retry_s = max(1, -(-int(retry_ms) // 1000))  # ceil
+                return JSONResponse(
+                    status_code=429,
+                    headers={"Retry-After": str(retry_s)},
+                    content={"envelope": reply.to_dict()})
         return JSONResponse(
             status_code=200,
             content={"envelope": reply.to_dict()})
