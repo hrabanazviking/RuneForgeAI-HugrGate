@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:01:52.442989+00:00",
-  "module_count": 44,
+  "generated_utc": "2026-10-09T11:05:08.460440+00:00",
+  "module_count": 45,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -529,9 +529,36 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 28,
+      "loc": 30,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
+    },
+    "hugrgate.contracts.negotiation": {
+      "docstring": "Contract version negotiation. Gjallarbr\u00fa slice 027.\n\nTwo parties (a contract producer and consumer, client and server, two\nservices) each support a set of contract schema versions. This module\nlets them agree on one version \u2014 and, for full sessions, on the\ncontract kinds they both understand \u2014 without silent downgrades.\n\nSelection rule: among the versions every party supports, the winner\nminimizes the sum of preference ranks across parties (each party lists\nversions most-preferred first); ties break toward the highest version.\nThe rule is deterministic and symmetric \u2014 no party is privileged.\n\nFailure is loud: disjoint version sets raise :class:`ContractError`\n(``no_common_version``); disjoint kind sets raise ``no_common_kind``.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 212,
+      "path": "hugrgate/contracts/negotiation.py",
+      "public_defs": [
+        "parse_version",
+        "VersionOffer",
+        "NegotiationResult",
+        "negotiate_version",
+        "ContractEndpoint",
+        "SessionAgreement",
+        "negotiate_session",
+        "rank_of",
+        "to_dict",
+        "score",
+        "local",
+        "offer",
+        "supports_kind",
+        "to_dict"
+      ]
     },
     "hugrgate.contracts.schema": {
       "docstring": "Decision contract schema v2. Gjallarbr\u00fa slice 026.\n\nThe v1 decision contract is :class:`hugrgate.spec.DecisionSpec`: an\nunversioned dataclass with five fixed types, no identity, and no\ncanonical form. Schema v2 introduces :class:`DecisionContract`:\n\n- every contract carries a ``schema_version`` (``\"2.0\"``) and a unique\n  ``contract_id``;\n- the ``kind`` string is drawn from an explicit registry\n  (:data:`CONTRACT_KINDS`), so new decision shapes are discoverable and\n  deserializable without touching this module;\n- serialization is canonical JSON with a sha256 content hash\n  (:meth:`DecisionContract.canonical_hash`), giving contracts a stable\n  identity for caching, provenance, and negotiation;\n- :meth:`DecisionContract.validate_value` is the validation hook every\n  later Campaign II slice extends.\n\n``DecisionSpec`` is untouched: v2 contracts live alongside it and\nmigration between the two is slice 047's job.",
@@ -1000,6 +1027,7 @@
     "test_api_inventory.py",
     "test_arch_map.py",
     "test_contracts_026.py",
+    "test_contracts_027.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1010,5 +1038,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7443
+  "total_loc": 7657
 }

@@ -30,6 +30,7 @@ LAYERS: dict[str, list[str]] = {
     ],
     "contract-engine": [
         "hugrgate.contracts", "hugrgate.contracts.schema",
+        "hugrgate.contracts.negotiation",
     ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",

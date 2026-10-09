@@ -16,6 +16,7 @@ from hugrgate.contracts.schema import (
     is_supported_version,
     register_kind,
 )
+from hugrgate.contracts import negotiation
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -25,4 +26,5 @@ __all__ = [
     "contract_from_dict",
     "is_supported_version",
     "register_kind",
+    "negotiation",
 ]

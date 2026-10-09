@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 44 · **public names:** 190
+**Modules:** 45 · **public names:** 198
 
 ## API stability policy
 
@@ -236,6 +236,19 @@ that this document never drifts from the code.
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+| `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
+
+### `hugrgate.contracts.negotiation`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `VersionOffer` | class | `(party: 'str', versions: 'Tuple[str, ...]' = <factory>) -> None` |
+| `NegotiationResult` | class | `(version: 'str', common: 'Tuple[str, ...]', parties: 'Tuple[str, ...]') -> None` |
+| `ContractEndpoint` | class | `(party: 'str', schema_versions: 'Tuple[str, ...]' = <factory>, kinds: 'Tuple[str, ...]' = <factory>) -> None` |
+| `SessionAgreement` | class | `(schema_version: 'str', kinds: 'Tuple[str, ...]', client: 'str', server: 'str') -> None` |
+| `parse_version` | function | `(version: 'str') -> 'Tuple[int, ...]'` |
+| `negotiate_version` | function | `(*offers: 'VersionOffer') -> 'NegotiationResult'` |
+| `negotiate_session` | function | `(client: 'ContractEndpoint', server: 'ContractEndpoint') -> 'SessionAgreement'` |
 
 ### `hugrgate.contracts.schema`
 
