@@ -647,7 +647,6 @@ class AgentLoopDetected(AgentError):
     can be rerouted or escalated.
     """
     code = "agent_loop_detected"
-    recoverable = False
 class AgentRunaway(AgentError):
     """A ticket breached runaway limits (escalations/steps/tokens) or
     the kill switch tripped. Slice 394.  Not recoverable: a runaway
@@ -661,7 +660,6 @@ class AgentBudgetExhausted(AgentError):
     supervisor can top them up.
     """
     code = "agent_budget_exhausted"
-    recoverable = False
 class AgentEscalationFailed(AgentError):
     """An escalation could not be delivered (no higher level, depth
     cap reached, cooldown storm). Slice 384.  Recoverable: the ticket

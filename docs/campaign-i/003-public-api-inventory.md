@@ -4205,7 +4205,7 @@ that this document never drifts from the code.
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
 | `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
@@ -4308,7 +4308,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
