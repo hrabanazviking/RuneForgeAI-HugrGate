@@ -34,6 +34,9 @@ from hugrgate.errors import (
     JurisdictionViolation,
     KeyProviderError,
     LocalOnlyViolation,
+    MemoryAccessDenied,
+    MemoryError,
+    MemoryQuotaExceeded,
     MultiprocError,
     NPUError,
     NumaError,
@@ -87,6 +90,9 @@ ALL_ERRORS = [
     SecretDetected,
     SealError,
     KeyProviderError,
+    MemoryAccessDenied,
+    MemoryError,
+    MemoryQuotaExceeded,
 ]
 
 EXPECTED_CODES = {
@@ -137,6 +143,9 @@ EXPECTED_CODES = {
     SecretDetected: "secret_detected",
     SealError: "seal_error",
     KeyProviderError: "key_provider_error",
+    MemoryError: "memory_error",
+    MemoryQuotaExceeded: "memory_quota_exceeded",
+    MemoryAccessDenied: "memory_access_denied",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -191,6 +200,9 @@ EXPECTED_RECOVERABLE = {
     SecretDetected: False,
     SealError: False,
     KeyProviderError: False,
+    MemoryError: True,
+    MemoryQuotaExceeded: True,
+    MemoryAccessDenied: False,
 }
 
 
