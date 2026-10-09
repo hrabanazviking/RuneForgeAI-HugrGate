@@ -231,3 +231,12 @@ it into an opaque agent.
   preservation, duplicate-id `MemoryError`); `to_dict` added to the
   `EpisodeLike` protocol.
 - Tests: `tests/test_memory_io.py` (9 tests).
+
+### Slice 319 — Memory replay
+- `hugrgate/memory/replay.py`: `replay(history, decide)` re-runs
+  episodes through a caller-supplied `decide(spec) -> (value,
+  probability)` and reports value-match rate, mean absolute
+  probability drift, per-episode mismatches, and counted (never fatal)
+  errors. Specs are deep-copied so a misbehaving policy cannot mutate
+  history. Query pre-filter and limit supported.
+- Tests: `tests/test_memory_replay.py` (9 tests).

@@ -70,6 +70,7 @@ from hugrgate.memory.policies import (
 )
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
 from hugrgate.memory.recency import RecencyFeatures, recency_features
+from hugrgate.memory.replay import ReplayReport, ReplayResult, replay
 from hugrgate.memory.retention import (
     MemoryQuota,
     QuotaStatus,
@@ -112,6 +113,8 @@ __all__ = [
     "Outcome",
     "QuotaStatus",
     "RecencyFeatures",
+    "ReplayReport",
+    "ReplayResult",
     "RetentionReport",
     "RetrievalResult",
     "RolePermission",
@@ -148,6 +151,7 @@ __all__ = [
     "recency_features",
     "record_only_backend",
     "redact_above",
+    "replay",
     "retrieve",
     "retrieve_conditioned",
 ]
