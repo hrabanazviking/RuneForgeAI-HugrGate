@@ -1158,6 +1158,7 @@ flowchart TD
     ensemble_voting --> result
     evlab --> evlab_api
     evlab --> evlab_bootstrap
+    evlab --> evlab_calibration
     evlab --> evlab_compare
     evlab --> evlab_crossval
     evlab --> evlab_dataset
@@ -1177,6 +1178,11 @@ flowchart TD
     evlab_bootstrap --> policy
     evlab_bootstrap --> result
     evlab_bootstrap --> spec
+    evlab_calibration --> core
+    evlab_calibration --> errors
+    evlab_calibration --> policy
+    evlab_calibration --> result
+    evlab_calibration --> spec
     evlab_compare --> core
     evlab_compare --> errors
     evlab_compare --> evlab_bootstrap
@@ -2353,6 +2359,7 @@ flowchart TD
 | `ensemble.voting` | `result` | no |
 | `evlab` | `evlab.api` | no |
 | `evlab` | `evlab.bootstrap` | no |
+| `evlab` | `evlab.calibration` | no |
 | `evlab` | `evlab.compare` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
@@ -2372,6 +2379,11 @@ flowchart TD
 | `evlab.bootstrap` | `policy` | no |
 | `evlab.bootstrap` | `result` | no |
 | `evlab.bootstrap` | `spec` | no |
+| `evlab.calibration` | `core` | no |
+| `evlab.calibration` | `errors` | no |
+| `evlab.calibration` | `policy` | no |
+| `evlab.calibration` | `result` | no |
+| `evlab.calibration` | `spec` | no |
 | `evlab.compare` | `core` | no |
 | `evlab.compare` | `errors` | no |
 | `evlab.compare` | `evlab.bootstrap` | no |

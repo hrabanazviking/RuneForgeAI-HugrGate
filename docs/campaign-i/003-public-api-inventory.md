@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 298 · **public names:** 1807
+**Modules:** 299 · **public names:** 1825
 
 ## API stability policy
 
@@ -2260,6 +2260,7 @@ that this document never drifts from the code.
 | `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
 | `BootstrapCI` | class | `(metric: 'str', estimate: 'float', ci_low: 'float', ci_high: 'float', ci_level: 'float', n_boot: 'int', n_items: 'int', seed: 'int') -> None` |
 | `CVReport` | class | `(k: 'int', seed: 'int', n_items: 'int', folds: 'list[FoldResult]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]') -> None` |
+| `CalibrationComparison` | class | `(methods: 'dict[str, dict[str, float]]', n_calib: 'int', n_eval: 'int', n_bins: 'int' = 10) -> None` |
 | `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
 | `DatasetManifest` | class | `(name: 'str', version: 'str', columns: 'list[ColumnSpec]' = <factory>, description: 'str' = '', license: 'str' = 'unknown', spec: 'dict[str, Any]' = <factory>, sensitivity: 'str' = 'public', fingerprint: 'str' = '', created_at: 'str' = '', provenance: 'DatasetProvenance | None' = None, extra: 'dict[str, Any]' = <factory>) -> None` |
 | `DatasetProvenance` | class | `(source_uri: 'str' = '', acquisition: 'str' = 'manual', creator: 'str' = '', created_at: 'str' = '', license: 'str' = 'unknown', parents: 'list[dict[str, str]]' = <factory>, steps: 'list[TransformStep]' = <factory>) -> None` |
@@ -2268,18 +2269,26 @@ that this document never drifts from the code.
 | `EvaluationLab` | class | `(gate: 'HugrGate | None' = None) -> 'None'` |
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
+| `HistogramBinningCalibrator` | class | `(n_bins: 'int' = 10) -> 'None'` |
+| `IdentityCalibrator` | class | `()` |
+| `LabCalibrator` | class | `()` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
+| `PackageCalibrator` | class | `(calibrator: 'Any') -> 'None'` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 | `SignificanceResult` | class | `(test: 'str', statistic: 'float', p_value: 'float', alpha: 'float', n: 'int', details: 'dict[str, Any]') -> None` |
 | `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
 | `StratifiedReport` | class | `(stratify_key: 'str', strata: 'list[str]', stratum_sizes: 'dict[str, int]', per_stratum: 'dict[str, dict[str, dict[str, Any]]]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]', n_items: 'int' = 0) -> None` |
+| `TemperatureCalibrator` | class | `() -> 'None'` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+| `compare_backend_calibration` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str]', calibrator_factories: 'Sequence[Callable[[], LabCalibrator]]', *, calib_frac: 'float' = 0.5, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, n_bins: 'int' = 10, max_items: 'int | None' = None) -> 'dict[str, CalibrationComparison]'` |
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
+| `compare_calibrators` | function | `(calib_confidences: 'Sequence[float]', calib_correct: 'Sequence[int]', eval_confidences: 'Sequence[float]', eval_correct: 'Sequence[int]', calibrators: 'Sequence[LabCalibrator]', n_bins: 'int' = 10) -> 'CalibrationComparison'` |
 | `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
+| `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
@@ -2306,6 +2315,20 @@ that this document never drifts from the code.
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+
+### `hugrgate.evlab.calibration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationComparison` | class | `(methods: 'dict[str, dict[str, float]]', n_calib: 'int', n_eval: 'int', n_bins: 'int' = 10) -> None` |
+| `HistogramBinningCalibrator` | class | `(n_bins: 'int' = 10) -> 'None'` |
+| `IdentityCalibrator` | class | `()` |
+| `LabCalibrator` | class | `()` |
+| `PackageCalibrator` | class | `(calibrator: 'Any') -> 'None'` |
+| `TemperatureCalibrator` | class | `() -> 'None'` |
+| `compare_backend_calibration` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str]', calibrator_factories: 'Sequence[Callable[[], LabCalibrator]]', *, calib_frac: 'float' = 0.5, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, n_bins: 'int' = 10, max_items: 'int | None' = None) -> 'dict[str, CalibrationComparison]'` |
+| `compare_calibrators` | function | `(calib_confidences: 'Sequence[float]', calib_correct: 'Sequence[int]', eval_confidences: 'Sequence[float]', eval_correct: 'Sequence[int]', calibrators: 'Sequence[LabCalibrator]', n_bins: 'int' = 10) -> 'CalibrationComparison'` |
+| `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 
 ### `hugrgate.evlab.compare`
 
