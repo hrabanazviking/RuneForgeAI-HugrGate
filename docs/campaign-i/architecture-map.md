@@ -414,6 +414,32 @@ flowchart TD
         evlab_report[evlab.report]
         evlab_release[evlab.release]
     end
+    subgraph security-forge[security-forge]
+        security[security]
+        security_threat_model[security.threat_model]
+        security_attack_surface[security.attack_surface]
+        security_depscan[security.depscan]
+        security_supply_chain[security.supply_chain]
+        security_model_signing[security.model_signing]
+        security_checksums[security.checksums]
+        security_plugins[security.plugins]
+        security_sandbox[security.sandbox]
+        security_input_limits[security.input_limits]
+        security_resource_guards[security.resource_guards]
+        security_serde_guards[security.serde_guards]
+        security_path_guards[security.path_guards]
+        security_injection_corpus[security.injection_corpus]
+        security_prompt_injection[security.prompt_injection]
+        security_malicious_backend[security.malicious_backend]
+        security_provenance_guards[security.provenance_guards]
+        security_cache_poisoning[security.cache_poisoning]
+        security_replay[security.replay]
+        security_authz[security.authz]
+        security_rate_limit[security.rate_limit]
+        security_secret_audit[security.secret_audit]
+        security_fuzzing[security.fuzzing]
+        security_gauntlet[security.gauntlet]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -1789,6 +1815,7 @@ flowchart TD
     scheduler --> backpressure
     scheduler --> errors
     scheduler --> log
+    security --> security_threat_model
     serde --> errors
     serde --> policy
     serde --> result
@@ -1851,6 +1878,7 @@ flowchart TD
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 | observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
 | evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
+| security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.rate_limit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
 
 ## Internal dependency edges
 
@@ -3230,6 +3258,7 @@ flowchart TD
 | `scheduler` | `backpressure` | no |
 | `scheduler` | `errors` | no |
 | `scheduler` | `log` | no |
+| `security` | `security.threat_model` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |

@@ -313,6 +313,24 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.evlab.repro", "hugrgate.evlab.gates",
         "hugrgate.evlab.report", "hugrgate.evlab.release",
     ],
+    "security-forge": [  # Gjallarbrú campaign XVII, slices 401-425
+        "hugrgate.security", "hugrgate.security.threat_model",
+        "hugrgate.security.attack_surface", "hugrgate.security.depscan",
+        "hugrgate.security.supply_chain", "hugrgate.security.model_signing",
+        "hugrgate.security.checksums", "hugrgate.security.plugins",
+        "hugrgate.security.sandbox", "hugrgate.security.input_limits",
+        "hugrgate.security.resource_guards",
+        "hugrgate.security.serde_guards",
+        "hugrgate.security.path_guards",
+        "hugrgate.security.injection_corpus",
+        "hugrgate.security.prompt_injection",
+        "hugrgate.security.malicious_backend",
+        "hugrgate.security.provenance_guards",
+        "hugrgate.security.cache_poisoning",
+        "hugrgate.security.replay", "hugrgate.security.authz",
+        "hugrgate.security.rate_limit", "hugrgate.security.secret_audit",
+        "hugrgate.security.fuzzing", "hugrgate.security.gauntlet",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 363 · **public names:** 2201
+**Modules:** 365 · **public names:** 2213
 
 ## API stability policy
 
@@ -3954,6 +3954,28 @@ that this document never drifts from the code.
 | `BatchScheduler` | class | `(config: 'SchedulerConfig | None' = None, executor: 'BatchExecutor | None' = None, backpressure: 'BackpressureEngine | None' = None) -> 'None'` |
 | `SchedulerConfig` | class | `(max_batch_size: 'int' = 32, batch_window_s: 'float' = 0.005, max_queue_depth: 'int' = 1024, max_workers: 'int' = 8, shutdown_timeout_s: 'float' = 10.0, adaptive: 'bool' = False, min_batch_size: 'int' = 1, target_batch_latency_s: 'float' = 0.05, priority_enabled: 'bool' = False, starvation_horizon_s: 'float' = 30.0, deadline_enabled: 'bool' = False, drop_late: 'bool' = True) -> None` |
 | `ThreadPoolBatchExecutor` | class | `(max_workers: 'int' = 8) -> 'None'` |
+
+### `hugrgate.security`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
+| `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
+| `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
+| `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
+| `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `default_threat_model` | function | `() -> 'ThreatModel'` |
+
+### `hugrgate.security.threat_model`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
+| `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
+| `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
+| `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
+| `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `default_threat_model` | function | `() -> 'ThreatModel'` |
 
 ### `hugrgate.serde`
 
