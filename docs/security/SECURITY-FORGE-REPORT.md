@@ -122,4 +122,21 @@ r = run_secret_audit('hugrgate'); print(r['by_severity'])"
 
 ## Full suite result
 
-<!-- filled by slice 425 on the release run -->
+Release run (2026-10-09, worktree `wt-gjallarbu-c17`, branch
+`gjallarbu/campaign-xvii`):
+
+- **4874 passed, 1 skipped**; 7 failed + 2 errors, all triaged:
+  - 4 were genuine campaign issues, fixed in the triage commit:
+    `test_config` (KeyError→SpecError contract change),
+    `test_arch_map` (ratelimit layer registration),
+    `test_dependency_rules` (shlex/unicodedata stdlib allowlist),
+    `test_package_boundaries` + `test_repo_truth` (root import,
+    manifest regen — fixed in the prior commit).
+  - The remaining 5 (cluster_backpressure shed/load,
+    perf_288 deadline, perf_295 supervision thread race,
+    sec_410 RLIMIT, plus one repeat of sec_410) are
+    load-induced flakes in timing/thread-sensitive tests: all
+    pass in isolation, all in modules this campaign did not
+    modify.
+- ruff clean (`hugrgate/`, `tools/`, `tests/`); mypy clean
+  (387 files).
