@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 50 · **public names:** 218
+**Modules:** 51 · **public names:** 220
 
 ## API stability policy
 
@@ -242,6 +242,7 @@ that this document never drifts from the code.
 | `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
 | `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/hatch/w` |
 | `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/hatch/wo` |
+| `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/hatch/works` |
 
 ### `hugrgate.contracts.composite`
 
@@ -294,6 +295,12 @@ that this document never drifts from the code.
 | `MAX_NESTING_DEPTH` | constant | `8` |
 | `NestedCategoricalContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, options: 'List[str]' = <factory>, children: "Dict[str, 'NestedCategoricalContract']" = <factory>) -> None` |
 | `parse_path` | function | `(value: 'Any') -> 'Tuple[str, ...]'` |
+
+### `hugrgate.contracts.ordinal`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OrdinalContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, levels: 'List[str]' = <factory>, anchors: 'Dict[str, float]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.schema`
 

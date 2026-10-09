@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:18:17.250018+00:00",
-  "module_count": 50,
+  "generated_utc": "2026-10-09T11:20:04.429672+00:00",
+  "module_count": 51,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 48,
+      "loc": 49,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -678,6 +678,30 @@
         "is_leaf",
         "subcontract_at",
         "validate_value",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.ordinal": {
+      "docstring": "Rich ordinal semantics \u2014 ordinals you can measure. Gjallarbr\u00fa slice 033.\n\nA v1 ordinal spec is pure order: ``low < medium < high``, but nothing says\n*how far apart* they are. :class:`OrdinalContract` (kind ``\"ordinal\"``)\npins every level to a numeric anchor on a scale (default: 0, 1, \u2026, n\u22121),\nwhich unlocks:\n\n- :meth:`distance` \u2014 how far apart two levels are;\n- :meth:`interpolate` \u2014 map a numeric model output to the nearest level;\n- :meth:`expected_anchor` \u2014 the expected scale position of a distribution;\n- :meth:`validate_distribution` \u2014 ordered-distribution sanity (keys \u2286\n  levels, values \u2208 [0,1], sum \u2248 1).\n\nAnchors must be strictly increasing in level order: the scale never folds\nback on itself.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 193,
+      "path": "hugrgate/contracts/ordinal.py",
+      "public_defs": [
+        "OrdinalContract",
+        "rank_of",
+        "anchor_of",
+        "is_ordered",
+        "distance",
+        "levels_between",
+        "interpolate",
+        "expected_anchor",
+        "validate_value",
+        "validate_distribution",
         "describe"
       ]
     },
@@ -1154,6 +1178,7 @@
     "test_contracts_030.py",
     "test_contracts_031.py",
     "test_contracts_032.py",
+    "test_contracts_033.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1164,5 +1189,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8984
+  "total_loc": 9178
 }
