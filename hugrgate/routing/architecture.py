@@ -269,6 +269,7 @@ class SerialPlanExecutor:
                 result.metadata["ladder_rung"] = i
                 result.metadata["ladder_backend"] = backend.name
                 router.last_audit = audit
+                router.note_latencies(audit)
                 return RoutingDecision(
                     result=result, plan=plan,
                     audit=[e.to_dict() for e in audit], accepted_rung=i)
@@ -279,6 +280,7 @@ class SerialPlanExecutor:
             router._log_attempt(state, ctx.spec, result, policy, gate)
 
         router.last_audit = audit
+        router.note_latencies(audit)
         raise Abstention(
             "routing plan exhausted: no rung cleared its gate",
             reason="ladder_exhausted",
@@ -297,11 +299,25 @@ class LadderRouterV2(LadderRouter):
     """
 
     def __init__(self, *args, planner: Optional[RungPlanner] = None,
-                 executor: Optional[RungExecutor] = None, **kwargs):
+                 executor: Optional[RungExecutor] = None,
+                 latency_tracker=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.planner: RungPlanner = planner or _DefaultPlanner(self)
         self.executor: RungExecutor = executor or SerialPlanExecutor()
+        self.latency_tracker = latency_tracker
         self.last_plan: Optional[RoutingPlan] = None
+
+    def note_latencies(self, audit) -> None:
+        """Feed measured rung latencies into the tracker, if one is set."""
+        if self.latency_tracker is None:
+            return
+        for entry in audit:
+            latency = entry.get("latency_ms") if isinstance(entry, dict) \
+                else entry.latency_ms
+            name = entry.get("backend_name") if isinstance(entry, dict) \
+                else entry.backend_name
+            if latency and latency > 0:
+                self.latency_tracker.record(name, latency)
 
     def build_plan(self, state: Mapping[str, Any], spec: DecisionSpec,
                    policy: Optional[DecisionPolicy] = None,

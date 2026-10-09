@@ -28,6 +28,10 @@ from hugrgate.routing.confidence import (
     ConfidenceAwarePlanner,
     adjusted_gate,
 )
+from hugrgate.routing.latency import (
+    LatencyAwarePlanner,
+    LatencyTracker,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
@@ -50,6 +54,8 @@ __all__ = [
     "adjusted_gate",
     "LadderRouterV2",
     "LadderSynthesizer",
+    "LatencyAwarePlanner",
+    "LatencyTracker",
     "QOS_DEPTH_CAPS",
     "QOS_WEIGHTS",
     "RungBuilder",
