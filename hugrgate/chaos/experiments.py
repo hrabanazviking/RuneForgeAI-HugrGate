@@ -198,7 +198,8 @@ def partial_service_failure_experiment(
             f"cannot fail unbreakable backends: {sorted(unknown)}")
 
     if simultaneous:
-        faults = (_simultaneous_fault(service, failing, state, spec),)
+        faults: tuple[Fault, ...] = (
+            _simultaneous_fault(service, failing, state, spec),)
         hypothesis = (f"the service fails cleanly when {sorted(failing)} "
                       f"all fail at once")
     else:
@@ -405,7 +406,7 @@ def _patch_module_attr(module_name: str, attr: str,
     return patcher.stop
 
 
-def _expect_backend_error_hint(call: Callable[[], None],
+def _expect_backend_error_hint(call: Callable[[], Any],
                                hint: str = "install") -> None:
     """Assert ``call`` raises BackendError with a helpful message —
     the graceful shape of a missing optional dependency."""

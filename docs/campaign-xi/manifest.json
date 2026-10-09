@@ -1,0 +1,349 @@
+{
+  "campaign": "XI",
+  "generated_utc": "2026-10-09T15:53:09.323608+00:00",
+  "mission": "Reliability & Chaos",
+  "module_count": 17,
+  "modules": {
+    "hugrgate.chaos": {
+      "loc": 172,
+      "public_names": [
+        "CHAOS_LAB",
+        "CORRUPTION_KINDS",
+        "CRASH",
+        "CRITICAL",
+        "DOWN",
+        "ERROR_RATE",
+        "HANG",
+        "LATENCY",
+        "MALFORMED",
+        "MUST_REJECT_KINDS",
+        "OK",
+        "UP",
+        "WARN",
+        "BlastRadius",
+        "BulkheadExecutor",
+        "CPUStarvationSimulator",
+        "CacheCorruptor",
+        "ChaosExperiment",
+        "CrashOnlyHarness",
+        "CrashReport",
+        "DegradationPlan",
+        "DegradationPlanRegistry",
+        "DegradationReport",
+        "DegradationStep",
+        "DependencyMatrix",
+        "DependencyScenario",
+        "ExperimentReport",
+        "ExperimentRunner",
+        "Fault",
+        "FaultResult",
+        "FaultSpec",
+        "FaultyBackend",
+        "MemoryPressureSimulator",
+        "MemoryReading",
+        "ModelCorruptor",
+        "NetworkGuard",
+        "NetworkSimulator",
+        "ProbeOutcome",
+        "RecoveryProbe",
+        "RecoveryReport",
+        "RecoveryVerifier",
+        "ResourceGuard",
+        "RetryBudget",
+        "ScheduledFault",
+        "Scorecard",
+        "ScorecardEntry",
+        "ScorecardReport",
+        "ServiceUnderTest",
+        "SkewedClock",
+        "SoakConfig",
+        "SoakReport",
+        "SoakRunner",
+        "SteadyStateProbe",
+        "audit_deadline_clocks",
+        "backend_health_probe",
+        "builtin_degradation_plans",
+        "builtin_dependency_matrix",
+        "circuit_closed_probe",
+        "decision_smoke_probe",
+        "default_retry_policy",
+        "dependency_failure_matrix",
+        "disk_full",
+        "partial_service_failure_experiment",
+        "read_only",
+        "retry_with_budget",
+        "run_experiment_on_lab"
+      ]
+    },
+    "hugrgate.chaos.backend_faults": {
+      "loc": 311,
+      "public_names": [
+        "CRASH",
+        "ERROR_RATE",
+        "HANG",
+        "LATENCY",
+        "MALFORMED",
+        "FaultSpec",
+        "FaultyBackend"
+      ]
+    },
+    "hugrgate.chaos.bulkhead": {
+      "loc": 126,
+      "public_names": [
+        "BulkheadExecutor"
+      ]
+    },
+    "hugrgate.chaos.cache_faults": {
+      "loc": 77,
+      "public_names": [
+        "CacheCorruptor"
+      ]
+    },
+    "hugrgate.chaos.clock": {
+      "loc": 142,
+      "public_names": [
+        "SkewedClock",
+        "audit_deadline_clocks"
+      ]
+    },
+    "hugrgate.chaos.crash": {
+      "loc": 165,
+      "public_names": [
+        "CrashOnlyHarness",
+        "CrashReport",
+        "worker_main"
+      ]
+    },
+    "hugrgate.chaos.degradation": {
+      "loc": 272,
+      "public_names": [
+        "DegradationPlan",
+        "DegradationPlanRegistry",
+        "DegradationReport",
+        "DegradationStep",
+        "builtin_degradation_plans"
+      ]
+    },
+    "hugrgate.chaos.experiments": {
+      "loc": 499,
+      "public_names": [
+        "CHAOS_LAB",
+        "DependencyMatrix",
+        "DependencyScenario",
+        "ServiceUnderTest",
+        "builtin_dependency_matrix",
+        "dependency_failure_matrix",
+        "partial_service_failure_experiment",
+        "run_experiment_on_lab"
+      ]
+    },
+    "hugrgate.chaos.filesystem": {
+      "loc": 81,
+      "public_names": [
+        "disk_full",
+        "read_only"
+      ]
+    },
+    "hugrgate.chaos.framework": {
+      "loc": 314,
+      "public_names": [
+        "BlastRadius",
+        "ChaosExperiment",
+        "ExperimentReport",
+        "ExperimentRunner",
+        "Fault",
+        "FaultResult",
+        "ProbeOutcome",
+        "SteadyStateProbe"
+      ]
+    },
+    "hugrgate.chaos.model_faults": {
+      "loc": 159,
+      "public_names": [
+        "CORRUPTION_KINDS",
+        "MUST_REJECT_KINDS",
+        "ModelCorruptor"
+      ]
+    },
+    "hugrgate.chaos.network": {
+      "loc": 205,
+      "public_names": [
+        "DOWN",
+        "UP",
+        "NetworkGuard",
+        "NetworkSimulator"
+      ]
+    },
+    "hugrgate.chaos.recovery": {
+      "loc": 224,
+      "public_names": [
+        "RecoveryProbe",
+        "RecoveryReport",
+        "RecoveryVerifier",
+        "backend_health_probe",
+        "circuit_closed_probe",
+        "decision_smoke_probe"
+      ]
+    },
+    "hugrgate.chaos.resources": {
+      "loc": 272,
+      "public_names": [
+        "CRITICAL",
+        "OK",
+        "WARN",
+        "CPUStarvationSimulator",
+        "MemoryPressureSimulator",
+        "MemoryReading",
+        "ResourceGuard"
+      ]
+    },
+    "hugrgate.chaos.retry": {
+      "loc": 150,
+      "public_names": [
+        "RetryBudget",
+        "default_retry_policy",
+        "retry_with_budget"
+      ]
+    },
+    "hugrgate.chaos.scorecard": {
+      "loc": 273,
+      "public_names": [
+        "Scorecard",
+        "ScorecardEntry",
+        "ScorecardReport"
+      ]
+    },
+    "hugrgate.chaos.soak": {
+      "loc": 195,
+      "public_names": [
+        "ScheduledFault",
+        "SoakConfig",
+        "SoakReport",
+        "SoakRunner"
+      ]
+    }
+  },
+  "slices": [
+    {
+      "slice": 251,
+      "doc": "251-chaos-framework.md",
+      "doc_chars": 3375
+    },
+    {
+      "slice": 252,
+      "doc": "252-backend-crash-injection.md",
+      "doc_chars": 2514
+    },
+    {
+      "slice": 253,
+      "doc": "253-backend-hang-injection.md",
+      "doc_chars": 2240
+    },
+    {
+      "slice": 254,
+      "doc": "254-latency-injection.md",
+      "doc_chars": 2405
+    },
+    {
+      "slice": 255,
+      "doc": "255-error-rate-injection.md",
+      "doc_chars": 1831
+    },
+    {
+      "slice": 256,
+      "doc": "256-malformed-result-injection.md",
+      "doc_chars": 2145
+    },
+    {
+      "slice": 257,
+      "doc": "257-corrupt-model-simulation.md",
+      "doc_chars": 2551
+    },
+    {
+      "slice": 258,
+      "doc": "258-cache-corruption-simulation.md",
+      "doc_chars": 2360
+    },
+    {
+      "slice": 259,
+      "doc": "259-disk-full-simulation.md",
+      "doc_chars": 2275
+    },
+    {
+      "slice": 260,
+      "doc": "260-read-only-filesystem-test.md",
+      "doc_chars": 2276
+    },
+    {
+      "slice": 261,
+      "doc": "261-memory-pressure-test.md",
+      "doc_chars": 2088
+    },
+    {
+      "slice": 262,
+      "doc": "262-cpu-starvation-test.md",
+      "doc_chars": 1580
+    },
+    {
+      "slice": 263,
+      "doc": "263-network-loss-test.md",
+      "doc_chars": 2312
+    },
+    {
+      "slice": 264,
+      "doc": "264-network-flap-test.md",
+      "doc_chars": 1886
+    },
+    {
+      "slice": 265,
+      "doc": "265-clock-skew-test.md",
+      "doc_chars": 2207
+    },
+    {
+      "slice": 266,
+      "doc": "266-partial-service-failure.md",
+      "doc_chars": 2325
+    },
+    {
+      "slice": 267,
+      "doc": "267-dependency-failure-matrix.md",
+      "doc_chars": 2481
+    },
+    {
+      "slice": 268,
+      "doc": "268-retry-budget.md",
+      "doc_chars": 2501
+    },
+    {
+      "slice": 269,
+      "doc": "269-bulkhead.md",
+      "doc_chars": 2471
+    },
+    {
+      "slice": 270,
+      "doc": "270-degradation-plans.md",
+      "doc_chars": 2268
+    },
+    {
+      "slice": 271,
+      "doc": "271-recovery-verification.md",
+      "doc_chars": 2054
+    },
+    {
+      "slice": 272,
+      "doc": "272-crash-only-restart.md",
+      "doc_chars": 2298
+    },
+    {
+      "slice": 273,
+      "doc": "273-long-soak.md",
+      "doc_chars": 2108
+    },
+    {
+      "slice": 274,
+      "doc": "274-scorecard.md",
+      "doc_chars": 2004
+    }
+  ],
+  "total_public_names": 133
+}

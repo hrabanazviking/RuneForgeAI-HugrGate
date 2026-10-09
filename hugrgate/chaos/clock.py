@@ -37,6 +37,7 @@ import inspect
 import threading
 import time
 from collections.abc import Callable
+from typing import Any
 
 import hugrgate.cache as _cache
 import hugrgate.chaos.framework as _framework
@@ -91,12 +92,14 @@ class SkewedClock:
             return self._offset
 
 
-def _signature_clock_default(module: object, qualname: str) -> object:
+def _signature_clock_default(module: object, qualname: str) -> str:
     """The default of the ``clock`` parameter, or a marker string."""
-    target = module
+    target: Any = module
     for part in qualname.split("."):
         target = getattr(target, part)
-    params = inspect.signature(target.__init__).parameters
+    # inspect.signature on the class reads the constructor signature
+    # (via __init__) without touching the instance attribute.
+    params = inspect.signature(target).parameters
     if "clock" not in params:
         return "<no clock parameter>"
     default = params["clock"].default
@@ -115,7 +118,7 @@ def audit_deadline_clocks() -> dict[str, str]:
     report a monotonic clock; anything else is a skew vulnerability
     and fails the audit's test until fixed or deliberately accepted.
     """
-    report = {
+    report: dict[str, str] = {
         "hugrgate.circuit.CircuitRegistry": _signature_clock_default(
             _circuit, "CircuitRegistry"),
         "hugrgate.chaos.framework.ExperimentRunner":

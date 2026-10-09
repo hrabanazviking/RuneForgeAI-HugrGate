@@ -26,7 +26,7 @@ import builtins
 import contextlib
 import errno
 import os
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from typing import Any
 from unittest import mock
 
@@ -42,7 +42,8 @@ def _is_write_mode(mode: str) -> bool:
     return any(c in _WRITE_MODE_CHARS for c in mode)
 
 
-def _faulty_open_factory(errno_code: int, real_open):  # type: ignore[no-untyped-def]
+def _faulty_open_factory(errno_code: int,
+                          real_open: Callable[..., Any]) -> Callable[..., Any]:
     def faulty_open(file: Any, mode: str = "r", *args: Any,
                     **kwargs: Any) -> Any:
         if _is_write_mode(mode):

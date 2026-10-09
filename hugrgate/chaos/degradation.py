@@ -2,7 +2,7 @@
 
 When a fault strikes, the system should degrade according to a plan,
 not improvise. A :class:`DegradationPlan` names a failure mode (via
-the taxonomy ``code``\ s it answers, e.g. ``"backend_unavailable"``)
+the taxonomy codes it answers, e.g. ``"backend_unavailable"``)
 and lists the steps to take in order — fail over, serve stale, shed
 load, abstain — each step a callable taking a context dict and
 returning a human-readable note.

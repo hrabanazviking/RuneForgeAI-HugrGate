@@ -224,6 +224,17 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.edge.chaos",
         "hugrgate.edge.gate",
     ],
+    "chaos": [  # Gjallarbrú campaign XI, slices 251-275
+        "hugrgate.chaos", "hugrgate.chaos.framework",
+        "hugrgate.chaos.backend_faults", "hugrgate.chaos.model_faults",
+        "hugrgate.chaos.cache_faults", "hugrgate.chaos.filesystem",
+        "hugrgate.chaos.resources", "hugrgate.chaos.network",
+        "hugrgate.chaos.clock", "hugrgate.chaos.experiments",
+        "hugrgate.chaos.retry", "hugrgate.chaos.bulkhead",
+        "hugrgate.chaos.degradation", "hugrgate.chaos.recovery",
+        "hugrgate.chaos.crash", "hugrgate.chaos.soak",
+        "hugrgate.chaos.scorecard",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}
