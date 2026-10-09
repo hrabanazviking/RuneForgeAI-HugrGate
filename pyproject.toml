@@ -29,6 +29,7 @@ server = ["fastapi>=0.104", "uvicorn>=0.24", "httpx>=0.27"]
 bench = ["numpy>=1.24"]
 vllm = ["vllm>=0.4"]
 mlx = ["mlx-lm>=0.16"]  # Apple silicon only
+openvino = ["openvino>=2023.0"]
 test = ["pytest>=7.0"]
 typecheck = ["mypy>=1.0"]
 lint = ["ruff>=0.8", "coverage>=7.0"]

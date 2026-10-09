@@ -144,6 +144,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "onnxruntime": {"onnx"},
     "vllm": {"vllm"},
     "mlx_lm": {"mlx"},
+    "openvino": {"openvino"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
