@@ -31,6 +31,7 @@ __all__ = [
     "cmd_decide",
     "cmd_doctor",
     "cmd_health",
+    "cmd_inspect",
     "cmd_models",
     "cmd_openapi",
     "cmd_report",
@@ -417,6 +418,12 @@ def cmd_completion(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_inspect(args: argparse.Namespace) -> int:
+    """Drop into the interactive inspector REPL (slice 436)."""
+    from hugrgate.inspect import run_inspect
+    return run_inspect(args.url)
+
+
 def _command_names(parser: argparse.ArgumentParser) -> list[str]:
     """Sorted subcommand names (for completion and did-you-mean)."""
     for action in parser._actions:
@@ -510,6 +517,12 @@ def build_parser() -> argparse.ArgumentParser:
                        help="print a shell completion script")
     p.add_argument("shell", choices=["bash", "zsh", "fish"])
     p.set_defaults(func=cmd_completion)
+
+    p = sub.add_parser("inspect",
+                       help="interactive inspector REPL")
+    p.add_argument("--url", default=None,
+                   help="service URL (default: http://127.0.0.1:8377)")
+    p.set_defaults(func=cmd_inspect)
 
     return parser
 

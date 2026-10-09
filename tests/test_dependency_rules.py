@@ -65,7 +65,10 @@ CONTRACTS = {
 SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.client",
            # Campaign XVIII (slice 428): the v2 SDK is client-side
            # service-layer code — it builds on hugrgate.client.
-           "hugrgate.sdk"}
+           "hugrgate.sdk",
+           # Campaign XVIII (slice 436): the interactive inspector
+           # drives the client like the CLI does.
+           "hugrgate.inspect"}
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
