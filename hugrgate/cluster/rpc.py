@@ -115,13 +115,15 @@ class RPCClient:
     def _prepare(self, msg_type: MessageType,
                  payload: dict[str, Any],
                  trace_id: str | None = None) -> ClusterMessage:
-        message = ClusterMessage(
+        return ClusterMessage(
             msg_type=msg_type,
             sender=self.node_id,
             seq=self.next_seq(),
             trace_id=trace_id or new_trace_id(),
             payload=payload,
         )
+
+    def _apply_hook(self, message: ClusterMessage) -> ClusterMessage:
         if self._outbound_hook is not None:
             message = self._outbound_hook(message)
             if not isinstance(message, ClusterMessage):
@@ -131,7 +133,12 @@ class RPCClient:
 
     def send(self, peer: PeerRecord,
              message: ClusterMessage) -> ClusterMessage:
-        """Send a raw envelope; return the decoded reply envelope."""
+        """Send a raw envelope; return the decoded reply envelope.
+
+        The outbound hook (slice 208 signing) is applied here so every
+        outbound envelope — decide, batch, policy, … — is sealed.
+        """
+        message = self._apply_hook(message)
         data = encode_message(message)
         headers = {"content-type": "application/json"}
         if self._mac_provider is not None:

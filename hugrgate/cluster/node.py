@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
 from hugrgate.cluster.identity import NodeIdentity
+from hugrgate.cluster.policy_sync import PolicyPropagator
 from hugrgate.cluster.protocol import (
     ClusterMessage,
     MessageType,
@@ -101,7 +102,11 @@ class ClusterNode:
                              Callable[[ClusterMessage], ClusterMessage]] = {
             MessageType.DECIDE_REQUEST: self.handle_decide,
             MessageType.BATCH_REQUEST: self.handle_batch,
+            MessageType.POLICY_PUSH: self.handle_policy_push,
+            MessageType.POLICY_PULL: self.handle_policy_pull,
         }
+        #: Cluster policy propagation (slice 210).
+        self.policy_sync = PolicyPropagator(node_id=identity.node_id)
 
     # -- local facts --------------------------------------------------------
 
@@ -222,6 +227,55 @@ class ClusterNode:
             return error_envelope(
                 BackendError(f"handler failed: {e}"),
                 self.node_id, self.next_seq(), message.trace_id)
+
+    # -- policy propagation (slice 210) -------------------------------------
+
+    def handle_policy_push(self, message: ClusterMessage) -> ClusterMessage:
+        """Merge an inbound cluster policy; report what changed."""
+        payload = message.payload
+        changed = self.policy_sync.receive(
+            payload.get("policy", {}), payload.get("version", {}))
+        snapshot = self.policy_sync.snapshot()
+        snapshot["changed"] = changed
+        return self._respond(message, MessageType.POLICY_RESPONSE,
+                             snapshot)
+
+    def handle_policy_pull(self, message: ClusterMessage) -> ClusterMessage:
+        """Serve the current cluster policy snapshot."""
+        snapshot = self.policy_sync.snapshot()
+        snapshot["changed"] = False
+        return self._respond(message, MessageType.POLICY_RESPONSE,
+                             snapshot)
+
+    def propagate_policy(self) -> dict[str, str]:
+        """Push the cluster policy to every known peer.
+
+        Returns ``{node_id: "ok" | error}`` — best effort per peer;
+        one unreachable peer never blocks the rest.
+        """
+        snapshot = self.policy_sync.snapshot()
+        outcomes: dict[str, str] = {}
+        for peer in self.peers():
+            message = ClusterMessage(
+                msg_type=MessageType.POLICY_PUSH,
+                sender=self.node_id,
+                seq=self.rpc.next_seq(),
+                trace_id=new_trace_id(),
+                payload=dict(snapshot),
+            )
+            try:
+                reply = self.rpc.send(peer, message)
+            except HugrGateError as e:
+                outcomes[peer.node_id] = f"{e.code}: {e.message}"
+                continue
+            if reply.msg_type is MessageType.ERROR:
+                raw = reply.payload.get("error", {})
+                code = raw.get("code", "unknown") if isinstance(
+                    raw, dict) else "unknown"
+                outcomes[peer.node_id] = f"peer error: {code}"
+            else:
+                outcomes[peer.node_id] = "ok"
+        return outcomes
 
     # -- decide ---------------------------------------------------------------
 

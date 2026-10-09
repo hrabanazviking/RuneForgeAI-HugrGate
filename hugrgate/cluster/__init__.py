@@ -32,6 +32,11 @@ from hugrgate.cluster.node import (
     InboundHook,
     NodeAuthenticator,
 )
+from hugrgate.cluster.policy_sync import (
+    PolicyPropagator,
+    PolicyVersion,
+    merge_policies,
+)
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     MAX_MESSAGE_BYTES,
@@ -87,6 +92,8 @@ __all__ = [
     "NodeIdentity",
     "OutboundHook",
     "PeerRecord",
+    "PolicyPropagator",
+    "PolicyVersion",
     "RPCClient",
     "RemoteBackend",
     "StaticDiscovery",
@@ -101,6 +108,7 @@ __all__ = [
     "fetch_server_fingerprint",
     "load_static_config",
     "make_self_signed_cert",
+    "merge_policies",
     "new_trace_id",
     "trusted_context_for",
     "verify_cert_fingerprint",

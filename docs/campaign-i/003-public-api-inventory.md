@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 56 · **public names:** 266
+**Modules:** 57 · **public names:** 272
 
 ## API stability policy
 
@@ -253,6 +253,8 @@ that this document never drifts from the code.
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+| `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
+| `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
@@ -267,6 +269,7 @@ that this document never drifts from the code.
 | `fetch_server_fingerprint` | function | `(host: 'str', port: 'int', timeout: 'float' = 5.0) -> 'str'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 | `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
+| `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
 | `new_trace_id` | function | `() -> 'str'` |
 | `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
 | `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
@@ -319,6 +322,14 @@ that this document never drifts from the code.
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
+
+### `hugrgate.cluster.policy_sync`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
+| `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
+| `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
 
 ### `hugrgate.cluster.protocol`
 
