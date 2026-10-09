@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 53 · **public names:** 240
+**Modules:** 53 · **public names:** 241
 
 ## API stability policy
 
@@ -290,6 +290,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
 | `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
+| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
 | `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
 | `NPUAdapter` | class | `()` |
 | `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |

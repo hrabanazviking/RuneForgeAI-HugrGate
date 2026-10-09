@@ -28,6 +28,7 @@ from hugrgate.errors import HugrGateError
 __all__ = [
     "PRECISIONS",
     "HailoAdapter",
+    "JetsonAdapter",
     "MockNPUAdapter",
     "NPUAdapter",
     "NPUCapability",
@@ -324,4 +325,119 @@ class HailoAdapter(NPUAdapter):
                 raise NPUError(f"unknown Hailo model handle {handle!r}")
         raise NPUError(
             "Hailo infer() needs the HailoRT runtime on-device; "
+            "NEEDS_HARDWARE_VALIDATION")
+
+
+#: Jetson model substrings -> (device label, INT8 TOPS, power mW).
+#: Vendor-declared figures; NEEDS_HARDWARE_VALIDATION on-device.
+_JETSON_SPECS: dict[str, tuple[str, float, float]] = {
+    "orin nano": ("Jetson Orin Nano", 40.0, 15000.0),
+    "orin nx": ("Jetson Orin NX", 100.0, 25000.0),
+    "xavier nx": ("Jetson Xavier NX", 21.0, 20000.0),
+    "xavier agx": ("Jetson AGX Xavier", 32.0, 30000.0),
+    "jetson nano": ("Jetson Nano", 0.5, 10000.0),
+    "tx2": ("Jetson TX2", 1.3, 15000.0),
+}
+
+
+class JetsonAdapter(NPUAdapter):
+    """NVIDIA Jetson adapter boundary (slice 187).
+
+    Detection is three-stage: the device-tree model must name an
+    NVIDIA Jetson board, ``/etc/nv_tegra_release`` should exist, and
+    TensorRT should import. Missing board identity → ``None``;
+    missing TensorRT degrades the capability (CPU-only Jetson is
+    still a Jetson, but not an NPU target) — reported via the
+    ``notes`` field rather than silent absence.
+    """
+
+    name = "jetson"
+    vendor = "nvidia"
+
+    def __init__(self, trt: Any | None = None,
+                 model_text: str | None = None,
+                 tegra_release_present: bool | None = None):
+        self._trt = trt
+        self._model_text = model_text
+        self._tegra_release_present = tegra_release_present
+        self._lock = threading.RLock()
+        self._models: dict[str, str] = {}
+
+    def _read_model(self) -> str:
+        if self._model_text is not None:
+            return self._model_text
+        try:
+            with open("/sys/firmware/devicetree/base/model",
+                      encoding="utf-8") as fh:
+                return fh.read().strip("\x00").strip()
+        except OSError:
+            return ""
+
+    def _has_tegra_release(self) -> bool:
+        if self._tegra_release_present is not None:
+            return self._tegra_release_present
+        import os as _os
+        return _os.path.exists("/etc/nv_tegra_release")
+
+    def _load_trt(self) -> Any | None:
+        if self._trt is not None:
+            return self._trt
+        try:
+            import tensorrt as trt
+            return trt
+        except ImportError:
+            return None
+
+    def _spec(self, model: str) -> tuple[str, float, float] | None:
+        lowered = model.lower()
+        for key, spec in _JETSON_SPECS.items():
+            if key in lowered:
+                return spec
+        return None
+
+    def detect(self) -> NPUCapability | None:
+        model = self._read_model()
+        if "nvidia" not in model.lower() or "jetson" not in model.lower():
+            return None
+        spec = self._spec(model)
+        device = spec[0] if spec else model.strip() or "Jetson (unknown)"
+        tops = spec[1] if spec else 1.0
+        power = spec[2] if spec else None
+        trt = self._load_trt()
+        notes = ""
+        if trt is None:
+            notes = ("TensorRT not importable: NPU path unavailable, "
+                     "CPU fallback only; NEEDS_HARDWARE_VALIDATION")
+        elif not self._has_tegra_release():
+            notes = ("nv_tegra_release missing: unusual for a Jetson; "
+                     "NEEDS_HARDWARE_VALIDATION")
+        return NPUCapability(
+            vendor="nvidia", device=device, tops_int8=tops,
+            precisions=("int8", "fp16", "fp32"),
+            power_mw=power,
+            driver=str(getattr(trt, "__version__", "")) or None,
+            notes=notes or "NEEDS_HARDWARE_VALIDATION: vendor figures")
+
+    def load_model(self, model_path: str, **kwargs: Any) -> str:
+        self.require_available()  # raises when no Jetson is present
+        if not model_path.endswith((".engine", ".plan")):
+            raise NPUError(
+                f"Jetson TensorRT models must be .engine/.plan, got "
+                f"{model_path!r}")
+        if self._load_trt() is None:
+            raise NPUError(
+                "TensorRT not importable; cannot load Jetson engine "
+                "NEEDS_HARDWARE_VALIDATION")
+        handle = f"jetson://{model_path}"
+        with self._lock:
+            self._models[handle] = model_path
+        return handle
+
+    def infer(self, handle: str, inputs: Any) -> Any:
+        self.require_available()
+        with self._lock:
+            if handle not in self._models:
+                raise NPUError(f"unknown Jetson model handle {handle!r}")
+        raise NPUError(
+            "Jetson infer() needs TensorRT on-device; "
             "NEEDS_HARDWARE_VALIDATION")

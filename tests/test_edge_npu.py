@@ -205,3 +205,84 @@ def test_hailo_registry_integration():
                               pci_vendor_ids=["0x1e60"]))
     found = reg.detect_all()
     assert found["hailo"].device == "Hailo-8L"
+
+
+# --- slice 187: Jetson adapter ---------------------------------------------------
+
+from hugrgate.edge.npu import JetsonAdapter
+
+
+class _FakeTrt:
+    __version__ = "8.6.1"
+
+
+_ORIN_NANO_MODEL = "NVIDIA Jetson Orin Nano Developer Kit\x00"
+
+
+def test_jetson_detect_orin_nano():
+    adapter = JetsonAdapter(trt=_FakeTrt(), model_text=_ORIN_NANO_MODEL,
+                            tegra_release_present=True)
+    cap = adapter.detect()
+    assert cap is not None
+    assert cap.vendor == "nvidia"
+    assert cap.device == "Jetson Orin Nano"
+    assert cap.tops_int8 == 40.0
+    assert cap.power_mw == 15000.0
+    assert set(cap.precisions) == {"int8", "fp16", "fp32"}
+    assert adapter.is_available()
+
+
+def test_jetson_detect_unknown_model_conservative():
+    adapter = JetsonAdapter(trt=_FakeTrt(),
+                            model_text="NVIDIA Jetson Future Board",
+                            tegra_release_present=True)
+    cap = adapter.detect()
+    assert cap is not None
+    assert cap.tops_int8 == 1.0  # conservative: unknown board
+    assert "Future Board" in cap.device
+
+
+def test_jetson_non_jetson_host_absent():
+    adapter = JetsonAdapter(trt=_FakeTrt(),
+                            model_text="Raspberry Pi 5 Model B",
+                            tegra_release_present=False)
+    assert adapter.detect() is None
+
+
+def test_jetson_missing_trt_noted_not_absent():
+    adapter = JetsonAdapter(trt=None, model_text=_ORIN_NANO_MODEL,
+                            tegra_release_present=True)
+    cap = adapter.detect()
+    assert cap is not None  # the board is real; only the NPU path degrades
+    assert "TensorRT not importable" in cap.notes
+    with pytest.raises(NPUError, match="TensorRT not importable"):
+        adapter.load_model("models/tiny.engine")
+
+
+def test_jetson_load_model_requires_engine_or_plan():
+    adapter = JetsonAdapter(trt=_FakeTrt(), model_text=_ORIN_NANO_MODEL,
+                            tegra_release_present=True)
+    assert adapter.load_model("m.engine") == "jetson://m.engine"
+    assert adapter.load_model("m.plan") == "jetson://m.plan"
+    with pytest.raises(NPUError, match=r"\.engine/\.plan"):
+        adapter.load_model("m.onnx")
+
+
+def test_jetson_infer_marks_hardware_validation():
+    adapter = JetsonAdapter(trt=_FakeTrt(), model_text=_ORIN_NANO_MODEL,
+                            tegra_release_present=True)
+    handle = adapter.load_model("m.engine")
+    with pytest.raises(NPUError, match="NEEDS_HARDWARE_VALIDATION"):
+        adapter.infer(handle, {})
+    with pytest.raises(NPUError, match="unknown Jetson model handle"):
+        adapter.infer("jetson://nope.engine", {})
+
+
+def test_jetson_registry_best_for_prefers_tops():
+    reg = NPURegistry()
+    reg.register(JetsonAdapter(trt=_FakeTrt(), model_text=_ORIN_NANO_MODEL,
+                               tegra_release_present=True))
+    reg.register(HailoAdapter(sdk=_FakeHailoSdk(),
+                              pci_vendor_ids=["0x1e60"]))
+    best = reg.best_for("int8")
+    assert best is not None and best.name == "jetson"  # 40 > 13 TOPS
