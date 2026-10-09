@@ -159,3 +159,17 @@ it into an opaque agent.
   unlabeled), raw + decay-weighted mean probability, mean latency,
   first/last seen, observed models; query pre-filter and scan limit.
 - Tests: `tests/test_memory_backend_history.py` (7 tests).
+
+### Slice 313 — Contract history features
+- Attack (Anti-Checkbox Rule): `privacy_preserving_record` silently
+  dropped `contract_id` (it rides in `result.metadata`), making
+  contract history impossible. Now propagated as an identifier across
+  all privacy modes — never state payload, never PII. Existing
+  privacy tests still green.
+- `hugrgate/memory/contract_history.py`: `contract_key_for()`
+  (`contract:<id>` or synthetic `spec:<value-space-signature>`);
+  `contract_histories()` aggregates per-contract `ContractHistory`
+  (counts, acceptance rate, outcome distribution, success rate `None`
+  when unlabeled, serving backends, mean probability, first/last seen).
+- Tests: `tests/test_memory_contract_history.py` (8 tests, incl.
+  propagation across all five privacy classes).

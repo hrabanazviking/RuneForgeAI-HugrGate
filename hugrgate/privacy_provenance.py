@@ -108,6 +108,13 @@ def privacy_preserving_record(state: Mapping[str, Any],
         metadata.update(redact_metadata(record.metadata))
     # mode == "none": no state-derived metadata whatsoever.
     metadata["redacted"] = scrubbed
+    # Slice 313: the decision contract id is an identifier, not state
+    # payload — it survives every privacy mode so contract history
+    # (hugrgate.memory.contract_history) can group decisions by the
+    # contract they served. Never a state value, never PII.
+    contract_id = result.metadata.get("contract_id")
+    if isinstance(contract_id, str) and contract_id:
+        metadata["contract_id"] = contract_id
     record.metadata = metadata
     return record
 

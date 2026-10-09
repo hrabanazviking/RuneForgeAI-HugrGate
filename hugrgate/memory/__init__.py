@@ -21,6 +21,11 @@ from __future__ import annotations
 
 from hugrgate.memory.backend_history import BackendHistory, backend_histories
 from hugrgate.memory.conditioned import retrieve_conditioned
+from hugrgate.memory.contract_history import (
+    ContractHistory,
+    contract_histories,
+    contract_key_for,
+)
 from hugrgate.memory.decay import (
     decay_weight,
     decayed_mean,
@@ -64,6 +69,7 @@ from hugrgate.memory.similarity import (
 __all__ = [
     "OUTCOME_KINDS",
     "BackendHistory",
+    "ContractHistory",
     "DecisionHistory",
     "Episode",
     "FrequencyEntry",
@@ -83,6 +89,8 @@ __all__ = [
     "by_backend_value",
     "by_model",
     "by_outcome_kind",
+    "contract_histories",
+    "contract_key_for",
     "cosine",
     "count_by",
     "decay_weight",
