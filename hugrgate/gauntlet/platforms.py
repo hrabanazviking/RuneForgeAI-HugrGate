@@ -34,6 +34,7 @@ __all__ = [
     "VALIDATED_PLATFORMS",
     "PlatformInfo",
     "PosixFinding",
+    "check_windows_import_safety",
     "current_platform",
     "is_validated",
     "linux_live_checks",
@@ -208,6 +209,18 @@ def scan_posix_only(root: str | Path) -> tuple[PosixFinding, ...]:
                 PosixFinding(rel, lineno, api, _is_guarded(tree, node))
             )
     return tuple(findings)
+
+
+def check_windows_import_safety(
+    root: str | Path,
+) -> tuple[PosixFinding, ...]:
+    """Windows import gate: no *unguarded* POSIX-only API uses.
+
+    Every unguarded use is a potential ``ImportError``/``AttributeError``
+    the moment the module is imported on Windows. Returns the
+    offending findings (empty means the tree is import-safe).
+    """
+    return tuple(f for f in scan_posix_only(root) if not f.guarded)
 
 
 def linux_live_checks() -> dict[str, bool]:
