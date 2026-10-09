@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 44 · **public names:** 184
+**Modules:** 46 · **public names:** 200
 
 ## API stability policy
 
@@ -225,6 +225,32 @@ that this document never drifts from the code.
 | `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
 | `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
+
+### `hugrgate.cluster`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
+| `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `PROTOCOL_VERSION` | constant | `1` |
+| `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `MessageType` | class | `(*values)` |
+| `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
+| `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.protocol`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
+| `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `PROTOCOL_VERSION` | constant | `1` |
+| `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `MessageType` | class | `(*values)` |
+| `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
+| `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `new_trace_id` | function | `() -> 'str'` |
 
 ### `hugrgate.core`
 
