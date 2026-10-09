@@ -39,6 +39,7 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "RetryBudgetExhausted",
     "SpecError",
     "StorageError",
     "TelemetryError",
@@ -236,6 +237,15 @@ class RecoveryError(HugrGateError):
 class ResidencyError(HugrGateError):
     """A residency invariant was violated (unknown model, no room)."""
     code = "edge_residency_error"
+class RetryBudgetExhausted(BackendError):
+    """The retry budget was exhausted before the operation succeeded.
+
+    A backend-family failure: the call did not succeed, after a
+    bounded number of retries. Recoverable: after the budget window
+    refills, retrying can plausibly succeed.
+    """
+    code = "retry_budget_exhausted"
+    recoverable = True
 class StorageError(HugrGateError):
     """A storage invariant was violated (budget, format, key)."""
     code = "edge_storage_error"

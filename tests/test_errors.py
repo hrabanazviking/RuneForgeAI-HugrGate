@@ -36,6 +36,7 @@ from hugrgate.errors import (
     QueueFull,
     RecoveryError,
     ResidencyError,
+    RetryBudgetExhausted,
     SpecError,
     StorageError,
     TelemetryError,
@@ -53,8 +54,8 @@ ALL_ERRORS = [
     # Campaign VIII edge-intelligence errors (slice 200 taxonomy promotion).
     EdgeAffinityError, BenchmarkError, OfflineBootstrapError, EdgeCacheError,
     ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
-    QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
-    WatchdogError,
+    QuantError, RecoveryError, ResidencyError, RetryBudgetExhausted,
+    StorageError, TelemetryError, WatchdogError,
     ClusterAuthError,
 ]
 
@@ -83,6 +84,7 @@ EXPECTED_CODES = {
     QuantError: "edge_quant_error",
     RecoveryError: "edge_recovery_error",
     ResidencyError: "edge_residency_error",
+    RetryBudgetExhausted: "retry_budget_exhausted",
     StorageError: "edge_storage_error",
     TelemetryError: "edge_telemetry_error",
     WatchdogError: "edge_watchdog_error",
@@ -118,6 +120,7 @@ EXPECTED_RECOVERABLE = {
     QuantError: False,
     RecoveryError: True,
     ResidencyError: True,
+    RetryBudgetExhausted: True,
     StorageError: True,
     TelemetryError: False,
     WatchdogError: False,

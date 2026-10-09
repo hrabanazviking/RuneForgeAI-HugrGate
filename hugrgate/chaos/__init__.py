@@ -68,6 +68,11 @@ from hugrgate.chaos.resources import (
     MemoryReading,
     ResourceGuard,
 )
+from hugrgate.chaos.retry import (
+    RetryBudget,
+    default_retry_policy,
+    retry_with_budget,
+)
 
 __all__ = [
     "CHAOS_LAB",
@@ -102,14 +107,17 @@ __all__ = [
     "NetworkSimulator",
     "ProbeOutcome",
     "ResourceGuard",
+    "RetryBudget",
     "ServiceUnderTest",
     "SkewedClock",
     "SteadyStateProbe",
     "audit_deadline_clocks",
     "builtin_dependency_matrix",
+    "default_retry_policy",
     "dependency_failure_matrix",
     "disk_full",
     "partial_service_failure_experiment",
     "read_only",
+    "retry_with_budget",
     "run_experiment_on_lab",
 ]

@@ -8,6 +8,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Union
 
 from hugrgate.backend import Backend, BackendRegistry
+from hugrgate.chaos.retry import RetryBudget, retry_with_budget
 from hugrgate.errors import (
     Abstention,
     BackendError,
@@ -115,7 +116,8 @@ class HugrGate:
     def decide(self, state: Mapping[str, Any], spec: SpecLike,
                policy: DecisionPolicy | None = None,
                context: Mapping[str, Any] | None = None,
-               backend_name: str | None = None) -> DecisionResult:
+               backend_name: str | None = None,
+               retry_budget: RetryBudget | None = None) -> DecisionResult:
         """Make a bounded machine judgment.
 
         Never returns a value outside the spec's decision space.
@@ -124,6 +126,11 @@ class HugrGate:
         :class:`~hugrgate.contracts.schema.DecisionContract`; v2
         contracts with a v1 equivalent are migrated at the boundary
         (their ``contract_id`` rides in ``result.metadata``).
+
+        ``retry_budget`` (slice 268) is optional: when given, the
+        backend call retries recoverable failures within the budget
+        and raises :class:`RetryBudgetExhausted` when it is spent.
+        ``None`` (default) keeps the single-attempt behavior.
         """
         policy = policy or DecisionPolicy()
         validate_state(state)
@@ -142,7 +149,12 @@ class HugrGate:
             backend = self._select_backend(spec, policy)
 
         try:
-            result = backend.evaluate(state, spec, context)
+            if retry_budget is None:
+                result = backend.evaluate(state, spec, context)
+            else:
+                result = retry_with_budget(
+                    lambda: backend.evaluate(state, spec, context),
+                    retry_budget)
         except Abstention:
             logger.debug("backend %r abstained (spec=%s)", backend.name,
                          spec.type)
@@ -195,7 +207,8 @@ class HugrGate:
                       spec: DecisionSpec,
                       policy: DecisionPolicy | None = None,
                       context: Mapping[str, Any] | None = None,
-                      backend_name: str | None = None) -> DecisionResult:
+                      backend_name: str | None = None,
+                      retry_budget: RetryBudget | None = None) -> DecisionResult:
         """Async variant of :meth:`decide` (slice 018).
 
         Backend inference is synchronous and may block; this runs it in
@@ -203,4 +216,5 @@ class HugrGate:
         stays responsive. Same contract, same errors as ``decide``.
         """
         return await asyncio.to_thread(
-            self.decide, state, spec, policy, context, backend_name)
+            self.decide, state, spec, policy, context, backend_name,
+            retry_budget)
