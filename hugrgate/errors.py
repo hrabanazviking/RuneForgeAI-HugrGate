@@ -850,3 +850,60 @@ class ScaffoldError(HugrGateError):
     """
     code = "scaffold_error"
     recoverable = False
+class AutotuneError(HugrGateError):
+    """Base for all Campaign XIX autonomous-optimization failures.
+    Slice 451. Tuning is advisory to the decision path: optimizer-side
+    faults (a crashed tuner, a rejected proposal) are recoverable so a
+    single bad tuner cannot halt the whole cycle.
+    """
+    code = "autotune_error"
+    recoverable = True
+class ObjectiveError(AutotuneError):
+    """An objective specification is malformed or unusable.
+    Slice 452. A bad objective (unknown metric, empty weights, wrong
+    direction) is a caller/operator bug — not recoverable by retry.
+    """
+    code = "objective_error"
+    recoverable = False
+class ConstraintViolation(AutotuneError):
+    """A proposed parameter change violated a declared constraint.
+    Slice 453. The proposal is skipped and the tuner continues; the
+    rejection itself is routine search behavior, hence recoverable.
+    """
+    code = "constraint_violation"
+    recoverable = True
+class TunerError(AutotuneError):
+    """A tuner raised while producing a proposal.
+    Slice 451. Recoverable: the controller logs, skips the tuner, and
+    finishes the cycle with the remaining tuners.
+    """
+    code = "tuner_error"
+    recoverable = True
+class UnsafeProposalError(AutotuneError):
+    """A proposal was blocked by optimizer safety limits.
+    Slice 472. Not recoverable: the limits are the operator's stated
+    policy — retrying the identical proposal cannot succeed.
+    """
+    code = "unsafe_proposal"
+    recoverable = False
+class RollbackError(AutotuneError):
+    """An automatic rollback failed or left the config indeterminate.
+    Slice 469. Not recoverable: a failed rollback is a pager-grade
+    state-integrity problem, not a transient fault.
+    """
+    code = "rollback_error"
+    recoverable = False
+class ReproducibilityError(AutotuneError):
+    """A tuning run could not be reproduced from its recorded seed.
+    Slice 471. Not recoverable: non-reproducibility signals tampering
+    or a broken recorder — fix the recorder, do not retry blindly.
+    """
+    code = "reproducibility_error"
+    recoverable = False
+class ParameterError(AutotuneError):
+    """A tunable-parameter definition or value is invalid.
+    Slice 451. Unknown parameter names, out-of-bounds values, and
+    wrong-typed values are caller bugs — not recoverable by retry.
+    """
+    code = "parameter_error"
+    recoverable = False

@@ -56,7 +56,7 @@ def _stable_repr(obj: object) -> str:
     if isinstance(obj, (list, tuple)):
         inner = ", ".join(_stable_repr(v) for v in obj)
         return f"[{inner}]" if isinstance(obj, list) else f"({inner})"
-    return repr(obj)
+    return re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
 
 
 def describe(module, name: str) -> tuple[str, str]:

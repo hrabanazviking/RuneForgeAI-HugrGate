@@ -23,6 +23,7 @@ from hugrgate.errors import (
     AgentRunaway,
     AlertError,
     AuthzDenied,
+    AutotuneError,
     BackendError,
     BackendUnavailable,
     BackpressureError,
@@ -33,6 +34,7 @@ from hugrgate.errors import (
     ClusterAuthError,
     ConfigError,
     ConformanceError,
+    ConstraintViolation,
     ContractError,
     DataFlowDenied,
     DatasetError,
@@ -58,8 +60,10 @@ from hugrgate.errors import (
     MultiprocError,
     NPUError,
     NumaError,
+    ObjectiveError,
     ObservabilityError,
     OfflineBootstrapError,
+    ParameterError,
     PathTraversalBlocked,
     PerfGateError,
     PluginError,
@@ -76,9 +80,11 @@ from hugrgate.errors import (
     RateLimitExceeded,
     RecoveryError,
     ReplayDetected,
+    ReproducibilityError,
     ResidencyError,
     ResourceBudgetExceeded,
     RetryBudgetExhausted,
+    RollbackError,
     SandboxViolation,
     ScaffoldError,
     SchedulerError,
@@ -95,6 +101,8 @@ from hugrgate.errors import (
     TelemetryError,
     TimeoutError,
     TraceError,
+    TunerError,
+    UnsafeProposalError,
     WatchdogError,
     ZeroCopyError,
 )
@@ -156,6 +164,14 @@ ALL_ERRORS = [
     ProtocolError,
     ScaffoldError,
     SDKError,
+    AutotuneError,
+    ObjectiveError,
+    ConstraintViolation,
+    TunerError,
+    UnsafeProposalError,
+    RollbackError,
+    ReproducibilityError,
+    ParameterError,
 ]
 
 EXPECTED_CODES = {
@@ -235,6 +251,14 @@ EXPECTED_CODES = {
     ConformanceError: "conformance_error",
     ConfigError: "config_error",
     ScaffoldError: "scaffold_error",
+    AutotuneError: "autotune_error",
+    ObjectiveError: "objective_error",
+    ConstraintViolation: "constraint_violation",
+    TunerError: "tuner_error",
+    UnsafeProposalError: "unsafe_proposal",
+    RollbackError: "rollback_error",
+    ReproducibilityError: "reproducibility_error",
+    ParameterError: "parameter_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -324,6 +348,14 @@ EXPECTED_RECOVERABLE = {
     ConformanceError: False,
     ConfigError: False,
     ScaffoldError: False,
+    AutotuneError: True,
+    ObjectiveError: False,
+    ConstraintViolation: True,
+    TunerError: True,
+    UnsafeProposalError: False,
+    RollbackError: False,
+    ReproducibilityError: False,
+    ParameterError: False,
 }
 
 
