@@ -82,8 +82,10 @@ def test_rejects_unterminated_string():
 def test_rejects_unbalanced_brackets():
     with pytest.raises(SpecError, match="unbalanced"):
         Grammar.from_gbnf('root ::= ("a"')
-    with pytest.raises(SpecError, match="unbalanced"):
+    with pytest.raises(SpecError, match="outside a class"):
         Grammar.from_gbnf('root ::= "a"]')
+    with pytest.raises(SpecError, match="unterminated character class"):
+        Grammar.from_gbnf('root ::= [a-z')
 
 
 def test_rejects_missing_root_rule():

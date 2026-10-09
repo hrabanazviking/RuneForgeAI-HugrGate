@@ -55,49 +55,61 @@ def gbnf_escape(text: str) -> str:
 
 
 def _check_gbnf(source: str, root: str = "root") -> None:
-    """Syntactic sanity check for GBNF text. Raises SpecError."""
+    """Syntactic sanity check for GBNF text. Raises SpecError.
+
+    A small three-state scanner (code / string / char-class) checks
+    quote termination and bracket balance. It is *not* a full GBNF
+    parser — it catches malformed builder output and hand-written
+    mistakes, not deep grammar semantics.
+    """
     if not source or not source.strip():
         raise SpecError("grammar source must be non-empty")
-    # Balanced double quotes (respecting backslash escapes).
-    in_string, escaped = False, False
+    in_string = False
+    in_class = False
+    escaped = False
+    class_first = False  # `]` right after `[`/`[^` is literal
+    depth_paren = 0
     for char in source:
+        if escaped:
+            escaped = False
+            class_first = False
+            continue
+        if char == "\\":
+            escaped = True
+            class_first = False
+            continue
         if in_string:
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
-            elif char == '"':
+            if char == '"':
                 in_string = False
-        elif char == '"':
-            in_string = True
-    if in_string:
-        raise SpecError("grammar has an unterminated string literal")
-    # Balanced parens/brackets outside strings.
-    depth_paren = depth_bracket = 0
-    in_string, escaped = False, False
-    for char in source:
-        if in_string:
-            if escaped:
-                escaped = False
-            elif char == "\\":
-                escaped = True
+            class_first = False
+            continue
+        if in_class:
+            if char == "]" and not class_first:
+                in_class = False
             elif char == '"':
-                in_string = False
+                pass  # literal quote inside a char class
+            class_first = False
             continue
         if char == '"':
             in_string = True
+        elif char == "[":
+            in_class = True
+            class_first = True
+        elif char == "]":
+            raise SpecError(
+                "grammar has a character-class bracket outside a class")
         elif char == "(":
             depth_paren += 1
         elif char == ")":
             depth_paren -= 1
-        elif char == "[":
-            depth_bracket += 1
-        elif char == "]":
-            depth_bracket -= 1
-        if depth_paren < 0 or depth_bracket < 0:
-            raise SpecError("grammar has unbalanced brackets")
-    if depth_paren or depth_bracket:
-        raise SpecError("grammar has unbalanced brackets")
+            if depth_paren < 0:
+                raise SpecError("grammar has unbalanced parentheses")
+    if in_string:
+        raise SpecError("grammar has an unterminated string literal")
+    if in_class:
+        raise SpecError("grammar has an unterminated character class")
+    if depth_paren:
+        raise SpecError("grammar has unbalanced parentheses")
     # A root rule must exist: `root ::= ...` at line start (ish).
     pattern = re.compile(rf"(?m)^\s*{re.escape(root)}\s*::=")
     if not pattern.search(source):
