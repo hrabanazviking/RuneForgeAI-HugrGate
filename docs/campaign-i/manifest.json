@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:16:15.323979+00:00",
-  "module_count": 49,
+  "generated_utc": "2026-10-09T11:18:17.250018+00:00",
+  "module_count": 50,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 47,
+      "loc": 48,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -573,6 +573,28 @@
         "validate_value",
         "describe",
         "visit"
+      ]
+    },
+    "hugrgate.contracts.crossfield": {
+      "docstring": "Cross-field constraints \u2014 invariants over whole decisions.\n\nGjallarbr\u00fa slice 032.\n\nConditional fields (slice 031) decide *whether* a field is active. They\ncannot state *invariants* spanning fields: ``start < end``,\n``a + b <= 100``, \"these three codes are pairwise distinct\". This module\nadds declarative, serializable constraints evaluated after per-field\nvalidation:\n\n- :class:`FieldConstraint`: one invariant \u2014 ``fields`` involved, an\n  ``op``, and a ``target`` (a literal, or ``{\"field\": name}`` to compare\n  against another field's value);\n- :class:`ConstrainedCompositeContract` (kind ``\"constrained-composite\"``):\n  a composite with a ``constraints`` list; :meth:`validate_value`\n  aggregates *every* violation into one error instead of failing fast.\n\nConstraints are data, not callables: they serialize, describe\nthemselves, and stay auditable (law 14: bounded, typed, auditable).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 289,
+      "path": "hugrgate/contracts/crossfield.py",
+      "public_defs": [
+        "FieldConstraint",
+        "ConstrainedCompositeContract",
+        "check",
+        "describe",
+        "to_dict",
+        "from_dict",
+        "violations",
+        "validate_value",
+        "describe"
       ]
     },
     "hugrgate.contracts.hierarchy": {
@@ -1131,6 +1153,7 @@
     "test_contracts_029.py",
     "test_contracts_030.py",
     "test_contracts_031.py",
+    "test_contracts_032.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1141,5 +1164,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8694
+  "total_loc": 8984
 }

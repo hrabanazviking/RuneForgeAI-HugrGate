@@ -30,6 +30,7 @@ __all__ = [
     "hierarchy",
     "composite",
     "conditional",
+    "crossfield",
 ]
 
 
@@ -39,7 +40,7 @@ def __getattr__(name: str):
     # importlib.import_module is used instead of `from ... import ...`,
     # which would re-enter __getattr__ and recurse forever.
     if name in ("negotiation", "nested", "hierarchy", "composite",
-                "conditional"):
+                "conditional", "crossfield"):
         import importlib
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module

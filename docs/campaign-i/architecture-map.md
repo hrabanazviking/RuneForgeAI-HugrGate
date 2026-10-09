@@ -27,6 +27,7 @@ flowchart TD
         contracts_hierarchy[contracts.hierarchy]
         contracts_composite[contracts.composite]
         contracts_conditional[contracts.conditional]
+        contracts_crossfield[contracts.crossfield]
     end
     subgraph runtime[runtime]
         core[core]
@@ -153,6 +154,9 @@ flowchart TD
     contracts_conditional --> contracts_composite
     contracts_conditional --> contracts_schema
     contracts_conditional --> errors
+    contracts_crossfield --> contracts_composite
+    contracts_crossfield --> contracts_schema
+    contracts_crossfield --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
     contracts_negotiation --> contracts_schema
@@ -225,7 +229,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -313,6 +317,9 @@ flowchart TD
 | `contracts.conditional` | `contracts.composite` | no |
 | `contracts.conditional` | `contracts.schema` | no |
 | `contracts.conditional` | `errors` | no |
+| `contracts.crossfield` | `contracts.composite` | no |
+| `contracts.crossfield` | `contracts.schema` | no |
+| `contracts.crossfield` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
 | `contracts.negotiation` | `contracts.schema` | no |

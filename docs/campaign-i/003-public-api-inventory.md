@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 49 · **public names:** 214
+**Modules:** 50 · **public names:** 218
 
 ## API stability policy
 
@@ -241,6 +241,7 @@ that this document never drifts from the code.
 | `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
 | `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
 | `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/hatch/w` |
+| `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/hatch/wo` |
 
 ### `hugrgate.contracts.composite`
 
@@ -256,6 +257,14 @@ that this document never drifts from the code.
 | `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
 | `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
 | `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, conditions: 'Dict[str, FieldCondition]' = <factory>) -> None` |
+
+### `hugrgate.contracts.crossfield`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONSTRAINT_OPS` | constant | `('lt', 'le', 'eq', 'ne', 'gt', 'ge', 'sum_lt', 'sum_le', 'su` |
+| `FieldConstraint` | class | `(fields: 'Tuple[str, ...]', op: 'str', target: 'Any' = None, description: 'str' = '') -> None` |
+| `ConstrainedCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, constraints: 'List[FieldConstraint]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.hierarchy`
 
