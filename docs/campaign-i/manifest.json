@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:38:34.667076+00:00",
-  "module_count": 59,
+  "generated_utc": "2026-10-09T11:40:24.360537+00:00",
+  "module_count": 60,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 59,
+      "loc": 60,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -698,6 +698,31 @@
         "distribution_violations",
         "validate_distribution",
         "check_distribution",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.features": {
+      "docstring": "Input feature contracts \u2014 what the model may assume.\n\nGjallarbr\u00fa slice 042.\n\n``hugrgate/features.py`` extractors turn raw state into flat\n``{name: float}`` dicts, but nothing contracts the *input* side: which\nfeatures must be present, their dtypes, valid ranges, or what happens\nwith missing/extra keys. :class:`FeatureContract` (kind\n``\"input-features\"``) declares:\n\n- :class:`FeatureSpec`: ``name``, ``dtype`` (``float`` | ``int`` |\n  ``bool`` | ``category``), ``required``, numeric ``minimum``/``maximum``,\n  ``categories`` for categoricals, and a ``default`` for optional fields;\n- validation with aggregated violations (missing, mistyped,\n  out-of-range, unknown category);\n- :meth:`select`: project a raw mapping onto the declared feature order \u2014\n  filling defaults, dropping or rejecting extras per ``allow_extra`` \u2014\n  producing the clean, ordered feature dict a backend can consume.\n\n(This is ``hugrgate.contracts.features``; the existing\n``hugrgate.features`` extractor module is untouched.)",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 288,
+      "path": "hugrgate/contracts/features.py",
+      "public_defs": [
+        "FeatureSpec",
+        "FeatureContract",
+        "check",
+        "to_dict",
+        "from_dict",
+        "specs",
+        "feature_names",
+        "required_names",
+        "violations",
+        "validate_value",
+        "select",
         "describe"
       ]
     },
@@ -1388,6 +1413,7 @@
     "test_contracts_039.py",
     "test_contracts_040.py",
     "test_contracts_041.py",
+    "test_contracts_042.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1398,5 +1424,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11261
+  "total_loc": 11550
 }

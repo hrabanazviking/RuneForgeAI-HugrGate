@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 59 · **public names:** 262
+**Modules:** 60 · **public names:** 266
 
 ## API stability policy
 
@@ -251,6 +251,7 @@ that this document never drifts from the code.
 | `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/hatch/workspac` |
 | `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/hatch/wor` |
 | `context` | constant | `<module 'hugrgate.contracts.context' from '/home/hatch/works` |
+| `features` | constant | `<module 'hugrgate.contracts.features' from '/home/hatch/work` |
 
 ### `hugrgate.contracts.composite`
 
@@ -308,6 +309,14 @@ that this document never drifts from the code.
 | `DistributionConstraint` | class | `(op: 'str', threshold: 'float' = 0.0, labels: 'Tuple[str, ...]' = (), description: 'str' = '') -> None` |
 | `DistributionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, constraints: 'List[DistributionConstraint]' = <factory>) -> None` |
 | `shannon_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+
+### `hugrgate.contracts.features`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FEATURE_DTYPES` | constant | `('float', 'int', 'bool', 'category')` |
+| `FeatureSpec` | class | `(name: 'str', dtype: 'str' = 'float', required: 'bool' = True, minimum: 'Optional[float]' = None, maximum: 'Optional[float]' = None, categories: 'Tuple[str, ...]' = (), default: 'Any' = None) -> None` |
+| `FeatureContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, features: 'List[Dict[str, Any]]' = <factory>, allow_extra: 'bool' = True) -> None` |
 
 ### `hugrgate.contracts.hierarchy`
 

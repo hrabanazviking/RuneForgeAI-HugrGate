@@ -37,6 +37,7 @@ flowchart TD
         contracts_risk[contracts.risk]
         contracts_deadlines[contracts.deadlines]
         contracts_context[contracts.context]
+        contracts_features[contracts.features]
     end
     subgraph runtime[runtime]
         core[core]
@@ -176,6 +177,8 @@ flowchart TD
     contracts_deadlines --> spec
     contracts_distributions --> contracts_schema
     contracts_distributions --> errors
+    contracts_features --> contracts_schema
+    contracts_features --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
     contracts_multilabel --> contracts_schema
@@ -260,7 +263,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -361,6 +364,8 @@ flowchart TD
 | `contracts.deadlines` | `spec` | no |
 | `contracts.distributions` | `contracts.schema` | no |
 | `contracts.distributions` | `errors` | no |
+| `contracts.features` | `contracts.schema` | no |
+| `contracts.features` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
 | `contracts.multilabel` | `contracts.schema` | no |
