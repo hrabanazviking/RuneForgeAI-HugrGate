@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:53:01.098705+00:00",
-  "module_count": 62,
+  "generated_utc": "2026-10-09T11:56:26.442816+00:00",
+  "module_count": 63,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 63,
+      "loc": 64,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -550,6 +550,21 @@
         "field_contract",
         "validate_value",
         "describe"
+      ]
+    },
+    "hugrgate.contracts.composition": {
+      "docstring": "Contract composition \u2014 combining contracts. Gjallarbr\u00fa slice 045.\n\nInheritance (slice 044) is *is-a* specialization of one base. Composition\nis *and*: merging, producting, and stacking contracts.\n\n- :func:`merge`: union the fields of several composites of the *same*\n  concrete sub-kind (``composite``, ``conditional-composite``,\n  ``constrained-composite``). Field conflicts resolve by policy\n  (``error`` | ``left`` | ``right``); conditions union; constraints\n  concatenate. Cross-sub-kind merges are rejected \u2014 silently dropping\n  conditions or constraints would lie about the result.\n- :func:`product`: the joint decision \u2014 any two contracts as two named\n  fields of one composite (``A \u00d7 B``).\n- :func:`with_deadline`: stack a temporal bound onto any contract via\n  :class:`TimedContract`.\n\n``derive_contract`` (044) is single-base override; ``merge`` is its\nmulti-base union sibling.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 167,
+      "path": "hugrgate/contracts/composition.py",
+      "public_defs": [
+        "merge",
+        "product",
+        "with_deadline"
       ]
     },
     "hugrgate.contracts.conditional": {
@@ -1453,6 +1468,7 @@
     "test_contracts_042.py",
     "test_contracts_043.py",
     "test_contracts_044.py",
+    "test_contracts_045.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1463,5 +1479,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 12155
+  "total_loc": 12323
 }

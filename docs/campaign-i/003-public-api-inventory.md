@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 62 · **public names:** 273
+**Modules:** 63 · **public names:** 278
 
 ## API stability policy
 
@@ -254,6 +254,7 @@ that this document never drifts from the code.
 | `features` | constant | `<module 'hugrgate.contracts.features' from '/home/hatch/work` |
 | `explanations` | constant | `<module 'hugrgate.contracts.explanations' from '/home/hatch/` |
 | `inheritance` | constant | `<module 'hugrgate.contracts.inheritance' from '/home/hatch/w` |
+| `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
 
 ### `hugrgate.contracts.composite`
 
@@ -261,6 +262,15 @@ that this document never drifts from the code.
 |---|---|---|
 | `FieldContract` | constant | `typing.Union[hugrgate.contracts.schema.DecisionContract, hug` |
 | `CompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>) -> None` |
+
+### `hugrgate.contracts.composition`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MERGE_POLICIES` | constant | `('error', 'left', 'right')` |
+| `merge` | function | `(*contracts: 'CompositeContract', contract_id: 'str', on_conflict: 'str' = 'error', name: 'str' = '', description: 'str' = '', metadata: 'Optional[Dict[str, Any]]' = None) -> 'CompositeContract'` |
+| `product` | function | `(a: 'DecisionContract', b: 'DecisionContract', *, contract_id: 'str', name_a: 'str' = 'first', name_b: 'str' = 'second', name: 'str' = '', description: 'str' = '', metadata: 'Optional[Dict[str, Any]]' = None) -> 'CompositeContract'` |
+| `with_deadline` | function | `(contract: 'DecisionContract', *, contract_id: 'str', budget_ms: 'Optional[float]' = None, not_before: 'Optional[float]' = None, not_after: 'Optional[float]' = None, name: 'str' = '', description: 'str' = '', metadata: 'Optional[Dict[str, Any]]' = None) -> 'TimedContract'` |
 
 ### `hugrgate.contracts.conditional`
 

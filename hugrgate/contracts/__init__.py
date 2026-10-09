@@ -43,6 +43,7 @@ __all__ = [
     "features",
     "explanations",
     "inheritance",
+    "composition",
 ]
 
 
@@ -55,7 +56,7 @@ def __getattr__(name: str):
                 "conditional", "crossfield", "ordinal", "uncertainty",
                 "distributions", "multilabel", "cost", "utility",
                 "risk", "deadlines", "context", "features",
-                "explanations", "inheritance"):
+                "explanations", "inheritance", "composition"):
         import importlib
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module

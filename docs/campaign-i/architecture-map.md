@@ -40,6 +40,7 @@ flowchart TD
         contracts_features[contracts.features]
         contracts_explanations[contracts.explanations]
         contracts_inheritance[contracts.inheritance]
+        contracts_composition[contracts.composition]
     end
     subgraph runtime[runtime]
         core[core]
@@ -163,6 +164,13 @@ flowchart TD
     contracts_composite --> contracts_schema
     contracts_composite --> errors
     contracts_composite --> spec
+    contracts_composition --> contracts_composite
+    contracts_composition --> contracts_conditional
+    contracts_composition --> contracts_crossfield
+    contracts_composition --> contracts_deadlines
+    contracts_composition --> contracts_schema
+    contracts_composition --> errors
+    contracts_composition --> spec
     contracts_conditional --> contracts_composite
     contracts_conditional --> contracts_schema
     contracts_conditional --> errors
@@ -287,7 +295,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -372,6 +380,13 @@ flowchart TD
 | `contracts.composite` | `contracts.schema` | no |
 | `contracts.composite` | `errors` | no |
 | `contracts.composite` | `spec` | no |
+| `contracts.composition` | `contracts.composite` | no |
+| `contracts.composition` | `contracts.conditional` | no |
+| `contracts.composition` | `contracts.crossfield` | no |
+| `contracts.composition` | `contracts.deadlines` | no |
+| `contracts.composition` | `contracts.schema` | no |
+| `contracts.composition` | `errors` | no |
+| `contracts.composition` | `spec` | no |
 | `contracts.conditional` | `contracts.composite` | no |
 | `contracts.conditional` | `contracts.schema` | no |
 | `contracts.conditional` | `errors` | no |
