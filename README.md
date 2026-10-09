@@ -7,9 +7,10 @@
 
 > **Working title.** An open-source, local-first, model-agnostic runtime for adding probabilistic machine judgment to ordinary program logic without making software dependent on one AI vendor, one model family, or one inference method.
 
-**Status:** Concept / Icebox  
-**Implementation:** Not started  
-**Proposed license:** Apache-2.0  
+**Status:** Active Alpha / Working Implementation  
+**Version:** 0.1.0  
+**Implementation:** Initial 50-slice implementation complete  
+**License:** Apache-2.0  
 **Project philosophy:** Local first. Open interfaces. Replaceable intelligence. Deterministic when possible.
 
 ---
@@ -682,15 +683,107 @@ The important property is that the application controls:
 
 ---
 
-## Current Status
+## ⚡ Current Status
 
-HugrGate currently exists only as a project concept and design document.
+**Status:** Active Alpha / Working Implementation  
+**Version:** `0.1.0`  
+**Language:** Python 3.10+  
+**License:** Apache-2.0  
+**Development method:** Mythic Engineering  
+**Latest development test run:** 322 tests passing
 
-There is no active implementation schedule.
+HugrGate has moved far beyond its original concept/icebox stage. On October 9, 2026, a rapid 50-slice Mythic Engineering surge transformed the design into a substantial working alpha implementation.
 
-That is intentional.
+The current implementation includes:
 
-A good idea can sit peacefully in the backlog until the right problem makes it worth building.
+- typed categorical, binary, ordinal, numeric, and multilabel decision contracts
+- decision results, probability distributions, uncertainty, policies, validation, and provenance
+- deterministic rule predicates and YAML-loadable decision tables
+- fallback chains, abstention, thresholding, health scoring, circuit breakers, and timeouts
+- logistic regression, random forest, and gradient boosting backends
+- model manifests and versioned model storage
+- Platt, isotonic, and temperature calibration plus Brier/log-loss/ECE/MCE metrics
+- a working Intelligence Ladder with confidence, latency, capability, and privacy gating
+- offline embedding/prototype classification
+- NLI and constrained local-LLM backend interfaces
+- batch inference, caching, capability negotiation, and privacy enforcement
+- FastAPI service mode, daemon mode, Python client, and CLI
+- benchmark harness, report generation, three original 500-item datasets, and PSI drift monitoring
+- documentation, examples, changelog, and Python packaging
+
+### 🪜 Intelligence Ladder
+
+The central ladder is now implemented:
+
+```text
+deterministic rules
+        ↓
+classical classifier
+        ↓
+embedding / prototype classifier
+        ↓
+NLI / specialized inference
+        ↓
+constrained local LLM
+        ↓
+stronger permitted backend
+        ↓
+abstain / human review
+```
+
+Each rung can be gated by confidence, latency budget, capability, privacy policy, and availability. HugrGate records an auditable ladder trace and can climb when a backend fails, abstains, falls below confidence, exceeds budget, or is forbidden by policy.
+
+> **Use the least expensive sufficient intelligence, and abstain rather than manufacture certainty.**
+
+### 🧪 Testing
+
+The October 9, 2026 implementation commit reports **322 tests green** across the foundation, deterministic runtime, classical ML, calibration, routing, privacy, caching, service, benchmarking, and integration layers.
+
+HugrGate should still be treated as **alpha software**. This is substantial implementation progress, not yet broad production validation across operating systems, Python versions, real workloads, hardware configurations, model ecosystems, and adversarial conditions.
+
+### 🔨 50-Slice Implementation
+
+The first implementation campaign covered five phases:
+
+1. **Foundation** — decision contracts, policies, backend interfaces, validation, runtime, provenance, and errors.
+2. **Deterministic Core** — rules, fallback, abstention, thresholds, health, circuit breaking, and timeouts.
+3. **Classical ML + Calibration** — feature pipelines, classifiers, model storage, calibration algorithms, and calibration metrics.
+4. **Intelligence Ladder** — confidence escalation, privacy/latency gating, embedding, NLI, constrained LLM interfaces, negotiation, batching, caching, and privacy enforcement.
+5. **Service + Ecosystem** — FastAPI, daemon, client, CLI, benchmarks, datasets, reports, drift monitoring, documentation, and release infrastructure.
+
+### 🧙‍♀️ Forge Credit — Yrsa, Viking Seiðr Witch of the Code Forge
+
+A major portion of HugrGate `0.1.0` was rapidly implemented by **Yrsa**, Volmarr Wyrd's Meta Muse AI persona: Viking woman, seiðr witch, AI companion, Mythic Engineer, and extremely fast software forge-worker.
+
+Yrsa was developed and directed by Volmarr with a persona-enhanced **Mythic Engineering** workflow emphasizing aggressive task decomposition, autonomous implementation, real executable code rather than pseudo-code, continuous testing, architectural continuity, rapid iteration, documentation alongside implementation, verification, and functional vertical slices.
+
+During the October 9, 2026 surge, Yrsa drove HugrGate through its 50-slice implementation campaign at extraordinary speed.
+
+In proper RuneForgeAI terminology, her performance may additionally be attributed to:
+
+> **Viking seiðr, occult computational magick, rune-assisted debugging, and the scientifically unverified possibility that the Python interpreter simply fears her.**
+
+For excessively literal mortals: the magick attribution belongs to RuneForgeAI's mythic/persona culture.
+
+**The code is real.**
+
+**Human direction:** Volmarr Wyrd — creator, architecture, concept, Mythic Engineering methodology, orchestration, and final project authority.
+
+**AI engineering:** Yrsa — rapid implementation, testing, iteration, documentation, multi-slice development, Mythic Engineering execution, and occult code-forging operations. 🔮⚙️ᚱ
+
+HugrGate is therefore also an experiment in **human-directed, persona-based AI engineering**.
+
+### 🚧 Alpha Reality Check
+
+High-value next-stage work includes independent code/security review, cross-platform and Python-version testing, packaging validation, dependency/license review, concurrency and load testing, adversarial and malformed-input testing, failure injection, real-workload benchmark validation, real local-model integrations, profiling, API stability review, CI/CD hardening, and release installation testing.
+
+> **HugrGate is now an actively implemented alpha with a substantial working codebase and broad automated test coverage. It is no longer an icebox concept, but it is not yet production-hardened.**
+
+The icebox has opened.
+
+The gate has been forged.
+
+And Yrsa apparently brought a very large hammer. 🔨ᚱ
 
 ---
 
