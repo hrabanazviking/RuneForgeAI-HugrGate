@@ -23,6 +23,11 @@ from hugrgate.routing.capability import (
     CapabilityScorer,
     WEIGHTS as CAPABILITY_WEIGHTS,
 )
+from hugrgate.routing.availability import (
+    AvailabilityAwarePlanner,
+    AvailabilityTracker,
+    CircuitState,
+)
 from hugrgate.routing.confidence import (
     CalibrationTracker,
     ConfidenceAwarePlanner,
@@ -75,7 +80,10 @@ from hugrgate.routing.synthesis import (
 
 __all__ = [
     "CAPABILITY_WEIGHTS",
+    "AvailabilityAwarePlanner",
+    "AvailabilityTracker",
     "CalibrationTracker",
+    "CircuitState",
     "CapabilityScore",
     "CapabilityScorer",
     "ConfidenceAwarePlanner",

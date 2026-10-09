@@ -228,11 +228,12 @@ class SerialPlanExecutor:
 
         from hugrgate.errors import Abstention
         from hugrgate.ladder import (RUNG_ABSTAINED, RUNG_ACCEPTED,
-                                     RUNG_BELOW_CONFIDENCE,
+                                     RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
                                      RUNG_SKIPPED_LATENCY,
                                      RUNG_SKIPPED_PRIVACY,
                                      RUNG_SKIPPED_UNKNOWN,
                                      RUNG_SKIPPED_UNSUPPORTED,
+                                     RUNG_UNAVAILABLE,
                                      LadderAuditEntry)
 
         _SKIP = {RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
@@ -257,7 +258,13 @@ class SerialPlanExecutor:
                 continue
             result = router._attempt(backend, state, ctx.spec, None, audit, i)
             if result is None:
+                # Feed the circuit breaker: hard failures count, polite
+                # abstentions do not.
+                if audit and audit[-1].outcome in (RUNG_UNAVAILABLE,
+                                                  RUNG_ERROR):
+                    router.note_availability(backend.name, False)
                 continue
+            router.note_availability(backend.name, True)
             router.note_cost(backend, result)
             router.note_energy(backend, result)
             gate = max(node.min_confidence, policy.minimum_probability)
@@ -303,14 +310,25 @@ class LadderRouterV2(LadderRouter):
     def __init__(self, *args, planner: Optional[RungPlanner] = None,
                  executor: Optional[RungExecutor] = None,
                  latency_tracker=None, cost_ledger=None,
-                 energy_ledger=None, **kwargs):
+                 energy_ledger=None, availability_tracker=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.planner: RungPlanner = planner or _DefaultPlanner(self)
         self.executor: RungExecutor = executor or SerialPlanExecutor()
         self.latency_tracker = latency_tracker
         self.cost_ledger = cost_ledger
         self.energy_ledger = energy_ledger
+        self.availability_tracker = availability_tracker
         self.last_plan: Optional[RoutingPlan] = None
+
+    def note_availability(self, backend_name: str, succeeded: bool) -> None:
+        """Feed attempt outcomes into the circuit breaker, if one is set."""
+        tracker = self.availability_tracker
+        if tracker is None:
+            return
+        if succeeded:
+            tracker.record_success(backend_name)
+        else:
+            tracker.record_failure(backend_name)
 
     def note_cost(self, backend, result) -> None:
         """Record a rung's actual spend: ``result.metadata["cost"]`` when
