@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 60 · **public names:** 288
+**Modules:** 61 · **public names:** 294
 
 ## API stability policy
 
@@ -234,6 +234,7 @@ that this document never drifts from the code.
 | `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
 | `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
 | `DEFAULT_LAN_PORT` | constant | `18377` |
+| `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
@@ -249,6 +250,7 @@ that this document never drifts from the code.
 | `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
+| `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
 | `MessageType` | class | `(*values)` |
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
@@ -257,6 +259,7 @@ that this document never drifts from the code.
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
+| `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
 | `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
@@ -338,6 +341,14 @@ that this document never drifts from the code.
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
 | `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
+
+### `hugrgate.cluster.node_latency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
+| `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
+| `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
 
 ### `hugrgate.cluster.policy_sync`
 

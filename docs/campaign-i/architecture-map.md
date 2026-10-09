@@ -83,6 +83,7 @@ flowchart TD
         cluster_privacy_boundary[cluster.privacy_boundary]
         cluster_routing[cluster.routing]
         cluster_node_health[cluster.node_health]
+        cluster_node_latency[cluster.node_latency]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -181,6 +182,7 @@ flowchart TD
     cluster --> cluster_lan
     cluster --> cluster_node
     cluster --> cluster_node_health
+    cluster --> cluster_node_latency
     cluster --> cluster_policy_sync
     cluster --> cluster_privacy_boundary
     cluster --> cluster_protocol
@@ -209,6 +211,7 @@ flowchart TD
     cluster_node --> cluster_discovery
     cluster_node --> cluster_identity
     cluster_node --> cluster_node_health
+    cluster_node --> cluster_node_latency
     cluster_node --> cluster_policy_sync
     cluster_node --> cluster_protocol
     cluster_node --> cluster_routing
@@ -220,6 +223,7 @@ flowchart TD
     cluster_node --> serde
     cluster_node --> spec
     cluster_node_health --> errors
+    cluster_node_latency --> errors
     cluster_policy_sync --> errors
     cluster_policy_sync --> policy
     cluster_policy_sync --> serde
@@ -337,7 +341,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -437,6 +441,7 @@ flowchart TD
 | `cluster` | `cluster.lan` | no |
 | `cluster` | `cluster.node` | no |
 | `cluster` | `cluster.node_health` | no |
+| `cluster` | `cluster.node_latency` | no |
 | `cluster` | `cluster.policy_sync` | no |
 | `cluster` | `cluster.privacy_boundary` | no |
 | `cluster` | `cluster.protocol` | no |
@@ -465,6 +470,7 @@ flowchart TD
 | `cluster.node` | `cluster.discovery` | no |
 | `cluster.node` | `cluster.identity` | no |
 | `cluster.node` | `cluster.node_health` | no |
+| `cluster.node` | `cluster.node_latency` | no |
 | `cluster.node` | `cluster.policy_sync` | no |
 | `cluster.node` | `cluster.protocol` | no |
 | `cluster.node` | `cluster.routing` | no |
@@ -476,6 +482,7 @@ flowchart TD
 | `cluster.node` | `serde` | no |
 | `cluster.node` | `spec` | no |
 | `cluster.node_health` | `errors` | no |
+| `cluster.node_latency` | `errors` | no |
 | `cluster.policy_sync` | `errors` | no |
 | `cluster.policy_sync` | `policy` | no |
 | `cluster.policy_sync` | `serde` | no |

@@ -37,6 +37,11 @@ from hugrgate.cluster.node_health import (
     NodeHealthMonitor,
     PeerHealth,
 )
+from hugrgate.cluster.node_latency import (
+    DEFAULT_LATENCY_TARGET_MS,
+    LatencyTracker,
+    PeerLatency,
+)
 from hugrgate.cluster.policy_sync import (
     PolicyPropagator,
     PolicyVersion,
@@ -87,6 +92,7 @@ __all__ = [
     "CLUSTER_RPC_PATH",
     "DEFAULT_LAN_GROUP",
     "DEFAULT_LAN_PORT",
+    "DEFAULT_LATENCY_TARGET_MS",
     "DEFAULT_QUARANTINE_THRESHOLD",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
@@ -102,6 +108,7 @@ __all__ = [
     "DistributedRouter",
     "InboundHook",
     "LANDiscoveryAdapter",
+    "LatencyTracker",
     "MessageType",
     "MulticastConfig",
     "NodeAuthenticator",
@@ -110,6 +117,7 @@ __all__ = [
     "NodeIdentity",
     "OutboundHook",
     "PeerHealth",
+    "PeerLatency",
     "PeerRecord",
     "PeerScores",
     "PolicyPropagator",

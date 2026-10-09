@@ -20,6 +20,7 @@ from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
 from hugrgate.cluster.identity import NodeIdentity
 from hugrgate.cluster.node_health import NodeHealthMonitor
+from hugrgate.cluster.node_latency import LatencyTracker
 from hugrgate.cluster.policy_sync import PolicyPropagator
 from hugrgate.cluster.protocol import (
     ClusterMessage,
@@ -113,6 +114,8 @@ class ClusterNode:
         self.router = DistributedRouter(self)
         #: Node health scoring (slice 213).
         self.health = NodeHealthMonitor()
+        #: Node latency scoring (slice 214).
+        self.latency = LatencyTracker()
 
     # -- local facts --------------------------------------------------------
 
@@ -153,7 +156,11 @@ class ClusterNode:
 
         Every outcome feeds the health monitor (slice 213): transport
         and backend failures count against the peer, successes heal it.
+        Round-trip time feeds the latency tracker (slice 214).
         """
+        import time
+
+        start = time.perf_counter()
         try:
             result = self.rpc.decide(peer, spec, state, policy=policy,
                                      backend_name=backend_name,
@@ -162,7 +169,9 @@ class ClusterNode:
         except BackendError:
             self.health.record_failure(peer.node_id)
             raise
+        rtt_ms = (time.perf_counter() - start) * 1000.0
         self.health.record_success(peer.node_id)
+        self.latency.record(peer.node_id, rtt_ms)
         return result
 
     def refresh_scores(self) -> None:
@@ -175,7 +184,7 @@ class ClusterNode:
             node_id = peer.node_id
             self.router.set_scores(node_id, PeerScores(
                 health=self.health.score(node_id),
-                latency=1.0,   # slice 214
+                latency=self.latency.score(node_id),
                 cost=1.0,      # slice 215
             ))
 

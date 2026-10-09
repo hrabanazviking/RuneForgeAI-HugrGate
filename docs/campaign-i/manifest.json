@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:26:17.706078+00:00",
-  "module_count": 60,
+  "generated_utc": "2026-10-09T13:27:25.123295+00:00",
+  "module_count": 61,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 137,
+      "loc": 145,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -686,9 +686,10 @@
         "collections",
         "hugrgate",
         "threading",
+        "time",
         "typing"
       ],
-      "loc": 430,
+      "loc": 439,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -731,6 +732,29 @@
         "score",
         "is_quarantined",
         "quarantined_peers",
+        "reset",
+        "stats"
+      ]
+    },
+    "hugrgate.cluster.node_latency": {
+      "docstring": "Node latency scoring. Slice 214.\n\nRound-trip times are measured on every remote RPC and folded into an\nexponentially-weighted moving average per peer. The score mirrors the\nbackend health monitor's latency factor (slice 17):\n\n``score = min(1.0, target_ms / ewma_ms)``\n\n\u2014 at or under the target a peer scores 1.0; a peer twice as slow\nscores 0.5. Unknown peers score 1.0 (no evidence of slowness).\nPercentiles (p50/p95) are exposed for operators and the benchmark\nsuite (slice 224).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "threading"
+      ],
+      "loc": 133,
+      "path": "hugrgate/cluster/node_latency.py",
+      "public_defs": [
+        "PeerLatency",
+        "LatencyTracker",
+        "record",
+        "ewma",
+        "percentile",
+        "score",
         "reset",
         "stats"
       ]
@@ -1441,6 +1465,7 @@
     "test_cluster_identity.py",
     "test_cluster_lan.py",
     "test_cluster_node_health.py",
+    "test_cluster_node_latency.py",
     "test_cluster_policy_sync.py",
     "test_cluster_privacy_boundary.py",
     "test_cluster_protocol.py",
@@ -1475,5 +1500,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11230
+  "total_loc": 11380
 }
