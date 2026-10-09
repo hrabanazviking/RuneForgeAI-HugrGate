@@ -1,9 +1,10 @@
-"""Local NLI + embedding model packs. Slices 166-167.
+"""Local model packs. Slices 166-168.
 
-A *pack* is a curated, known-good model choice for one fabric job.
-This slice covers NLI packs: zero-shot entailment models served by
-the transformers runtime (slices 167-168 add embedding and classifier
-packs to the same registry).
+A *pack* is a curated, known-good model choice for one fabric job:
+
+- slice 166 — NLI packs: zero-shot entailment models;
+- slice 167 — embedding packs: sentence embedding models;
+- slice 168 — classifier packs: text-classification models.
 
 Each :class:`ModelPack` records the Hugging Face id, the runtime and
 pipeline task that serve it, languages, license, and an honest size
@@ -27,6 +28,7 @@ from hugrgate.runtimes import LocalRuntime, ModelRef
 from hugrgate.runtimes.transformers_rt import TransformersRuntime
 
 __all__ = [
+    "CLASSIFIER_PACKS",
     "EMBEDDING_PACKS",
     "NLI_PACKS",
     "ModelPack",
@@ -38,9 +40,10 @@ __all__ = [
     "runtime_for_pack",
 ]
 
-#: Pack kinds (classifier packs arrive in slice 168).
+#: Pack kinds.
 KIND_NLI = "nli"
 KIND_EMBEDDING = "embedding"
+KIND_CLASSIFIER = "classifier"
 
 
 @dataclass(frozen=True)
@@ -62,7 +65,7 @@ class ModelPack:
     extra: dict[str, Any] = field(default_factory=dict, compare=False)
 
     def __post_init__(self) -> None:
-        if self.kind not in (KIND_NLI, KIND_EMBEDDING):
+        if self.kind not in (KIND_NLI, KIND_EMBEDDING, KIND_CLASSIFIER):
             raise SpecError(f"unknown pack kind {self.kind!r}")
 
     def to_model_ref(self) -> ModelRef:
@@ -129,14 +132,41 @@ EMBEDDING_PACKS: tuple[ModelPack, ...] = (
                     "retrieval."),
 )
 
+CLASSIFIER_PACKS: tuple[ModelPack, ...] = (
+    ModelPack(
+        kind=KIND_CLASSIFIER, name="twitter-roberta-sentiment",
+        hf_id="cardiffnlp/twitter-roberta-base-sentiment-latest",
+        task="text-classification",
+        languages=("en",), license="cc-by-4.0", size_mb=500.0,
+        description="RoBERTa sentiment (positive/neutral/negative) "
+                    "trained on tweets; robust to informal text.",
+        labels=("positive", "neutral", "negative"),
+        default=True),
+    ModelPack(
+        kind=KIND_CLASSIFIER, name="go-emotions",
+        hf_id="SamLowe/roberta-base-go_emotions",
+        task="text-classification",
+        languages=("en",), license="apache-2.0", size_mb=500.0,
+        description="RoBERTa on GoEmotions; 27 fine-grained emotion "
+                    "labels + neutral.",
+        labels=("admiration", "amusement", "anger", "annoyance",
+                "approval", "caring", "confusion", "curiosity",
+                "desire", "disappointment", "disapproval", "disgust",
+                "embarrassment", "excitement", "fear", "gratitude",
+                "grief", "joy", "love", "nervousness", "optimism",
+                "pride", "realization", "relief", "remorse",
+                "sadness", "surprise", "neutral")),
+)
+
 _PACKS: dict[str, tuple[ModelPack, ...]] = {
     KIND_NLI: NLI_PACKS,
     KIND_EMBEDDING: EMBEDDING_PACKS,
+    KIND_CLASSIFIER: CLASSIFIER_PACKS,
 }
 
 
 def packs_for(kind: str) -> tuple[ModelPack, ...]:
-    """All packs of one kind (``"nli"``/``"embedding"``)."""
+    """All packs of one kind (``"nli"``/``"embedding"``/``"classifier"``)."""
     if kind not in _PACKS:
         raise SpecError(
             f"unknown pack kind {kind!r}; choose from "
