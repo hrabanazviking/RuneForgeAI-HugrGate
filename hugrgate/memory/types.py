@@ -11,6 +11,7 @@ the spokes typed without creating a cycle: ``Episode`` and
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, Protocol
 
 from hugrgate.provenance import DecisionRecord
@@ -41,7 +42,7 @@ class EpisodeLike(Protocol):
 class HistoryLike(Protocol):
     """Structural shape of :class:`hugrgate.memory.history.DecisionHistory`."""
 
-    def find(self, query: Any) -> list[EpisodeLike]:
+    def find(self, query: Any) -> Sequence[EpisodeLike]:
         """Run a query; return episode copies."""
         ...  # pragma: no cover - protocol stub
 
@@ -49,11 +50,12 @@ class HistoryLike(Protocol):
         """Return one episode copy; raise when unknown."""
         ...  # pragma: no cover - protocol stub
 
-    def recent(self, n: int = 10) -> list[EpisodeLike]:
+    def recent(self, n: int = 10) -> Sequence[EpisodeLike]:
         """Chronological episode copies (newest last)."""
         ...  # pragma: no cover - protocol stub
 
-    def by_request_hash(self, request_hash: str) -> list[EpisodeLike]:
+    def by_request_hash(
+        self, request_hash: str) -> Sequence[EpisodeLike]:
         """Episode copies matching a provenance request hash."""
         ...  # pragma: no cover - protocol stub
 

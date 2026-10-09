@@ -51,7 +51,7 @@ def retrieve_conditioned(
                 f"unknown outcome kind(s): {sorted(unknown)}; expected "
                 f"a subset of {OUTCOME_KINDS} or None")
 
-    episodes: list[EpisodeLike] = history.find(MemoryQuery())
+    episodes: list[EpisodeLike] = list(history.find(MemoryQuery()))
     conditioned: list[EpisodeLike] = []
     for episode in episodes:
         outcome = episode.outcome

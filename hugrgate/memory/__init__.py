@@ -20,6 +20,7 @@ behavior is typed, thread-safe, and bounded (see
 from __future__ import annotations
 
 from hugrgate.memory.access import (
+    ROLE_PERMISSIONS,
     GuardedHistory,
     MemoryAccessPolicy,
     RolePermission,

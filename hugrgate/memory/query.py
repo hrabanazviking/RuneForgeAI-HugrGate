@@ -18,7 +18,7 @@ Queries never mutate the store and always return deep copies.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
@@ -47,8 +47,7 @@ _MEMORY_ONLY_FIELDS = (
 _E = TypeVar("_E", bound=EpisodeLike)
 
 
-def _frozen(values: set[str] | frozenset[str] | list[str] | tuple[str, ...]
-              | None) -> frozenset[str] | None:
+def _frozen(values: Collection[str] | None) -> frozenset[str] | None:
     if values is None:
         return None
     return frozenset(values)
@@ -61,21 +60,21 @@ class MemoryQuery:
     Every filter is optional; an empty query matches everything.
     """
 
-    backends: frozenset[str] | None = None
-    models: frozenset[str] | None = None
+    backends: Collection[str] | None = None
+    models: Collection[str] | None = None
     accepted: bool | None = None
     fallback_used: bool | None = None
     recorded_after: float | None = None
     recorded_before: float | None = None
-    privacy_classes: frozenset[str] | None = None
-    tags_any: frozenset[str] | None = None
-    tags_all: frozenset[str] | None = None
-    outcome_kinds: frozenset[str] | None = None
+    privacy_classes: Collection[str] | None = None
+    tags_any: Collection[str] | None = None
+    tags_all: Collection[str] | None = None
+    outcome_kinds: Collection[str] | None = None
     has_outcome: bool | None = None
     has_ground_truth: bool | None = None
     min_probability: float | None = None
     max_probability: float | None = None
-    request_hashes: frozenset[str] | None = None
+    request_hashes: Collection[str] | None = None
     sort_by: str = "recorded_at"
     descending: bool = True
     limit: int | None = None
@@ -133,11 +132,11 @@ class MemoryQuery:
         if (self.privacy_classes is not None
                 and episode.privacy_class not in self.privacy_classes):
             return False
-        if self.tags_any is not None and not (self.tags_any & set(
-                episode.tags)):
+        tags_any = frozenset(self.tags_any or ())
+        if self.tags_any is not None and not (tags_any & set(episode.tags)):
             return False
-        if self.tags_all is not None and not self.tags_all <= set(
-                episode.tags):
+        tags_all = frozenset(self.tags_all or ())
+        if self.tags_all is not None and not tags_all <= set(episode.tags):
             return False
         if self.outcome_kinds is not None:
             if episode.outcome is None or episode.outcome.kind \

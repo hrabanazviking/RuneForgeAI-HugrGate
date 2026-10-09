@@ -1,5 +1,190 @@
 # Changelog — HugrGate
 
+## Unreleased — Gjallarbrú Campaign XIII: Decision Memory (slices 301–325)
+
+Episodic memory for the runtime: every decision becomes a recallable,
+annotatable episode — observed outcomes, verified ground truth,
+similarity search, transparent retrieval, recency/frequency features,
+per-backend/contract/domain aggregates, privacy-gated access,
+quotas and compaction, JSONL backup, replay, counterfactuals,
+memory-assisted routing and calibration, adversarial scanning, and a
+benchmark suite with a checked-in baseline. Built on top of the
+provenance chain (snapshots, never index references); answers the
+Campaign XII unbounded-growth flag with byte accounting, quotas, and
+`ProvenanceStore.estimate_bytes`.
+
+### Added (slice 324)
+- Memory benchmark suite (`hugrgate/memory/benchmarks.py`,
+  `tests/test_memory_benchmarks.py`, `benchmarks/memory_bench.json`
+  baseline): seeded workload measuring record (~60us mean),
+  attach_outcome (~40us), find (~82ms over 2000 episodes),
+  recall (~100ms), export+import (~233ms), estimate_bytes (~32ms);
+  artifact save/load/compare with a CLI that never overwrites the
+  baseline on `--compare`.
+
+### Added (slice 323)
+- Memory adversarial scanning (`hugrgate/memory/adversarial.py`,
+  `tests/test_memory_adversarial.py`): outcome-flooding, chronology
+  violation, duplicate-flood, timestamp-anomaly, and label-conflict
+  detectors with severity-graded findings; detection only, the
+  operator decides the response.
+
+### Added (slice 322)
+- Memory-assisted calibration
+  (`hugrgate/memory/assisted_calibration.py`,
+  `tests/test_memory_assisted_calibration.py`): PAVA isotonic
+  recalibration maps from labeled episodes, Brier score and ECE
+  metrics, chronological fit/validate split. Validated on controlled
+  miscalibrated data (n=2000, seeded): ECE 0.1497 -> 0.0541, Brier
+  0.2693 -> 0.2395.
+
+### Added (slice 321)
+- Memory-assisted routing (`hugrgate/memory/assisted_routing.py`,
+  `tests/test_memory_assisted_routing.py`): `advise_route()`
+  recommends the candidate backend with the best historical success on
+  similar decisions, abstaining explicitly when history is
+  insufficient.
+
+### Added (slice 320)
+- Historical counterfactuals (`hugrgate/memory/counterfactuals.py`,
+  `tests/test_memory_counterfactuals.py`): per-backend and per-value
+  success estimates over similarity-gated episodes with Wilson score
+  intervals and sufficient-data flags; assumptions stated explicitly.
+
+### Added (slice 319)
+- Memory replay (`hugrgate/memory/replay.py`,
+  `tests/test_memory_replay.py`): re-runs stored episodes through a
+  caller-supplied `decide()` function; value-match rate, mean absolute
+  probability drift, per-episode mismatches, counted (never fatal)
+  errors; specs deep-copied so policies cannot mutate history.
+
+### Added (slice 318)
+- Memory export/import (`hugrgate/memory/io.py`,
+  `tests/test_memory_io.py`): versioned JSONL envelopes for episodes
+  and compaction summaries; id-preserving restore with duplicate
+  skipping, corrupt-line reports, strict mode, unknown-schema
+  rejection. `Episode.from_dict()` and
+  `DecisionHistory.import_episode()`.
+
+### Added (slice 317)
+- Memory compaction (`hugrgate/memory/compaction.py`,
+  `tests/test_memory_compaction.py`): rolls old episodes into
+  `CompactionSummary` aggregates, purges the raw episodes, stores
+  summaries on the history; ground-truth-bearing episodes spared by
+  default.
+
+### Added (slice 316)
+- Memory retention controls (`hugrgate/memory/retention.py`,
+  `tests/test_memory_retention.py`): TTL per privacy class (reusing
+  `privacy_retention` defaults), episode-count and byte quotas,
+  `enforce_quotas()` / `check_quota()`, `MemoryQuotaExceeded` on
+  unsatisfiable quotas; `DecisionHistory.purge()` primitive and
+  `ProvenanceStore.estimate_bytes()` — the direct answer to the
+  Campaign XII +1.3 GB unbounded-growth flag.
+
+### Added (slice 315)
+- Memory privacy controls (`hugrgate/memory/access.py`,
+  `tests/test_memory_access.py`): owner/analyst/auditor roles over the
+  privacy ladder, redacted read views, owner-only writes via
+  `GuardedHistory`; adversarial negative tests for denied reads,
+  denied writes, role escalation, and view isolation.
+
+### Added (slice 314)
+- Domain history profiles (`hugrgate/memory/domain_profiles.py`,
+  `tests/test_memory_domain_profiles.py`): per-domain aggregates —
+  volume, acceptance, outcomes, top backends, spec-type mix, mean
+  probability, decay-weighted activity.
+
+### Added (slice 313)
+- Contract history features (`hugrgate/memory/contract_history.py`,
+  `tests/test_memory_contract_history.py`): per-contract track
+  records grouped by `contract_id` (or synthetic spec-shape keys);
+  hardened `privacy_preserving_record` to propagate `contract_id`
+  across all privacy modes — it was silently dropped, making contract
+  history impossible.
+
+### Added (slice 312)
+- Backend history features (`hugrgate/memory/backend_history.py`,
+  `tests/test_memory_backend_history.py`): per-backend counts,
+  acceptance rate, outcome distribution, success rate (`None` when
+  unlabeled), raw and decay-weighted probability means, latency,
+  models seen.
+
+### Added (slice 311)
+- Outcome-conditioned retrieval
+  (`hugrgate/memory/conditioned.py`,
+  `tests/test_memory_conditioned.py`): recall filtered by outcome
+  kind with strict unknown-exclusion and a ground-truth-agreement
+  gate; additive `episodes=` subset parameter on `retrieve()`.
+
+### Added (slice 310)
+- Frequency features (`hugrgate/memory/frequency.py`,
+  `tests/test_memory_frequency.py`): `count_by()` with pluggable key
+  functions (backend, model, backend+value, outcome kind); raw and
+  decay-weighted counts, first/last seen, per-outcome breakdowns.
+
+### Added (slice 309)
+- Recency features (`hugrgate/memory/recency.py`,
+  `tests/test_memory_recency.py`): time-since-last-similar, last
+  outcome kind, head-of-history success/failure streaks, raw and
+  decay-weighted similar counts, mean similarity.
+
+### Added (slice 308)
+- Time-decay weighting (`hugrgate/memory/decay.py`,
+  `tests/test_memory_decay.py`): shared exponential-decay math
+  (`decay_weight`, `half_life_for_horizon`, `effective_count`,
+  `decayed_mean`); `retrieval.py` refactored onto it.
+
+### Added (slice 307)
+- Contextual memory policies (`hugrgate/memory/policies.py`,
+  `tests/test_memory_policies.py`): ordered record/drop/redact rules
+  with built-in factories (`drop_forbidden`, `redact_above`,
+  `drop_backend`, `record_only_backend`, `drop_unaccepted`); policy
+  hook in `DecisionHistory.record()`; `EpisodeLike`/`HistoryLike`
+  protocols keep the import graph acyclic.
+
+### Added (slice 306)
+- Decision retrieval (`hugrgate/memory/retrieval.py`,
+  `tests/test_memory_retrieval.py`): transparent
+  similarity+recency+outcome scoring with `RetrievalResult` score
+  breakdowns and `explain()`; `recall()` convenience.
+
+### Added (slice 305)
+- Historical similarity search (`hugrgate/memory/similarity.py`,
+  `tests/test_memory_similarity.py`): auditable sparse feature
+  vectors, exact cosine similarity, top-k `most_similar` with
+  shared-feature explanations and recency tie-breaks.
+
+### Added (slice 304)
+- Ground-truth attachment (`hugrgate/memory/groundtruth.py`,
+  `tests/test_memory_groundtruth.py`): verified labels with
+  immutable-once-set semantics and a supersede audit trail;
+  `outcome_agrees()` comparability and
+  `DecisionHistory.consistency_report()`.
+
+### Added (slice 303)
+- Outcome attachment (`hugrgate/memory/outcomes.py`,
+  `tests/test_memory_outcomes.py`): frozen `Outcome` value objects
+  (kind/score/observed_at/note/latency) and
+  `DecisionHistory.attach_outcome()` with an overwrite guard.
+
+### Added (slice 302)
+- Queryable provenance store (`hugrgate/memory/query.py`,
+  `tests/test_memory_query.py`): typed `MemoryQuery`
+  filter/sort/paginate language, `DecisionHistory.find()`,
+  `ProvenanceStore.scan()` hardening, and the `find_in_provenance`
+  adapter (memory-only filters raise instead of being silently
+  ignored).
+
+### Added (slice 301)
+- Decision history API (`hugrgate/memory/`, `history.py`,
+  `tests/test_memory_history.py`): `Episode` snapshots and the
+  append-mostly thread-safe `DecisionHistory` (record/get/recent/
+  count/by_request_hash/episodes_between/clear/
+  import_from_provenance/estimate_bytes, `max_episodes` eviction);
+  new `MemoryError` / `MemoryQuotaExceeded` / `MemoryAccessDenied`
+  taxonomy entries.
+
 ## Unreleased — Gjallarbrú Campaign X: Privacy Fortress (slices 226–250)
 
 Data sovereignty and enforceable information-flow constraints become

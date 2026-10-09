@@ -142,6 +142,34 @@ flowchart TD
         bench_report[bench_report]
         log[log]
     end
+    subgraph memory[memory]
+        memory[memory]
+        memory_access[memory.access]
+        memory_adversarial[memory.adversarial]
+        memory_assisted_calibration[memory.assisted_calibration]
+        memory_assisted_routing[memory.assisted_routing]
+        memory_backend_history[memory.backend_history]
+        memory_benchmarks[memory.benchmarks]
+        memory_compaction[memory.compaction]
+        memory_conditioned[memory.conditioned]
+        memory_contract_history[memory.contract_history]
+        memory_counterfactuals[memory.counterfactuals]
+        memory_decay[memory.decay]
+        memory_domain_profiles[memory.domain_profiles]
+        memory_frequency[memory.frequency]
+        memory_groundtruth[memory.groundtruth]
+        memory_history[memory.history]
+        memory_io[memory.io]
+        memory_outcomes[memory.outcomes]
+        memory_policies[memory.policies]
+        memory_query[memory.query]
+        memory_recency[memory.recency]
+        memory_replay[memory.replay]
+        memory_retention[memory.retention]
+        memory_retrieval[memory.retrieval]
+        memory_similarity[memory.similarity]
+        memory_types[memory.types]
+    end
     subgraph backends[backends]
         backends_rules[backends.rules]
         backends_logreg[backends.logreg]
@@ -1156,6 +1184,99 @@ flowchart TD
     ladder --> spec
     ladder --> validation
     lockaudit --> log
+    memory --> memory_access
+    memory --> memory_adversarial
+    memory --> memory_assisted_calibration
+    memory --> memory_assisted_routing
+    memory --> memory_backend_history
+    memory --> memory_compaction
+    memory --> memory_conditioned
+    memory --> memory_contract_history
+    memory --> memory_counterfactuals
+    memory --> memory_decay
+    memory --> memory_domain_profiles
+    memory --> memory_frequency
+    memory --> memory_groundtruth
+    memory --> memory_history
+    memory --> memory_io
+    memory --> memory_outcomes
+    memory --> memory_policies
+    memory --> memory_query
+    memory --> memory_recency
+    memory --> memory_replay
+    memory --> memory_retention
+    memory --> memory_retrieval
+    memory --> memory_similarity
+    memory_access --> errors
+    memory_access --> memory_query
+    memory_access --> memory_types
+    memory_access --> privacy
+    memory_adversarial --> memory_groundtruth
+    memory_adversarial --> memory_query
+    memory_adversarial --> memory_types
+    memory_assisted_calibration --> errors
+    memory_assisted_calibration --> memory_query
+    memory_assisted_calibration --> memory_types
+    memory_assisted_routing --> memory_counterfactuals
+    memory_assisted_routing --> memory_types
+    memory_backend_history --> memory_decay
+    memory_backend_history --> memory_query
+    memory_backend_history --> memory_types
+    memory_benchmarks --> memory
+    memory_benchmarks --> provenance
+    memory_compaction --> memory_query
+    memory_compaction --> memory_types
+    memory_conditioned --> memory_groundtruth
+    memory_conditioned --> memory_outcomes
+    memory_conditioned --> memory_query
+    memory_conditioned --> memory_retrieval
+    memory_conditioned --> memory_types
+    memory_contract_history --> memory_query
+    memory_contract_history --> memory_types
+    memory_counterfactuals --> memory_query
+    memory_counterfactuals --> memory_similarity
+    memory_counterfactuals --> memory_types
+    memory_domain_profiles --> memory_decay
+    memory_domain_profiles --> memory_query
+    memory_domain_profiles --> memory_types
+    memory_frequency --> memory_decay
+    memory_frequency --> memory_query
+    memory_frequency --> memory_types
+    memory_groundtruth --> memory_outcomes
+    memory_history --> errors
+    memory_history --> memory_compaction
+    memory_history -.-> memory_groundtruth
+    memory_history --> memory_outcomes
+    memory_history --> memory_policies
+    memory_history --> memory_query
+    memory_history --> privacy
+    memory_history --> provenance
+    memory_io --> errors
+    memory_io --> memory_compaction
+    memory_io --> memory_history
+    memory_io --> memory_query
+    memory_io --> memory_types
+    memory_policies --> privacy
+    memory_policies --> provenance
+    memory_query --> errors
+    memory_query --> memory_types
+    memory_query --> provenance
+    memory_recency --> memory_decay
+    memory_recency --> memory_query
+    memory_recency --> memory_similarity
+    memory_recency --> memory_types
+    memory_replay --> memory_query
+    memory_replay --> memory_types
+    memory_retention --> errors
+    memory_retention --> memory_query
+    memory_retention --> memory_types
+    memory_retention --> privacy_retention
+    memory_retrieval --> memory_decay
+    memory_retrieval --> memory_query
+    memory_retrieval --> memory_similarity
+    memory_retrieval --> memory_types
+    memory_similarity --> memory_types
+    memory_types --> provenance
     millionbench --> backend
     millionbench --> core
     millionbench --> log
@@ -1470,6 +1591,7 @@ flowchart TD
 | privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
+| memory | `memory`, `memory.access`, `memory.adversarial`, `memory.assisted_calibration`, `memory.assisted_routing`, `memory.backend_history`, `memory.benchmarks`, `memory.compaction`, `memory.conditioned`, `memory.contract_history`, `memory.counterfactuals`, `memory.decay`, `memory.domain_profiles`, `memory.frequency`, `memory.groundtruth`, `memory.history`, `memory.io`, `memory.outcomes`, `memory.policies`, `memory.query`, `memory.recency`, `memory.replay`, `memory.retention`, `memory.retrieval`, `memory.similarity`, `memory.types` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
@@ -2306,6 +2428,99 @@ flowchart TD
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
 | `lockaudit` | `log` | no |
+| `memory` | `memory.access` | no |
+| `memory` | `memory.adversarial` | no |
+| `memory` | `memory.assisted_calibration` | no |
+| `memory` | `memory.assisted_routing` | no |
+| `memory` | `memory.backend_history` | no |
+| `memory` | `memory.compaction` | no |
+| `memory` | `memory.conditioned` | no |
+| `memory` | `memory.contract_history` | no |
+| `memory` | `memory.counterfactuals` | no |
+| `memory` | `memory.decay` | no |
+| `memory` | `memory.domain_profiles` | no |
+| `memory` | `memory.frequency` | no |
+| `memory` | `memory.groundtruth` | no |
+| `memory` | `memory.history` | no |
+| `memory` | `memory.io` | no |
+| `memory` | `memory.outcomes` | no |
+| `memory` | `memory.policies` | no |
+| `memory` | `memory.query` | no |
+| `memory` | `memory.recency` | no |
+| `memory` | `memory.replay` | no |
+| `memory` | `memory.retention` | no |
+| `memory` | `memory.retrieval` | no |
+| `memory` | `memory.similarity` | no |
+| `memory.access` | `errors` | no |
+| `memory.access` | `memory.query` | no |
+| `memory.access` | `memory.types` | no |
+| `memory.access` | `privacy` | no |
+| `memory.adversarial` | `memory.groundtruth` | no |
+| `memory.adversarial` | `memory.query` | no |
+| `memory.adversarial` | `memory.types` | no |
+| `memory.assisted_calibration` | `errors` | no |
+| `memory.assisted_calibration` | `memory.query` | no |
+| `memory.assisted_calibration` | `memory.types` | no |
+| `memory.assisted_routing` | `memory.counterfactuals` | no |
+| `memory.assisted_routing` | `memory.types` | no |
+| `memory.backend_history` | `memory.decay` | no |
+| `memory.backend_history` | `memory.query` | no |
+| `memory.backend_history` | `memory.types` | no |
+| `memory.benchmarks` | `memory` | no |
+| `memory.benchmarks` | `provenance` | no |
+| `memory.compaction` | `memory.query` | no |
+| `memory.compaction` | `memory.types` | no |
+| `memory.conditioned` | `memory.groundtruth` | no |
+| `memory.conditioned` | `memory.outcomes` | no |
+| `memory.conditioned` | `memory.query` | no |
+| `memory.conditioned` | `memory.retrieval` | no |
+| `memory.conditioned` | `memory.types` | no |
+| `memory.contract_history` | `memory.query` | no |
+| `memory.contract_history` | `memory.types` | no |
+| `memory.counterfactuals` | `memory.query` | no |
+| `memory.counterfactuals` | `memory.similarity` | no |
+| `memory.counterfactuals` | `memory.types` | no |
+| `memory.domain_profiles` | `memory.decay` | no |
+| `memory.domain_profiles` | `memory.query` | no |
+| `memory.domain_profiles` | `memory.types` | no |
+| `memory.frequency` | `memory.decay` | no |
+| `memory.frequency` | `memory.query` | no |
+| `memory.frequency` | `memory.types` | no |
+| `memory.groundtruth` | `memory.outcomes` | no |
+| `memory.history` | `errors` | no |
+| `memory.history` | `memory.compaction` | no |
+| `memory.history` | `memory.groundtruth` | yes |
+| `memory.history` | `memory.outcomes` | no |
+| `memory.history` | `memory.policies` | no |
+| `memory.history` | `memory.query` | no |
+| `memory.history` | `privacy` | no |
+| `memory.history` | `provenance` | no |
+| `memory.io` | `errors` | no |
+| `memory.io` | `memory.compaction` | no |
+| `memory.io` | `memory.history` | no |
+| `memory.io` | `memory.query` | no |
+| `memory.io` | `memory.types` | no |
+| `memory.policies` | `privacy` | no |
+| `memory.policies` | `provenance` | no |
+| `memory.query` | `errors` | no |
+| `memory.query` | `memory.types` | no |
+| `memory.query` | `provenance` | no |
+| `memory.recency` | `memory.decay` | no |
+| `memory.recency` | `memory.query` | no |
+| `memory.recency` | `memory.similarity` | no |
+| `memory.recency` | `memory.types` | no |
+| `memory.replay` | `memory.query` | no |
+| `memory.replay` | `memory.types` | no |
+| `memory.retention` | `errors` | no |
+| `memory.retention` | `memory.query` | no |
+| `memory.retention` | `memory.types` | no |
+| `memory.retention` | `privacy_retention` | no |
+| `memory.retrieval` | `memory.decay` | no |
+| `memory.retrieval` | `memory.query` | no |
+| `memory.retrieval` | `memory.similarity` | no |
+| `memory.retrieval` | `memory.types` | no |
+| `memory.similarity` | `memory.types` | no |
+| `memory.types` | `provenance` | no |
 | `millionbench` | `backend` | no |
 | `millionbench` | `core` | no |
 | `millionbench` | `log` | no |

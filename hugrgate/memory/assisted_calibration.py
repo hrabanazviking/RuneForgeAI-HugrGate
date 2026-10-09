@@ -23,6 +23,7 @@ Metric/coverage assumptions (stated, not hidden):
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -160,7 +161,7 @@ class CalibrationValidation:
         }
 
 
-def _labeled_pairs(episodes: list[EpisodeLike]
+def _labeled_pairs(episodes: Sequence[EpisodeLike]
                    ) -> list[tuple[float, int]]:
     pairs = []
     for episode in episodes:
