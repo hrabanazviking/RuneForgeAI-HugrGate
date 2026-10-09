@@ -110,11 +110,22 @@ class DecisionSpec:
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> DecisionSpec:
+        # Slice 422: non-dict input used to escape as TypeError and
+        # mixed-type keys broke sorted() (both fuzz-found, T-16).
+        if not isinstance(d, dict):
+            raise SpecError(
+                f"spec must be a dict, got {type(d).__name__}",
+                code="spec_not_mapping")
         unknown = set(d) - cls._KEYS
         if unknown:
             raise SpecError(
-                f"unknown spec key(s): {sorted(unknown)}; "
+                f"unknown spec key(s): {sorted(unknown, key=repr)}; "
                 f"expected keys: {sorted(cls._KEYS)}")
+        # Slice 422: a missing "type" used to escape as KeyError
+        # (fuzz-found, T-16). Missing required keys are SpecErrors.
+        if "type" not in d:
+            raise SpecError("spec is missing required key 'type'",
+                            code="spec_missing_type")
         return cls(
             type=d["type"],
             options=d.get("options"),

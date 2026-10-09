@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 385 · **public names:** 2387
+**Modules:** 386 · **public names:** 2399
 
 ## API stability policy
 
@@ -3962,7 +3962,7 @@ that this document never drifts from the code.
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
 | `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
@@ -3976,6 +3976,8 @@ that this document never drifts from the code.
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
 | `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
 | `DeserializationPolicy` | class | `(allow_pickle: 'bool' = True, allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = <factory>) -> None` |
+| `FuzzReport` | class | `(target_name: 'str', cases: 'int', ok: 'int' = 0, taxonomy_errors: 'int' = 0, hangs: 'int' = 0, crashes: 'list[Crash]' = <factory>) -> None` |
+| `FuzzTarget` | class | `(name: 'str', fn: 'Callable[[Any], Any]', allowed: 'tuple[type[BaseException], ...]' = ()) -> 'None'` |
 | `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
 | `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
@@ -4015,11 +4017,15 @@ that this document never drifts from the code.
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
+| `hostile_json_texts` | function | `(rng: 'random.Random') -> 'str'` |
+| `hostile_states` | function | `(rng: 'random.Random') -> 'Any'` |
+| `hostile_values` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
 | `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
 | `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
 | `open_request` | function | `(envelope: 'Mapping[str, Any]', keys: 'Mapping[str, bytes]', guard: 'ReplayGuard') -> 'dict[str, Any]'` |
 | `register_safe_class` | function | `(cls: 'type') -> 'type'` |
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
+| `run_campaign` | function | `(target: 'FuzzTarget', generator: 'Callable[[random.Random], Any]', n_cases: 'int' = 500, seed: 'int' = 20261009, timeout_s: 'float' = 5.0) -> 'FuzzReport'` |
 | `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
 | `run_gauntlet` | function | `() -> 'GauntletReport'` |
 | `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
@@ -4056,7 +4062,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
@@ -4093,6 +4099,17 @@ that this document never drifts from the code.
 | `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.fuzzing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FuzzReport` | class | `(target_name: 'str', cases: 'int', ok: 'int' = 0, taxonomy_errors: 'int' = 0, hangs: 'int' = 0, crashes: 'list[Crash]' = <factory>) -> None` |
+| `FuzzTarget` | class | `(name: 'str', fn: 'Callable[[Any], Any]', allowed: 'tuple[type[BaseException], ...]' = ()) -> 'None'` |
+| `hostile_json_texts` | function | `(rng: 'random.Random') -> 'str'` |
+| `hostile_states` | function | `(rng: 'random.Random') -> 'Any'` |
+| `hostile_values` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
+| `run_campaign` | function | `(target: 'FuzzTarget', generator: 'Callable[[random.Random], Any]', n_cases: 'int' = 500, seed: 'int' = 20261009, timeout_s: 'float' = 5.0) -> 'FuzzReport'` |
 
 ### `hugrgate.security.injection_corpus`
 

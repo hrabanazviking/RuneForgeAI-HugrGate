@@ -33,7 +33,7 @@ hash-chained provenance (slice 015), cluster mutual auth (slice
 | 419 | `hugrgate/security/authz.py` — service authorization policy | done |
 | 420 | `hugrgate/security/rate_limit.py` — rate limiting | pending |
 | 421 | `hugrgate/security/secret_audit.py` — secret-handling audit | done |
-| 422 | `hugrgate/security/fuzzing.py` — fuzzing campaign harness | pending |
+| 422 | `hugrgate/security/fuzzing.py` — fuzzing campaign harness | done |
 | 423 | `tools/secscan.py` + gate — static security analysis | pending |
 | 424 | `hugrgate/security/gauntlet.py` — security gauntlet | pending |
 | 425 | release gate + completion report | pending |

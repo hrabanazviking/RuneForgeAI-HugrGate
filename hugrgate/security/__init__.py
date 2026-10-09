@@ -88,6 +88,14 @@ from hugrgate.security.depscan import (
 from hugrgate.security.depscan import (
     Finding as DependencyFinding,
 )
+from hugrgate.security.fuzzing import (
+    FuzzReport,
+    FuzzTarget,
+    hostile_json_texts,
+    hostile_states,
+    hostile_values,
+    run_campaign,
+)
 from hugrgate.security.injection_corpus import (
     PAYLOADS,
     detect_sqli,
@@ -197,6 +205,8 @@ __all__ = [
     "DependencyFinding",
     "DependencyRecord",
     "DeserializationPolicy",
+    "FuzzReport",
+    "FuzzTarget",
     "InputLimits",
     "ModelChecksumGate",
     "ModelSigner",
@@ -236,11 +246,15 @@ __all__ = [
     "find_unlisted",
     "generate_sbom",
     "guarded",
+    "hostile_json_texts",
+    "hostile_states",
+    "hostile_values",
     "is_within",
     "neutralize",
     "open_request",
     "register_safe_class",
     "restricted_loads",
+    "run_campaign",
     "run_corpus",
     "run_gauntlet",
     "run_poison_suite",
