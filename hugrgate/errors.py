@@ -40,6 +40,7 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "SchedulerError",
     "SerdeError",
     "SpecError",
     "StorageError",
@@ -278,3 +279,13 @@ class SerdeError(HugrGateError):
     """
     code = "serde_error"
     recoverable = False
+
+
+class SchedulerError(HugrGateError):
+    """A scheduling invariant was violated (bad config, full queue, down).
+
+    Slice 285.  Queue-full and shutdown races are transient — shedding
+    load or retrying later can succeed.
+    """
+    code = "scheduler_error"
+    recoverable = True
