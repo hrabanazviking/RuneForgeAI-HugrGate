@@ -30,6 +30,7 @@ __all__ = [
     "EdgeMemoryError",
     "GGUFError",
     "GateError",
+    "GpuschedError",
     "HugrGateError",
     "MultiprocError",
     "NPUError",
@@ -348,4 +349,16 @@ class NumaError(HugrGateError):
     (see the module docstring of :mod:`hugrgate.numa`).
     """
     code = "numa_error"
+    recoverable = True
+
+
+class GpuschedError(HugrGateError):
+    """GPU discovery or device assignment failed.
+
+    Slice 297.  GPU scheduling is a best-effort placement hint; the
+    gate always runs correctly on CPU.  Real GPU-hardware validation
+    is still needed (see the module docstring of
+    :mod:`hugrgate.gpusched`).
+    """
+    code = "gpusched_error"
     recoverable = True
