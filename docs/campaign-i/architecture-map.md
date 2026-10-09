@@ -81,6 +81,7 @@ flowchart TD
         edge_npu[edge.npu]
         edge_residency[edge.residency]
         edge_cachetune[edge.cachetune]
+        edge_storage[edge.storage]
     end
 
     hugrgate --> backend
@@ -204,6 +205,7 @@ flowchart TD
     edge_routing --> edge_power
     edge_routing --> edge_thermal
     edge_routing --> policy
+    edge_storage --> errors
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -274,7 +276,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage` |
 
 ## Internal dependency edges
 
@@ -401,6 +403,7 @@ flowchart TD
 | `edge.routing` | `edge.power` | no |
 | `edge.routing` | `edge.thermal` | no |
 | `edge.routing` | `policy` | no |
+| `edge.storage` | `errors` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |

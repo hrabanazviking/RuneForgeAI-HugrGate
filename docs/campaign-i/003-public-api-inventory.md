@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 55 · **public names:** 251
+**Modules:** 56 · **public names:** 255
 
 ## API stability policy
 
@@ -366,6 +366,15 @@ that this document never drifts from the code.
 | `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
 | `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
 | `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
+
+### `hugrgate.edge.storage`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
+| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
 
 ### `hugrgate.edge.thermal`
 
