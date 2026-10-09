@@ -23,6 +23,8 @@ from hugrgate.errors import (
     CalibrationError,
     ChaosError,
     ClusterAuthError,
+    ConfigError,
+    ConformanceError,
     ContractError,
     DataFlowDenied,
     DatasetError,
@@ -48,17 +50,21 @@ from hugrgate.errors import (
     ObservabilityError,
     OfflineBootstrapError,
     PerfGateError,
+    PluginError,
     PolicyError,
     PoolError,
     PowerBudgetError,
     PrivacyViolation,
     ProfilingError,
+    ProtocolError,
     QuantError,
     QueueFull,
     RecoveryError,
     ResidencyError,
     RetryBudgetExhausted,
+    ScaffoldError,
     SchedulerError,
+    SDKError,
     SealError,
     SecretDetected,
     SerdeError,
@@ -107,6 +113,9 @@ ALL_ERRORS = [
     MemoryQuotaExceeded,
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
+    # Campaign XVIII developer-ecosystem errors (slice 426).
+    ProtocolError, SDKError, PluginError, ConformanceError,
+    ConfigError, ScaffoldError,
 ]
 
 EXPECTED_CODES = {
@@ -169,6 +178,13 @@ EXPECTED_CODES = {
     DatasetError: "dataset_error",
     EvalError: "eval_error",
     EvalGateError: "eval_gate_error",
+    # Campaign XVIII developer-ecosystem errors (slice 426).
+    ProtocolError: "protocol_error",
+    SDKError: "sdk_error",
+    PluginError: "plugin_error",
+    ConformanceError: "conformance_error",
+    ConfigError: "config_error",
+    ScaffoldError: "scaffold_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -237,6 +253,16 @@ EXPECTED_RECOVERABLE = {
     DatasetError: False,
     EvalError: False,
     EvalGateError: False,
+    # Campaign XVIII (slice 426): deliberate per class — version skew
+    # and bad configs are caller bugs (False); transport and plugin
+    # faults can succeed on retry (True); conformance failures are
+    # correctness signals (False).
+    ProtocolError: False,
+    SDKError: True,
+    PluginError: True,
+    ConformanceError: False,
+    ConfigError: False,
+    ScaffoldError: False,
 }
 
 

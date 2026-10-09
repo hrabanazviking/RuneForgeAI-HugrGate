@@ -38,7 +38,13 @@ from hugrgate.errors import (
     BackendUnavailable,
     HugrGateError,
     PolicyError,
+    ProtocolError,
     SpecError,
+)
+from hugrgate.protocol import (
+    PROTOCOL_VERSION,
+    SUPPORTED_PROTOCOL_VERSIONS,
+    negotiate_version,
 )
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
@@ -305,6 +311,19 @@ def create_app(gate: HugrGate | None = None,
     def models() -> list[dict[str, Any]]:
         return [asdict(m) for m in list_models()]
 
+    @app.get("/protocol")
+    def protocol() -> dict[str, Any]:
+        """Advertise the wire-protocol versions this service speaks.
+
+        Slice 426: clients call this first and fail fast on version
+        skew instead of sending doomed requests.
+        """
+        return {
+            "protocol_version": PROTOCOL_VERSION,
+            "supported_versions": list(SUPPORTED_PROTOCOL_VERSIONS),
+            "service_version": HUGRGATE_VERSION,
+        }
+
     @app.post("/decide")
     async def decide(request: Request) -> JSONResponse:
         """Make a decision.
@@ -321,6 +340,12 @@ def create_app(gate: HugrGate | None = None,
                 content={"error": {"code": "bad_request",
                                    "message": "request body must be JSON",
                                    "recoverable": True, "details": {}}})
+        # Slice 426: protocol-version negotiation runs before any
+        # spec/policy parsing — skew is a caller bug, not a data bug.
+        try:
+            negotiated = negotiate_version(body.get("protocol_version"))
+        except ProtocolError as e:
+            return _error_response(e, 422)
         try:
             spec = DecisionSpec.from_dict(body["spec"])
         except KeyError:
@@ -362,6 +387,7 @@ def create_app(gate: HugrGate | None = None,
             return _error_response(e, 422)
         except HugrGateError as e:
             return _error_response(e, 500)
+        result.metadata["protocol_version"] = negotiated
         return JSONResponse(status_code=200, content=result.to_dict())
 
     if node is not None:

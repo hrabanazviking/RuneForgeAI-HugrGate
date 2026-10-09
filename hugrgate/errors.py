@@ -608,3 +608,69 @@ class EvalGateError(HugrGateError):
     """
     code = "eval_gate_error"
     recoverable = False
+
+
+class ProtocolError(HugrGateError):
+    """Wire-protocol violation (unknown/unsupported protocol version).
+
+    Slice 426.  Deliberately *not* recoverable by blind retry: the
+    client must upgrade (or downgrade) to a protocol version the
+    service speaks.  Retrying the same bytes against the same
+    service cannot succeed.
+    """
+    code = "protocol_error"
+    recoverable = False
+
+
+class SDKError(HugrGateError):
+    """The Python SDK v2 client failed (transport down, bad response).
+
+    Slice 428.  Recoverable: transient network or service faults can
+    succeed on retry, and the SDK retries recoverable failures
+    automatically.
+    """
+    code = "sdk_error"
+    recoverable = True
+
+
+class PluginError(HugrGateError):
+    """A backend plugin failed to load, register, or validate.
+
+    Slice 439.  Recoverable: plugins are isolated — a broken plugin
+    never poisons the core runtime, and fixing or removing the
+    plugin restores discovery.
+    """
+    code = "plugin_error"
+    recoverable = True
+
+
+class ConformanceError(HugrGateError):
+    """A backend or contract failed its conformance battery.
+
+    Slices 440-441.  Deliberately *not* recoverable: a conformance
+    failure is a correctness signal about the plugin or template
+    itself.  Fix the implementation, then re-run the kit.
+    """
+    code = "conformance_error"
+    recoverable = False
+
+
+class ConfigError(HugrGateError):
+    """A generated or supplied configuration is invalid.
+
+    Slice 437.  Deliberately *not* recoverable: the operator must
+    fix the configuration (the generator never emits an invalid
+    file, so this signals hand-editing or version skew).
+    """
+    code = "config_error"
+    recoverable = False
+
+
+class ScaffoldError(HugrGateError):
+    """Project scaffolding failed (bad name, target exists, write error).
+
+    Slice 438.  Deliberately *not* recoverable: the filesystem or
+    project name must change before retrying.
+    """
+    code = "scaffold_error"
+    recoverable = False

@@ -21,6 +21,7 @@ from hugrgate.backend import Backend
 from hugrgate.core import HugrGate
 from hugrgate.errors import Abstention, BackendError
 from hugrgate.policy import DecisionPolicy
+from hugrgate.protocol import PROTOCOL_VERSION
 from hugrgate.result import DecisionResult
 from hugrgate.serde import (
     policy_from_dict,
@@ -140,6 +141,7 @@ class HugrGateClient:
             result.metadata["client_transport"] = "inprocess"
             return result
         payload: dict[str, Any] = {
+            "protocol_version": PROTOCOL_VERSION,
             "spec": spec.to_dict(),
             "state": dict(state),
             "backend_name": backend_name,
@@ -168,6 +170,29 @@ class HugrGateClient:
         result.metadata["client_transport"] = (
             "unix-socket" if self.socket_path else "http")
         return result
+
+    def protocol(self) -> dict[str, Any]:
+        """Fetch the service's protocol advertisement (slice 426).
+
+        Raises :class:`~hugrgate.errors.BackendError` when the
+        service is unreachable; falls back to the local protocol
+        version when in-process fallback is enabled.
+        """
+        if self._direct_gate:
+            return {"protocol_version": PROTOCOL_VERSION,
+                    "supported_versions": [PROTOCOL_VERSION],
+                    "mode": "inprocess"}
+        try:
+            response = self._http.get(f"{self.url}/protocol")
+            response.raise_for_status()
+            return response.json()
+        except Exception:  # noqa: BLE001 - reachability probe
+            if self.fallback_inprocess:
+                return {"protocol_version": PROTOCOL_VERSION,
+                        "supported_versions": [PROTOCOL_VERSION],
+                        "mode": "inprocess-fallback"}
+            raise BackendError(
+                "hugrgate service unreachable for /protocol") from None
 
     def health(self) -> dict[str, Any]:
         """Liveness probe. Never raises: reports reachability."""
