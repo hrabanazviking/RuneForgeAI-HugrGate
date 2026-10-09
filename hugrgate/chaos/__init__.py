@@ -42,15 +42,26 @@ from hugrgate.chaos.model_faults import (
     MUST_REJECT_KINDS,
     ModelCorruptor,
 )
+from hugrgate.chaos.resources import (
+    CRITICAL,
+    OK,
+    WARN,
+    MemoryPressureSimulator,
+    MemoryReading,
+    ResourceGuard,
+)
 
 __all__ = [
     "CORRUPTION_KINDS",
     "CRASH",
+    "CRITICAL",
     "ERROR_RATE",
     "HANG",
     "LATENCY",
     "MALFORMED",
     "MUST_REJECT_KINDS",
+    "OK",
+    "WARN",
     "BlastRadius",
     "CacheCorruptor",
     "ChaosExperiment",
@@ -60,8 +71,11 @@ __all__ = [
     "FaultResult",
     "FaultSpec",
     "FaultyBackend",
+    "MemoryPressureSimulator",
+    "MemoryReading",
     "ModelCorruptor",
     "ProbeOutcome",
+    "ResourceGuard",
     "SteadyStateProbe",
     "disk_full",
     "read_only",
