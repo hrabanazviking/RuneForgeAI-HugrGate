@@ -1,0 +1,330 @@
+"""Ensemble foundations — shared vote plumbing. Slice 101.
+
+Every ensemble strategy in :mod:`hugrgate.ensemble` speaks this one
+dialect:
+
+- :class:`MemberVote` — one member backend's ballot, or the recorded
+  reason it could not vote (fault isolation: a dead member is skipped
+  and named, never fatal).
+- :func:`collect_votes` — evaluate every member against the spec with
+  per-member fault isolation and contract validation.
+- :func:`finalize_result` — build the :class:`DecisionResult` every
+  combiner returns, with the shared ``metadata["ensemble"]`` contract:
+  strategy name, per-member votes, normalized weights, tally, winner
+  share, and the minority report (slice 114 expands it; it is present
+  from day one so dissent is never silently dropped).
+
+Determinism: tie-breaks are total and documented
+(:func:`break_tie`); no randomness anywhere in this package.
+"""
+
+from __future__ import annotations
+
+import math
+import time
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field
+from typing import Any
+
+from hugrgate.backend import Backend
+from hugrgate.errors import (
+    Abstention,
+    BackendError,
+    BackendUnavailable,
+    HugrGateError,
+    PolicyError,
+    SpecError,
+)
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
+from hugrgate.validation import validate_result
+
+__all__ = [
+    "DISCRETE_SPEC_TYPES",
+    "Combiner",
+    "MemberVote",
+    "StrategyContext",
+    "break_tie",
+    "collect_votes",
+    "complete_distribution",
+    "finalize_result",
+    "normalize_weights",
+    "normalized_entropy",
+    "require_discrete_spec",
+    "shannon_entropy",
+]
+
+#: Spec types the voting-family strategies can combine. Numeric specs
+#: have no discrete ballots; multilabel ballots are lists (unhashable
+#: as single votes) and are left to a future slice.
+DISCRETE_SPEC_TYPES = ("categorical", "binary", "ordinal")
+
+
+@dataclass
+class MemberVote:
+    """One member's ballot (or its recorded failure to vote)."""
+
+    backend: str
+    value: Any | None
+    probability: float
+    distribution: dict[str, float] = field(default_factory=dict)
+    weight: float = 1.0
+    skipped: bool = False
+    skip_reason: str = ""
+    latency_ms: float = 0.0
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "backend": self.backend,
+            "value": self.value,
+            "probability": self.probability,
+            "distribution": dict(self.distribution),
+            "weight": self.weight,
+            "skipped": self.skipped,
+            "skip_reason": self.skip_reason,
+            "latency_ms": self.latency_ms,
+        }
+
+
+@dataclass
+class StrategyContext:
+    """What a combiner needs beyond the raw votes."""
+
+    spec: DecisionSpec
+    options: dict[str, Any] = field(default_factory=dict)
+    fitted: Any = None  # learned meta-model (stacking/blending/MoE/BMA)
+    state: Mapping[str, Any] | None = None  # input state (MoE routing)
+
+
+#: A combiner turns member votes into one decision. It must return a
+#: fully-formed :class:`DecisionResult` (or an abstention result); it
+#: must never raise for ordinary disagreement between members.
+Combiner = Callable[[list[MemberVote], StrategyContext], DecisionResult]
+
+
+def normalize_weights(weights: Mapping[str, float],
+                      members: list[str]) -> dict[str, float]:
+    """Validate and normalize member weights to sum to 1.
+
+    Members missing from the map get weight 0: a weights map names the
+    members that count. Raises :class:`PolicyError` for unknown
+    members, negative or non-finite weights, or a total weight of zero.
+    """
+    unknown = [k for k in weights if k not in members]
+    if unknown:
+        raise PolicyError(
+            f"weights name unknown member(s): {unknown}; "
+            f"members are {members}")
+    total = 0.0
+    for name in members:
+        w = weights.get(name, 0.0)
+        if not isinstance(w, (int, float)) or not math.isfinite(w):
+            raise PolicyError(
+                f"weight for {name!r} must be a finite number, got {w!r}")
+        if w < 0:
+            raise PolicyError(
+                f"weight for {name!r} must be >= 0, got {w}")
+        total += w
+    if total <= 0:
+        raise PolicyError("weights must sum to a positive value")
+    return {name: weights.get(name, 0.0) / total for name in members}
+
+
+def shannon_entropy(distribution: Mapping[str, float]) -> float:
+    """Shannon entropy (bits) of a probability distribution."""
+    h = 0.0
+    for p in distribution.values():
+        if p > 0:
+            h -= p * math.log2(p)
+    return h
+
+
+def normalized_entropy(distribution: Mapping[str, float]) -> float:
+    """Entropy scaled to [0, 1] by the uniform-distribution maximum."""
+    n = len(distribution)
+    if n <= 1:
+        return 0.0
+    return shannon_entropy(distribution) / math.log2(n)
+
+
+def break_tie(candidates: list[str], scores: Mapping[str, float],
+              first_seen: Mapping[str, int]) -> str:
+    """Deterministic winner among tied candidates.
+
+    Order: highest score, then earliest ballot cast, then
+    lexicographic value. Total: the same votes always elect the same
+    winner on every machine.
+    """
+    if not candidates:
+        raise HugrGateError("break_tie needs at least one candidate")
+    return sorted(
+        candidates,
+        key=lambda v: (-scores.get(v, 0.0),
+                       first_seen.get(v, len(first_seen)),
+                       str(v)),
+    )[0]
+
+
+def require_discrete_spec(spec: DecisionSpec, strategy: str) -> None:
+    """Voting-family strategies need discrete ballots."""
+    if spec.type not in DISCRETE_SPEC_TYPES:
+        raise BackendError(
+            f"ensemble strategy {strategy!r} needs a discrete spec "
+            f"{list(DISCRETE_SPEC_TYPES)}, got {spec.type!r}")
+
+
+def complete_distribution(vote: MemberVote,
+                          space: list[str]) -> dict[str, float]:
+    """Complete an empty member distribution.
+
+    The member's reported probability goes on the voted value; the
+    remainder is split uniformly across the other options (mirrors the
+    rules backend, slice 13). A non-empty distribution is returned
+    unchanged — its missing keys are genuine zeros, since a valid
+    distribution always sums to 1.
+    """
+    if vote.distribution:
+        return dict(vote.distribution)
+    if vote.value is None or vote.value not in space:
+        raise BackendError(
+            f"cannot complete an empty distribution for member "
+            f"{vote.backend!r} with value {vote.value!r}")
+    others = [o for o in space if o != vote.value]
+    if not others:
+        return {str(vote.value): 1.0}
+    rest = (1.0 - vote.probability) / len(others)
+    completed = {o: rest for o in others}
+    completed[str(vote.value)] = vote.probability
+    return completed
+
+
+def _skip_vote(backend: str, weight: float, reason: str) -> MemberVote:
+    return MemberVote(backend=backend, value=None, probability=0.0,
+                      distribution={}, weight=weight, skipped=True,
+                      skip_reason=reason)
+
+
+def collect_votes(members: list[Backend],
+                  state: Mapping[str, Any],
+                  spec: DecisionSpec,
+                  context: Mapping[str, Any] | None = None,
+                  weights: Mapping[str, float] | None = None,
+                  min_members: int = 1,
+                  ensemble_name: str = "ensemble") -> list[MemberVote]:
+    """Evaluate every member with per-member fault isolation.
+
+    A member that abstains, fails, violates the result contract, does
+    not support the spec, or raises unexpectedly is *skipped* and its
+    reason recorded — one sick voter never poisons the election.
+    Raises :class:`BackendError` only when fewer than ``min_members``
+    usable votes remain.
+    """
+    if min_members < 1:
+        raise PolicyError(
+            f"min_members must be >= 1, got {min_members}")
+    votes: list[MemberVote] = []
+    for member in members:
+        if weights is None:
+            w = 1.0
+        else:
+            # A weights map names the members that count; unnamed
+            # members get weight 0 (see normalize_weights).
+            w = float(weights.get(member.name, 0.0))
+        if not member.supports(spec):
+            votes.append(_skip_vote(member.name, w, "unsupported_spec"))
+            continue
+        start = time.perf_counter()
+        try:
+            result = member.evaluate(state, spec, context)
+            validate_result(result, spec)
+        except Abstention as e:
+            votes.append(_skip_vote(
+                member.name, w, f"abstained: {e.message}"))
+            continue
+        except (BackendError, BackendUnavailable) as e:
+            votes.append(_skip_vote(
+                member.name, w, f"backend_error: {e.message}"))
+            continue
+        except SpecError as e:
+            votes.append(_skip_vote(
+                member.name, w, f"invalid_result: {e.message}"))
+            continue
+        except Exception as e:  # noqa: BLE001 - isolation is the point
+            votes.append(_skip_vote(
+                member.name, w,
+                f"unexpected_{type(e).__name__}: {e}"))
+            continue
+        if result.value is None:
+            # An abstention-shaped result is an abstention, not a vote
+            # for "None" (slice 102 hardening: None is not countable).
+            votes.append(_skip_vote(member.name, w, "abstained_result"))
+            continue
+        latency_ms = (time.perf_counter() - start) * 1000.0
+        votes.append(MemberVote(
+            backend=member.name,
+            value=result.value,
+            probability=result.probability,
+            distribution=dict(result.distribution),
+            weight=w,
+            latency_ms=latency_ms,
+        ))
+    usable = [v for v in votes if not v.skipped]
+    if len(usable) < min_members:
+        raise BackendError(
+            f"ensemble {ensemble_name!r}: only {len(usable)} of "
+            f"{len(members)} members produced usable votes "
+            f"(need >= {min_members})")
+    return votes
+
+
+def finalize_result(*, strategy: str, spec: DecisionSpec,
+                    votes: list[MemberVote],
+                    weights: Mapping[str, float],
+                    value: Any, probability: float,
+                    distribution: dict[str, float],
+                    uncertainty: float,
+                    winner_share: float | None = None,
+                    extra: dict[str, Any] | None = None,
+                    model: str = "ensemble",
+                    latency_ms: float = 0.0,
+                    backend: str = "ensemble") -> DecisionResult:
+    """Build the combiner's :class:`DecisionResult`.
+
+    Populates the shared ``metadata["ensemble"]`` contract: strategy,
+    per-member ballots, normalized weights, the minority report
+    (dissenting members are named, never dropped), plus any
+    strategy-specific ``extra`` block.
+    """
+    usable = [v for v in votes if not v.skipped]
+    total_w = sum(weights.get(v.backend, 0.0) for v in usable) or 1.0
+    norm = {v.backend: weights.get(v.backend, 0.0) / total_w
+            for v in usable}
+    minority = [
+        {"backend": v.backend, "value": v.value,
+         "probability": v.probability, "weight": norm[v.backend]}
+        for v in usable if v.value != value
+    ]
+    meta: dict[str, Any] = {
+        "strategy": strategy,
+        "members": [v.backend for v in votes],
+        "member_votes": [v.to_dict() for v in votes],
+        "weights": norm,
+        "winner_share": winner_share,
+        "minority_report": minority,
+        "usable_votes": len(usable),
+        "skipped_votes": len(votes) - len(usable),
+    }
+    if extra:
+        meta.update(extra)
+    return DecisionResult(
+        value=value,
+        probability=probability,
+        distribution=dict(distribution),
+        uncertainty=uncertainty,
+        accepted=True,
+        backend=backend,
+        model=model,
+        latency_ms=latency_ms,
+        calibration_profile="ensemble",
+        metadata={"ensemble": meta},
+    )

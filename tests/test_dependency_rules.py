@@ -142,7 +142,7 @@ _STDLIB = {
     "concurrent",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
-_LOCAL_MODULES = {"event_triage", "build"}
+_LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes"}
 
 
 def _third_party_imports() -> dict[str, set[str]]:

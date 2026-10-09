@@ -1,13 +1,13 @@
 {
-  "generated_utc": "2026-10-09T11:59:15.984846+00:00",
-  "module_count": 67,
+  "generated_utc": "2026-10-09T12:24:19.444258+00:00",
+  "module_count": 66,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
       "imports": [
         "hugrgate"
       ],
-      "loc": 25,
+      "loc": 43,
       "path": "hugrgate/__init__.py",
       "public_defs": []
     },
@@ -31,10 +31,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
+        "threading",
         "typing"
       ],
-      "loc": 127,
+      "loc": 151,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -44,6 +46,7 @@
         "evaluate",
         "health",
         "warmup",
+        "close",
         "batch",
         "calibration_info",
         "estimated_latency",
@@ -78,11 +81,11 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hashlib",
         "hugrgate",
         "numpy",
-        "re",
-        "typing"
+        "re"
       ],
       "loc": 260,
       "path": "hugrgate/backends/embedding.py",
@@ -126,12 +129,12 @@
       "docstring": "Local LLM backend \u2014 constrained decoding. Slice 35.\n\n:class:`LLMBackend` runs an open-weight local model through a small engine\ninterface and applies **constrained decoding**: the engine may only emit\nspec-valid values (categorical/ordinal \u2192 option tokens, binary \u2192 yes/no).\nWhatever the engine returns is re-validated against the spec \u2014 an\nout-of-spec emission is a :class:`BackendError`, never a result.\n\nThe ``llama_cpp`` dependency is optional and imported lazily; without an\nengine, evaluation raises :class:`BackendUnavailable`. Tests inject a mock\nengine \u2014 no model download required.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "llama_cpp",
         "math",
-        "time",
-        "typing"
+        "time"
       ],
       "loc": 247,
       "path": "hugrgate/backends/llm.py",
@@ -155,6 +158,7 @@
       "docstring": "Logistic regression backend. Slice 22.\n\nTrains on ``(state, label)`` pairs, emits ``predict_proba`` distributions,\nand round-trips through pickle + :class:`ModelManifest`.  This module also\ndefines :class:`SklearnClassifierBackend`, the shared contract base reused\nby the forest (slice 23) and boosting (slice 24) backends.",
       "imports": [
         "__future__",
+        "collections",
         "datetime",
         "hugrgate",
         "numpy",
@@ -163,7 +167,7 @@
         "time",
         "typing"
       ],
-      "loc": 303,
+      "loc": 304,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -187,9 +191,9 @@
       "docstring": "NLI backend \u2014 statement entailment as a binary decision. Slice 34.\n\n:class:`NLIBackend` answers one question: *is the spec's statement supported\nby the state?* A natural-language-inference model scores\n``P(entailment | premise, statement)`` and that becomes the probability of\n``\"true\"``. Constrained to ``binary`` specs only.\n\nThe ``transformers`` dependency is optional and imported lazily: without it\n(or without a model/engine), evaluation raises :class:`BackendUnavailable`\ninstead of failing at import time. Tests inject a plain callable\n``nli_fn(premise, statement) -> float`` \u2014 no downloads required.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "transformers",
-        "typing"
+        "transformers"
       ],
       "loc": 153,
       "path": "hugrgate/backends/nli.py",
@@ -207,13 +211,14 @@
       "docstring": "Rule backend \u2014 predicates, decision tables, confidence distributions.\n\nSlices 11-13: a deterministic backend that evaluates predicate rules\nagainst the decision state.\n\nSlice 11 \u2014 predicates:\n    {\"if\": {\"field\": \"temperature\", \"gt\": 90},\n     \"then\": \"critical\", \"confidence\": 0.99}\nOperators: eq, ne, gt, gte, lt, lte, in, contains, exists.\nFirst-match wins.\n\nSlice 12 \u2014 decision tables:\nRows of conditions -> outcome, explicit priority ordering, a default\nrule, and YAML-loadable rule sets::\n\n    rules:\n      - name: critical-malware\n        priority: 100\n        if:\n          all:\n            - {field: severity, gte: 8}\n            - {field: category, eq: malware}\n        then: escalate\n        confidence: 0.97\n      - {default: log, confidence: 0.5}\n\nSlice 13 \u2014 confidence & distribution:\nThe matched rule's confidence becomes the winner's probability; the\nremainder (1 - confidence) is split uniformly across the other options\nof the spec's value space. supports(): categorical, binary, ordinal.\n\nMissing-field semantics (documented, pinned by tests):\n  - eq / in / contains / gt / gte / lt / lte on a missing field -> False\n  - ne on a missing field -> True (\"not equal\" includes absent)\n  - exists -> True iff the field is present (or per explicit flag)\nComparison type errors (e.g. gt between str and int) never match.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing",
         "yaml"
       ],
-      "loc": 380,
+      "loc": 381,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -238,6 +243,7 @@
       "docstring": "Benchmark harness \u2014 datasets \u2192 backends \u2192 metrics. Slice 45.\n\nRuns a labeled (or unlabeled) dataset through one or more backends and\nreports:\n\n- ``accuracy`` \u2014 exact-match rate (categorical / ordinal / binary;\n  set-equality for multilabel; skipped for numeric)\n- ``brier_score`` \u2014 mean squared error of the full distribution\n  against the one-hot truth\n- ``ece`` \u2014 expected calibration error over 10 confidence bins\n- ``latency_p50_ms`` / ``latency_p99_ms`` \u2014 from ``result.latency_ms``\n- ``throughput_per_s`` \u2014 decisions per wall-clock second\n- ``abstention_rate`` \u2014 fraction of items the gate abstained on\n\nThe report is a plain JSON-serializable dict (see :func:`run_benchmark`),\nrenderable to markdown by :mod:`hugrgate.bench_report`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hashlib",
         "hugrgate",
@@ -246,7 +252,7 @@
         "time",
         "typing"
       ],
-      "loc": 346,
+      "loc": 345,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -264,9 +270,10 @@
       "docstring": "Benchmark report \u2014 markdown rendering of benchmark JSON. Slice 47.\n\nProduces a human-readable report with:\n\n- summary + per-backend metric tables,\n- ASCII reliability diagrams (accuracy vs confidence per bin),\n- a hardware / methodology block for reproducibility.",
       "imports": [
         "__future__",
+        "collections",
         "typing"
       ],
-      "loc": 145,
+      "loc": 146,
       "path": "hugrgate/bench_report.py",
       "public_defs": [
         "ascii_reliability_diagram",
@@ -284,10 +291,11 @@
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 167,
+      "loc": 181,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -306,7 +314,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 89,
+      "loc": 47,
       "path": "hugrgate/calibration/__init__.py",
       "public_defs": []
     },
@@ -315,11 +323,12 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 120,
+      "loc": 121,
       "path": "hugrgate/calibration/_base.py",
       "public_defs": [
         "Calibrator",
@@ -336,311 +345,16 @@
         "list"
       ]
     },
-    "hugrgate.calibration.adversarial": {
-      "docstring": "Calibration adversarial tests. Slice 098.\n\nCalibration is usually evaluated on the same distribution it was fit on \u2014\nthe kindest possible test.  This module attacks it instead:\n\n- :func:`overconfidence_attack` \u2014 pushes scores toward the extremes\n  (the classic \"model gets cocky\" failure);\n- :func:`underconfidence_attack` \u2014 pulls scores toward 0.5;\n- :func:`label_flip_attack` \u2014 random label noise (seeded);\n- :func:`bias_shift_attack` \u2014 systematic additive score bias, clipped;\n- :func:`stress_test` \u2014 fits a calibrator on clean data, then reports\n  Brier/ECE degradation under each attack in a JSON-serializable\n  :class:`StressReport`.\n\nUse it in CI or before promoting a calibration profile: a map that\ncollapses under mild attacks shouldn't ship.",
+    "hugrgate.calibration.isotonic": {
+      "docstring": "Isotonic regression via the Pool Adjacent Violators (PAV) algorithm.\n\nSlice 27.  Fits a non-decreasing stepwise map from raw scores to empirical\nevent rates.  The PAV implementation below is written independently from the\ntextbook description: sort by score, greedily merge adjacent blocks whose\nmeans violate monotonicity, and predict with the resulting step function.",
       "imports": [
         "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 169,
-      "path": "hugrgate/calibration/adversarial.py",
-      "public_defs": [
-        "overconfidence_attack",
-        "underconfidence_attack",
-        "label_flip_attack",
-        "bias_shift_attack",
-        "StressReport",
-        "stress_test",
-        "as_dict",
-        "worst_ece_degradation"
-      ]
-    },
-    "hugrgate.calibration.aleatoric": {
-      "docstring": "Aleatoric uncertainty adapters. Slice 096.\n\nAleatoric uncertainty = noise inherent in the data-generating process: no\namount of modeling removes it.  These adapters *estimate* it from\nobservables:\n\n- :func:`predictive_entropy` \u2014 entropy of one predictive distribution\n  (with a single model, the working aleatoric estimate);\n- :func:`bernoulli_noise` \u2014 ``p(1\u2212p)``, the variance of a Bernoulli\n  outcome: the irreducible noise at calibrated probability ``p``;\n- :func:`label_noise_estimate` \u2014 binned ``E[p(1\u2212p)]`` over a labeled fit\n  set: the data's own noise floor as the calibrator sees it;\n- :func:`noise_floor_report` \u2014 bundles the estimate with the per-bin\n  detail into a JSON-serializable :class:`AleatoricReport`.\n\nCompanion to slice 095 (epistemic adapters): together they cover both\nhalves of slice 094's decomposition from measurable quantities.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 132,
-      "path": "hugrgate/calibration/aleatoric.py",
-      "public_defs": [
-        "AleatoricReport",
-        "predictive_entropy",
-        "bernoulli_noise",
-        "label_noise_estimate",
-        "noise_floor_report",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.autoselect": {
-      "docstring": "Calibration auto-selection. Slice 092.\n\nInstead of tribal knowledge (\"always use isotonic\"), pick the calibrator by\nseeded K-fold cross-validation on the actual fit data.  :func:`auto_select`\nevaluates candidate calibrators from the slice-091 catalog on a proper\nscoring rule (Brier, log-loss) or ECE, ranks them by held-out mean, and\nreturns the winner *refit on the full data*.\n\nCandidate defaults: the non-streaming, non-fallback, non-deprecated catalog\nentries (platt, isotonic, temperature, beta-binomial).  Streaming calibrators\nare excluded by default because fold semantics differ for them \u2014 pass them\nexplicitly if you want them compared.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 153,
-      "path": "hugrgate/calibration/autoselect.py",
-      "public_defs": [
-        "SelectionResult",
-        "auto_select",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.bayes": {
-      "docstring": "Bayesian calibration research adapter. Slice 081.\n\nRESEARCH ADAPTER \u2014 not a production default.  :class:`BetaBinomialCalibrator`\ntreats each score bin as a Binomial experiment with a Beta prior and returns\nthe posterior predictive mean as the calibrated probability, *plus* a\ncredible interval so downstream code can see how much data backs the map.\nUseful for low-data regimes and for studying prior sensitivity; prefer\nPlatt/isotonic/temperature when you have ample data and want a point map.\n\nThe Beta quantiles use an independent implementation of the regularized\nincomplete beta function (continued fraction, Numerical Recipes ``betacf``)\nwith bisection inversion \u2014 no scipy dependency.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "math",
-        "numpy",
-        "typing"
-      ],
-      "loc": 180,
-      "path": "hugrgate/calibration/bayes.py",
-      "public_defs": [
-        "beta_quantile",
-        "BetaBinomialCalibrator",
-        "fit",
-        "calibrate",
-        "credible_interval",
-        "get_params",
-        "from_params"
-      ]
-    },
-    "hugrgate.calibration.bench": {
-      "docstring": "Calibration benchmark suite. Slice 099.\n\nCompares the calibration methods head-to-head on controlled synthetic\ndatasets with known miscalibration shapes.  Every dataset is generated from\na seeded PRNG, so the artifact is byte-identical on every run for a fixed\nseed \u2014 no invented numbers, ever.\n\nDatasets (``n`` samples each):\n- ``overconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(2z)``;\n- ``underconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(0.5z)``;\n- ``label-noise`` \u2014 well-shaped scores, 15% flipped labels;\n- ``well-calibrated`` \u2014 reported == true (control: calibration should be\n  ~neutral here).\n\nEntries: ``raw`` (identity baseline \u2014 the explicit baseline the slice\nrequires) plus every batch calibrator in the catalog.  Metrics: Brier,\nlog-loss, ECE, before \u2192 after.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 156,
-      "path": "hugrgate/calibration/bench.py",
-      "public_defs": [
-        "generate_dataset",
-        "run_benchmark",
-        "fit",
-        "calibrate",
-        "get_params",
-        "from_params"
-      ]
-    },
-    "hugrgate.calibration.conformal": {
-      "docstring": "Split-conformal classification. Slice 082.\n\nWhere calibration asks \"is 0.8 really 80%?\", conformal prediction asks \"which\nset of labels covers the truth with probability \u2265 1\u2212\u03b1?\"  :class:`ConformalClassifier`\nimplements split (inductive) conformal prediction for classifiers:\n\n- nonconformity score ``s(x, y) = 1 \u2212 p\u0302(y | x)`` on a held-out calibration\n  fold;\n- threshold ``q\u0302`` = the ``\u2308(n+1)(1\u2212\u03b1)\u2309/n`` quantile of those scores;\n- prediction set ``{c : p\u0302(c | x) \u2265 1 \u2212 q\u0302}``.\n\nUnder exchangeability of calibration and test data, the set covers the true\nlabel with probability at least ``1 \u2212 \u03b1`` (finite-sample guarantee).  An\noptional Mondrian (group-conditional) mode fits one threshold per group for\ngroup-conditional coverage.\n\nThis module returns plain ``frozenset`` prediction sets; slice 084's\n:class:`~hugrgate.calibration.sets.PredictionSet` adds the set-metric\nabstraction on top.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "math",
-        "numpy",
-        "typing"
-      ],
-      "loc": 156,
-      "path": "hugrgate/calibration/conformal.py",
-      "public_defs": [
-        "ConformalClassifier",
-        "fitted",
-        "fit",
-        "predict_set",
-        "predict_sets",
-        "empirical_coverage",
-        "mean_set_size",
-        "thresholds"
-      ]
-    },
-    "hugrgate.calibration.conformal_regression": {
-      "docstring": "Split-conformal regression. Slice 083.\n\nCompanion to :mod:`hugrgate.calibration.conformal`: finite-sample prediction\n*intervals* for real-valued predictions.  :class:`ConformalRegressor`\nimplements split conformal prediction with\n\n- absolute-residual nonconformity ``s = |y \u2212 \u0177|`` (constant-width intervals), or\n- normalized residuals ``s = |y \u2212 \u0177| / difficulty`` when a difficulty\n  estimate is supplied (locally adaptive widths: easy points get tight\n  intervals, hard points get wide ones).\n\nUnder exchangeability, ``[\u0177 \u2212 q\u0302\u00b7d, \u0177 + q\u0302\u00b7d]`` covers the true value with\nprobability at least ``1 \u2212 \u03b1``.  Operates on plain floats, so it works with\nany point-prediction source, including HugrGate numeric backends.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "math",
-        "numpy",
-        "typing"
-      ],
-      "loc": 149,
-      "path": "hugrgate/calibration/conformal_regression.py",
-      "public_defs": [
-        "ConformalRegressor",
-        "fitted",
-        "quantile",
-        "fit",
-        "predict_interval",
-        "predict_intervals",
-        "empirical_coverage",
-        "mean_width"
-      ]
-    },
-    "hugrgate.calibration.coverage": {
-      "docstring": "Coverage guarantees tooling. Slice 085.\n\nConformal prediction promises *marginal* coverage \u2265 1\u2212\u03b1, but on any finite\ntest set the empirical hit rate is just an estimate.  This module turns that\nestimate into a checkable claim:\n\n- :func:`clopper_pearson` \u2014 exact two-sided binomial confidence interval\n  (built on the slice-081 ``beta_quantile``, no scipy);\n- :func:`hoeffding_lower_bound` \u2014 one-sided Hoeffding lower bound, the\n  distribution-free quick check;\n- :class:`CoverageCertificate` \u2014 bundles n, hits, empirical coverage, the\n  interval, and a ``holds`` verdict against a target coverage;\n- :func:`validate_coverage` \u2014 certify a batch of\n  :class:`~hugrgate.calibration.sets.PredictionSet` outcomes;\n- :func:`required_n` \u2014 how many test points you need before a\n  Clopper-Pearson interval of a given width is even possible.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "numpy",
-        "statistics",
-        "typing"
-      ],
-      "loc": 167,
-      "path": "hugrgate/calibration/coverage.py",
-      "public_defs": [
-        "clopper_pearson",
-        "hoeffding_lower_bound",
-        "CoverageCertificate",
-        "validate_coverage",
-        "required_n",
-        "empirical",
-        "interval",
-        "validates",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.decomposition": {
-      "docstring": "Uncertainty decomposition. Slice 094.\n\nTotal predictive uncertainty splits into two principled parts (Depeweg et\nal.; Kendall & Gal):\n\n- **aleatoric** \u2014 expected entropy of the members: noise inherent in the\n  data, irreducible by more modeling;\n- **epistemic** \u2014 mutual information between the prediction and the model\n  identity: disagreement *between* members, reducible with more data or\n  better models;\n\nwith ``total = entropy(mean distribution) = aleatoric + epistemic``.\n\n:func:`decompose` takes an ensemble's predictive distributions (one\nprobability vector per member) and returns an :class:`UncertaintyBreakdown`.\nFeed it members' calibrated outputs \u2014 e.g. per-class vectors from\n:class:`~hugrgate.calibration.perclass.PerClassCalibrator` variants or\nbackend ensembles \u2014 and the epistemic term tells you when the system is\nguessing *about its own knowledge*.",
-      "imports": [
-        "__future__",
-        "dataclasses",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
       "loc": 112,
-      "path": "hugrgate/calibration/decomposition.py",
-      "public_defs": [
-        "UncertaintyBreakdown",
-        "decompose",
-        "decompose_dicts",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.drift": {
-      "docstring": "Calibration under drift. Slice 088.\n\nA calibration map is a bet that the future resembles the fit set.  When the\nscore\u2192outcome relationship drifts, the bet goes bad silently \u2014 live ECE\nclimbs while nobody watches.  :class:`CalibrationDriftMonitor` watches the\n*calibrated* outputs in production:\n\n- each observed batch contributes Brier and ECE;\n- the first ``baseline_batches`` batches establish the in-control mean and\n  standard deviation of each metric;\n- afterwards EWMAs of both metrics are compared against\n  ``mean + k\u00b7std`` control limits (with a ``min_std`` floor so a\n  suspiciously quiet baseline can't arm a hair-trigger) \u2014 crossing either\n  limit raises an alarm and the monitor recommends ``\"recalibrate\"``.\n\nPair it with :class:`~hugrgate.calibration.online.OnlineCalibrator` or\n:class:`~hugrgate.calibration.window.SlidingWindowCalibrator`: the monitor\nsays *when*, the adaptive calibrator does the *what*.  After recalibrating,\ncall :meth:`reset_alarm` to re-arm.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 181,
-      "path": "hugrgate/calibration/drift.py",
-      "public_defs": [
-        "DriftReport",
-        "CalibrationDriftMonitor",
-        "as_dict",
-        "batches_seen",
-        "history",
-        "alarmed",
-        "alarm_batch",
-        "alarm_metric",
-        "baseline_stats",
-        "control_limits",
-        "observe",
-        "recommend",
-        "reset_alarm",
-        "report"
-      ]
-    },
-    "hugrgate.calibration.ensemble": {
-      "docstring": "Calibration ensemble. Slice 093.\n\nNo single calibrator wins everywhere: Platt is stable but rigid, isotonic\nis flexible but data-hungry, temperature is minimal.  :class:`CalibratorEnsemble`\nfits several member calibrators on the same data and averages their maps \u2014\nmean (default), median, or custom weights.\n\nBy Jensen's inequality the Brier score of a convex combination is at most\nthe average of the members' Brier scores, so the ensemble never pays more\nthan the *average* member \u2014 and in practice it lands near the best one\nwithout requiring the choice up front (see also slice 092's auto-selection).",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 133,
-      "path": "hugrgate/calibration/ensemble.py",
-      "public_defs": [
-        "CalibratorEnsemble",
-        "member_names",
-        "fit",
-        "calibrate",
-        "member_spread",
-        "get_params",
-        "from_params"
-      ]
-    },
-    "hugrgate.calibration.epistemic": {
-      "docstring": "Epistemic uncertainty adapters. Slice 095.\n\nEpistemic uncertainty = \"the model doesn't know what it doesn't know\".\nThese adapters *produce* epistemic estimates from HugrGate components and\nwire them into the existing abstention machinery:\n\n- :func:`ensemble_epistemic` \u2014 mutual information across an ensemble's\n  predictive distributions (slice 094's decomposition);\n- :func:`distance_epistemic` \u2014 out-of-distribution proxy: how far a score\n  sits from the calibration fit-score cloud, normalized to [0, 1];\n- :func:`combine_epistemic` \u2014 conservative (max) combination of adapters;\n- :func:`review_on_epistemic` \u2014 marks a\n  :class:`~hugrgate.result.DecisionResult` for human review via\n  :func:`hugrgate.abstain.mark_for_review` when epistemic uncertainty\n  exceeds a threshold.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 137,
-      "path": "hugrgate/calibration/epistemic.py",
-      "public_defs": [
-        "EpistemicReport",
-        "ensemble_epistemic",
-        "ensemble_epistemic_dicts",
-        "distance_epistemic",
-        "combine_epistemic",
-        "review_on_epistemic",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.group": {
-      "docstring": "Group calibration. Slice 078.\n\nA single global calibrator can hide per-group miscalibration: group A is\noverconfident while group B is underconfident and the average looks fine.\n:class:`GroupCalibrator` fits one binary calibrator per group value (plus a\nglobal fallback for unseen groups), and reports per-group Brier/ECE together\nwith the *calibration disparity* ``max_g ECE_g \u2212 min_g ECE_g``.\n\nGroup labels are opaque strings supplied by the caller (e.g. a segment,\ncohort, or backend name).  HugrGate never invents them \u2014 see the privacy\nmodule before using real demographic attributes.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 156,
-      "path": "hugrgate/calibration/group.py",
-      "public_defs": [
-        "GroupCalibrator",
-        "fitted",
-        "groups",
-        "group_metrics",
-        "disparity",
-        "fit",
-        "calibrate",
-        "calibrate_batch",
-        "get_params"
-      ]
-    },
-    "hugrgate.calibration.imbalance": {
-      "docstring": "Calibration under class imbalance. Slice 089.\n\nHeavy imbalance breaks naive calibration two ways: the fit is dominated by\nthe majority class, and the deployment prior often differs from the fit\nprior anyway.  This module provides the standard, honest toolkit:\n\n- :func:`rebalance` \u2014 resample a fit set to a target positive rate\n  (minority oversampling / majority undersampling, seeded);\n- :func:`saerens_prior_correction` \u2014 Saerens\u2013Latinne\u2013Decaestecker prior\n  correction: transport calibrated probabilities from the fit prior to the\n  deployment prior without refitting;\n- :func:`fit_balanced` \u2014 rebalance + fit any :class:`Calibrator`, returning\n  the fitted unit and an :class:`ImbalanceReport`;\n- :func:`stratified_metrics` \u2014 Brier/ECE computed separately on the\n  positive and negative strata, so minority-class miscalibration can't hide\n  behind a good-looking average.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 177,
-      "path": "hugrgate/calibration/imbalance.py",
-      "public_defs": [
-        "ImbalanceReport",
-        "rebalance",
-        "saerens_prior_correction",
-        "fit_balanced",
-        "stratified_metrics",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.isotonic": {
-      "docstring": "Isotonic regression via the Pool Adjacent Violators (PAV) algorithm.\n\nSlice 27.  Fits a non-decreasing stepwise map from raw scores to empirical\nevent rates.  The PAV implementation below is written independently from the\ntextbook description: sort by score, greedily merge adjacent blocks whose\nmeans violate monotonicity, and predict with the resulting step function.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 111,
       "path": "hugrgate/calibration/isotonic.py",
       "public_defs": [
         "IsotonicCalibrator",
@@ -654,9 +368,9 @@
       "docstring": "Calibration metrics. Slice 28.\n\nBinary metrics \u2014 Brier score, log loss, expected/maximum calibration error\n(ECE/MCE) \u2014 plus reliability-diagram bin data and a multiclass ECE helper\n(max-probability confidence vs. correctness) for whole-distribution checks.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
-        "numpy",
-        "typing"
+        "numpy"
       ],
       "loc": 149,
       "path": "hugrgate/calibration/metrics.py",
@@ -669,89 +383,16 @@
         "ece_multiclass"
       ]
     },
-    "hugrgate.calibration.online": {
-      "docstring": "Online (incremental) calibration. Slice 079.\n\nBatch calibrators assume the world stands still while you collect a fit set.\n:class:`OnlineCalibrator` instead maintains binned (score \u2192 empirical rate)\nstatistics that update with every :meth:`partial_fit` call and slowly forget\nold data via exponential decay, so the map tracks a drifting relationship\nbetween scores and outcomes.\n\n- Each of ``n_bins`` bins keeps decayed ``(positives, total)`` counts.\n- The calibrated value for a score is the Laplace-smoothed empirical rate\n  of its bin, passed through a weighted pool-adjacent-violators (PAV) pass\n  so the map stays monotone non-decreasing in the score.\n- ``decay=1.0`` disables forgetting (pure cumulative counts);\n  ``decay<1.0`` down-weights older batches per :meth:`partial_fit` call.\n\nIt subclasses :class:`Calibrator` (``fit`` = reset + one ``partial_fit``)\nso it works with the pipeline, registry, and auto-selection.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 178,
-      "path": "hugrgate/calibration/online.py",
-      "public_defs": [
-        "OnlineCalibrator",
-        "partial_fit",
-        "fit",
-        "calibrate",
-        "effective_samples",
-        "bin_stats",
-        "get_params",
-        "from_params"
-      ]
-    },
-    "hugrgate.calibration.perclass": {
-      "docstring": "Per-class calibration. Slice 077.\n\n``CalibratedBackend`` already applied one-vs-rest calibrators per class, but\nthere was no principled *fitting* side: callers had to hand-roll the per-class\nloop and hand-assemble ``CalibrationProfile.calibrator_params``.  This module\nprovides :class:`PerClassCalibrator`, which:\n\n- fits one binary calibrator per class (one-vs-rest) from multiclass\n  probability dicts + labels, via any :class:`Calibrator` factory;\n- records per-class fit diagnostics (Brier/ECE before/after) so a single\n  badly-calibrated class is visible instead of being averaged away;\n- handles classes absent from the fit data with a constant-prior fallback\n  instead of crashing (a class unseen during calibration still needs a\n  prediction at serving time);\n- renormalizes the calibrated distribution and exports/imports\n  :class:`~hugrgate.calibration.profiles.CalibrationProfile` parameter dicts.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 232,
-      "path": "hugrgate/calibration/perclass.py",
-      "public_defs": [
-        "PerClassCalibrator",
-        "build_profile",
-        "fit",
-        "calibrate",
-        "get_params",
-        "from_params",
-        "fitted",
-        "classes",
-        "per_class_metrics",
-        "fit",
-        "calibrate_dist",
-        "calibrate_batch",
-        "to_profile_params",
-        "from_profile_params"
-      ]
-    },
-    "hugrgate.calibration.pipeline": {
-      "docstring": "Calibration pipeline (architecture v2). Slice 076.\n\nWhat existed before this slice: three binary calibrators (Platt, isotonic,\ntemperature), bare metrics, and versioned profiles \u2014 but no lifecycle around\n* fitting a calibrator: no fit-data diagnostics, no before/after comparison,\nno refusal to deploy a calibration that made things worse.\n\nThis module adds that lifecycle without touching the existing calibrators:\n\n- :func:`validate_fit_data` \u2014 diagnostics + hard validation of a\n  (scores, labels) fit set (both classes present, finite scores, sane size).\n- :class:`CalibrationPipeline` \u2014 wraps a calibrator factory, fits it,\n  records before/after Brier / log-loss / ECE / MCE, and produces a\n  :class:`CalibrationReport` carrying provenance, the dataset hash, and an\n  ``improved`` verdict.\n- :class:`CalibrationReport` \u2014 JSON-serializable, round-trippable; can seed\n  a :class:`~hugrgate.calibration.profiles.CalibrationProfile` via\n  :meth:`CalibrationReport.as_profile_kwargs`.\n\nThe pipeline *warns* (does not raise) when calibration fails to improve the\nmetrics, because on near-perfect scores any map is noise \u2014 but\n:meth:`CalibrationPipeline.fit_strict` raises in that case for pipelines that\nwant a hard gate.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 244,
-      "path": "hugrgate/calibration/pipeline.py",
-      "public_defs": [
-        "FitDiagnostics",
-        "validate_fit_data",
-        "CalibrationReport",
-        "CalibrationPipeline",
-        "as_dict",
-        "as_dict",
-        "from_dict",
-        "improvement",
-        "fit",
-        "fit_strict",
-        "apply"
-      ]
-    },
     "hugrgate.calibration.platt": {
       "docstring": "Platt scaling. Slice 26.\n\nFits a sigmoid ``p = 1 / (1 + exp(A\u00b7s + B))`` to validation scores by\nminimizing the negative log-likelihood with Platt's target smoothing.\nThe Newton optimization below is an independent implementation written\nfrom the textbook formulation (gradient/Hessian of the logistic loss);\nno code is copied from scikit-learn or any other library.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/calibration/platt.py",
       "public_defs": [
         "PlattCalibrator",
@@ -765,6 +406,7 @@
       "docstring": "Calibration profiles. Slice 29.\n\nA :class:`CalibrationProfile` is a named, versioned record of a fitted\ncalibration: which backend + model it applies to, which calibrator with\nwhich per-class parameters, the metrics on the calibration set, and a hash\nof that dataset.  Profiles are stored *separately* from model weights, so\nrecalibration never touches the underlying model.\n\n:class:`CalibratedBackend` wraps any trained classifier backend, applies the\nprofile's per-class (one-vs-rest) calibrators to the raw distribution,\nrenormalizes, and stamps ``result.calibration_profile``.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "datetime",
         "hashlib",
@@ -774,7 +416,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 276,
+      "loc": 264,
       "path": "hugrgate/calibration/profiles.py",
       "public_defs": [
         "hash_dataset",
@@ -802,112 +444,16 @@
         "calibration_info"
       ]
     },
-    "hugrgate.calibration.registry": {
-      "docstring": "Calibration registry (rich catalog). Slice 091.\n\nThe legacy :class:`~hugrgate.calibration._base.CalibratorRegistry` maps\nnames to classes and nothing more \u2014 enough to rebuild a calibrator, not\nenough to *choose* one.  This module layers a metadata catalog on top:\n\n- :class:`CalibratorSpec` \u2014 per-calibrator metadata: family (parametric /\n  nonparametric / bayesian / streaming / fallback), monotonicity, whether\n  both classes are required to fit, streaming support, deprecation status;\n- :func:`catalog` / :func:`spec` / :func:`find` \u2014 inspect and filter the\n  catalog (e.g. \"monotone streaming calibrators\");\n- :func:`describe` \u2014 human-readable summary for docs and the auto-selector\n  (slice 092).\n\nThe legacy registry is untouched (backward compatibility); this catalog\nsyncs from it at import time and overlays the metadata table below.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 172,
-      "path": "hugrgate/calibration/registry.py",
-      "public_defs": [
-        "CalibratorSpec",
-        "register_spec",
-        "catalog",
-        "spec",
-        "find",
-        "describe",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.risk_coverage": {
-      "docstring": "Risk-coverage curves. Slice 087.\n\nThe loss-based sibling of slice 086's selective (accuracy) curves.  Given\nper-decision confidences and *losses* (0/1 error by default, but any bounded\nloss works \u2014 e.g. a cost-weighted error), the risk-coverage (RC) curve shows\nthe mean loss over the kept decisions as coverage shrinks toward the most\nconfident sliver.\n\n- :func:`risk_coverage_curve` \u2014 rows ``{threshold, coverage, risk, n}``;\n- :func:`aurc` \u2014 area under the RC curve (lower is better), with the oracle\n  curve (sorted by true loss) as the reference: ``excess = aurc \u2212 aurc*``\n  measures how much the confidence ranking leaves on the table;\n- :func:`coverage_at_risk` \u2014 the abstention-policy lookup: largest coverage\n  with risk \u2264 target;\n- :func:`risk_at_coverage` \u2014 interpolated risk at a target coverage.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 147,
-      "path": "hugrgate/calibration/risk_coverage.py",
-      "public_defs": [
-        "risk_coverage_curve",
-        "aurc",
-        "oracle_aurc",
-        "risk_at_coverage",
-        "coverage_at_risk"
-      ]
-    },
-    "hugrgate.calibration.selective": {
-      "docstring": "Selective prediction curves. Slice 086.\n\nSelective prediction: answer only when confident, abstain otherwise.  Given\nper-decision confidences and correctness flags, this module builds the\n*selective accuracy curve* \u2014 accuracy as a function of the fraction of\ndecisions kept (coverage) \u2014 plus the area under it and coverage lookup at a\ntarget accuracy.\n\nSlice 087's risk-coverage curves are the loss-based sibling; this module is\nthe accuracy-based one.  Both consume the same ``(confidence, correct)``\npairs, so either can be derived from HugrGate decision logs.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 125,
-      "path": "hugrgate/calibration/selective.py",
-      "public_defs": [
-        "selective_curve",
-        "area_under_selective_curve",
-        "accuracy_at_coverage",
-        "coverage_at_accuracy"
-      ]
-    },
-    "hugrgate.calibration.sets": {
-      "docstring": "Prediction sets. Slice 084.\n\nSlice 082 produced raw ``frozenset`` prediction sets with a coverage\nguarantee.  This module adds the *abstraction* on top:\n\n- :class:`PredictionSet` \u2014 an immutable set with its construction method,\n  parameters, and provenance attached, so a set can be audited later;\n- construction strategies: fixed ``threshold``, ``top_k``, cumulative-mass\n  (APS-lite), and wrapping a fitted\n  :class:`~hugrgate.calibration.conformal.ConformalClassifier`;\n- set metrics: coverage, mean size, and *size-stratified* coverage, which\n  catches the classic failure where large sets cover fine but singletons\n  (the \"confident\" predictions) systematically miss.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 187,
-      "path": "hugrgate/calibration/sets.py",
-      "public_defs": [
-        "PredictionSet",
-        "threshold_set",
-        "topk_set",
-        "cumulative_set",
-        "from_conformal",
-        "set_metrics",
-        "size_stratified_coverage",
-        "size",
-        "covers",
-        "as_dict"
-      ]
-    },
-    "hugrgate.calibration.shift": {
-      "docstring": "Calibration under distribution shift. Slice 090.\n\nTwo shift flavors, two tools:\n\n**Covariate shift** (``P(x)`` changes, ``P(y|x)`` doesn't): detect it with\nthe population stability index (:func:`psi`), then correct with binned\ndensity-ratio weights (:func:`density_ratio_weights`) and\n:func:`resample_for_shift`, which resamples the source fit set so it mimics\nthe target covariate distribution before fitting.\n\n**Label shift** (``P(y)`` changes, ``P(x|y)`` doesn't): estimate the target\nprior with the Saerens\u2013Latinne\u2013Decaestecker EM algorithm\n(:func:`em_target_prior`), then transport with the slice-089\n:func:`~hugrgate.calibration.imbalance.saerens_prior_correction`.\n\nAll density estimates are binned histograms over the score axis \u2014 honest,\ndependency-free, and adequate for one-dimensional calibration scores.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 165,
-      "path": "hugrgate/calibration/shift.py",
-      "public_defs": [
-        "psi",
-        "psi_band",
-        "density_ratio_weights",
-        "resample_for_shift",
-        "em_target_prior"
-      ]
-    },
     "hugrgate.calibration.temperature": {
-      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = \u03c3(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
+      "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = sigmoid(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 136,
+      "loc": 137,
       "path": "hugrgate/calibration/temperature.py",
       "public_defs": [
         "TemperatureCalibrator",
@@ -918,59 +464,17 @@
         "nll"
       ]
     },
-    "hugrgate.calibration.viz": {
-      "docstring": "Calibration visualization data. Slice 097.\n\nFrontends need *data*, not plots: this module produces JSON-serializable\npayloads for the standard calibration visuals, with no plotting dependency:\n\n- :func:`reliability_curve_data` \u2014 reliability-diagram points\n  (mean predicted vs. mean actual per bin) plus the ideal diagonal;\n- :func:`confidence_histogram` \u2014 histogram of top-class confidences;\n- :func:`per_class_ece_bars` \u2014 one-vs-rest ECE per class;\n- :func:`risk_coverage_points` / :func:`selective_curve_points` \u2014\n  normalized pass-throughs of the slice-086/087 curves;\n- :func:`calibration_dashboard` \u2014 the combined payload: summary metrics,\n  reliability curve, histogram, per-class bars, and data-quality notes.\n\nEvery payload passes ``json.dumps`` \u2014 that invariant is tested.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "json",
-        "numpy",
-        "typing"
-      ],
-      "loc": 170,
-      "path": "hugrgate/calibration/viz.py",
-      "public_defs": [
-        "reliability_curve_data",
-        "confidence_histogram",
-        "per_class_ece_bars",
-        "risk_coverage_points",
-        "selective_curve_points",
-        "calibration_dashboard"
-      ]
-    },
-    "hugrgate.calibration.window": {
-      "docstring": "Sliding-window calibration. Slice 080.\n\nComplements the binned :class:`OnlineCalibrator` (slice 079): instead of an\napproximate incremental map, :class:`SlidingWindowCalibrator` keeps the last\n``window_size`` raw ``(score, label)`` pairs and periodically *refits* any\nordinary batch calibrator on exactly that window.  You get the full fidelity\nof Platt/isotonic/temperature on recent data, at the cost of a refit per\n``refit_every`` samples.\n\nA refit is attempted only when the window holds at least ``min_samples``\nrows with both classes present; otherwise the previous map is kept (or, if\nno fit ever succeeded, :meth:`calibrate` raises).",
-      "imports": [
-        "__future__",
-        "collections",
-        "hugrgate",
-        "numpy",
-        "typing"
-      ],
-      "loc": 158,
-      "path": "hugrgate/calibration/window.py",
-      "public_defs": [
-        "SlidingWindowCalibrator",
-        "partial_fit",
-        "refit",
-        "fit",
-        "calibrate",
-        "window_fill",
-        "window_span",
-        "get_params",
-        "from_params"
-      ]
-    },
     "hugrgate.circuit": {
       "docstring": "Circuit breaker \u2014 per-backend failure containment. Slice 18.\n\nStates:\n\n- **closed**: traffic flows; consecutive failures are counted.\n- **open**: calls are rejected fast (``allow()`` -> False) until\n  ``reset_timeout_s`` has elapsed.\n- **half-open**: after the timeout, a limited number of probe calls\n  (``half_open_max_probes``) are let through. A probe success closes the\n  circuit; a probe failure re-opens it and restarts the timeout.\n\n:class:`CircuitRegistry` owns one breaker per backend name and creates\nthem on demand. :class:`~hugrgate.fallback.FallbackChain` accepts a\nregistry: open circuits are skipped (recorded in the fallback trace)\nand every attempt's outcome is reported back to its breaker.\n\nThe clock is injectable (``clock`` parameter) so tests can drive time\ndeterministically. All methods are thread-safe.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "threading",
         "time",
         "typing"
       ],
-      "loc": 173,
+      "loc": 174,
       "path": "hugrgate/circuit.py",
       "public_defs": [
         "CircuitBreaker",
@@ -998,7 +502,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 275,
+      "loc": 277,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -1016,19 +520,17 @@
       ]
     },
     "hugrgate.client": {
-      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nAlso home to the JSON serde helpers shared by the server, daemon and CLI:\n:func:`policy_to_dict`, :func:`policy_from_dict`, :func:`result_from_dict`.",
+      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.",
       "imports": [
         "__future__",
+        "collections",
         "httpx",
         "hugrgate",
         "typing"
       ],
-      "loc": 277,
+      "loc": 220,
       "path": "hugrgate/client.py",
       "public_defs": [
-        "policy_to_dict",
-        "policy_from_dict",
-        "result_from_dict",
         "HugrGateClient",
         "decide",
         "health",
@@ -1040,17 +542,21 @@
       "docstring": "HugrGate core runtime \u2014 decide(). Slice 8.",
       "imports": [
         "__future__",
+        "asyncio",
+        "collections",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 120,
+      "loc": 159,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
         "register",
+        "close",
         "decide",
-        "decide_batch"
+        "decide_batch",
+        "adecide"
       ]
     },
     "hugrgate.daemon": {
@@ -1059,6 +565,7 @@
         "__future__",
         "argparse",
         "asyncio",
+        "collections",
         "contextlib",
         "dataclasses",
         "fastapi",
@@ -1070,7 +577,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 445,
+      "loc": 494,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -1119,13 +626,488 @@
         "history"
       ]
     },
+    "hugrgate.ensemble.__init__": {
+      "docstring": "Ensemble intelligence \u2014 one decision from many backends. Slices 101-125.\n\n:class:`Ensemble` composes member backends behind a single\n:class:`~hugrgate.backend.Backend` interface and combines their ballots\nwith a registered strategy (voting, Bayesian averaging, stacking,\nblending, mixture-of-experts), wrapped in disagreement handling,\nreliability weighting, calibration, provenance, caching, and release\ngating.",
+      "imports": [
+        "hugrgate"
+      ],
+      "loc": 231,
+      "path": "hugrgate/ensemble/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.ensemble.adversarial": {
+      "docstring": "Ensemble adversarial tests \u2014 kick the council and see. Slice 123.\n\nFault isolation is only real if it holds under attack. This module\nprovides deterministic saboteur backends and a suite runner:\n\n- :class:`DropoutBackend` \u2014 raises :class:`BackendError` every\n  ``every``-th call (a member that keeps dying);\n- :class:`CorruptBackend` \u2014 returns a self-contradictory result\n  every ``every``-th call (mass \u2260 probability; the contract\n  catches it);\n- :class:`AbstainBackend` \u2014 raises :class:`Abstention` every\n  ``every``-th call;\n- :class:`SlowBackend` \u2014 sleeps ``delay_seconds`` per call;\n- :func:`tie_storm_members` \u2014 an evenly split electorate, to pin\n  the documented tie-break;\n- :func:`run_adversarial_suite` \u2014 runs named\n  :class:`AdversarialCase`s and summarizes decided values, errors,\n  usable-vote floors, and skip reasons.\n\nAll sabotage is deterministic (every-k-th-call patterns, no RNG),\nso suites are reproducible.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 229,
+      "path": "hugrgate/ensemble/adversarial.py",
+      "public_defs": [
+        "SaboteurBackend",
+        "DropoutBackend",
+        "CorruptBackend",
+        "AbstainBackend",
+        "SlowBackend",
+        "tie_storm_members",
+        "AdversarialCase",
+        "run_adversarial_suite",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.ensemble.api": {
+      "docstring": "Ensemble API \u2014 one decision from many backends. Slice 101.\n\n:class:`Ensemble` is itself a :class:`~hugrgate.backend.Backend`, so it\nplugs into :class:`~hugrgate.core.HugrGate`, the daemon, the HTTP\nserver, and the policy/provenance machinery with no special casing:\nregister it, and ``gate.decide(state, spec)`` fans out to every member\nand combines their ballots with the chosen strategy.\n\nStrategies live in a registry (:func:`register_strategy`) so new\ncombiners (voting variants, BMA, stacking, blending, mixture of\nexperts) plug in without touching this module. The built-in set:\n\n- ``\"soft\"`` \u2014 average member distributions, elect the argmax\n  (:mod:`hugrgate.ensemble.voting`)\n\n``Ensemble`` also exposes :meth:`decide_batch` for the batch path\n(slice 122 builds on it).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 268,
+      "path": "hugrgate/ensemble/api.py",
+      "public_defs": [
+        "register_strategy",
+        "get_strategy",
+        "EnsembleConfig",
+        "Ensemble",
+        "attach",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "decide_batch",
+        "member_votes"
+      ]
+    },
+    "hugrgate.ensemble.averaging": {
+      "docstring": "Bayesian model averaging adapter. Slice 106.\n\nAdapts HugrGate backends \u2014 which emit :class:`DecisionResult`s, not\nBayesian evidences \u2014 into Bayesian model averaging terms:\n\n``P(M\u1d62|D) \u221d P(D|M\u1d62) \u00b7 P(M\u1d62)``\n\n- the **prior** ``P(M\u1d62)`` is operator-supplied (uniform by default);\n- the **evidence** ``P(D|M\u1d62)`` is estimated from predictive\n  log-likelihoods: each labeled outcome contributes\n  ``log P\u1d62(true label)`` to the member's accumulated log-evidence.\n\n:meth:`BayesianModelAverager.posterior_weights` turns the accumulated\nevidence into the posterior model probabilities; the ``\"bma\"``\ncombiner averages member distributions with those weights. Members\nwith no observations yet fall back to their prior \u2014 the adapter never\npunishes a member for not having been scored.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 193,
+      "path": "hugrgate/ensemble/averaging.py",
+      "public_defs": [
+        "predictive_log_likelihood",
+        "BayesianModelAverager",
+        "bma_combine",
+        "observe",
+        "observe_outcome",
+        "log_evidences",
+        "observation_counts",
+        "posterior_weights",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.base": {
+      "docstring": "Ensemble foundations \u2014 shared vote plumbing. Slice 101.\n\nEvery ensemble strategy in :mod:`hugrgate.ensemble` speaks this one\ndialect:\n\n- :class:`MemberVote` \u2014 one member backend's ballot, or the recorded\n  reason it could not vote (fault isolation: a dead member is skipped\n  and named, never fatal).\n- :func:`collect_votes` \u2014 evaluate every member against the spec with\n  per-member fault isolation and contract validation.\n- :func:`finalize_result` \u2014 build the :class:`DecisionResult` every\n  combiner returns, with the shared ``metadata[\"ensemble\"]`` contract:\n  strategy name, per-member votes, normalized weights, tally, winner\n  share, and the minority report (slice 114 expands it; it is present\n  from day one so dissent is never silently dropped).\n\nDeterminism: tie-breaks are total and documented\n(:func:`break_tie`); no randomness anywhere in this package.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "time",
+        "typing"
+      ],
+      "loc": 329,
+      "path": "hugrgate/ensemble/base.py",
+      "public_defs": [
+        "MemberVote",
+        "StrategyContext",
+        "normalize_weights",
+        "shannon_entropy",
+        "normalized_entropy",
+        "break_tie",
+        "require_discrete_spec",
+        "complete_distribution",
+        "collect_votes",
+        "finalize_result",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.batch": {
+      "docstring": "Ensemble batch mode \u2014 one council session, many rulings. Slice 122.\n\n:meth:`Ensemble.evaluate` asks every member about one state.\n:meth:`Ensemble.decide_batch` used to just loop that. This module\ncollects ballots the efficient way: each member's :meth:`batch`\nfast path is called once for the whole batch, and the ballots are\ntransposed so every state gets its own election.\n\nFault isolation mirrors :func:`collect_votes` exactly, per\n(member, state):\n\n- a member whose ``batch()`` raises falls back to per-state\n  ``evaluate`` (same isolation as the single-state path);\n- a ``batch()`` that returns the wrong number of results is a\n  contract violation: the member is skipped for every state;\n- each returned result is validated; abstention-shaped, invalid,\n  or contract-violating results become skip votes with named\n  reasons;\n- :class:`BackendError` only when a state ends up with fewer than\n  ``min_members`` usable votes.\n\nReturns ``votes_by_state[i]`` \u2014 the ballots for ``states[i]``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 162,
+      "path": "hugrgate/ensemble/batch.py",
+      "public_defs": [
+        "batch_collect_votes"
+      ]
+    },
+    "hugrgate.ensemble.benchmarks": {
+      "docstring": "Ensemble benchmarks \u2014 measured, not promised. Slice 125 needs these\nnumbers; this slice produces them. Slice 124.\n\nReuses :mod:`hugrgate.bench` metrics (accuracy, Brier score, ECE) so\nensemble numbers are comparable with single-backend numbers:\n\n- :func:`benchmark_strategies` \u2014 one fresh council per strategy over\n  the same labeled states; per strategy: accuracy, Brier, ECE,\n  wall-clock time;\n- :func:`benchmark_scaling` \u2014 wall time vs council size;\n- :func:`write_benchmark_report` \u2014 the JSON artifact.\n\nTests exercise the harness against ``tmp_path`` only and never touch\nthe committed artifact (Campaign III lesson); the real\n``benchmarks/ensemble.json`` is regenerated via ``regenerate_ensemble_benchmarks()`` after\nthe final test run, before committing.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 204,
+      "path": "hugrgate/ensemble/benchmarks.py",
+      "public_defs": [
+        "benchmark_strategies",
+        "benchmark_scaling",
+        "write_benchmark_report",
+        "demo_council",
+        "regenerate_ensemble_benchmarks",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.ensemble.blending": {
+      "docstring": "Blending engine \u2014 convex member weights from holdout data. Slice 108.\n\nBlending is stacking's leaner sibling: instead of training a full\nmeta-learner, it learns one convex weight vector\n(``w\u1d62 \u2265 0``, ``\u03a3w = 1``) minimizing multiclass log-loss on a holdout\nset of member predictions. Optimization is projected gradient descent\nonto the probability simplex \u2014 uniform init, fixed iterations, fully\ndeterministic, pure Python.\n\nWhen to reach for which:\n- **blending**: few holdout samples, want an interpretable weight per\n  member, hard to overfit;\n- **stacking** (107): plenty of data, want per-class meta-weights\n  (can anti-learn a member for one class while trusting it for\n  another).\n\n:class:`Blender` owns the fit/blend cycle; the ``\"blending\"``\ncombiner needs a fitted blender in ``ctx.fitted``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 224,
+      "path": "hugrgate/ensemble/blending.py",
+      "public_defs": [
+        "project_simplex",
+        "log_loss",
+        "Blender",
+        "blending_combine",
+        "fitted",
+        "weights",
+        "fit",
+        "blend",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.cache": {
+      "docstring": "Ensemble cache \u2014 don't re-ask the council. Slice 121.\n\nMember backends can be expensive; repeated identical states should\nnot re-pay the full vote. :class:`EnsembleCache` is a TTL + LRU\ncache keyed on the canonical ``(state, spec, strategy)`` triple:\n\n- **TTL**: entries expire after ``ttl_seconds`` (monotonic clock);\n- **LRU**: beyond ``maxsize`` entries the least-recently-used goes;\n- **privacy**: ``privacy=\"strict\"`` evaluations bypass the cache\n  entirely \u2014 sensitive states are never written to it;\n- **invalidation**: :meth:`invalidate_member` drops every entry\n  whose council included that member (its votes are stale);\n- **isolation**: results are deep-copied on the way in and on the\n  way out, so no caller can corrupt the cache through a held\n  reference (same discipline as :class:`ProvenanceStore`).\n\n:class:`CachedEnsemble` wraps an :class:`Ensemble` with this policy.\nChanging fitted models or strategy options changes outputs without\nchanging the key \u2014 use a fresh cache (or :meth:`invalidate`) then.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "hugrgate",
+        "json",
+        "time",
+        "typing"
+      ],
+      "loc": 165,
+      "path": "hugrgate/ensemble/cache.py",
+      "public_defs": [
+        "EnsembleCache",
+        "CachedEnsemble",
+        "get",
+        "put",
+        "invalidate_member",
+        "invalidate",
+        "stats",
+        "name",
+        "members",
+        "evaluate",
+        "invalidate_member",
+        "invalidate",
+        "stats"
+      ]
+    },
+    "hugrgate.ensemble.calibration": {
+      "docstring": "Ensemble calibration \u2014 honest probabilities out. Slice 118.\n\nEnsemble combination rules produce *scores*, not calibrated\nprobabilities: a 0.9 vote share does not mean the winner is right 90%\nof the time. :class:`EnsembleCalibrator` fits temperature scaling on\nheld-out ensemble outputs (``p_T(v) \u221d p(v)^(1/T)``), minimizing\nnegative log-likelihood with a deterministic golden-section search:\n\n- ``T > 1`` softens overconfident ensembles;\n- ``T < 1`` sharpens underconfident ones;\n- ``T = 1`` is the identity (a well-calibrated ensemble is left\n  alone).\n\n:func:`expected_calibration_error` mirrors the formula in\n:mod:`hugrgate.bench` (10 confidence bins) but works directly on\ndistributions. :meth:`EnsembleCalibrator.calibrate_result` returns a\nnew :class:`DecisionResult` with the calibrated distribution,\n``calibration_profile=\"ensemble:temperature\"``, and the ensemble\nmetadata preserved.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 214,
+      "path": "hugrgate/ensemble/calibration.py",
+      "public_defs": [
+        "expected_calibration_error",
+        "EnsembleCalibrator",
+        "fitted",
+        "fit",
+        "calibrate",
+        "calibrate_result",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.consensus": {
+      "docstring": "Consensus thresholds \u2014 supermajority gates. Slice 113.\n\nDisagreement *detection* (111) classifies a split; consensus\n*thresholds* set the bar a winner must clear to be accepted at all.\nThe winner's share (``metadata[\"ensemble\"][\"winner_share\"]``, falling\nback to the result probability) must reach ``min_agreement`` \u2014\notherwise the decision becomes an abstention naming the shortfall.\n\nPresets: :meth:`ConsensusConfig.majority` (0.5),\n:meth:`ConsensusConfig.supermajority` (2/3),\n:meth:`ConsensusConfig.unanimity` (1.0).\n\nWire it into an ensemble via the ``consensus`` strategy option::\n\n    Ensemble(members, strategy=\"hard\",\n             strategy_options={\"consensus\": 0.67})",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 136,
+      "path": "hugrgate/ensemble/consensus.py",
+      "public_defs": [
+        "ConsensusConfig",
+        "winner_share",
+        "apply_consensus",
+        "maybe_apply_consensus",
+        "majority",
+        "supermajority",
+        "unanimity",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.correlation": {
+      "docstring": "Correlated-error detection \u2014 finding members that fail as one. Slice 115.\n\nAn ensemble whose members err together is a single model with extra\nlatency: the vote looks independent, but the failures are not. This\nmodule turns the pairwise Q statistics (slice 110) into a verdict:\n\n- every member pair with ``Q >= threshold`` is flagged;\n- flagged pairs are merged into *cliques* (connected components via\n  union-find): chains like a~b, b~c form one clique even when a~c is\n  weak;\n- each clique carries a recommendation (keep one, drop or downweight\n  the rest \u2014 slice 116 acts on it).\n\nInput is a correctness history per member (aligned boolean lists);\nsee :mod:`hugrgate.ensemble.diversity` for the underlying metrics.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 139,
+      "path": "hugrgate/ensemble/correlation.py",
+      "public_defs": [
+        "CorrelatedPair",
+        "CorrelatedErrorReport",
+        "detect_correlated_errors",
+        "to_dict",
+        "correlated",
+        "recommendations",
+        "to_dict",
+        "find",
+        "union"
+      ]
+    },
+    "hugrgate.ensemble.disagreement": {
+      "docstring": "Disagreement detection, escalation, and minority reports. Slices 111-112, 114.\n\n:class:`DisagreementDetector` (111) turns the raw diversity metrics\n(slice 110) into a verdict \u2014 none / mild / strong \u2014 with the\ndissenting members named. :class:`EscalationPolicy` + :func:`escalate`\n(112) map that verdict to an action: decide anyway, flag for review,\nabstain with a named reason, or fall back to a designated backend.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 295,
+      "path": "hugrgate/ensemble/disagreement.py",
+      "public_defs": [
+        "DisagreementThresholds",
+        "DisagreementReport",
+        "DisagreementDetector",
+        "EscalationPolicy",
+        "escalate",
+        "MinorityReport",
+        "minority_report",
+        "audit_minority_report",
+        "to_dict",
+        "detect",
+        "to_text"
+      ]
+    },
+    "hugrgate.ensemble.diversity": {
+      "docstring": "Diversity metrics \u2014 measuring *useful* disagreement. Slice 110.\n\nAn ensemble of clones is a single model with extra latency.\nDiversity metrics quantify how differently members behave, so\noperators can tell a real ensemble from an echo chamber:\n\nLabel-free (one decision, from ballots):\n- :func:`vote_entropy` \u2014 entropy (bits) of the ballot distribution;\n- :func:`disagreement_rate` \u2014 fraction of member pairs casting\n  different ballots;\n- :func:`winner_margin` \u2014 winner's hard-vote share minus the\n  runner-up's.\n\nLabeled (histories of correctness / probability-for-truth):\n- :func:`q_statistic` \u2014 classic pairwise Q in [-1, 1] (0 =\n  independent errors, 1 = identical, -1 = perfectly complementary);\n- :func:`double_fault_rate` \u2014 fraction of samples both members miss;\n- :func:`error_disagreement_rate` \u2014 fraction exactly one misses;\n- :func:`error_correlation` \u2014 Pearson correlation of the members'\n  probability-for-truth vectors.\n\nAll functions are pure and deterministic. Degenerate inputs (zero\nvariance, empty histories) return documented neutral values rather\nthan raising \u2014 a metric that crashes on unanimous members is worse\nthan useless.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 182,
+      "path": "hugrgate/ensemble/diversity.py",
+      "public_defs": [
+        "vote_entropy",
+        "disagreement_rate",
+        "winner_margin",
+        "q_statistic",
+        "double_fault_rate",
+        "error_disagreement_rate",
+        "error_correlation",
+        "diversity_summary"
+      ]
+    },
+    "hugrgate.ensemble.explanations": {
+      "docstring": "Ensemble explanations \u2014 the council's reasoning in plain words. Slice 120.\n\n``metadata[\"ensemble\"]`` is machine-readable; operators and auditors\nneed sentences. :func:`explain_ensemble` renders a human-readable\naccount of an ensemble decision from the recorded metadata:\n\n- **concise**: one paragraph \u2014 the verdict, the vote split, the\n  dissent, and any escalation, consensus, or calibration notes;\n- **verbose**: a multi-line breakdown \u2014 per-member ballots with\n  weights, the minority report, disagreement, consensus, and\n  calibration sections.\n\nEvery claim in the text is read straight out of the metadata, so the\nexplanation can never drift from the recorded decision.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 167,
+      "path": "hugrgate/ensemble/explanations.py",
+      "public_defs": [
+        "explain_ensemble"
+      ]
+    },
+    "hugrgate.ensemble.membership": {
+      "docstring": "Dynamic ensemble membership \u2014 earn your seat. Slice 117.\n\nA fixed member list cannot adapt: a backend that degrades keeps\nvoting, and a better backend waits outside. :class:`MembershipManager`\nholds the member backends and moves them between ``active``,\n``standby``, and ``retired`` on evidence:\n\n- an **active** member whose Laplace-smoothed reliability drops below\n  ``retire_below`` over at least ``min_observations`` outcomes is\n  **retired** (never below ``min_active`` active members);\n- a **standby** member whose reliability reaches ``promote_above``\n  over ``min_observations`` outcomes is **promoted** to active;\n- every transition \u2014 automatic or manual \u2014 is appended to an event\n  log (sequence-numbered, deterministic) for provenance (slice 119).\n\nStandby members keep receiving observations (shadow voting in a real\ndeployment feeds :meth:`observe`); the manager itself never runs\nbackends, it only curates the roster.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 182,
+      "path": "hugrgate/ensemble/membership.py",
+      "public_defs": [
+        "MembershipManager",
+        "status",
+        "active_members",
+        "standby_members",
+        "retired_members",
+        "events",
+        "observe",
+        "retire",
+        "to_standby",
+        "activate",
+        "build_ensemble",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.moe": {
+      "docstring": "Mixture-of-experts router \u2014 route by input region. Slice 109.\n\nEvery other strategy asks the same members about every input. A\nmixture of experts instead *routes*: a gating network maps the input\nstate to a distribution over experts, the top-k experts are consulted,\nand their ballots are combined with the gate weights.\n\nTraining (supervised, deterministic): for each labeled sample, the\ntarget gate distribution is uniform over the experts that voted\ncorrectly (uniform over all when none did \u2014 the sample teaches no\npreference). The gating network is softmax regression on the state\nfeatures, trained with batch gradient descent from zero init \u2014\nsoft targets, so it is implemented here rather than reusing the\nhard-label regression from :mod:`hugrgate.ensemble.stacking`.\n\n:class:`ExpertRouter` owns features/fit/routing; the ``\"moe\"``\ncombiner needs a fitted router in ``ctx.fitted`` **and** the input\nstate in ``ctx.state`` (wired by :meth:`Ensemble.evaluate`).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 249,
+      "path": "hugrgate/ensemble/moe.py",
+      "public_defs": [
+        "ExpertRouter",
+        "moe_combine",
+        "fitted",
+        "extract",
+        "fit",
+        "route",
+        "route_topk",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.provenance": {
+      "docstring": "Ensemble provenance \u2014 every council ruling on the record. Slice 119.\n\nEnsemble decisions already carry rich metadata (strategy, members,\nmember votes, weights, minority report), but :class:`DecisionRecord`\ndrops it: ``from_decision`` only keeps state keys. This module closes\nthe gap:\n\n- :func:`record_ensemble_decision` builds the record from the state,\n  spec, and ensemble result, copies the full ``metadata[\"ensemble\"]``\n  block into ``record.metadata[\"ensemble\"]``, optionally attaches a\n  :class:`MembershipManager` event log, appends to the store, and\n  returns the stored (hash-chained) record;\n- :func:`find_ensemble_records` retrieves recent ensemble records,\n  optionally filtered by strategy.\n\nBecause records travel through ``ProvenanceStore.append``, they get\nthe slice-015 integrity chain for free: tampering with a recorded\nensemble ruling breaks ``verify_chain()``.",
+      "imports": [
+        "__future__",
+        "copy",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 88,
+      "path": "hugrgate/ensemble/provenance.py",
+      "public_defs": [
+        "record_ensemble_decision",
+        "find_ensemble_records"
+      ]
+    },
+    "hugrgate.ensemble.release": {
+      "docstring": "Ensemble release gate \u2014 the council earns its deployment. Slice 125.\n\nA checklist with teeth. :class:`ReleaseGate` composes named checks \u2014\neach a zero-argument callable returning ``(passed, detail)`` \u2014 and\n:meth:`run` produces a :class:`ReleaseVerdict`. A check that raises\nfails with the exception recorded; the gate always runs every check.\n\nBuilt-in check factories (all real measurements, no stubs):\n\n- :func:`benchmark_thresholds` \u2014 accuracy / ECE / Brier floors via\n  slice 124's harness on labeled states;\n- :func:`diversity_floor` \u2014 mean disagreement rate (slice 110) must\n  clear the floor: a council that never disagrees is redundant;\n- :func:`no_correlated_cliques` \u2014 slice 115 must find no error\n  cliques on the labeled states;\n- :func:`adversarial_clean` \u2014 slice 123's suite: no ``UNEXPECTED``\n  errors, and every case decides fully unless named in\n  ``may_refuse`` (honest refusal is allowed where expected);\n- :func:`evidence_check` \u2014 for what the gate cannot measure\n  itself (CI test results, completion notes): the caller supplies\n  the verdict and the detail.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 262,
+      "path": "hugrgate/ensemble/release.py",
+      "public_defs": [
+        "CheckResult",
+        "ReleaseVerdict",
+        "ReleaseGate",
+        "benchmark_thresholds",
+        "diversity_floor",
+        "no_correlated_cliques",
+        "adversarial_clean",
+        "evidence_check",
+        "to_dict",
+        "passed",
+        "failures",
+        "to_dict",
+        "summary",
+        "add",
+        "run",
+        "check",
+        "check",
+        "check",
+        "check",
+        "check"
+      ]
+    },
+    "hugrgate.ensemble.reliability": {
+      "docstring": "Backend reliability weighting \u2014 trust, but verify. Slice 116.\n\nStatic weights encode operator *belief*; reliability weights encode\n*evidence*. :class:`ReliabilityTracker` records each member's labeled\noutcomes and converts the track record into weights:\n\n- ``reliability(m)`` \u2014 Laplace-smoothed accuracy\n  ``(successes + s) / (total + 2s)`` (default ``s=1``): a new member\n  starts at 0.5, not 0 \u2014 no one is condemned without evidence;\n- :meth:`ReliabilityTracker.weights` \u2014 reliabilities (times any\n  penalties) normalized to sum to 1, ready to feed\n  ``Ensemble(weights=...)``;\n- :meth:`ReliabilityTracker.apply_correlation_report` \u2014 the slice-115\n  wiring: inside each correlated-error clique, all but the most\n  reliable member are penalized by ``factor`` (default 0.5), so\n  duplicated minds stop buying duplicate influence.\n\nUsage::\n\n    tracker = ReliabilityTracker([\"a\", \"b\", \"c\"])\n    tracker.observe(\"a\", correct=True)   # ... from labeled feedback\n    ens = Ensemble(members, strategy=\"weighted\",\n                   weights=tracker.weights())",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 139,
+      "path": "hugrgate/ensemble/reliability.py",
+      "public_defs": [
+        "ReliabilityTracker",
+        "observe",
+        "observe_many",
+        "reliability",
+        "raw_accuracy",
+        "penalize",
+        "clear_penalties",
+        "apply_correlation_report",
+        "weights",
+        "observation_counts",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.stacking": {
+      "docstring": "Stacking engine \u2014 a meta-learner over member predictions. Slice 107.\n\nStacking trains a second-level model on the members' out-of-fold\npredictions instead of fixing combination weights up front. The\nmeta-learner here is multinomial logistic regression (softmax)\nimplemented in pure Python \u2014 zero-init batch gradient descent, fixed\niteration count, fully deterministic, no scikit-learn dependency:\n\n- meta-features: each member's (completed) probability vector over\n  the spec's value space, concatenated;\n- target: the true label;\n- L2-regularized cross-entropy, bias unregularized.\n\n:class:`StackingEngine` owns the feature layout and the fitted\nregression; the ``\"stacking\"`` combiner needs a fitted engine in\n``ctx.fitted`` (via ``Ensemble.attach``).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 260,
+      "path": "hugrgate/ensemble/stacking.py",
+      "public_defs": [
+        "SoftmaxRegression",
+        "StackingEngine",
+        "stacking_combine",
+        "fitted",
+        "fit",
+        "predict_proba",
+        "predict",
+        "fitted",
+        "fit",
+        "predict_proba",
+        "to_dict"
+      ]
+    },
+    "hugrgate.ensemble.voting": {
+      "docstring": "Voting combiners \u2014 many ballots, one decision. Slices 101-105.\n\n- **soft** (101, hardened 103): weight-aware average of the members'\n  probability distributions, elect the argmax. A member that votes a\n  value with an empty distribution gets it *completed* \u2014 its reported\n  probability on the voted value, the remainder split uniformly (the\n  slice-13 rules-backend semantics) \u2014 so an incomplete ballot never\n  silently dilutes the average.\n- **hard** (102): one ballot per member; majority wins, ties broken\n  deterministically (most confident tied camp, then earliest ballot,\n  then lexicographic).\n- **weighted** (104): hard voting where each ballot counts with its\n  member weight; the winner is the argmax of weighted scores and its\n  probability is the weighted vote share.\n- **confidence** (105): like weighted, but each ballot's weight is\n  the member's own reported probability (times its base weight) \u2014 a\n  confident minority can overrule an unsure majority.\n\nAll combiners share the contract from :mod:`hugrgate.ensemble.base`:\nnever raise on ordinary disagreement, always return a valid\n:class:`DecisionResult` with the shared ``metadata[\"ensemble\"]``\nblock, and break ties deterministically.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 259,
+      "path": "hugrgate/ensemble/voting.py",
+      "public_defs": [
+        "soft_voting",
+        "weighted_voting",
+        "confidence_weighted_voting",
+        "hard_voting"
+      ]
+    },
     "hugrgate.errors": {
       "docstring": "Error taxonomy for HugrGate. Slice 10; hardened in slice 007.\n\nEvery HugrGate error carries:\n\n- ``code`` \u2014 a stable machine-readable string (unique across the taxonomy;\n  enforced by ``tests/test_errors.py``), also used on the HTTP wire;\n- ``recoverable`` \u2014 whether retrying the operation can plausibly succeed;\n- ``message`` + ``details`` \u2014 human text and structured context.\n\n``to_dict()`` / ``from_dict()`` give a lossless wire round-trip so a\nclient can reconstruct the exact error class from an HTTP error body.",
       "imports": [
         "__future__",
         "typing"
       ],
-      "loc": 142,
+      "loc": 141,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -1148,10 +1130,11 @@
       "docstring": "Fallback engine \u2014 ordered failover across backends. Slice 14.\n\n``FallbackChain`` is itself a :class:`~hugrgate.backend.Backend`, so it\ndrops straight into :class:`~hugrgate.core.HugrGate` and the provenance\ntrail. Backends are tried in order; on :class:`BackendError` (which\nincludes :class:`TimeoutError` and :class:`BackendUnavailable`) the next\nbackend is tried. When every backend has failed, the policy's\n``fallback_behavior`` decides:\n\n- ``\"abstain\"``   -> raise :class:`Abstention` (reason\n  ``all_backends_failed``)\n- ``\"safe_default\"`` -> return a ``DecisionResult`` for the configured\n  safe value (must lie inside the spec's value space)\n- ``\"escalate\"``  -> raise :class:`Abstention` with reason\n  ``escalation_required`` (a human must take the decision)\n\n``Abstention`` raised by an inner backend is *not* swallowed: abstaining\nis a decision, not a failure, and it propagates to the caller.\n\nEvery attempt is recorded in ``result.metadata[\"fallback_trace\"]`` and\n``result.fallback_used`` is set when any failover happened, so the\nprovenance record carries the full chain trace.\n\nA :class:`~hugrgate.circuit.CircuitRegistry` may be supplied; backends\nwhose circuit is open are skipped (recorded in the trace) and outcomes\nare reported back to their breakers.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "typing"
       ],
-      "loc": 170,
+      "loc": 171,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -1166,13 +1149,14 @@
       "imports": [
         "__future__",
         "abc",
+        "collections",
         "enum",
         "hugrgate",
         "math",
         "numpy",
         "typing"
       ],
-      "loc": 290,
+      "loc": 291,
       "path": "hugrgate/features.py",
       "public_defs": [
         "MissingValuePolicy",
@@ -1206,10 +1190,9 @@
         "__future__",
         "collections",
         "dataclasses",
-        "threading",
-        "typing"
+        "threading"
       ],
-      "loc": 141,
+      "loc": 140,
       "path": "hugrgate/health.py",
       "public_defs": [
         "BackendStats",
@@ -1226,17 +1209,20 @@
       "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "time",
         "typing"
       ],
-      "loc": 294,
+      "loc": 321,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
         "LadderAuditEntry",
         "LadderRouter",
+        "to_dict",
+        "from_dict",
         "to_dict",
         "ladder_for",
         "decide"
@@ -1296,8 +1282,8 @@
       "docstring": "Backend capability negotiation. Slice 36.\n\n:func:`select_backend` turns a registry into an ordered candidate list for\none decision: filter by capability, privacy, latency, cost and health, then\nrank the survivors by historical quality (accuracy + calibration) with\nlatency and name as deterministic tie-breakers.\n\nIt returns candidates \u2014 it never raises \u2014 so routers (ladder, fallback)\ncan decide what \"no candidate\" means for their policy.",
       "imports": [
         "__future__",
-        "hugrgate",
-        "typing"
+        "collections",
+        "hugrgate"
       ],
       "loc": 96,
       "path": "hugrgate/negotiate.py",
@@ -1314,10 +1300,11 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 77,
+      "loc": 96,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
+        "to_dict",
         "evaluate",
         "backend_allowed"
       ]
@@ -1326,11 +1313,12 @@
       "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/privacy.py",
       "public_defs": [
         "PrivacyGuard",
@@ -1347,21 +1335,26 @@
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
         "__future__",
+        "collections",
         "copy",
         "dataclasses",
         "hashlib",
         "hugrgate",
         "json",
+        "threading",
         "time",
         "typing"
       ],
-      "loc": 129,
+      "loc": 218,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
         "ProvenanceStore",
         "from_decision",
+        "to_dict",
+        "from_dict",
         "append",
+        "evicted_count",
         "by_hash",
         "recent",
         "count",
@@ -1383,10 +1376,27 @@
         "to_dict"
       ]
     },
+    "hugrgate.serde": {
+      "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 74,
+      "path": "hugrgate/serde.py",
+      "public_defs": [
+        "policy_to_dict",
+        "policy_from_dict",
+        "result_from_dict"
+      ]
+    },
     "hugrgate.server": {
       "docstring": "HugrGate local HTTP API \u2014 FastAPI service. Slice 41.\n\nExposes the in-process :class:`HugrGate` runtime over HTTP:\n\n- ``POST /decide`` \u2014 spec + state + policy JSON \u2192 result JSON\n- ``GET  /health`` \u2014 liveness probe\n- ``GET  /backends`` \u2014 registered backend capabilities\n- ``GET  /models`` \u2014 known model catalogue entries\n\nLocalhost-only by default: :func:`run` binds ``127.0.0.1`` unless the\noperator explicitly passes a different host.\n\nThis module also ships two small deterministic built-in backends\n(``uniform`` and ``keyword``) so the service, CLI, daemon and benchmark\nharness are usable end to end with zero ML dependencies. They are honest\nbaselines \u2014 not intelligent \u2014 and richer backends register through the\nsame :class:`BackendRegistry` contract.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "fastapi",
         "hugrgate",
@@ -1397,7 +1407,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 368,
+      "loc": 370,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -1442,11 +1452,12 @@
       "docstring": "Thresholding \u2014 per-option, ordinal-cumulative, and numeric-band gates.\n\nSlice 16. The policy's ``minimum_probability`` is a single global floor;\nthis module adds finer gates that the application configures per spec:\n\n- **per-option thresholds**: ``{\"escalate\": 0.9}`` \u2014 the winning option\n  must carry at least that much of the distribution mass.\n- **ordinal cumulative thresholds**: ``(\"moderate\", 0.8)`` \u2014 for ordinal\n  specs, P(level >= \"moderate\") must clear the bar (\"at least moderate\").\n- **numeric band thresholds**: the numeric value lands in a named band\n  (e.g. ``normal`` / ``watch`` / ``alert``); each band may demand its own\n  minimum probability.\n\n:func:`apply_thresholds` runs the policy floor first, then the\nconfigured gates. The first failing gate turns the result into an\nabstention (via :mod:`hugrgate.abstain`) whose reason names the gate.",
       "imports": [
         "__future__",
+        "collections",
         "dataclasses",
         "hugrgate",
         "typing"
       ],
-      "loc": 178,
+      "loc": 213,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -1454,18 +1465,23 @@
         "ordinal_cumulative_probability",
         "classify_numeric_band",
         "apply_thresholds",
-        "contains"
+        "contains",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.timeout": {
       "docstring": "Timeouts \u2014 per-decision deadline enforcement via threads. Slice 19.\n\nThe decision function runs on a daemon worker thread while the caller\njoins with the deadline. On breach a :class:`TimeoutError` is raised;\nthe worker thread is daemonized so a hung backend can never block\nprocess exit (it may still finish in the background \u2014 threads cannot be\nkilled, a documented limitation).\n\nThe deadline for a backend is::\n\n    min(policy.maximum_latency_ms, backend.estimated_latency_ms * headroom)\n\nwhen the policy sets a latency cap, else\n``backend.estimated_latency_ms * headroom``.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "threading",
         "typing"
       ],
-      "loc": 138,
+      "loc": 139,
       "path": "hugrgate/timeout.py",
       "public_defs": [
         "run_with_deadline",
@@ -1485,12 +1501,13 @@
       "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7;\nhardened in slice 011.",
       "imports": [
         "__future__",
+        "collections",
         "hugrgate",
         "json",
         "math",
         "typing"
       ],
-      "loc": 130,
+      "loc": 131,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -1503,48 +1520,59 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_async_readiness.py",
     "test_backend_registry.py",
-    "test_calib_adversarial.py",
-    "test_calib_aleatoric.py",
-    "test_calib_autoselect.py",
-    "test_calib_bayes.py",
-    "test_calib_bench.py",
-    "test_calib_conformal.py",
-    "test_calib_conformal_reg.py",
-    "test_calib_coverage.py",
-    "test_calib_decomposition.py",
-    "test_calib_drift.py",
-    "test_calib_ensemble.py",
-    "test_calib_epistemic.py",
-    "test_calib_group.py",
-    "test_calib_imbalance.py",
-    "test_calib_online.py",
-    "test_calib_perclass.py",
-    "test_calib_pipeline.py",
-    "test_calib_registry.py",
-    "test_calib_risk_coverage.py",
-    "test_calib_selective.py",
-    "test_calib_sets.py",
-    "test_calib_shift.py",
-    "test_calib_viz.py",
-    "test_calib_window.py",
     "test_config.py",
+    "test_coverage_attack.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_determinism_contract.py",
     "test_deterministic.py",
+    "test_ensemble_101_api.py",
+    "test_ensemble_102_hard_voting.py",
+    "test_ensemble_103_soft_voting.py",
+    "test_ensemble_104_weighted_voting.py",
+    "test_ensemble_105_confidence_voting.py",
+    "test_ensemble_106_bma.py",
+    "test_ensemble_107_stacking.py",
+    "test_ensemble_108_blending.py",
+    "test_ensemble_109_moe.py",
+    "test_ensemble_110_diversity.py",
+    "test_ensemble_111_disagreement.py",
+    "test_ensemble_112_escalation.py",
+    "test_ensemble_113_consensus.py",
+    "test_ensemble_114_minority.py",
+    "test_ensemble_115_correlation.py",
+    "test_ensemble_116_reliability.py",
+    "test_ensemble_117_membership.py",
+    "test_ensemble_118_calibration.py",
+    "test_ensemble_119_provenance.py",
+    "test_ensemble_120_explanations.py",
+    "test_ensemble_121_caching.py",
+    "test_ensemble_122_batch.py",
+    "test_ensemble_123_adversarial.py",
+    "test_ensemble_124_benchmarks.py",
+    "test_ensemble_125_release.py",
     "test_errors.py",
     "test_foundation.py",
+    "test_import_cycles.py",
     "test_ladder.py",
     "test_logging.py",
     "test_ml_calibration.py",
+    "test_package_boundaries.py",
     "test_policy_invariants.py",
     "test_provenance_integrity.py",
+    "test_release_gate.py",
     "test_repo_truth.py",
+    "test_resource_lifecycle.py",
     "test_result_invariants.py",
+    "test_serialization_contracts.py",
     "test_service.py",
     "test_state_validation.py",
+    "test_static_analysis.py",
+    "test_taxonomy.py",
+    "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11649
+  "total_loc": 12581
 }

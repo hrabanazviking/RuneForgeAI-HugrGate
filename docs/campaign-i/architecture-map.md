@@ -20,33 +20,6 @@ flowchart TD
         validation[validation]
         serde[serde]
     end
-    subgraph contract-engine[contract-engine]
-        contracts[contracts]
-        contracts_schema[contracts.schema]
-        contracts_negotiation[contracts.negotiation]
-        contracts_nested[contracts.nested]
-        contracts_hierarchy[contracts.hierarchy]
-        contracts_composite[contracts.composite]
-        contracts_conditional[contracts.conditional]
-        contracts_crossfield[contracts.crossfield]
-        contracts_ordinal[contracts.ordinal]
-        contracts_uncertainty[contracts.uncertainty]
-        contracts_distributions[contracts.distributions]
-        contracts_multilabel[contracts.multilabel]
-        contracts_cost[contracts.cost]
-        contracts_utility[contracts.utility]
-        contracts_risk[contracts.risk]
-        contracts_deadlines[contracts.deadlines]
-        contracts_context[contracts.context]
-        contracts_features[contracts.features]
-        contracts_explanations[contracts.explanations]
-        contracts_inheritance[contracts.inheritance]
-        contracts_composition[contracts.composition]
-        contracts_templates[contracts.templates]
-        contracts_migration[contracts.migration]
-        contracts_lint[contracts.lint]
-        contracts_fuzz[contracts.fuzz]
-    end
     subgraph runtime[runtime]
         core[core]
         abstain[abstain]
@@ -57,32 +30,6 @@ flowchart TD
         circuit[circuit]
         privacy[privacy]
         ladder[ladder]
-    end
-    subgraph routing[routing]
-        routing[routing]
-        routing_architecture[routing.architecture]
-        routing_rungs[routing.rungs]
-        routing_synthesis[routing.synthesis]
-        routing_capability[routing.capability]
-        routing_confidence[routing.confidence]
-        routing_latency[routing.latency]
-        routing_cost[routing.cost]
-        routing_energy[routing.energy]
-        routing_memory[routing.memory]
-        routing_privacy[routing.privacy]
-        routing_hardware[routing.hardware]
-        routing_availability[routing.availability]
-        routing_qos[routing.qos]
-        routing_parallel[routing.parallel]
-        routing_hedged[routing.hedged]
-        routing_early_exit[routing.early_exit]
-        routing_fallback[routing.fallback]
-        routing_dag[routing.dag]
-        routing_explain[routing.explain]
-        routing_replay[routing.replay]
-        routing_simulate[routing.simulate]
-        routing_dsl[routing.dsl]
-        routing_fuzz[routing.fuzz]
     end
     subgraph state[state]
         provenance[provenance]
@@ -107,35 +54,35 @@ flowchart TD
     subgraph calibration[calibration]
         calibration[calibration]
         calibration__base[calibration._base]
-        calibration_adversarial[calibration.adversarial]
-        calibration_aleatoric[calibration.aleatoric]
-        calibration_autoselect[calibration.autoselect]
-        calibration_bayes[calibration.bayes]
-        calibration_bench[calibration.bench]
-        calibration_conformal[calibration.conformal]
-        calibration_conformal_regression[calibration.conformal_regression]
-        calibration_coverage[calibration.coverage]
-        calibration_decomposition[calibration.decomposition]
-        calibration_drift[calibration.drift]
-        calibration_ensemble[calibration.ensemble]
-        calibration_epistemic[calibration.epistemic]
-        calibration_group[calibration.group]
-        calibration_imbalance[calibration.imbalance]
         calibration_isotonic[calibration.isotonic]
         calibration_metrics[calibration.metrics]
-        calibration_online[calibration.online]
-        calibration_perclass[calibration.perclass]
-        calibration_pipeline[calibration.pipeline]
         calibration_platt[calibration.platt]
         calibration_profiles[calibration.profiles]
-        calibration_registry[calibration.registry]
-        calibration_risk_coverage[calibration.risk_coverage]
-        calibration_selective[calibration.selective]
-        calibration_sets[calibration.sets]
-        calibration_shift[calibration.shift]
         calibration_temperature[calibration.temperature]
-        calibration_viz[calibration.viz]
-        calibration_window[calibration.window]
+    end
+    subgraph ensemble[ensemble]
+        ensemble[ensemble]
+        ensemble_base[ensemble.base]
+        ensemble_api[ensemble.api]
+        ensemble_voting[ensemble.voting]
+        ensemble_averaging[ensemble.averaging]
+        ensemble_stacking[ensemble.stacking]
+        ensemble_blending[ensemble.blending]
+        ensemble_moe[ensemble.moe]
+        ensemble_diversity[ensemble.diversity]
+        ensemble_disagreement[ensemble.disagreement]
+        ensemble_consensus[ensemble.consensus]
+        ensemble_correlation[ensemble.correlation]
+        ensemble_reliability[ensemble.reliability]
+        ensemble_membership[ensemble.membership]
+        ensemble_calibration[ensemble.calibration]
+        ensemble_provenance[ensemble.provenance]
+        ensemble_explanations[ensemble.explanations]
+        ensemble_cache[ensemble.cache]
+        ensemble_batch[ensemble.batch]
+        ensemble_adversarial[ensemble.adversarial]
+        ensemble_benchmarks[ensemble.benchmarks]
+        ensemble_release[ensemble.release]
     end
     subgraph service[service]
         server[server]
@@ -199,65 +146,13 @@ flowchart TD
     cache --> result
     cache --> spec
     calibration --> calibration__base
-    calibration --> calibration_bayes
-    calibration --> calibration_ensemble
     calibration --> calibration_isotonic
-    calibration --> calibration_online
-    calibration --> calibration_perclass
     calibration --> calibration_platt
     calibration --> calibration_temperature
-    calibration --> calibration_window
     calibration__base --> errors
-    calibration_adversarial --> calibration__base
-    calibration_adversarial --> calibration_metrics
-    calibration_adversarial --> errors
-    calibration_aleatoric --> errors
-    calibration_autoselect --> calibration__base
-    calibration_autoselect --> calibration_metrics
-    calibration_autoselect --> calibration_registry
-    calibration_autoselect --> errors
-    calibration_bayes --> calibration__base
-    calibration_bayes --> errors
-    calibration_bench --> calibration__base
-    calibration_bench --> calibration_metrics
-    calibration_bench --> errors
-    calibration_conformal --> errors
-    calibration_conformal_regression --> errors
-    calibration_coverage --> calibration_bayes
-    calibration_coverage --> errors
-    calibration_decomposition --> errors
-    calibration_drift --> calibration_metrics
-    calibration_drift --> errors
-    calibration_ensemble --> calibration__base
-    calibration_ensemble --> calibration_isotonic
-    calibration_ensemble --> calibration_platt
-    calibration_ensemble --> calibration_temperature
-    calibration_ensemble --> errors
-    calibration_epistemic --> abstain
-    calibration_epistemic --> calibration_decomposition
-    calibration_epistemic --> errors
-    calibration_epistemic --> result
-    calibration_group --> calibration__base
-    calibration_group --> calibration_metrics
-    calibration_group --> calibration_pipeline
-    calibration_group --> errors
-    calibration_imbalance --> calibration__base
-    calibration_imbalance --> calibration_metrics
-    calibration_imbalance --> errors
     calibration_isotonic --> calibration__base
     calibration_isotonic --> errors
     calibration_metrics --> errors
-    calibration_online --> calibration__base
-    calibration_online --> errors
-    calibration_perclass --> calibration__base
-    calibration_perclass --> calibration_metrics
-    calibration_perclass --> calibration_pipeline
-    calibration_perclass --> calibration_profiles
-    calibration_perclass --> errors
-    calibration_pipeline --> calibration__base
-    calibration_pipeline --> calibration_metrics
-    calibration_pipeline --> calibration_profiles
-    calibration_pipeline --> errors
     calibration_platt --> calibration__base
     calibration_platt --> errors
     calibration_profiles --> backend
@@ -265,21 +160,8 @@ flowchart TD
     calibration_profiles --> errors
     calibration_profiles --> result
     calibration_profiles --> spec
-    calibration_registry --> calibration__base
-    calibration_registry --> errors
-    calibration_risk_coverage --> errors
-    calibration_selective --> errors
-    calibration_sets --> errors
-    calibration_shift --> calibration__base
-    calibration_shift --> calibration_imbalance
-    calibration_shift --> errors
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
-    calibration_viz --> calibration_metrics
-    calibration_viz --> errors
-    calibration_window -.-> calibration
-    calibration_window --> calibration__base
-    calibration_window --> errors
     circuit --> log
     cli -.-> bench
     cli -.-> bench_report
@@ -298,132 +180,7 @@ flowchart TD
     client --> serde
     client -.-> server
     client --> spec
-    contracts --> contracts_composite
-    contracts --> contracts_composition
-    contracts --> contracts_conditional
-    contracts --> contracts_context
-    contracts --> contracts_cost
-    contracts --> contracts_crossfield
-    contracts --> contracts_deadlines
-    contracts --> contracts_distributions
-    contracts --> contracts_explanations
-    contracts --> contracts_features
-    contracts --> contracts_fuzz
-    contracts --> contracts_hierarchy
-    contracts --> contracts_inheritance
-    contracts --> contracts_lint
-    contracts --> contracts_migration
-    contracts --> contracts_multilabel
-    contracts --> contracts_negotiation
-    contracts --> contracts_nested
-    contracts --> contracts_ordinal
-    contracts --> contracts_risk
-    contracts --> contracts_schema
-    contracts --> contracts_templates
-    contracts --> contracts_uncertainty
-    contracts --> contracts_utility
-    contracts_composite --> contracts_schema
-    contracts_composite --> errors
-    contracts_composite --> spec
-    contracts_composition --> contracts_composite
-    contracts_composition --> contracts_conditional
-    contracts_composition --> contracts_crossfield
-    contracts_composition --> contracts_deadlines
-    contracts_composition --> contracts_schema
-    contracts_composition --> errors
-    contracts_composition --> spec
-    contracts_conditional --> contracts_composite
-    contracts_conditional --> contracts_schema
-    contracts_conditional --> errors
-    contracts_context --> contracts_schema
-    contracts_context --> errors
-    contracts_cost --> contracts_schema
-    contracts_cost --> errors
-    contracts_crossfield --> contracts_composite
-    contracts_crossfield --> contracts_schema
-    contracts_crossfield --> errors
-    contracts_deadlines -.-> contracts_composite
-    contracts_deadlines --> contracts_schema
-    contracts_deadlines --> errors
-    contracts_deadlines --> spec
-    contracts_distributions --> contracts_schema
-    contracts_distributions --> errors
-    contracts_explanations --> contracts_schema
-    contracts_explanations --> errors
-    contracts_explanations --> result
-    contracts_features --> contracts_schema
-    contracts_features --> errors
-    contracts_fuzz --> contracts_cost
-    contracts_fuzz --> contracts_distributions
-    contracts_fuzz --> contracts_multilabel
-    contracts_fuzz --> contracts_nested
-    contracts_fuzz --> contracts_ordinal
-    contracts_fuzz --> contracts_schema
-    contracts_fuzz --> contracts_uncertainty
-    contracts_fuzz --> errors
-    contracts_hierarchy --> contracts_schema
-    contracts_hierarchy --> errors
-    contracts_inheritance --> contracts_composite
-    contracts_inheritance --> contracts_conditional
-    contracts_inheritance --> contracts_context
-    contracts_inheritance --> contracts_cost
-    contracts_inheritance --> contracts_crossfield
-    contracts_inheritance --> contracts_deadlines
-    contracts_inheritance --> contracts_distributions
-    contracts_inheritance --> contracts_explanations
-    contracts_inheritance --> contracts_features
-    contracts_inheritance --> contracts_hierarchy
-    contracts_inheritance --> contracts_multilabel
-    contracts_inheritance --> contracts_nested
-    contracts_inheritance --> contracts_ordinal
-    contracts_inheritance --> contracts_risk
-    contracts_inheritance --> contracts_schema
-    contracts_inheritance --> contracts_uncertainty
-    contracts_inheritance --> contracts_utility
-    contracts_inheritance --> errors
-    contracts_inheritance -.-> spec
-    contracts_lint --> contracts_composite
-    contracts_lint --> contracts_cost
-    contracts_lint --> contracts_deadlines
-    contracts_lint --> contracts_distributions
-    contracts_lint --> contracts_explanations
-    contracts_lint --> contracts_features
-    contracts_lint --> contracts_multilabel
-    contracts_lint --> contracts_nested
-    contracts_lint --> contracts_ordinal
-    contracts_lint --> contracts_schema
-    contracts_lint --> contracts_templates
-    contracts_lint --> contracts_uncertainty
-    contracts_lint --> errors
-    contracts_migration --> contracts_multilabel
-    contracts_migration --> contracts_nested
-    contracts_migration --> contracts_ordinal
-    contracts_migration --> contracts_schema
-    contracts_migration --> contracts_uncertainty
-    contracts_migration --> errors
-    contracts_migration --> spec
-    contracts_multilabel --> contracts_schema
-    contracts_multilabel --> errors
-    contracts_negotiation --> contracts_schema
-    contracts_negotiation --> errors
-    contracts_nested --> contracts_schema
-    contracts_nested --> errors
-    contracts_ordinal --> contracts_schema
-    contracts_ordinal --> errors
-    contracts_risk --> contracts_cost
-    contracts_risk --> contracts_schema
-    contracts_risk --> errors
-    contracts_schema --> errors
-    contracts_templates --> contracts_schema
-    contracts_templates --> errors
-    contracts_uncertainty --> contracts_schema
-    contracts_uncertainty --> errors
-    contracts_utility --> contracts_cost
-    contracts_utility --> contracts_schema
-    contracts_utility --> errors
     core --> backend
-    core -.-> contracts_migration
-    core -.-> contracts_schema
     core --> errors
     core --> log
     core --> policy
@@ -440,6 +197,122 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    ensemble --> ensemble_adversarial
+    ensemble --> ensemble_api
+    ensemble --> ensemble_averaging
+    ensemble --> ensemble_base
+    ensemble --> ensemble_batch
+    ensemble --> ensemble_benchmarks
+    ensemble --> ensemble_blending
+    ensemble --> ensemble_cache
+    ensemble --> ensemble_calibration
+    ensemble --> ensemble_consensus
+    ensemble --> ensemble_correlation
+    ensemble --> ensemble_disagreement
+    ensemble --> ensemble_diversity
+    ensemble --> ensemble_explanations
+    ensemble --> ensemble_membership
+    ensemble --> ensemble_moe
+    ensemble --> ensemble_provenance
+    ensemble --> ensemble_release
+    ensemble --> ensemble_reliability
+    ensemble --> ensemble_stacking
+    ensemble --> ensemble_voting
+    ensemble_adversarial --> backend
+    ensemble_adversarial --> ensemble_api
+    ensemble_adversarial --> errors
+    ensemble_adversarial --> result
+    ensemble_adversarial --> spec
+    ensemble_api --> backend
+    ensemble_api --> ensemble_averaging
+    ensemble_api --> ensemble_base
+    ensemble_api --> ensemble_batch
+    ensemble_api --> ensemble_blending
+    ensemble_api --> ensemble_consensus
+    ensemble_api --> ensemble_moe
+    ensemble_api --> ensemble_stacking
+    ensemble_api --> ensemble_voting
+    ensemble_api --> errors
+    ensemble_api --> result
+    ensemble_api --> spec
+    ensemble_api --> validation
+    ensemble_averaging --> ensemble_base
+    ensemble_averaging --> errors
+    ensemble_averaging --> result
+    ensemble_base --> backend
+    ensemble_base --> errors
+    ensemble_base --> result
+    ensemble_base --> spec
+    ensemble_base --> validation
+    ensemble_batch --> backend
+    ensemble_batch --> ensemble_base
+    ensemble_batch --> errors
+    ensemble_batch --> result
+    ensemble_batch --> spec
+    ensemble_batch --> validation
+    ensemble_benchmarks --> backend
+    ensemble_benchmarks --> bench
+    ensemble_benchmarks --> ensemble_api
+    ensemble_benchmarks --> errors
+    ensemble_benchmarks --> result
+    ensemble_benchmarks --> spec
+    ensemble_blending --> ensemble_base
+    ensemble_blending --> errors
+    ensemble_blending --> result
+    ensemble_blending --> spec
+    ensemble_cache -.-> ensemble_api
+    ensemble_cache --> errors
+    ensemble_cache --> result
+    ensemble_cache --> spec
+    ensemble_calibration --> ensemble_base
+    ensemble_calibration --> errors
+    ensemble_calibration --> result
+    ensemble_consensus --> abstain
+    ensemble_consensus --> errors
+    ensemble_consensus --> result
+    ensemble_consensus --> spec
+    ensemble_correlation --> ensemble_diversity
+    ensemble_correlation --> errors
+    ensemble_disagreement --> abstain
+    ensemble_disagreement --> backend
+    ensemble_disagreement --> ensemble_base
+    ensemble_disagreement --> ensemble_diversity
+    ensemble_disagreement --> errors
+    ensemble_disagreement --> result
+    ensemble_disagreement --> spec
+    ensemble_diversity --> ensemble_base
+    ensemble_diversity --> errors
+    ensemble_explanations --> errors
+    ensemble_explanations --> result
+    ensemble_membership --> backend
+    ensemble_membership -.-> ensemble_api
+    ensemble_membership --> ensemble_reliability
+    ensemble_membership --> errors
+    ensemble_moe --> ensemble_base
+    ensemble_moe --> errors
+    ensemble_moe --> result
+    ensemble_moe --> spec
+    ensemble_provenance --> errors
+    ensemble_provenance --> provenance
+    ensemble_provenance --> result
+    ensemble_provenance --> spec
+    ensemble_release --> backend
+    ensemble_release --> ensemble_adversarial
+    ensemble_release --> ensemble_batch
+    ensemble_release --> ensemble_benchmarks
+    ensemble_release --> ensemble_correlation
+    ensemble_release --> ensemble_diversity
+    ensemble_release --> errors
+    ensemble_release --> spec
+    ensemble_reliability --> ensemble_correlation
+    ensemble_reliability --> errors
+    ensemble_stacking --> ensemble_base
+    ensemble_stacking --> errors
+    ensemble_stacking --> result
+    ensemble_stacking --> spec
+    ensemble_voting --> ensemble_base
+    ensemble_voting --> errors
+    ensemble_voting --> result
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -472,104 +345,6 @@ flowchart TD
     provenance --> result
     provenance --> spec
     result --> errors
-    routing --> routing_architecture
-    routing --> routing_availability
-    routing --> routing_capability
-    routing --> routing_confidence
-    routing --> routing_cost
-    routing --> routing_dag
-    routing --> routing_dsl
-    routing --> routing_early_exit
-    routing --> routing_energy
-    routing --> routing_explain
-    routing --> routing_fallback
-    routing --> routing_fuzz
-    routing --> routing_hardware
-    routing --> routing_hedged
-    routing --> routing_latency
-    routing --> routing_memory
-    routing --> routing_parallel
-    routing --> routing_privacy
-    routing --> routing_qos
-    routing --> routing_replay
-    routing --> routing_rungs
-    routing --> routing_simulate
-    routing --> routing_synthesis
-    routing_architecture -.-> errors
-    routing_architecture -.-> ladder
-    routing_architecture --> policy
-    routing_architecture --> result
-    routing_architecture --> spec
-    routing_availability --> backend
-    routing_availability --> routing_architecture
-    routing_capability --> backend
-    routing_capability --> routing_architecture
-    routing_confidence --> backend
-    routing_confidence --> routing_architecture
-    routing_cost --> routing_architecture
-    routing_dag --> errors
-    routing_dag --> ladder
-    routing_dag --> routing_architecture
-    routing_dag -.-> spec
-    routing_dsl --> errors
-    routing_dsl --> policy
-    routing_dsl --> routing_architecture
-    routing_early_exit --> errors
-    routing_early_exit --> ladder
-    routing_early_exit --> routing_architecture
-    routing_early_exit --> routing_qos
-    routing_energy --> backend
-    routing_energy --> routing_architecture
-    routing_explain --> ladder
-    routing_explain --> routing_architecture
-    routing_fallback --> errors
-    routing_fallback --> ladder
-    routing_fallback --> routing_architecture
-    routing_fuzz --> backend
-    routing_fuzz -.-> errors
-    routing_fuzz --> ladder
-    routing_fuzz --> policy
-    routing_fuzz --> result
-    routing_fuzz --> routing_architecture
-    routing_fuzz --> routing_early_exit
-    routing_fuzz --> routing_fallback
-    routing_fuzz --> routing_rungs
-    routing_fuzz --> routing_synthesis
-    routing_fuzz --> spec
-    routing_fuzz --> validation
-    routing_hardware --> backend
-    routing_hardware --> routing_architecture
-    routing_hedged --> backend
-    routing_hedged --> errors
-    routing_hedged --> ladder
-    routing_hedged --> routing_architecture
-    routing_hedged --> routing_qos
-    routing_latency --> backend
-    routing_latency --> routing_architecture
-    routing_memory --> backend
-    routing_memory --> routing_architecture
-    routing_parallel --> errors
-    routing_parallel --> ladder
-    routing_parallel --> routing_architecture
-    routing_parallel --> routing_qos
-    routing_privacy --> backend
-    routing_privacy --> routing_architecture
-    routing_replay --> errors
-    routing_replay --> ladder
-    routing_replay --> result
-    routing_replay --> routing_architecture
-    routing_rungs --> backend
-    routing_rungs --> routing_architecture
-    routing_rungs -.-> routing_capability
-    routing_simulate --> routing_architecture
-    routing_simulate --> routing_capability
-    routing_simulate --> routing_energy
-    routing_simulate --> routing_memory
-    routing_synthesis --> backend
-    routing_synthesis --> routing_architecture
-    routing_synthesis --> routing_capability
-    routing_synthesis --> routing_qos
-    routing_synthesis --> routing_rungs
     serde --> errors
     serde --> policy
     serde --> result
@@ -602,12 +377,11 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
-| routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
-| calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
+| calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
+| ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
 
@@ -667,65 +441,13 @@ flowchart TD
 | `cache` | `result` | no |
 | `cache` | `spec` | no |
 | `calibration` | `calibration._base` | no |
-| `calibration` | `calibration.bayes` | no |
-| `calibration` | `calibration.ensemble` | no |
 | `calibration` | `calibration.isotonic` | no |
-| `calibration` | `calibration.online` | no |
-| `calibration` | `calibration.perclass` | no |
 | `calibration` | `calibration.platt` | no |
 | `calibration` | `calibration.temperature` | no |
-| `calibration` | `calibration.window` | no |
 | `calibration._base` | `errors` | no |
-| `calibration.adversarial` | `calibration._base` | no |
-| `calibration.adversarial` | `calibration.metrics` | no |
-| `calibration.adversarial` | `errors` | no |
-| `calibration.aleatoric` | `errors` | no |
-| `calibration.autoselect` | `calibration._base` | no |
-| `calibration.autoselect` | `calibration.metrics` | no |
-| `calibration.autoselect` | `calibration.registry` | no |
-| `calibration.autoselect` | `errors` | no |
-| `calibration.bayes` | `calibration._base` | no |
-| `calibration.bayes` | `errors` | no |
-| `calibration.bench` | `calibration._base` | no |
-| `calibration.bench` | `calibration.metrics` | no |
-| `calibration.bench` | `errors` | no |
-| `calibration.conformal` | `errors` | no |
-| `calibration.conformal_regression` | `errors` | no |
-| `calibration.coverage` | `calibration.bayes` | no |
-| `calibration.coverage` | `errors` | no |
-| `calibration.decomposition` | `errors` | no |
-| `calibration.drift` | `calibration.metrics` | no |
-| `calibration.drift` | `errors` | no |
-| `calibration.ensemble` | `calibration._base` | no |
-| `calibration.ensemble` | `calibration.isotonic` | no |
-| `calibration.ensemble` | `calibration.platt` | no |
-| `calibration.ensemble` | `calibration.temperature` | no |
-| `calibration.ensemble` | `errors` | no |
-| `calibration.epistemic` | `abstain` | no |
-| `calibration.epistemic` | `calibration.decomposition` | no |
-| `calibration.epistemic` | `errors` | no |
-| `calibration.epistemic` | `result` | no |
-| `calibration.group` | `calibration._base` | no |
-| `calibration.group` | `calibration.metrics` | no |
-| `calibration.group` | `calibration.pipeline` | no |
-| `calibration.group` | `errors` | no |
-| `calibration.imbalance` | `calibration._base` | no |
-| `calibration.imbalance` | `calibration.metrics` | no |
-| `calibration.imbalance` | `errors` | no |
 | `calibration.isotonic` | `calibration._base` | no |
 | `calibration.isotonic` | `errors` | no |
 | `calibration.metrics` | `errors` | no |
-| `calibration.online` | `calibration._base` | no |
-| `calibration.online` | `errors` | no |
-| `calibration.perclass` | `calibration._base` | no |
-| `calibration.perclass` | `calibration.metrics` | no |
-| `calibration.perclass` | `calibration.pipeline` | no |
-| `calibration.perclass` | `calibration.profiles` | no |
-| `calibration.perclass` | `errors` | no |
-| `calibration.pipeline` | `calibration._base` | no |
-| `calibration.pipeline` | `calibration.metrics` | no |
-| `calibration.pipeline` | `calibration.profiles` | no |
-| `calibration.pipeline` | `errors` | no |
 | `calibration.platt` | `calibration._base` | no |
 | `calibration.platt` | `errors` | no |
 | `calibration.profiles` | `backend` | no |
@@ -733,21 +455,8 @@ flowchart TD
 | `calibration.profiles` | `errors` | no |
 | `calibration.profiles` | `result` | no |
 | `calibration.profiles` | `spec` | no |
-| `calibration.registry` | `calibration._base` | no |
-| `calibration.registry` | `errors` | no |
-| `calibration.risk_coverage` | `errors` | no |
-| `calibration.selective` | `errors` | no |
-| `calibration.sets` | `errors` | no |
-| `calibration.shift` | `calibration._base` | no |
-| `calibration.shift` | `calibration.imbalance` | no |
-| `calibration.shift` | `errors` | no |
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
-| `calibration.viz` | `calibration.metrics` | no |
-| `calibration.viz` | `errors` | no |
-| `calibration.window` | `calibration` | yes |
-| `calibration.window` | `calibration._base` | no |
-| `calibration.window` | `errors` | no |
 | `circuit` | `log` | no |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
@@ -766,132 +475,7 @@ flowchart TD
 | `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
-| `contracts` | `contracts.composite` | no |
-| `contracts` | `contracts.composition` | no |
-| `contracts` | `contracts.conditional` | no |
-| `contracts` | `contracts.context` | no |
-| `contracts` | `contracts.cost` | no |
-| `contracts` | `contracts.crossfield` | no |
-| `contracts` | `contracts.deadlines` | no |
-| `contracts` | `contracts.distributions` | no |
-| `contracts` | `contracts.explanations` | no |
-| `contracts` | `contracts.features` | no |
-| `contracts` | `contracts.fuzz` | no |
-| `contracts` | `contracts.hierarchy` | no |
-| `contracts` | `contracts.inheritance` | no |
-| `contracts` | `contracts.lint` | no |
-| `contracts` | `contracts.migration` | no |
-| `contracts` | `contracts.multilabel` | no |
-| `contracts` | `contracts.negotiation` | no |
-| `contracts` | `contracts.nested` | no |
-| `contracts` | `contracts.ordinal` | no |
-| `contracts` | `contracts.risk` | no |
-| `contracts` | `contracts.schema` | no |
-| `contracts` | `contracts.templates` | no |
-| `contracts` | `contracts.uncertainty` | no |
-| `contracts` | `contracts.utility` | no |
-| `contracts.composite` | `contracts.schema` | no |
-| `contracts.composite` | `errors` | no |
-| `contracts.composite` | `spec` | no |
-| `contracts.composition` | `contracts.composite` | no |
-| `contracts.composition` | `contracts.conditional` | no |
-| `contracts.composition` | `contracts.crossfield` | no |
-| `contracts.composition` | `contracts.deadlines` | no |
-| `contracts.composition` | `contracts.schema` | no |
-| `contracts.composition` | `errors` | no |
-| `contracts.composition` | `spec` | no |
-| `contracts.conditional` | `contracts.composite` | no |
-| `contracts.conditional` | `contracts.schema` | no |
-| `contracts.conditional` | `errors` | no |
-| `contracts.context` | `contracts.schema` | no |
-| `contracts.context` | `errors` | no |
-| `contracts.cost` | `contracts.schema` | no |
-| `contracts.cost` | `errors` | no |
-| `contracts.crossfield` | `contracts.composite` | no |
-| `contracts.crossfield` | `contracts.schema` | no |
-| `contracts.crossfield` | `errors` | no |
-| `contracts.deadlines` | `contracts.composite` | yes |
-| `contracts.deadlines` | `contracts.schema` | no |
-| `contracts.deadlines` | `errors` | no |
-| `contracts.deadlines` | `spec` | no |
-| `contracts.distributions` | `contracts.schema` | no |
-| `contracts.distributions` | `errors` | no |
-| `contracts.explanations` | `contracts.schema` | no |
-| `contracts.explanations` | `errors` | no |
-| `contracts.explanations` | `result` | no |
-| `contracts.features` | `contracts.schema` | no |
-| `contracts.features` | `errors` | no |
-| `contracts.fuzz` | `contracts.cost` | no |
-| `contracts.fuzz` | `contracts.distributions` | no |
-| `contracts.fuzz` | `contracts.multilabel` | no |
-| `contracts.fuzz` | `contracts.nested` | no |
-| `contracts.fuzz` | `contracts.ordinal` | no |
-| `contracts.fuzz` | `contracts.schema` | no |
-| `contracts.fuzz` | `contracts.uncertainty` | no |
-| `contracts.fuzz` | `errors` | no |
-| `contracts.hierarchy` | `contracts.schema` | no |
-| `contracts.hierarchy` | `errors` | no |
-| `contracts.inheritance` | `contracts.composite` | no |
-| `contracts.inheritance` | `contracts.conditional` | no |
-| `contracts.inheritance` | `contracts.context` | no |
-| `contracts.inheritance` | `contracts.cost` | no |
-| `contracts.inheritance` | `contracts.crossfield` | no |
-| `contracts.inheritance` | `contracts.deadlines` | no |
-| `contracts.inheritance` | `contracts.distributions` | no |
-| `contracts.inheritance` | `contracts.explanations` | no |
-| `contracts.inheritance` | `contracts.features` | no |
-| `contracts.inheritance` | `contracts.hierarchy` | no |
-| `contracts.inheritance` | `contracts.multilabel` | no |
-| `contracts.inheritance` | `contracts.nested` | no |
-| `contracts.inheritance` | `contracts.ordinal` | no |
-| `contracts.inheritance` | `contracts.risk` | no |
-| `contracts.inheritance` | `contracts.schema` | no |
-| `contracts.inheritance` | `contracts.uncertainty` | no |
-| `contracts.inheritance` | `contracts.utility` | no |
-| `contracts.inheritance` | `errors` | no |
-| `contracts.inheritance` | `spec` | yes |
-| `contracts.lint` | `contracts.composite` | no |
-| `contracts.lint` | `contracts.cost` | no |
-| `contracts.lint` | `contracts.deadlines` | no |
-| `contracts.lint` | `contracts.distributions` | no |
-| `contracts.lint` | `contracts.explanations` | no |
-| `contracts.lint` | `contracts.features` | no |
-| `contracts.lint` | `contracts.multilabel` | no |
-| `contracts.lint` | `contracts.nested` | no |
-| `contracts.lint` | `contracts.ordinal` | no |
-| `contracts.lint` | `contracts.schema` | no |
-| `contracts.lint` | `contracts.templates` | no |
-| `contracts.lint` | `contracts.uncertainty` | no |
-| `contracts.lint` | `errors` | no |
-| `contracts.migration` | `contracts.multilabel` | no |
-| `contracts.migration` | `contracts.nested` | no |
-| `contracts.migration` | `contracts.ordinal` | no |
-| `contracts.migration` | `contracts.schema` | no |
-| `contracts.migration` | `contracts.uncertainty` | no |
-| `contracts.migration` | `errors` | no |
-| `contracts.migration` | `spec` | no |
-| `contracts.multilabel` | `contracts.schema` | no |
-| `contracts.multilabel` | `errors` | no |
-| `contracts.negotiation` | `contracts.schema` | no |
-| `contracts.negotiation` | `errors` | no |
-| `contracts.nested` | `contracts.schema` | no |
-| `contracts.nested` | `errors` | no |
-| `contracts.ordinal` | `contracts.schema` | no |
-| `contracts.ordinal` | `errors` | no |
-| `contracts.risk` | `contracts.cost` | no |
-| `contracts.risk` | `contracts.schema` | no |
-| `contracts.risk` | `errors` | no |
-| `contracts.schema` | `errors` | no |
-| `contracts.templates` | `contracts.schema` | no |
-| `contracts.templates` | `errors` | no |
-| `contracts.uncertainty` | `contracts.schema` | no |
-| `contracts.uncertainty` | `errors` | no |
-| `contracts.utility` | `contracts.cost` | no |
-| `contracts.utility` | `contracts.schema` | no |
-| `contracts.utility` | `errors` | no |
 | `core` | `backend` | no |
-| `core` | `contracts.migration` | yes |
-| `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |
 | `core` | `log` | no |
 | `core` | `policy` | no |
@@ -908,6 +492,122 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `ensemble` | `ensemble.adversarial` | no |
+| `ensemble` | `ensemble.api` | no |
+| `ensemble` | `ensemble.averaging` | no |
+| `ensemble` | `ensemble.base` | no |
+| `ensemble` | `ensemble.batch` | no |
+| `ensemble` | `ensemble.benchmarks` | no |
+| `ensemble` | `ensemble.blending` | no |
+| `ensemble` | `ensemble.cache` | no |
+| `ensemble` | `ensemble.calibration` | no |
+| `ensemble` | `ensemble.consensus` | no |
+| `ensemble` | `ensemble.correlation` | no |
+| `ensemble` | `ensemble.disagreement` | no |
+| `ensemble` | `ensemble.diversity` | no |
+| `ensemble` | `ensemble.explanations` | no |
+| `ensemble` | `ensemble.membership` | no |
+| `ensemble` | `ensemble.moe` | no |
+| `ensemble` | `ensemble.provenance` | no |
+| `ensemble` | `ensemble.release` | no |
+| `ensemble` | `ensemble.reliability` | no |
+| `ensemble` | `ensemble.stacking` | no |
+| `ensemble` | `ensemble.voting` | no |
+| `ensemble.adversarial` | `backend` | no |
+| `ensemble.adversarial` | `ensemble.api` | no |
+| `ensemble.adversarial` | `errors` | no |
+| `ensemble.adversarial` | `result` | no |
+| `ensemble.adversarial` | `spec` | no |
+| `ensemble.api` | `backend` | no |
+| `ensemble.api` | `ensemble.averaging` | no |
+| `ensemble.api` | `ensemble.base` | no |
+| `ensemble.api` | `ensemble.batch` | no |
+| `ensemble.api` | `ensemble.blending` | no |
+| `ensemble.api` | `ensemble.consensus` | no |
+| `ensemble.api` | `ensemble.moe` | no |
+| `ensemble.api` | `ensemble.stacking` | no |
+| `ensemble.api` | `ensemble.voting` | no |
+| `ensemble.api` | `errors` | no |
+| `ensemble.api` | `result` | no |
+| `ensemble.api` | `spec` | no |
+| `ensemble.api` | `validation` | no |
+| `ensemble.averaging` | `ensemble.base` | no |
+| `ensemble.averaging` | `errors` | no |
+| `ensemble.averaging` | `result` | no |
+| `ensemble.base` | `backend` | no |
+| `ensemble.base` | `errors` | no |
+| `ensemble.base` | `result` | no |
+| `ensemble.base` | `spec` | no |
+| `ensemble.base` | `validation` | no |
+| `ensemble.batch` | `backend` | no |
+| `ensemble.batch` | `ensemble.base` | no |
+| `ensemble.batch` | `errors` | no |
+| `ensemble.batch` | `result` | no |
+| `ensemble.batch` | `spec` | no |
+| `ensemble.batch` | `validation` | no |
+| `ensemble.benchmarks` | `backend` | no |
+| `ensemble.benchmarks` | `bench` | no |
+| `ensemble.benchmarks` | `ensemble.api` | no |
+| `ensemble.benchmarks` | `errors` | no |
+| `ensemble.benchmarks` | `result` | no |
+| `ensemble.benchmarks` | `spec` | no |
+| `ensemble.blending` | `ensemble.base` | no |
+| `ensemble.blending` | `errors` | no |
+| `ensemble.blending` | `result` | no |
+| `ensemble.blending` | `spec` | no |
+| `ensemble.cache` | `ensemble.api` | yes |
+| `ensemble.cache` | `errors` | no |
+| `ensemble.cache` | `result` | no |
+| `ensemble.cache` | `spec` | no |
+| `ensemble.calibration` | `ensemble.base` | no |
+| `ensemble.calibration` | `errors` | no |
+| `ensemble.calibration` | `result` | no |
+| `ensemble.consensus` | `abstain` | no |
+| `ensemble.consensus` | `errors` | no |
+| `ensemble.consensus` | `result` | no |
+| `ensemble.consensus` | `spec` | no |
+| `ensemble.correlation` | `ensemble.diversity` | no |
+| `ensemble.correlation` | `errors` | no |
+| `ensemble.disagreement` | `abstain` | no |
+| `ensemble.disagreement` | `backend` | no |
+| `ensemble.disagreement` | `ensemble.base` | no |
+| `ensemble.disagreement` | `ensemble.diversity` | no |
+| `ensemble.disagreement` | `errors` | no |
+| `ensemble.disagreement` | `result` | no |
+| `ensemble.disagreement` | `spec` | no |
+| `ensemble.diversity` | `ensemble.base` | no |
+| `ensemble.diversity` | `errors` | no |
+| `ensemble.explanations` | `errors` | no |
+| `ensemble.explanations` | `result` | no |
+| `ensemble.membership` | `backend` | no |
+| `ensemble.membership` | `ensemble.api` | yes |
+| `ensemble.membership` | `ensemble.reliability` | no |
+| `ensemble.membership` | `errors` | no |
+| `ensemble.moe` | `ensemble.base` | no |
+| `ensemble.moe` | `errors` | no |
+| `ensemble.moe` | `result` | no |
+| `ensemble.moe` | `spec` | no |
+| `ensemble.provenance` | `errors` | no |
+| `ensemble.provenance` | `provenance` | no |
+| `ensemble.provenance` | `result` | no |
+| `ensemble.provenance` | `spec` | no |
+| `ensemble.release` | `backend` | no |
+| `ensemble.release` | `ensemble.adversarial` | no |
+| `ensemble.release` | `ensemble.batch` | no |
+| `ensemble.release` | `ensemble.benchmarks` | no |
+| `ensemble.release` | `ensemble.correlation` | no |
+| `ensemble.release` | `ensemble.diversity` | no |
+| `ensemble.release` | `errors` | no |
+| `ensemble.release` | `spec` | no |
+| `ensemble.reliability` | `ensemble.correlation` | no |
+| `ensemble.reliability` | `errors` | no |
+| `ensemble.stacking` | `ensemble.base` | no |
+| `ensemble.stacking` | `errors` | no |
+| `ensemble.stacking` | `result` | no |
+| `ensemble.stacking` | `spec` | no |
+| `ensemble.voting` | `ensemble.base` | no |
+| `ensemble.voting` | `errors` | no |
+| `ensemble.voting` | `result` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
@@ -940,104 +640,6 @@ flowchart TD
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
-| `routing` | `routing.architecture` | no |
-| `routing` | `routing.availability` | no |
-| `routing` | `routing.capability` | no |
-| `routing` | `routing.confidence` | no |
-| `routing` | `routing.cost` | no |
-| `routing` | `routing.dag` | no |
-| `routing` | `routing.dsl` | no |
-| `routing` | `routing.early_exit` | no |
-| `routing` | `routing.energy` | no |
-| `routing` | `routing.explain` | no |
-| `routing` | `routing.fallback` | no |
-| `routing` | `routing.fuzz` | no |
-| `routing` | `routing.hardware` | no |
-| `routing` | `routing.hedged` | no |
-| `routing` | `routing.latency` | no |
-| `routing` | `routing.memory` | no |
-| `routing` | `routing.parallel` | no |
-| `routing` | `routing.privacy` | no |
-| `routing` | `routing.qos` | no |
-| `routing` | `routing.replay` | no |
-| `routing` | `routing.rungs` | no |
-| `routing` | `routing.simulate` | no |
-| `routing` | `routing.synthesis` | no |
-| `routing.architecture` | `errors` | yes |
-| `routing.architecture` | `ladder` | yes |
-| `routing.architecture` | `policy` | no |
-| `routing.architecture` | `result` | no |
-| `routing.architecture` | `spec` | no |
-| `routing.availability` | `backend` | no |
-| `routing.availability` | `routing.architecture` | no |
-| `routing.capability` | `backend` | no |
-| `routing.capability` | `routing.architecture` | no |
-| `routing.confidence` | `backend` | no |
-| `routing.confidence` | `routing.architecture` | no |
-| `routing.cost` | `routing.architecture` | no |
-| `routing.dag` | `errors` | no |
-| `routing.dag` | `ladder` | no |
-| `routing.dag` | `routing.architecture` | no |
-| `routing.dag` | `spec` | yes |
-| `routing.dsl` | `errors` | no |
-| `routing.dsl` | `policy` | no |
-| `routing.dsl` | `routing.architecture` | no |
-| `routing.early_exit` | `errors` | no |
-| `routing.early_exit` | `ladder` | no |
-| `routing.early_exit` | `routing.architecture` | no |
-| `routing.early_exit` | `routing.qos` | no |
-| `routing.energy` | `backend` | no |
-| `routing.energy` | `routing.architecture` | no |
-| `routing.explain` | `ladder` | no |
-| `routing.explain` | `routing.architecture` | no |
-| `routing.fallback` | `errors` | no |
-| `routing.fallback` | `ladder` | no |
-| `routing.fallback` | `routing.architecture` | no |
-| `routing.fuzz` | `backend` | no |
-| `routing.fuzz` | `errors` | yes |
-| `routing.fuzz` | `ladder` | no |
-| `routing.fuzz` | `policy` | no |
-| `routing.fuzz` | `result` | no |
-| `routing.fuzz` | `routing.architecture` | no |
-| `routing.fuzz` | `routing.early_exit` | no |
-| `routing.fuzz` | `routing.fallback` | no |
-| `routing.fuzz` | `routing.rungs` | no |
-| `routing.fuzz` | `routing.synthesis` | no |
-| `routing.fuzz` | `spec` | no |
-| `routing.fuzz` | `validation` | no |
-| `routing.hardware` | `backend` | no |
-| `routing.hardware` | `routing.architecture` | no |
-| `routing.hedged` | `backend` | no |
-| `routing.hedged` | `errors` | no |
-| `routing.hedged` | `ladder` | no |
-| `routing.hedged` | `routing.architecture` | no |
-| `routing.hedged` | `routing.qos` | no |
-| `routing.latency` | `backend` | no |
-| `routing.latency` | `routing.architecture` | no |
-| `routing.memory` | `backend` | no |
-| `routing.memory` | `routing.architecture` | no |
-| `routing.parallel` | `errors` | no |
-| `routing.parallel` | `ladder` | no |
-| `routing.parallel` | `routing.architecture` | no |
-| `routing.parallel` | `routing.qos` | no |
-| `routing.privacy` | `backend` | no |
-| `routing.privacy` | `routing.architecture` | no |
-| `routing.replay` | `errors` | no |
-| `routing.replay` | `ladder` | no |
-| `routing.replay` | `result` | no |
-| `routing.replay` | `routing.architecture` | no |
-| `routing.rungs` | `backend` | no |
-| `routing.rungs` | `routing.architecture` | no |
-| `routing.rungs` | `routing.capability` | yes |
-| `routing.simulate` | `routing.architecture` | no |
-| `routing.simulate` | `routing.capability` | no |
-| `routing.simulate` | `routing.energy` | no |
-| `routing.simulate` | `routing.memory` | no |
-| `routing.synthesis` | `backend` | no |
-| `routing.synthesis` | `routing.architecture` | no |
-| `routing.synthesis` | `routing.capability` | no |
-| `routing.synthesis` | `routing.qos` | no |
-| `routing.synthesis` | `routing.rungs` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
