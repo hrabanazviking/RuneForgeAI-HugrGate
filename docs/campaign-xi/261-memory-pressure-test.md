@@ -1,6 +1,6 @@
 # Slice 261 — Memory-pressure test
 
-**Date:** 2026-10-09 · **Tests:** `tests/test_chaos_memory_pressure.py` (9 tests, green)
+**Date:** 2026-10-09 · **Tests:** `tests/test_chaos_memory_pressure.py` (8 tests, green)
 
 ## What existed before
 
@@ -42,7 +42,7 @@ machinery for the core path:
 
 ## Verification
 
-- 9 tests: reading/simulator validation; threshold escalation
+- 8 tests: reading/simulator validation; threshold escalation
   ok→warn→critical→ok with `allow_work` semantics; shed-on-entry
   only; unregister; failing shedder doesn't break escalation;
   cache shed integration; critical refusal + recovery.
