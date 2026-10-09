@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 48 · **public names:** 210
+**Modules:** 49 · **public names:** 214
 
 ## API stability policy
 
@@ -240,6 +240,7 @@ that this document never drifts from the code.
 | `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
 | `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
 | `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
+| `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/hatch/w` |
 
 ### `hugrgate.contracts.composite`
 
@@ -247,6 +248,14 @@ that this document never drifts from the code.
 |---|---|---|
 | `FieldContract` | constant | `typing.Union[hugrgate.contracts.schema.DecisionContract, hug` |
 | `CompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>) -> None` |
+
+### `hugrgate.contracts.conditional`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
+| `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
+| `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, conditions: 'Dict[str, FieldCondition]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.hierarchy`
 

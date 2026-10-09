@@ -26,6 +26,7 @@ flowchart TD
         contracts_nested[contracts.nested]
         contracts_hierarchy[contracts.hierarchy]
         contracts_composite[contracts.composite]
+        contracts_conditional[contracts.conditional]
     end
     subgraph runtime[runtime]
         core[core]
@@ -149,6 +150,9 @@ flowchart TD
     contracts_composite --> contracts_schema
     contracts_composite --> errors
     contracts_composite --> spec
+    contracts_conditional --> contracts_composite
+    contracts_conditional --> contracts_schema
+    contracts_conditional --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
     contracts_negotiation --> contracts_schema
@@ -221,7 +225,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -306,6 +310,9 @@ flowchart TD
 | `contracts.composite` | `contracts.schema` | no |
 | `contracts.composite` | `errors` | no |
 | `contracts.composite` | `spec` | no |
+| `contracts.conditional` | `contracts.composite` | no |
+| `contracts.conditional` | `contracts.schema` | no |
+| `contracts.conditional` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
 | `contracts.negotiation` | `contracts.schema` | no |

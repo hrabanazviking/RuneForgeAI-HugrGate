@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:14:08.474947+00:00",
-  "module_count": 48,
+  "generated_utc": "2026-10-09T11:16:15.323979+00:00",
+  "module_count": 49,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 45,
+      "loc": 47,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -550,6 +550,29 @@
         "field_contract",
         "validate_value",
         "describe"
+      ]
+    },
+    "hugrgate.contracts.conditional": {
+      "docstring": "Conditional decision fields. Gjallarbr\u00fa slice 031.\n\nA composite contract (slice 030) requires every field, always. Real\ndecisions are conditional: ``allergy_details`` only matters when\n``has_allergy`` is true; ``dosage`` only when ``medication`` is not\n``\"none\"``.\n\n:class:`ConditionalCompositeContract` (kind ``\"conditional-composite\"``)\nextends :class:`CompositeContract` with per-field\n:class:`FieldCondition`s. Given a value mapping, activation is computed\nto a fixpoint \u2014 conditions may chain (a field conditional on another\nconditional field cascades). Only active fields are required and\nvalidated; providing a value for an *inactive* field is rejected as a\ncontradiction. Condition cycles and self-references are rejected at\nconstruction.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 268,
+      "path": "hugrgate/contracts/conditional.py",
+      "public_defs": [
+        "FieldCondition",
+        "ConditionalCompositeContract",
+        "satisfied_by",
+        "to_dict",
+        "from_dict",
+        "active_fields",
+        "activation_report",
+        "validate_value",
+        "describe",
+        "visit"
       ]
     },
     "hugrgate.contracts.hierarchy": {
@@ -1107,6 +1130,7 @@
     "test_contracts_028.py",
     "test_contracts_029.py",
     "test_contracts_030.py",
+    "test_contracts_031.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1117,5 +1141,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8424
+  "total_loc": 8694
 }

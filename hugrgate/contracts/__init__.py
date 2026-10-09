@@ -29,6 +29,7 @@ __all__ = [
     "nested",
     "hierarchy",
     "composite",
+    "conditional",
 ]
 
 
@@ -37,7 +38,8 @@ def __getattr__(name: str):
     # (hugrgate.contracts -> hugrgate.contracts would be a self-edge).
     # importlib.import_module is used instead of `from ... import ...`,
     # which would re-enter __getattr__ and recurse forever.
-    if name in ("negotiation", "nested", "hierarchy", "composite"):
+    if name in ("negotiation", "nested", "hierarchy", "composite",
+                "conditional"):
         import importlib
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module
