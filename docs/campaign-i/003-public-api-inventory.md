@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 52 · **public names:** 233
+**Modules:** 53 · **public names:** 239
 
 ## API stability policy
 
@@ -283,6 +283,17 @@ that this document never drifts from the code.
 | `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
 | `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
 | `MemoryMode` | class | `(*values)` |
+
+### `hugrgate.edge.npu`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
+| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
+| `NPUAdapter` | class | `()` |
+| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPURegistry` | class | `()` |
 
 ### `hugrgate.edge.platform`
 
