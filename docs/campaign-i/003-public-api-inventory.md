@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 48 · **public names:** 204
+**Modules:** 50 · **public names:** 215
 
 ## API stability policy
 
@@ -297,6 +297,27 @@ that this document never drifts from the code.
 | `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
 | `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
 | `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
+
+### `hugrgate.edge.routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
+| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None)` |
+| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
+
+### `hugrgate.edge.thermal`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CRITICAL_C` | constant | `85.0` |
+| `WARN_C` | constant | `70.0` |
+| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
+| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
+| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
+| `ThermalLevel` | class | `(*values)` |
+| `ThermalSensor` | class | `()` |
+| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
 
 ### `hugrgate.errors`
 

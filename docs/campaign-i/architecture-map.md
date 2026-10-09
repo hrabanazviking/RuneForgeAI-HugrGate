@@ -74,6 +74,8 @@ flowchart TD
         edge_platform[edge.platform]
         edge_memory[edge.memory]
         edge_affinity[edge.affinity]
+        edge_thermal[edge.thermal]
+        edge_routing[edge.routing]
     end
 
     hugrgate --> backend
@@ -181,6 +183,9 @@ flowchart TD
     daemon -.-> spec
     edge_affinity --> errors
     edge_memory --> errors
+    edge_routing --> backend
+    edge_routing --> edge_thermal
+    edge_routing --> policy
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -251,7 +256,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing` |
 
 ## Internal dependency edges
 
@@ -362,6 +367,9 @@ flowchart TD
 | `daemon` | `spec` | yes |
 | `edge.affinity` | `errors` | no |
 | `edge.memory` | `errors` | no |
+| `edge.routing` | `backend` | no |
+| `edge.routing` | `edge.thermal` | no |
+| `edge.routing` | `policy` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
