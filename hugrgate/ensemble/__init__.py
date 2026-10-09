@@ -111,6 +111,16 @@ from hugrgate.ensemble.membership import (
     MembershipManager,
 )
 from hugrgate.ensemble.reliability import ReliabilityTracker
+from hugrgate.ensemble.release import (
+    CheckResult,
+    ReleaseGate,
+    ReleaseVerdict,
+    adversarial_clean,
+    benchmark_thresholds,
+    diversity_floor,
+    evidence_check,
+    no_correlated_cliques,
+)
 from hugrgate.ensemble.stacking import (
     SoftmaxRegression,
     StackingEngine,
@@ -148,6 +158,14 @@ __all__ = [
     "write_benchmark_report",
     "demo_council",
     "regenerate_ensemble_benchmarks",
+    "CheckResult",
+    "ReleaseVerdict",
+    "ReleaseGate",
+    "benchmark_thresholds",
+    "diversity_floor",
+    "no_correlated_cliques",
+    "adversarial_clean",
+    "evidence_check",
     "SaboteurBackend",
     "DropoutBackend",
     "CorruptBackend",
