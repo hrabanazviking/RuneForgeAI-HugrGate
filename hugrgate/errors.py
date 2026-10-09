@@ -523,3 +523,69 @@ class PerfGateError(HugrGateError):
     """
     code = "perfgate_error"
     recoverable = False
+
+
+# --- Campaign XIV: observability errors -----------------------------------------
+# Slice 326 promotes the observability failure modes into the taxonomy up
+# front so every later slice in the campaign raises taxonomy errors, never
+# bare ``ValueError``/``RuntimeError``.  Codes are unique and stable.
+# Recoverability is deliberate: observability must never take down a
+# decision — recording failures are recoverable; definition errors (bad
+# metric name, invalid SLO) are caller bugs and not recoverable.
+class ObservabilityError(HugrGateError):
+    """Base for all Campaign XIV observability failures.
+
+    Slice 326.  A failed metric recording, dropped span, or missed alert
+    must never fail the decision it observes; subclasses keep that
+    promise unless the failure is a caller-side definition bug.
+    """
+    code = "observability_error"
+    recoverable = True
+
+
+class MetricError(ObservabilityError):
+    """A metric definition or recording was invalid.
+
+    Slice 326.  Bad metric names, wrong label sets, negative counter
+    increments, non-finite observations, and label-cardinality overflow
+    all surface here.  Recording is best-effort — the gate must keep
+    deciding — so this is recoverable; *definition* bugs should still be
+    fixed rather than retried blindly.
+    """
+    code = "metric_error"
+    recoverable = True
+
+
+class TraceError(ObservabilityError):
+    """A trace/span invariant was violated.
+
+    Slice 328.  Malformed traceparent headers, forbidden (payload)
+    attribute keys, or a broken span lifecycle surface here.
+    Recoverable: a dropped span loses one observation, never the
+    decision.
+    """
+    code = "trace_error"
+    recoverable = True
+
+
+class SLOError(ObservabilityError):
+    """An SLO definition or evaluation was invalid.
+
+    Slice 344.  Targets outside (0, 1], non-positive windows, or
+    evaluations over empty sample sets surface here.  Not recoverable:
+    a bad SLO definition is a configuration bug — fix it, do not retry
+    the same definition.
+    """
+    code = "slo_error"
+    recoverable = False
+
+
+class AlertError(ObservabilityError):
+    """An alert rule or alert delivery failed.
+
+    Slice 343.  Bad rule configuration is a caller bug, but a missed
+    delivery must never cascade — recoverable so the alerter can keep
+    evaluating the remaining rules.
+    """
+    code = "alert_error"
+    recoverable = True

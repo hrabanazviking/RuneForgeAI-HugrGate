@@ -1,0 +1,76 @@
+{
+  "slice": 341,
+  "recorded_at": 1791564545.2371593,
+  "host": "htch-runtime",
+  "model": {
+    "model": "power_coefficient",
+    "power_w": {
+      "default": 65.0,
+      "cpu": 65.0,
+      "gpu": 250.0,
+      "npu": 15.0,
+      "remote": 5.0
+    },
+    "caveat": "Estimates from average-power coefficients, not meter readings. Replace with hardware telemetry for billing-grade numbers."
+  },
+  "coefficient_provenance": {
+    "default": "nameplate-ish average for capacity planning; NOT a meter reading",
+    "cpu": "nameplate-ish average for capacity planning; NOT a meter reading",
+    "gpu": "nameplate-ish average for capacity planning; NOT a meter reading",
+    "npu": "nameplate-ish average for capacity planning; NOT a meter reading",
+    "remote": "nameplate-ish average for capacity planning; NOT a meter reading"
+  },
+  "determinism_check": {
+    "inputs": {
+      "backend": "gpu",
+      "latency_ms": 123.4
+    },
+    "outputs_wh": [
+      0.008569444444444446,
+      0.008569444444444446,
+      0.008569444444444446
+    ],
+    "deterministic": true
+  },
+  "worked_example_100ms": {
+    "cpu": {
+      "latency_ms": 100.0,
+      "estimated_wh": 0.0018055555555555557,
+      "baseline_zero_wh": 0.0
+    },
+    "gpu": {
+      "latency_ms": 100.0,
+      "estimated_wh": 0.006944444444444445,
+      "baseline_zero_wh": 0.0
+    },
+    "npu": {
+      "latency_ms": 100.0,
+      "estimated_wh": 0.0004166666666666667,
+      "baseline_zero_wh": 0.0
+    },
+    "remote": {
+      "latency_ms": 100.0,
+      "estimated_wh": 0.0001388888888888889,
+      "baseline_zero_wh": 0.0
+    },
+    "mystery-backend": {
+      "latency_ms": 100.0,
+      "estimated_wh": 0.0018055555555555557,
+      "baseline_zero_wh": 0.0
+    }
+  },
+  "aggregator_summary": {
+    "total_wh": 0.007444444,
+    "estimator": {
+      "model": "power_coefficient",
+      "power_w": {
+        "default": 65.0,
+        "cpu": 65.0,
+        "gpu": 250.0,
+        "npu": 15.0,
+        "remote": 5.0
+      },
+      "caveat": "Estimates from average-power coefficients, not meter readings. Replace with hardware telemetry for billing-grade numbers."
+    }
+  }
+}

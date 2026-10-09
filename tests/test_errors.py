@@ -14,6 +14,7 @@ from pathlib import Path
 import hugrgate
 from hugrgate.errors import (
     Abstention,
+    AlertError,
     BackendError,
     BackendUnavailable,
     BackpressureError,
@@ -37,9 +38,11 @@ from hugrgate.errors import (
     MemoryAccessDenied,
     MemoryError,
     MemoryQuotaExceeded,
+    MetricError,
     MultiprocError,
     NPUError,
     NumaError,
+    ObservabilityError,
     OfflineBootstrapError,
     PerfGateError,
     PolicyError,
@@ -56,11 +59,13 @@ from hugrgate.errors import (
     SealError,
     SecretDetected,
     SerdeError,
+    SLOError,
     SpecError,
     StorageError,
     SupervisionError,
     TelemetryError,
     TimeoutError,
+    TraceError,
     WatchdogError,
     ZeroCopyError,
 )
@@ -90,9 +95,12 @@ ALL_ERRORS = [
     SecretDetected,
     SealError,
     KeyProviderError,
+    # Campaign XIII decision-memory errors (slice 301 taxonomy promotion).
     MemoryAccessDenied,
     MemoryError,
     MemoryQuotaExceeded,
+    # Campaign XIV observability errors (slice 326 taxonomy promotion).
+    ObservabilityError, MetricError, TraceError, SLOError, AlertError,
 ]
 
 EXPECTED_CODES = {
@@ -146,6 +154,12 @@ EXPECTED_CODES = {
     MemoryError: "memory_error",
     MemoryQuotaExceeded: "memory_quota_exceeded",
     MemoryAccessDenied: "memory_access_denied",
+    # Campaign XIV observability errors (slice 326).
+    ObservabilityError: "observability_error",
+    MetricError: "metric_error",
+    TraceError: "trace_error",
+    SLOError: "slo_error",
+    AlertError: "alert_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -203,6 +217,14 @@ EXPECTED_RECOVERABLE = {
     MemoryError: True,
     MemoryQuotaExceeded: True,
     MemoryAccessDenied: False,
+    # Campaign XIV observability errors (slice 326): recording failures
+    # must never take down a decision (recoverable); a bad SLO
+    # definition is a configuration bug (not recoverable).
+    ObservabilityError: True,
+    MetricError: True,
+    TraceError: True,
+    SLOError: False,
+    AlertError: True,
 }
 
 

@@ -155,6 +155,9 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     # Campaign VIII (slice 185): lazy vendor SDK imports in
     # hugrgate.edge.npu — also provided by the npu extra.
     "hailo_platform": {"npu"},
+    # Campaign XIV (slice 327): lazy OTel SDK imports in
+    # hugrgate.observability.otel — provided by the otel extra.
+    "opentelemetry": {"otel"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
@@ -172,6 +175,7 @@ _STDLIB = {
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
     "concurrent",
     "struct",
+    "bisect",  # Campaign XIV (slice 326): histogram bucket search.
     "resource", "types", "builtins",
     "glob", "zlib",
     "hmac", "secrets", "ssl", "stat",
@@ -235,6 +239,11 @@ def test_every_third_party_import_is_declared():
                 "llama-cpp-python": "llama_cpp",
                 "mlx-lm": "mlx_lm",
                 "hailort": "hailo_platform",
+                # Campaign XIV (slice 327): all three OTel distributions
+                # provide the single "opentelemetry" top-level package.
+                "opentelemetry-api": "opentelemetry",
+                "opentelemetry-sdk": "opentelemetry",
+                "opentelemetry-exporter-otlp": "opentelemetry",
             }.get(dist, dist),
             set(),
         ).update(exs)

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 315 · **public names:** 1914
+**Modules:** 339 · **public names:** 1992
 
 ## API stability policy
 
@@ -2679,6 +2679,204 @@ that this document never drifts from the code.
 | `pin_to_node` | function | `(node: 'int', topology: 'NumaTopology | None' = None) -> 'None'` |
 | `pinned_to` | class | `(node: 'int', topology: 'NumaTopology | None' = None) -> 'None'` |
 | `suggest_node` | function | `(worker_index: 'int', topology: 'NumaTopology | None' = None) -> 'int'` |
+
+### `hugrgate.observability`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.observability.abstention`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AbstentionMetrics` | class | `(registry: 'MetricRegistry | None' = None, window: 'int' = 1000) -> 'None'` |
+
+### `hugrgate.observability.alerts`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SEVERITIES` | constant | `('info', 'warning', 'critical')` |
+| `Alert` | class | `(name: 'str', severity: 'str', dedup_key: 'str', message: 'str', fired_at: 'float' = <factory>, details: 'dict[str, Any]' = <factory>) -> None` |
+| `AlertManager` | class | `(max_history: 'int' = 500) -> 'None'` |
+| `AlertRule` | class | `(name: 'str', severity: 'str', condition: 'Callable[[dict[str, Any]], bool]', cooldown_s: 'float' = 300.0, dedup_key: 'str' = '') -> None` |
+| `alert_for_drift_report` | function | `(report: 'DriftReport', monitor_name: 'str' = 'drift') -> 'Alert | None'` |
+
+### `hugrgate.observability.confidence`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONFIDENCE_BUCKETS` | constant | `(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)` |
+| `ConfidenceHistogram` | class | `(registry: 'MetricRegistry', name: 'str' = 'hugrgate_decision_confidence', label_names: 'tuple[str, ...]' = ('backend',)) -> 'None'` |
+
+### `hugrgate.observability.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_LEDGER` | constant | `1000` |
+| `CostMetrics` | class | `(registry: 'MetricRegistry | None' = None, currency: 'str' = 'USD') -> 'None'` |
+
+### `hugrgate.observability.dashboard`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `VERDICTS` | constant | `('accept', 'review', 'abstain')` |
+| `HealthDashboard` | class | `(registry: 'MetricRegistry | None' = None, health: 'HealthMonitor | None' = None) -> 'None'` |
+
+### `hugrgate.observability.energy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_POWER_W` | constant | `{'default': 65.0, 'cpu': 65.0, 'gpu': 250.0, 'npu': 15.0, 'r` |
+| `MAX_LEDGER` | constant | `1000` |
+| `DefaultEnergyEstimator` | class | `(power_w: 'dict[str, float] | None' = None) -> 'None'` |
+| `EnergyEstimator` | class | `(*args, **kwargs)` |
+| `EnergyMetrics` | class | `(registry: 'MetricRegistry | None' = None, estimator: 'EnergyEstimator | None' = None) -> 'None'` |
+
+### `hugrgate.observability.escalation`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_HISTORY` | constant | `500` |
+| `EscalationMetrics` | class | `(registry: 'MetricRegistry | None' = None) -> 'None'` |
+
+### `hugrgate.observability.explain`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DecisionExplainer` | class | `()` |
+| `ExplanationReport` | class | `(verdict: 'str', summary: 'str', sections: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.observability.histograms`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LatencyTracker` | class | `(registry: 'MetricRegistry', name: 'str' = 'hugrgate_decision_latency_seconds', label_names: 'tuple[str, ...]' = ('backend',), buckets: 'tuple[float, ...]' = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)) -> 'None'` |
+
+### `hugrgate.observability.load`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_BUDGET_P99_US` | constant | `500.0` |
+| `LoadResult` | class | `(n: 'int', instrumented_p50_us: 'float', instrumented_p99_us: 'float', instrumented_max_us: 'float', baseline_p50_us: 'float', baseline_p99_us: 'float', overhead_p99_us: 'float', budget_p99_us: 'float', within_budget: 'bool') -> None` |
+| `ObservabilityLoadHarness` | class | `(budget_p99_us: 'float' = 500.0, warmup: 'int' = 200) -> 'None'` |
+
+### `hugrgate.observability.logschema`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EVENT_SCHEMAS` | constant | `{'decision.completed': {'version': 1, 'required': ('spec_typ` |
+| `ObservabilityFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
+| `TraceLoggerAdapter` | class | `(logger: 'logging.Logger', trace_id: 'str | None' = None, span_id: 'str | None' = None) -> 'None'` |
+| `emit_event` | function | `(logger_name: 'str', event: 'str', fields: 'dict[str, Any]', level: 'int' = 20, trace_id: 'str | None' = None, span_id: 'str | None' = None) -> 'None'` |
+| `validate_event` | function | `(event: 'str', fields: 'dict[str, Any]') -> 'dict[str, Any]'` |
+
+### `hugrgate.observability.metrics`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_LATENCY_BUCKETS` | constant | `(0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.` |
+| `Counter` | class | `(name: 'str', description: 'str', label_names: 'tuple[str, ...]', registry: 'MetricRegistry') -> 'None'` |
+| `Gauge` | class | `(name: 'str', description: 'str', label_names: 'tuple[str, ...]', registry: 'MetricRegistry') -> 'None'` |
+| `Histogram` | class | `(name: 'str', description: 'str', label_names: 'tuple[str, ...]', registry: 'MetricRegistry', buckets: 'tuple[float, ...]' = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0)) -> 'None'` |
+| `MetricRegistry` | class | `(max_series: 'int' = 1000) -> 'None'` |
+| `validate_metric_name` | function | `(name: 'str') -> 'str'` |
+
+### `hugrgate.observability.otel`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InMemoryExporter` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `OtelBridge` | class | `(config: 'OtelConfig | None' = None, fallback: 'SpanExporter | None' = None) -> 'None'` |
+| `OtelConfig` | class | `(service_name: 'str' = 'hugrgate', service_version: 'str' = '0.0.0', endpoint: 'str' = 'http://localhost:4318/v1/traces', enabled: 'bool' = True, sample_rate: 'float' = 1.0, headers: 'dict[str, str]' = <factory>) -> None` |
+| `SpanExporter` | class | `(*args, **kwargs)` |
+| `_load_sdk` | function | `() -> 'Any | None'` |
+| `_otel_trace` | function | `() -> 'Any'` |
+| `decode_traceparent` | function | `(header: 'str') -> 'dict[str, Any]'` |
+| `encode_traceparent` | function | `(trace_id: 'str', span_id: 'str', sampled: 'bool' = True) -> 'str'` |
+
+### `hugrgate.observability.privacy_metrics`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyEventMetrics` | class | `(registry: 'MetricRegistry | None' = None) -> 'None'` |
+
+### `hugrgate.observability.prometheus`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONTENT_TYPE` | constant | `'text/plain; version=0.0.4; charset=utf-8'` |
+| `escape_label_value` | function | `(value: 'str') -> 'str'` |
+| `generate_latest` | function | `(registry: 'MetricRegistry') -> 'str'` |
+
+### `hugrgate.observability.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TraceReplay` | class | `(store: 'TraceStore') -> 'None'` |
+
+### `hugrgate.observability.slo`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SLO_KINDS` | constant | `('availability', 'latency', 'abstention_rate', 'custom')` |
+| `SLODefinition` | class | `(name: 'str', target: 'float', window_s: 'float', kind: 'str' = 'availability', description: 'str' = '', params: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.observability.slo_eval`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `STATUSES` | constant | `('ok', 'warning', 'breaching')` |
+| `SLOEvaluator` | class | `(now: 'float | None' = None) -> 'None'` |
+| `SLOStatus` | class | `(slo_name: 'str', target: 'float', window_s: 'float', n_samples: 'int', good_fraction: 'float', burn_rate: 'float', error_budget_remaining: 'float', status: 'str') -> None` |
+
+### `hugrgate.observability.spans_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BACKEND_SPAN_NAME` | constant | `'hugrgate.backend'` |
+| `annotate_backend_outcome` | function | `(span: 'Span', backend_name: 'str', latency_ms: 'float', ok: 'bool', error_code: 'str | None' = None) -> 'Span'` |
+| `backend_span` | function | `(tracer: 'Tracer', backend_name: 'str', attempt: 'int' = 1, parent: 'Span | SpanContext | None' = None, extra_attributes: 'dict[str, Any] | None' = None) -> 'Iterator[Span]'` |
+
+### `hugrgate.observability.spans_calibration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CALIBRATION_SPAN_NAME` | constant | `'hugrgate.calibration'` |
+| `annotate_calibration` | function | `(span: 'Span', method: 'str', nominal_coverage: 'float', n_samples: 'int', achieved_coverage: 'float | None' = None, extra: 'dict[str, Any] | None' = None) -> 'Span'` |
+| `calibration_span` | function | `(tracer: 'Tracer', method: 'str', parent: 'Span | SpanContext | None' = None) -> 'Iterator[Span]'` |
+| `coverage_within_tolerance` | function | `(achieved: 'float', nominal: 'float', n: 'int', alpha: 'float' = 0.05) -> 'dict[str, Any]'` |
+| `empirical_coverage` | function | `(prediction_sets: 'Sequence[Sequence[Any]]', true_labels: 'Sequence[Any]') -> 'float'` |
+
+### `hugrgate.observability.spans_decision`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DECISION_SPAN_NAME` | constant | `'hugrgate.decision'` |
+| `annotate_decision` | function | `(span: 'Span', spec: 'DecisionSpec', result: 'DecisionResult', policy: 'DecisionPolicy | None' = None) -> 'Span'` |
+| `decision_span` | function | `(tracer: 'Tracer', spec: 'DecisionSpec', policy: 'DecisionPolicy | None' = None, parent: 'Span | SpanContext | None' = None, extra_attributes: 'dict[str, Any] | None' = None) -> 'Iterator[Span]'` |
+| `probability_band` | function | `(probability: 'float') -> 'str'` |
+| `verdict_of` | function | `(result: 'DecisionResult') -> 'str'` |
+
+### `hugrgate.observability.spans_routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ROUTING_SPAN_NAME` | constant | `'hugrgate.routing'` |
+| `annotate_routing` | function | `(span: 'Span', event: 'RouteEvent | Mapping[str, Any]') -> 'Span'` |
+| `routing_span` | function | `(tracer: 'Tracer', event: 'RouteEvent | Mapping[str, Any]', parent: 'Span | SpanContext | None' = None) -> 'Iterator[Span]'` |
+
+### `hugrgate.observability.trace`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FORBIDDEN_ATTRIBUTE_KEYS` | constant | `{'document', 'input', 'password', 'payload', 'pii', 'prompt'` |
+| `ProbabilisticSampler` | class | `(rate: 'float' = 1.0) -> 'None'` |
+| `Span` | class | `(name: 'str', context: 'SpanContext', parent_span_id: 'str | None' = None, attributes: 'Mapping[str, Any] | None' = None, start_time: 'float | None' = None) -> 'None'` |
+| `SpanContext` | class | `(trace_id: 'str', span_id: 'str', sampled: 'bool' = True) -> None` |
+| `TraceStore` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `Tracer` | class | `(store: 'TraceStore | None' = None, sampler: 'ProbabilisticSampler | None' = None, service_name: 'str' = 'hugrgate') -> 'None'` |
+| `new_span_id` | function | `() -> 'str'` |
+| `new_trace_id` | function | `() -> 'str'` |
 
 ### `hugrgate.perfgate`
 
