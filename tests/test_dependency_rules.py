@@ -219,6 +219,8 @@ _STDLIB = {
     # Campaign XVIII (slices 447/449): packaging tests parse the
     # systemd unit and the launchd plist with the stdlib.
     "configparser", "plistlib",
+    "select",  # Campaign XX (slice 479): platforms.py resource scan.
+    # ("py_compile" already listed above; also used by slice 477 install gauntlet probe.)
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

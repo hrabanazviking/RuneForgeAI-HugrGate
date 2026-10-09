@@ -73,6 +73,7 @@ hugrgate serve --port 8377 --unix-socket /tmp/hugrgate.sock \
 ## Python Client
 
 ```python
+# noexec: illustrative fragment — needs a live service or gate in scope
 from hugrgate.client import HugrGateClient
 
 client = HugrGateClient(url="http://127.0.0.1:8377")

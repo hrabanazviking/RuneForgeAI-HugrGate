@@ -22,13 +22,15 @@ top of the existing benchmark machinery (`hugrgate.bench`,
 ## Quick start
 
 ```python
+# noexec: illustrative sketch — needs a gate with backends registered
 from hugrgate.evlab import EvaluationLab, Experiment
 
 lab = EvaluationLab()  # or EvaluationLab(gate=my_gate)
 lab.register_experiment(Experiment(
     name="smoke",
     dataset={"name": "smoke", "version": "1.0.0",
-             "spec": {...}, "items": [{"state": {...}, "expected": "a"}]},
+             "spec": {"type": "categorical", "options": ["a", "b"]},
+             "items": [{"state": {"x": 1}, "expected": "a"}]},
     backends=["rules", "logreg"],
     seed=351,
 ))

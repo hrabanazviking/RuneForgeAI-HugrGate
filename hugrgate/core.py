@@ -24,6 +24,9 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
+if TYPE_CHECKING:
+    from hugrgate.security.input_limits import InputLimits
+
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
@@ -137,6 +140,19 @@ class HugrGate:
         Shared by :meth:`decide` (sync) and :meth:`adecide` (async):
         Abstention propagates, BackendError propagates, anything else
         becomes BackendError.
+
+        Slice 490: *anything* includes ``BaseException``. A hostile
+        backend raising ``KeyboardInterrupt``/``SystemExit``/raw
+        ``BaseException`` must not escape the gate and kill the
+        host's control flow — it becomes a chained ``BackendError``.
+        The host's own signals still work: this only contains
+        exceptions raised *by the backend callable*.
+
+        Slice 500: ``asyncio.CancelledError`` is exempt — it is the
+        event loop's cancellation protocol, not hostility.
+        Containing it broke ``asyncio.wait_for`` timeouts (the
+        waiter needs the cancellation to propagate so it can raise
+        ``TimeoutError``).
         """
         try:
             return evaluate()
@@ -148,10 +164,18 @@ class HugrGate:
             logger.warning("backend %r failed; no failover in core path",
                            backend.name)
             raise
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
             logger.warning("backend %r raised unexpected %s",
                            backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}") from e
+        except BaseException as e:
+            logger.warning("backend %r raised hostile %s; contained",
+                           backend.name, type(e).__name__)
+            raise BackendError(
+                f"backend {backend.name} raised {type(e).__name__}; "
+                f"contained") from e
 
     def _finalize_result(self, result: DecisionResult, backend: Backend,
                          state: Mapping[str, Any], spec: DecisionSpec,
@@ -163,6 +187,13 @@ class HugrGate:
         gate, and records provenance.  Identical semantics whichever
         path evaluated the backend.
         """
+        # Slice 490: a hostile backend may return garbage instead of a
+        # DecisionResult. Fail closed with BackendError before touching
+        # attributes — never let AttributeError/TypeError escape.
+        if not isinstance(result, DecisionResult):
+            raise BackendError(
+                f"backend {backend.name} returned "
+                f"{type(result).__name__}, not a DecisionResult")
         result.latency_ms = (time.perf_counter() - start) * 1000
         result.backend = backend.name
 
@@ -244,7 +275,19 @@ class HugrGate:
                                      contract_id, start)
 
     def decide_batch(self, states: list, spec: SpecLike,
-                     policy: DecisionPolicy | None = None) -> list:
+                     policy: DecisionPolicy | None = None,
+                     limits: InputLimits | None = None) -> list:
+        """Decide a batch of states, enforcing batch-amplification limits.
+
+        Slice 492: ``states`` are checked with
+        :func:`hugrgate.security.input_limits.check_batch` *before*
+        any decision runs — an unbounded batch previously fanned out
+        without limit. Breaches raise :class:`InputTooLarge`;
+        ``limits`` overrides the default :class:`InputLimits`.
+        """
+        from hugrgate.security.input_limits import check_batch
+
+        check_batch(states, limits)
         return [self.decide(s, spec, policy) for s in states]
 
     async def adecide(self, state: Mapping[str, Any],
@@ -294,10 +337,20 @@ class HugrGate:
             logger.warning("backend %r failed; no failover in core path",
                            backend.name)
             raise
+        except asyncio.CancelledError:
+            # Slice 500: cancellation is control flow, not hostility —
+            # asyncio.wait_for needs it to propagate to raise TimeoutError.
+            raise
         except Exception as e:
             logger.warning("backend %r raised unexpected %s",
                            backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}") from e
+        except BaseException as e:
+            logger.warning("backend %r raised hostile %s; contained",
+                           backend.name, type(e).__name__)
+            raise BackendError(
+                f"backend {backend.name} raised {type(e).__name__}; "
+                f"contained") from e
 
         return self._finalize_result(result, backend, state, spec, policy,
                                      contract_id, start)

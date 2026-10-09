@@ -1,0 +1,11 @@
+{
+  "generated_by": "tools/matrix/dep_latest_audit.py (slice 484)",
+  "dependencies": {
+    "pyyaml": {
+      "minimum": "6.0",
+      "installed": "6.0.3",
+      "meets_floor": true
+    }
+  },
+  "deprecated_api_findings": []
+}

@@ -51,6 +51,7 @@ __all__ = [
     "MemoryAccessDenied",
     "MemoryError",
     "MemoryQuotaExceeded",
+    "MigrationError",
     "MultiprocError",
     "NPUError",
     "NumaError",
@@ -285,6 +286,20 @@ class MemoryAccessDenied(MemoryError):
     """
 
     code = "memory_access_denied"
+    recoverable = False
+
+
+class MigrationError(HugrGateError):
+    """A stored-data migration failed or has no path (slice 485).
+
+    Raised when an on-disk envelope (memory export, provenance
+    snapshot, cache file) cannot be migrated to the readable
+    version: no migration path is registered, or a migration
+    function raised. Not recoverable by blind retry: the registry
+    or the bytes must change.
+    """
+
+    code = "migration_error"
     recoverable = False
 
 

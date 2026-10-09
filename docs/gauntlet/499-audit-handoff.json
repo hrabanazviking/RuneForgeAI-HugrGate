@@ -1,0 +1,81 @@
+{
+  "audience": "Independent auditor: reproduce every precision claim below with the given commands, then compare against the recorded evidence. All commands run from the repo root with the project venv (~/workspace/RuneForgeAI-HugrGate/venv).",
+  "claims": [
+    {
+      "claim": "The ECE calibration metric agrees with ground truth: a perfect forecaster scores ECE 0.0092 (< 0.03 tolerance), injected overconfidence miscalibration scores 0.0515/0.0826 (> 0.04), and ECE grows monotonically with severity (n=20000, 15 bins, seed=494).",
+      "evidence": [
+        "docs/gauntlet/494-calibration-truth-audit.md"
+      ],
+      "id": "CAL-01",
+      "reproduce": [
+        "pytest tests/test_gauntlet_494_calibration_audit.py -q"
+      ]
+    },
+    {
+      "claim": "The benchmark workload is deterministic: identical SHA-256 result digests across runs, timing CV 0.068 (< 0.25 band), ~8-9k decisions/sec on the reference machine (3 runs x 2000 decisions, seed 495).",
+      "evidence": [
+        "docs/gauntlet/495-benchmark-reproducibility-audit.md",
+        "docs/gauntlet/495-benchmark-baseline.json"
+      ],
+      "id": "PERF-01",
+      "reproduce": [
+        "pytest tests/test_gauntlet_495_repro.py -q"
+      ]
+    },
+    {
+      "claim": "Every executable Python snippet in the user-facing docs runs green: 3 PASS, 4 honestly SKIP (fragments marked # noexec), 0 FAIL across docs/quickstart.md, docs/api.md, docs/ladder.md, docs/calibration.md, docs/campaign-xiv/observability.md, docs/evlab/evaluation-lab.md.",
+      "evidence": [
+        "docs/gauntlet/496-documentation-executable-audit.md"
+      ],
+      "id": "DOC-01",
+      "reproduce": [
+        "python tools/docs_exec_audit.py docs/quickstart.md docs/api.md docs/ladder.md docs/calibration.md docs/campaign-xiv/observability.md docs/evlab/evaluation-lab.md"
+      ]
+    },
+    {
+      "claim": "The 1.0 runtime dependency closure is license-clean: hugrgate (Apache-2.0) + PyYAML 6.0.3 (MIT). No copyleft in the shipped tree.",
+      "evidence": [
+        "docs/gauntlet/497-license-provenance-audit.md",
+        "docs/gauntlet/497-license-manifest.json"
+      ],
+      "id": "LIC-01",
+      "reproduce": [
+        "python tools/license_audit.py"
+      ]
+    },
+    {
+      "claim": "The release candidate builds (sdist + wheel) and verifies: metadata, entry points (hugrgate, hugrgate-server), and a smoke install with a live decision all pass (5/5 checks).",
+      "evidence": [
+        "docs/gauntlet/498-release-candidate-build.md"
+      ],
+      "id": "RC-01",
+      "reproduce": [
+        "python tools/rc_build.py --builder-python <python-with-build>"
+      ]
+    },
+    {
+      "claim": "The public API matches the 1.0 baseline: 422 modules, 2563 public names; the live tree diffs clean (no removals, no signature breaks, no new required params).",
+      "evidence": [
+        "docs/gauntlet/486-api-compatibility-audit.md",
+        "docs/gauntlet/api-baseline-1.0.json"
+      ],
+      "id": "API-01",
+      "reproduce": [
+        "pytest tests/test_gauntlet_486_api_audit.py -q"
+      ]
+    },
+    {
+      "claim": "Feature freeze is enforced: change-kind gating, waiver registry, and public-API growth diff keep the 1.0 surface stable.",
+      "evidence": [
+        "docs/gauntlet/476-feature-freeze.md"
+      ],
+      "id": "FRZ-01",
+      "reproduce": [
+        "pytest tests/test_gauntlet_476_freeze.py -q"
+      ]
+    }
+  ],
+  "date": "2026-10-09",
+  "handoff_version": "1.0.0",
+  "package": "hugrgate-precision-audit-handoff"
+}

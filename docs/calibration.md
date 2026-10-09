@@ -37,6 +37,7 @@ comparing live prediction distributions against calibration-time
 baselines. Two modes:
 
 ```python
+# noexec: illustrative fragment — needs calibration_confidences in scope
 from hugrgate.drift import DriftMonitor, recalibration_advisory
 
 # Histogram mode: confidence distribution vs calibration time.

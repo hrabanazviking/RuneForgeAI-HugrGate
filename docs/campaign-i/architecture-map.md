@@ -508,6 +508,25 @@ flowchart TD
         security_fuzzing[security.fuzzing]
         security_gauntlet[security.gauntlet]
     end
+    subgraph gauntlet[gauntlet]
+        gauntlet[gauntlet]
+        gauntlet_freeze[gauntlet.freeze]
+        gauntlet_pymatrix[gauntlet.pymatrix]
+        gauntlet_platforms[gauntlet.platforms]
+        gauntlet_deps[gauntlet.deps]
+        gauntlet_store_migrate[gauntlet.store_migrate]
+        gauntlet_api_audit[gauntlet.api_audit]
+        gauntlet_racehunt[gauntlet.racehunt]
+        gauntlet_soak[gauntlet.soak]
+        gauntlet_fuzz[gauntlet.fuzz]
+        gauntlet_hostile[gauntlet.hostile]
+        gauntlet_partition[gauntlet.partition]
+        gauntlet_exhaustion[gauntlet.exhaustion]
+        gauntlet_leakscan[gauntlet.leakscan]
+        gauntlet_calibration_audit[gauntlet.calibration_audit]
+        gauntlet_repro[gauntlet.repro]
+        gauntlet_license_audit[gauntlet.license_audit]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -1277,6 +1296,7 @@ flowchart TD
     core --> privacy_provenance
     core --> provenance
     core --> result
+    core -.-> security_input_limits
     core --> spec
     core --> validation
     daemon -.-> client
@@ -1623,6 +1643,35 @@ flowchart TD
     flame --> hugrgate
     flame --> errors
     flame --> log
+    gauntlet_calibration_audit --> calibration_metrics
+    gauntlet_exhaustion --> errors
+    gauntlet_fuzz --> errors
+    gauntlet_fuzz -.-> serde
+    gauntlet_fuzz -.-> spec
+    gauntlet_fuzz -.-> validation
+    gauntlet_hostile --> backend
+    gauntlet_hostile --> result
+    gauntlet_hostile --> spec
+    gauntlet_leakscan -.-> policy
+    gauntlet_partition --> errors
+    gauntlet_racehunt -.-> backend
+    gauntlet_racehunt -.-> cache
+    gauntlet_racehunt -.-> policy
+    gauntlet_racehunt -.-> result
+    gauntlet_racehunt -.-> spec
+    gauntlet_repro -.-> backend
+    gauntlet_repro -.-> core
+    gauntlet_repro -.-> policy
+    gauntlet_repro -.-> result
+    gauntlet_repro -.-> security_input_limits
+    gauntlet_repro -.-> spec
+    gauntlet_soak -.-> backend
+    gauntlet_soak -.-> chaos_soak
+    gauntlet_soak -.-> core
+    gauntlet_soak -.-> policy
+    gauntlet_soak -.-> result
+    gauntlet_soak -.-> spec
+    gauntlet_store_migrate --> errors
     gpusched --> errors
     gpusched --> log
     hotpaths --> errors
@@ -1713,6 +1762,7 @@ flowchart TD
     memory_history --> privacy
     memory_history --> provenance
     memory_io --> errors
+    memory_io --> gauntlet_store_migrate
     memory_io --> memory_compaction
     memory_io --> memory_history
     memory_io --> memory_query
@@ -2230,6 +2280,7 @@ flowchart TD
 | evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
 | agents | `agents`, `agents.types`, `agents.bus`, `agents.contract`, `agents.triage`, `agents.intent`, `agents.tools`, `agents.memory_write`, `agents.memory_read`, `agents.notify`, `agents.attention`, `agents.escalation`, `agents.human_review`, `agents.dispatch`, `agents.registry`, `agents.health`, `agents.cost`, `agents.privacy`, `agents.fusion`, `agents.disagreement`, `agents.loopbreak`, `agents.runaway`, `agents.budgets`, `agents.provenance`, `agents.replay`, `agents.simulator`, `agents.benchmark`, `agents.release_gate` |
 | security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.ratelimit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
+| gauntlet | `gauntlet`, `gauntlet.freeze`, `gauntlet.pymatrix`, `gauntlet.platforms`, `gauntlet.deps`, `gauntlet.store_migrate`, `gauntlet.api_audit`, `gauntlet.racehunt`, `gauntlet.soak`, `gauntlet.fuzz`, `gauntlet.hostile`, `gauntlet.partition`, `gauntlet.exhaustion`, `gauntlet.leakscan`, `gauntlet.calibration_audit`, `gauntlet.repro`, `gauntlet.license_audit` |
 
 ## Internal dependency edges
 
@@ -3003,6 +3054,7 @@ flowchart TD
 | `core` | `privacy_provenance` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
+| `core` | `security.input_limits` | yes |
 | `core` | `spec` | no |
 | `core` | `validation` | no |
 | `daemon` | `client` | yes |
@@ -3349,6 +3401,35 @@ flowchart TD
 | `flame` | `hugrgate` | no |
 | `flame` | `errors` | no |
 | `flame` | `log` | no |
+| `gauntlet.calibration_audit` | `calibration.metrics` | no |
+| `gauntlet.exhaustion` | `errors` | no |
+| `gauntlet.fuzz` | `errors` | no |
+| `gauntlet.fuzz` | `serde` | yes |
+| `gauntlet.fuzz` | `spec` | yes |
+| `gauntlet.fuzz` | `validation` | yes |
+| `gauntlet.hostile` | `backend` | no |
+| `gauntlet.hostile` | `result` | no |
+| `gauntlet.hostile` | `spec` | no |
+| `gauntlet.leakscan` | `policy` | yes |
+| `gauntlet.partition` | `errors` | no |
+| `gauntlet.racehunt` | `backend` | yes |
+| `gauntlet.racehunt` | `cache` | yes |
+| `gauntlet.racehunt` | `policy` | yes |
+| `gauntlet.racehunt` | `result` | yes |
+| `gauntlet.racehunt` | `spec` | yes |
+| `gauntlet.repro` | `backend` | yes |
+| `gauntlet.repro` | `core` | yes |
+| `gauntlet.repro` | `policy` | yes |
+| `gauntlet.repro` | `result` | yes |
+| `gauntlet.repro` | `security.input_limits` | yes |
+| `gauntlet.repro` | `spec` | yes |
+| `gauntlet.soak` | `backend` | yes |
+| `gauntlet.soak` | `chaos.soak` | yes |
+| `gauntlet.soak` | `core` | yes |
+| `gauntlet.soak` | `policy` | yes |
+| `gauntlet.soak` | `result` | yes |
+| `gauntlet.soak` | `spec` | yes |
+| `gauntlet.store_migrate` | `errors` | no |
 | `gpusched` | `errors` | no |
 | `gpusched` | `log` | no |
 | `hotpaths` | `errors` | no |
@@ -3439,6 +3520,7 @@ flowchart TD
 | `memory.history` | `privacy` | no |
 | `memory.history` | `provenance` | no |
 | `memory.io` | `errors` | no |
+| `memory.io` | `gauntlet.store_migrate` | no |
 | `memory.io` | `memory.compaction` | no |
 | `memory.io` | `memory.history` | no |
 | `memory.io` | `memory.query` | no |

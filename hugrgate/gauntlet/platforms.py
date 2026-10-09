@@ -1,0 +1,410 @@
+"""Platform/architecture matrix for the 1.0 release (slices 479-482).
+
+The supported-platform matrix is built from *actually validated*
+platforms only — never from hope. This module provides:
+
+- :class:`PlatformInfo` / :func:`current_platform`: the machine we
+  are standing on.
+- :data:`VALIDATED_PLATFORMS`: platforms the gauntlet has proven by
+  running its checks there. Entries are added by the per-OS slices
+  (479 Linux, 480 Windows, 481 macOS) only after their checks pass.
+- :func:`scan_posix_only`: AST scan for POSIX-only stdlib APIs
+  (``fcntl``, ``pty``, ``pwd``, ``grp``, ``termios``,
+  ``os.fork``/``os.posix_spawn``, ``signal.SIGKILL``/``SIGSTOP``)
+  and whether each use site is guarded (``try/except ImportError``,
+  ``sys.platform``/``os.name`` checks, or ``getattr`` with a
+  default). Unguarded uses are import-time crashes on Windows.
+- :func:`linux_live_checks`: runtime probes that only make sense on
+  Linux (epoll, ``/proc/self``, ``uname``).
+
+Slice 482 extends the machine axis (x86_64 vs ARM64).
+"""
+
+from __future__ import annotations
+
+import ast
+import os
+import platform
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+
+__all__ = [
+    "POSIX_ONLY_MODULES",
+    "VALIDATED_PLATFORMS",
+    "MacOSFinding",
+    "PlatformInfo",
+    "PosixFinding",
+    "check_arch_assumptions",
+    "check_macos_assumptions",
+    "check_windows_import_safety",
+    "current_platform",
+    "is_validated",
+    "linux_live_checks",
+    "normalize_arch",
+    "record_validated",
+    "scan_posix_only",
+]
+
+#: Stdlib modules that do not exist on Windows.
+POSIX_ONLY_MODULES = frozenset(
+    {"fcntl", "pty", "pwd", "grp", "termios", "resource", "curses"}
+)
+
+#: POSIX-only attribute uses that crash at import/call time on Windows.
+POSIX_ONLY_ATTRS = frozenset(
+    {
+        ("os", "fork"),
+        ("os", "forkpty"),
+        ("os", "posix_spawn"),
+        ("os", "posix_spawnp"),
+        ("os", "setuid"),
+        ("os", "setgid"),
+        ("signal", "SIGKILL"),
+        ("signal", "SIGSTOP"),
+    }
+)
+
+#: Platforms proven by actually running the gauntlet checks there.
+#: Populated by slices 479-481; never extended by assertion.
+VALIDATED_PLATFORMS: tuple[tuple[str, str], ...] = ()
+
+
+#: Canonical architecture names. Linux reports "aarch64" where macOS
+#: reports "arm64" for the same ISA — the matrix must not treat them
+#: as different platforms.
+_ARCH_ALIASES = {
+    "aarch64": "arm64",
+    "aarch64_be": "arm64",
+    "arm64": "arm64",
+    "amd64": "x86_64",
+    "x86_64": "x86_64",
+    "x64": "x86_64",
+    "i386": "x86",
+    "i686": "x86",
+    "x86": "x86",
+}
+
+
+def normalize_arch(machine: str) -> str:
+    """Canonicalize ``platform.machine()`` output for matrix keys."""
+    return _ARCH_ALIASES.get(machine.strip().lower(), machine.strip().lower())
+
+
+@dataclass(frozen=True)
+class PlatformInfo:
+    """The platform we are standing on."""
+
+    os_name: str  # "posix" / "nt" / "java"
+    sys_platform: str  # "linux" / "darwin" / "win32" / ...
+    machine: str  # "x86_64" / "arm64" / "aarch64" / ...
+    bits: int  # pointer width: 32 or 64
+
+    @property
+    def os_key(self) -> str:
+        return {"linux": "linux", "darwin": "macos"}.get(
+            self.sys_platform,
+            "windows" if self.sys_platform == "win32" else self.sys_platform,
+        )
+
+    @property
+    def arch_key(self) -> str:
+        """Normalized architecture for matrix keys (slice 482)."""
+        return normalize_arch(self.machine)
+
+    @property
+    def platform_key(self) -> tuple[str, str]:
+        return (self.os_key, self.arch_key)
+
+
+@dataclass(frozen=True)
+class PosixFinding:
+    """One POSIX-only API use site."""
+
+    path: str
+    lineno: int
+    api: str
+    guarded: bool
+
+    def __str__(self) -> str:
+        status = "guarded" if self.guarded else "UNGUARDED"
+        return f"{self.path}:{self.lineno}: {self.api} ({status})"
+
+
+def current_platform() -> PlatformInfo:
+    """Describe the running interpreter's platform."""
+    return PlatformInfo(
+        os_name=os.name,
+        sys_platform=sys.platform,
+        machine=platform.machine(),
+        bits=64 if sys.maxsize > 2**32 else 32,
+    )
+
+
+def record_validated(info: PlatformInfo) -> tuple[tuple[str, str], ...]:
+    """Return the validated-platforms tuple with ``info`` added."""
+    global VALIDATED_PLATFORMS
+    key = info.platform_key
+    if key not in VALIDATED_PLATFORMS:
+        VALIDATED_PLATFORMS = (*VALIDATED_PLATFORMS, key)
+    return VALIDATED_PLATFORMS
+
+
+def is_validated(info: PlatformInfo) -> bool:
+    """Whether ``info``'s (os, arch) pair has been proven."""
+    return info.platform_key in VALIDATED_PLATFORMS
+
+
+def _is_guarded(tree: ast.Module, node: ast.AST) -> bool:
+    """Heuristic: is ``node`` inside a platform guard?
+
+    Recognizes ``try/except ImportError``, ``if sys.platform`` /
+    ``if os.name`` tests, and ``hasattr``/``getattr`` probes. This is
+    intentionally conservative: an unrecognized guard style reports
+    the site as unguarded so a human looks at it.
+    """
+    parents: dict[int, ast.AST] = {}
+    for parent in ast.walk(tree):
+        for child in ast.iter_child_nodes(parent):
+            parents[id(child)] = parent
+
+    current: ast.AST | None = node
+    while current is not None:
+        up: ast.AST | None = parents.get(id(current))
+        if isinstance(up, ast.Try):
+            for handler in up.handlers:
+                if handler.type is None:
+                    return True
+                names = set()
+                if isinstance(handler.type, ast.Name):
+                    names.add(handler.type.id)
+                elif isinstance(handler.type, ast.Tuple):
+                    names.update(
+                        e.id for e in handler.type.elts if isinstance(e, ast.Name)
+                    )
+                if names & {"ImportError", "AttributeError", "OSError", "Exception"}:
+                    return True
+        if isinstance(up, ast.If):
+            src = ast.dump(up.test)
+            if "sys.platform" in src or "os.name" in src or "platform" in src:
+                return True
+        current = up
+    return False
+
+
+def _module_imports_posix(tree: ast.Module) -> list[tuple[int, str]]:
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                top = alias.name.split(".")[0]
+                if top in POSIX_ONLY_MODULES:
+                    found.append((node.lineno, top))
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            top = node.module.split(".")[0]
+            if top in POSIX_ONLY_MODULES:
+                found.append((node.lineno, top))
+    return found
+
+
+def _attr_uses_posix(tree: ast.Module) -> list[tuple[int, str, ast.AST]]:
+    found: list[tuple[int, str, ast.AST]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            key = (node.value.id, node.attr)
+            if key in POSIX_ONLY_ATTRS:
+                found.append((node.lineno, f"{key[0]}.{key[1]}", node))
+    return found
+
+
+def scan_posix_only(root: str | Path) -> tuple[PosixFinding, ...]:
+    """Scan ``root`` for POSIX-only API uses and their guard status."""
+    findings: list[PosixFinding] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        rel = str(path)
+        for lineno, mod in _module_imports_posix(tree):
+            import_node = next(
+                n for n in ast.walk(tree)
+                if isinstance(n, (ast.Import, ast.ImportFrom))
+                and n.lineno == lineno
+            )
+            findings.append(
+                PosixFinding(rel, lineno, f"import {mod}",
+                             _is_guarded(tree, import_node))
+            )
+        for lineno, api, node in _attr_uses_posix(tree):
+            findings.append(
+                PosixFinding(rel, lineno, api, _is_guarded(tree, node))
+            )
+    return tuple(findings)
+
+
+#: String patterns that betray x86-64-only assumptions in Python
+#: source: raw ISA names, SIMD intrinsic families, and exact-match
+#: machine comparisons that should go through normalize_arch().
+_ARCH_ASSUMPTION_PATTERNS = (
+    "__x86_64__",
+    "__SSE__",
+    "__AVX__",
+)
+
+
+def check_arch_assumptions(root: str | Path) -> tuple[MacOSFinding, ...]:
+    """Scan ``root`` for x86-64-only assumptions.
+
+    Flags raw ISA/intrinsic tokens and *exact* ``platform.machine()``
+    string comparisons (``== "x86_64"``), which silently miss
+    ``"AMD64"``/``"aarch64"`` aliases — compare
+    :func:`normalize_arch` output instead.
+    """
+    findings: list[MacOSFinding] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+            tree = ast.parse(text, filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        rel = str(path)
+        lowered = text.lower()
+        for token in _ARCH_ASSUMPTION_PATTERNS:
+            if token.lower() in lowered and "normalize_arch" not in text:
+                findings.append(
+                    MacOSFinding(rel, 1, f"raw ISA token {token!r}")
+                )
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Compare)
+                and any(isinstance(op, (ast.Eq, ast.NotEq))
+                        for op in node.ops)
+                and any(
+                    isinstance(c, ast.Constant)
+                    and isinstance(c.value, str)
+                    and c.value.lower() in
+                    ("x86_64", "amd64", "aarch64", "arm64")
+                    for c in node.comparators
+                )
+                and any(
+                    isinstance(call, ast.Call)
+                    and isinstance(call.func, ast.Attribute)
+                    and call.func.attr == "machine"
+                    for call in ast.walk(node)
+                )
+                and "normalize_arch" not in text
+            ):
+                findings.append(
+                    MacOSFinding(
+                        rel, node.lineno,
+                        "exact platform.machine() comparison; "
+                        "use normalize_arch()",
+                    )
+                )
+    return tuple(findings)
+
+
+def check_windows_import_safety(
+    root: str | Path,
+) -> tuple[PosixFinding, ...]:
+    """Windows import gate: no *unguarded* POSIX-only API uses.
+
+    Every unguarded use is a potential ``ImportError``/``AttributeError``
+    the moment the module is imported on Windows. Returns the
+    offending findings (empty means the tree is import-safe).
+    """
+    return tuple(f for f in scan_posix_only(root) if not f.guarded)
+
+
+@dataclass(frozen=True)
+class MacOSFinding:
+    """One macOS-hostile assumption: a Linux-only facility used
+    without a fallback."""
+
+    path: str
+    lineno: int
+    what: str
+
+    def __str__(self) -> str:
+        return f"{self.path}:{self.lineno}: {self.what}"
+
+
+def check_macos_assumptions(root: str | Path) -> tuple[MacOSFinding, ...]:
+    """Scan ``root`` for assumptions that break on macOS.
+
+    Flags: unguarded ``open("/proc/...")`` reads (no ``/proc`` on
+    macOS — every one must degrade, as ``edge/memory.py`` does),
+    ``select.epoll`` uses (macOS has kqueue, not epoll), and any
+    forced ``multiprocessing`` ``"fork"`` start method (macOS
+    defaults to ``spawn``; fork-with-threads is unsafe).
+    """
+    findings: list[MacOSFinding] = []
+    for path in sorted(Path(root).rglob("*.py")):
+        if "__pycache__" in path.parts:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+        rel = str(path)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "open"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+                and node.args[0].value.startswith("/proc/")
+                and not _is_guarded(tree, node)
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno,
+                                 f"unguarded {node.args[0].value} read")
+                )
+            if (
+                isinstance(node, ast.Attribute)
+                and isinstance(node.value, ast.Name)
+                and node.value.id == "select"
+                and node.attr == "epoll"
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno, "select.epoll (no epoll on macOS)")
+                )
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "set_start_method"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value == "fork"
+            ):
+                findings.append(
+                    MacOSFinding(rel, node.lineno,
+                                 'forced multiprocessing "fork" start method')
+                )
+    return tuple(findings)
+
+
+def linux_live_checks() -> dict[str, bool]:
+    """Runtime probes for Linux. All must be True on a Linux 1.0 host."""
+    info = current_platform()
+    checks: dict[str, bool] = {}
+    checks["is_linux"] = info.sys_platform == "linux"
+    try:
+        import select as _select
+
+        checks["epoll_available"] = hasattr(_select, "epoll")
+    except ImportError:
+        checks["epoll_available"] = False
+    checks["proc_self_readable"] = Path("/proc/self/status").is_file()
+    try:
+        checks["uname_works"] = bool(os.uname().sysname)
+    except (AttributeError, OSError):
+        checks["uname_works"] = False
+    return checks

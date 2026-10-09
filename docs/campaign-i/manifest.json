@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T20:08:38.932882+00:00",
-  "module_count": 451,
+  "generated_utc": "2026-10-09T20:11:53.127504+00:00",
+  "module_count": 432,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -1290,599 +1290,6 @@
         "aevaluate"
       ]
     },
-    "hugrgate.autotune.__init__": {
-      "docstring": "Autonomous optimization for HugrGate. Campaign XIX, slices 451-475.\n\nThe :mod:`hugrgate.autotune` package lets HugrGate *safely tune itself*:\nthresholds, confidence gates, latency budgets, cache policy, batch sizes,\nbackend order, ensemble weights, and calibration choice can be adjusted\nautomatically against declared objectives, guarded by constraints, safety\nlimits, provenance, and rollback triggers.\n\nThe pipeline per tuning cycle is::\n\n    tuners propose -> constraints validate -> safety limits check\n        -> mode driver (offline/shadow/canary/applied) disposes\n        -> provenance records everything\n\nSlices:\n\n- 451 controller (this package's spine): :mod:`hugrgate.autotune.controller`\n- 452 objectives: :mod:`hugrgate.autotune.objectives`\n- 453 constraints: :mod:`hugrgate.autotune.constraints`\n- 454-465 tuners: :mod:`hugrgate.autotune.tuners`\n- 466-468 modes: :mod:`hugrgate.autotune.modes`\n- 469 rollback: :mod:`hugrgate.autotune.rollback`\n- 470 provenance: :mod:`hugrgate.autotune.provenance`\n- 471 reproducibility: :mod:`hugrgate.autotune.repro`\n- 472 safety limits: :mod:`hugrgate.autotune.limits`\n- 473 adversarial harness: :mod:`hugrgate.autotune.adversarial`\n- 474 benchmark: :mod:`hugrgate.autotune.benchmark`\n- 475 release gate: :mod:`hugrgate.autotune.release`\n\nLocal-first: the optimizer never phones home; all data is recorded\ntelemetry or operator-supplied datasets.",
-      "imports": [
-        "__future__"
-      ],
-      "loc": 38,
-      "path": "hugrgate/autotune/__init__.py",
-      "public_defs": []
-    },
-    "hugrgate.autotune.adversarial": {
-      "docstring": "Optimizer adversarial tests. Slice 473.\n\nTuners consume data and propose config changes \u2014 both are attack\nsurfaces. This module is the red-team harness for the optimizer:\n\n- :func:`poison_labels` / :func:`spike_samples`: corrupt a tuner's\n  inputs (flipped labels, injected latency spikes) with a seeded,\n  reproducible corruption;\n- :func:`label_poisoning_attack`: run a threshold tuner on clean vs\n  poisoned data and measure how far the poisoned proposal's\n  *clean-data* metric falls;\n- :func:`latency_spike_attack`: run the latency tuner on spiked\n  samples and check the allocation stays sane (sums to the budget,\n  no stage starved below its minimum);\n- :func:`malicious_tuner_attack`: a tuner proposing unknown params,\n  out-of-bounds values, and wrong types must never change the\n  store \u2014 the controller rejects before any driver sees them;\n- :func:`crash_storm_attack`: every tuner crashing must still leave\n  a completed cycle with all tuners skipped.\n\nEach attack returns an :class:`AttackResult` (measurements, not just\npass/fail) so the containment properties are auditable. The test\nsuite asserts the properties; the harness supplies the attacks.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 264,
-      "path": "hugrgate/autotune/adversarial.py",
-      "public_defs": [
-        "AttackResult",
-        "poison_labels",
-        "spike_samples",
-        "label_poisoning_attack",
-        "latency_spike_attack",
-        "malicious_tuner_attack",
-        "crash_storm_attack",
-        "to_dict",
-        "tune",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.benchmark": {
-      "docstring": "Autotuning benchmark. Slice 474.\n\nClaims about tuners need numbers. This module is the harness that\nproduces them: each :class:`BenchmarkScenario` runs one tuner\nend-to-end through a real controller (offline mode, journaling\ndriver), then scores the *baseline config* and the *tuned config*\nwith the same replay evaluator on the same recorded data. The\nreported improvement is therefore measured, never asserted.\n\nA scenario needs:\n\n- ``params``: the tunable parameters to register;\n- ``tuner``: the tuner under test (seeded, deterministic);\n- ``replay``: ``config -> float`` scoring a full config on recorded\n  data (higher is better);\n- ``data_fingerprint``: what the numbers were measured on.\n\n:class:`AutotuneBenchmark.run` executes every scenario and returns\na :class:`BenchmarkReport` with per-scenario baseline/tuned scores,\nimprovement, wall time, and the proposal id behind the tuned\nscore. ``summary()`` renders a human-readable table. Reports are\nplain data (``to_dict``); persisting them is the caller's job \u2014\nmeasurement artifacts (``benchmarks/*.json``) are never committed.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "time",
-        "typing"
-      ],
-      "loc": 181,
-      "path": "hugrgate/autotune/benchmark.py",
-      "public_defs": [
-        "BenchmarkScenario",
-        "BenchmarkResult",
-        "BenchmarkReport",
-        "AutotuneBenchmark",
-        "to_dict",
-        "to_dict",
-        "summary",
-        "run"
-      ]
-    },
-    "hugrgate.autotune.constraints": {
-      "docstring": "Constraint specification. Slice 453.\n\nConstraints are the fences inside which the optimizer may roam. Where\nthe :class:`ConfigStore` enforces *hard* validity (type, registered\nname, absolute bounds), constraints express *policy*: operating\nenvelopes tighter than the hard bounds, conditional rules (\"if the\ncanary backend is on, the shadow backend must be off\"), and budget\ncaps (\"the three latency budgets must sum under 900 ms\").\n\nA constraint is a predicate over the full candidate parameter dict.\nA broken constraint raises :class:`ConstraintViolation` \u2014 the\ncontroller treats that as a routine proposal rejection, not a crash.\n\nProvided:\n\n- :class:`ConstraintSpec` \u2014 id, predicate, human message, severity;\n- :class:`Violation` \u2014 structured record of one breach;\n- :class:`ConstraintSet` \u2014 ordered set with ``validate`` (raise on\n  first breach), ``validate_all`` (collect every breach), and\n  ``as_callables`` for :meth:`OptimizationController.register_constraint`;\n- builders: :func:`within_bounds`, :func:`requires`, :func:`implies`,\n  :func:`mutual_exclusion`, :func:`sum_leq`, :func:`change_within`.\n\nPrivacy note: constraint messages must not echo secret parameter\nvalues \u2014 builders only name the parameter and the rule, never the\nvalue, in the violation message.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 208,
-      "path": "hugrgate/autotune/constraints.py",
-      "public_defs": [
-        "Violation",
-        "ConstraintSpec",
-        "ConstraintSet",
-        "within_bounds",
-        "requires",
-        "implies",
-        "mutual_exclusion",
-        "sum_leq",
-        "change_within",
-        "to_dict",
-        "check",
-        "as_callable",
-        "add",
-        "ids",
-        "validate",
-        "validate_all",
-        "as_callables"
-      ]
-    },
-    "hugrgate.autotune.controller": {
-      "docstring": "Optimization controller. Slice 451.\n\nThe controller is the spine of Campaign XIX. It owns:\n\n- the :class:`ConfigStore`: the typed registry of tunable parameters\n  (bounds, dtypes, defaults) with snapshot/restore and validated apply;\n- the :class:`Tuner` protocol every optimizer plugs into;\n- the :class:`Mode` lifecycle (offline / shadow / canary / applied)\n  with a driver registry \u2014 the concrete drivers land in slices 466-468;\n- the per-cycle pipeline: tuners propose, constraints validate, the\n  mode driver disposes, and every step is journaled.\n\nDeliberate non-goals: the controller does not *choose* objectives\n(slice 452), does not *define* constraints (slice 453), and does not\nenforce the full safety-limit policy (slice 472). It does enforce the\nhard invariant that only registered, in-bounds, correctly-typed values\ncan ever be applied \u2014 that check lives here, not in the drivers.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "enum",
-        "hugrgate",
-        "threading",
-        "time",
-        "typing",
-        "uuid"
-      ],
-      "loc": 469,
-      "path": "hugrgate/autotune/controller.py",
-      "public_defs": [
-        "Mode",
-        "TunableParameter",
-        "ConfigStore",
-        "Proposal",
-        "TuningContext",
-        "Tuner",
-        "Disposition",
-        "DriverResult",
-        "ModeDriver",
-        "TuningRun",
-        "OptimizationController",
-        "coerce",
-        "register",
-        "get",
-        "describe",
-        "names",
-        "snapshot",
-        "restore",
-        "apply",
-        "delta",
-        "to_dict",
-        "current",
-        "score",
-        "tune",
-        "handle",
-        "to_dict",
-        "handle",
-        "register_tuner",
-        "register_objective",
-        "register_constraint",
-        "register_driver",
-        "tuners",
-        "history",
-        "run_cycle"
-      ]
-    },
-    "hugrgate.autotune.limits": {
-      "docstring": "Optimizer safety limits. Slice 472.\n\nTuners propose; *this* module says \"no\". :class:`SafetyLimits`\ndeclares the operator's policy, and :class:`SafetyEnforcer` checks\nevery proposal against it, raising :class:`UnsafeProposalError`\n(not recoverable \u2014 the limits are deliberate policy, and retrying\nthe identical proposal cannot succeed).\n\nEnforced per proposal:\n\n- **kill switch**: when engaged, every proposal is rejected;\n- **frozen params**: named params the optimizer may never touch;\n- **blast radius**: at most ``max_params_per_proposal`` params per\n  proposal;\n- **step size**: a numeric param may not move more than\n  ``max_step_fraction`` of its bound width in one proposal\n  (relative to its *current* value, not its default);\n- **mode allowlist**: e.g. forbid ``APPLIED`` until canary\n  evidence exists;\n- **rate limit**: at most ``max_cycles_per_hour`` tuning cycles,\n  counted from the controller's run history.\n\nIntegration: :meth:`SafetyEnforcer.as_driver` wraps any\n:class:`ModeDriver` \u2014 the check runs *after* controller validation\n(type/bounds/constraints) and *before* the inner driver disposes.\nThis keeps the controller (slice 451) untouched: safety is a driver\ndecorator, not a controller branch.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "time"
-      ],
-      "loc": 156,
-      "path": "hugrgate/autotune/limits.py",
-      "public_defs": [
-        "SafetyLimits",
-        "SafetyEnforcer",
-        "record_cycle",
-        "check_rate",
-        "check_proposal",
-        "as_driver",
-        "guarded_controller",
-        "handle"
-      ]
-    },
-    "hugrgate.autotune.modes": {
-      "docstring": "Optimization modes: offline, shadow, canary. Campaign XIX.\n\n- Slice 466: :class:`OfflineDriver` \u2014 proposals are journaled and may\n  be *replayed* against recorded telemetry; nothing ever touches the\n  live config.\n- Slice 467: :class:`ShadowDriver` \u2014 proposals are evaluated\n  side-by-side with live traffic; compared, never applied.\n- Slice 468: :class:`CanaryDriver` \u2014 proposals apply to a traffic\n  fraction with automatic guardrails.",
-      "imports": [
-        "__future__",
-        "collections",
-        "copy",
-        "dataclasses",
-        "hugrgate",
-        "statistics",
-        "time",
-        "typing",
-        "uuid"
-      ],
-      "loc": 287,
-      "path": "hugrgate/autotune/modes.py",
-      "public_defs": [
-        "OfflineDriver",
-        "ShadowDriver",
-        "CanaryLease",
-        "CanaryDriver",
-        "handle",
-        "replay",
-        "export",
-        "clear",
-        "handle",
-        "handle",
-        "poll",
-        "promote"
-      ]
-    },
-    "hugrgate.autotune.objectives": {
-      "docstring": "Objective specification. Slice 452.\n\nAn objective turns a parameter vector into a number the optimizer can\nclimb. This module defines:\n\n- :class:`Direction` \u2014 maximize or minimize;\n- :class:`ObjectiveSpec` \u2014 one metric: an evaluator, a direction,\n  normalization bounds (so composites stay scale-free), and an\n  optional target;\n- :class:`WeightedObjective` \u2014 a scale-free weighted sum of specs;\n- :class:`LexicographicObjective` \u2014 ordered priorities: never\n  sacrifice a higher objective for a lower one;\n- :class:`GuardedObjective` \u2014 a primary objective fenced by guard\n  objectives that must stay above their floors.\n\nAll composites expose :meth:`as_callable` returning the plain\n``values -> float`` callable the controller's\n:meth:`OptimizationController.register_objective` expects. Bad\nspecifications (unknown metric kind, empty weights, negative\nweights, zero-width bounds) raise :class:`ObjectiveError` \u2014 a caller\nbug, not retryable.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "enum",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 254,
-      "path": "hugrgate/autotune/objectives.py",
-      "public_defs": [
-        "Direction",
-        "ObjectiveSpec",
-        "WeightedObjective",
-        "LexicographicObjective",
-        "GuardedObjective",
-        "metric_from_samples",
-        "raw",
-        "normalized",
-        "meets_target",
-        "to_dict",
-        "normalized",
-        "as_callable",
-        "vector",
-        "better",
-        "rank",
-        "as_callable",
-        "feasible",
-        "normalized",
-        "violations",
-        "as_callable"
-      ]
-    },
-    "hugrgate.autotune.provenance": {
-      "docstring": "Optimization provenance. Slice 470.\n\nEvery tuning decision must answer \"who changed what, when, why, and\nfrom what data\". This module records each tuning *run* and each\nproposal *disposition* as a hash-chained :class:`OptimizationRecord`\n\u2014 mirroring :mod:`hugrgate.provenance`'s integrity chain so silent\nedits break :meth:`OptimizationProvenance.verify_chain`.\n\nA record captures: the tuner, the proposal id and its changes, the\nmode and disposition, the config hash before/after, the seed, a\nfingerprint of the input data (dataset hash supplied by the caller \u2014\nthe tuner knows its data, this module does not), and a compact\nevidence summary. :class:`ProvenanceTracker.track_run` consumes a\ncontroller :class:`TuningRun` directly, so wiring provenance into an\nexisting controller is one call per cycle.\n\nPrivacy: changes and evidence summaries are config values, not user\npayload \u2014 but track_run *redacts* any key whose name looks secret\n(``token``, ``secret``, ``password``, ``key``) before recording.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hashlib",
-        "hugrgate",
-        "json",
-        "time",
-        "typing",
-        "uuid"
-      ],
-      "loc": 237,
-      "path": "hugrgate/autotune/provenance.py",
-      "public_defs": [
-        "hash_mapping",
-        "OptimizationRecord",
-        "OptimizationProvenance",
-        "ProvenanceTracker",
-        "canonical",
-        "seal",
-        "verify",
-        "to_dict",
-        "append",
-        "verify_chain",
-        "by_proposal",
-        "by_tuner",
-        "recent",
-        "export",
-        "track_run",
-        "verify"
-      ]
-    },
-    "hugrgate.autotune.release": {
-      "docstring": "Autonomous Optimization release gate. Slice 475.\n\nCampaign XIX's capstone: :func:`release_gate` ties the campaign\ntogether into one go/no-go decision. It runs, in order:\n\n1. **error taxonomy** \u2014 every Campaign XIX error is registered with\n   a unique, stable code and a deliberate recoverable flag;\n2. **controller smoke** \u2014 a full propose/validate/dispose cycle with\n   a null tuner completes and journals;\n3. **safety posture** \u2014 the default :class:`SafetyLimits` have the\n   kill switch off, a non-empty mode allowlist that excludes\n   ``APPLIED``, and sane bounds;\n4. **provenance integrity** \u2014 a tracker records a cycle and the\n   chain verifies;\n5. **reproducibility** \u2014 a manifest records and a replay matches;\n6. **no silent corruption** \u2014 the tuner package exports resolve and\n   the adversarial harness reports its known breaking point\n   honestly (40% label noise is *detected*, not contained).\n\nThe outcome is a :class:`ReleaseVerdict` (``\"release\"`` or\n``\"hold\"`` with every reason named); :func:`assert_release` turns a\nhold into :class:`AutotuneError` for CI. A release with zero checks\nis a rubber stamp and is refused outright.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "datetime",
-        "hugrgate",
-        "importlib",
-        "typing"
-      ],
-      "loc": 291,
-      "path": "hugrgate/autotune/release.py",
-      "public_defs": [
-        "ReleaseCheck",
-        "ReleaseVerdict",
-        "campaign_checks",
-        "release_gate",
-        "assert_release",
-        "passed",
-        "to_dict",
-        "summary",
-        "tune",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.repro": {
-      "docstring": "Optimization reproducibility. Slice 471.\n\nA tuning run that cannot be reproduced cannot be trusted. This\nmodule captures a *run manifest* \u2014 everything needed to replay a\ncontroller cycle deterministically \u2014 and verifies replays.\n\nA :class:`RunManifest` records: the run id, seed, mode, tuner names\nwith their dataclass configs, objective ids, constraint ids (by\nqualified name or repr), the data fingerprint, the config snapshot\nbefore the run, and the code version. :func:`verify_replay` rebuilds\nan equivalent controller through a caller-supplied factory, re-runs\nthe cycle, and compares the resulting proposals change-for-change.\n\nHonest limits, recorded in the manifest: objectives and constraints\nare opaque callables \u2014 they are recorded by qualified name when\navailable, else by repr \u2014 so replay requires the same code version\n(also recorded). A tuner that reads wall-clock time, unseeded RNG,\nor the live network is not replayable; the tuners in\n:mod:`hugrgate.autotune.tuners` are seeded and deterministic by\nconstruction.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "json",
-        "time",
-        "typing"
-      ],
-      "loc": 216,
-      "path": "hugrgate/autotune/repro.py",
-      "public_defs": [
-        "snapshot_bundle",
-        "restore_bundle",
-        "RunManifest",
-        "record_manifest",
-        "verify_replay",
-        "to_dict",
-        "from_dict"
-      ]
-    },
-    "hugrgate.autotune.rollback": {
-      "docstring": "Rollback triggers. Slice 469.\n\nThe canary driver (slice 468) has the *mechanism* for rollback; this\nmodule adds the *policy*: declarative triggers that watch metrics and\nfire automatically.\n\nA :class:`RollbackTrigger` watches one metric callable and fires when\nthe metric stays on the wrong side of a threshold for\n``sustained`` consecutive checks \u2014 a single bad sample never pages\nanyone. :class:`RollbackController.check()` evaluates all triggers,\ntracks consecutive breaches, and on firing calls the registered\n``restore`` function (e.g. restoring the pre-canary snapshot). If the\nrestore itself fails, :class:`RollbackError` is raised \u2014 a failed\nrollback is a state-integrity emergency, never retried blindly.\n\n:meth:`RollbackController.as_canary_guardrails` converts triggers\ninto the ``(ok, reason)`` guardrail callables\n:class:`CanaryDriver` polls, wiring this slice to slice 468. A\nfiring trigger reports breach (not ok) exactly once per arming; after\nfiring it disarms until :meth:`reset` (operators re-arm deliberately).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "time",
-        "typing"
-      ],
-      "loc": 175,
-      "path": "hugrgate/autotune/rollback.py",
-      "public_defs": [
-        "RollbackTrigger",
-        "RollbackEvent",
-        "RollbackController",
-        "breached",
-        "to_dict",
-        "add_trigger",
-        "reset",
-        "events",
-        "evaluate",
-        "check",
-        "as_canary_guardrails"
-      ]
-    },
-    "hugrgate.autotune.tuners.__init__": {
-      "docstring": "Tuner subpackage. Campaign XIX, slices 454-465.",
-      "imports": [
-        "__future__"
-      ],
-      "loc": 5,
-      "path": "hugrgate/autotune/tuners/__init__.py",
-      "public_defs": []
-    },
-    "hugrgate.autotune.tuners._base": {
-      "docstring": "Shared tuner machinery. Slice 454.\n\nEvery Campaign XIX tuner is a small deterministic optimizer over one\npiece of HugrGate configuration. This module holds what they share:\n\n- :class:`BaseTuner`: the :class:`Tuner` protocol plus seeded RNG,\n  proposal construction, and a ``min_delta`` significance gate (no\n  proposal for noise-level wins);\n- :func:`seeded_rng`: deterministic ``random.Random`` from an int seed;\n- :func:`kfold_indices`: stratified k-fold splits for honest\n  held-out evaluation;\n- :func:`linspace`: candidate grids without numpy.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "random",
-        "time",
-        "typing",
-        "uuid"
-      ],
-      "loc": 108,
-      "path": "hugrgate/autotune/tuners/_base.py",
-      "public_defs": [
-        "seeded_rng",
-        "linspace",
-        "kfold_indices",
-        "BaseTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.backends": {
-      "docstring": "Backend-order tuner. Slice 459.\n\nWhen the primary backend fails or abstains, HugrGate falls through to\nthe next backend. The try-order decides the expected cost:\n\n    E[cost] = c_1 + f_1\u00b7c_2 + f_1\u00b7f_2\u00b7c_3 + \u2026\n\nwhere c_i is the per-call cost and f_i the failure probability. The\noptimal order is *not* \"cheapest first\": by the pairwise interchange\nargument, adjacent backends i, j should be swapped exactly when\n``c_i/s_i > c_j/s_j`` (s = success probability), i.e. the optimal\norder sorts by **cost-per-success ascending** (Smith's rule for\nfallthrough chains).\n\nThis tuner computes that order from measured (success_rate, cost)\npairs and proposes rank assignments for one int param per backend\n(``{rank_prefix}.{name}`` in [0, K-1]); consumers sort by rank.\nThe test suite verifies the tuner's order against brute-force\npermutation search on randomized instances.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 116,
-      "path": "hugrgate/autotune/tuners/backends.py",
-      "public_defs": [
-        "expected_chain_cost",
-        "BackendOrderTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.batching": {
-      "docstring": "Batch-size tuner. Slice 458.\n\nThroughput as a function of batch size saturates: each batch pays a\nfixed cost plus a per-item cost. This tuner *fits* that curve from\nmeasured (batch_size, latency, memory) samples instead of assuming\nit, then picks the batch size maximizing modeled throughput subject\nto latency and memory caps.\n\nModel (least squares on the samples):\n\n- ``latency(b) = a + c * b`` (fixed + per-item cost),\n- ``memory(b) = m0 + m1 * b``,\n- ``throughput(b) = b / latency(b)``.\n\nFeasible candidates are powers of two inside the parameter bounds\n(plus the bound endpoints), filtered by\n``latency_hat(b) <= latency_cap`` and ``memory_hat(b) <= memory_cap``.\nA proposal requires the modeled win over the current batch size to\nclear ``min_delta`` *and* the latency fit to explain the data\n(R\u00b2 >= 0.5) \u2014 a tuner that cannot trust its model stays silent.\n\nEvidence carries the fitted coefficients, R\u00b2 values, and the\nbaseline-vs-tuned comparison, so the numbers are re-derivable from\nthe input samples.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 149,
-      "path": "hugrgate/autotune/tuners/batching.py",
-      "public_defs": [
-        "fit_linear",
-        "powers_of_two",
-        "BatchSizeTuner",
-        "tune",
-        "latency_hat",
-        "feasible"
-      ]
-    },
-    "hugrgate.autotune.tuners.cache": {
-      "docstring": "Cache-policy tuner. Slice 457.\n\nAttacks a real weakness: :class:`hugrgate.cache.DecisionCache` ships\nwith hand-picked ``ttl_seconds`` / ``max_size`` and a fixed LRU\ndiscipline. This tuner replays a recorded access trace through a\nsimulator over a grid of (ttl, max_size, eviction) candidates and\nproposes the cheapest configuration \u2014 measured, not guessed.\n\nThe simulator is deliberately simple and documented as such: it\nmodels insert/access/expiry/eviction on (key, timestamp, miss_cost)\ntriples. It does not model DecisionCache's policy-fingerprint\nnamespacing; it answers \"which (ttl, size, eviction) wastes the least\nmiss cost on *this* trace\", which is exactly the question a cache\ntuner should answer.\n\nCandidates: ttl on a linear grid inside the param bounds, max_size on\na geometric ladder clipped to the param bounds, eviction over the\nparam's declared choices (subset of {\"lru\", \"lfu\"}).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 157,
-      "path": "hugrgate/autotune/tuners/cache.py",
-      "public_defs": [
-        "simulate_trace",
-        "CachePolicyTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.calibration_select": {
-      "docstring": "Calibration selector tuner. Slice 461.\n\nWraps the hardened :func:`hugrgate.calibration.autoselect.auto_select`\n(slice 092 + slice 461) as an autotune tuner: the tunable parameter is\nthe *name* of the deployed calibrator (a str param whose choices\ncover the candidate catalog plus ``\"none\"``), and the current value is\ntreated as the incumbent. A challenger is proposed only when its\npaired fold-by-fold win over the incumbent clears ``min_win`` \u2014\notherwise the tuner stays silent (\"do no harm\").\n\nRequires numpy (the ``ml`` extra); without it the tuner raises and\nthe controller isolates it like any crashing tuner.\n\nStatistical behavior, validated on controlled data (see tests): on\nsystematically miscalibrated scores the selector moves off ``\"none\"``\nto a calibrator that lowers held-out ECE; on already-calibrated\nscores it keeps ``\"none\"``. Assumptions recorded in every proposal's\nevidence: scores and labels are i.i.d. with deployment traffic; the\nselection metric (Brier/log-loss/ECE) matches the operator's notion\nof \"calibrated\"; the refit winner is deployed, not the fold models.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 95,
-      "path": "hugrgate/autotune/tuners/calibration_select.py",
-      "public_defs": [
-        "CalibrationSelectorTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.cost": {
-      "docstring": "Cost-aware tuner. Slice 464.\n\nMoney is the other budget. This tuner chooses among priced operating\nchoices (backends, API tiers, model endpoints) from *measured*\nper-decision cost samples (dollars, from billing/telemetry \u2014 never\nassumed) and quality samples.\n\nTwo modes:\n\n- ``budget``: maximize mean quality subject to mean + 1 SE cost <=\n  ``cost_budget`` (conservative: no gambling on noisy cost means);\n- ``floor``: minimize mean cost subject to the quality guarantee\n  ``mean - 1.96*SE >= quality_floor`` \u2014 the operator's quality bar\n  holds with ~95% confidence on the measured samples.\n\nAn over-budget (or under-floor) incumbent scores -inf: a violation\nto escape, not a baseline to beat. The tunable parameter is a str\nparam naming the active choice; the proposal evidence is the full\nmeasured comparison, re-derivable from the input samples.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "statistics",
-        "typing"
-      ],
-      "loc": 137,
-      "path": "hugrgate/autotune/tuners/cost.py",
-      "public_defs": [
-        "CostAwareTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.energy": {
-      "docstring": "Energy-aware tuner. Slice 463.\n\nQuality costs energy. This tuner chooses among discrete operating\nchoices (backends, model sizes, feature flags) using *measured*\nper-decision energy samples and quality scores \u2014 never assumed\nnumbers.\n\nTwo modes:\n\n- ``budget``: maximize mean quality subject to mean energy per\n  decision <= ``energy_budget_j``;\n- ``efficiency``: maximize mean quality per joule.\n\nEnergy samples are joules-per-decision measured by the operator's\npower instrumentation (RAPL, INA rails, or a calibrated power\nmodel). The tuner does not invent them: every figure in the proposal\nevidence is computed from the input samples, and the explicit\nbaseline \u2014 the *current* choice measured on the same samples \u2014 is\nreported alongside the tuned choice. Re-running with the same seed\nand samples reproduces the artifact exactly.\n\nThe tunable parameter is a str param naming the active choice.\nChoices with fewer than ``min_samples`` are excluded (a mean over\nthree samples is not a measurement).",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "statistics",
-        "typing"
-      ],
-      "loc": 146,
-      "path": "hugrgate/autotune/tuners/energy.py",
-      "public_defs": [
-        "EnergyAwareTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.gates": {
-      "docstring": "Confidence-gate tuner. Slice 455.\n\nThe abstention gate (\"answer only when confidence >= tau\") trades\n*coverage* (fraction answered) against *selective accuracy* (accuracy\non the answered). This tuner learns tau from labeled\n(confidence, correct) pairs with an honest statistical guarantee:\n\n- ``accuracy_floor`` mode: maximize coverage subject to the\n  **Wilson lower bound** of the selective accuracy staying above a\n  floor at confidence level ``1 - alpha``;\n- ``coverage_target`` mode: maximize selective accuracy subject to\n  coverage staying above a target.\n\nProtocol (all seeded, all deterministic):\n\n1. stratified 70/30 train/validation split on correctness;\n2. on train, sweep tau over a grid; keep the feasible set per mode;\n3. pick the feasible tau maximizing the primary metric (ties break\n   toward the *lower* tau \u2014 less abstention for equal quality);\n4. **validate on the held-out split**: the guarantee is checked on\n   data the selection never saw. A proposal is made only if the\n   held-out check passes *and* the primary metric beats the current\n   tau by ``min_delta``.\n\nMetric/coverage assumptions (reported in every proposal's evidence):\n\n- confidence scores are comparable across samples (a higher score\n  means more likely correct \u2014 the tuner does not recalibrate);\n- the validation split is i.i.d. with deployment traffic; under\n  distribution shift the Wilson bound does not transfer;\n- ``correct`` labels are ground truth, not model self-reports.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 226,
-      "path": "hugrgate/autotune/tuners/gates.py",
-      "public_defs": [
-        "wilson_lower_bound",
-        "ConfidenceGateTuner",
-        "tune",
-        "feasible_tr"
-      ]
-    },
-    "hugrgate.autotune.tuners.hardware": {
-      "docstring": "Hardware-aware tuner. Slice 462.\n\nThe same HugrGate deployment runs on a 2-core edge box and a 64-core\nserver; one static config fits neither. This tuner detects the host\n(cpu count, RAM, architecture) and selects the matching hardware\ntier, proposing that tier's parameter profile.\n\nTiers are operator-declared: each :class:`HardwareTier` names minimum\ncpu/memory requirements and a dict of parameter values. The tuner\npicks the *most demanding tier the hardware satisfies* (tiers sorted\nby requirements descending), diffs its profile against the live\nconfig, and proposes only the differing params.\n\nWhat this tuner does *not* do (marked honestly): it cannot verify\nthat a tier's profile actually performs well on the hardware \u2014 that\nis the operator's benchmarking job (slice 474's autotuning benchmark\ncan validate a profile before it ships). Detection uses stdlib only\n(``os.cpu_count``, ``/proc/meminfo`` on Linux with a conservative\nfallback); no vendor SDKs.\n\nFor tests and dry-runs the detected profile can be injected, so tier\nselection is deterministic without mocking the OS.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "os",
-        "platform",
-        "re",
-        "typing"
-      ],
-      "loc": 147,
-      "path": "hugrgate/autotune/tuners/hardware.py",
-      "public_defs": [
-        "HardwareProfile",
-        "detect_hardware",
-        "HardwareTier",
-        "HardwareAwareTuner",
-        "to_dict",
-        "matches",
-        "select_tier",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.latency": {
-      "docstring": "Latency-budget tuner. Slice 456.\n\nA decision pipeline has per-stage latency budgets (routing, backend,\ncalibration, ...) that must sum to a total budget. The naive baseline\nis an *equal split*; this tuner does better by measuring.\n\nGiven measured per-stage latency samples, the tuner:\n\n1. estimates each stage's empirical tail P(X > b) from the samples;\n2. seeds the allocation proportional to each stage's p99 (slow stages\n   get more budget);\n3. refines with coordinate descent on the simplex, minimizing the\n   joint overflow probability ``1 - prod(1 - p_i)``;\n4. compares against the explicit **equal-split baseline measured on\n   the same samples** and proposes only on a real win.\n\nThe comparison is the reproducible measurement artifact: baseline and\ntuned overflow are both computed from the recorded samples, stored in\nthe proposal evidence, and re-derivable by re-running the tuner with\nthe same seed. No numbers are invented \u2014 every figure traces to the\ninput samples.\n\nAssumptions (recorded in evidence): stage latencies are treated as\nindependent for the joint-overflow estimate; samples are i.i.d. with\ndeployment traffic; budgets are in milliseconds.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 163,
-      "path": "hugrgate/autotune/tuners/latency.py",
-      "public_defs": [
-        "quantile",
-        "empirical_tail",
-        "LatencyBudgetTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.privacy": {
-      "docstring": "Privacy-constrained tuner. Slice 465.\n\nOptimization must never buy utility with privacy it does not own.\nThis tuner chooses among operating choices (telemetry verbosity,\nretention windows, redaction levels, DP-noised vs raw features)\nsubject to two hard privacy fences:\n\n1. **Classification ceiling**: every choice declares the privacy\n   class of the data it touches (the :mod:`hugrgate.privacy` ladder:\n   public < standard < sensitive < strict < forbidden). A choice is\n   eligible only when its class is at or below the deployment's\n   ``max_privacy_class`` (from ``ctx.data``) \u2014 checked with\n   :func:`hugrgate.privacy.class_rank`, so the ladder's ordering\n   stays load-bearing in exactly one place.\n2. **Epsilon budget**: every choice declares its differential-privacy\n   spend (0 = no personal data leaves the enclave); the chosen\n   choice's epsilon must fit ``epsilon_budget``.\n\nModes: ``budget`` maximizes mean measured utility under the fences;\n``minimize`` minimizes epsilon spend subject to the utility\nguarantee mean - 1.96*SE >= ``utility_floor``. An infeasible\nincumbent scores -inf. Evidence records the class and epsilon\naccounting per choice \u2014 the privacy audit trail for the decision.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "statistics",
-        "typing"
-      ],
-      "loc": 162,
-      "path": "hugrgate/autotune/tuners/privacy.py",
-      "public_defs": [
-        "PrivacyConstrainedTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.thresholds": {
-      "docstring": "Threshold tuner. Slice 454.\n\nAttacks a real weakness: HugrGate's decision thresholds (the policy's\n``minimum_probability``, per-option gates in :mod:`hugrgate.threshold`)\nare hand-set constants. This tuner sweeps a threshold parameter over a\ngrid, evaluates each candidate with stratified k-fold cross-validation\non labeled score data, and proposes the winner \u2014 but only when the\nheld-out win clears ``min_delta`` over the current value.\n\nMetric choices (all computed on the held-out folds):\n\n- ``f1``: harmonic mean of precision/recall at the threshold;\n- ``accuracy``: plain correctness;\n- ``youden``: TPR - FPR (best operating point on the ROC);\n- ``f_beta:<b>``: recall-weighted F score.\n\nThe tuner is deliberately conservative: it maximizes the *mean*\nheld-out metric minus one standard error (the \"one-SE rule\"), so it\nprefers thresholds that are robust, not just lucky on one fold.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 172,
-      "path": "hugrgate/autotune/tuners/thresholds.py",
-      "public_defs": [
-        "threshold_metric",
-        "ThresholdTuner",
-        "tune"
-      ]
-    },
-    "hugrgate.autotune.tuners.weights": {
-      "docstring": "Ensemble-weight tuner. Slice 460.\n\nAttacks a real weakness: :class:`hugrgate.ensemble.blending.Blender`\nlearns weights online with a fixed learning rate, and ensemble\nweights elsewhere are hand-set. This tuner finds the batch-optimal\nweights on labeled data.\n\nSetup: K members, N samples, C classes. Member m gives a probability\nvector p[n][m][c]; the blend is ``sum_m w_m \u00b7 p[n][m]`` with w on the\nsimplex. Objective: mean log-likelihood of the true labels.\n\nOptimization: projected gradient ascent on the simplex (reusing\n:func:`hugrgate.ensemble.blending.project_simplex` \u2014 no duplication),\nwith backtracking line search (Armijo) and a deterministic uniform\nstart. The gradient is exact:\n\n    dL/dw_m = mean_n p[n][m][y_n] / blend[n][y_n].\n\nThe tuner proposes one float param per member\n(``{weight_prefix}.{member}`` in [0, 1]); consumers normalize. A\nproposal requires the tuned log-likelihood to beat the current\n(store) weights \u2014 normalized to the simplex \u2014 by ``min_delta``.\n\nEvidence carries baseline/tuned weights and log-likelihoods plus the\niteration count, so the win is re-derivable from the input votes.",
-      "imports": [
-        "__future__",
-        "collections",
-        "dataclasses",
-        "hugrgate",
-        "math",
-        "typing"
-      ],
-      "loc": 159,
-      "path": "hugrgate/autotune/tuners/weights.py",
-      "public_defs": [
-        "mean_log_likelihood",
-        "EnsembleWeightTuner",
-        "tune"
-      ]
-    },
     "hugrgate.backend": {
       "docstring": "Backend interface + registry. Slice 6.",
       "imports": [
@@ -2269,21 +1676,19 @@
       ]
     },
     "hugrgate.calibration.autoselect": {
-      "docstring": "Calibration auto-selection. Slice 092, hardened in slice 461.\n\nInstead of tribal knowledge (\"always use isotonic\"), pick the calibrator by\nseeded K-fold cross-validation on the actual fit data.  :func:`auto_select`\nevaluates candidate calibrators from the slice-091 catalog on a proper\nscoring rule (Brier, log-loss) or ECE, ranks them by held-out mean, and\nreturns the winner *refit on the full data*.\n\nSlice 461 hardening (backward compatible \u2014 defaults preserve slice-092\nbehavior):\n\n- ``\"none\"`` pseudo-candidate: the identity calibrator (raw scores).\n  Selection can now conclude that *no* calibration beats the raw\n  scores, which the old code could never express.\n- ``incumbent`` + ``min_win``: when an incumbent calibrator is named,\n  a challenger wins only if its *paired* fold-by-fold win over the\n  incumbent clears ``min_win`` (mean of per-fold differences minus one\n  standard error). Otherwise the incumbent is kept \u2014 \"do no harm\"\n  beats chasing noise.\n- Fold scores are tracked per fold index so the paired comparison is\n  aligned even when candidates skip different degenerate folds.\n\nCandidate defaults: the non-streaming, non-fallback, non-deprecated catalog\nentries (platt, isotonic, temperature, beta-binomial).  Streaming calibrators\nare excluded by default because fold semantics differ for them \u2014 pass them\nexplicitly if you want them compared.",
+      "docstring": "Calibration auto-selection. Slice 092.\n\nInstead of tribal knowledge (\"always use isotonic\"), pick the calibrator by\nseeded K-fold cross-validation on the actual fit data.  :func:`auto_select`\nevaluates candidate calibrators from the slice-091 catalog on a proper\nscoring rule (Brier, log-loss) or ECE, ranks them by held-out mean, and\nreturns the winner *refit on the full data*.\n\nCandidate defaults: the non-streaming, non-fallback, non-deprecated catalog\nentries (platt, isotonic, temperature, beta-binomial).  Streaming calibrators\nare excluded by default because fold semantics differ for them \u2014 pass them\nexplicitly if you want them compared.",
       "imports": [
         "__future__",
         "collections",
         "dataclasses",
         "hugrgate",
-        "math",
         "numpy",
         "typing"
       ],
-      "loc": 247,
+      "loc": 155,
       "path": "hugrgate/calibration/autoselect.py",
       "public_defs": [
         "SelectionResult",
-        "paired_win",
         "auto_select",
         "as_dict"
       ]
@@ -2985,7 +2390,7 @@
         "time",
         "typing"
       ],
-      "loc": 165,
+      "loc": 176,
       "path": "hugrgate/chaos/crash.py",
       "public_defs": [
         "worker_main",
@@ -2993,6 +2398,7 @@
         "CrashOnlyHarness",
         "recovered_cleanly",
         "to_dict",
+        "default_kill_signal",
         "run_worker"
       ]
     },
@@ -3375,18 +2781,18 @@
         "__future__",
         "argparse",
         "dataclasses",
-        "difflib",
         "hugrgate",
         "json",
-        "pathlib",
-        "re",
         "sys",
         "typing",
         "yaml"
       ],
-      "loc": 783,
+      "loc": 280,
       "path": "hugrgate/cli.py",
       "public_defs": [
+        "load_spec",
+        "load_state",
+        "load_policy",
         "cmd_decide",
         "cmd_backends",
         "cmd_models",
@@ -3394,20 +2800,8 @@
         "cmd_serve",
         "cmd_bench",
         "cmd_report",
-        "cmd_openapi",
-        "cmd_doctor",
-        "cmd_completion",
-        "cmd_new",
-        "cmd_plugins",
-        "cmd_check_backend",
-        "cmd_check_contract",
-        "cmd_inspect",
-        "cmd_init",
-        "cmd_gen",
         "build_parser",
-        "main",
-        "check",
-        "error"
+        "main"
       ]
     },
     "hugrgate.client": {
@@ -3419,12 +2813,11 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 245,
+      "loc": 220,
       "path": "hugrgate/client.py",
       "public_defs": [
         "HugrGateClient",
         "decide",
-        "protocol",
         "health",
         "backends",
         "close"
@@ -4146,61 +3539,6 @@
         "drain"
       ]
     },
-    "hugrgate.compat": {
-      "docstring": "Developer-facing compatibility helpers. Gjallarbr\u00fa slice 444.\n\nThree migrations developers actually face, each with a function and\na prose guide in ``docs/migration.md``:\n\n1. **v1 client \u2192 SDK v2** (:func:`upgrade_client`): rebuilds a\n   :class:`~hugrgate.client.HugrGateClient` as a\n   :class:`~hugrgate.sdk.HugrGateSDK` with identical transport\n   settings. v1 is untouched and keeps working; v2 is a strict\n   superset (context manager, retries, batch, versioned\n   User-Agent).\n2. **contract schema v1 \u2192 v2** (:func:`migrate_contract`): upgrades\n   a v1 contract/spec dict through\n   :func:`hugrgate.contracts.migration.migrate` and returns the\n   v2 contract plus its :class:`MigrationReport`.\n3. **pre-protocol clients** (slice 426): no code needed \u2014 the\n   server negotiates. Documented in ``docs/migration.md`` only.",
-      "imports": [
-        "__future__",
-        "collections",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 94,
-      "path": "hugrgate/compat.py",
-      "public_defs": [
-        "upgrade_client",
-        "migrate_contract"
-      ]
-    },
-    "hugrgate.configgen": {
-      "docstring": "Configuration generator. Slice 437.\n\nGenerates annotated, *valid* configuration files:\n\n- ``hugrgate init`` \u2014 a starter working directory: ``hugrgate.yaml``\n  (daemon config), ``spec.yaml``, ``policy.yaml``,\n  ``state.example.yaml``.\n- ``hugrgate gen daemon|spec|policy`` \u2014 one file at a time, with\n  flag-driven customization.\n\nEvery generated file round-trips through the real validators\n(:class:`DaemonConfig`, :class:`DecisionSpec`,\n:func:`policy_from_dict`), so the generator can never emit a file\nHugrGate itself rejects. :func:`load_daemon_config` closes the\nloop for hand-edited files, and ``hugrgate serve --config`` applies\na config file to the daemon.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "pathlib",
-        "typing",
-        "yaml"
-      ],
-      "loc": 229,
-      "path": "hugrgate/configgen.py",
-      "public_defs": [
-        "generate_daemon_config",
-        "load_daemon_config",
-        "generate_spec",
-        "generate_policy",
-        "write_new",
-        "init_project"
-      ]
-    },
-    "hugrgate.conformance": {
-      "docstring": "Backend conformance kit. Slice 440.\n\nA backend is not conformant because it *imports* \u2014 it is\nconformant because it honors the :class:`Backend` contract under\nexercise. :func:`run_backend_conformance` drives a backend\nthrough a battery of checks and returns a\n:class:`ConformanceReport`:\n\n- interface shape (via :func:`hugrgate.plugins.validate_plugin`),\n- ``supports()`` returns booleans and never raises on well-formed\n  specs of every spec type,\n- ``evaluate()`` returns well-formed results (distribution sums to\n  1, probabilities in [0, 1], decided value inside the spec's\n  value space, probability consistent with the distribution),\n- ``evaluate()`` failures raise taxonomy errors or stdlib\n  validation errors \u2014 never raw ``Exception``s (slice 007 law),\n- ``health()`` / ``privacy_properties()`` /\n  ``calibration_info()`` return dicts,\n- latency/cost estimates are sane non-negative numbers.\n\n:func:`assert_conformance` raises\n:class:`~hugrgate.errors.ConformanceError` listing every failure.\n``hugrgate check-backend NAME`` runs the kit from the CLI.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 228,
-      "path": "hugrgate/conformance.py",
-      "public_defs": [
-        "ConformanceCheck",
-        "ConformanceReport",
-        "run_backend_conformance",
-        "assert_conformance",
-        "passed",
-        "failures",
-        "to_dict"
-      ]
-    },
     "hugrgate.contracts.__init__": {
       "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.\n\nAll contract submodules are imported eagerly (``import`` form, so the\nimport graph stays acyclic) so every contract ``kind`` is registered the\nmoment this package is imported \u2014 ``contract_from_dict`` never fails on\nan unimported kind.",
       "imports": [
@@ -4267,28 +3605,6 @@
         "validate_value",
         "describe",
         "visit"
-      ]
-    },
-    "hugrgate.contracts.conformance": {
-      "docstring": "Contract conformance kit \u2014 behavioral checks for templates.\n\nGjallarbr\u00fa slice 441.\n\n:func:`lint_template` judges whether a template is *well-built*;\nthis kit proves a template *behaves*: it instantiates across its\nparameter space, rejects what it must reject, and every instance\nit produces is a valid, round-trippable, lint-clean contract.\n\n- :func:`run_template_conformance` \u2014 the battery.\n- :func:`run_contract_conformance` \u2014 the instance-level battery\n  (round-trip, lint-clean, value validation sane).\n- :func:`assert_conformance` \u2014 raise\n  :class:`~hugrgate.errors.ConformanceError` on any failure.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "random",
-        "typing"
-      ],
-      "loc": 333,
-      "path": "hugrgate/contracts/conformance.py",
-      "public_defs": [
-        "TemplateConformanceCheck",
-        "TemplateConformanceReport",
-        "run_template_conformance",
-        "run_contract_conformance",
-        "assert_conformance",
-        "passed",
-        "failures",
-        "to_dict"
       ]
     },
     "hugrgate.contracts.context": {
@@ -4841,7 +4157,7 @@
         "time",
         "typing"
       ],
-      "loc": 325,
+      "loc": 366,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -5997,7 +5313,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 909,
+      "loc": 803,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -6018,6 +5334,7 @@
         "MemoryError",
         "MemoryQuotaExceeded",
         "MemoryAccessDenied",
+        "MigrationError",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -6078,20 +5395,6 @@
         "ReplayDetected",
         "AuthzDenied",
         "RateLimitExceeded",
-        "ProtocolError",
-        "SDKError",
-        "PluginError",
-        "ConformanceError",
-        "ConfigError",
-        "ScaffoldError",
-        "AutotuneError",
-        "ObjectiveError",
-        "ConstraintViolation",
-        "TunerError",
-        "UnsafeProposalError",
-        "RollbackError",
-        "ReproducibilityError",
-        "ParameterError",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -6837,6 +6140,410 @@
         "render_svg"
       ]
     },
+    "hugrgate.gauntlet.__init__": {
+      "docstring": "Campaign XX gauntlet utilities \u2014 HugrGate 1.0 release hardening.\n\nEach module in this subpackage is one slice of the 1.0 Gauntlet\n(slices 476-500): release gates, platform/dependency matrices,\nadversarial harnesses, and audit tooling. None of these names are\nre-exported from the ``hugrgate`` package root; the root surface\nstays frozen per slice 476.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 12,
+      "path": "hugrgate/gauntlet/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.gauntlet.api_audit": {
+      "docstring": "API compatibility audit for the 1.0 release (slice 486).\n\nThe package surface is append-only within a major version\n(slice 003's policy); this module makes the policy executable:\n\n- :func:`snapshot_package`: capture every ``hugrgate`` module's\n  ``__all__`` contract as ``{module: {name: {kind, sig}}}``.\n- :func:`save_baseline` / :func:`load_baseline`: the JSON baseline\n  lives at ``docs/gauntlet/api-baseline-1.0.json``.\n- :func:`diff_snapshots`: classify drift as additive (new modules /\n  names \u2014 allowed under the freeze only with a waiver, slice 476),\n  breaking (removed modules / names, signature narrowings, kind\n  changes), or clean.\n- :func:`signatures_compatible`: a new signature is compatible when\n  every call the old signature accepted still binds \u2014 new\n  *defaulted* parameters are fine, new required parameters or\n  removed parameters are not.\n\nBreaking drift fails the 1.0 release gate; additive drift needs a\nfreeze waiver.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "importlib",
+        "inspect",
+        "json",
+        "pathlib"
+      ],
+      "loc": 233,
+      "path": "hugrgate/gauntlet/api_audit.py",
+      "public_defs": [
+        "snapshot_package",
+        "save_baseline",
+        "load_baseline",
+        "signatures_compatible",
+        "ApiDiff",
+        "diff_snapshots",
+        "breaking",
+        "additive",
+        "summary"
+      ]
+    },
+    "hugrgate.gauntlet.calibration_audit": {
+      "docstring": "Calibration truth audit (slice 494).\n\nThe calibration metrics (``expected_calibration_error`` et al.)\nare only as trustworthy as their agreement with ground truth.\nThis module audits the ECE metric itself against synthetic data\nwith *known* true probabilities:\n\n- a perfect forecaster (reports the true p) must score ECE near\n  zero \u2014 within statistical noise;\n- a deliberately miscalibrated forecaster (overconfidence map\n  ``q = clip(0.5 + s*(p - 0.5))``) must score clearly above zero;\n- ECE must grow monotonically with the miscalibration severity\n  ``s`` \u2014 the metric is sensitive, not just thresholded.\n\nAll randomness is seeded; reruns are bit-identical.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "itertools",
+        "numpy",
+        "typing"
+      ],
+      "loc": 141,
+      "path": "hugrgate/gauntlet/calibration_audit.py",
+      "public_defs": [
+        "synthetic_bernoulli",
+        "overconfidence_map",
+        "CalibrationAuditReport",
+        "run_calibration_audit",
+        "perfect_within_noise",
+        "miscalibration_detected",
+        "monotone",
+        "passed",
+        "to_markdown"
+      ]
+    },
+    "hugrgate.gauntlet.deps": {
+      "docstring": "Dependency matrices for the 1.0 release (slices 483-484).\n\nSlice 483 (minimums): ``pyproject.toml`` declares minimum versions\n(``pyyaml>=6.0``). This module parses them, renders a\n``requirements-min.txt`` pinning every runtime dependency at its\ndeclared floor, and checks the running environment against those\nfloors. The check is dependency-free (no ``packaging`` import \u2014\n``packaging`` is not a runtime dependency of HugrGate): version\ncomparison is numeric over dot-separated segments, which is exact\nfor the ``>=X.Y`` floors we declare.\n\nSlice 484 (latest) lives in :func:`latest_audit`.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "tomllib"
+      ],
+      "loc": 286,
+      "path": "hugrgate/gauntlet/deps.py",
+      "public_defs": [
+        "DepRequirement",
+        "DepStatus",
+        "DepReport",
+        "parse_requirement",
+        "read_runtime_dependencies",
+        "version_key",
+        "installed_version",
+        "check_minimums",
+        "render_min_requirements",
+        "write_min_requirements",
+        "scan_deprecated_api",
+        "latest_audit",
+        "ok",
+        "violations"
+      ]
+    },
+    "hugrgate.gauntlet.exhaustion": {
+      "docstring": "Resource exhaustion gauntlet (slice 492).\n\nInput limits existed (``hugrgate/security/input_limits.py``) but\n``HugrGate.decide_batch`` never called ``check_batch`` \u2014 an\nunbounded batch fanned out without limit (fixed in slice 492).\nThis module is the gauntlet proving exhaustion scenarios are\ncontained end to end through the live gate:\n\n- oversized / over-deep / non-serializable states \u2192 ``SpecError``\n  via :meth:`HugrGate.decide`;\n- oversized batches (count or total bytes) \u2192 ``InputTooLarge``\n  via :meth:`HugrGate.decide_batch`;\n- after every rejection the gate still serves (no poisoning);\n- a control batch passes untouched.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 93,
+      "path": "hugrgate/gauntlet/exhaustion.py",
+      "public_defs": [
+        "ExhaustionReport",
+        "run_exhaustion_gauntlet",
+        "contained"
+      ]
+    },
+    "hugrgate.gauntlet.freeze": {
+      "docstring": "Feature-freeze enforcement for the HugrGate 1.0 release (slice 476).\n\nThe freeze is real machinery, not a sign on the door:\n\n- :class:`FreezeManifest` loads ``release/freeze.toml`` \u2014 the frozen\n  version, the freeze date, the allowed change kinds, and the recorded\n  waivers.\n- :class:`ChangeRequest` describes a proposed change; :func:`evaluate`\n  returns a :class:`FreezeVerdict` of ``allow``, ``deny``, or\n  ``waiver-required`` with human-readable reasons.\n- :func:`check_public_api_growth` diffs a baseline public-name set\n  against the live one so the freeze gate can catch undeclared API\n  additions (the full audit lives in slice 486).\n\nChange kinds follow conventional-commit vocabulary. Only kinds that\ncannot grow the public surface or the dependency closure may land\nwithout a waiver: ``bugfix``, ``security``, ``docs``, ``tests``,\n``refactor``, ``perf``. ``feature``, ``api-add``, and\n``dependency-add`` are denied unless a waiver recorded in the\nmanifest names the exact change.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "pathlib",
+        "tomllib",
+        "typing"
+      ],
+      "loc": 201,
+      "path": "hugrgate/gauntlet/freeze.py",
+      "public_defs": [
+        "Waiver",
+        "ChangeRequest",
+        "FreezeVerdict",
+        "FreezeManifest",
+        "load_manifest",
+        "evaluate",
+        "check_public_api_growth",
+        "waiver_ids"
+      ]
+    },
+    "hugrgate.gauntlet.fuzz": {
+      "docstring": "Public-interface fuzzer (slice 489).\n\nPrivacy (slice 247) and security (slice 422) already fuzz their own\ncorners; this module is the *generic* harness: enumerate public\nentry points, feed them seeded garbage (hostile shapes included \u2014\nhuge strings, deep nesting, NaN/Inf, wrong types), and prove that\nonly documented exception kinds ever escape.\n\nA public function may raise:\n\n- any :class:`hugrgate.errors.HugrGateError` (the taxonomy), or\n- stdlib validation errors: ``ValueError``, ``TypeError``,\n  ``KeyError``, ``AttributeError``, ``NotImplementedError``.\n\nAnything else (``IndexError``, ``ZeroDivisionError``,\n``RecursionError``, ``SystemExit``, ...) is recorded as an\n*unexpected* escape \u2014 a robustness bug, since callers cannot be\nexpected to catch what the contract never names.\n\n:func:`fuzz_targets` runs the curated 1.0 target list;\n:func:`fuzz_callable` fuzzes one function; both are deterministic\nfor a fixed seed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "sys",
+        "traceback",
+        "typing"
+      ],
+      "loc": 194,
+      "path": "hugrgate/gauntlet/fuzz.py",
+      "public_defs": [
+        "generate_garbage",
+        "FuzzReport",
+        "fuzz_callable",
+        "fuzz_targets",
+        "clean",
+        "raise_if_dirty"
+      ]
+    },
+    "hugrgate.gauntlet.hostile": {
+      "docstring": "Hostile backend doubles for the backend gauntlet (slice 490).\n\nReal backends fail in boring ways; hostile ones fail in *adversarial*\nways: raising outside ``Exception``, returning garbage instead of a\n``DecisionResult``, or contradicting the spec. The gate's contract\nis total containment \u2014 ``HugrGate.decide`` must only ever let\ntaxonomy errors escape \u2014 and these doubles prove it.\n\nEach double is a real :class:`hugrgate.backend.Backend`; the tests\ndrive them through the live ``HugrGate.decide`` path.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 141,
+      "path": "hugrgate/gauntlet/hostile.py",
+      "public_defs": [
+        "HostileBackend",
+        "ExplodingBackend",
+        "BaseExceptionBackend",
+        "KeyboardInterruptBackend",
+        "SystemExitBackend",
+        "NaNBackend",
+        "WrongTypeBackend",
+        "NoneBackend",
+        "OutOfSpaceBackend",
+        "BadDistributionBackend",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.leakscan": {
+      "docstring": "Privacy leak gauntlet (slice 493).\n\nRedaction machinery exists (``privacy_redact``, ``privacy_pii``,\nper-class provenance modes); this module proves no canary secret\nescapes through the *observable* surfaces of a decision:\n\n- log records emitted during ``decide`` (captured handler),\n- exception messages from failing decisions,\n- provenance records for restrictive privacy classes,\n- cached-decision log lines on repeat calls.\n\nCanaries are obviously fake (``sk-canary-...``) and documented as\ntest fixtures \u2014 never real credentials.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "logging",
+        "typing"
+      ],
+      "loc": 160,
+      "path": "hugrgate/gauntlet/leakscan.py",
+      "public_defs": [
+        "scan_text",
+        "LeakScanner",
+        "LeakReport",
+        "run_leak_gauntlet",
+        "log_text",
+        "findings",
+        "emit",
+        "clean"
+      ]
+    },
+    "hugrgate.gauntlet.license_audit": {
+      "docstring": "License/provenance audit (slice 497).\n\nHugrGate 1.0 ships a dependency tree; the tree's licenses must be\nknown. This module inventories installed distributions via\n``importlib.metadata``, normalizes their declared license into an\nSPDX-ish token set, and classifies each package:\n\n- ``allow`` \u2014 permissive license on the allowlist;\n- ``review`` \u2014 copyleft (GPL/AGPL/LGPL family) or unknown: legal\n  review required, surfaced loudly, never silently passed.\n\nCompound ``License-Expression`` values (``A AND B``) are split and\neach token classified; the package takes the strictest token\nverdict. The repo itself is Apache-2.0 (pyproject.toml).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "typing"
+      ],
+      "loc": 229,
+      "path": "hugrgate/gauntlet/license_audit.py",
+      "public_defs": [
+        "classify_license",
+        "PackageLicense",
+        "LicenseReport",
+        "audit_installed",
+        "runtime_closure",
+        "audit_runtime",
+        "by_status",
+        "needs_review",
+        "clean",
+        "to_dict"
+      ]
+    },
+    "hugrgate.gauntlet.partition": {
+      "docstring": "Network partition gauntlet (slice 491).\n\n``hugrgate/chaos/network.py`` simulates partitions; this module is\nthe *gauntlet* that proves the decision path stays fail-closed\nunder them. The invariant under test, end to end through the live\n``HugrGate.decide`` path:\n\n- while a remote backend's host is partitioned, decisions fail\n  *fast* with :class:`BackendUnavailable` \u2014 never by silently\n  weakening the policy (no lowered ``minimum_probability``, no\n  flipped ``remote_inference``, no mutated policy object);\n- partial failure (one of two remotes down) does not take down the\n  reachable one;\n- after healing, decisions succeed again with the policy\n  byte-identical to before the partition.\n\n:func:`run_partition_scenario` drives the three phases (up \u2192\npartitioned \u2192 healed) and returns a :class:`PartitionReport`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 138,
+      "path": "hugrgate/gauntlet/partition.py",
+      "public_defs": [
+        "snapshot_policy",
+        "assert_policy_intact",
+        "PartitionReport",
+        "run_partition_scenario",
+        "fail_closed_ok"
+      ]
+    },
+    "hugrgate.gauntlet.platforms": {
+      "docstring": "Platform/architecture matrix for the 1.0 release (slices 479-482).\n\nThe supported-platform matrix is built from *actually validated*\nplatforms only \u2014 never from hope. This module provides:\n\n- :class:`PlatformInfo` / :func:`current_platform`: the machine we\n  are standing on.\n- :data:`VALIDATED_PLATFORMS`: platforms the gauntlet has proven by\n  running its checks there. Entries are added by the per-OS slices\n  (479 Linux, 480 Windows, 481 macOS) only after their checks pass.\n- :func:`scan_posix_only`: AST scan for POSIX-only stdlib APIs\n  (``fcntl``, ``pty``, ``pwd``, ``grp``, ``termios``,\n  ``os.fork``/``os.posix_spawn``, ``signal.SIGKILL``/``SIGSTOP``)\n  and whether each use site is guarded (``try/except ImportError``,\n  ``sys.platform``/``os.name`` checks, or ``getattr`` with a\n  default). Unguarded uses are import-time crashes on Windows.\n- :func:`linux_live_checks`: runtime probes that only make sense on\n  Linux (epoll, ``/proc/self``, ``uname``).\n\nSlice 482 extends the machine axis (x86_64 vs ARM64).",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "os",
+        "pathlib",
+        "platform",
+        "select",
+        "sys"
+      ],
+      "loc": 410,
+      "path": "hugrgate/gauntlet/platforms.py",
+      "public_defs": [
+        "normalize_arch",
+        "PlatformInfo",
+        "PosixFinding",
+        "current_platform",
+        "record_validated",
+        "is_validated",
+        "scan_posix_only",
+        "check_arch_assumptions",
+        "check_windows_import_safety",
+        "MacOSFinding",
+        "check_macos_assumptions",
+        "linux_live_checks",
+        "os_key",
+        "arch_key",
+        "platform_key"
+      ]
+    },
+    "hugrgate.gauntlet.pymatrix": {
+      "docstring": "Python-version matrix validation for the 1.0 release (slice 478).\n\nHugrGate declares ``requires-python = \">=3.10\"``. This module turns\nthat declaration into a checked matrix instead of a hope:\n\n- :data:`SUPPORTED_MINORS` \u2014 the minor versions the 1.0 release\n  claims: 3.10 through 3.13.\n- :func:`read_requires_python` \u2014 parse the lower bound out of\n  ``pyproject.toml``.\n- :func:`check_syntax_compat` \u2014 prove every ``hugrgate`` source file\n  parses under the *oldest* supported grammar via\n  ``ast.parse(feature_version=...)``. New syntax (``match`` is fine\n  on 3.10; ``except*``, ``type`` aliases are not) is caught here,\n  not on a user's 3.10 box.\n- :func:`validate_matrix` \u2014 the whole claim in one call: declared\n  lower bound, matrix coverage, and syntax compatibility.\n\nThe runnable form is ``tools/matrix/python_matrix.py``.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "re",
+        "tomllib"
+      ],
+      "loc": 127,
+      "path": "hugrgate/gauntlet/pymatrix.py",
+      "public_defs": [
+        "MatrixReport",
+        "read_requires_python",
+        "check_syntax_compat",
+        "validate_matrix",
+        "ok"
+      ]
+    },
+    "hugrgate.gauntlet.racehunt": {
+      "docstring": "Concurrency race hunt harness (slice 487).\n\nThread-safety was audited in slices 017/293; this module keeps it\nhonest with a reusable hammer: N threads start behind a\n``threading.Barrier`` (so they truly contend rather than politely\ntaking turns), run a workload M iterations each, and every\nexception is captured and reported. The caller supplies an\n*invariant* \u2014 a predicate over the final state \u2014 which is the\nactual race detector: races that corrupt state fail the invariant\neven when no exception escapes.\n\n:func:`hammer` is the workhorse; :func:`hammer_cache` and\n:func:`hammer_registry` are the two production targets the 1.0\ngauntlet pins (``DecisionCache`` and ``BackendRegistry``).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "traceback",
+        "typing"
+      ],
+      "loc": 208,
+      "path": "hugrgate/gauntlet/racehunt.py",
+      "public_defs": [
+        "RaceHuntError",
+        "HammerReport",
+        "hammer",
+        "hammer_cache",
+        "hammer_registry",
+        "ok",
+        "raise_if_failed",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.repro": {
+      "docstring": "Benchmark reproducibility audit (slice 495).\n\nBenchmarks are only useful if they measure the code, not the\nweather. This module provides:\n\n- :func:`run_workload` \u2014 a deterministic decision workload\n  (seeded states, fixed stub backend) returning a content digest\n  plus timing;\n- :func:`run_reproducibility_audit` \u2014 runs the workload ``runs``\n  times and asserts (a) identical digests across runs\n  (determinism) and (b) timing within a documented noise band;\n- :func:`compare_with_baseline` \u2014 compares a fresh measurement\n  against an explicit recorded baseline JSON (never invented).\n\nTiming is inherently noisy; the audit is honest about that: the\ndigest assertion is exact, the timing assertion is a band.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "numpy",
+        "platform",
+        "time",
+        "typing"
+      ],
+      "loc": 159,
+      "path": "hugrgate/gauntlet/repro.py",
+      "public_defs": [
+        "run_workload",
+        "ReproReport",
+        "run_reproducibility_audit",
+        "compare_with_baseline",
+        "digests",
+        "deterministic",
+        "timing_cv",
+        "timing_stable",
+        "passed",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.soak": {
+      "docstring": "Long-duration soak with memory-growth detection (slice 488).\n\n``hugrgate/chaos/soak.py`` drives workloads under faults and checks\ninvariants \u2014 but none of its invariants watched memory, so a slow\nleak could soak for hours undetected. This module adds the missing\ninvariant:\n\n- :func:`rss_mb`: current-process RSS in MiB (``resource.getrusage``,\n  guarded for non-Unix; None when unobservable).\n- :class:`MemoryGrowthInvariant`: a zero-arg callable for\n  ``SoakRunner`` invariants \u2014 snapshots RSS on first call, raises\n  ``AssertionError`` when growth since the snapshot exceeds\n  ``budget_mb``. The snapshot refreshes after ``window_ops``\n  checks so a slow sawtooth (grow then settle) does not false-positive.\n- :func:`run_gate_soak`: the 1.0 soak \u2014 drives ``HugrGate.decide``\n  end to end under ``SoakRunner`` with the memory invariant armed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "resource",
+        "time",
+        "typing"
+      ],
+      "loc": 148,
+      "path": "hugrgate/gauntlet/soak.py",
+      "public_defs": [
+        "rss_mb",
+        "MemoryGrowthInvariant",
+        "SoakSummary",
+        "run_gate_soak",
+        "ok",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.store_migrate": {
+      "docstring": "Upgrade/migration gauntlet for on-disk state (slice 485).\n\n``hugrgate/contracts/migration.py`` migrates spec *dicts*; nothing\nmigrated on-disk *store files* \u2014 ``hugrgate/memory/io.py`` hard\nrejected any export whose version was not current, turning old\nbackups into garbage after a format bump. This module is the\ngeneric machinery:\n\n- :class:`Migration`: one ``from_version -> to_version`` step for a\n  named schema, carrying a pure ``payload -> payload`` function.\n- :class:`MigrationRegistry`: ``register()`` steps;\n  :meth:`plan` finds the shortest path with BFS (multi-hop\n  ``1 -> 2 -> 3`` works without registering ``1 -> 3``);\n  :meth:`migrate` applies the chain and records history.\n- :func:`migrate_envelope_file`: whole-file JSON envelopes\n  (``{\"schema\", \"version\", \"payload\"}``) migrated in place with a\n  ``.bak`` backup; idempotent \u2014 files already at the target are\n  left untouched.\n\nFailures raise :class:`hugrgate.errors.MigrationError` (not\nrecoverable: the registry or the bytes must change).\n\nThe memory export path wires this in: see\n:func:`hugrgate.memory.io.register_memory_migration`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 202,
+      "path": "hugrgate/gauntlet/store_migrate.py",
+      "public_defs": [
+        "Migration",
+        "MigrationRegistry",
+        "migrate_envelope_file",
+        "register",
+        "step",
+        "plan",
+        "migrate"
+      ]
+    },
     "hugrgate.gpusched": {
       "docstring": "GPU scheduling boundary \u2014 discovery, parsing, device assignment.\n\nSlice 297.\n\n.. warning::\n   **Real-hardware validation needed (Law 13).** No GPU is present on\n   this machine (``nvidia-smi`` absent), so live discovery and device\n   assignment are implemented against the documented ``nvidia-smi``\n   CLI contract and exercised only through (a) parsing of captured\n   sample outputs and (b) a scheduler driven by synthetic\n   inventories.  Nothing here has run against real GPUs.  Do not\n   trust placement decisions until that validation exists.\n\nWhat this module does:\n\n- :func:`discover_gpus`: run ``nvidia-smi --query-gpu=... --format=csv``\n  and parse one :class:`GpuInfo` per device.  Returns ``[]`` when\n  ``nvidia-smi`` is missing or reports no GPUs \u2014 that is a normal\n  CPU-only machine, not an error.\n- :func:`parse_smi_csv`: the pure parser, unit-tested against sample\n  outputs (the samples are fixtures, not measurements).\n- :class:`GpuScheduler`: assigns devices to workers.  Policies:\n  ``\"least-memory-used\"`` (default \u2014 pack onto the emptiest device),\n  ``\"round-robin\"``.  Assignments are tracked and released; over-full\n  devices raise :class:`GpuschedError` only when\n  ``max_workers_per_gpu`` is set and exceeded, otherwise workers\n  share.\n\nPlacement is a hint: every caller must run correctly with\n``device=None`` (CPU fallback).",
       "imports": [
@@ -6908,37 +6615,6 @@
         "collect"
       ]
     },
-    "hugrgate.inspect": {
-      "docstring": "Interactive inspector REPL. Slice 436.\n``hugrgate inspect`` drops the operator into a small read-eval loop\nagainst a live service (or the in-process gate):\n\n    hugrgate> backends\n    hugrgate> decide spec.yaml state.json --backend keyword\n    hugrgate> last\n    hugrgate> quit\n\nEvery command prints human-readable output; errors are reported\ninline and never kill the loop. ``Ctrl-D`` / ``quit`` exits cleanly.",
-      "imports": [
-        "__future__",
-        "collections",
-        "hugrgate",
-        "json",
-        "readline",
-        "shlex",
-        "typing"
-      ],
-      "loc": 237,
-      "path": "hugrgate/inspect.py",
-      "public_defs": [
-        "InspectSession",
-        "run_inspect",
-        "out",
-        "close",
-        "do_help",
-        "do_url",
-        "do_health",
-        "do_protocol",
-        "do_backends",
-        "do_models",
-        "do_decide",
-        "do_last",
-        "do_quit",
-        "handle_line",
-        "run"
-      ]
-    },
     "hugrgate.ladder": {
       "docstring": "Intelligence ladder \u2014 ordered backend cascade. Slices 31-32.\n\nThe ladder is the heart of \"least expensive sufficient intelligence\":\nbackends are ordered from cheapest to most capable, and each rung declares\na ``min_confidence`` gate. A rung whose result clears its gate wins; a rung\nwhose result falls short hands the decision upward. When every rung is\nexhausted the gate abstains rather than guess.\n\nSlice 32 adds two pruning rules applied *before* a rung runs:\n- **Latency budgets**: a rung whose ``estimated_latency`` exceeds its own\n  budget \u2014 or the time remaining under ``policy.maximum_latency_ms`` \u2014 is\n  skipped, never started.\n- **Privacy gate**: remote rungs require ``policy.remote_inference=True``\n  (and pass the operator-level :class:`PrivacyGuard`).\n\nSlice 284 adds :meth:`LadderRouter.decide_concurrent`: the same ordered\nsemantics, but rungs evaluate in parallel and the lowest-index rung that\nclears its gate wins the race.  Pre-run pruning stays sequential (cheap\nand deterministic); evaluation overlaps.  Backends used concurrently\nmust be thread-safe.\n\nEvery rung outcome \u2014 attempted, skipped, failed, accepted \u2014 is recorded in\nan auditable trail, both in the result's metadata and, optionally, in a\n:class:`ProvenanceStore`.",
       "imports": [
@@ -6963,22 +6639,6 @@
         "skip_reason",
         "decide",
         "decide_concurrent"
-      ]
-    },
-    "hugrgate.loaders": {
-      "docstring": "Shared file loaders for the CLI and the inspector.\n\nGjallarbr\u00fa slice 444 (extracted from ``hugrgate.cli``).\n\n``load_spec`` / ``load_state`` / ``load_policy`` used to live in\n:mod:`hugrgate.cli`, but the inspector (:mod:`hugrgate.inspect`)\nneeds them too \u2014 and the CLI needs the inspector for\n``hugrgate inspect``. Keeping them here breaks that import cycle.\n:mod:`hugrgate.cli` re-exports them, so ``hugrgate.cli.load_spec``\nkeeps working.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "typing",
-        "yaml"
-      ],
-      "loc": 53,
-      "path": "hugrgate/loaders.py",
-      "public_defs": [
-        "load_spec",
-        "load_state",
-        "load_policy"
       ]
     },
     "hugrgate.lockaudit": {
@@ -7378,9 +7038,10 @@
         "pathlib",
         "typing"
       ],
-      "loc": 182,
+      "loc": 213,
       "path": "hugrgate/memory/io.py",
       "public_defs": [
+        "register_memory_migration",
         "ExportReport",
         "ImportReport",
         "export_jsonl",
@@ -8268,27 +7929,6 @@
         "check"
       ]
     },
-    "hugrgate.plugins": {
-      "docstring": "Backend plugin SDK. Slice 439.\n\nThird-party backends plug into HugrGate through the\n``hugrgate.backends`` entry-point group::\n\n    # third-party pyproject.toml\n    [project.entry-points.\"hugrgate.backends\"]\n    mybackend = \"mypackage.module:MyBackend\"\n\n    # mypackage/module.py\n    from hugrgate.backend import Backend\n    class MyBackend(Backend):\n        name = \"mybackend\"\n        ...\n\nThis module is the *loading* side:\n\n- :func:`discover_plugins` \u2014 find installed entry points without\n  importing them (cheap, never raises on a broken plugin when\n  ``on_error=\"collect\"``).\n- :func:`load_plugin` \u2014 import one entry point, instantiate it,\n  and validate it against the :class:`Backend` contract.\n- :func:`validate_plugin` \u2014 interface + smoke validation.\n- :func:`register_discovered_plugins` \u2014 load everything and\n  register it on a :class:`BackendRegistry`, isolating failures:\n  one broken plugin can never take down the others (or the gate).\n\nFailures raise :class:`~hugrgate.errors.PluginError` with the\nplugin name attached.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "importlib",
-        "typing"
-      ],
-      "loc": 221,
-      "path": "hugrgate/plugins.py",
-      "public_defs": [
-        "PluginInfo",
-        "discover_plugins",
-        "load_plugin",
-        "validate_plugin",
-        "PluginReport",
-        "register_discovered_plugins",
-        "loaded"
-      ]
-    },
     "hugrgate.policy": {
       "docstring": "DecisionPolicy \u2014 application-controlled thresholds. Slice 5.",
       "imports": [
@@ -8916,25 +8556,6 @@
         "profile_decision"
       ]
     },
-    "hugrgate.protocol": {
-      "docstring": "HugrGate stable wire protocol v1. Slice 426.\n\nThis module is the single source of truth for the versioned HTTP wire\nprotocol between HugrGate clients (Python SDK, TypeScript/Rust/Go/C\nSDKs, the CLI) and the service (:mod:`hugrgate.server`).\n\nProtocol v1 rules:\n\n- Every ``POST /decide`` request may carry ``protocol_version``. When\n  absent the request is treated as v1 (pre-version clients).\n- The service accepts any ``1.x`` version with ``x >= 0`` (minor\n  versions stay wire-compatible) and rejects anything else with\n  :class:`~hugrgate.errors.ProtocolError` (HTTP 422).\n- ``GET /protocol`` advertises the service's protocol versions, so\n  clients can fail fast instead of sending doomed requests.\n- :class:`Envelope` wraps responses where the caller wants explicit\n  version echo; ``/decide`` keeps its legacy bare body for backward\n  compatibility and adds the version inside ``metadata`` instead.\n\nVersion history:\n\n- ``1.0`` \u2014 initial stable protocol: ``/``, ``/health``,\n  ``/backends``, ``/models``, ``/decide``, ``/protocol``.",
-      "imports": [
-        "__future__",
-        "dataclasses",
-        "hugrgate",
-        "typing"
-      ],
-      "loc": 120,
-      "path": "hugrgate/protocol.py",
-      "public_defs": [
-        "parse_protocol_version",
-        "negotiate_version",
-        "Envelope",
-        "build_envelope",
-        "to_dict",
-        "from_dict"
-      ]
-    },
     "hugrgate.provenance": {
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
@@ -9262,16 +8883,17 @@
       ]
     },
     "hugrgate.routing.hardware": {
-      "docstring": "Hardware-aware routing. Slice 061.\n\nA rung is only viable if the backend can actually run *here*.\n:class:`HostProfile` describes this machine (CPUs, RAM, GPU presence,\nplatform); :func:`hardware_compatible` checks a backend's\n``hardware_requirements()`` against it; :class:`HardwareAwarePlanner`\nprunes incompatible rungs at plan time.\n\nRecognized requirement keys (all optional; unknown keys are ignored so\nnew backends never break old routers):\n- ``requires_gpu`` (bool) \u2014 needs ``host.has_gpu``;\n- ``min_memory_mb`` (number) \u2014 needs ``host.memory_mb >=`` it;\n- ``min_cpu_count`` (int) \u2014 needs ``host.cpu_count >=`` it;\n- ``platforms`` (list of ``sys.platform`` strings) \u2014 host must be listed.\n\n``HostProfile.detect()`` builds a profile from the real machine using\nthe standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or a\nconservative fallback), ``sys.platform``, and ``nvidia-smi`` presence\nfor GPU detection. GPU detection is best-effort and documented as such.",
+      "docstring": "Hardware-aware routing. Slice 061.\n\nA rung is only viable if the backend can actually run *here*.\n:class:`HostProfile` describes this machine (CPUs, RAM, GPU presence,\nplatform); :func:`hardware_compatible` checks a backend's\n``hardware_requirements()`` against it; :class:`HardwareAwarePlanner`\nprunes incompatible rungs at plan time.\n\nRecognized requirement keys (all optional; unknown keys are ignored so\nnew backends never break old routers):\n- ``requires_gpu`` (bool) \u2014 needs ``host.has_gpu``;\n- ``min_memory_mb`` (number) \u2014 needs ``host.memory_mb >=`` it;\n- ``min_cpu_count`` (int) \u2014 needs ``host.cpu_count >=`` it;\n- ``platforms`` (list of ``sys.platform`` strings) \u2014 host must be listed.\n\n``HostProfile.detect()`` builds a profile from the real machine using\nthe standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or\n``sysctl hw.memsize`` on macOS, or a conservative fallback),\n``sys.platform``, and ``nvidia-smi`` presence\nfor GPU detection. GPU detection is best-effort and documented as such.",
       "imports": [
         "__future__",
         "dataclasses",
         "hugrgate",
         "os",
         "shutil",
+        "subprocess",
         "sys"
       ],
-      "loc": 135,
+      "loc": 152,
       "path": "hugrgate/routing/hardware.py",
       "public_defs": [
         "HostProfile",
@@ -10159,22 +9781,6 @@
         "warmup_backend"
       ]
     },
-    "hugrgate.scaffold": {
-      "docstring": "Project scaffolder. Slice 438.\n\n``hugrgate new NAME`` creates a complete, working HugrGate project:\n\n    myproj/\n        pyproject.toml        # hugrgate dependency, pytest config\n        README.md             # run instructions\n        .gitignore\n        spec.yaml             # starter DecisionSpec\n        policy.yaml           # starter DecisionPolicy\n        state.example.yaml    # example decision state\n        src/myproj/__init__.py\n        src/myproj/main.py    # decide() via the SDK v2 in-process gate\n        tests/test_smoke.py   # a smoke test that actually passes\n\nThe scaffolded project's own test suite is executed by this\nslice's tests to prove the scaffold works out of the box.",
-      "imports": [
-        "__future__",
-        "hugrgate",
-        "keyword",
-        "pathlib",
-        "re"
-      ],
-      "loc": 196,
-      "path": "hugrgate/scaffold.py",
-      "public_defs": [
-        "validate_project_name",
-        "scaffold_project"
-      ]
-    },
     "hugrgate.scheduler": {
       "docstring": "Batch scheduler v2 \u2014 general-purpose windowed batch engine. Slice 285.\n\nThe daemon's :class:`BatchingQueue` (slice 018) is asyncio-only and\ncoupled to daemon wire types.  This module is the reusable scheduling\ncore for Campaign XII:\n\n- :class:`BatchScheduler` \u2014 thread-safe, works from any thread, no\n  event loop required.  Submissions are futures; a background worker\n  thread coalesces them into batches (``max_batch_size`` items or\n  ``batch_window_s`` expiry, whichever comes first) and hands each\n  batch to a :class:`BatchExecutor`.\n- :class:`BatchExecutor` \u2014 protocol: ``execute_batch(tasks)`` runs one\n  batch and settles each task's future.  :class:`ThreadPoolBatchExecutor`\n  is the default (each task's callable in a worker thread).\n- :class:`SchedulerConfig` \u2014 validated knobs (bad values raise\n  :class:`SchedulerError`, not ``ValueError``).\n- Backpressure: ``max_queue_depth`` submissions beyond capacity raise\n  :class:`SchedulerError` (recoverable \u2014 shed load, retry later).\n- Observability: :meth:`BatchScheduler.stats` reports batches, tasks,\n  average batch size, queue-wait p50, and batch-execution p50.\n\nSlices 286-288 extend this engine (adaptive sizing, priority lanes,\ndeadline scheduling); the task record already carries ``priority`` and\n``deadline`` fields so those slices slot in without reshaping.",
       "imports": [
@@ -10210,26 +9816,6 @@
         "stats"
       ]
     },
-    "hugrgate.sdk": {
-      "docstring": "HugrGate Python SDK v2. Slice 428.\n\n:class:`HugrGateSDK` builds on the battle-tested\n:class:`~hugrgate.client.HugrGateClient` transport and adds the\nergonomics production integrations actually need:\n\n- context-manager use (``with HugrGateSDK(...) as sdk:``),\n- automatic retry with exponential backoff on *recoverable* failures\n  (transport errors, HTTP 502/503, taxonomy errors flagged\n  recoverable) \u2014 never on caller bugs like ``spec_error``,\n- HTTP error envelopes mapped back onto the HugrGate error taxonomy\n  (``SpecError``, ``BackendUnavailable``, ...) instead of leaking\n  ``httpx.HTTPStatusError``,\n- ``decide_batch`` for one spec over many states,\n- a versioned ``User-Agent`` header so operators can see SDK skew in\n  their access logs.\n\nv1 (:mod:`hugrgate.client`) is untouched and keeps working; v2 is a\nstrict superset.",
-      "imports": [
-        "__future__",
-        "collections",
-        "httpx",
-        "hugrgate",
-        "time",
-        "typing"
-      ],
-      "loc": 226,
-      "path": "hugrgate/sdk.py",
-      "public_defs": [
-        "HugrGateSDK",
-        "close",
-        "decide",
-        "decide_batch",
-        "decide_value"
-      ]
-    },
     "hugrgate.security.__init__": {
       "docstring": "Security Forge \u2014 Gjallarbr\u00fa Campaign XVII (slices 401-425).\n\nAdversarial robustness for a runtime that faces hostile inputs,\nmodels, plugins, and networks. Built *on top of* the existing\ndefenses \u2014 privacy fortress (redaction, tokenization, sealed crypto),\nsecret detection, hash-chained audit logs, cluster mutual auth \u2014\nhardening what exists instead of duplicating it:\n\n- :mod:`hugrgate.security.threat_model` \u2014 STRIDE threat model v2\n  with coverage analysis (slice 401).\n- :mod:`hugrgate.security.attack_surface` \u2014 enumerated, audited\n  attack surface (slice 402).\n- :mod:`hugrgate.security.depscan` \u2014 dependency security scanning\n  (slice 403).\n- :mod:`hugrgate.security.supply_chain` \u2014 supply-chain policy +\n  SBOM (slice 404).\n- :mod:`hugrgate.security.model_signing` \u2014 signed model metadata\n  (slice 405).\n- :mod:`hugrgate.security.checksums` \u2014 model checksum enforcement\n  (slice 406).\n- :mod:`hugrgate.security.plugins` \u2014 plugin trust model (slice 407).\n- :mod:`hugrgate.security.sandbox` \u2014 backend sandbox boundary\n  (slice 408).\n- :mod:`hugrgate.security.input_limits` \u2014 input-size limits\n  (slice 409).\n- :mod:`hugrgate.security.resource_guards` \u2014 resource-exhaustion\n  guards (slice 410).\n- :mod:`hugrgate.security.serde_guards` \u2014 deserialization hardening\n  (slice 411).\n- :mod:`hugrgate.security.path_guards` \u2014 path traversal defenses\n  (slice 412).\n- :mod:`hugrgate.security.injection_corpus` \u2014 injection test corpus\n  (slice 413).\n- :mod:`hugrgate.security.prompt_injection` \u2014 prompt-injection\n  boundary (slice 414).\n- :mod:`hugrgate.security.malicious_backend` \u2014 malicious-backend\n  adversarial fixtures (slice 415).\n- :mod:`hugrgate.security.provenance_guards` \u2014 provenance tamper\n  detection + tip sealing (slice 416).\n- :mod:`hugrgate.security.cache_poisoning` \u2014 cache-poisoning\n  defenses (slice 417).\n- :mod:`hugrgate.security.replay` \u2014 replay attack defenses\n  (slice 418).\n- :mod:`hugrgate.security.authz` \u2014 service authorization policy\n  (slice 419).\n- :mod:`hugrgate.security.rate_limit` \u2014 rate limiting (slice 420).\n- :mod:`hugrgate.security.secret_audit` \u2014 secret-handling audit\n  (slice 421).\n- :mod:`hugrgate.security.fuzzing` \u2014 deterministic fuzzing campaign\n  harness (slice 422).\n- :mod:`hugrgate.security.gauntlet` \u2014 independent-style security\n  gauntlet (slice 424).",
       "imports": [
@@ -10249,7 +9835,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 290,
+      "loc": 277,
       "path": "hugrgate/security/attack_surface.py",
       "public_defs": [
         "SurfaceEntry",
@@ -10867,14 +10453,13 @@
         "fastapi",
         "hugrgate",
         "math",
-        "pydantic",
         "re",
         "time",
         "typing",
         "uvicorn",
         "warnings"
       ],
-      "loc": 554,
+      "loc": 386,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -10883,10 +10468,6 @@
         "register_model",
         "list_models",
         "build_gate",
-        "DecideRequest",
-        "ErrorBody",
-        "ProtocolBody",
-        "dump_openapi_schema",
         "create_app",
         "run",
         "capabilities",
@@ -10899,7 +10480,6 @@
         "health",
         "backends",
         "models",
-        "protocol",
         "decide"
       ]
     },
@@ -11059,7 +10639,7 @@
       ]
     }
   },
-  "pyproject_version": "0.1.0",
+  "pyproject_version": "1.0.0",
   "python_requires": ">=3.10 (per pyproject)",
   "test_files": [
     "test_adaptive_bandit.py",
@@ -11114,31 +10694,6 @@
     "test_api_inventory.py",
     "test_arch_map.py",
     "test_async_readiness.py",
-    "test_autotune_451_controller.py",
-    "test_autotune_452_objectives.py",
-    "test_autotune_453_constraints.py",
-    "test_autotune_454_thresholds.py",
-    "test_autotune_455_gates.py",
-    "test_autotune_456_latency.py",
-    "test_autotune_457_cache.py",
-    "test_autotune_458_batching.py",
-    "test_autotune_459_backends.py",
-    "test_autotune_460_weights.py",
-    "test_autotune_461_calibration.py",
-    "test_autotune_462_hardware.py",
-    "test_autotune_463_energy.py",
-    "test_autotune_464_cost.py",
-    "test_autotune_465_privacy.py",
-    "test_autotune_466_offline.py",
-    "test_autotune_467_shadow.py",
-    "test_autotune_468_canary.py",
-    "test_autotune_469_rollback.py",
-    "test_autotune_470_provenance.py",
-    "test_autotune_471_repro.py",
-    "test_autotune_472_limits.py",
-    "test_autotune_473_adversarial.py",
-    "test_autotune_474_benchmark.py",
-    "test_autotune_475_release.py",
     "test_backend_registry.py",
     "test_calib_adversarial.py",
     "test_calib_aleatoric.py",
@@ -11244,31 +10799,6 @@
     "test_dependency_rules.py",
     "test_determinism_contract.py",
     "test_deterministic.py",
-    "test_deveco_426_protocol.py",
-    "test_deveco_427_openapi.py",
-    "test_deveco_428_sdk.py",
-    "test_deveco_429_ts_sdk.py",
-    "test_deveco_430_rust_sdk.py",
-    "test_deveco_431_go_sdk.py",
-    "test_deveco_432_c_abi.py",
-    "test_deveco_433_c_client.py",
-    "test_deveco_434_mojo.py",
-    "test_deveco_435_cli_ux.py",
-    "test_deveco_435_doctor_live.py",
-    "test_deveco_436_inspect.py",
-    "test_deveco_437_configgen.py",
-    "test_deveco_438_scaffold.py",
-    "test_deveco_439_plugins.py",
-    "test_deveco_440_backend_conformance.py",
-    "test_deveco_441_contract_conformance.py",
-    "test_deveco_442_gallery.py",
-    "test_deveco_443_cookbook.py",
-    "test_deveco_444_compat.py",
-    "test_deveco_446_docker.py",
-    "test_deveco_447_systemd.py",
-    "test_deveco_448_windows.py",
-    "test_deveco_449_macos.py",
-    "test_deveco_450_release_gate.py",
     "test_edge_affinity.py",
     "test_edge_bench.py",
     "test_edge_bootstrap.py",
@@ -11338,6 +10868,31 @@
     "test_evlab_374_report.py",
     "test_evlab_375_release.py",
     "test_foundation.py",
+    "test_gauntlet_476_freeze.py",
+    "test_gauntlet_477_install.py",
+    "test_gauntlet_478_pymatrix.py",
+    "test_gauntlet_479_linux.py",
+    "test_gauntlet_480_windows.py",
+    "test_gauntlet_481_macos.py",
+    "test_gauntlet_482_arm64.py",
+    "test_gauntlet_483_depmin.py",
+    "test_gauntlet_484_deplat.py",
+    "test_gauntlet_485_migration.py",
+    "test_gauntlet_486_api_audit.py",
+    "test_gauntlet_487_racehunt.py",
+    "test_gauntlet_488_soak.py",
+    "test_gauntlet_489_fuzz.py",
+    "test_gauntlet_490_hostile.py",
+    "test_gauntlet_491_partition.py",
+    "test_gauntlet_492_exhaustion.py",
+    "test_gauntlet_493_leakscan.py",
+    "test_gauntlet_494_calibration_audit.py",
+    "test_gauntlet_495_repro.py",
+    "test_gauntlet_496_docsaudit.py",
+    "test_gauntlet_497_license.py",
+    "test_gauntlet_498_rcbuild.py",
+    "test_gauntlet_499_handoff.py",
+    "test_gauntlet_500_release.py",
     "test_import_cycles.py",
     "test_ladder.py",
     "test_localrt_151_interface.py",
@@ -11514,5 +11069,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 97300
+  "total_loc": 92920
 }

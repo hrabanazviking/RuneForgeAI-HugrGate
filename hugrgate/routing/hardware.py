@@ -14,8 +14,9 @@ new backends never break old routers):
 - ``platforms`` (list of ``sys.platform`` strings) — host must be listed.
 
 ``HostProfile.detect()`` builds a profile from the real machine using
-the standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or a
-conservative fallback), ``sys.platform``, and ``nvidia-smi`` presence
+the standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or
+``sysctl hw.memsize`` on macOS, or a conservative fallback),
+``sys.platform``, and ``nvidia-smi`` presence
 for GPU detection. GPU detection is best-effort and documented as such.
 """
 
@@ -23,6 +24,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import sys
 from dataclasses import dataclass, field
 
@@ -64,13 +66,28 @@ class HostProfile:
     @staticmethod
     def _detect_memory_mb() -> float:
         try:
-            with open("/proc/meminfo") as f:
+            with open("/proc/meminfo", encoding="utf-8") as f:
                 for line in f:
                     if line.startswith("MemTotal:"):
                         kb = float(line.split()[1])
                         return round(kb / 1024.0, 1)
         except OSError:
             pass
+        if sys.platform == "darwin":
+            # macOS has no /proc/meminfo; sysctl hw.memsize reports
+            # bytes. Slice 481: without this, macOS hosts silently
+            # fell back to the 1024 MB conservative floor.
+            try:
+                out = subprocess.run(
+                    ["sysctl", "-n", "hw.memsize"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                if out.returncode == 0:
+                    return round(float(out.stdout.strip()) / (1024.0**2), 1)
+            except (OSError, ValueError, subprocess.SubprocessError):
+                pass
         return 1024.0  # conservative fallback when unobservable
 
     def to_dict(self) -> dict:

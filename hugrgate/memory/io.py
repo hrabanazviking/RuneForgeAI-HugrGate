@@ -26,7 +26,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from hugrgate.errors import HugrGateError, MemoryError
+from hugrgate.errors import HugrGateError, MemoryError, MigrationError
+from hugrgate.gauntlet.store_migrate import Migration, MigrationRegistry
 from hugrgate.memory.compaction import CompactionSummary
 from hugrgate.memory.history import Episode
 from hugrgate.memory.query import MemoryQuery
@@ -34,10 +35,12 @@ from hugrgate.memory.types import HistoryLike
 
 __all__ = [
     "MEMORY_EXPORT_VERSION",
+    "MEMORY_MIGRATIONS",
     "ExportReport",
     "ImportReport",
     "export_jsonl",
     "import_jsonl",
+    "register_memory_migration",
 ]
 
 #: Current export schema version. Bump when the envelope changes.
@@ -45,6 +48,22 @@ MEMORY_EXPORT_VERSION = 1
 
 _EPISODE_SCHEMA = "hugrgate.memory/episode"
 _SUMMARY_SCHEMA = "hugrgate.memory/compaction-summary"
+
+#: Migration steps for memory export envelopes, keyed by schema.
+#: Slice 485: old backups migrate forward instead of being rejected.
+MEMORY_MIGRATIONS = MigrationRegistry()
+
+
+def register_memory_migration(schema: str, from_version: Any,
+                              to_version: Any,
+                              func: Any) -> Migration:
+    """Register one memory-export migration step (slice 485).
+
+    ``func`` maps the old payload dict to the new payload dict.
+    """
+    return MEMORY_MIGRATIONS.register(
+        Migration(schema, from_version, to_version, func)
+    )
 
 
 @dataclass(frozen=True)
@@ -125,10 +144,22 @@ def _parse_line(line: str, lineno: int) -> tuple[str, dict[str, Any]]:
         raise MemoryError(f"line {lineno}: unknown schema {schema!r}",
                           lineno=lineno, schema=schema)
     if version != MEMORY_EXPORT_VERSION:
-        raise MemoryError(
-            f"line {lineno}: unsupported version {version!r} "
-            f"(expected {MEMORY_EXPORT_VERSION})",
-            lineno=lineno, version=version)
+        # Slice 485: migrate old envelopes forward when a path is
+        # registered instead of rejecting the whole backup.
+        payload = envelope.get("payload")
+        if not isinstance(payload, dict):
+            raise MemoryError(f"line {lineno}: payload must be an object",
+                              lineno=lineno)
+        try:
+            migrated = MEMORY_MIGRATIONS.migrate(
+                schema, payload, version, MEMORY_EXPORT_VERSION)
+        except MigrationError as exc:
+            raise MemoryError(
+                f"line {lineno}: unsupported version {version!r} "
+                f"(expected {MEMORY_EXPORT_VERSION}): {exc}",
+                lineno=lineno, version=version) from exc
+        envelope = {"schema": schema, "version": MEMORY_EXPORT_VERSION,
+                    "payload": migrated}
     payload = envelope.get("payload")
     if not isinstance(payload, dict):
         raise MemoryError(f"line {lineno}: payload must be an object",

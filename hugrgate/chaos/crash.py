@@ -93,18 +93,29 @@ class CrashOnlyHarness:
         self._dir = Path(directory)
         self._python = python
 
+    @staticmethod
+    def default_kill_signal() -> int:
+        """Kill signal for the worker, resolved at call time.
+
+        ``signal.SIGKILL`` does not exist on Windows; evaluating it as
+        a default argument would break module import there (slice
+        480). Resolve lazily: SIGKILL where available, SIGTERM
+        otherwise.
+        """
+        return getattr(signal, "SIGKILL", signal.SIGTERM)
+
     def run_worker(self, count: int = 10 ** 9,
                    kill_after_s: float = 1.0,
-                   kill_signal: int = signal.SIGKILL) -> CrashReport:
+                   kill_signal: int | None = None) -> CrashReport:
         """Run the worker, kill it after ``kill_after_s``, recover.
 
-        Returns a :class:`CrashReport`; raises :class:`SpecError`
-        when recovery itself fails (the incident we are testing
-        for).
+        ``kill_signal`` defaults to :meth:`default_kill_signal`.
         """
         if kill_after_s <= 0:
             raise SpecError(
                 f"kill_after_s must be positive, got {kill_after_s!r}")
+        if kill_signal is None:
+            kill_signal = self.default_kill_signal()
         self._dir.mkdir(parents=True, exist_ok=True)
         env = dict(os.environ)
         env["PYTHONPATH"] = str(_repo_root()) + os.pathsep + env.get(

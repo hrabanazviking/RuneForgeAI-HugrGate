@@ -57,6 +57,7 @@ from hugrgate.errors import (
     MemoryError,
     MemoryQuotaExceeded,
     MetricError,
+    MigrationError,
     MultiprocError,
     NPUError,
     NumaError,
@@ -172,6 +173,8 @@ ALL_ERRORS = [
     RollbackError,
     ReproducibilityError,
     ParameterError,
+    # Campaign XX gauntlet errors (slice 485 taxonomy promotion).
+    MigrationError,
 ]
 
 EXPECTED_CODES = {
@@ -450,9 +453,19 @@ def test_raise_sites_use_taxonomy_or_stdlib_validation():
         "NotImplementedError", "RuntimeError", "StopIteration",
         "AssertionError",
     }
+    # Gauntlet attack fixtures are excluded: raising non-taxonomy
+    # errors is their entire purpose — hostile backends
+    # (BaseException/KeyboardInterrupt/SystemExit payloads) and the
+    # race-hunt harness's own failure signal (an AssertionError
+    # subclass). The production raise-site rule does not apply to
+    # the payloads aimed at the gate.
+    excluded = {"hugrgate/gauntlet/hostile.py",
+                "hugrgate/gauntlet/racehunt.py"}
     offenders = []
     for path in sorted((ROOT / "hugrgate").rglob("*.py")):
         if "__pycache__" in path.parts:
+            continue
+        if str(path.relative_to(ROOT)) in excluded:
             continue
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
