@@ -45,6 +45,12 @@ from hugrgate.routing.explain import (
     explain_plan,
     explain_route,
 )
+from hugrgate.routing.replay import (
+    RecordingExecutor,
+    ReplayExecutor,
+    RouteRecording,
+    replay,
+)
 from hugrgate.routing.cost import (
     CostAwarePlanner,
     CostLedger,
@@ -165,7 +171,11 @@ __all__ = [
     "RungBuilder",
     "RungExecutor",
     "RungFilter",
+    "RecordingExecutor",
+    "ReplayExecutor",
+    "RouteRecording",
     "RungMode",
+    "replay",
     "RungNode",
     "RungPlanner",
     "RouterContext",
