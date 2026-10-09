@@ -143,6 +143,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "coverage": {"lint"},
     "onnxruntime": {"onnx"},
     "vllm": {"vllm"},
+    "mlx_lm": {"mlx"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
@@ -209,6 +210,7 @@ def test_every_third_party_import_is_declared():
                 "pyyaml": "yaml",
                 "scikit-learn": "sklearn",
                 "llama-cpp-python": "llama_cpp",
+                "mlx-lm": "mlx_lm",
             }.get(dist, dist),
             set(),
         ).update(exs)
