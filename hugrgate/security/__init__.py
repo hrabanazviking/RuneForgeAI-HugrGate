@@ -96,6 +96,11 @@ from hugrgate.security.fuzzing import (
     hostile_values,
     run_campaign,
 )
+from hugrgate.security.gauntlet import (
+    BatteryResult,
+    SecurityGauntletReport,
+    run_security_gauntlet,
+)
 from hugrgate.security.injection_corpus import (
     PAYLOADS,
     detect_sqli,
@@ -198,6 +203,7 @@ __all__ = [
     "Asset",
     "AttackSurface",
     "AuthzPolicy",
+    "BatteryResult",
     "BoundCache",
     "BoundaryEnforcer",
     "ChecksumManifest",
@@ -220,6 +226,7 @@ __all__ = [
     "SandboxPolicy",
     "SandboxedBackend",
     "SecretAuditFinding",
+    "SecurityGauntletReport",
     "SignedMetadata",
     "SupplyChainPolicy",
     "SupplyVerdict",
@@ -260,6 +267,7 @@ __all__ = [
     "run_poison_suite",
     "run_sandboxed",
     "run_secret_audit",
+    "run_security_gauntlet",
     "run_tamper_suite",
     "safe_join",
     "safe_read_text",

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 386 · **public names:** 2399
+**Modules:** 387 · **public names:** 2405
 
 ## API stability policy
 
@@ -3962,13 +3962,14 @@ that this document never drifts from the code.
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
 | `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
+| `BatteryResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '', seconds: 'float' = 0.0) -> None` |
 | `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
 | `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
 | `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
@@ -3991,6 +3992,7 @@ that this document never drifts from the code.
 | `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
 | `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
 | `SecretAuditFinding` | class | `(path: 'str', line: 'int', rule: 'str', severity: 'str', message: 'str', snippet: 'str' = '') -> None` |
+| `SecurityGauntletReport` | class | `(batteries: 'list[BatteryResult]' = <factory>) -> None` |
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
 | `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
@@ -4031,6 +4033,7 @@ that this document never drifts from the code.
 | `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `run_secret_audit` | function | `(root: 'str | Path' = '.') -> 'dict[str, Any]'` |
+| `run_security_gauntlet` | function | `() -> 'SecurityGauntletReport'` |
 | `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
 | `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
@@ -4062,7 +4065,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
@@ -4110,6 +4113,14 @@ that this document never drifts from the code.
 | `hostile_states` | function | `(rng: 'random.Random') -> 'Any'` |
 | `hostile_values` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
 | `run_campaign` | function | `(target: 'FuzzTarget', generator: 'Callable[[random.Random], Any]', n_cases: 'int' = 500, seed: 'int' = 20261009, timeout_s: 'float' = 5.0) -> 'FuzzReport'` |
+
+### `hugrgate.security.gauntlet`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BatteryResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '', seconds: 'float' = 0.0) -> None` |
+| `SecurityGauntletReport` | class | `(batteries: 'list[BatteryResult]' = <factory>) -> None` |
+| `run_security_gauntlet` | function | `() -> 'SecurityGauntletReport'` |
 
 ### `hugrgate.security.injection_corpus`
 
