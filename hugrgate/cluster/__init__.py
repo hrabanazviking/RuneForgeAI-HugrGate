@@ -7,6 +7,12 @@ modules (routes, transport servers) stay behind their own imports.
 
 from __future__ import annotations
 
+from hugrgate.cluster.auth import (
+    AUTH_HEADER,
+    Authenticator,
+    ClusterKey,
+    enable_mutual_auth,
+)
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import (
     DEFAULT_STALE_AFTER_S,
@@ -21,7 +27,11 @@ from hugrgate.cluster.lan import (
     LANDiscoveryAdapter,
     MulticastConfig,
 )
-from hugrgate.cluster.node import ClusterNode, InboundHook
+from hugrgate.cluster.node import (
+    ClusterNode,
+    InboundHook,
+    NodeAuthenticator,
+)
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     MAX_MESSAGE_BYTES,
@@ -46,6 +56,7 @@ from hugrgate.cluster.static_config import (
 )
 
 __all__ = [
+    "AUTH_HEADER",
     "CLUSTER_RPC_PATH",
     "DEFAULT_LAN_GROUP",
     "DEFAULT_LAN_PORT",
@@ -53,6 +64,8 @@ __all__ = [
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
     "PROTOCOL_VERSION",
+    "Authenticator",
+    "ClusterKey",
     "ClusterMessage",
     "ClusterNode",
     "Discovery",
@@ -61,6 +74,7 @@ __all__ = [
     "LANDiscoveryAdapter",
     "MessageType",
     "MulticastConfig",
+    "NodeAuthenticator",
     "NodeCapabilities",
     "NodeIdentity",
     "OutboundHook",
@@ -70,6 +84,7 @@ __all__ = [
     "StaticDiscovery",
     "StaticPeerConfig",
     "decode_message",
+    "enable_mutual_auth",
     "encode_message",
     "error_envelope",
     "example_config",

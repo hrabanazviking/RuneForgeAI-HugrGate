@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import threading
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
@@ -30,6 +30,7 @@ from hugrgate.errors import (
     Abstention,
     BackendError,
     BackendUnavailable,
+    ClusterAuthError,
     HugrGateError,
     PolicyError,
     PrivacyViolation,
@@ -46,7 +47,16 @@ if TYPE_CHECKING:
 __all__ = [
     "ClusterNode",
     "InboundHook",
+    "NodeAuthenticator",
 ]
+
+#: Structural type for slice-208 authenticators. Declared here (rather
+#: than importing ``hugrgate.cluster.auth``) because the import graph —
+#: including ``TYPE_CHECKING`` edges — must stay acyclic: auth.py
+#: already references ClusterNode.
+class NodeAuthenticator(Protocol):
+    def seal(self, data: bytes) -> str: ...
+    def verify(self, data: bytes, tag: str | None) -> bool: ...
 
 #: Server-side hook applied to inbound envelopes (slice 208 plugs
 #: authentication verification in here). May raise to reject.
@@ -78,8 +88,15 @@ class ClusterNode:
         self.serve_remote = serve_remote
         #: Server-side inbound hook (authentication, slice 208).
         self.inbound_hook: InboundHook | None = None
+        #: Mutual authentication (slice 208). When ``require_auth`` is
+        #: true, every inbound envelope must carry a valid HMAC tag.
+        self.authenticator: NodeAuthenticator | None = None
+        self.require_auth = False
         self._seq = 0
-        self._lock = threading.Lock()
+        self._last_seq: dict[str, int] = {}  # sender -> highest seq seen
+        # RLock: _check_auth holds the lock while fail() -> next_seq()
+        # re-enters it.
+        self._lock = threading.RLock()
         self._handlers: dict[MessageType,
                              Callable[[ClusterMessage], ClusterMessage]] = {
             MessageType.DECIDE_REQUEST: self.handle_decide,
@@ -129,6 +146,29 @@ class ClusterNode:
 
     # -- inbound ------------------------------------------------------------
 
+    def _check_auth(self, message: ClusterMessage,
+                    auth_tag: str | None,
+                    raw: bytes | None) -> ClusterMessage | None:
+        """Verify authentication; return an ERROR envelope or None."""
+        def fail(reason: str) -> ClusterMessage:
+            return error_envelope(
+                ClusterAuthError(reason),
+                self.node_id, self.next_seq(), message.trace_id)
+
+        if self.authenticator is None:
+            return fail("node requires authentication but has no "
+                        "authenticator configured")
+        if not auth_tag or raw is None:
+            return fail("missing authentication tag")
+        if not self.authenticator.verify(raw, auth_tag):
+            return fail("authentication failed: bad tag")
+        with self._lock:
+            last = self._last_seq.get(message.sender, -1)
+            if message.seq <= last:
+                return fail("replayed or stale message: seq not monotonic")
+            self._last_seq[message.sender] = message.seq
+        return None
+
     def _respond(self, request: ClusterMessage,
                  msg_type: MessageType,
                  payload: dict[str, Any]) -> ClusterMessage:
@@ -140,8 +180,21 @@ class ClusterNode:
             payload=payload,
         )
 
-    def dispatch(self, message: ClusterMessage) -> ClusterMessage:
-        """Route one inbound envelope to its handler."""
+    def dispatch(self, message: ClusterMessage,
+                 auth_tag: str | None = None,
+                 raw: bytes | None = None) -> ClusterMessage:
+        """Route one inbound envelope to its handler.
+
+        When ``require_auth`` is set, ``auth_tag`` (the
+        ``X-Cluster-MAC`` header) is verified against ``raw`` (the
+        exact wire bytes) before anything else, and per-sender ``seq``
+        monotonicity rejects replays. All auth failures return a typed
+        ``cluster_auth_error`` envelope — never a guess, never a leak.
+        """
+        if self.require_auth:
+            failure = self._check_auth(message, auth_tag, raw)
+            if failure is not None:
+                return failure
         if self.inbound_hook is not None:
             try:
                 self.inbound_hook(message)

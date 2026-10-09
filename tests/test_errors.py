@@ -17,6 +17,7 @@ from hugrgate.errors import (
     BackendError,
     BackendUnavailable,
     CalibrationError,
+    ClusterAuthError,
     HugrGateError,
     PolicyError,
     PrivacyViolation,
@@ -30,6 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ALL_ERRORS = [
     HugrGateError, SpecError, PolicyError, BackendError, BackendUnavailable,
     CalibrationError, TimeoutError, PrivacyViolation, QueueFull, Abstention,
+    ClusterAuthError,
 ]
 
 EXPECTED_CODES = {
@@ -43,6 +45,7 @@ EXPECTED_CODES = {
     PrivacyViolation: "privacy_violation",
     QueueFull: "queue_full",
     Abstention: "abstention",
+    ClusterAuthError: "cluster_auth_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -56,6 +59,7 @@ EXPECTED_RECOVERABLE = {
     PrivacyViolation: False,
     QueueFull: True,
     Abstention: True,
+    ClusterAuthError: False,
 }
 
 
@@ -101,6 +105,7 @@ def test_to_dict_from_dict_round_trip():
         QueueFull("daemon is shutting down"),
         Abstention("low confidence", reason="below_threshold", p=0.4),
         HugrGateError("generic"),
+        ClusterAuthError("bad tag"),
     ]
     for original in cases:
         data = original.to_dict()

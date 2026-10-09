@@ -75,13 +75,19 @@ class RPCClient:
     """Cluster RPC client: envelopes to ``POST /cluster/rpc``.
 
     ``http_client`` is injectable for tests (pass an
-    ``httpx.Client`` with ``ASGITransport``); production use builds its
+    ``httpx.Client`` with a custom transport); production use builds its
     own with ``trust_env=False`` so proxy env vars can never reroute
     cluster traffic (same rationale as :class:`HugrGateClient`).
+
+    ``mac_provider`` seals the exact wire bytes of every outbound
+    envelope; the tag travels in the ``X-Cluster-MAC`` header (slice
+    208). Use :func:`enable_mutual_auth
+    <hugrgate.cluster.auth.enable_mutual_auth>` to wire it.
     """
 
     def __init__(self, node_id: str, timeout: float = 10.0,
                  outbound_hook: OutboundHook | None = None,
+                 mac_provider: Callable[[bytes], str] | None = None,
                  http_client: httpx.Client | None = None) -> None:
         if not node_id:
             raise SpecError("RPCClient needs a node_id")
@@ -90,6 +96,7 @@ class RPCClient:
         self.node_id = node_id
         self.timeout = timeout
         self._outbound_hook = outbound_hook
+        self._mac_provider = mac_provider
         self._http = http_client or httpx.Client(timeout=timeout,
                                                  trust_env=False)
         self._owns_http = http_client is None
@@ -126,11 +133,12 @@ class RPCClient:
              message: ClusterMessage) -> ClusterMessage:
         """Send a raw envelope; return the decoded reply envelope."""
         data = encode_message(message)
+        headers = {"content-type": "application/json"}
+        if self._mac_provider is not None:
+            headers["x-cluster-mac"] = self._mac_provider(data)
         url = peer.address + CLUSTER_RPC_PATH
         try:
-            response = self._http.post(
-                url, content=data,
-                headers={"content-type": "application/json"})
+            response = self._http.post(url, content=data, headers=headers)
         except httpx.ConnectError as e:
             raise BackendUnavailable(
                 f"peer {peer.node_id[:12]}… unreachable: {e}") from e

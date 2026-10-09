@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 54 · **public names:** 242
+**Modules:** 55 · **public names:** 254
 
 ## API stability policy
 
@@ -230,6 +230,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `AUTH_HEADER` | constant | `'x-cluster-mac'` |
 | `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
 | `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
 | `DEFAULT_LAN_PORT` | constant | `18377` |
@@ -237,6 +238,8 @@ that this document never drifts from the code.
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
 | `PROTOCOL_VERSION` | constant | `1` |
+| `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
+| `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `Discovery` | class | `()` |
@@ -245,20 +248,32 @@ that this document never drifts from the code.
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `MessageType` | class | `(*values)` |
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
+| `NodeAuthenticator` | class | `(*args, **kwargs)` |
 | `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
-| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
+| `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
 | `example_config` | function | `() -> 'dict[str, Any]'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.auth`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AUTH_HEADER` | constant | `'x-cluster-mac'` |
+| `KEY_BYTES` | constant | `32` |
+| `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
+| `ClusterKey` | class | `(key: 'bytes') -> None` |
+| `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
 
 ### `hugrgate.cluster.capabilities`
 
@@ -297,6 +312,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `NodeAuthenticator` | class | `(*args, **kwargs)` |
 
 ### `hugrgate.cluster.protocol`
 
@@ -321,7 +337,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
 
@@ -374,6 +390,7 @@ that this document never drifts from the code.
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |

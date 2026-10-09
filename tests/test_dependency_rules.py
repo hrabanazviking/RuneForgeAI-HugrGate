@@ -129,12 +129,13 @@ RESERVED_EXTRAS = {"onnx": "reserved for a future ONNX backend (slice 004 audit)
 _STDLIB = {
     "__future__", "abc", "argparse", "ast", "asyncio", "collections",
     "contextlib", "copy", "dataclasses", "datetime", "enum", "hashlib",
-    "importlib", "inspect", "io", "itertools", "json", "logging", "math",
-    "os", "pathlib", "pickle", "platform", "random", "re", "shutil",
-    "signal", "socket", "statistics", "string", "subprocess", "sys",
-    "tempfile", "threading", "time", "tomllib", "traceback", "typing",
-    "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
-    "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
+    "hmac", "importlib", "inspect", "io", "itertools", "json", "logging",
+    "math", "os", "pathlib", "pickle", "platform", "random", "re",
+    "secrets", "shutil", "signal", "socket", "ssl", "stat", "statistics",
+    "string", "subprocess", "sys", "tempfile", "threading", "time",
+    "tomllib", "traceback", "typing", "unittest", "uuid", "warnings",
+    "functools", "operator", "textwrap", "csv", "gzip", "zipfile",
+    "email", "html", "http", "urllib",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build"}

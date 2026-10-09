@@ -20,6 +20,7 @@ __all__ = [
     "BackendError",
     "BackendUnavailable",
     "CalibrationError",
+    "ClusterAuthError",
     "HugrGateError",
     "PolicyError",
     "PrivacyViolation",
@@ -105,6 +106,18 @@ class TimeoutError(BackendError):
 
 class PrivacyViolation(HugrGateError):
     code = "privacy_violation"
+    recoverable = False
+
+
+class ClusterAuthError(HugrGateError):
+    """Raised when cluster peer authentication fails (slice 208).
+
+    Not recoverable by blind retry: a bad tag means a wrong key, a
+    tampered envelope, or a replay — retrying the same bytes cannot
+    help. The operator must fix the key or investigate.
+    """
+
+    code = "cluster_auth_error"
     recoverable = False
 
 

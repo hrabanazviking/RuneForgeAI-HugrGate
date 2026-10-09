@@ -55,7 +55,11 @@ def build_cluster_router(node: ClusterNode) -> APIRouter:
                                   "message": str(e),
                                   "recoverable": False,
                                   "details": {}}})
-        reply: ClusterMessage = node.dispatch(message)
+        # Mutual authentication (slice 208): the tag covers the exact
+        # wire bytes; the node verifies before dispatching.
+        tag = request.headers.get("x-cluster-mac")
+        reply: ClusterMessage = node.dispatch(message, auth_tag=tag,
+                                              raw=body)
         return JSONResponse(
             status_code=200,
             content={"envelope": reply.to_dict()})

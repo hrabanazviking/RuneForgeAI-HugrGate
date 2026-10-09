@@ -63,7 +63,10 @@ class LoopbackTransport(httpx.BaseTransport):
             return httpx.Response(
                 400, json={"error": {"code": "spec_error",
                                     "message": str(e)}})
-        reply = self.node.dispatch(message)
+        reply = self.node.dispatch(
+            message,
+            auth_tag=request.headers.get("x-cluster-mac"),
+            raw=request.content)
         return httpx.Response(200, json={"envelope": reply.to_dict()})
 
 

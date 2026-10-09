@@ -77,6 +77,7 @@ flowchart TD
         cluster_rpc[cluster.rpc]
         cluster_node[cluster.node]
         cluster_routes[cluster.routes]
+        cluster_auth[cluster.auth]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -168,6 +169,7 @@ flowchart TD
     client --> serde
     client -.-> server
     client --> spec
+    cluster --> cluster_auth
     cluster --> cluster_capabilities
     cluster --> cluster_discovery
     cluster --> cluster_identity
@@ -176,6 +178,8 @@ flowchart TD
     cluster --> cluster_protocol
     cluster --> cluster_rpc
     cluster --> cluster_static_config
+    cluster_auth --> cluster_node
+    cluster_auth --> errors
     cluster_capabilities --> hugrgate
     cluster_capabilities --> backend
     cluster_capabilities --> cluster_identity
@@ -305,7 +309,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -398,6 +402,7 @@ flowchart TD
 | `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
+| `cluster` | `cluster.auth` | no |
 | `cluster` | `cluster.capabilities` | no |
 | `cluster` | `cluster.discovery` | no |
 | `cluster` | `cluster.identity` | no |
@@ -406,6 +411,8 @@ flowchart TD
 | `cluster` | `cluster.protocol` | no |
 | `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
+| `cluster.auth` | `cluster.node` | no |
+| `cluster.auth` | `errors` | no |
 | `cluster.capabilities` | `hugrgate` | no |
 | `cluster.capabilities` | `backend` | no |
 | `cluster.capabilities` | `cluster.identity` | no |
