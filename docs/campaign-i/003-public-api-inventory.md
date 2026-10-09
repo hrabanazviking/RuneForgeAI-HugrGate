@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 59 · **public names:** 267
+**Modules:** 60 · **public names:** 271
 
 ## API stability policy
 
@@ -394,6 +394,15 @@ that this document never drifts from the code.
 | `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
+
+### `hugrgate.edge.telemetry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MAX_EVENTS` | constant | `256` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
+| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
 
 ### `hugrgate.edge.thermal`
 
