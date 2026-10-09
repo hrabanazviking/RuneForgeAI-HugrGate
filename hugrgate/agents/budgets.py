@@ -85,6 +85,10 @@ class BudgetLedger:
                                 "latency_ms": 0.0}
         return True
 
+    def allocated(self, agent_id: str) -> bool:
+        """True when the agent has a budget allocated."""
+        return agent_id in self._budgets
+
     def remaining(self, agent_id: str) -> DecisionBudget:
         """Unspent budget (zeros when unallocated)."""
         budget = self._budgets.get(agent_id)
