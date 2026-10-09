@@ -141,3 +141,13 @@ it into an opaque agent.
   `FrequencyTable.top(n)` ranks by decayed count; optional
   `MemoryQuery` pre-filter and scan `limit`.
 - Tests: `tests/test_memory_frequency.py` (10 tests).
+
+### Slice 311 — Outcome-conditioned retrieval
+- `hugrgate/memory/conditioned.py`: `retrieve_conditioned()` filters
+  precedents by outcome kind (default: successes only), with
+  `include_unknown` (default strict-off, anti-survivorship-bias) and
+  `require_truth_agreement` (ground truth must agree with the outcome).
+- `retrieve()` gained an additive `episodes=` subset parameter so
+  conditioned (or otherwise pre-filtered) sets score without a second
+  history scan; prior tests still green.
+- Tests: `tests/test_memory_conditioned.py` (9 tests).

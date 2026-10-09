@@ -19,6 +19,7 @@ behavior is typed, thread-safe, and bounded (see
 
 from __future__ import annotations
 
+from hugrgate.memory.conditioned import retrieve_conditioned
 from hugrgate.memory.decay import (
     decay_weight,
     decayed_mean,
@@ -98,4 +99,5 @@ __all__ = [
     "record_only_backend",
     "redact_above",
     "retrieve",
+    "retrieve_conditioned",
 ]

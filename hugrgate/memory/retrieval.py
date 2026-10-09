@@ -13,6 +13,7 @@ The recency term uses :mod:`hugrgate.memory.decay`.
 from __future__ import annotations
 
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -70,12 +71,15 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
              half_life_seconds: float = 86400.0,
              min_score: float = 0.0,
              exclude_ids: set[str] | frozenset[str] = frozenset(),
+             episodes: Sequence[EpisodeLike] | None = None,
              now: float | None = None) -> list[RetrievalResult]:
     """Recall the top-``k`` precedents for ``query_features``.
 
     ``score = alpha*similarity + beta*recency + gamma*outcome_bonus``.
     Weights must be non-negative with a positive sum; ``min_score``
-    filters weak hits. ``now`` is injectable for deterministic tests.
+    filters weak hits. ``episodes`` scores a caller-supplied subset
+    instead of scanning the whole history (used by conditioned
+    retrieval); ``now`` is injectable for deterministic tests.
     """
     weights = {"alpha": alpha, "beta": beta, "gamma": gamma}
     for name, value in weights.items():
@@ -89,7 +93,8 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
         raise ValueError(f"min_score must be in [0, 1], got {min_score}")
     current = time.time() if now is None else now
 
-    episodes = history.find(MemoryQuery())
+    if episodes is None:
+        episodes = history.find(MemoryQuery())
     # Over-fetch candidates: recency/outcome can promote beyond the
     # pure-similarity top-k.
     candidates = most_similar(query_features, episodes,
