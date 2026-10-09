@@ -85,6 +85,7 @@ flowchart TD
         cluster_node_health[cluster.node_health]
         cluster_node_latency[cluster.node_latency]
         cluster_node_cost[cluster.node_cost]
+        cluster_work_stealing[cluster.work_stealing]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -192,6 +193,7 @@ flowchart TD
     cluster --> cluster_rpc
     cluster --> cluster_static_config
     cluster --> cluster_transport
+    cluster --> cluster_work_stealing
     cluster_auth --> cluster_node
     cluster_auth --> errors
     cluster_capabilities --> hugrgate
@@ -219,6 +221,7 @@ flowchart TD
     cluster_node --> cluster_protocol
     cluster_node --> cluster_routing
     cluster_node --> cluster_rpc
+    cluster_node --> cluster_work_stealing
     cluster_node --> core
     cluster_node --> errors
     cluster_node --> policy
@@ -248,6 +251,7 @@ flowchart TD
     cluster_rpc --> cluster_discovery
     cluster_rpc --> cluster_privacy_boundary
     cluster_rpc --> cluster_protocol
+    cluster_rpc -.-> cluster_work_stealing
     cluster_rpc --> errors
     cluster_rpc --> policy
     cluster_rpc --> result
@@ -256,6 +260,8 @@ flowchart TD
     cluster_static_config --> cluster_discovery
     cluster_static_config --> errors
     cluster_transport --> errors
+    cluster_work_stealing --> cluster_privacy_boundary
+    cluster_work_stealing --> errors
     core --> backend
     core --> errors
     core --> log
@@ -345,7 +351,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -454,6 +460,7 @@ flowchart TD
 | `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
 | `cluster` | `cluster.transport` | no |
+| `cluster` | `cluster.work_stealing` | no |
 | `cluster.auth` | `cluster.node` | no |
 | `cluster.auth` | `errors` | no |
 | `cluster.capabilities` | `hugrgate` | no |
@@ -481,6 +488,7 @@ flowchart TD
 | `cluster.node` | `cluster.protocol` | no |
 | `cluster.node` | `cluster.routing` | no |
 | `cluster.node` | `cluster.rpc` | no |
+| `cluster.node` | `cluster.work_stealing` | no |
 | `cluster.node` | `core` | no |
 | `cluster.node` | `errors` | no |
 | `cluster.node` | `policy` | no |
@@ -510,6 +518,7 @@ flowchart TD
 | `cluster.rpc` | `cluster.discovery` | no |
 | `cluster.rpc` | `cluster.privacy_boundary` | no |
 | `cluster.rpc` | `cluster.protocol` | no |
+| `cluster.rpc` | `cluster.work_stealing` | yes |
 | `cluster.rpc` | `errors` | no |
 | `cluster.rpc` | `policy` | no |
 | `cluster.rpc` | `result` | no |
@@ -518,6 +527,8 @@ flowchart TD
 | `cluster.static_config` | `cluster.discovery` | no |
 | `cluster.static_config` | `errors` | no |
 | `cluster.transport` | `errors` | no |
+| `cluster.work_stealing` | `cluster.privacy_boundary` | no |
+| `cluster.work_stealing` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `log` | no |

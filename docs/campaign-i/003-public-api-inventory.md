@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 62 · **public names:** 296
+**Modules:** 63 · **public names:** 299
 
 ## API stability policy
 
@@ -426,6 +426,14 @@ that this document never drifts from the code.
 | `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
 | `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
 | `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
+
+### `hugrgate.cluster.work_stealing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_STEAL_BATCH` | constant | `64` |
+| `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
+| `StealableQueue` | class | `() -> 'None'` |
 
 ### `hugrgate.core`
 

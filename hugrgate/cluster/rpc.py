@@ -301,6 +301,34 @@ class RPCClient:
                 f"peer {peer.node_id[:12]}… returned no batch results")
         return results
 
+    def steal(self, peer: PeerRecord, max_jobs: int = 8,
+              trace_id: str | None = None) -> list[dict]:
+        """Steal queued jobs from a peer (work stealing, slice 216).
+
+        Returns the stolen job dicts (already privacy-redacted by the
+        victim). Raises the peer's typed error on refusal.
+        """
+        from hugrgate.cluster.work_stealing import StealJob
+
+        if not isinstance(max_jobs, int) or max_jobs < 1:
+            raise SpecError("max_jobs must be a positive int")
+        message = self._prepare(MessageType.STEAL_REQUEST,
+                                {"max_jobs": max_jobs}, trace_id)
+        reply = self.send(peer, message)
+        if reply.msg_type is not MessageType.STEAL_RESPONSE:
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… sent unexpected "
+                f"{reply.msg_type.value}")
+        jobs = reply.payload.get("jobs")
+        if not isinstance(jobs, list):
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… returned no stolen jobs")
+        # Validate shape early: a lying peer's garbage dies here, not
+        # in the local queue.
+        for raw in jobs:
+            StealJob.from_dict(raw)
+        return jobs
+
 
 class RemoteBackend(Backend):
     """A peer node exposed as an ordinary backend.

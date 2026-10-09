@@ -87,6 +87,11 @@ from hugrgate.cluster.transport import (
     trusted_context_for,
     verify_cert_fingerprint,
 )
+from hugrgate.cluster.work_stealing import (
+    MAX_STEAL_BATCH,
+    StealableQueue,
+    StealJob,
+)
 
 __all__ = [
     "AUTH_HEADER",
@@ -98,6 +103,7 @@ __all__ = [
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
+    "MAX_STEAL_BATCH",
     "PROTOCOL_VERSION",
     "SENSITIVE_PREFIX",
     "Authenticator",
@@ -130,6 +136,8 @@ __all__ = [
     "RouteCandidate",
     "StaticDiscovery",
     "StaticPeerConfig",
+    "StealJob",
+    "StealableQueue",
     "TLSServer",
     "cert_fingerprint",
     "decode_message",

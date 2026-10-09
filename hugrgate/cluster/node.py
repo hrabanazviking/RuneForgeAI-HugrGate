@@ -30,6 +30,12 @@ from hugrgate.cluster.protocol import (
 )
 from hugrgate.cluster.routing import DistributedRouter, PeerScores
 from hugrgate.cluster.rpc import RPCClient, error_envelope
+from hugrgate.cluster.work_stealing import (
+    DEFAULT_STEAL_BATCH,
+    MAX_STEAL_BATCH,
+    StealableQueue,
+    StealJob,
+)
 from hugrgate.core import HugrGate
 from hugrgate.errors import (
     Abstention,
@@ -106,9 +112,13 @@ class ClusterNode:
                              Callable[[ClusterMessage], ClusterMessage]] = {
             MessageType.DECIDE_REQUEST: self.handle_decide,
             MessageType.BATCH_REQUEST: self.handle_batch,
+            MessageType.STEAL_REQUEST: self.handle_steal_request,
             MessageType.POLICY_PUSH: self.handle_policy_push,
             MessageType.POLICY_PULL: self.handle_policy_pull,
         }
+        #: Work stealing (slice 216): pending decision jobs thieves may
+        #: steal from the tail.
+        self.steal_queue = StealableQueue()
         #: Cluster policy propagation (slice 210).
         self.policy_sync = PolicyPropagator(node_id=identity.node_id)
         #: Node health scoring (slice 213).
@@ -402,6 +412,48 @@ class ClusterNode:
             results.append(self._serve_one(req))
         return self._respond(message, MessageType.BATCH_RESPONSE,
                              {"results": results})
+
+    def handle_steal_request(self, message: ClusterMessage) -> ClusterMessage:
+        """Victim side of work stealing: hand over tail jobs, redacted."""
+        if not self.serve_remote:
+            return error_envelope(
+                BackendUnavailable("this node does not serve remote "
+                                   "decisions"),
+                self.node_id, self.next_seq(), message.trace_id)
+        raw_max = message.payload.get("max_jobs", DEFAULT_STEAL_BATCH)
+        if not isinstance(raw_max, int) or raw_max < 1:
+            return error_envelope(
+                SpecError("steal request needs a positive int 'max_jobs'"),
+                self.node_id, self.next_seq(), message.trace_id)
+        stolen = self.steal_queue.steal(min(raw_max, MAX_STEAL_BATCH))
+        jobs = [job.redacted().to_dict() for job in stolen]
+        return self._respond(message, MessageType.STEAL_RESPONSE,
+                             {"jobs": jobs,
+                              "remaining": len(self.steal_queue)})
+
+    def request_steal(self, peer: PeerRecord,
+                      max_jobs: int = DEFAULT_STEAL_BATCH,
+                      trace_id: str | None = None) -> int:
+        """Steal up to ``max_jobs`` from a peer; enqueue locally.
+
+        Returns the number stolen. Feeds health/latency like any
+        remote call.
+        """
+        import time
+
+        start = time.perf_counter()
+        try:
+            jobs = self.rpc.steal(peer, max_jobs,
+                                  trace_id=trace_id or new_trace_id())
+        except BackendError:
+            self.health.record_failure(peer.node_id)
+            raise
+        rtt_ms = (time.perf_counter() - start) * 1000.0
+        self.health.record_success(peer.node_id)
+        self.latency.record(peer.node_id, rtt_ms)
+        for raw in jobs:
+            self.steal_queue.offer(StealJob.from_dict(raw))
+        return len(jobs)
 
     def _serve_one(self, req: Any) -> dict[str, Any]:
         if not isinstance(req, dict):
