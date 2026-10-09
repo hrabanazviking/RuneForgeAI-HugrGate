@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 52 · **public names:** 227
+**Modules:** 52 · **public names:** 233
 
 ## API stability policy
 
@@ -313,11 +313,17 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
 | `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QuantFormat` | class | `(*values)` |
 | `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
 | `QuantProfileRegistry` | class | `()` |
+| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
+| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
 | `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
+| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
+| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
+| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
 | `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
 
 ### `hugrgate.edge.routing`

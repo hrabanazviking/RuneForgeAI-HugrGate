@@ -31,11 +31,17 @@ except ImportError:  # optional dependency — pure-python fallback below
 
 __all__ = [
     "QUANT_PROFILES",
+    "Int4Adapter",
     "QuantError",
     "QuantFormat",
     "QuantProfile",
     "QuantProfileRegistry",
+    "QuantizedTensor",
+    "dequantize_int8",
     "estimate",
+    "int8_matvec",
+    "int8_roundtrip_error",
+    "quantize_int8",
     "select_profile",
 ]
 
@@ -205,33 +211,186 @@ def _require_numpy() -> None:
             "'bench' extra: pip install 'hugrgate[bench]'")
 
 
-def quantize_int8(weights: np.ndarray) -> tuple[np.ndarray, float, int]:
-    """Affine per-tensor INT8 quantization (slice 183's execution path).
+def quantize_int8(weights: np.ndarray, *, symmetric: bool = False,
+                  axis: int | None = None
+                  ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Affine INT8 quantization — the edge INT8 inference path.
 
-    Returns ``(q, scale, zero_point)`` with ``q`` in int8 and
-    ``weights ≈ scale * (q - zero_point)``. Deterministic: identical
-    input always yields identical output. A constant tensor maps to a
-    degenerate scale of 1.0 with all-zero codes.
+    Per-tensor by default (``axis=None``); ``axis=0`` (or 1) quantizes
+    per output-channel, which cuts error when channels live on wildly
+    different scales. ``symmetric=True`` pins ``zero_point`` to 0
+    (better for weight tensors centered near zero).
+
+    Returns ``(q, scales, zero_points)`` with ``q`` int8 and
+    ``weights ≈ scales * (q - zero_points)`` broadcast along ``axis``.
+    Deterministic: identical input always yields identical output.
+    Rejects NaN/Inf — silently quantizing poisoned weights would corrupt
+    every downstream decision.
     """
     _require_numpy()
     w = np.asarray(weights, dtype=np.float64)
-    wmin, wmax = float(w.min()), float(w.max())
-    if wmax == wmin:
-        q = np.zeros(w.shape, dtype=np.int8)
-        return q, 1.0, 0
-    scale = (wmax - wmin) / 255.0
-    zero_point = round(-wmin / scale) - 128
-    zero_point = max(-128, min(127, zero_point))
-    q = np.clip(np.round(w / scale + zero_point), -128, 127
-                ).astype(np.int8)
-    return q, scale, zero_point
+    if w.size == 0:
+        raise QuantError("cannot quantize an empty tensor")
+    if not np.all(np.isfinite(w)):
+        raise QuantError("weights contain NaN or Inf; refusing to quantize")
+
+    def _params(block: np.ndarray) -> tuple[float, int]:
+        wmin, wmax = float(block.min()), float(block.max())
+        if wmax == wmin:
+            return 1.0, 0
+        if symmetric:
+            amax = max(abs(wmin), abs(wmax))
+            return amax / 127.0, 0
+        scale = (wmax - wmin) / 255.0
+        zp = max(-128, min(127, round(-wmin / scale) - 128))
+        return scale, zp
+
+    if axis is None:
+        scale, zp = _params(w)
+        scales = np.array([scale])
+        zps = np.array([zp])
+        q = np.clip(np.round(w / scale + zp), -128, 127).astype(np.int8)
+    else:
+        ax = axis % w.ndim
+        moved = np.moveaxis(w, ax, 0)
+        scales_list: list[float] = []
+        zps_list: list[int] = []
+        q_blocks = []
+        for ch in range(moved.shape[0]):
+            scale, zp = _params(moved[ch])
+            scales_list.append(scale)
+            zps_list.append(zp)
+            q_blocks.append(np.clip(np.round(moved[ch] / scale + zp),
+                                    -128, 127).astype(np.int8))
+        scales = np.array(scales_list)
+        zps = np.array(zps_list)
+        q = np.moveaxis(np.stack(q_blocks), 0, ax)
+    return q, scales, zps
 
 
-def dequantize_int8(q: np.ndarray, scale: float, zero_point: int
+def dequantize_int8(q: np.ndarray, scales: np.ndarray,
+                    zero_points: np.ndarray, axis: int | None = None
                     ) -> np.ndarray:
-    """Invert :func:`quantize_int8`."""
+    """Invert :func:`quantize_int8` (per-tensor or per-channel)."""
     _require_numpy()
-    return (np.asarray(q, dtype=np.float64) - zero_point) * scale
+    qf = np.asarray(q, dtype=np.float64)
+    if axis is None:
+        return (qf - float(zero_points.ravel()[0])) * float(scales.ravel()[0])
+    ax = axis % qf.ndim
+    shape = [1] * qf.ndim
+    shape[ax] = -1
+    s = np.asarray(scales, dtype=np.float64).reshape(shape)
+    z = np.asarray(zero_points, dtype=np.float64).reshape(shape)
+    return (qf - z) * s
+
+
+@dataclass(frozen=True)
+class QuantizedTensor:
+    """A serializable INT8 tensor: codes + parameters + provenance.
+
+    This is what the edge model store (slice 189/191) persists: the
+    int8 codes plus everything needed to run or audit the quantized
+    op without the original float weights.
+    """
+
+    codes: np.ndarray          # int8
+    scales: np.ndarray         # float64, one per channel (or one)
+    zero_points: np.ndarray    # int64, one per channel (or one)
+    shape: tuple[int, ...]
+    symmetric: bool
+    axis: int | None
+
+    def __post_init__(self) -> None:
+        if np is not None and self.codes.dtype != np.int8:
+            raise QuantError("codes must be int8")
+
+    @classmethod
+    def from_weights(cls, weights: np.ndarray, *,
+                     symmetric: bool = False,
+                     axis: int | None = None) -> QuantizedTensor:
+        q, scales, zps = quantize_int8(weights, symmetric=symmetric,
+                                       axis=axis)
+        return cls(codes=q, scales=scales,
+                   zero_points=zps.astype(np.int64),
+                   shape=tuple(np.shape(weights)),
+                   symmetric=symmetric, axis=axis)
+
+    def dequantize(self) -> np.ndarray:
+        return dequantize_int8(self.codes, self.scales,
+                               self.zero_points, axis=self.axis)
+
+    def to_bytes(self) -> bytes:
+        """Compact little-endian serialization: header + codes + params."""
+        import struct as _struct
+        fmt = "<8sB?bq"
+        header = _struct.pack(
+            fmt, b"HGQT0001", len(self.shape),
+            self.symmetric, -1 if self.axis is None else self.axis,
+            len(self.scales))
+        dims = _struct.pack(f"<{len(self.shape)}q", *self.shape)
+        return (header + dims + self.codes.tobytes()
+                + self.scales.astype("<f8").tobytes()
+                + self.zero_points.astype("<i8").tobytes())
+
+    @classmethod
+    def from_bytes(cls, blob: bytes) -> QuantizedTensor:
+        import struct as _struct
+        fmt = "<8sB?bq"
+        hsize = _struct.calcsize(fmt)
+        if len(blob) < hsize:
+            raise QuantError("quantized tensor blob too short")
+        magic, rank, symmetric, axis_raw, nscales = _struct.unpack(
+            fmt, blob[:hsize])
+        if magic != b"HGQT0001":
+            raise QuantError(f"bad magic {magic!r}; not a HugrGate QT blob")
+        off = hsize
+        dims = _struct.unpack(f"<{rank}q", blob[off:off + 8 * rank])
+        off += 8 * rank
+        shape = tuple(int(d) for d in dims)
+        n = 1
+        for d in shape:
+            n *= d
+        codes = np.frombuffer(blob[off:off + n], dtype=np.int8).copy()
+        off += n
+        if len(blob) < off + 16 * nscales:
+            raise QuantError("quantized tensor blob truncated")
+        scales = np.frombuffer(
+            blob[off:off + 8 * nscales], dtype="<f8").astype(float)
+        off += 8 * nscales
+        zps = np.frombuffer(
+            blob[off:off + 8 * nscales], dtype="<i8").astype(np.int64)
+        if codes.size != n or scales.size != nscales:
+            raise QuantError("quantized tensor blob truncated")
+        axis = None if axis_raw < 0 else int(axis_raw)
+        return cls(codes=codes.reshape(shape), scales=scales,
+                   zero_points=zps, shape=shape,
+                   symmetric=bool(symmetric), axis=axis)
+
+    def nbytes(self) -> int:
+        return len(self.to_bytes())
+
+
+def int8_matvec(weight_qt: QuantizedTensor, x: np.ndarray,
+                bias: np.ndarray | None = None) -> np.ndarray:
+    """Simulated quantized inference: ``y = dequant(W) @ x + b``.
+
+    This is the honest edge INT8 path: the multiply happens against
+    dequantized int8 codes (what a real kernel computes, up to its own
+    accumulation rounding), never against the original float weights.
+    """
+    _require_numpy()
+    w = weight_qt.dequantize()
+    xv = np.asarray(x, dtype=np.float64)
+    if w.ndim != 2 or xv.ndim != 1 or w.shape[1] != xv.shape[0]:
+        raise QuantError(
+            f"matvec shape mismatch: W{w.shape} @ x{xv.shape}")
+    y = w @ xv
+    if bias is not None:
+        bv = np.asarray(bias, dtype=np.float64)
+        if bv.shape != (w.shape[0],):
+            raise QuantError(f"bias shape {bv.shape} != {(w.shape[0],)}")
+        y = y + bv
+    return y
 
 
 def int8_roundtrip_error(weights: np.ndarray) -> float:
