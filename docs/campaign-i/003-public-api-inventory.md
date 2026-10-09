@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 43 · **public names:** 181
+**Modules:** 67 · **public names:** 290
 
 ## API stability policy
 
@@ -142,7 +142,31 @@ that this document never drifts from the code.
 | `PlattCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
 | `IsotonicCalibrator` | class | `()` |
 | `TemperatureCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
+| `OnlineCalibrator` | class | `(n_bins: 'int' = 10, decay: 'float' = 0.995, prior_strength: 'float' = 1.0)` |
+| `SlidingWindowCalibrator` | class | `(factory: 'Callable[[], Calibrator]', window_size: 'int' = 500, refit_every: 'int' = 50, min_samples: 'int' = 20)` |
+| `BetaBinomialCalibrator` | class | `(n_bins: 'int' = 10, prior_a: 'float' = 1.0, prior_b: 'float' = 1.0)` |
+| `CalibratorEnsemble` | class | `(members: 'Sequence[Tuple[Callable[[], Calibrator], float]] | None' = None, mode: 'str' = 'mean')` |
+| `adversarial` | constant | `<module 'hugrgate.calibration.adversarial' from '/home/hatch` |
+| `aleatoric` | constant | `<module 'hugrgate.calibration.aleatoric' from '/home/hatch/w` |
+| `autoselect` | constant | `<module 'hugrgate.calibration.autoselect' from '/home/hatch/` |
+| `bench` | constant | `<module 'hugrgate.calibration.bench' from '/home/hatch/works` |
+| `conformal` | constant | `<module 'hugrgate.calibration.conformal' from '/home/hatch/w` |
+| `conformal_regression` | constant | `<module 'hugrgate.calibration.conformal_regression' from '/h` |
+| `coverage` | constant | `<module 'hugrgate.calibration.coverage' from '/home/hatch/wo` |
+| `decomposition` | constant | `<module 'hugrgate.calibration.decomposition' from '/home/hat` |
+| `drift` | constant | `<module 'hugrgate.calibration.drift' from '/home/hatch/works` |
+| `epistemic` | constant | `<module 'hugrgate.calibration.epistemic' from '/home/hatch/w` |
+| `group` | constant | `<module 'hugrgate.calibration.group' from '/home/hatch/works` |
+| `imbalance` | constant | `<module 'hugrgate.calibration.imbalance' from '/home/hatch/w` |
+| `registry` | constant | `<module 'hugrgate.calibration.registry' from '/home/hatch/wo` |
+| `risk_coverage` | constant | `<module 'hugrgate.calibration.risk_coverage' from '/home/hat` |
+| `selective` | constant | `<module 'hugrgate.calibration.selective' from '/home/hatch/w` |
+| `sets` | constant | `<module 'hugrgate.calibration.sets' from '/home/hatch/worksp` |
+| `shift` | constant | `<module 'hugrgate.calibration.shift' from '/home/hatch/works` |
+| `viz` | constant | `<module 'hugrgate.calibration.viz' from '/home/hatch/workspa` |
 | `metrics` | constant | `<module 'hugrgate.calibration.metrics' from '/home/hatch/wor` |
+| `perclass` | constant | `<module 'hugrgate.calibration.perclass' from '/home/hatch/wo` |
+| `pipeline` | constant | `<module 'hugrgate.calibration.pipeline' from '/home/hatch/wo` |
 | `profiles` | constant | `<module 'hugrgate.calibration.profiles' from '/home/hatch/wo` |
 
 ### `hugrgate.calibration._base`
@@ -151,6 +175,120 @@ that this document never drifts from the code.
 |---|---|---|
 | `Calibrator` | class | `()` |
 | `CalibratorRegistry` | class | `()` |
+
+### `hugrgate.calibration.adversarial`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `StressReport` | class | `(calibrator_name: 'str', baseline: 'Dict[str, float]', attacks: 'List[Dict[str, Any]]' = <factory>) -> None` |
+| `overconfidence_attack` | function | `(scores: 'Sequence[float]', strength: 'float' = 0.2) -> 'List[float]'` |
+| `underconfidence_attack` | function | `(scores: 'Sequence[float]', strength: 'float' = 0.2) -> 'List[float]'` |
+| `label_flip_attack` | function | `(labels: 'Sequence[int]', flip_rate: 'float' = 0.1, seed: 'int' = 0) -> 'List[int]'` |
+| `bias_shift_attack` | function | `(scores: 'Sequence[float]', shift: 'float' = 0.1) -> 'List[float]'` |
+| `stress_test` | function | `(factory: 'Callable[[], Calibrator]', scores: 'Sequence[float]', labels: 'Sequence[int]', attacks: 'Dict[str, Callable[[List[float], List[int]], tuple[List[float], List[int]]]] | None' = None, n_bins: 'int' = 10) -> 'StressReport'` |
+
+### `hugrgate.calibration.aleatoric`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AleatoricReport` | class | `(adapter: 'str', value: 'float', details: 'Dict[str, Any]' = <factory>) -> None` |
+| `predictive_entropy` | function | `(proba: 'Mapping[str, float]') -> 'float'` |
+| `bernoulli_noise` | function | `(p: 'float') -> 'float'` |
+| `label_noise_estimate` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', n_bins: 'int' = 10) -> 'float'` |
+| `noise_floor_report` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', n_bins: 'int' = 10) -> 'AleatoricReport'` |
+
+### `hugrgate.calibration.autoselect`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_CANDIDATES` | constant | `['beta-binomial', 'ensemble', 'isotonic', 'platt', 'temperat` |
+| `SelectionResult` | class | `(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'List[Dict[str, Any]]', best: 'str', best_params: 'Dict[str, Any]', n_samples: 'int', notes: 'str' = '') -> None` |
+| `auto_select` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Optional[Sequence[str]]' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True) -> 'SelectionResult'` |
+
+### `hugrgate.calibration.bayes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BetaBinomialCalibrator` | class | `(n_bins: 'int' = 10, prior_a: 'float' = 1.0, prior_b: 'float' = 1.0)` |
+| `beta_quantile` | function | `(p: 'float', a: 'float', b: 'float', tol: 'float' = 1e-10) -> 'float'` |
+
+### `hugrgate.calibration.bench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DATASETS` | constant | `('overconfident', 'underconfident', 'label-noise', 'well-cal` |
+| `BENCH_CALIBRATORS` | constant | `('raw', 'platt', 'isotonic', 'temperature', 'beta-binomial',` |
+| `generate_dataset` | function | `(kind: 'str', n: 'int', seed: 'int') -> 'tuple[List[float], List[int]]'` |
+| `run_benchmark` | function | `(seed: 'int' = 20261009, n: 'int' = 2000, datasets: 'Sequence[str]' = ('overconfident', 'underconfident', 'label-noise', 'well-calibrated'), calibrators: 'Sequence[str]' = ('raw', 'platt', 'isotonic', 'temperature', 'beta-binomial', 'ensemble')) -> 'Dict[str, Any]'` |
+
+### `hugrgate.calibration.conformal`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConformalClassifier` | class | `(alpha: 'float' = 0.1)` |
+
+### `hugrgate.calibration.conformal_regression`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConformalRegressor` | class | `(alpha: 'float' = 0.1)` |
+
+### `hugrgate.calibration.coverage`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `clopper_pearson` | function | `(k: 'int', n: 'int', level: 'float' = 0.95) -> 'Tuple[float, float]'` |
+| `hoeffding_lower_bound` | function | `(k: 'int', n: 'int', delta: 'float' = 0.05) -> 'float'` |
+| `CoverageCertificate` | class | `(n: 'int', hits: 'int', level: 'float' = 0.95, method: 'str' = 'clopper-pearson', notes: 'str' = '', extra: 'Dict[str, Any]' = <factory>) -> None` |
+| `validate_coverage` | function | `(sets: 'Sequence[Any]', labels: 'Sequence[str]', target: 'float', level: 'float' = 0.95, method: 'str' = 'clopper-pearson') -> 'CoverageCertificate'` |
+| `required_n` | function | `(width: 'float', level: 'float' = 0.95, p: 'float' = 0.5) -> 'int'` |
+
+### `hugrgate.calibration.decomposition`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `UncertaintyBreakdown` | class | `(total: 'float', aleatoric: 'float', epistemic: 'float', n_members: 'int', n_classes: 'int') -> None` |
+| `decompose` | function | `(predictions: 'Sequence[Sequence[float]]') -> 'UncertaintyBreakdown'` |
+| `decompose_dicts` | function | `(predictions: 'Sequence[Mapping[str, float]]') -> 'UncertaintyBreakdown'` |
+
+### `hugrgate.calibration.drift`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationDriftMonitor` | class | `(baseline_batches: 'int' = 5, k: 'float' = 3.0, ewma_alpha: 'float' = 0.3, min_std: 'float' = 0.001, n_bins: 'int' = 10)` |
+| `DriftReport` | class | `(monitor: "'CalibrationDriftMonitor'")` |
+
+### `hugrgate.calibration.ensemble`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibratorEnsemble` | class | `(members: 'Sequence[Tuple[Callable[[], Calibrator], float]] | None' = None, mode: 'str' = 'mean')` |
+
+### `hugrgate.calibration.epistemic`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EpistemicReport` | class | `(adapter: 'str', value: 'float', threshold: 'float', triggered: 'bool', details: 'Dict[str, Any]' = <factory>) -> None` |
+| `ensemble_epistemic` | function | `(predictions: 'Sequence[Sequence[float]]') -> 'UncertaintyBreakdown'` |
+| `distance_epistemic` | function | `(score: 'float', fit_scores: 'Sequence[float]') -> 'float'` |
+| `combine_epistemic` | function | `(values: 'Sequence[float]') -> 'float'` |
+| `review_on_epistemic` | function | `(result: 'DecisionResult', epistemic_value: 'float', threshold: 'float', reason: 'str' = 'high-epistemic-uncertainty') -> "tuple['DecisionResult', EpistemicReport]"` |
+
+### `hugrgate.calibration.group`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GroupCalibrator` | class | `(factory: 'Callable[[], Calibrator]', min_group_samples: 'int' = 20)` |
+
+### `hugrgate.calibration.imbalance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ImbalanceReport` | class | `(base_rate: 'float', target_rate: 'float', n_before: 'int', n_after: 'int', correction_applied: 'bool', deploy_prior: 'float') -> None` |
+| `rebalance` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', target_rate: 'float' = 0.5, seed: 'int' = 0) -> 'Tuple[List[float], List[int]]'` |
+| `saerens_prior_correction` | function | `(p_cal: 'float', fit_prior: 'float', deploy_prior: 'float') -> 'float'` |
+| `fit_balanced` | function | `(factory: 'Callable[[], Calibrator]', scores: 'Sequence[float]', labels: 'Sequence[int]', target_rate: 'float' = 0.5, seed: 'int' = 0, deploy_prior: 'float | None' = None) -> 'Tuple[Calibrator, ImbalanceReport]'` |
+| `stratified_metrics` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'Dict[str, Dict[str, float]]'` |
 
 ### `hugrgate.calibration.isotonic`
 
@@ -169,6 +307,29 @@ that this document never drifts from the code.
 | `maximum_calibration_error` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `ece_multiclass` | function | `(y_true: 'Sequence[str]', probas: 'Sequence[Dict[str, float]]', n_bins: 'int' = 10) -> 'float'` |
 
+### `hugrgate.calibration.online`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OnlineCalibrator` | class | `(n_bins: 'int' = 10, decay: 'float' = 0.995, prior_strength: 'float' = 1.0)` |
+
+### `hugrgate.calibration.perclass`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PerClassCalibrator` | class | `(factory: 'Callable[[], Calibrator]')` |
+| `build_profile` | function | `(name: 'str', per_class: 'PerClassCalibrator', backend_name: 'str' = '', model_name: 'str' = '', model_version: 'str' = '', version: 'str' = '1.0.0') -> 'CalibrationProfile'` |
+
+### `hugrgate.calibration.pipeline`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MIN_FIT_SAMPLES` | constant | `10` |
+| `FitDiagnostics` | class | `(n_samples: 'int', n_positive: 'int', n_negative: 'int', score_min: 'float', score_max: 'float', positive_rate: 'float', dataset_hash: 'str') -> None` |
+| `CalibrationReport` | class | `(calibrator_name: 'str', calibrator_params: 'Dict[str, Any]', diagnostics: 'Dict[str, Any]', metrics_before: 'Dict[str, float]', metrics_after: 'Dict[str, float]', improved: 'bool', created_at: 'str' = <factory>, provenance: 'Dict[str, Any]' = <factory>, notes: 'str' = '') -> None` |
+| `CalibrationPipeline` | class | `(factory: 'Callable[[], Calibrator]', name: 'Optional[str]' = None)` |
+| `validate_fit_data` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', min_samples: 'int' = 10) -> 'FitDiagnostics'` |
+
 ### `hugrgate.calibration.platt`
 
 | Name | Kind | Signature / value |
@@ -184,11 +345,79 @@ that this document never drifts from the code.
 | `CalibrationProfileStore` | class | `(root: 'str | Path')` |
 | `CalibratedBackend` | class | `(inner: 'Backend', profile: 'CalibrationProfile', calibrators: 'Optional[Dict[str, Calibrator]]' = None)` |
 
+### `hugrgate.calibration.registry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibratorSpec` | class | `(name: 'str', cls: 'Type[Calibrator]', family: 'str', monotone: 'bool', needs_both_classes: 'bool', streaming: 'bool', description: 'str' = '', deprecated: 'bool' = False, replaced_by: 'Optional[str]' = None, extra: 'Dict[str, Any]' = <factory>) -> None` |
+| `catalog` | function | `() -> 'Dict[str, CalibratorSpec]'` |
+| `spec` | function | `(name: 'str') -> 'CalibratorSpec'` |
+| `find` | function | `(family: 'Optional[str]' = None, monotone: 'Optional[bool]' = None, streaming: 'Optional[bool]' = None, needs_both_classes: 'Optional[bool]' = None, include_deprecated: 'bool' = False) -> 'List[CalibratorSpec]'` |
+| `describe` | function | `() -> 'List[Dict[str, Any]]'` |
+| `register_spec` | function | `(spec_: 'CalibratorSpec') -> 'None'` |
+
+### `hugrgate.calibration.risk_coverage`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `risk_coverage_curve` | function | `(confidences: 'Sequence[float]', losses: 'Sequence[float]', n_points: 'int' = 50) -> 'List[Dict[str, float]]'` |
+| `aurc` | function | `(curve: 'Sequence[Dict[str, float]]') -> 'float'` |
+| `oracle_aurc` | function | `(losses: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
+| `risk_at_coverage` | function | `(curve: 'Sequence[Dict[str, float]]', coverage: 'float') -> 'float'` |
+| `coverage_at_risk` | function | `(curve: 'Sequence[Dict[str, float]]', risk: 'float') -> 'float'` |
+
+### `hugrgate.calibration.selective`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `selective_curve` | function | `(confidences: 'Sequence[float]', correct: 'Sequence[int]', n_points: 'int' = 50) -> 'List[Dict[str, float]]'` |
+| `area_under_selective_curve` | function | `(curve: 'Sequence[Dict[str, float]]') -> 'float'` |
+| `coverage_at_accuracy` | function | `(curve: 'Sequence[Dict[str, float]]', accuracy: 'float') -> 'float'` |
+| `accuracy_at_coverage` | function | `(curve: 'Sequence[Dict[str, float]]', coverage: 'float') -> 'float'` |
+
+### `hugrgate.calibration.sets`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PredictionSet` | class | `(labels: 'FrozenSet[str]', method: 'str', params: 'Dict[str, Any]' = <factory>, provenance: 'Dict[str, Any]' = <factory>) -> None` |
+| `threshold_set` | function | `(proba: 'Mapping[str, float]', threshold: 'float') -> 'PredictionSet'` |
+| `topk_set` | function | `(proba: 'Mapping[str, float]', k: 'int') -> 'PredictionSet'` |
+| `cumulative_set` | function | `(proba: 'Mapping[str, float]', mass: 'float') -> 'PredictionSet'` |
+| `set_metrics` | function | `(sets: 'Sequence[PredictionSet]', labels: 'Sequence[str]') -> 'Dict[str, float]'` |
+| `size_stratified_coverage` | function | `(sets: 'Sequence[PredictionSet]', labels: 'Sequence[str]') -> 'List[Dict[str, float]]'` |
+
+### `hugrgate.calibration.shift`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `psi` | function | `(source: 'Sequence[float]', target: 'Sequence[float]', n_bins: 'int' = 10, smooth: 'float' = 0.5) -> 'float'` |
+| `psi_band` | function | `(value: 'float') -> 'str'` |
+| `density_ratio_weights` | function | `(source: 'Sequence[float]', target: 'Sequence[float]', n_bins: 'int' = 10, smooth: 'float' = 0.5) -> 'List[float]'` |
+| `resample_for_shift` | function | `(source_scores: 'Sequence[float]', source_labels: 'Sequence[int]', target_scores: 'Sequence[float]', n_bins: 'int' = 10, seed: 'int' = 0) -> 'Tuple[List[float], List[int]]'` |
+| `em_target_prior` | function | `(source_scores: 'Sequence[float]', source_labels: 'Sequence[int]', target_scores: 'Sequence[float]', factory: 'Callable[[], Calibrator]', max_iter: 'int' = 100, tol: 'float' = 1e-06) -> 'float'` |
+
 ### `hugrgate.calibration.temperature`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `TemperatureCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
+
+### `hugrgate.calibration.viz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `reliability_curve_data` | function | `(y_true: 'Sequence[int]', y_prob: 'Sequence[float]', n_bins: 'int' = 10) -> 'Dict[str, Any]'` |
+| `confidence_histogram` | function | `(probas: 'Sequence[Mapping[str, float]]', n_bins: 'int' = 10) -> 'Dict[str, Any]'` |
+| `per_class_ece_bars` | function | `(y_true: 'Sequence[str]', probas: 'Sequence[Mapping[str, float]]', n_bins: 'int' = 10) -> 'Dict[str, Any]'` |
+| `risk_coverage_points` | function | `(curve: 'Sequence[Dict[str, float]]') -> 'Dict[str, Any]'` |
+| `selective_curve_points` | function | `(curve: 'Sequence[Dict[str, float]]') -> 'Dict[str, Any]'` |
+| `calibration_dashboard` | function | `(y_true: 'Sequence[str]', probas: 'Sequence[Mapping[str, float]]', n_bins: 'int' = 10) -> 'Dict[str, Any]'` |
+
+### `hugrgate.calibration.window`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SlidingWindowCalibrator` | class | `(factory: 'Callable[[], Calibrator]', window_size: 'int' = 500, refit_every: 'int' = 50, min_samples: 'int' = 20)` |
 
 ### `hugrgate.circuit`
 

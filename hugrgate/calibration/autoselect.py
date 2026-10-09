@@ -14,7 +14,7 @@ explicitly if you want them compared.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Sequence
 
 try:
@@ -64,7 +64,7 @@ class SelectionResult:
     metric: str
     n_folds: int
     seed: int
-    ranking: List[Dict[str, float]]  # {name, mean, std}, best first
+    ranking: List[Dict[str, Any]]  # {name, mean, std, folds}, best first
     best: str
     best_params: Dict[str, Any]
     n_samples: int
@@ -101,7 +101,8 @@ def auto_select(scores: Sequence[float], labels: Sequence[int],
             f"unknown metric {metric!r}; choose from {sorted(_METRICS)}")
     if n_folds < 2:
         raise CalibrationError("n_folds must be ≥ 2")
-    names = list(candidates) if candidates is not None else list(DEFAULT_CANDIDATES)
+    names: List[str] = (list(candidates) if candidates is not None
+                        else list(DEFAULT_CANDIDATES))
     if not names:
         raise CalibrationError("no candidate calibrators")
     score_fn = _METRICS[metric]
@@ -112,7 +113,7 @@ def auto_select(scores: Sequence[float], labels: Sequence[int],
     if n_folds > s.size:
         raise CalibrationError("n_folds exceeds sample count")
 
-    ranking = []
+    ranking: List[Dict[str, Any]] = []
     for name in names:
         cls = CalibratorRegistry.get(name)  # raises on unknown names
         fold_scores = []

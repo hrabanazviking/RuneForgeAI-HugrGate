@@ -28,7 +28,7 @@ def test_auto_select_picks_winner():
     res = auto_select(s, y, seed=0)
     assert isinstance(res, SelectionResult)
     assert set(DEFAULT_CANDIDATES) == {"platt", "isotonic", "temperature",
-                                       "beta-binomial"}
+                                       "beta-binomial", "ensemble"}
     assert res.best in DEFAULT_CANDIDATES
     means = [r["mean"] for r in res.ranking]
     assert means == sorted(means)

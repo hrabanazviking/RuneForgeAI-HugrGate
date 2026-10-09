@@ -61,6 +61,10 @@ BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models"}
 CALIB_ALLOWED = {
     "hugrgate.errors", "hugrgate.backend",
     "hugrgate.result", "hugrgate.spec",
+    # Slice 095: epistemic adapters flag results for human review via
+    # hugrgate.abstain.mark_for_review.  abstain is a core domain module
+    # (not service layer) — precedent: hugrgate.threshold imports it too.
+    "hugrgate.abstain",
 }
 
 

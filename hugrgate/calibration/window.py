@@ -15,7 +15,7 @@ no fit ever succeeded, :meth:`calibrate` raises).
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Callable, Deque, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Deque, Dict, Optional, Sequence, Tuple
 
 try:
     import numpy as np

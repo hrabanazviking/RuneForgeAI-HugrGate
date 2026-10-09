@@ -54,7 +54,7 @@ class GroupCalibrator:
         self.min_group_samples = int(min_group_samples)
         self._units: Dict[str, Calibrator] = {}
         self._global: Optional[Calibrator] = None
-        self._group_metrics: Dict[str, Dict[str, float]] = {}
+        self._group_metrics: Dict[str, Dict[str, Any]] = {}
         self._fitted = False
 
     @property
@@ -66,7 +66,7 @@ class GroupCalibrator:
         return sorted(self._units)
 
     @property
-    def group_metrics(self) -> Dict[str, Dict[str, float]]:
+    def group_metrics(self) -> Dict[str, Dict[str, Any]]:
         return {k: dict(v) for k, v in self._group_metrics.items()}
 
     def disparity(self, metric: str = "ece_after") -> float:

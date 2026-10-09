@@ -21,9 +21,8 @@ guessing *about its own knowledge*.
 
 from __future__ import annotations
 
-import math
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any, Dict, Mapping, Sequence
 
 try:
     import numpy as np

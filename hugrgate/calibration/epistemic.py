@@ -18,7 +18,7 @@ wire them into the existing abstention machinery:
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any, Dict, Mapping, Sequence
 
 try:
     import numpy as np

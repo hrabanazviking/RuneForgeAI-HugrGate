@@ -19,7 +19,6 @@ halves of slice 094's decomposition from measurable quantities.
 
 from __future__ import annotations
 
-import math
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Sequence
 

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:09:45.835129+00:00",
-  "module_count": 43,
+  "generated_utc": "2026-10-09T11:59:15.984846+00:00",
+  "module_count": 67,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -34,7 +34,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 84,
+      "loc": 127,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -51,7 +51,9 @@
         "privacy_properties",
         "hardware_requirements",
         "register",
+        "unregister",
         "get",
+        "get_or_raise",
         "list",
         "supporting"
       ]
@@ -304,7 +306,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 47,
+      "loc": 89,
       "path": "hugrgate/calibration/__init__.py",
       "public_defs": []
     },
@@ -332,6 +334,302 @@
         "get",
         "build",
         "list"
+      ]
+    },
+    "hugrgate.calibration.adversarial": {
+      "docstring": "Calibration adversarial tests. Slice 098.\n\nCalibration is usually evaluated on the same distribution it was fit on \u2014\nthe kindest possible test.  This module attacks it instead:\n\n- :func:`overconfidence_attack` \u2014 pushes scores toward the extremes\n  (the classic \"model gets cocky\" failure);\n- :func:`underconfidence_attack` \u2014 pulls scores toward 0.5;\n- :func:`label_flip_attack` \u2014 random label noise (seeded);\n- :func:`bias_shift_attack` \u2014 systematic additive score bias, clipped;\n- :func:`stress_test` \u2014 fits a calibrator on clean data, then reports\n  Brier/ECE degradation under each attack in a JSON-serializable\n  :class:`StressReport`.\n\nUse it in CI or before promoting a calibration profile: a map that\ncollapses under mild attacks shouldn't ship.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 169,
+      "path": "hugrgate/calibration/adversarial.py",
+      "public_defs": [
+        "overconfidence_attack",
+        "underconfidence_attack",
+        "label_flip_attack",
+        "bias_shift_attack",
+        "StressReport",
+        "stress_test",
+        "as_dict",
+        "worst_ece_degradation"
+      ]
+    },
+    "hugrgate.calibration.aleatoric": {
+      "docstring": "Aleatoric uncertainty adapters. Slice 096.\n\nAleatoric uncertainty = noise inherent in the data-generating process: no\namount of modeling removes it.  These adapters *estimate* it from\nobservables:\n\n- :func:`predictive_entropy` \u2014 entropy of one predictive distribution\n  (with a single model, the working aleatoric estimate);\n- :func:`bernoulli_noise` \u2014 ``p(1\u2212p)``, the variance of a Bernoulli\n  outcome: the irreducible noise at calibrated probability ``p``;\n- :func:`label_noise_estimate` \u2014 binned ``E[p(1\u2212p)]`` over a labeled fit\n  set: the data's own noise floor as the calibrator sees it;\n- :func:`noise_floor_report` \u2014 bundles the estimate with the per-bin\n  detail into a JSON-serializable :class:`AleatoricReport`.\n\nCompanion to slice 095 (epistemic adapters): together they cover both\nhalves of slice 094's decomposition from measurable quantities.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 132,
+      "path": "hugrgate/calibration/aleatoric.py",
+      "public_defs": [
+        "AleatoricReport",
+        "predictive_entropy",
+        "bernoulli_noise",
+        "label_noise_estimate",
+        "noise_floor_report",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.autoselect": {
+      "docstring": "Calibration auto-selection. Slice 092.\n\nInstead of tribal knowledge (\"always use isotonic\"), pick the calibrator by\nseeded K-fold cross-validation on the actual fit data.  :func:`auto_select`\nevaluates candidate calibrators from the slice-091 catalog on a proper\nscoring rule (Brier, log-loss) or ECE, ranks them by held-out mean, and\nreturns the winner *refit on the full data*.\n\nCandidate defaults: the non-streaming, non-fallback, non-deprecated catalog\nentries (platt, isotonic, temperature, beta-binomial).  Streaming calibrators\nare excluded by default because fold semantics differ for them \u2014 pass them\nexplicitly if you want them compared.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 153,
+      "path": "hugrgate/calibration/autoselect.py",
+      "public_defs": [
+        "SelectionResult",
+        "auto_select",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.bayes": {
+      "docstring": "Bayesian calibration research adapter. Slice 081.\n\nRESEARCH ADAPTER \u2014 not a production default.  :class:`BetaBinomialCalibrator`\ntreats each score bin as a Binomial experiment with a Beta prior and returns\nthe posterior predictive mean as the calibrated probability, *plus* a\ncredible interval so downstream code can see how much data backs the map.\nUseful for low-data regimes and for studying prior sensitivity; prefer\nPlatt/isotonic/temperature when you have ample data and want a point map.\n\nThe Beta quantiles use an independent implementation of the regularized\nincomplete beta function (continued fraction, Numerical Recipes ``betacf``)\nwith bisection inversion \u2014 no scipy dependency.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "numpy",
+        "typing"
+      ],
+      "loc": 180,
+      "path": "hugrgate/calibration/bayes.py",
+      "public_defs": [
+        "beta_quantile",
+        "BetaBinomialCalibrator",
+        "fit",
+        "calibrate",
+        "credible_interval",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.bench": {
+      "docstring": "Calibration benchmark suite. Slice 099.\n\nCompares the calibration methods head-to-head on controlled synthetic\ndatasets with known miscalibration shapes.  Every dataset is generated from\na seeded PRNG, so the artifact is byte-identical on every run for a fixed\nseed \u2014 no invented numbers, ever.\n\nDatasets (``n`` samples each):\n- ``overconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(2z)``;\n- ``underconfident`` \u2014 true ``p = \u03c3(z)``, reported ``\u03c3(0.5z)``;\n- ``label-noise`` \u2014 well-shaped scores, 15% flipped labels;\n- ``well-calibrated`` \u2014 reported == true (control: calibration should be\n  ~neutral here).\n\nEntries: ``raw`` (identity baseline \u2014 the explicit baseline the slice\nrequires) plus every batch calibrator in the catalog.  Metrics: Brier,\nlog-loss, ECE, before \u2192 after.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/calibration/bench.py",
+      "public_defs": [
+        "generate_dataset",
+        "run_benchmark",
+        "fit",
+        "calibrate",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.conformal": {
+      "docstring": "Split-conformal classification. Slice 082.\n\nWhere calibration asks \"is 0.8 really 80%?\", conformal prediction asks \"which\nset of labels covers the truth with probability \u2265 1\u2212\u03b1?\"  :class:`ConformalClassifier`\nimplements split (inductive) conformal prediction for classifiers:\n\n- nonconformity score ``s(x, y) = 1 \u2212 p\u0302(y | x)`` on a held-out calibration\n  fold;\n- threshold ``q\u0302`` = the ``\u2308(n+1)(1\u2212\u03b1)\u2309/n`` quantile of those scores;\n- prediction set ``{c : p\u0302(c | x) \u2265 1 \u2212 q\u0302}``.\n\nUnder exchangeability of calibration and test data, the set covers the true\nlabel with probability at least ``1 \u2212 \u03b1`` (finite-sample guarantee).  An\noptional Mondrian (group-conditional) mode fits one threshold per group for\ngroup-conditional coverage.\n\nThis module returns plain ``frozenset`` prediction sets; slice 084's\n:class:`~hugrgate.calibration.sets.PredictionSet` adds the set-metric\nabstraction on top.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "numpy",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/calibration/conformal.py",
+      "public_defs": [
+        "ConformalClassifier",
+        "fitted",
+        "fit",
+        "predict_set",
+        "predict_sets",
+        "empirical_coverage",
+        "mean_set_size",
+        "thresholds"
+      ]
+    },
+    "hugrgate.calibration.conformal_regression": {
+      "docstring": "Split-conformal regression. Slice 083.\n\nCompanion to :mod:`hugrgate.calibration.conformal`: finite-sample prediction\n*intervals* for real-valued predictions.  :class:`ConformalRegressor`\nimplements split conformal prediction with\n\n- absolute-residual nonconformity ``s = |y \u2212 \u0177|`` (constant-width intervals), or\n- normalized residuals ``s = |y \u2212 \u0177| / difficulty`` when a difficulty\n  estimate is supplied (locally adaptive widths: easy points get tight\n  intervals, hard points get wide ones).\n\nUnder exchangeability, ``[\u0177 \u2212 q\u0302\u00b7d, \u0177 + q\u0302\u00b7d]`` covers the true value with\nprobability at least ``1 \u2212 \u03b1``.  Operates on plain floats, so it works with\nany point-prediction source, including HugrGate numeric backends.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "numpy",
+        "typing"
+      ],
+      "loc": 149,
+      "path": "hugrgate/calibration/conformal_regression.py",
+      "public_defs": [
+        "ConformalRegressor",
+        "fitted",
+        "quantile",
+        "fit",
+        "predict_interval",
+        "predict_intervals",
+        "empirical_coverage",
+        "mean_width"
+      ]
+    },
+    "hugrgate.calibration.coverage": {
+      "docstring": "Coverage guarantees tooling. Slice 085.\n\nConformal prediction promises *marginal* coverage \u2265 1\u2212\u03b1, but on any finite\ntest set the empirical hit rate is just an estimate.  This module turns that\nestimate into a checkable claim:\n\n- :func:`clopper_pearson` \u2014 exact two-sided binomial confidence interval\n  (built on the slice-081 ``beta_quantile``, no scipy);\n- :func:`hoeffding_lower_bound` \u2014 one-sided Hoeffding lower bound, the\n  distribution-free quick check;\n- :class:`CoverageCertificate` \u2014 bundles n, hits, empirical coverage, the\n  interval, and a ``holds`` verdict against a target coverage;\n- :func:`validate_coverage` \u2014 certify a batch of\n  :class:`~hugrgate.calibration.sets.PredictionSet` outcomes;\n- :func:`required_n` \u2014 how many test points you need before a\n  Clopper-Pearson interval of a given width is even possible.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "numpy",
+        "statistics",
+        "typing"
+      ],
+      "loc": 167,
+      "path": "hugrgate/calibration/coverage.py",
+      "public_defs": [
+        "clopper_pearson",
+        "hoeffding_lower_bound",
+        "CoverageCertificate",
+        "validate_coverage",
+        "required_n",
+        "empirical",
+        "interval",
+        "validates",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.decomposition": {
+      "docstring": "Uncertainty decomposition. Slice 094.\n\nTotal predictive uncertainty splits into two principled parts (Depeweg et\nal.; Kendall & Gal):\n\n- **aleatoric** \u2014 expected entropy of the members: noise inherent in the\n  data, irreducible by more modeling;\n- **epistemic** \u2014 mutual information between the prediction and the model\n  identity: disagreement *between* members, reducible with more data or\n  better models;\n\nwith ``total = entropy(mean distribution) = aleatoric + epistemic``.\n\n:func:`decompose` takes an ensemble's predictive distributions (one\nprobability vector per member) and returns an :class:`UncertaintyBreakdown`.\nFeed it members' calibrated outputs \u2014 e.g. per-class vectors from\n:class:`~hugrgate.calibration.perclass.PerClassCalibrator` variants or\nbackend ensembles \u2014 and the epistemic term tells you when the system is\nguessing *about its own knowledge*.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 112,
+      "path": "hugrgate/calibration/decomposition.py",
+      "public_defs": [
+        "UncertaintyBreakdown",
+        "decompose",
+        "decompose_dicts",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.drift": {
+      "docstring": "Calibration under drift. Slice 088.\n\nA calibration map is a bet that the future resembles the fit set.  When the\nscore\u2192outcome relationship drifts, the bet goes bad silently \u2014 live ECE\nclimbs while nobody watches.  :class:`CalibrationDriftMonitor` watches the\n*calibrated* outputs in production:\n\n- each observed batch contributes Brier and ECE;\n- the first ``baseline_batches`` batches establish the in-control mean and\n  standard deviation of each metric;\n- afterwards EWMAs of both metrics are compared against\n  ``mean + k\u00b7std`` control limits (with a ``min_std`` floor so a\n  suspiciously quiet baseline can't arm a hair-trigger) \u2014 crossing either\n  limit raises an alarm and the monitor recommends ``\"recalibrate\"``.\n\nPair it with :class:`~hugrgate.calibration.online.OnlineCalibrator` or\n:class:`~hugrgate.calibration.window.SlidingWindowCalibrator`: the monitor\nsays *when*, the adaptive calibrator does the *what*.  After recalibrating,\ncall :meth:`reset_alarm` to re-arm.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 181,
+      "path": "hugrgate/calibration/drift.py",
+      "public_defs": [
+        "DriftReport",
+        "CalibrationDriftMonitor",
+        "as_dict",
+        "batches_seen",
+        "history",
+        "alarmed",
+        "alarm_batch",
+        "alarm_metric",
+        "baseline_stats",
+        "control_limits",
+        "observe",
+        "recommend",
+        "reset_alarm",
+        "report"
+      ]
+    },
+    "hugrgate.calibration.ensemble": {
+      "docstring": "Calibration ensemble. Slice 093.\n\nNo single calibrator wins everywhere: Platt is stable but rigid, isotonic\nis flexible but data-hungry, temperature is minimal.  :class:`CalibratorEnsemble`\nfits several member calibrators on the same data and averages their maps \u2014\nmean (default), median, or custom weights.\n\nBy Jensen's inequality the Brier score of a convex combination is at most\nthe average of the members' Brier scores, so the ensemble never pays more\nthan the *average* member \u2014 and in practice it lands near the best one\nwithout requiring the choice up front (see also slice 092's auto-selection).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 133,
+      "path": "hugrgate/calibration/ensemble.py",
+      "public_defs": [
+        "CalibratorEnsemble",
+        "member_names",
+        "fit",
+        "calibrate",
+        "member_spread",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.epistemic": {
+      "docstring": "Epistemic uncertainty adapters. Slice 095.\n\nEpistemic uncertainty = \"the model doesn't know what it doesn't know\".\nThese adapters *produce* epistemic estimates from HugrGate components and\nwire them into the existing abstention machinery:\n\n- :func:`ensemble_epistemic` \u2014 mutual information across an ensemble's\n  predictive distributions (slice 094's decomposition);\n- :func:`distance_epistemic` \u2014 out-of-distribution proxy: how far a score\n  sits from the calibration fit-score cloud, normalized to [0, 1];\n- :func:`combine_epistemic` \u2014 conservative (max) combination of adapters;\n- :func:`review_on_epistemic` \u2014 marks a\n  :class:`~hugrgate.result.DecisionResult` for human review via\n  :func:`hugrgate.abstain.mark_for_review` when epistemic uncertainty\n  exceeds a threshold.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 137,
+      "path": "hugrgate/calibration/epistemic.py",
+      "public_defs": [
+        "EpistemicReport",
+        "ensemble_epistemic",
+        "ensemble_epistemic_dicts",
+        "distance_epistemic",
+        "combine_epistemic",
+        "review_on_epistemic",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.group": {
+      "docstring": "Group calibration. Slice 078.\n\nA single global calibrator can hide per-group miscalibration: group A is\noverconfident while group B is underconfident and the average looks fine.\n:class:`GroupCalibrator` fits one binary calibrator per group value (plus a\nglobal fallback for unseen groups), and reports per-group Brier/ECE together\nwith the *calibration disparity* ``max_g ECE_g \u2212 min_g ECE_g``.\n\nGroup labels are opaque strings supplied by the caller (e.g. a segment,\ncohort, or backend name).  HugrGate never invents them \u2014 see the privacy\nmodule before using real demographic attributes.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/calibration/group.py",
+      "public_defs": [
+        "GroupCalibrator",
+        "fitted",
+        "groups",
+        "group_metrics",
+        "disparity",
+        "fit",
+        "calibrate",
+        "calibrate_batch",
+        "get_params"
+      ]
+    },
+    "hugrgate.calibration.imbalance": {
+      "docstring": "Calibration under class imbalance. Slice 089.\n\nHeavy imbalance breaks naive calibration two ways: the fit is dominated by\nthe majority class, and the deployment prior often differs from the fit\nprior anyway.  This module provides the standard, honest toolkit:\n\n- :func:`rebalance` \u2014 resample a fit set to a target positive rate\n  (minority oversampling / majority undersampling, seeded);\n- :func:`saerens_prior_correction` \u2014 Saerens\u2013Latinne\u2013Decaestecker prior\n  correction: transport calibrated probabilities from the fit prior to the\n  deployment prior without refitting;\n- :func:`fit_balanced` \u2014 rebalance + fit any :class:`Calibrator`, returning\n  the fitted unit and an :class:`ImbalanceReport`;\n- :func:`stratified_metrics` \u2014 Brier/ECE computed separately on the\n  positive and negative strata, so minority-class miscalibration can't hide\n  behind a good-looking average.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 177,
+      "path": "hugrgate/calibration/imbalance.py",
+      "public_defs": [
+        "ImbalanceReport",
+        "rebalance",
+        "saerens_prior_correction",
+        "fit_balanced",
+        "stratified_metrics",
+        "as_dict"
       ]
     },
     "hugrgate.calibration.isotonic": {
@@ -371,6 +669,80 @@
         "ece_multiclass"
       ]
     },
+    "hugrgate.calibration.online": {
+      "docstring": "Online (incremental) calibration. Slice 079.\n\nBatch calibrators assume the world stands still while you collect a fit set.\n:class:`OnlineCalibrator` instead maintains binned (score \u2192 empirical rate)\nstatistics that update with every :meth:`partial_fit` call and slowly forget\nold data via exponential decay, so the map tracks a drifting relationship\nbetween scores and outcomes.\n\n- Each of ``n_bins`` bins keeps decayed ``(positives, total)`` counts.\n- The calibrated value for a score is the Laplace-smoothed empirical rate\n  of its bin, passed through a weighted pool-adjacent-violators (PAV) pass\n  so the map stays monotone non-decreasing in the score.\n- ``decay=1.0`` disables forgetting (pure cumulative counts);\n  ``decay<1.0`` down-weights older batches per :meth:`partial_fit` call.\n\nIt subclasses :class:`Calibrator` (``fit`` = reset + one ``partial_fit``)\nso it works with the pipeline, registry, and auto-selection.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 178,
+      "path": "hugrgate/calibration/online.py",
+      "public_defs": [
+        "OnlineCalibrator",
+        "partial_fit",
+        "fit",
+        "calibrate",
+        "effective_samples",
+        "bin_stats",
+        "get_params",
+        "from_params"
+      ]
+    },
+    "hugrgate.calibration.perclass": {
+      "docstring": "Per-class calibration. Slice 077.\n\n``CalibratedBackend`` already applied one-vs-rest calibrators per class, but\nthere was no principled *fitting* side: callers had to hand-roll the per-class\nloop and hand-assemble ``CalibrationProfile.calibrator_params``.  This module\nprovides :class:`PerClassCalibrator`, which:\n\n- fits one binary calibrator per class (one-vs-rest) from multiclass\n  probability dicts + labels, via any :class:`Calibrator` factory;\n- records per-class fit diagnostics (Brier/ECE before/after) so a single\n  badly-calibrated class is visible instead of being averaged away;\n- handles classes absent from the fit data with a constant-prior fallback\n  instead of crashing (a class unseen during calibration still needs a\n  prediction at serving time);\n- renormalizes the calibrated distribution and exports/imports\n  :class:`~hugrgate.calibration.profiles.CalibrationProfile` parameter dicts.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 232,
+      "path": "hugrgate/calibration/perclass.py",
+      "public_defs": [
+        "PerClassCalibrator",
+        "build_profile",
+        "fit",
+        "calibrate",
+        "get_params",
+        "from_params",
+        "fitted",
+        "classes",
+        "per_class_metrics",
+        "fit",
+        "calibrate_dist",
+        "calibrate_batch",
+        "to_profile_params",
+        "from_profile_params"
+      ]
+    },
+    "hugrgate.calibration.pipeline": {
+      "docstring": "Calibration pipeline (architecture v2). Slice 076.\n\nWhat existed before this slice: three binary calibrators (Platt, isotonic,\ntemperature), bare metrics, and versioned profiles \u2014 but no lifecycle around\n* fitting a calibrator: no fit-data diagnostics, no before/after comparison,\nno refusal to deploy a calibration that made things worse.\n\nThis module adds that lifecycle without touching the existing calibrators:\n\n- :func:`validate_fit_data` \u2014 diagnostics + hard validation of a\n  (scores, labels) fit set (both classes present, finite scores, sane size).\n- :class:`CalibrationPipeline` \u2014 wraps a calibrator factory, fits it,\n  records before/after Brier / log-loss / ECE / MCE, and produces a\n  :class:`CalibrationReport` carrying provenance, the dataset hash, and an\n  ``improved`` verdict.\n- :class:`CalibrationReport` \u2014 JSON-serializable, round-trippable; can seed\n  a :class:`~hugrgate.calibration.profiles.CalibrationProfile` via\n  :meth:`CalibrationReport.as_profile_kwargs`.\n\nThe pipeline *warns* (does not raise) when calibration fails to improve the\nmetrics, because on near-perfect scores any map is noise \u2014 but\n:meth:`CalibrationPipeline.fit_strict` raises in that case for pipelines that\nwant a hard gate.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 244,
+      "path": "hugrgate/calibration/pipeline.py",
+      "public_defs": [
+        "FitDiagnostics",
+        "validate_fit_data",
+        "CalibrationReport",
+        "CalibrationPipeline",
+        "as_dict",
+        "as_dict",
+        "from_dict",
+        "improvement",
+        "fit",
+        "fit_strict",
+        "apply"
+      ]
+    },
     "hugrgate.calibration.platt": {
       "docstring": "Platt scaling. Slice 26.\n\nFits a sigmoid ``p = 1 / (1 + exp(A\u00b7s + B))`` to validation scores by\nminimizing the negative log-likelihood with Platt's target smoothing.\nThe Newton optimization below is an independent implementation written\nfrom the textbook formulation (gradient/Hessian of the logistic loss);\nno code is copied from scikit-learn or any other library.",
       "imports": [
@@ -402,7 +774,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 263,
+      "loc": 276,
       "path": "hugrgate/calibration/profiles.py",
       "public_defs": [
         "hash_dataset",
@@ -430,6 +802,103 @@
         "calibration_info"
       ]
     },
+    "hugrgate.calibration.registry": {
+      "docstring": "Calibration registry (rich catalog). Slice 091.\n\nThe legacy :class:`~hugrgate.calibration._base.CalibratorRegistry` maps\nnames to classes and nothing more \u2014 enough to rebuild a calibrator, not\nenough to *choose* one.  This module layers a metadata catalog on top:\n\n- :class:`CalibratorSpec` \u2014 per-calibrator metadata: family (parametric /\n  nonparametric / bayesian / streaming / fallback), monotonicity, whether\n  both classes are required to fit, streaming support, deprecation status;\n- :func:`catalog` / :func:`spec` / :func:`find` \u2014 inspect and filter the\n  catalog (e.g. \"monotone streaming calibrators\");\n- :func:`describe` \u2014 human-readable summary for docs and the auto-selector\n  (slice 092).\n\nThe legacy registry is untouched (backward compatibility); this catalog\nsyncs from it at import time and overlays the metadata table below.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 172,
+      "path": "hugrgate/calibration/registry.py",
+      "public_defs": [
+        "CalibratorSpec",
+        "register_spec",
+        "catalog",
+        "spec",
+        "find",
+        "describe",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.risk_coverage": {
+      "docstring": "Risk-coverage curves. Slice 087.\n\nThe loss-based sibling of slice 086's selective (accuracy) curves.  Given\nper-decision confidences and *losses* (0/1 error by default, but any bounded\nloss works \u2014 e.g. a cost-weighted error), the risk-coverage (RC) curve shows\nthe mean loss over the kept decisions as coverage shrinks toward the most\nconfident sliver.\n\n- :func:`risk_coverage_curve` \u2014 rows ``{threshold, coverage, risk, n}``;\n- :func:`aurc` \u2014 area under the RC curve (lower is better), with the oracle\n  curve (sorted by true loss) as the reference: ``excess = aurc \u2212 aurc*``\n  measures how much the confidence ranking leaves on the table;\n- :func:`coverage_at_risk` \u2014 the abstention-policy lookup: largest coverage\n  with risk \u2264 target;\n- :func:`risk_at_coverage` \u2014 interpolated risk at a target coverage.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 147,
+      "path": "hugrgate/calibration/risk_coverage.py",
+      "public_defs": [
+        "risk_coverage_curve",
+        "aurc",
+        "oracle_aurc",
+        "risk_at_coverage",
+        "coverage_at_risk"
+      ]
+    },
+    "hugrgate.calibration.selective": {
+      "docstring": "Selective prediction curves. Slice 086.\n\nSelective prediction: answer only when confident, abstain otherwise.  Given\nper-decision confidences and correctness flags, this module builds the\n*selective accuracy curve* \u2014 accuracy as a function of the fraction of\ndecisions kept (coverage) \u2014 plus the area under it and coverage lookup at a\ntarget accuracy.\n\nSlice 087's risk-coverage curves are the loss-based sibling; this module is\nthe accuracy-based one.  Both consume the same ``(confidence, correct)``\npairs, so either can be derived from HugrGate decision logs.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 125,
+      "path": "hugrgate/calibration/selective.py",
+      "public_defs": [
+        "selective_curve",
+        "area_under_selective_curve",
+        "accuracy_at_coverage",
+        "coverage_at_accuracy"
+      ]
+    },
+    "hugrgate.calibration.sets": {
+      "docstring": "Prediction sets. Slice 084.\n\nSlice 082 produced raw ``frozenset`` prediction sets with a coverage\nguarantee.  This module adds the *abstraction* on top:\n\n- :class:`PredictionSet` \u2014 an immutable set with its construction method,\n  parameters, and provenance attached, so a set can be audited later;\n- construction strategies: fixed ``threshold``, ``top_k``, cumulative-mass\n  (APS-lite), and wrapping a fitted\n  :class:`~hugrgate.calibration.conformal.ConformalClassifier`;\n- set metrics: coverage, mean size, and *size-stratified* coverage, which\n  catches the classic failure where large sets cover fine but singletons\n  (the \"confident\" predictions) systematically miss.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 187,
+      "path": "hugrgate/calibration/sets.py",
+      "public_defs": [
+        "PredictionSet",
+        "threshold_set",
+        "topk_set",
+        "cumulative_set",
+        "from_conformal",
+        "set_metrics",
+        "size_stratified_coverage",
+        "size",
+        "covers",
+        "as_dict"
+      ]
+    },
+    "hugrgate.calibration.shift": {
+      "docstring": "Calibration under distribution shift. Slice 090.\n\nTwo shift flavors, two tools:\n\n**Covariate shift** (``P(x)`` changes, ``P(y|x)`` doesn't): detect it with\nthe population stability index (:func:`psi`), then correct with binned\ndensity-ratio weights (:func:`density_ratio_weights`) and\n:func:`resample_for_shift`, which resamples the source fit set so it mimics\nthe target covariate distribution before fitting.\n\n**Label shift** (``P(y)`` changes, ``P(x|y)`` doesn't): estimate the target\nprior with the Saerens\u2013Latinne\u2013Decaestecker EM algorithm\n(:func:`em_target_prior`), then transport with the slice-089\n:func:`~hugrgate.calibration.imbalance.saerens_prior_correction`.\n\nAll density estimates are binned histograms over the score axis \u2014 honest,\ndependency-free, and adequate for one-dimensional calibration scores.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 165,
+      "path": "hugrgate/calibration/shift.py",
+      "public_defs": [
+        "psi",
+        "psi_band",
+        "density_ratio_weights",
+        "resample_for_shift",
+        "em_target_prior"
+      ]
+    },
     "hugrgate.calibration.temperature": {
       "docstring": "Temperature scaling. Slice 27.\n\nSingle-parameter calibration: ``p_cal = \u03c3(logit(p_raw) / T)`` with ``T > 0``\nfit by minimizing the negative log-likelihood with an independent 1-D\nNewton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly\nincreasing \u2014 the ranking of scores is always preserved.",
       "imports": [
@@ -447,6 +916,49 @@
         "get_params",
         "from_params",
         "nll"
+      ]
+    },
+    "hugrgate.calibration.viz": {
+      "docstring": "Calibration visualization data. Slice 097.\n\nFrontends need *data*, not plots: this module produces JSON-serializable\npayloads for the standard calibration visuals, with no plotting dependency:\n\n- :func:`reliability_curve_data` \u2014 reliability-diagram points\n  (mean predicted vs. mean actual per bin) plus the ideal diagonal;\n- :func:`confidence_histogram` \u2014 histogram of top-class confidences;\n- :func:`per_class_ece_bars` \u2014 one-vs-rest ECE per class;\n- :func:`risk_coverage_points` / :func:`selective_curve_points` \u2014\n  normalized pass-throughs of the slice-086/087 curves;\n- :func:`calibration_dashboard` \u2014 the combined payload: summary metrics,\n  reliability curve, histogram, per-class bars, and data-quality notes.\n\nEvery payload passes ``json.dumps`` \u2014 that invariant is tested.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "numpy",
+        "typing"
+      ],
+      "loc": 170,
+      "path": "hugrgate/calibration/viz.py",
+      "public_defs": [
+        "reliability_curve_data",
+        "confidence_histogram",
+        "per_class_ece_bars",
+        "risk_coverage_points",
+        "selective_curve_points",
+        "calibration_dashboard"
+      ]
+    },
+    "hugrgate.calibration.window": {
+      "docstring": "Sliding-window calibration. Slice 080.\n\nComplements the binned :class:`OnlineCalibrator` (slice 079): instead of an\napproximate incremental map, :class:`SlidingWindowCalibrator` keeps the last\n``window_size`` raw ``(score, label)`` pairs and periodically *refits* any\nordinary batch calibrator on exactly that window.  You get the full fidelity\nof Platt/isotonic/temperature on recent data, at the cost of a refit per\n``refit_every`` samples.\n\nA refit is attempted only when the window holds at least ``min_samples``\nrows with both classes present; otherwise the previous map is kept (or, if\nno fit ever succeeded, :meth:`calibrate` raises).",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "numpy",
+        "typing"
+      ],
+      "loc": 158,
+      "path": "hugrgate/calibration/window.py",
+      "public_defs": [
+        "SlidingWindowCalibrator",
+        "partial_fit",
+        "refit",
+        "fit",
+        "calibrate",
+        "window_fill",
+        "window_span",
+        "get_params",
+        "from_params"
       ]
     },
     "hugrgate.circuit": {
@@ -719,7 +1231,7 @@
         "time",
         "typing"
       ],
-      "loc": 289,
+      "loc": 294,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -802,7 +1314,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 72,
+      "loc": 77,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -835,6 +1347,7 @@
       "docstring": "Decision provenance \u2014 why did the program take this branch? Slice 9.",
       "imports": [
         "__future__",
+        "copy",
         "dataclasses",
         "hashlib",
         "hugrgate",
@@ -842,7 +1355,7 @@
         "time",
         "typing"
       ],
-      "loc": 84,
+      "loc": 129,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -851,7 +1364,8 @@
         "append",
         "by_hash",
         "recent",
-        "count"
+        "count",
+        "verify_chain"
       ]
     },
     "hugrgate.result": {
@@ -862,7 +1376,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 64,
+      "loc": 82,
       "path": "hugrgate/result.py",
       "public_defs": [
         "DecisionResult",
@@ -932,7 +1446,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 167,
+      "loc": 178,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -968,14 +1482,15 @@
       ]
     },
     "hugrgate.validation": {
-      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7.",
+      "docstring": "Validation layer \u2014 the application never receives an invalid value. Slice 7;\nhardened in slice 011.",
       "imports": [
         "__future__",
         "hugrgate",
         "json",
+        "math",
         "typing"
       ],
-      "loc": 60,
+      "loc": 130,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -988,18 +1503,48 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_backend_registry.py",
+    "test_calib_adversarial.py",
+    "test_calib_aleatoric.py",
+    "test_calib_autoselect.py",
+    "test_calib_bayes.py",
+    "test_calib_bench.py",
+    "test_calib_conformal.py",
+    "test_calib_conformal_reg.py",
+    "test_calib_coverage.py",
+    "test_calib_decomposition.py",
+    "test_calib_drift.py",
+    "test_calib_ensemble.py",
+    "test_calib_epistemic.py",
+    "test_calib_group.py",
+    "test_calib_imbalance.py",
+    "test_calib_online.py",
+    "test_calib_perclass.py",
+    "test_calib_pipeline.py",
+    "test_calib_registry.py",
+    "test_calib_risk_coverage.py",
+    "test_calib_selective.py",
+    "test_calib_sets.py",
+    "test_calib_shift.py",
+    "test_calib_viz.py",
+    "test_calib_window.py",
     "test_config.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
+    "test_determinism_contract.py",
     "test_deterministic.py",
     "test_errors.py",
     "test_foundation.py",
     "test_ladder.py",
     "test_logging.py",
     "test_ml_calibration.py",
+    "test_policy_invariants.py",
+    "test_provenance_integrity.py",
     "test_repo_truth.py",
+    "test_result_invariants.py",
     "test_service.py",
+    "test_state_validation.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7461
+  "total_loc": 11649
 }
