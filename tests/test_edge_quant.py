@@ -267,3 +267,100 @@ def test_int8_matvec_rejects_shape_mismatch():
         int8_matvec(qt, np.ones(7))
     with pytest.raises(QuantError, match="bias shape"):
         int8_matvec(qt, np.ones(8), np.ones(3))
+
+
+# --- slice 184: INT4 adapter support ------------------------------------------
+
+from hugrgate.edge.quant import Int4Adapter
+
+
+def test_int4_nd_roundtrip_bounded():
+    rng = np.random.default_rng(184)
+    w = rng.normal(0, 1, size=(8, 48))  # last axis not a multiple of 32
+    adapter = Int4Adapter(group_size=32)
+    rec = adapter.unpack(adapter.pack(w))
+    assert rec.shape == w.shape
+    # symmetric 4-bit: max error <= half a per-group bin (amax/7 / 2)
+    groups = w.reshape(-1, 32)
+    bound = float(np.abs(groups).max(axis=1).max() / 7.0 / 2.0) + 1e-9
+    assert adapter.roundtrip_error(w) <= bound
+
+
+def test_int4_1d_and_exact_multiple():
+    adapter = Int4Adapter(group_size=16)
+    w = np.linspace(-3, 3, 64)
+    np.testing.assert_allclose(adapter.unpack(adapter.pack(w)), w,
+                               atol=0.2)
+    assert adapter.packed_bytes(64) == 32
+    assert adapter.storage_bytes((4, 64)) == 4 * 32 + 4 * 4 * 8
+
+
+def test_int4_serialization_roundtrip():
+    rng = np.random.default_rng(184)
+    adapter = Int4Adapter(group_size=32)
+    w = rng.normal(0, 2, size=(5, 40))
+    blob = adapter.pack(w)
+    data = adapter.to_bytes(blob)
+    blob2 = adapter.from_bytes(data)
+    np.testing.assert_allclose(adapter.unpack(blob2), adapter.unpack(blob),
+                               rtol=0, atol=0)
+    # 4 bits/weight + fp64 scales: far below fp32
+    assert len(data) < w.nbytes // 2
+
+
+def test_int4_rejects_bad_inputs():
+    adapter = Int4Adapter(group_size=32)
+    with pytest.raises(QuantError, match="positive even"):
+        Int4Adapter(group_size=7)
+    with pytest.raises(QuantError, match="positive even"):
+        Int4Adapter(group_size=0)
+    with pytest.raises(QuantError, match="empty"):
+        adapter.pack(np.array([]))
+    with pytest.raises(QuantError, match="NaN or Inf"):
+        adapter.pack(np.array([1.0, float("nan")]))
+
+
+def test_int4_rejects_malformed_blobs():
+    adapter = Int4Adapter(group_size=32)
+    good = adapter.pack(np.ones((4, 32)))
+    with pytest.raises(QuantError, match="must be a dict"):
+        adapter.unpack("nope")  # type: ignore[arg-type]
+    bad = dict(good)
+    del bad["scales"]
+    with pytest.raises(QuantError, match="missing key"):
+        adapter.unpack(bad)
+    bad = dict(good)
+    bad["group_size"] = 16
+    with pytest.raises(QuantError, match="group_size"):
+        adapter.unpack(bad)
+    bad = dict(good)
+    bad["packed"] = np.zeros(2, dtype=np.uint8)
+    with pytest.raises(QuantError, match="truncated"):
+        adapter.unpack(bad)
+    bad = dict(good)
+    bad["shape"] = (4, -32)
+    with pytest.raises(QuantError, match="negative dims"):
+        adapter.unpack(bad)
+
+
+def test_int4_rejects_malformed_bytes():
+    adapter = Int4Adapter(group_size=32)
+    data = adapter.to_bytes(adapter.pack(np.ones((4, 32))))
+    with pytest.raises(QuantError, match="bad magic"):
+        adapter.from_bytes(b"BADMAGIC" + data[8:])
+    with pytest.raises(QuantError, match="too short"):
+        adapter.from_bytes(data[:4])
+    with pytest.raises(QuantError, match="truncated"):
+        adapter.from_bytes(data[:-5])
+    other = Int4Adapter(group_size=16)
+    with pytest.raises(QuantError, match="group_size"):
+        other.from_bytes(data)
+
+
+def test_int4_deterministic():
+    rng = np.random.default_rng(184)
+    adapter = Int4Adapter()
+    w = rng.normal(0, 1, size=(3, 33))
+    b1, b2 = adapter.pack(w), adapter.pack(w)
+    np.testing.assert_array_equal(b1["packed"], b2["packed"])
+    np.testing.assert_array_equal(b1["scales"], b2["scales"])

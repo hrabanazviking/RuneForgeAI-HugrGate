@@ -403,13 +403,21 @@ def int8_roundtrip_error(weights: np.ndarray) -> float:
 
 
 class Int4Adapter:
-    """Groupwise symmetric INT4 packing (slice 184's execution path).
+    """Groupwise symmetric INT4 packing — the edge INT4 adapter.
 
-    Weights are split into groups of ``group_size``; each group gets
-    its own float scale, and values are packed two nibbles per byte
-    (low nibble first). Deterministic and exactly invertible up to the
-    4-bit rounding error.
+    Weights of any shape are grouped along the last axis in chunks of
+    ``group_size`` (padded with zeros when the axis is not a multiple);
+    each group gets its own float64 scale, and codes are packed two
+    nibbles per byte (low nibble first). Deterministic and invertible
+    up to the 4-bit rounding error (bounded by half a per-group bin).
+
+    :meth:`to_bytes` / :meth:`from_bytes` persist the packed form with
+    an ``HGQ4`` magic and full length validation; :meth:`unpack`
+    validates blob structure and raises :class:`QuantError` on anything
+    malformed instead of leaking ``KeyError``/``ValueError``.
     """
+
+    MAGIC = b"HGQ40001"
 
     def __init__(self, group_size: int = 32):
         if group_size <= 0 or group_size % 2:
@@ -417,13 +425,24 @@ class Int4Adapter:
                 "group_size must be a positive even number")
         self.group_size = group_size
 
+    # -- packing -----------------------------------------------------------
+
     def pack(self, weights: np.ndarray) -> dict[str, Any]:
-        """Pack a 1-D weight vector into nibbles + per-group scales."""
+        """Pack an N-D weight tensor into nibbles + per-group scales."""
         _require_numpy()
-        w = np.asarray(weights, dtype=np.float64).ravel()
-        pad = (-len(w)) % self.group_size
+        w = np.asarray(weights, dtype=np.float64)
+        if w.size == 0:
+            raise QuantError("cannot pack an empty tensor")
+        if not np.all(np.isfinite(w)):
+            raise QuantError(
+                "weights contain NaN or Inf; refusing to pack")
+        shape = w.shape
+        last = shape[-1]
+        pad = (-last) % self.group_size
         if pad:
-            w = np.concatenate([w, np.zeros(pad)])
+            pad_shape = (*shape[:-1], pad)
+            w = np.concatenate(
+                [w, np.zeros(pad_shape, dtype=np.float64)], axis=-1)
         groups = w.reshape(-1, self.group_size)
         amax = np.maximum(np.abs(groups).max(axis=1),
                           np.finfo(float).tiny)
@@ -432,25 +451,112 @@ class Int4Adapter:
                     ).astype(np.int8) + 8  # shift to 0..15
         flat = q.ravel().astype(np.uint8)
         packed = (flat[0::2] | (flat[1::2] << 4)).astype(np.uint8)
-        return {"packed": packed, "scales": scales,
-                "length": len(weights), "group_size": self.group_size}
+        return {"packed": packed, "scales": scales, "shape": shape,
+                "group_size": self.group_size}
+
+    def _validate_blob(self, blob: dict[str, Any]) -> tuple[
+            np.ndarray, np.ndarray, tuple[int, ...], int, int]:
+        """Validate structure; return (packed, scales, shape, n_padded,
+        n_groups) with exact padded element/group counts."""
+        if not isinstance(blob, dict):
+            raise QuantError("int4 blob must be a dict")
+        for key in ("packed", "scales", "shape", "group_size"):
+            if key not in blob:
+                raise QuantError(f"int4 blob missing key {key!r}")
+        group_size = blob["group_size"]
+        if group_size != self.group_size:
+            raise QuantError(
+                f"blob group_size {group_size!r} != adapter "
+                f"{self.group_size}")
+        packed = np.asarray(blob["packed"], dtype=np.uint8).ravel()
+        scales = np.asarray(blob["scales"], dtype=np.float64).ravel()
+        shape = tuple(int(d) for d in blob["shape"])
+        if any(d < 0 for d in shape):
+            raise QuantError(f"int4 blob has negative dims {shape}")
+        n = 1
+        for d in shape:
+            n *= d
+        if shape and shape[-1]:
+            padded_last = shape[-1] + (-shape[-1]) % self.group_size
+            n_padded = n // shape[-1] * padded_last
+        else:
+            padded_last, n_padded = 0, 0
+        n_groups = n_padded // self.group_size
+        if packed.size * 2 < n_padded or scales.size < n_groups:
+            raise QuantError("int4 blob truncated")
+        return packed, scales, shape, n_padded, n_groups
 
     def unpack(self, blob: dict[str, Any]) -> np.ndarray:
         """Unpack a :meth:`pack` blob back to float64 weights."""
         _require_numpy()
-        packed = np.asarray(blob["packed"], dtype=np.uint8)
-        scales = np.asarray(blob["scales"], dtype=np.float64)
-        group_size = int(blob["group_size"])
+        packed, scales, shape, n_padded, n_groups = \
+            self._validate_blob(blob)
+        if not shape or not shape[-1]:
+            return np.zeros(shape, dtype=np.float64)
+        flat = np.empty(n_groups * self.group_size, dtype=np.int8)
+        # Use exactly the needed prefix; over-long blobs are tolerated.
+        use = packed[:n_padded // 2]
+        flat[0::2] = (use & 0x0F).astype(np.int8)
+        flat[1::2] = ((use >> 4) & 0x0F).astype(np.int8)
+        signed = flat.astype(np.float64) - 8.0  # back to -8..7
+        groups = signed.reshape(n_groups, self.group_size)
+        w = (groups * scales[:n_groups, None]).ravel()
+        padded_last = shape[-1] + (-shape[-1]) % self.group_size
+        rows = w.size // padded_last
+        return w.reshape(rows, padded_last)[:, :shape[-1]].reshape(shape)
+
+    # -- serialization ------------------------------------------------------
+
+    def to_bytes(self, blob: dict[str, Any]) -> bytes:
+        """Serialize a :meth:`pack` blob with magic + length checks."""
+        import struct as _struct
+        packed, scales, shape, _, _ = self._validate_blob(blob)
+        header = _struct.pack("<8sBq", self.MAGIC, len(shape),
+                              self.group_size)
+        dims = _struct.pack(f"<{len(shape)}q", *shape)
+        return (header + dims + packed.tobytes()
+                + scales.astype("<f8").tobytes())
+
+    def from_bytes(self, data: bytes) -> dict[str, Any]:
+        """Inverse of :meth:`to_bytes`; validates magic and lengths."""
+        import struct as _struct
+        _require_numpy()
+        fmt = "<8sBq"
+        hsize = _struct.calcsize(fmt)
+        if len(data) < hsize:
+            raise QuantError("int4 blob too short")
+        magic, rank, group_size = _struct.unpack(fmt, data[:hsize])
+        if magic != self.MAGIC:
+            raise QuantError(
+                f"bad magic {magic!r}; not a HugrGate INT4 blob")
         if group_size != self.group_size:
             raise QuantError(
                 f"blob group_size {group_size} != adapter {self.group_size}")
-        flat = np.empty(packed.size * 2, dtype=np.int8)
-        flat[0::2] = (packed & 0x0F).astype(np.int8)
-        flat[1::2] = ((packed >> 4) & 0x0F).astype(np.int8)
-        signed = flat.astype(np.float64) - 8.0  # back to -8..7
-        groups = signed.reshape(-1, group_size)
-        w = (groups * scales[:, None]).ravel()
-        return w[:int(blob["length"])]
+        off = hsize
+        if len(data) < off + 8 * rank:
+            raise QuantError("int4 blob truncated")
+        shape = tuple(int(d) for d in
+                      _struct.unpack(f"<{rank}q", data[off:off + 8 * rank]))
+        off += 8 * rank
+        n = 1
+        for d in shape:
+            n *= d
+        padded_last = shape[-1] + (-shape[-1]) % self.group_size \
+            if shape else 0
+        n_packed = (n // shape[-1] * padded_last // 2) \
+            if shape and shape[-1] else 0
+        n_groups = n_packed * 2 // self.group_size
+        if len(data) < off + n_packed + 8 * n_groups:
+            raise QuantError("int4 blob truncated")
+        packed = np.frombuffer(
+            data[off:off + n_packed], dtype=np.uint8).copy()
+        off += n_packed
+        scales = np.frombuffer(
+            data[off:off + 8 * n_groups], dtype="<f8").astype(float)
+        return {"packed": packed, "scales": scales, "shape": shape,
+                "group_size": self.group_size}
+
+    # -- analysis ------------------------------------------------------------
 
     def roundtrip_error(self, weights: np.ndarray) -> float:
         """Max absolute error of a pack/unpack round-trip."""
@@ -460,6 +566,16 @@ class Int4Adapter:
                                    - rec)))
 
     def packed_bytes(self, length: int) -> int:
-        """Exact packed size in bytes for a vector of ``length``."""
+        """Exact nibble bytes for a last-axis of ``length``."""
         groups = math.ceil(length / self.group_size)
         return groups * (self.group_size // 2)
+
+    def storage_bytes(self, shape: tuple[int, ...]) -> int:
+        """Exact total bytes (nibbles + fp64 scales) for ``shape``."""
+        if not shape:
+            return 0
+        rows = 1
+        for d in shape[:-1]:
+            rows *= d
+        groups = rows * math.ceil(shape[-1] / self.group_size)
+        return groups * (self.group_size // 2) + groups * 8
