@@ -603,17 +603,9 @@ A public release should state that the project is independent and not affiliated
 
 ---
 
-## Proposed License
+## License
 
-**Apache License 2.0** is the initial recommendation because it is permissive while including explicit patent-related provisions for contributions.
-
-Final licensing should be selected before outside code contributions begin.
-
-Possible alternatives:
-
-- MIT
-- Apache-2.0
-- dual MIT / Apache-2.0
+**Apache License 2.0** because it is permissive while including explicit patent-related provisions for contributions.
 
 Do not accept code with uncertain provenance.
 
