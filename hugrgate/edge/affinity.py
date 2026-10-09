@@ -17,7 +17,7 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import EdgeAffinityError
 
 __all__ = [
     "PROFILES",
@@ -33,10 +33,6 @@ PROFILES: dict[str, str] = {
     "inference": "all CPUs except core 0 (left for OS/watchdog)",
     "isolated": "highest-numbered CPU only (maximum isolation)",
 }
-
-
-class EdgeAffinityError(HugrGateError):
-    """An affinity request was invalid or the OS refused it."""
 
 
 def parse_cpu_list(spec: str) -> frozenset[int]:

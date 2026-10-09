@@ -88,6 +88,7 @@ flowchart TD
         edge_telemetry[edge.telemetry]
         edge_bench[edge.bench]
         edge_chaos[edge.chaos]
+        edge_gate[edge.gate]
     end
 
     hugrgate --> backend
@@ -193,16 +194,36 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    edge --> edge_affinity
+    edge --> edge_bench
+    edge --> edge_bootstrap
+    edge --> edge_cachetune
+    edge --> edge_chaos
+    edge --> edge_gate
+    edge --> edge_memory
+    edge --> edge_npu
+    edge --> edge_platform
+    edge --> edge_power
+    edge --> edge_quant
+    edge --> edge_recovery
+    edge --> edge_residency
+    edge --> edge_routing
+    edge --> edge_storage
+    edge --> edge_telemetry
+    edge --> edge_thermal
+    edge --> edge_watchdog
     edge_affinity --> errors
-    edge_bench -.-> hugrgate
     edge_bench -.-> backends_rules
-    edge_bench -.-> edge
+    edge_bench -.-> core
     edge_bench -.-> edge_memory
     edge_bench -.-> edge_npu
     edge_bench -.-> edge_platform
+    edge_bench -.-> edge_quant
     edge_bench -.-> edge_storage
     edge_bench -.-> edge_telemetry
     edge_bench --> errors
+    edge_bench -.-> policy
+    edge_bench -.-> spec
     edge_bootstrap --> edge_cachetune
     edge_bootstrap --> edge_memory
     edge_bootstrap --> edge_npu
@@ -230,6 +251,9 @@ flowchart TD
     edge_chaos -.-> edge_watchdog
     edge_chaos --> errors
     edge_chaos -.-> result
+    edge_gate -.-> edge_bench
+    edge_gate -.-> edge_chaos
+    edge_gate --> errors
     edge_memory --> errors
     edge_npu --> errors
     edge_power --> errors
@@ -314,7 +338,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 
 ## Internal dependency edges
 
@@ -423,16 +447,36 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `edge` | `edge.affinity` | no |
+| `edge` | `edge.bench` | no |
+| `edge` | `edge.bootstrap` | no |
+| `edge` | `edge.cachetune` | no |
+| `edge` | `edge.chaos` | no |
+| `edge` | `edge.gate` | no |
+| `edge` | `edge.memory` | no |
+| `edge` | `edge.npu` | no |
+| `edge` | `edge.platform` | no |
+| `edge` | `edge.power` | no |
+| `edge` | `edge.quant` | no |
+| `edge` | `edge.recovery` | no |
+| `edge` | `edge.residency` | no |
+| `edge` | `edge.routing` | no |
+| `edge` | `edge.storage` | no |
+| `edge` | `edge.telemetry` | no |
+| `edge` | `edge.thermal` | no |
+| `edge` | `edge.watchdog` | no |
 | `edge.affinity` | `errors` | no |
-| `edge.bench` | `hugrgate` | yes |
 | `edge.bench` | `backends.rules` | yes |
-| `edge.bench` | `edge` | yes |
+| `edge.bench` | `core` | yes |
 | `edge.bench` | `edge.memory` | yes |
 | `edge.bench` | `edge.npu` | yes |
 | `edge.bench` | `edge.platform` | yes |
+| `edge.bench` | `edge.quant` | yes |
 | `edge.bench` | `edge.storage` | yes |
 | `edge.bench` | `edge.telemetry` | yes |
 | `edge.bench` | `errors` | no |
+| `edge.bench` | `policy` | yes |
+| `edge.bench` | `spec` | yes |
 | `edge.bootstrap` | `edge.cachetune` | no |
 | `edge.bootstrap` | `edge.memory` | no |
 | `edge.bootstrap` | `edge.npu` | no |
@@ -460,6 +504,9 @@ flowchart TD
 | `edge.chaos` | `edge.watchdog` | yes |
 | `edge.chaos` | `errors` | no |
 | `edge.chaos` | `result` | yes |
+| `edge.gate` | `edge.bench` | yes |
+| `edge.gate` | `edge.chaos` | yes |
+| `edge.gate` | `errors` | no |
 | `edge.memory` | `errors` | no |
 | `edge.npu` | `errors` | no |
 | `edge.power` | `errors` | no |

@@ -16,7 +16,7 @@ import threading
 from abc import ABC, abstractmethod
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import PowerBudgetError
 
 __all__ = [
     "MockPowerSource",
@@ -25,10 +25,6 @@ __all__ = [
     "PowerSource",
     "SysfsPowerSensor",
 ]
-
-
-class PowerBudgetError(HugrGateError):
-    """A power-budget invariant was violated."""
 
 
 class PowerSource(ABC):

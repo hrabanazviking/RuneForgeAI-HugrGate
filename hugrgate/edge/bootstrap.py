@@ -39,7 +39,7 @@ from hugrgate.edge.platform import (
 from hugrgate.edge.residency import ResidencyManager
 from hugrgate.edge.storage import WearAwareStore
 from hugrgate.edge.thermal import SysfsThermalSensor, ThermalGovernor
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import OfflineBootstrapError
 
 __all__ = [
     "BootstrapContext",
@@ -49,10 +49,6 @@ __all__ = [
     "StepOutcome",
     "default_edge_plan",
 ]
-
-
-class OfflineBootstrapError(HugrGateError):
-    """A bootstrap plan violates the offline-first law."""
 
 
 @dataclass(frozen=True)

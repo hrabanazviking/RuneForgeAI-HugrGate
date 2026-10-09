@@ -24,7 +24,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import TelemetryError
 
 __all__ = [
     "DEFAULT_MAX_EVENTS",
@@ -35,10 +35,6 @@ __all__ = [
 
 #: Default ring-buffer capacity.
 DEFAULT_MAX_EVENTS = 256
-
-
-class TelemetryError(HugrGateError):
-    """A telemetry invariant was violated."""
 
 
 @dataclass(frozen=True)

@@ -21,7 +21,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import ChaosError
 
 __all__ = [
     "BUILTIN_SCENARIOS",
@@ -30,10 +30,6 @@ __all__ = [
     "FaultScenario",
     "build_builtin_runner",
 ]
-
-
-class ChaosError(HugrGateError):
-    """A fault-injection scenario failed its verification."""
 
 
 @dataclass(frozen=True)

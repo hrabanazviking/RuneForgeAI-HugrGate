@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import QuantError
 
 try:
     import numpy as np
@@ -44,10 +44,6 @@ __all__ = [
     "quantize_int8",
     "select_profile",
 ]
-
-
-class QuantError(HugrGateError):
-    """A quantization profile or operation was invalid."""
 
 
 class QuantFormat(str, Enum):

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 62 · **public names:** 287
+**Modules:** 63 · **public names:** 415
 
 ## API stability policy
 
@@ -262,6 +262,115 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
+| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
+| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
+| `CRITICAL_C` | constant | `85.0` |
+| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
+| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
+| `DEFAULT_MAX_EVENTS` | constant | `256` |
+| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
+| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
+| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
+| `PI_BASELINES` | constant | `{'Raspberry Pi 5': EdgeBaseline(board='Raspberry Pi 5', cpu_` |
+| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
+| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
+| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
+| `WARN_C` | constant | `70.0` |
+| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
+| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
+| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
+| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
+| `BootstrapContext` | class | `()` |
+| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
+| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
+| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ChaosRunner` | class | `()` |
+| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
+| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
+| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
+| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
+| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
+| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
+| `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
+| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
+| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
+| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
+| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
+| `MemoryMode` | class | `(*values)` |
+| `MissPolicy` | class | `(*values)` |
+| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
+| `MockPowerSource` | class | `(script: 'list[float | None]')` |
+| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
+| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `NPUAdapter` | class | `()` |
+| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPURegistry` | class | `()` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
+| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
+| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
+| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
+| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerSource` | class | `()` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantFormat` | class | `(*values)` |
+| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
+| `QuantProfileRegistry` | class | `()` |
+| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
+| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
+| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
+| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
+| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
+| `ThermalLevel` | class | `(*values)` |
+| `ThermalSensor` | class | `()` |
+| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
+| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
+| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
+| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
+| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
+| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
+| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
+| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
+| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
+| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
+| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
+| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
+| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
+| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
+| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
+| `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
+| `run_builtin_scenarios` | function | `() -> 'dict[str, Any]'` |
+| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
+| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
 
 ### `hugrgate.edge.affinity`
 
@@ -320,6 +429,15 @@ that this document never drifts from the code.
 | `ChaosRunner` | class | `()` |
 | `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
 | `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
+
+### `hugrgate.edge.gate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
+| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
+| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
 
 ### `hugrgate.edge.memory`
 
@@ -458,13 +576,28 @@ that this document never drifts from the code.
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 

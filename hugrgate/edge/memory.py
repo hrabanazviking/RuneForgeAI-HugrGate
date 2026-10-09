@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import EdgeMemoryError
 
 __all__ = [
     "CRITICAL_AVAILABLE_BYTES",
@@ -54,10 +54,6 @@ class MemoryMode(str, Enum):
     STANDARD = "standard"
     LOW = "low"
     CRITICAL = "critical"
-
-
-class EdgeMemoryError(HugrGateError):
-    """A memory budget was exceeded or an allocation was invalid."""
 
 
 @dataclass(frozen=True)

@@ -19,17 +19,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from hugrgate.edge.memory import MemoryManager, MemoryMode
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import ResidencyError
 
 __all__ = [
     "ModelEntry",
     "ResidencyError",
     "ResidencyManager",
 ]
-
-
-class ResidencyError(HugrGateError):
-    """A residency invariant was violated (unknown model, no room)."""
 
 
 @dataclass

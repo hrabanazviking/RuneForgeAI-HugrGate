@@ -27,7 +27,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import StorageError
 
 __all__ = [
     "DEFAULT_BUFFER_BYTES",
@@ -44,10 +44,6 @@ DEFAULT_MAX_VALUE_BYTES = 16 * 1024 * 1024
 _HEADER = struct.Struct("<I I")  # key_len, value_len; value_len=0xFFFF_FFFF → tombstone
 _TOMBSTONE = 0xFFFFFFFF
 _MAGIC = b"HGWS0001"
-
-
-class StorageError(HugrGateError):
-    """A storage invariant was violated (budget, format, key)."""
 
 
 class WearAwareStore:

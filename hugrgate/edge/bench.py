@@ -30,7 +30,7 @@ from hugrgate.edge.platform import (
     PlatformInfo,
     PlatformProbe,
 )
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import BenchmarkError
 
 try:
     import numpy as np
@@ -53,10 +53,6 @@ __all__ = [
 
 #: Artifact schema version. Bump when the JSON layout changes.
 ARTIFACT_SCHEMA = "edge-bench/1"
-
-
-class BenchmarkError(HugrGateError):
-    """A benchmark definition or artifact was invalid."""
 
 
 @dataclass
@@ -288,11 +284,13 @@ def edge_bench_suite(name: str = "edge-suite",
     """
     import tempfile
 
-    from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
+    import hugrgate.edge.quant as _quant
     from hugrgate.backends.rules import Rule, RuleBackend
-    from hugrgate.edge import quant as _quant
+    from hugrgate.core import HugrGate
     from hugrgate.edge.storage import WearAwareStore
     from hugrgate.edge.telemetry import TelemetryLite
+    from hugrgate.policy import DecisionPolicy
+    from hugrgate.spec import DecisionSpec
 
     if np is None:
         raise BenchmarkError(

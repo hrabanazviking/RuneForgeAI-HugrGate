@@ -16,13 +16,28 @@ from hugrgate.errors import (
     Abstention,
     BackendError,
     BackendUnavailable,
+    BenchmarkError,
     CalibrationError,
+    ChaosError,
+    EdgeAffinityError,
+    EdgeCacheError,
+    EdgeMemoryError,
+    GateError,
     HugrGateError,
+    NPUError,
+    OfflineBootstrapError,
     PolicyError,
+    PowerBudgetError,
     PrivacyViolation,
+    QuantError,
     QueueFull,
+    RecoveryError,
+    ResidencyError,
     SpecError,
+    StorageError,
+    TelemetryError,
     TimeoutError,
+    WatchdogError,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,6 +45,11 @@ ROOT = Path(__file__).resolve().parent.parent
 ALL_ERRORS = [
     HugrGateError, SpecError, PolicyError, BackendError, BackendUnavailable,
     CalibrationError, TimeoutError, PrivacyViolation, QueueFull, Abstention,
+    # Campaign VIII edge-intelligence errors (slice 200 taxonomy promotion).
+    EdgeAffinityError, BenchmarkError, OfflineBootstrapError, EdgeCacheError,
+    ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
+    QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
+    WatchdogError,
 ]
 
 EXPECTED_CODES = {
@@ -43,6 +63,21 @@ EXPECTED_CODES = {
     PrivacyViolation: "privacy_violation",
     QueueFull: "queue_full",
     Abstention: "abstention",
+    EdgeAffinityError: "edge_affinity_error",
+    BenchmarkError: "edge_benchmark_error",
+    OfflineBootstrapError: "edge_bootstrap_error",
+    EdgeCacheError: "edge_cache_error",
+    ChaosError: "edge_chaos_error",
+    GateError: "edge_gate_error",
+    EdgeMemoryError: "edge_memory_error",
+    NPUError: "edge_npu_error",
+    PowerBudgetError: "edge_power_budget_error",
+    QuantError: "edge_quant_error",
+    RecoveryError: "edge_recovery_error",
+    ResidencyError: "edge_residency_error",
+    StorageError: "edge_storage_error",
+    TelemetryError: "edge_telemetry_error",
+    WatchdogError: "edge_watchdog_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -56,6 +91,25 @@ EXPECTED_RECOVERABLE = {
     PrivacyViolation: False,
     QueueFull: True,
     Abstention: True,
+    # Deliberate per class (slice 200): True where retrying after a changed
+    # environment can plausibly succeed (freed memory, installed extra,
+    # shed load, appeared hardware); False where the caller must fix the
+    # request itself (invalid arguments, structural law violations).
+    EdgeAffinityError: True,
+    BenchmarkError: True,
+    OfflineBootstrapError: False,
+    EdgeCacheError: False,
+    ChaosError: False,
+    GateError: False,
+    EdgeMemoryError: True,
+    NPUError: True,
+    PowerBudgetError: True,
+    QuantError: False,
+    RecoveryError: True,
+    ResidencyError: True,
+    StorageError: True,
+    TelemetryError: False,
+    WatchdogError: False,
 }
 
 
@@ -101,6 +155,9 @@ def test_to_dict_from_dict_round_trip():
         QueueFull("daemon is shutting down"),
         Abstention("low confidence", reason="below_threshold", p=0.4),
         HugrGateError("generic"),
+        # Campaign VIII taxonomy members round-trip identically.
+        NPUError("no Hailo device", vendor="hailo"),
+        EdgeMemoryError("budget exceeded", needed_bytes=1024),
     ]
     for original in cases:
         data = original.to_dict()

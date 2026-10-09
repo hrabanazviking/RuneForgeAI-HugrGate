@@ -19,13 +19,28 @@ __all__ = [
     "Abstention",
     "BackendError",
     "BackendUnavailable",
+    "BenchmarkError",
     "CalibrationError",
+    "ChaosError",
+    "EdgeAffinityError",
+    "EdgeCacheError",
+    "EdgeMemoryError",
+    "GateError",
     "HugrGateError",
+    "NPUError",
+    "OfflineBootstrapError",
     "PolicyError",
+    "PowerBudgetError",
     "PrivacyViolation",
+    "QuantError",
     "QueueFull",
+    "RecoveryError",
+    "ResidencyError",
     "SpecError",
+    "StorageError",
+    "TelemetryError",
     "TimeoutError",
+    "WatchdogError",
 ]
 
 
@@ -139,3 +154,100 @@ class Abstention(HugrGateError):
         return cls(data.get("message", "insufficient confidence"),
                    reason=data.get("reason", "below_threshold"),
                    **data.get("details", {}))
+
+
+# --- Campaign VIII: edge-intelligence errors -----------------------------------
+# Each slice owned its error locally; slice 200 promotes them into the
+# taxonomy so every raise site in the package is a taxonomy error or a
+# stdlib validation error (tests/test_errors.py). Codes are unique and
+# stable; recoverable is deliberate per class (see slice 200 doc).
+
+
+class EdgeAffinityError(HugrGateError):
+    """An affinity request was invalid or the OS refused it."""
+    code = "edge_affinity_error"
+    recoverable = True
+
+
+class BenchmarkError(HugrGateError):
+    """A benchmark definition or artifact was invalid."""
+    code = "edge_benchmark_error"
+    recoverable = True
+
+
+class OfflineBootstrapError(HugrGateError):
+    """A bootstrap plan violates the offline-first law."""
+    code = "edge_bootstrap_error"
+    recoverable = False
+
+
+class EdgeCacheError(HugrGateError):
+    """A cache-tuning request was invalid."""
+    code = "edge_cache_error"
+    recoverable = False
+
+
+class ChaosError(HugrGateError):
+    """A fault-injection scenario failed its verification."""
+    code = "edge_chaos_error"
+    recoverable = False
+
+
+class GateError(HugrGateError):
+    """The release gate itself failed to execute (not a check failure)."""
+    code = "edge_gate_error"
+    recoverable = False
+
+
+class EdgeMemoryError(HugrGateError):
+    """A memory budget was exceeded or an allocation was invalid."""
+    code = "edge_memory_error"
+    recoverable = True
+
+
+class NPUError(HugrGateError):
+    """An NPU operation failed (load/infer on a present device)."""
+    code = "edge_npu_error"
+    recoverable = True
+
+
+class PowerBudgetError(HugrGateError):
+    """A power-budget invariant was violated."""
+    code = "edge_power_budget_error"
+    recoverable = True
+
+
+class QuantError(HugrGateError):
+    """A quantization profile or operation was invalid."""
+    code = "edge_quant_error"
+    recoverable = False
+
+
+class RecoveryError(HugrGateError):
+    """A checkpoint could not be written or recovered."""
+    code = "edge_recovery_error"
+    recoverable = True
+
+
+class ResidencyError(HugrGateError):
+    """A residency invariant was violated (unknown model, no room)."""
+    code = "edge_residency_error"
+    recoverable = True
+
+
+class StorageError(HugrGateError):
+    """A storage invariant was violated (budget, format, key)."""
+    code = "edge_storage_error"
+    recoverable = True
+
+
+class TelemetryError(HugrGateError):
+    """A telemetry invariant was violated."""
+    code = "edge_telemetry_error"
+    recoverable = False
+
+
+class WatchdogError(HugrGateError):
+    """A watchdog invariant was violated."""
+    code = "edge_watchdog_error"
+    recoverable = False

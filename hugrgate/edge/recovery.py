@@ -27,7 +27,7 @@ import zlib
 from pathlib import Path
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import RecoveryError
 
 __all__ = [
     "Checkpoint",
@@ -37,10 +37,6 @@ __all__ = [
 
 #: Journal file magic + version, guarding against alien files.
 _MAGIC = "HGCK0001"
-
-
-class RecoveryError(HugrGateError):
-    """A checkpoint could not be written or recovered."""
 
 
 class Checkpoint:

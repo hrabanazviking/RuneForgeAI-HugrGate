@@ -23,7 +23,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import NPUError
 
 __all__ = [
     "PRECISIONS",
@@ -39,10 +39,6 @@ __all__ = [
 
 #: Precisions an adapter may advertise, ordered by bit-width.
 PRECISIONS = ("int4", "int8", "fp16", "fp32")
-
-
-class NPUError(HugrGateError):
-    """An NPU operation failed (load/infer on a present device)."""
 
 
 @dataclass(frozen=True)

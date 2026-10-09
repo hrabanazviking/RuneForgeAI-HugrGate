@@ -122,6 +122,11 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "ruff": {"lint"},
     "coverage": {"lint"},
     "onnxruntime": {"onnx"},
+    # Campaign VIII (slice 185): lazy vendor SDK imports in
+    # hugrgate.edge.npu — absent here, provided by the npu extra.
+    "hailo_platform": {"npu"},
+    "tensorrt": {"npu"},
+    "openvino": {"npu"},
 }
 # Declared extras with no current importer (documented reservations).
 RESERVED_EXTRAS = {"onnx": "reserved for a future ONNX backend (slice 004 audit)"}
@@ -135,6 +140,7 @@ _STDLIB = {
     "tempfile", "threading", "time", "tomllib", "traceback", "typing",
     "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
+    "glob", "struct", "zlib",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build"}
@@ -186,6 +192,7 @@ def test_every_third_party_import_is_declared():
                 "pyyaml": "yaml",
                 "scikit-learn": "sklearn",
                 "llama-cpp-python": "llama_cpp",
+                "hailort": "hailo_platform",
             }.get(dist, dist),
             set(),
         ).update(exs)

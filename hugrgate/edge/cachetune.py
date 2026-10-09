@@ -19,7 +19,7 @@ from typing import Any
 from hugrgate.cache import DecisionCache
 from hugrgate.edge.memory import MemoryManager, MemoryMode
 from hugrgate.edge.platform import EdgeBaseline
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import EdgeCacheError
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -46,10 +46,6 @@ _MODE_TTL_FACTOR = {
     MemoryMode.LOW: 0.5,
     MemoryMode.CRITICAL: 0.25,
 }
-
-
-class EdgeCacheError(HugrGateError):
-    """A cache-tuning request was invalid."""
 
 
 @dataclass(frozen=True)

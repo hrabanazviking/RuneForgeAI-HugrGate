@@ -30,6 +30,10 @@ bench = ["numpy>=1.24"]
 test = ["pytest>=7.0"]
 typecheck = ["mypy>=1.0"]
 lint = ["ruff>=0.8", "coverage>=7.0"]
+# Campaign VIII (slice 185): optional vendor SDKs for NPU adapters. All
+# imports are lazy (try/except ImportError inside detect()); the extra
+# only declares what *would* provide them on real edge hardware.
+npu = ["hailort>=4.0", "tensorrt>=8.6", "openvino>=2023.0"]
 
 [project.scripts]
 hugrgate = "hugrgate.cli:main"

@@ -18,17 +18,13 @@ from collections.abc import Callable
 from enum import Enum
 from typing import Any
 
-from hugrgate.errors import HugrGateError
+from hugrgate.errors import WatchdogError
 
 __all__ = [
     "EdgeWatchdog",
     "MissPolicy",
     "WatchdogError",
 ]
-
-
-class WatchdogError(HugrGateError):
-    """A watchdog invariant was violated."""
 
 
 class MissPolicy(str, Enum):
