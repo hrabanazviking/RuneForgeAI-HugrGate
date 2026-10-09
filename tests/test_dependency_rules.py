@@ -120,6 +120,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "pytest": {"test"},
     "mypy": {"typecheck"},
     "ruff": {"lint"},
+    "coverage": {"lint"},
     "onnxruntime": {"onnx"},
 }
 # Declared extras with no current importer (documented reservations).

@@ -57,4 +57,4 @@ def test_ruff_config_is_declared():
 
 def test_lint_extra_is_declared():
     text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'lint = ["ruff>=0.8"]' in text
+    assert 'lint = ["ruff>=0.8"' in text
