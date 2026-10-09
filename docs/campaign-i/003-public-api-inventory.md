@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 63 · **public names:** 299
+**Modules:** 64 · **public names:** 310
 
 ## API stability policy
 
@@ -235,19 +235,24 @@ that this document never drifts from the code.
 | `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
 | `DEFAULT_LAN_PORT` | constant | `18377` |
 | `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
+| `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `MAX_STEAL_BATCH` | constant | `64` |
 | `PROTOCOL_VERSION` | constant | `1` |
 | `SENSITIVE_PREFIX` | constant | `'private_'` |
 | `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
+| `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
+| `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `CostModel` | class | `() -> 'None'` |
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
+| `DistributedBatcher` | class | `(node: 'ClusterNode', max_batch_size: 'int' = 32) -> 'None'` |
 | `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
@@ -271,6 +276,8 @@ that this document never drifts from the code.
 | `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
+| `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
+| `StealableQueue` | class | `() -> 'None'` |
 | `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
 | `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
@@ -310,6 +317,15 @@ that this document never drifts from the code.
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+
+### `hugrgate.cluster.distributed_batch`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
+| `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
+| `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
+| `DistributedBatcher` | class | `(node: 'ClusterNode', max_batch_size: 'int' = 32) -> 'None'` |
 
 ### `hugrgate.cluster.identity`
 

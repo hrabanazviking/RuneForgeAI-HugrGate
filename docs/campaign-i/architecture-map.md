@@ -86,6 +86,7 @@ flowchart TD
         cluster_node_latency[cluster.node_latency]
         cluster_node_cost[cluster.node_cost]
         cluster_work_stealing[cluster.work_stealing]
+        cluster_distributed_batch[cluster.distributed_batch]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -180,6 +181,7 @@ flowchart TD
     cluster --> cluster_auth
     cluster --> cluster_capabilities
     cluster --> cluster_discovery
+    cluster --> cluster_distributed_batch
     cluster --> cluster_identity
     cluster --> cluster_lan
     cluster --> cluster_node
@@ -204,6 +206,14 @@ flowchart TD
     cluster_capabilities --> spec
     cluster_discovery --> cluster_capabilities
     cluster_discovery --> errors
+    cluster_distributed_batch --> hugrgate
+    cluster_distributed_batch --> cluster_node
+    cluster_distributed_batch --> cluster_privacy_boundary
+    cluster_distributed_batch --> cluster_protocol
+    cluster_distributed_batch --> errors
+    cluster_distributed_batch --> result
+    cluster_distributed_batch --> serde
+    cluster_distributed_batch --> spec
     cluster_identity --> cluster_protocol
     cluster_identity --> errors
     cluster_lan --> cluster_capabilities
@@ -213,6 +223,7 @@ flowchart TD
     cluster_lan --> errors
     cluster_node --> cluster_capabilities
     cluster_node --> cluster_discovery
+    cluster_node --> cluster_distributed_batch
     cluster_node --> cluster_identity
     cluster_node --> cluster_node_cost
     cluster_node --> cluster_node_health
@@ -351,7 +362,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -447,6 +458,7 @@ flowchart TD
 | `cluster` | `cluster.auth` | no |
 | `cluster` | `cluster.capabilities` | no |
 | `cluster` | `cluster.discovery` | no |
+| `cluster` | `cluster.distributed_batch` | no |
 | `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.lan` | no |
 | `cluster` | `cluster.node` | no |
@@ -471,6 +483,14 @@ flowchart TD
 | `cluster.capabilities` | `spec` | no |
 | `cluster.discovery` | `cluster.capabilities` | no |
 | `cluster.discovery` | `errors` | no |
+| `cluster.distributed_batch` | `hugrgate` | no |
+| `cluster.distributed_batch` | `cluster.node` | no |
+| `cluster.distributed_batch` | `cluster.privacy_boundary` | no |
+| `cluster.distributed_batch` | `cluster.protocol` | no |
+| `cluster.distributed_batch` | `errors` | no |
+| `cluster.distributed_batch` | `result` | no |
+| `cluster.distributed_batch` | `serde` | no |
+| `cluster.distributed_batch` | `spec` | no |
 | `cluster.identity` | `cluster.protocol` | no |
 | `cluster.identity` | `errors` | no |
 | `cluster.lan` | `cluster.capabilities` | no |
@@ -480,6 +500,7 @@ flowchart TD
 | `cluster.lan` | `errors` | no |
 | `cluster.node` | `cluster.capabilities` | no |
 | `cluster.node` | `cluster.discovery` | no |
+| `cluster.node` | `cluster.distributed_batch` | no |
 | `cluster.node` | `cluster.identity` | no |
 | `cluster.node` | `cluster.node_cost` | no |
 | `cluster.node` | `cluster.node_health` | no |

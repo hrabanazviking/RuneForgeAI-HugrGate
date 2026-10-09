@@ -20,6 +20,12 @@ from hugrgate.cluster.discovery import (
     DiscoveryRegistry,
     PeerRecord,
 )
+from hugrgate.cluster.distributed_batch import (
+    DEFAULT_MAX_BATCH_SIZE,
+    BatchJob,
+    BatchOutcome,
+    DistributedBatcher,
+)
 from hugrgate.cluster.identity import KEY_BYTES, NodeIdentity
 from hugrgate.cluster.lan import (
     DEFAULT_LAN_GROUP,
@@ -99,6 +105,7 @@ __all__ = [
     "DEFAULT_LAN_GROUP",
     "DEFAULT_LAN_PORT",
     "DEFAULT_LATENCY_TARGET_MS",
+    "DEFAULT_MAX_BATCH_SIZE",
     "DEFAULT_QUARANTINE_THRESHOLD",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
@@ -107,12 +114,15 @@ __all__ = [
     "PROTOCOL_VERSION",
     "SENSITIVE_PREFIX",
     "Authenticator",
+    "BatchJob",
+    "BatchOutcome",
     "ClusterKey",
     "ClusterMessage",
     "ClusterNode",
     "CostModel",
     "Discovery",
     "DiscoveryRegistry",
+    "DistributedBatcher",
     "DistributedRouter",
     "InboundHook",
     "LANDiscoveryAdapter",

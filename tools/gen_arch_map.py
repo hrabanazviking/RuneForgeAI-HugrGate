@@ -73,6 +73,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.cluster.node_latency",
         "hugrgate.cluster.node_cost",
         "hugrgate.cluster.work_stealing",
+        "hugrgate.cluster.distributed_batch",
     ],
     "api": ["hugrgate"],
 }

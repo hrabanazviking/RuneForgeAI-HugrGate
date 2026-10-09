@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
+from hugrgate.cluster.distributed_batch import DistributedBatcher
 from hugrgate.cluster.identity import NodeIdentity
 from hugrgate.cluster.node_cost import CostModel
 from hugrgate.cluster.node_health import NodeHealthMonitor
@@ -129,6 +130,8 @@ class ClusterNode:
         self.costs = CostModel()
         #: Distributed routing (slice 212).
         self.router = DistributedRouter(self)
+        #: Distributed batching (slice 217).
+        self.batcher = DistributedBatcher(self)
 
     # -- local facts --------------------------------------------------------
 
