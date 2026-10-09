@@ -53,6 +53,10 @@ from hugrgate.routing.hardware import (
 from hugrgate.routing.early_exit import (
     EarlyExitExecutor,
 )
+from hugrgate.routing.fallback import (
+    FallbackGraph,
+    FallbackGraphExecutor,
+)
 from hugrgate.routing.hedged import (
     HedgedPlanExecutor,
 )
@@ -111,6 +115,8 @@ __all__ = [
     "EnergyLedger",
     "EnergyModel",
     "EarlyExitExecutor",
+    "FallbackGraph",
+    "FallbackGraphExecutor",
     "HardwareAwarePlanner",
     "HedgedPlanExecutor",
     "HostProfile",
