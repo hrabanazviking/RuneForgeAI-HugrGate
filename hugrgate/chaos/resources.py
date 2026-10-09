@@ -23,11 +23,16 @@ Slice 262 adds CPU-starvation simulation to the same module.
 from __future__ import annotations
 
 import threading
-from collections.abc import Callable
+import time
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from typing import Any
 
+from hugrgate.backend import Backend
 from hugrgate.errors import SpecError
 from hugrgate.log import get_logger
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 
 logger = get_logger(__name__)
 
@@ -35,6 +40,7 @@ __all__ = [
     "CRITICAL",
     "OK",
     "WARN",
+    "CPUStarvationSimulator",
     "MemoryPressureSimulator",
     "MemoryReading",
     "ResourceGuard",
@@ -181,3 +187,86 @@ class ResourceGuard:
                     logger.warning("resource guard shedder %r failed: %s",
                                    name, e)
         return new_state
+
+
+class CPUStarvationSimulator:
+    """Simulate a CPU-starved host: every unit of work takes longer.
+
+    ``share`` is the fraction of CPU the process receives, in (0, 1].
+    ``stretched(duration_s)`` models work that takes ``duration_s`` on
+    an idle machine running under starvation: it lasts
+    ``duration_s / share``. :meth:`starve_backend` wraps a backend so
+    its ``evaluate`` pays that dilation before delegating.
+
+    The resilience property under test: wall-clock deadlines
+    (:class:`~hugrgate.timeout.TimeoutBackend`) must still fire in
+    real time when the machine is slow — a starved backend becomes a
+    ``TimeoutError`` and the fallback chain routes around it, instead
+    of the caller hanging behind dilated work.
+    """
+
+    def __init__(self, share: float = 1.0):
+        self._share = 1.0
+        self.set_share(share)
+
+    def set_share(self, share: float) -> CPUStarvationSimulator:
+        if (not isinstance(share, (int, float))
+                or not 0.0 < share <= 1.0):
+            raise SpecError(
+                f"cpu share must be in (0, 1], got {share!r}")
+        self._share = float(share)
+        return self
+
+    @property
+    def share(self) -> float:
+        return self._share
+
+    @property
+    def dilation(self) -> float:
+        """Work takes this many times longer under starvation."""
+        return 1.0 / self._share
+
+    def stretched(self, duration_s: float) -> float:
+        """How long ``duration_s`` of work lasts when starved."""
+        if duration_s < 0:
+            raise SpecError(
+                f"duration_s must be >= 0, got {duration_s}")
+        return duration_s / self._share
+
+    def starve_backend(self, backend: Backend,
+                       base_delay_s: float = 0.0) -> Backend:
+        """Wrap ``backend`` so ``evaluate`` dilates ``base_delay_s``
+        of work before delegating."""
+        if not isinstance(backend, Backend):
+            raise SpecError(
+                "starve_backend wraps a Backend, got "
+                f"{type(backend).__name__}")
+        if base_delay_s < 0:
+            raise SpecError(
+                f"base_delay_s must be >= 0, got {base_delay_s}")
+        simulator = self
+
+        class StarvedBackend(Backend):
+            def __init__(self) -> None:
+                self.name = backend.name
+                self.is_remote = backend.is_remote
+                self._backend = backend
+
+            def capabilities(self) -> dict[str, Any]:
+                caps = dict(self._backend.capabilities())
+                caps["cpu_share"] = simulator.share
+                return caps
+
+            def supports(self, spec: DecisionSpec) -> bool:
+                return self._backend.supports(spec)
+
+            def evaluate(
+                    self, state: Mapping[str, Any], spec: DecisionSpec,
+                    context: Mapping[str, Any] | None = None
+            ) -> DecisionResult:
+                delay = simulator.stretched(base_delay_s)
+                if delay:
+                    time.sleep(delay)
+                return self._backend.evaluate(state, spec, context)
+
+        return StarvedBackend()
