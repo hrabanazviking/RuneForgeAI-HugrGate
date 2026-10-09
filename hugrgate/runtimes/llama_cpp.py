@@ -264,6 +264,8 @@ class LlamaCppRuntime(LocalRuntime):
     # -- operations -----------------------------------------------------------
 
     def warmup(self) -> None:
+        if self._model is None:
+            return  # nothing loaded; warmup is a no-op, not an error
         if self.embedding_mode:
             self.embed(["warmup"])
         else:
