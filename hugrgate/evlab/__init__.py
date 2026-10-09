@@ -78,6 +78,7 @@ from hugrgate.evlab.dataset import (
     TransformStep,
     fingerprint_items,
 )
+from hugrgate.evlab.latency import LatencyReport, latency_aware_evaluate
 from hugrgate.evlab.selective import (
     SelectivePoint,
     SelectiveReport,
@@ -123,6 +124,7 @@ __all__ = [
     "HistogramBinningCalibrator",
     "IdentityCalibrator",
     "LabCalibrator",
+    "LatencyReport",
     "MetricSet",
     "PackageCalibrator",
     "RunRecord",
@@ -147,6 +149,7 @@ __all__ = [
     "expected_calibration_error",
     "fingerprint_items",
     "kfold_indices",
+    "latency_aware_evaluate",
     "make_splits",
     "manifest_splits",
     "mcnemar_test",

@@ -1163,6 +1163,7 @@ flowchart TD
     evlab --> evlab_costaware
     evlab --> evlab_crossval
     evlab --> evlab_dataset
+    evlab --> evlab_latency
     evlab --> evlab_selective
     evlab --> evlab_significance
     evlab --> evlab_splits
@@ -1205,6 +1206,11 @@ flowchart TD
     evlab_crossval --> evlab_splits
     evlab_crossval --> policy
     evlab_dataset --> errors
+    evlab_latency --> core
+    evlab_latency --> errors
+    evlab_latency --> policy
+    evlab_latency --> result
+    evlab_latency --> spec
     evlab_selective --> core
     evlab_selective --> errors
     evlab_selective --> policy
@@ -2376,6 +2382,7 @@ flowchart TD
 | `evlab` | `evlab.costaware` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
@@ -2418,6 +2425,11 @@ flowchart TD
 | `evlab.crossval` | `evlab.splits` | no |
 | `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
+| `evlab.latency` | `core` | no |
+| `evlab.latency` | `errors` | no |
+| `evlab.latency` | `policy` | no |
+| `evlab.latency` | `result` | no |
+| `evlab.latency` | `spec` | no |
 | `evlab.selective` | `core` | no |
 | `evlab.selective` | `errors` | no |
 | `evlab.selective` | `policy` | no |
