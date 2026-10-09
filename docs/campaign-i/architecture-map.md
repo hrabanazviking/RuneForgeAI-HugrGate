@@ -34,6 +34,7 @@ flowchart TD
         contracts_multilabel[contracts.multilabel]
         contracts_cost[contracts.cost]
         contracts_utility[contracts.utility]
+        contracts_risk[contracts.risk]
     end
     subgraph runtime[runtime]
         core[core]
@@ -177,6 +178,9 @@ flowchart TD
     contracts_nested --> errors
     contracts_ordinal --> contracts_schema
     contracts_ordinal --> errors
+    contracts_risk --> contracts_cost
+    contracts_risk --> contracts_schema
+    contracts_risk --> errors
     contracts_schema --> errors
     contracts_uncertainty --> contracts_schema
     contracts_uncertainty --> errors
@@ -248,7 +252,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -353,6 +357,9 @@ flowchart TD
 | `contracts.nested` | `errors` | no |
 | `contracts.ordinal` | `contracts.schema` | no |
 | `contracts.ordinal` | `errors` | no |
+| `contracts.risk` | `contracts.cost` | no |
+| `contracts.risk` | `contracts.schema` | no |
+| `contracts.risk` | `errors` | no |
 | `contracts.schema` | `errors` | no |
 | `contracts.uncertainty` | `contracts.schema` | no |
 | `contracts.uncertainty` | `errors` | no |

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 56 · **public names:** 247
+**Modules:** 57 · **public names:** 255
 
 ## API stability policy
 
@@ -248,6 +248,7 @@ that this document never drifts from the code.
 | `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/hatch/wo` |
 | `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/hatch/workspac` |
 | `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/hatch/works` |
+| `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/hatch/workspac` |
 
 ### `hugrgate.contracts.composite`
 
@@ -331,6 +332,18 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `OrdinalContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, levels: 'List[str]' = <factory>, anchors: 'Dict[str, float]' = <factory>) -> None` |
+
+### `hugrgate.contracts.risk`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RISK_ATTITUDES` | constant | `('minimax', 'minimax_regret', 'cvar')` |
+| `RiskContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, costs: 'Dict[str, Dict[str, float]]' = <factory>, attitude: 'str' = 'minimax', cvar_alpha: 'float' = 0.9) -> None` |
+| `cvar_of_decision` | function | `(matrix: 'CostMatrix', distribution: 'Mapping[str, float]', decision: 'str', alpha: 'float') -> 'float'` |
+| `cvar_decision` | function | `(matrix: 'CostMatrix', distribution: 'Mapping[str, float]', alpha: 'float' = 0.9) -> 'Tuple[str, float]'` |
+| `minimax_decision` | function | `(matrix: 'CostMatrix') -> 'Tuple[str, float]'` |
+| `minimax_regret_decision` | function | `(matrix: 'CostMatrix') -> 'Tuple[str, float]'` |
+| `regret_table` | function | `(matrix: 'CostMatrix') -> 'Dict[str, Dict[str, float]]'` |
 
 ### `hugrgate.contracts.schema`
 

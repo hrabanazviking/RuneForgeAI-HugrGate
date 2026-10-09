@@ -37,6 +37,7 @@ __all__ = [
     "multilabel",
     "cost",
     "utility",
+    "risk",
 ]
 
 
@@ -47,7 +48,8 @@ def __getattr__(name: str):
     # which would re-enter __getattr__ and recurse forever.
     if name in ("negotiation", "nested", "hierarchy", "composite",
                 "conditional", "crossfield", "ordinal", "uncertainty",
-                "distributions", "multilabel", "cost", "utility"):
+                "distributions", "multilabel", "cost", "utility",
+                "risk"):
         import importlib
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module

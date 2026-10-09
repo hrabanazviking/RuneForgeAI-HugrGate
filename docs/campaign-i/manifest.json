@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:30:06.647122+00:00",
-  "module_count": 56,
+  "generated_utc": "2026-10-09T11:32:31.084153+00:00",
+  "module_count": 57,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 55,
+      "loc": 57,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -772,6 +772,30 @@
         "expected_anchor",
         "validate_value",
         "validate_distribution",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.risk": {
+      "docstring": "Risk matrices \u2014 deciding under risk aversion. Gjallarbr\u00fa slice 039.\n\nSlices 037\u2013038 optimize *expectation*: minimum expected cost, maximum\nexpected utility. A risk-averse decision maker cares about the *worst\ncase*, not the average. This module reuses :class:`CostMatrix` as the\nloss matrix (law 2: reuse sound architecture) and adds three\nrisk-sensitive decision rules:\n\n- :func:`minimax_decision` \u2014 minimize the worst-case loss. Needs no\n  distribution: pure robustness;\n- :func:`minimax_regret_decision` \u2014 minimize the worst-case *regret*,\n  where ``regret[d][o] = loss[d][o] \u2212 min_d\u2032 loss[d\u2032][o]``;\n- :func:`cvar_decision` \u2014 minimize CVaR_\u03b1: the expected loss in the\n  worst (1\u2212\u03b1) tail of the loss distribution (\u03b1=0 recovers expectation).\n\n:class:`RiskContract` (kind ``\"risk\"``) binds outcomes + loss matrix +\n``attitude`` (``minimax`` | ``minimax_regret`` | ``cvar``) with\n``cvar_alpha`` for the tail rule.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 241,
+      "path": "hugrgate/contracts/risk.py",
+      "public_defs": [
+        "minimax_decision",
+        "regret_table",
+        "minimax_regret_decision",
+        "cvar_of_decision",
+        "cvar_decision",
+        "RiskContract",
+        "matrix",
+        "validate_value",
+        "decide",
+        "expected_cost",
         "describe"
       ]
     },
@@ -1310,6 +1334,7 @@
     "test_contracts_036.py",
     "test_contracts_037.py",
     "test_contracts_038.py",
+    "test_contracts_039.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1320,5 +1345,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10534
+  "total_loc": 10777
 }
