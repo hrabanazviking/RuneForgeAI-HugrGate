@@ -50,6 +50,9 @@ from hugrgate.routing.hardware import (
     HostProfile,
     hardware_compatible,
 )
+from hugrgate.routing.early_exit import (
+    EarlyExitExecutor,
+)
 from hugrgate.routing.hedged import (
     HedgedPlanExecutor,
 )
@@ -107,6 +110,7 @@ __all__ = [
     "EnergyAwarePlanner",
     "EnergyLedger",
     "EnergyModel",
+    "EarlyExitExecutor",
     "HardwareAwarePlanner",
     "HedgedPlanExecutor",
     "HostProfile",
