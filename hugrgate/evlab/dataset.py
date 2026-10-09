@@ -37,11 +37,14 @@ from typing import Any
 from hugrgate.errors import DatasetError
 
 __all__ = [
+    "ACQUISITIONS",
     "COLUMN_TYPES",
     "ColumnSpec",
     "DatasetManifest",
+    "DatasetProvenance",
     "DatasetRegistry",
     "DatasetVersion",
+    "TransformStep",
 ]
 
 #: Declared column value types understood by the manifest validator.
@@ -165,6 +168,7 @@ class DatasetManifest:
     sensitivity: str = "public"
     fingerprint: str = ""
     created_at: str = ""
+    provenance: DatasetProvenance | None = None
     extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -196,6 +200,10 @@ class DatasetManifest:
                    for c in self.fingerprint)
         ):
             raise DatasetError("fingerprint must be a sha256 hex digest")
+        if self.provenance is not None:
+            if not isinstance(self.provenance, DatasetProvenance):
+                raise DatasetError("provenance must be a DatasetProvenance")
+            self.provenance.validate()
 
     def check(self, items: list[Mapping[str, Any]]) -> list[dict[str, Any]]:
         """Return the list of schema issues without raising."""
@@ -257,6 +265,8 @@ class DatasetManifest:
                 expected=self.fingerprint,
                 actual=actual,
             )
+        if self.provenance is not None and self.provenance.steps:
+            self.provenance.verify(self.fingerprint)
 
     def bumped(self, kind: str = "patch") -> DatasetManifest:
         """Copy with a bumped version (slice 353).
@@ -335,6 +345,8 @@ class DatasetManifest:
             "sensitivity": self.sensitivity,
             "fingerprint": self.fingerprint,
             "created_at": self.created_at,
+            "provenance": (self.provenance.to_dict()
+                           if self.provenance else None),
             "extra": dict(self.extra),
         }
 
@@ -351,6 +363,8 @@ class DatasetManifest:
             sensitivity=data.get("sensitivity", "public"),
             fingerprint=data.get("fingerprint", ""),
             created_at=data.get("created_at", ""),
+            provenance=(DatasetProvenance.from_dict(data["provenance"])
+                        if data.get("provenance") else None),
             extra=dict(data.get("extra", {})),
         )
 
@@ -586,3 +600,196 @@ class DatasetRegistry:
             return False
         drift = DatasetRegistry.diff(old, new)
         return not drift["removed_columns"] and not drift["changed_columns"]
+
+
+# ---------------------------------------------------------------------------
+# Slice 354 — dataset provenance
+# ---------------------------------------------------------------------------
+
+#: How a dataset came into being.
+ACQUISITIONS = (
+    "download",   # fetched from a source_uri
+    "generated",  # produced by a tool/pipeline
+    "derived",    # transformed from parent dataset(s)
+    "synthetic",  # fabricated (fuzzers, scenario builders)
+    "manual",     # hand-curated
+)
+
+
+@dataclass
+class TransformStep:
+    """One link in a dataset's derivation chain (slice 354).
+
+    ``input_fingerprint``/``output_fingerprint`` are item-set sha256
+    anchors (see :func:`fingerprint_items`): the chain is continuous
+    when every step's input matches the previous step's output (or the
+    parent fingerprint for the first step).
+    """
+
+    name: str
+    tool: str = ""
+    tool_version: str = ""
+    params: dict[str, Any] = field(default_factory=dict)
+    input_fingerprint: str = ""
+    output_fingerprint: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "tool": self.tool,
+            "tool_version": self.tool_version,
+            "params": dict(self.params),
+            "input_fingerprint": self.input_fingerprint,
+            "output_fingerprint": self.output_fingerprint,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> TransformStep:
+        return cls(
+            name=data["name"],
+            tool=data.get("tool", ""),
+            tool_version=data.get("tool_version", ""),
+            params=dict(data.get("params", {})),
+            input_fingerprint=data.get("input_fingerprint", ""),
+            output_fingerprint=data.get("output_fingerprint", ""),
+        )
+
+
+@dataclass
+class DatasetProvenance:
+    """Where a dataset came from and how it was shaped (slice 354).
+
+    This is *dataset-level* provenance — the complement of
+    :mod:`hugrgate.provenance`, which records per-decision lineage.
+    The two meet in :class:`hugrgate.evlab.api.RunRecord`, which
+    carries the dataset fingerprint that this chain anchors.
+    """
+
+    source_uri: str = ""
+    acquisition: str = "manual"
+    creator: str = ""
+    created_at: str = ""
+    license: str = "unknown"
+    parents: list[dict[str, str]] = field(default_factory=list)
+    steps: list[TransformStep] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not self.created_at:
+            self.created_at = _utc_now()
+
+    def validate(self) -> None:
+        if self.acquisition not in ACQUISITIONS:
+            raise DatasetError(
+                f"unknown acquisition {self.acquisition!r}; expected one "
+                f"of {list(ACQUISITIONS)}"
+            )
+        if self.acquisition == "download" and not self.source_uri:
+            raise DatasetError(
+                "acquisition='download' requires a source_uri"
+            )
+        if self.acquisition == "derived" and not self.parents:
+            raise DatasetError(
+                "acquisition='derived' requires at least one parent dataset"
+            )
+        for parent in self.parents:
+            if not {"name", "version", "fingerprint"} <= set(parent):
+                raise DatasetError(
+                    "parent entries need name, version, and fingerprint",
+                    parent=parent,
+                )
+        for step in self.steps:
+            if not step.name:
+                raise DatasetError("transform steps need a name")
+
+    def add_step(self, step: TransformStep) -> TransformStep:
+        """Append a step, auto-linking its input to the chain tip."""
+        if self.steps and not step.input_fingerprint:
+            step.input_fingerprint = self.steps[-1].output_fingerprint
+        self.steps.append(step)
+        return step
+
+    @property
+    def chain_hash(self) -> str:
+        """sha256 over the canonicalized step chain."""
+        payload = json.dumps([s.to_dict() for s in self.steps],
+                             sort_keys=True, default=str)
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    @property
+    def tip_fingerprint(self) -> str | None:
+        """Output fingerprint of the last step, if any."""
+        return self.steps[-1].output_fingerprint if self.steps else None
+
+    def verify(self, final_fingerprint: str) -> None:
+        """Check chain continuity and that the tip anchors ``final``."""
+        self.validate()
+        previous: str | None = None
+        for idx, step in enumerate(self.steps):
+            if idx == 0:
+                if self.parents:
+                    expected_inputs = {
+                        p["fingerprint"] for p in self.parents
+                    }
+                    if (step.input_fingerprint
+                            and step.input_fingerprint not in expected_inputs):
+                        raise DatasetError(
+                            f"step 0 {step.name!r} input does not match "
+                            "any parent fingerprint",
+                            step=step.name,
+                        )
+            elif step.input_fingerprint != previous:
+                raise DatasetError(
+                    f"provenance chain broken at step {idx} {step.name!r}: "
+                    "input fingerprint does not match previous output",
+                    step=step.name,
+                )
+            if not step.output_fingerprint:
+                raise DatasetError(
+                    f"step {idx} {step.name!r} has no output fingerprint",
+                    step=step.name,
+                )
+            previous = step.output_fingerprint
+        tip = self.tip_fingerprint
+        if tip and tip != final_fingerprint:
+            raise DatasetError(
+                "provenance tip does not anchor the dataset fingerprint: "
+                "the items changed after the recorded transforms",
+                tip=tip, dataset_fingerprint=final_fingerprint,
+            )
+
+    def summary(self) -> dict[str, Any]:
+        """Compact dict for embedding in run records / decision logs."""
+        return {
+            "acquisition": self.acquisition,
+            "source_uri": self.source_uri,
+            "creator": self.creator,
+            "license": self.license,
+            "n_parents": len(self.parents),
+            "n_steps": len(self.steps),
+            "chain_hash": self.chain_hash,
+            "tip_fingerprint": self.tip_fingerprint,
+        }
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "source_uri": self.source_uri,
+            "acquisition": self.acquisition,
+            "creator": self.creator,
+            "created_at": self.created_at,
+            "license": self.license,
+            "parents": [dict(p) for p in self.parents],
+            "steps": [s.to_dict() for s in self.steps],
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> DatasetProvenance:
+        return cls(
+            source_uri=data.get("source_uri", ""),
+            acquisition=data.get("acquisition", "manual"),
+            creator=data.get("creator", ""),
+            created_at=data.get("created_at", ""),
+            license=data.get("license", "unknown"),
+            parents=[dict(p) for p in data.get("parents", [])],
+            steps=[TransformStep.from_dict(s)
+                   for s in data.get("steps", [])],
+        )

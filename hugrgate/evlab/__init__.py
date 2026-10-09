@@ -43,24 +43,30 @@ from hugrgate.evlab.api import (
     RunRecord,
 )
 from hugrgate.evlab.dataset import (
+    ACQUISITIONS,
     COLUMN_TYPES,
     ColumnSpec,
     DatasetManifest,
+    DatasetProvenance,
     DatasetRegistry,
     DatasetVersion,
+    TransformStep,
     fingerprint_items,
 )
 
 __all__ = [
+    "ACQUISITIONS",
     "COLUMN_TYPES",
     "DEFAULT_METRICS",
     "ColumnSpec",
     "DatasetManifest",
+    "DatasetProvenance",
     "DatasetRegistry",
     "DatasetVersion",
     "EvaluationLab",
     "Experiment",
     "MetricSet",
     "RunRecord",
+    "TransformStep",
     "fingerprint_items",
 ]
