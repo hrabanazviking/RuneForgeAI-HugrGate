@@ -45,9 +45,13 @@ def describe(module, name: str) -> tuple[str, str]:
     elif inspect.ismethoddescriptor(obj):
         kind = "method-descriptor"
     else:
-        # Sanitize memory addresses: reprs of callables/objects embed them,
-        # which would make the inventory nondeterministic across runs.
-        return "constant", re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj)[:60])
+        # Determinism: sort set/frozenset constants (iteration order
+        # varies with hash seed) and sanitize memory addresses in reprs.
+        if isinstance(obj, (set, frozenset)):
+            shown = "{" + ", ".join(repr(x) for x in sorted(obj, key=repr)) + "}"
+        else:
+            shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
+        return "constant", shown[:60]
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):

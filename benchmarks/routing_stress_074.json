@@ -1,0 +1,146 @@
+{
+  "slice": "074",
+  "description": "routing throughput: v2 executors vs v1 baseline",
+  "decisions_per_config": 200,
+  "note": "near-instant backends; staggered confidences force a full climb every decision, so this measures routing machinery, not backend work.",
+  "results": [
+    {
+      "label": "v1-baseline/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 29794.3,
+      "mean_ms": 0.0336,
+      "p50_ms": 0.0304,
+      "p99_ms": 0.0667
+    },
+    {
+      "label": "v2-serial/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 14995.3,
+      "mean_ms": 0.0667,
+      "p50_ms": 0.0644,
+      "p99_ms": 0.0863
+    },
+    {
+      "label": "v2-plan-only/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 91548.0,
+      "mean_ms": 0.0109,
+      "p50_ms": 0.0107,
+      "p99_ms": 0.0179
+    },
+    {
+      "label": "v2-parallel/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 697.2,
+      "mean_ms": 1.4344,
+      "p50_ms": 0.9464,
+      "p99_ms": 5.9194
+    },
+    {
+      "label": "v2-hedged/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 1039.8,
+      "mean_ms": 0.9617,
+      "p50_ms": 0.613,
+      "p99_ms": 3.8727
+    },
+    {
+      "label": "v2-early-exit/4-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 4637.9,
+      "mean_ms": 0.2156,
+      "p50_ms": 0.0689,
+      "p99_ms": 3.125
+    },
+    {
+      "label": "v1-baseline/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 5547.6,
+      "mean_ms": 0.1803,
+      "p50_ms": 0.1052,
+      "p99_ms": 1.1927
+    },
+    {
+      "label": "v2-serial/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 4631.2,
+      "mean_ms": 0.2159,
+      "p50_ms": 0.2083,
+      "p99_ms": 0.3045
+    },
+    {
+      "label": "v2-plan-only/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 36143.1,
+      "mean_ms": 0.0277,
+      "p50_ms": 0.0266,
+      "p99_ms": 0.0492
+    },
+    {
+      "label": "v2-parallel/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 236.5,
+      "mean_ms": 4.2292,
+      "p50_ms": 2.7118,
+      "p99_ms": 15.0545
+    },
+    {
+      "label": "v2-hedged/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 468.6,
+      "mean_ms": 2.1339,
+      "p50_ms": 1.5933,
+      "p99_ms": 8.5293
+    },
+    {
+      "label": "v2-early-exit/16-rungs",
+      "decisions": 200,
+      "decisions_per_sec": 4408.1,
+      "mean_ms": 0.2269,
+      "p50_ms": 0.2185,
+      "p99_ms": 0.4281
+    }
+  ],
+  "comparisons": [
+    {
+      "rungs": 4,
+      "variant": "v2-serial",
+      "vs_v1_baseline": 0.503
+    },
+    {
+      "rungs": 4,
+      "variant": "v2-parallel",
+      "vs_v1_baseline": 0.023
+    },
+    {
+      "rungs": 4,
+      "variant": "v2-hedged",
+      "vs_v1_baseline": 0.035
+    },
+    {
+      "rungs": 4,
+      "variant": "v2-early-exit",
+      "vs_v1_baseline": 0.156
+    },
+    {
+      "rungs": 16,
+      "variant": "v2-serial",
+      "vs_v1_baseline": 0.835
+    },
+    {
+      "rungs": 16,
+      "variant": "v2-parallel",
+      "vs_v1_baseline": 0.043
+    },
+    {
+      "rungs": 16,
+      "variant": "v2-hedged",
+      "vs_v1_baseline": 0.084
+    },
+    {
+      "rungs": 16,
+      "variant": "v2-early-exit",
+      "vs_v1_baseline": 0.795
+    }
+  ]
+}

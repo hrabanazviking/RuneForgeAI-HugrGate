@@ -18,34 +18,6 @@ flowchart TD
         backend[backend]
         policy[policy]
         validation[validation]
-        serde[serde]
-    end
-    subgraph contract-engine[contract-engine]
-        contracts[contracts]
-        contracts_schema[contracts.schema]
-        contracts_negotiation[contracts.negotiation]
-        contracts_nested[contracts.nested]
-        contracts_hierarchy[contracts.hierarchy]
-        contracts_composite[contracts.composite]
-        contracts_conditional[contracts.conditional]
-        contracts_crossfield[contracts.crossfield]
-        contracts_ordinal[contracts.ordinal]
-        contracts_uncertainty[contracts.uncertainty]
-        contracts_distributions[contracts.distributions]
-        contracts_multilabel[contracts.multilabel]
-        contracts_cost[contracts.cost]
-        contracts_utility[contracts.utility]
-        contracts_risk[contracts.risk]
-        contracts_deadlines[contracts.deadlines]
-        contracts_context[contracts.context]
-        contracts_features[contracts.features]
-        contracts_explanations[contracts.explanations]
-        contracts_inheritance[contracts.inheritance]
-        contracts_composition[contracts.composition]
-        contracts_templates[contracts.templates]
-        contracts_migration[contracts.migration]
-        contracts_lint[contracts.lint]
-        contracts_fuzz[contracts.fuzz]
     end
     subgraph runtime[runtime]
         core[core]
@@ -58,6 +30,32 @@ flowchart TD
         privacy[privacy]
         ladder[ladder]
     end
+    subgraph routing[routing]
+        routing[routing]
+        routing_architecture[routing.architecture]
+        routing_rungs[routing.rungs]
+        routing_synthesis[routing.synthesis]
+        routing_capability[routing.capability]
+        routing_confidence[routing.confidence]
+        routing_latency[routing.latency]
+        routing_cost[routing.cost]
+        routing_energy[routing.energy]
+        routing_memory[routing.memory]
+        routing_privacy[routing.privacy]
+        routing_hardware[routing.hardware]
+        routing_availability[routing.availability]
+        routing_qos[routing.qos]
+        routing_parallel[routing.parallel]
+        routing_hedged[routing.hedged]
+        routing_early_exit[routing.early_exit]
+        routing_fallback[routing.fallback]
+        routing_dag[routing.dag]
+        routing_explain[routing.explain]
+        routing_replay[routing.replay]
+        routing_simulate[routing.simulate]
+        routing_dsl[routing.dsl]
+        routing_fuzz[routing.fuzz]
+    end
     subgraph state[state]
         provenance[provenance]
         health[health]
@@ -67,7 +65,6 @@ flowchart TD
         features[features]
         bench[bench]
         bench_report[bench_report]
-        log[log]
     end
     subgraph backends[backends]
         backends_rules[backends.rules]
@@ -106,7 +103,6 @@ flowchart TD
     abstain --> policy
     abstain --> result
     abstain --> spec
-    backend --> errors
     backend --> result
     backend --> spec
     backends_boosting --> backends_logreg
@@ -138,12 +134,6 @@ flowchart TD
     backends_rules --> result
     backends_rules --> spec
     bench --> hugrgate
-    bench --> core
-    bench --> errors
-    bench --> policy
-    bench --> result
-    bench --> spec
-    cache --> log
     cache --> policy
     cache --> privacy
     cache --> result
@@ -165,170 +155,29 @@ flowchart TD
     calibration_profiles --> spec
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
-    circuit --> log
+    cli -.-> hugrgate
     cli -.-> bench
     cli -.-> bench_report
     cli -.-> client
     cli -.-> daemon
-    cli -.-> errors
-    cli --> policy
-    cli -.-> serde
     cli -.-> server
-    cli --> spec
-    client --> backend
-    client --> core
-    client --> errors
-    client --> policy
-    client --> result
-    client --> serde
+    client --> hugrgate
     client -.-> server
-    client --> spec
-    contracts --> contracts_composite
-    contracts --> contracts_composition
-    contracts --> contracts_conditional
-    contracts --> contracts_context
-    contracts --> contracts_cost
-    contracts --> contracts_crossfield
-    contracts --> contracts_deadlines
-    contracts --> contracts_distributions
-    contracts --> contracts_explanations
-    contracts --> contracts_features
-    contracts --> contracts_fuzz
-    contracts --> contracts_hierarchy
-    contracts --> contracts_inheritance
-    contracts --> contracts_lint
-    contracts --> contracts_migration
-    contracts --> contracts_multilabel
-    contracts --> contracts_negotiation
-    contracts --> contracts_nested
-    contracts --> contracts_ordinal
-    contracts --> contracts_risk
-    contracts --> contracts_schema
-    contracts --> contracts_templates
-    contracts --> contracts_uncertainty
-    contracts --> contracts_utility
-    contracts_composite --> contracts_schema
-    contracts_composite --> errors
-    contracts_composite --> spec
-    contracts_composition --> contracts_composite
-    contracts_composition --> contracts_conditional
-    contracts_composition --> contracts_crossfield
-    contracts_composition --> contracts_deadlines
-    contracts_composition --> contracts_schema
-    contracts_composition --> errors
-    contracts_composition --> spec
-    contracts_conditional --> contracts_composite
-    contracts_conditional --> contracts_schema
-    contracts_conditional --> errors
-    contracts_context --> contracts_schema
-    contracts_context --> errors
-    contracts_cost --> contracts_schema
-    contracts_cost --> errors
-    contracts_crossfield --> contracts_composite
-    contracts_crossfield --> contracts_schema
-    contracts_crossfield --> errors
-    contracts_deadlines -.-> contracts_composite
-    contracts_deadlines --> contracts_schema
-    contracts_deadlines --> errors
-    contracts_deadlines --> spec
-    contracts_distributions --> contracts_schema
-    contracts_distributions --> errors
-    contracts_explanations --> contracts_schema
-    contracts_explanations --> errors
-    contracts_explanations --> result
-    contracts_features --> contracts_schema
-    contracts_features --> errors
-    contracts_fuzz --> contracts_cost
-    contracts_fuzz --> contracts_distributions
-    contracts_fuzz --> contracts_multilabel
-    contracts_fuzz --> contracts_nested
-    contracts_fuzz --> contracts_ordinal
-    contracts_fuzz --> contracts_schema
-    contracts_fuzz --> contracts_uncertainty
-    contracts_fuzz --> errors
-    contracts_hierarchy --> contracts_schema
-    contracts_hierarchy --> errors
-    contracts_inheritance --> contracts_composite
-    contracts_inheritance --> contracts_conditional
-    contracts_inheritance --> contracts_context
-    contracts_inheritance --> contracts_cost
-    contracts_inheritance --> contracts_crossfield
-    contracts_inheritance --> contracts_deadlines
-    contracts_inheritance --> contracts_distributions
-    contracts_inheritance --> contracts_explanations
-    contracts_inheritance --> contracts_features
-    contracts_inheritance --> contracts_hierarchy
-    contracts_inheritance --> contracts_multilabel
-    contracts_inheritance --> contracts_nested
-    contracts_inheritance --> contracts_ordinal
-    contracts_inheritance --> contracts_risk
-    contracts_inheritance --> contracts_schema
-    contracts_inheritance --> contracts_uncertainty
-    contracts_inheritance --> contracts_utility
-    contracts_inheritance --> errors
-    contracts_inheritance -.-> spec
-    contracts_lint --> contracts_composite
-    contracts_lint --> contracts_cost
-    contracts_lint --> contracts_deadlines
-    contracts_lint --> contracts_distributions
-    contracts_lint --> contracts_explanations
-    contracts_lint --> contracts_features
-    contracts_lint --> contracts_multilabel
-    contracts_lint --> contracts_nested
-    contracts_lint --> contracts_ordinal
-    contracts_lint --> contracts_schema
-    contracts_lint --> contracts_templates
-    contracts_lint --> contracts_uncertainty
-    contracts_lint --> errors
-    contracts_migration --> contracts_multilabel
-    contracts_migration --> contracts_nested
-    contracts_migration --> contracts_ordinal
-    contracts_migration --> contracts_schema
-    contracts_migration --> contracts_uncertainty
-    contracts_migration --> errors
-    contracts_migration --> spec
-    contracts_multilabel --> contracts_schema
-    contracts_multilabel --> errors
-    contracts_negotiation --> contracts_schema
-    contracts_negotiation --> errors
-    contracts_nested --> contracts_schema
-    contracts_nested --> errors
-    contracts_ordinal --> contracts_schema
-    contracts_ordinal --> errors
-    contracts_risk --> contracts_cost
-    contracts_risk --> contracts_schema
-    contracts_risk --> errors
-    contracts_schema --> errors
-    contracts_templates --> contracts_schema
-    contracts_templates --> errors
-    contracts_uncertainty --> contracts_schema
-    contracts_uncertainty --> errors
-    contracts_utility --> contracts_cost
-    contracts_utility --> contracts_schema
-    contracts_utility --> errors
     core --> backend
-    core -.-> contracts_migration
-    core -.-> contracts_schema
     core --> errors
-    core --> log
     core --> policy
     core --> provenance
     core --> result
     core --> spec
     core --> validation
+    daemon --> hugrgate
     daemon -.-> client
-    daemon --> core
     daemon -.-> errors
-    daemon -.-> log
-    daemon --> policy
-    daemon --> result
-    daemon --> serde
     daemon -.-> server
     daemon -.-> spec
     fallback --> backend
     fallback --> circuit
     fallback --> errors
-    fallback --> log
     fallback --> policy
     fallback --> result
     fallback --> spec
@@ -350,26 +199,112 @@ flowchart TD
     policy --> result
     privacy --> backend
     privacy --> errors
-    privacy --> log
     privacy --> policy
     privacy --> provenance
-    provenance -.-> errors
     provenance --> result
     provenance --> spec
     result --> errors
-    serde --> errors
-    serde --> policy
-    serde --> result
+    routing --> routing_architecture
+    routing --> routing_availability
+    routing --> routing_capability
+    routing --> routing_confidence
+    routing --> routing_cost
+    routing --> routing_dag
+    routing --> routing_dsl
+    routing --> routing_early_exit
+    routing --> routing_energy
+    routing --> routing_explain
+    routing --> routing_fallback
+    routing --> routing_fuzz
+    routing --> routing_hardware
+    routing --> routing_hedged
+    routing --> routing_latency
+    routing --> routing_memory
+    routing --> routing_parallel
+    routing --> routing_privacy
+    routing --> routing_qos
+    routing --> routing_replay
+    routing --> routing_rungs
+    routing --> routing_simulate
+    routing --> routing_synthesis
+    routing_architecture -.-> errors
+    routing_architecture -.-> ladder
+    routing_architecture --> policy
+    routing_architecture --> result
+    routing_architecture --> spec
+    routing_availability --> backend
+    routing_availability --> routing_architecture
+    routing_capability --> backend
+    routing_capability --> routing_architecture
+    routing_confidence --> backend
+    routing_confidence --> routing_architecture
+    routing_cost --> routing_architecture
+    routing_dag -.-> hugrgate
+    routing_dag --> errors
+    routing_dag --> ladder
+    routing_dag --> routing_architecture
+    routing_dsl --> errors
+    routing_dsl --> policy
+    routing_dsl --> routing_architecture
+    routing_early_exit --> errors
+    routing_early_exit --> ladder
+    routing_early_exit --> routing_architecture
+    routing_early_exit --> routing_qos
+    routing_energy --> backend
+    routing_energy --> routing_architecture
+    routing_explain --> ladder
+    routing_explain --> routing_architecture
+    routing_fallback --> errors
+    routing_fallback --> ladder
+    routing_fallback --> routing_architecture
+    routing_fuzz -.-> hugrgate
+    routing_fuzz --> errors
+    routing_fuzz --> ladder
+    routing_fuzz --> result
+    routing_fuzz --> routing_architecture
+    routing_fuzz --> routing_early_exit
+    routing_fuzz --> routing_fallback
+    routing_fuzz --> routing_rungs
+    routing_fuzz --> routing_synthesis
+    routing_fuzz --> validation
+    routing_hardware --> backend
+    routing_hardware --> routing_architecture
+    routing_hedged --> backend
+    routing_hedged --> errors
+    routing_hedged --> ladder
+    routing_hedged --> routing_architecture
+    routing_hedged --> routing_qos
+    routing_latency --> backend
+    routing_latency --> routing_architecture
+    routing_memory --> backend
+    routing_memory --> routing_architecture
+    routing_parallel --> errors
+    routing_parallel --> ladder
+    routing_parallel --> routing_architecture
+    routing_parallel --> routing_qos
+    routing_privacy --> backend
+    routing_privacy --> routing_architecture
+    routing_replay --> errors
+    routing_replay --> ladder
+    routing_replay --> result
+    routing_replay --> routing_architecture
+    routing_rungs --> backend
+    routing_rungs --> routing_architecture
+    routing_rungs -.-> routing_capability
+    routing_simulate --> routing_architecture
+    routing_simulate --> routing_capability
+    routing_simulate --> routing_energy
+    routing_simulate --> routing_memory
+    routing_synthesis --> backend
+    routing_synthesis --> routing_architecture
+    routing_synthesis --> routing_capability
+    routing_synthesis --> routing_qos
+    routing_synthesis --> routing_rungs
     server --> hugrgate
-    server --> backend
-    server --> core
+    server --> client
     server --> errors
-    server --> result
-    server --> serde
-    server --> spec
     spec --> errors
     threshold --> abstain
-    threshold --> errors
     threshold --> policy
     threshold --> result
     threshold --> spec
@@ -388,10 +323,10 @@ flowchart TD
 | Layer | Modules |
 |---|---|
 | foundation | `errors` |
-| contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
+| contracts | `spec`, `result`, `backend`, `policy`, `validation` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
-| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
+| routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
+| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
@@ -410,7 +345,6 @@ flowchart TD
 | `abstain` | `policy` | no |
 | `abstain` | `result` | no |
 | `abstain` | `spec` | no |
-| `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
 | `backends.boosting` | `backends.logreg` | no |
@@ -442,12 +376,6 @@ flowchart TD
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
 | `bench` | `hugrgate` | no |
-| `bench` | `core` | no |
-| `bench` | `errors` | no |
-| `bench` | `policy` | no |
-| `bench` | `result` | no |
-| `bench` | `spec` | no |
-| `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
 | `cache` | `result` | no |
@@ -469,170 +397,29 @@ flowchart TD
 | `calibration.profiles` | `spec` | no |
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
-| `circuit` | `log` | no |
+| `cli` | `hugrgate` | yes |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
 | `cli` | `client` | yes |
 | `cli` | `daemon` | yes |
-| `cli` | `errors` | yes |
-| `cli` | `policy` | no |
-| `cli` | `serde` | yes |
 | `cli` | `server` | yes |
-| `cli` | `spec` | no |
-| `client` | `backend` | no |
-| `client` | `core` | no |
-| `client` | `errors` | no |
-| `client` | `policy` | no |
-| `client` | `result` | no |
-| `client` | `serde` | no |
+| `client` | `hugrgate` | no |
 | `client` | `server` | yes |
-| `client` | `spec` | no |
-| `contracts` | `contracts.composite` | no |
-| `contracts` | `contracts.composition` | no |
-| `contracts` | `contracts.conditional` | no |
-| `contracts` | `contracts.context` | no |
-| `contracts` | `contracts.cost` | no |
-| `contracts` | `contracts.crossfield` | no |
-| `contracts` | `contracts.deadlines` | no |
-| `contracts` | `contracts.distributions` | no |
-| `contracts` | `contracts.explanations` | no |
-| `contracts` | `contracts.features` | no |
-| `contracts` | `contracts.fuzz` | no |
-| `contracts` | `contracts.hierarchy` | no |
-| `contracts` | `contracts.inheritance` | no |
-| `contracts` | `contracts.lint` | no |
-| `contracts` | `contracts.migration` | no |
-| `contracts` | `contracts.multilabel` | no |
-| `contracts` | `contracts.negotiation` | no |
-| `contracts` | `contracts.nested` | no |
-| `contracts` | `contracts.ordinal` | no |
-| `contracts` | `contracts.risk` | no |
-| `contracts` | `contracts.schema` | no |
-| `contracts` | `contracts.templates` | no |
-| `contracts` | `contracts.uncertainty` | no |
-| `contracts` | `contracts.utility` | no |
-| `contracts.composite` | `contracts.schema` | no |
-| `contracts.composite` | `errors` | no |
-| `contracts.composite` | `spec` | no |
-| `contracts.composition` | `contracts.composite` | no |
-| `contracts.composition` | `contracts.conditional` | no |
-| `contracts.composition` | `contracts.crossfield` | no |
-| `contracts.composition` | `contracts.deadlines` | no |
-| `contracts.composition` | `contracts.schema` | no |
-| `contracts.composition` | `errors` | no |
-| `contracts.composition` | `spec` | no |
-| `contracts.conditional` | `contracts.composite` | no |
-| `contracts.conditional` | `contracts.schema` | no |
-| `contracts.conditional` | `errors` | no |
-| `contracts.context` | `contracts.schema` | no |
-| `contracts.context` | `errors` | no |
-| `contracts.cost` | `contracts.schema` | no |
-| `contracts.cost` | `errors` | no |
-| `contracts.crossfield` | `contracts.composite` | no |
-| `contracts.crossfield` | `contracts.schema` | no |
-| `contracts.crossfield` | `errors` | no |
-| `contracts.deadlines` | `contracts.composite` | yes |
-| `contracts.deadlines` | `contracts.schema` | no |
-| `contracts.deadlines` | `errors` | no |
-| `contracts.deadlines` | `spec` | no |
-| `contracts.distributions` | `contracts.schema` | no |
-| `contracts.distributions` | `errors` | no |
-| `contracts.explanations` | `contracts.schema` | no |
-| `contracts.explanations` | `errors` | no |
-| `contracts.explanations` | `result` | no |
-| `contracts.features` | `contracts.schema` | no |
-| `contracts.features` | `errors` | no |
-| `contracts.fuzz` | `contracts.cost` | no |
-| `contracts.fuzz` | `contracts.distributions` | no |
-| `contracts.fuzz` | `contracts.multilabel` | no |
-| `contracts.fuzz` | `contracts.nested` | no |
-| `contracts.fuzz` | `contracts.ordinal` | no |
-| `contracts.fuzz` | `contracts.schema` | no |
-| `contracts.fuzz` | `contracts.uncertainty` | no |
-| `contracts.fuzz` | `errors` | no |
-| `contracts.hierarchy` | `contracts.schema` | no |
-| `contracts.hierarchy` | `errors` | no |
-| `contracts.inheritance` | `contracts.composite` | no |
-| `contracts.inheritance` | `contracts.conditional` | no |
-| `contracts.inheritance` | `contracts.context` | no |
-| `contracts.inheritance` | `contracts.cost` | no |
-| `contracts.inheritance` | `contracts.crossfield` | no |
-| `contracts.inheritance` | `contracts.deadlines` | no |
-| `contracts.inheritance` | `contracts.distributions` | no |
-| `contracts.inheritance` | `contracts.explanations` | no |
-| `contracts.inheritance` | `contracts.features` | no |
-| `contracts.inheritance` | `contracts.hierarchy` | no |
-| `contracts.inheritance` | `contracts.multilabel` | no |
-| `contracts.inheritance` | `contracts.nested` | no |
-| `contracts.inheritance` | `contracts.ordinal` | no |
-| `contracts.inheritance` | `contracts.risk` | no |
-| `contracts.inheritance` | `contracts.schema` | no |
-| `contracts.inheritance` | `contracts.uncertainty` | no |
-| `contracts.inheritance` | `contracts.utility` | no |
-| `contracts.inheritance` | `errors` | no |
-| `contracts.inheritance` | `spec` | yes |
-| `contracts.lint` | `contracts.composite` | no |
-| `contracts.lint` | `contracts.cost` | no |
-| `contracts.lint` | `contracts.deadlines` | no |
-| `contracts.lint` | `contracts.distributions` | no |
-| `contracts.lint` | `contracts.explanations` | no |
-| `contracts.lint` | `contracts.features` | no |
-| `contracts.lint` | `contracts.multilabel` | no |
-| `contracts.lint` | `contracts.nested` | no |
-| `contracts.lint` | `contracts.ordinal` | no |
-| `contracts.lint` | `contracts.schema` | no |
-| `contracts.lint` | `contracts.templates` | no |
-| `contracts.lint` | `contracts.uncertainty` | no |
-| `contracts.lint` | `errors` | no |
-| `contracts.migration` | `contracts.multilabel` | no |
-| `contracts.migration` | `contracts.nested` | no |
-| `contracts.migration` | `contracts.ordinal` | no |
-| `contracts.migration` | `contracts.schema` | no |
-| `contracts.migration` | `contracts.uncertainty` | no |
-| `contracts.migration` | `errors` | no |
-| `contracts.migration` | `spec` | no |
-| `contracts.multilabel` | `contracts.schema` | no |
-| `contracts.multilabel` | `errors` | no |
-| `contracts.negotiation` | `contracts.schema` | no |
-| `contracts.negotiation` | `errors` | no |
-| `contracts.nested` | `contracts.schema` | no |
-| `contracts.nested` | `errors` | no |
-| `contracts.ordinal` | `contracts.schema` | no |
-| `contracts.ordinal` | `errors` | no |
-| `contracts.risk` | `contracts.cost` | no |
-| `contracts.risk` | `contracts.schema` | no |
-| `contracts.risk` | `errors` | no |
-| `contracts.schema` | `errors` | no |
-| `contracts.templates` | `contracts.schema` | no |
-| `contracts.templates` | `errors` | no |
-| `contracts.uncertainty` | `contracts.schema` | no |
-| `contracts.uncertainty` | `errors` | no |
-| `contracts.utility` | `contracts.cost` | no |
-| `contracts.utility` | `contracts.schema` | no |
-| `contracts.utility` | `errors` | no |
 | `core` | `backend` | no |
-| `core` | `contracts.migration` | yes |
-| `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |
-| `core` | `log` | no |
 | `core` | `policy` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
 | `core` | `spec` | no |
 | `core` | `validation` | no |
+| `daemon` | `hugrgate` | no |
 | `daemon` | `client` | yes |
-| `daemon` | `core` | no |
 | `daemon` | `errors` | yes |
-| `daemon` | `log` | yes |
-| `daemon` | `policy` | no |
-| `daemon` | `result` | no |
-| `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
-| `fallback` | `log` | no |
 | `fallback` | `policy` | no |
 | `fallback` | `result` | no |
 | `fallback` | `spec` | no |
@@ -654,26 +441,112 @@ flowchart TD
 | `policy` | `result` | no |
 | `privacy` | `backend` | no |
 | `privacy` | `errors` | no |
-| `privacy` | `log` | no |
 | `privacy` | `policy` | no |
 | `privacy` | `provenance` | no |
-| `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
-| `serde` | `errors` | no |
-| `serde` | `policy` | no |
-| `serde` | `result` | no |
+| `routing` | `routing.architecture` | no |
+| `routing` | `routing.availability` | no |
+| `routing` | `routing.capability` | no |
+| `routing` | `routing.confidence` | no |
+| `routing` | `routing.cost` | no |
+| `routing` | `routing.dag` | no |
+| `routing` | `routing.dsl` | no |
+| `routing` | `routing.early_exit` | no |
+| `routing` | `routing.energy` | no |
+| `routing` | `routing.explain` | no |
+| `routing` | `routing.fallback` | no |
+| `routing` | `routing.fuzz` | no |
+| `routing` | `routing.hardware` | no |
+| `routing` | `routing.hedged` | no |
+| `routing` | `routing.latency` | no |
+| `routing` | `routing.memory` | no |
+| `routing` | `routing.parallel` | no |
+| `routing` | `routing.privacy` | no |
+| `routing` | `routing.qos` | no |
+| `routing` | `routing.replay` | no |
+| `routing` | `routing.rungs` | no |
+| `routing` | `routing.simulate` | no |
+| `routing` | `routing.synthesis` | no |
+| `routing.architecture` | `errors` | yes |
+| `routing.architecture` | `ladder` | yes |
+| `routing.architecture` | `policy` | no |
+| `routing.architecture` | `result` | no |
+| `routing.architecture` | `spec` | no |
+| `routing.availability` | `backend` | no |
+| `routing.availability` | `routing.architecture` | no |
+| `routing.capability` | `backend` | no |
+| `routing.capability` | `routing.architecture` | no |
+| `routing.confidence` | `backend` | no |
+| `routing.confidence` | `routing.architecture` | no |
+| `routing.cost` | `routing.architecture` | no |
+| `routing.dag` | `hugrgate` | yes |
+| `routing.dag` | `errors` | no |
+| `routing.dag` | `ladder` | no |
+| `routing.dag` | `routing.architecture` | no |
+| `routing.dsl` | `errors` | no |
+| `routing.dsl` | `policy` | no |
+| `routing.dsl` | `routing.architecture` | no |
+| `routing.early_exit` | `errors` | no |
+| `routing.early_exit` | `ladder` | no |
+| `routing.early_exit` | `routing.architecture` | no |
+| `routing.early_exit` | `routing.qos` | no |
+| `routing.energy` | `backend` | no |
+| `routing.energy` | `routing.architecture` | no |
+| `routing.explain` | `ladder` | no |
+| `routing.explain` | `routing.architecture` | no |
+| `routing.fallback` | `errors` | no |
+| `routing.fallback` | `ladder` | no |
+| `routing.fallback` | `routing.architecture` | no |
+| `routing.fuzz` | `hugrgate` | yes |
+| `routing.fuzz` | `errors` | no |
+| `routing.fuzz` | `ladder` | no |
+| `routing.fuzz` | `result` | no |
+| `routing.fuzz` | `routing.architecture` | no |
+| `routing.fuzz` | `routing.early_exit` | no |
+| `routing.fuzz` | `routing.fallback` | no |
+| `routing.fuzz` | `routing.rungs` | no |
+| `routing.fuzz` | `routing.synthesis` | no |
+| `routing.fuzz` | `validation` | no |
+| `routing.hardware` | `backend` | no |
+| `routing.hardware` | `routing.architecture` | no |
+| `routing.hedged` | `backend` | no |
+| `routing.hedged` | `errors` | no |
+| `routing.hedged` | `ladder` | no |
+| `routing.hedged` | `routing.architecture` | no |
+| `routing.hedged` | `routing.qos` | no |
+| `routing.latency` | `backend` | no |
+| `routing.latency` | `routing.architecture` | no |
+| `routing.memory` | `backend` | no |
+| `routing.memory` | `routing.architecture` | no |
+| `routing.parallel` | `errors` | no |
+| `routing.parallel` | `ladder` | no |
+| `routing.parallel` | `routing.architecture` | no |
+| `routing.parallel` | `routing.qos` | no |
+| `routing.privacy` | `backend` | no |
+| `routing.privacy` | `routing.architecture` | no |
+| `routing.replay` | `errors` | no |
+| `routing.replay` | `ladder` | no |
+| `routing.replay` | `result` | no |
+| `routing.replay` | `routing.architecture` | no |
+| `routing.rungs` | `backend` | no |
+| `routing.rungs` | `routing.architecture` | no |
+| `routing.rungs` | `routing.capability` | yes |
+| `routing.simulate` | `routing.architecture` | no |
+| `routing.simulate` | `routing.capability` | no |
+| `routing.simulate` | `routing.energy` | no |
+| `routing.simulate` | `routing.memory` | no |
+| `routing.synthesis` | `backend` | no |
+| `routing.synthesis` | `routing.architecture` | no |
+| `routing.synthesis` | `routing.capability` | no |
+| `routing.synthesis` | `routing.qos` | no |
+| `routing.synthesis` | `routing.rungs` | no |
 | `server` | `hugrgate` | no |
-| `server` | `backend` | no |
-| `server` | `core` | no |
+| `server` | `client` | no |
 | `server` | `errors` | no |
-| `server` | `result` | no |
-| `server` | `serde` | no |
-| `server` | `spec` | no |
 | `spec` | `errors` | no |
 | `threshold` | `abstain` | no |
-| `threshold` | `errors` | no |
 | `threshold` | `policy` | no |
 | `threshold` | `result` | no |
 | `threshold` | `spec` | no |

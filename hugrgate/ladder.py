@@ -40,18 +40,19 @@ from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
 __all__ = [
+    "LadderAuditEntry",
+    "LadderRouter",
+    "LadderRung",
     "RUNG_ABSTAINED",
     "RUNG_ACCEPTED",
     "RUNG_BELOW_CONFIDENCE",
+    "RUNG_CANCELLED",
     "RUNG_ERROR",
     "RUNG_SKIPPED_LATENCY",
     "RUNG_SKIPPED_PRIVACY",
     "RUNG_SKIPPED_UNKNOWN",
     "RUNG_SKIPPED_UNSUPPORTED",
     "RUNG_UNAVAILABLE",
-    "LadderAuditEntry",
-    "LadderRouter",
-    "LadderRung",
 ]
 
 #: Audit outcomes for a single rung.
@@ -64,6 +65,7 @@ RUNG_SKIPPED_LATENCY = "skipped_latency_budget"
 RUNG_UNAVAILABLE = "backend_unavailable"
 RUNG_ERROR = "backend_error"
 RUNG_ABSTAINED = "backend_abstained"
+RUNG_CANCELLED = "cancelled"  # slice 065: hedge straggler dropped after win
 
 
 @dataclass
@@ -170,6 +172,23 @@ class LadderRouter:
         """The rung list governing this spec type."""
         return self.ladders.get(spec.type, self.rungs)
 
+    # -- pre-run pruning (slice 051: extracted so v2 planners can reuse) --
+
+    def skip_reason(self, backend: Backend, rung: LadderRung,
+                    spec: DecisionSpec, policy: DecisionPolicy,
+                    started: float) -> Optional[tuple]:
+        """Full pre-run check: (outcome, detail) or None if the rung may run."""
+        if not backend.supports(spec):
+            return (RUNG_SKIPPED_UNSUPPORTED,
+                    f"backend does not support {spec.type} specs")
+        if not self.privacy_guard.remote_allowed(backend, policy):
+            return (RUNG_SKIPPED_PRIVACY,
+                    "remote backend blocked (policy/guard)")
+        skip = self._latency_skip(backend, rung, policy, started)
+        if skip is not None:
+            return (RUNG_SKIPPED_LATENCY, skip)
+        return None
+
     # -- routing ---------------------------------------------------------
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
@@ -200,20 +219,10 @@ class LadderRouter:
                     i, rung.backend_name, RUNG_SKIPPED_UNKNOWN,
                     detail="backend not in registry"))
                 continue
-            if not backend.supports(spec):
-                audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_UNSUPPORTED,
-                    detail=f"backend does not support {spec.type} specs"))
-                continue
-            if not self.privacy_guard.remote_allowed(backend, policy):
-                audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_PRIVACY,
-                    detail="remote backend blocked (policy/guard)"))
-                continue
-            skip = self._latency_skip(backend, rung, policy, started)
+            skip = self.skip_reason(backend, rung, spec, policy, started)
             if skip is not None:
                 audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_LATENCY, detail=skip))
+                    i, backend.name, skip[0], detail=skip[1]))
                 continue
 
             result = self._attempt(backend, state, spec, context, audit, i)
@@ -296,6 +305,13 @@ class LadderRouter:
             audit.append(LadderAuditEntry(
                 rung_index, backend.name, RUNG_ERROR,
                 detail=f"unexpected {type(e).__name__}: {e}",
+                latency_ms=(time.perf_counter() - t0) * 1000))
+            return None
+
+        if result is None:  # slice 073: hostile backend returned None
+            audit.append(LadderAuditEntry(
+                rung_index, backend.name, RUNG_ERROR,
+                detail="backend returned None instead of a DecisionResult",
                 latency_ms=(time.perf_counter() - t0) * 1000))
             return None
 
