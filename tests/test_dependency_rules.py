@@ -144,7 +144,9 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "onnxruntime": {"onnx"},
 }
 # Declared extras with no current importer (documented reservations).
-RESERVED_EXTRAS = {"onnx": "reserved for a future ONNX backend (slice 004 audit)"}
+# (The ``onnx`` reservation was retired in slice 154: the future ONNX
+# backend it waited for is ``hugrgate.runtimes.onnx``.)
+RESERVED_EXTRAS: dict[str, str] = {}
 
 _STDLIB = {
     "__future__", "abc", "argparse", "ast", "asyncio", "collections",
