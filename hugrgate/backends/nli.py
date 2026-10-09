@@ -20,6 +20,11 @@ from hugrgate.errors import BackendError, BackendUnavailable
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "PREMISE_FIELDS",
+    "NLIBackend",
+]
+
 try:  # optional dependency — the module must import without it
     from transformers import pipeline as _hf_pipeline  # type: ignore
 except Exception:  # pragma: no cover - absence is the common path in CI

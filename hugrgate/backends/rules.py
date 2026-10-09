@@ -49,6 +49,12 @@ from hugrgate.errors import Abstention, BackendError, BackendUnavailable, SpecEr
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "OPERATORS",
+    "Rule",
+    "RuleBackend",
+]
+
 OPERATORS = ("eq", "ne", "gt", "gte", "lt", "lte", "in", "contains", "exists")
 
 _MISSING = object()

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-10-09T10:45:26.783815+00:00",
+  "generated_utc": "2026-10-09T10:50:38.026827+00:00",
   "module_count": 42,
   "modules": {
     "hugrgate.__init__": {
@@ -18,7 +18,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 105,
+      "loc": 111,
       "path": "hugrgate/abstain.py",
       "public_defs": [
         "abstain",
@@ -34,7 +34,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 79,
+      "loc": 84,
       "path": "hugrgate/backend.py",
       "public_defs": [
         "Backend",
@@ -64,7 +64,7 @@
         "sklearn",
         "typing"
       ],
-      "loc": 51,
+      "loc": 69,
       "path": "hugrgate/backends/boosting.py",
       "public_defs": [
         "GradientBoostingBackend",
@@ -83,7 +83,7 @@
         "re",
         "typing"
       ],
-      "loc": 236,
+      "loc": 261,
       "path": "hugrgate/backends/embedding.py",
       "public_defs": [
         "Embedder",
@@ -114,7 +114,7 @@
         "sklearn",
         "typing"
       ],
-      "loc": 52,
+      "loc": 74,
       "path": "hugrgate/backends/forest.py",
       "public_defs": [
         "RandomForestBackend",
@@ -132,7 +132,7 @@
         "time",
         "typing"
       ],
-      "loc": 239,
+      "loc": 247,
       "path": "hugrgate/backends/llm.py",
       "public_defs": [
         "LLMChoice",
@@ -162,7 +162,7 @@
         "time",
         "typing"
       ],
-      "loc": 281,
+      "loc": 303,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -190,7 +190,7 @@
         "transformers",
         "typing"
       ],
-      "loc": 144,
+      "loc": 149,
       "path": "hugrgate/backends/nli.py",
       "public_defs": [
         "NLIBackend",
@@ -212,7 +212,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 373,
+      "loc": 379,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -245,7 +245,7 @@
         "time",
         "typing"
       ],
-      "loc": 321,
+      "loc": 332,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -265,7 +265,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 139,
+      "loc": 145,
       "path": "hugrgate/bench_report.py",
       "public_defs": [
         "ascii_reliability_diagram",
@@ -286,7 +286,7 @@
         "time",
         "typing"
       ],
-      "loc": 156,
+      "loc": 161,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -318,7 +318,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 102,
+      "loc": 120,
       "path": "hugrgate/calibration/_base.py",
       "public_defs": [
         "Calibrator",
@@ -343,7 +343,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 94,
+      "loc": 111,
       "path": "hugrgate/calibration/isotonic.py",
       "public_defs": [
         "IsotonicCalibrator",
@@ -357,10 +357,11 @@
       "docstring": "Calibration metrics. Slice 28.\n\nBinary metrics \u2014 Brier score, log loss, expected/maximum calibration error\n(ECE/MCE) \u2014 plus reliability-diagram bin data and a multiclass ECE helper\n(max-probability confidence vs. correctness) for whole-distribution checks.",
       "imports": [
         "__future__",
+        "hugrgate",
         "numpy",
         "typing"
       ],
-      "loc": 123,
+      "loc": 149,
       "path": "hugrgate/calibration/metrics.py",
       "public_defs": [
         "brier_score",
@@ -379,7 +380,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 112,
+      "loc": 130,
       "path": "hugrgate/calibration/platt.py",
       "public_defs": [
         "PlattCalibrator",
@@ -402,7 +403,7 @@
         "pathlib",
         "typing"
       ],
-      "loc": 244,
+      "loc": 263,
       "path": "hugrgate/calibration/profiles.py",
       "public_defs": [
         "hash_dataset",
@@ -438,7 +439,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 116,
+      "loc": 136,
       "path": "hugrgate/calibration/temperature.py",
       "public_defs": [
         "TemperatureCalibrator",
@@ -457,7 +458,7 @@
         "time",
         "typing"
       ],
-      "loc": 156,
+      "loc": 164,
       "path": "hugrgate/circuit.py",
       "public_defs": [
         "CircuitBreaker",
@@ -485,7 +486,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 258,
+      "loc": 273,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -510,7 +511,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 232,
+      "loc": 239,
       "path": "hugrgate/client.py",
       "public_defs": [
         "policy_to_dict",
@@ -531,7 +532,7 @@
         "time",
         "typing"
       ],
-      "loc": 107,
+      "loc": 111,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -557,7 +558,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 378,
+      "loc": 391,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -588,7 +589,7 @@
         "time",
         "typing"
       ],
-      "loc": 241,
+      "loc": 250,
       "path": "hugrgate/drift.py",
       "public_defs": [
         "population_stability_index",
@@ -610,7 +611,7 @@
       "imports": [
         "__future__"
       ],
-      "loc": 60,
+      "loc": 72,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -631,7 +632,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 159,
+      "loc": 163,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -652,7 +653,7 @@
         "numpy",
         "typing"
       ],
-      "loc": 268,
+      "loc": 290,
       "path": "hugrgate/features.py",
       "public_defs": [
         "MissingValuePolicy",
@@ -689,7 +690,7 @@
         "threading",
         "typing"
       ],
-      "loc": 136,
+      "loc": 141,
       "path": "hugrgate/health.py",
       "public_defs": [
         "BackendStats",
@@ -711,7 +712,7 @@
         "time",
         "typing"
       ],
-      "loc": 274,
+      "loc": 289,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -735,7 +736,7 @@
         "shutil",
         "typing"
       ],
-      "loc": 156,
+      "loc": 162,
       "path": "hugrgate/models.py",
       "public_defs": [
         "sha256_bytes",
@@ -761,7 +762,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 90,
+      "loc": 96,
       "path": "hugrgate/negotiate.py",
       "public_defs": [
         "select_backend",
@@ -776,7 +777,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 55,
+      "loc": 59,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -792,7 +793,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 117,
+      "loc": 123,
       "path": "hugrgate/privacy.py",
       "public_defs": [
         "PrivacyGuard",
@@ -816,7 +817,7 @@
         "time",
         "typing"
       ],
-      "loc": 79,
+      "loc": 84,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -836,7 +837,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 60,
+      "loc": 64,
       "path": "hugrgate/result.py",
       "public_defs": [
         "DecisionResult",
@@ -857,7 +858,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 354,
+      "loc": 365,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -889,7 +890,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 104,
+      "loc": 109,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -906,7 +907,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 159,
+      "loc": 167,
       "path": "hugrgate/threshold.py",
       "public_defs": [
         "NumericBand",
@@ -925,7 +926,7 @@
         "threading",
         "typing"
       ],
-      "loc": 131,
+      "loc": 138,
       "path": "hugrgate/timeout.py",
       "public_defs": [
         "run_with_deadline",
@@ -949,7 +950,7 @@
         "json",
         "typing"
       ],
-      "loc": 53,
+      "loc": 58,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -960,7 +961,9 @@
   "pyproject_version": "0.1.0",
   "python_requires": ">=3.10 (per pyproject)",
   "test_files": [
+    "test_api_inventory.py",
     "test_arch_map.py",
+    "test_dependency_rules.py",
     "test_deterministic.py",
     "test_foundation.py",
     "test_ladder.py",
@@ -968,5 +971,5 @@
     "test_repo_truth.py",
     "test_service.py"
   ],
-  "total_loc": 6666
+  "total_loc": 7104
 }

@@ -18,12 +18,32 @@ import re
 from abc import ABC, abstractmethod
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable, SpecError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
+
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise BackendError(
+            "the embedding backend requires numpy; install the 'ml' extra: "
+            "pip install 'hugrgate[ml]'"
+        )
+
+
+__all__ = [
+    "TEXT_FIELDS",
+    "Embedder",
+    "HashEmbedder",
+    "PrototypeBackend",
+]
 
 #: State keys inspected (in order) for the text to classify.
 TEXT_FIELDS = ("text", "message", "content", "statement", "premise", "input")
@@ -79,6 +99,7 @@ class HashEmbedder(Embedder):
                 yield text[i:i + n]
 
     def embed(self, texts: Sequence[str]) -> np.ndarray:
+        _require_numpy()
         mat = np.zeros((len(texts), self._dim), dtype=np.float64)
         for r, text in enumerate(texts):
             vec = mat[r]
@@ -94,6 +115,7 @@ class HashEmbedder(Embedder):
 
 
 def _softmax(scores: np.ndarray, temperature: float) -> np.ndarray:
+    _require_numpy()
     if temperature <= 0:
         raise SpecError(f"temperature must be > 0, got {temperature}")
     z = scores / temperature
@@ -118,6 +140,7 @@ class PrototypeBackend(Backend):
     def __init__(self, embedder: Optional[Embedder] = None,
                  temperature: float = 0.25,
                  text_fields: Sequence[str] = TEXT_FIELDS):
+        _require_numpy()
         self.embedder = embedder or HashEmbedder()
         if temperature <= 0:
             raise SpecError(f"temperature must be > 0, got {temperature}")
@@ -131,6 +154,7 @@ class PrototypeBackend(Backend):
 
     def fit(self, examples: Iterable[Tuple[str, str]]) -> "PrototypeBackend":
         """Build class prototypes from ``(text, label)`` pairs."""
+        _require_numpy()
         by_class: Dict[str, List[str]] = {}
         for text, label in examples:
             if not isinstance(text, str) or not text.strip():
@@ -199,6 +223,7 @@ class PrototypeBackend(Backend):
 
     def evaluate(self, state: Mapping, spec: DecisionSpec,
                  context: Optional[Mapping] = None) -> DecisionResult:
+        _require_numpy()
         if not self.fitted:
             raise BackendUnavailable(
                 "prototype backend is not trained — call fit(examples) first")

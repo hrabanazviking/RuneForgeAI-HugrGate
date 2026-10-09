@@ -13,8 +13,14 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
-import numpy as np
-from sklearn.linear_model import LogisticRegression
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
+try:
+    from sklearn.linear_model import LogisticRegression
+except ImportError:  # pragma: no cover - optional dependency
+    LogisticRegression = None  # type: ignore[assignment]
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable
@@ -22,6 +28,20 @@ from hugrgate.features import FeatureExtractor, Pipeline
 from hugrgate.models import ModelManifest, sha256_bytes
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
+
+
+def _require_ml() -> None:
+    """Deliberate error when the optional ML dependencies are absent."""
+    if np is None or LogisticRegression is None:  # pragma: no cover
+        raise BackendError(
+            "scikit-learn backends require numpy and scikit-learn; install "
+            "the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
+
+__all__ = [
+    "SklearnClassifierBackend",
+    "LogisticRegressionBackend",
+]
 
 _SUPPORTED_TYPES = ("categorical", "binary")
 
@@ -78,6 +98,7 @@ class SklearnClassifierBackend(Backend):
               sample_weight: Optional[Sequence[float]] = None
               ) -> Dict[str, float]:
         """Fit the classifier. Returns training metrics."""
+        _require_ml()
         if len(pairs) < 2:
             raise BackendError(f"{self.name}: need ≥2 training pairs")
         states = [s for s, _ in pairs]
@@ -270,6 +291,7 @@ class LogisticRegressionBackend(SklearnClassifierBackend):
     name = "logreg"
 
     def _make_classifier(self) -> LogisticRegression:
+        _require_ml()
         kwargs = {"max_iter": 1000}
         kwargs.update(self._classifier_kwargs)
         return LogisticRegression(**kwargs)

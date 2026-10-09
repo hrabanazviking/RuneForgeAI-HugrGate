@@ -21,6 +21,14 @@ from hugrgate.errors import BackendError, BackendUnavailable, TimeoutError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "MAX_STATE_CHARS",
+    "LLMChoice",
+    "LLMEngine",
+    "LlamaCppEngine",
+    "LLMBackend",
+]
+
 try:  # optional dependency — the module must import without it
     from llama_cpp import Llama as _Llama  # type: ignore
 except Exception:  # pragma: no cover - absence is the common path in CI

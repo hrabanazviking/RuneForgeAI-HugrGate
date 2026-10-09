@@ -18,9 +18,30 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
 
 from hugrgate.errors import BackendError
+
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise BackendError(
+            "feature batch encoding requires numpy; install the 'ml' extra: "
+            "pip install 'hugrgate[ml]'"
+        )
+
+__all__ = [
+    "MissingValuePolicy",
+    "FeatureExtractor",
+    "NumericEncoder",
+    "CategoricalEncoder",
+    "TextLengthEncoder",
+    "Pipeline",
+]
 
 
 class MissingValuePolicy(Enum):
@@ -57,6 +78,7 @@ class FeatureExtractor(ABC):
 
     def transform_batch(self, states: Sequence[Mapping[str, Any]]) -> np.ndarray:
         """Encode many states into an ``(n_samples, n_features)`` array."""
+        _require_numpy()
         names = self.feature_names()
         rows = []
         for state in states:

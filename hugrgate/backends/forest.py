@@ -8,11 +8,31 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
+try:
+    from sklearn.ensemble import RandomForestClassifier
+except ImportError:  # pragma: no cover - optional dependency
+    RandomForestClassifier = None  # type: ignore[assignment]
 
 from hugrgate.backends.logreg import SklearnClassifierBackend
+from hugrgate.errors import BackendError
 from hugrgate.features import FeatureExtractor
+
+__all__ = [
+    "RandomForestBackend",
+]
+
+
+def _require_ml() -> None:
+    """Deliberate error when the optional ML dependencies are absent."""
+    if np is None or RandomForestClassifier is None:  # pragma: no cover
+        raise BackendError(
+            "the forest backend requires numpy and scikit-learn; install "
+            "the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
 
 
 class RandomForestBackend(SklearnClassifierBackend):
@@ -30,11 +50,13 @@ class RandomForestBackend(SklearnClassifierBackend):
         super().__init__(model_name, feature_pipeline, version, **kwargs)
 
     def _make_classifier(self) -> RandomForestClassifier:
+        _require_ml()
         return RandomForestClassifier(**self._classifier_kwargs)
 
     def _extra_metadata(self) -> Dict[str, Any]:
         if not self.is_trained:
             return {}
+        _require_ml()
         importances = np.asarray(self._clf.feature_importances_, dtype=float)
         names = self._pipeline.feature_names()
         return {

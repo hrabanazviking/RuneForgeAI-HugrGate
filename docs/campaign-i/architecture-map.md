@@ -80,12 +80,14 @@ flowchart TD
     backend --> result
     backend --> spec
     backends_boosting --> backends_logreg
+    backends_boosting --> errors
     backends_boosting --> features
     backends_embedding --> backend
     backends_embedding --> errors
     backends_embedding --> result
     backends_embedding --> spec
     backends_forest --> backends_logreg
+    backends_forest --> errors
     backends_forest --> features
     backends_llm --> backend
     backends_llm --> errors
@@ -117,6 +119,7 @@ flowchart TD
     calibration__base --> errors
     calibration_isotonic --> calibration__base
     calibration_isotonic --> errors
+    calibration_metrics --> errors
     calibration_platt --> calibration__base
     calibration_platt --> errors
     calibration_profiles --> backend
@@ -222,12 +225,14 @@ flowchart TD
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
 | `backends.boosting` | `backends.logreg` | no |
+| `backends.boosting` | `errors` | no |
 | `backends.boosting` | `features` | no |
 | `backends.embedding` | `backend` | no |
 | `backends.embedding` | `errors` | no |
 | `backends.embedding` | `result` | no |
 | `backends.embedding` | `spec` | no |
 | `backends.forest` | `backends.logreg` | no |
+| `backends.forest` | `errors` | no |
 | `backends.forest` | `features` | no |
 | `backends.llm` | `backend` | no |
 | `backends.llm` | `errors` | no |
@@ -259,6 +264,7 @@ flowchart TD
 | `calibration._base` | `errors` | no |
 | `calibration.isotonic` | `calibration._base` | no |
 | `calibration.isotonic` | `errors` | no |
+| `calibration.metrics` | `errors` | no |
 | `calibration.platt` | `calibration._base` | no |
 | `calibration.platt` | `errors` | no |
 | `calibration.profiles` | `backend` | no |

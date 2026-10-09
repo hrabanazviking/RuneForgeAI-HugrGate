@@ -10,10 +10,27 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from sklearn.ensemble import HistGradientBoostingClassifier
+try:
+    from sklearn.ensemble import HistGradientBoostingClassifier
+except ImportError:  # pragma: no cover - optional dependency
+    HistGradientBoostingClassifier = None  # type: ignore[assignment]
 
 from hugrgate.backends.logreg import SklearnClassifierBackend
+from hugrgate.errors import BackendError
 from hugrgate.features import FeatureExtractor
+
+__all__ = [
+    "GradientBoostingBackend",
+]
+
+
+def _require_ml() -> None:
+    """Deliberate error when the optional ML dependencies are absent."""
+    if HistGradientBoostingClassifier is None:  # pragma: no cover
+        raise BackendError(
+            "the boosting backend requires scikit-learn; install the 'ml' "
+            "extra: pip install 'hugrgate[ml]'"
+        )
 
 
 class GradientBoostingBackend(SklearnClassifierBackend):
@@ -40,6 +57,7 @@ class GradientBoostingBackend(SklearnClassifierBackend):
         super().__init__(model_name, feature_pipeline, version, **kwargs)
 
     def _make_classifier(self) -> HistGradientBoostingClassifier:
+        _require_ml()
         return HistGradientBoostingClassifier(**self._classifier_kwargs)
 
     def capabilities(self) -> Dict[str, Any]:
