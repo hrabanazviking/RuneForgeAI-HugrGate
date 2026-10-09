@@ -32,6 +32,7 @@ from hugrgate.calibration.temperature import (                 # noqa: E402
 )
 from hugrgate.calibration.online import OnlineCalibrator       # noqa: E402
 from hugrgate.calibration.window import SlidingWindowCalibrator  # noqa: E402
+from hugrgate.calibration.bayes import BetaBinomialCalibrator   # noqa: E402
 from . import group, metrics, perclass, pipeline, profiles     # noqa: E402
 
 CalibratorRegistry.register("platt", PlattCalibrator)
@@ -39,6 +40,7 @@ CalibratorRegistry.register("isotonic", IsotonicCalibrator)
 CalibratorRegistry.register("temperature", TemperatureCalibrator)
 CalibratorRegistry.register("online", OnlineCalibrator)
 CalibratorRegistry.register("sliding-window", SlidingWindowCalibrator)
+CalibratorRegistry.register("beta-binomial", BetaBinomialCalibrator)
 CalibratorRegistry.register("constant-prior",
                              perclass._ConstantCalibrator)
 
@@ -50,6 +52,7 @@ __all__ = [
     "TemperatureCalibrator",
     "OnlineCalibrator",
     "SlidingWindowCalibrator",
+    "BetaBinomialCalibrator",
     "group",
     "metrics",
     "perclass",
