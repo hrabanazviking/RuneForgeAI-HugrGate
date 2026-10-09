@@ -34,6 +34,11 @@ from hugrgate.ensemble.base import (
     require_discrete_spec,
     shannon_entropy,
 )
+from hugrgate.ensemble.stacking import (
+    SoftmaxRegression,
+    StackingEngine,
+    stacking_combine,
+)
 from hugrgate.ensemble.voting import (
     confidence_weighted_voting,
     hard_voting,
@@ -66,4 +71,7 @@ __all__ = [
     "BayesianModelAverager",
     "bma_combine",
     "predictive_log_likelihood",
+    "SoftmaxRegression",
+    "StackingEngine",
+    "stacking_combine",
 ]

@@ -31,6 +31,7 @@ from hugrgate.ensemble.base import (
     collect_votes,
     normalize_weights,
 )
+from hugrgate.ensemble.stacking import stacking_combine
 from hugrgate.ensemble.voting import (
     confidence_weighted_voting,
     hard_voting,
@@ -87,6 +88,7 @@ register_strategy("hard", hard_voting)
 register_strategy("weighted", weighted_voting)
 register_strategy("confidence", confidence_weighted_voting)
 register_strategy("bma", bma_combine)
+register_strategy("stacking", stacking_combine)
 
 
 class EnsembleConfig:
