@@ -116,8 +116,8 @@ class InspectSession:
             self.out(f"- {m.get('name')} [{m.get('backend')}]")
 
     def do_decide(self, argv: list[str]) -> None:
-        from hugrgate.cli import load_policy, load_spec, load_state
         from hugrgate.errors import Abstention
+        from hugrgate.loaders import load_policy, load_spec, load_state
         spec_file = state_file = policy_file = None
         backend_name = None
         rest = list(argv)

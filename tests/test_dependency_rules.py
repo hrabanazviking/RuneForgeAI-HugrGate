@@ -74,7 +74,10 @@ SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.clien
            "hugrgate.plugins",
            # Campaign XVIII (slice 440): the conformance kit
            # exercises backends through the service layer.
-           "hugrgate.conformance"}
+           "hugrgate.conformance",
+           # Campaign XVIII (slice 444): the compat helpers rebuild
+           # v1 clients as SDK v2s through hugrgate.client.
+           "hugrgate.compat"}
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
@@ -200,6 +203,9 @@ _STDLIB = {
     "cProfile", "pstats", "tracemalloc", "timeit",
     # Campaign XII (slice 294): multiprocess mode.
     "multiprocessing",
+    # Campaign XVIII (slices 435/436/438): CLI did-you-mean, the
+    # inspector REPL, and the scaffolder's stdlib.
+    "difflib", "shlex", "readline", "keyword", "py_compile",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

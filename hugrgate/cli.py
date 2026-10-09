@@ -21,7 +21,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from hugrgate.policy import DecisionPolicy
+from hugrgate.loaders import (
+    load_policy,
+    load_spec,
+    load_state,
+)
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
@@ -46,35 +50,6 @@ __all__ = [
     "load_state",
     "main",
 ]
-
-
-def _load_doc(path: str) -> Any:
-    """Load a JSON or YAML document (YAML is a superset of JSON)."""
-    import yaml
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
-def load_spec(path: str) -> DecisionSpec:
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"spec file {path} must contain a mapping")
-    return DecisionSpec.from_dict(doc)
-
-
-def load_state(path: str) -> dict[str, Any]:
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"state file {path} must contain a mapping")
-    return doc
-
-
-def load_policy(path: str) -> DecisionPolicy:
-    from hugrgate.serde import policy_from_dict
-    doc = _load_doc(path)
-    if not isinstance(doc, dict):
-        raise ValueError(f"policy file {path} must contain a mapping")
-    return policy_from_dict(doc)
 
 
 def _print_json(payload: Any) -> None:
@@ -333,7 +308,6 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     """
     from hugrgate.client import HugrGateClient
     from hugrgate.protocol import PROTOCOL_VERSION
-    from hugrgate.spec import DecisionSpec
 
     url = args.url or "http://127.0.0.1:8377"
     checks: list[tuple[str, bool, str]] = []
@@ -525,6 +499,7 @@ def cmd_check_backend(args: argparse.Namespace) -> int:
 def cmd_check_contract(args: argparse.Namespace) -> int:
     """Run the contract conformance battery (slice 441)."""
     import json
+
     from hugrgate.contracts.conformance import (
         assert_conformance,
         run_contract_conformance,
