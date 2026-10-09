@@ -15,6 +15,12 @@ from hugrgate.cluster.discovery import (
     PeerRecord,
 )
 from hugrgate.cluster.identity import KEY_BYTES, NodeIdentity
+from hugrgate.cluster.lan import (
+    DEFAULT_LAN_GROUP,
+    DEFAULT_LAN_PORT,
+    LANDiscoveryAdapter,
+    MulticastConfig,
+)
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     MAX_MESSAGE_BYTES,
@@ -34,6 +40,8 @@ from hugrgate.cluster.static_config import (
 
 __all__ = [
     "CLUSTER_RPC_PATH",
+    "DEFAULT_LAN_GROUP",
+    "DEFAULT_LAN_PORT",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
@@ -41,7 +49,9 @@ __all__ = [
     "ClusterMessage",
     "Discovery",
     "DiscoveryRegistry",
+    "LANDiscoveryAdapter",
     "MessageType",
+    "MulticastConfig",
     "NodeCapabilities",
     "NodeIdentity",
     "PeerRecord",

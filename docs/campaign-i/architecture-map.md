@@ -73,6 +73,7 @@ flowchart TD
         cluster_capabilities[cluster.capabilities]
         cluster_discovery[cluster.discovery]
         cluster_static_config[cluster.static_config]
+        cluster_lan[cluster.lan]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -167,6 +168,7 @@ flowchart TD
     cluster --> cluster_capabilities
     cluster --> cluster_discovery
     cluster --> cluster_identity
+    cluster --> cluster_lan
     cluster --> cluster_protocol
     cluster --> cluster_static_config
     cluster_capabilities --> hugrgate
@@ -179,6 +181,11 @@ flowchart TD
     cluster_discovery --> errors
     cluster_identity --> cluster_protocol
     cluster_identity --> errors
+    cluster_lan --> cluster_capabilities
+    cluster_lan --> cluster_discovery
+    cluster_lan --> cluster_identity
+    cluster_lan --> cluster_protocol
+    cluster_lan --> errors
     cluster_protocol --> errors
     cluster_static_config --> cluster_discovery
     cluster_static_config --> errors
@@ -268,7 +275,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -364,6 +371,7 @@ flowchart TD
 | `cluster` | `cluster.capabilities` | no |
 | `cluster` | `cluster.discovery` | no |
 | `cluster` | `cluster.identity` | no |
+| `cluster` | `cluster.lan` | no |
 | `cluster` | `cluster.protocol` | no |
 | `cluster` | `cluster.static_config` | no |
 | `cluster.capabilities` | `hugrgate` | no |
@@ -376,6 +384,11 @@ flowchart TD
 | `cluster.discovery` | `errors` | no |
 | `cluster.identity` | `cluster.protocol` | no |
 | `cluster.identity` | `errors` | no |
+| `cluster.lan` | `cluster.capabilities` | no |
+| `cluster.lan` | `cluster.discovery` | no |
+| `cluster.lan` | `cluster.identity` | no |
+| `cluster.lan` | `cluster.protocol` | no |
+| `cluster.lan` | `errors` | no |
 | `cluster.protocol` | `errors` | no |
 | `cluster.static_config` | `cluster.discovery` | no |
 | `cluster.static_config` | `errors` | no |

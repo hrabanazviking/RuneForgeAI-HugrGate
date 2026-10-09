@@ -60,6 +60,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.cluster.capabilities",
         "hugrgate.cluster.discovery",
         "hugrgate.cluster.static_config",
+        "hugrgate.cluster.lan",
     ],
     "api": ["hugrgate"],
 }
