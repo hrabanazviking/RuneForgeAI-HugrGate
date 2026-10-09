@@ -288,6 +288,18 @@ EXPECTED_RECOVERABLE = {
     SignatureVerificationFailed: False,
     SupplyChainViolation: False,
     AgentError: True,
+    AgentRunaway: True,
+    HumanReviewTimeout: True,
+    PluginTrustError: True,
+    DeserializationBlocked: True,
+    InputTooLarge: True,
+    PathTraversalBlocked: True,
+    AuthzDenied: True,
+    PromptInjectionBlocked: True,
+    RateLimitExceeded: True,
+    ReplayDetected: True,
+    ResourceBudgetExceeded: True,
+    SandboxViolation: True,
 }
 
 
