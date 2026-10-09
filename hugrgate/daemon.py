@@ -30,7 +30,10 @@ from typing import Any, Dict, List, Mapping, Optional, Tuple
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
-from hugrgate import Abstention, DecisionPolicy, DecisionResult, HugrGate
+from hugrgate.core import HugrGate
+from hugrgate.errors import Abstention
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
 from hugrgate.client import policy_from_dict
 from hugrgate.errors import QueueFull
 from hugrgate.log import get_logger

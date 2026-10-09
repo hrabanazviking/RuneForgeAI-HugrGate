@@ -20,7 +20,8 @@ import json
 import sys
 from typing import Any, Dict, List, Optional
 
-from hugrgate import DecisionPolicy, DecisionSpec
+from hugrgate.policy import DecisionPolicy
+from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "load_spec",
@@ -72,7 +73,7 @@ def _print_json(payload: Any) -> None:
 
 
 def cmd_decide(args: argparse.Namespace) -> int:
-    from hugrgate import Abstention
+    from hugrgate.errors import Abstention
     spec = load_spec(args.spec)
     state = load_state(args.state)
     policy = load_policy(args.policy) if args.policy else None

@@ -14,15 +14,12 @@ from typing import Any, Dict, List, Mapping, Optional
 
 import httpx
 
-from hugrgate import (
-    Abstention,
-    Backend,
-    BackendError,
-    DecisionPolicy,
-    DecisionResult,
-    DecisionSpec,
-    HugrGate,
-)
+from hugrgate.backend import Backend
+from hugrgate.core import HugrGate
+from hugrgate.errors import Abstention, BackendError
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
 from hugrgate.errors import PolicyError
 
 __all__ = [

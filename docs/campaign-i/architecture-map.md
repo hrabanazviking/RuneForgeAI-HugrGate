@@ -110,6 +110,11 @@ flowchart TD
     backends_rules --> result
     backends_rules --> spec
     bench --> hugrgate
+    bench --> core
+    bench --> errors
+    bench --> policy
+    bench --> result
+    bench --> spec
     cache --> log
     cache --> policy
     cache --> privacy
@@ -133,15 +138,21 @@ flowchart TD
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
     circuit --> log
-    cli -.-> hugrgate
     cli -.-> bench
     cli -.-> bench_report
     cli -.-> client
     cli -.-> daemon
+    cli -.-> errors
+    cli --> policy
     cli -.-> server
-    client --> hugrgate
+    cli --> spec
+    client --> backend
+    client --> core
     client --> errors
+    client --> policy
+    client --> result
     client -.-> server
+    client --> spec
     core --> backend
     core --> errors
     core --> log
@@ -150,10 +161,12 @@ flowchart TD
     core --> result
     core --> spec
     core --> validation
-    daemon --> hugrgate
     daemon -.-> client
+    daemon --> core
     daemon -.-> errors
     daemon -.-> log
+    daemon --> policy
+    daemon --> result
     daemon -.-> server
     daemon -.-> spec
     fallback --> backend
@@ -189,8 +202,12 @@ flowchart TD
     provenance --> spec
     result --> errors
     server --> hugrgate
+    server --> backend
     server --> client
+    server --> core
     server --> errors
+    server --> result
+    server --> spec
     spec --> errors
     threshold --> abstain
     threshold --> errors
@@ -265,6 +282,11 @@ flowchart TD
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
 | `bench` | `hugrgate` | no |
+| `bench` | `core` | no |
+| `bench` | `errors` | no |
+| `bench` | `policy` | no |
+| `bench` | `result` | no |
+| `bench` | `spec` | no |
 | `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
@@ -288,15 +310,21 @@ flowchart TD
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
 | `circuit` | `log` | no |
-| `cli` | `hugrgate` | yes |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
 | `cli` | `client` | yes |
 | `cli` | `daemon` | yes |
+| `cli` | `errors` | yes |
+| `cli` | `policy` | no |
 | `cli` | `server` | yes |
-| `client` | `hugrgate` | no |
+| `cli` | `spec` | no |
+| `client` | `backend` | no |
+| `client` | `core` | no |
 | `client` | `errors` | no |
+| `client` | `policy` | no |
+| `client` | `result` | no |
 | `client` | `server` | yes |
+| `client` | `spec` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `log` | no |
@@ -305,10 +333,12 @@ flowchart TD
 | `core` | `result` | no |
 | `core` | `spec` | no |
 | `core` | `validation` | no |
-| `daemon` | `hugrgate` | no |
 | `daemon` | `client` | yes |
+| `daemon` | `core` | no |
 | `daemon` | `errors` | yes |
 | `daemon` | `log` | yes |
+| `daemon` | `policy` | no |
+| `daemon` | `result` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `fallback` | `backend` | no |
@@ -344,8 +374,12 @@ flowchart TD
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
 | `server` | `hugrgate` | no |
+| `server` | `backend` | no |
 | `server` | `client` | no |
+| `server` | `core` | no |
 | `server` | `errors` | no |
+| `server` | `result` | no |
+| `server` | `spec` | no |
 | `spec` | `errors` | no |
 | `threshold` | `abstain` | no |
 | `threshold` | `errors` | no |
