@@ -33,6 +33,7 @@ __all__ = [
     "HugrGateError",
     "MultiprocError",
     "NPUError",
+    "NumaError",
     "OfflineBootstrapError",
     "PolicyError",
     "PoolError",
@@ -335,4 +336,16 @@ class SupervisionError(HugrGateError):
     exceptions.  Recoverable — the supervisor itself keeps running.
     """
     code = "supervision_error"
+    recoverable = True
+
+
+class NumaError(HugrGateError):
+    """A NUMA topology query or thread-pinning request failed.
+
+    Slice 296.  NUMA operations are best-effort performance hints, not
+    correctness requirements — failure is always recoverable (run
+    unpinned).  Real multi-node hardware validation is still needed
+    (see the module docstring of :mod:`hugrgate.numa`).
+    """
+    code = "numa_error"
     recoverable = True
