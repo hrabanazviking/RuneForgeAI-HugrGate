@@ -29,6 +29,7 @@ from hugrgate.errors import (
     GGUFError,
     HugrGateError,
     JurisdictionViolation,
+    LocalOnlyViolation,
     NPUError,
     OfflineBootstrapError,
     PolicyError,
@@ -60,6 +61,7 @@ ALL_ERRORS = [
     ClusterAuthError,
     DataFlowDenied,
     JurisdictionViolation,
+    LocalOnlyViolation,
 ]
 
 EXPECTED_CODES = {
@@ -93,6 +95,7 @@ EXPECTED_CODES = {
     ClusterAuthError: "cluster_auth_error",
     DataFlowDenied: "data_flow_denied",
     JurisdictionViolation: "jurisdiction_violation",
+    LocalOnlyViolation: "local_only_violation",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -130,6 +133,7 @@ EXPECTED_RECOVERABLE = {
     ClusterAuthError: False,
     DataFlowDenied: False,
     JurisdictionViolation: False,
+    LocalOnlyViolation: False,
 }
 
 

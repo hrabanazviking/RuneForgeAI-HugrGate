@@ -31,6 +31,8 @@ from hugrgate.privacy_jurisdiction import (
     JurisdictionRegistry,
     JurisdictionViolation,
 )
+from hugrgate.privacy_labels import FieldLabels
+from hugrgate.privacy_localonly import LocalOnlyPolicy, LocalOnlyResult
 from hugrgate.privacy_trust import (
     TRUST_ORDER,
     BackendTrustRegistry,
@@ -288,6 +290,21 @@ class PrivacyGuard:
                         policy: DecisionPolicy) -> list[Backend]:
         """Selection-time filter: blocked backends never become candidates."""
         return [b for b in backends if self.remote_allowed(b, policy)]
+
+    # -- local-only field enforcement (slice 231) ------------------------
+
+    def enforce_local_only(self, state: Mapping[str, Any],
+                           labels: FieldLabels, backend: Backend,
+                           *, strict: bool = False) -> LocalOnlyResult:
+        """Strip (or in strict mode, reject) local-only fields.
+
+        Local backends pass through untouched. For remote backends,
+        any present local-only field is removed from the returned
+        copy and reported in ``result.stripped``; strict mode raises
+        :class:`~hugrgate.errors.LocalOnlyViolation` instead.
+        """
+        return LocalOnlyPolicy(strict=strict).enforce_for_backend(
+            state, labels, backend)
 
     # -- cache policy ----------------------------------------------------
 

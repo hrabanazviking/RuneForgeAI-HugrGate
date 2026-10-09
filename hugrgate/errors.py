@@ -32,6 +32,7 @@ __all__ = [
     "GateError",
     "HugrGateError",
     "JurisdictionViolation",
+    "LocalOnlyViolation",
     "NPUError",
     "OfflineBootstrapError",
     "PolicyError",
@@ -152,6 +153,19 @@ class JurisdictionViolation(PrivacyViolation):
     """
 
     code = "jurisdiction_violation"
+    recoverable = False
+
+
+class LocalOnlyViolation(PrivacyViolation):
+    """Raised when a local-only field would leave the process.
+
+    Subclass of :class:`PrivacyViolation`. Raised in strict mode by
+    the local-only enforcer (slice 231) instead of silently stripping
+    the field, so callers get a hard guarantee. Not recoverable by
+    blind retry: remove the field or mark it non-local-only.
+    """
+
+    code = "local_only_violation"
     recoverable = False
 
 

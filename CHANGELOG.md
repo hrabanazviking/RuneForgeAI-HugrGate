@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 231)
+- Local-only field enforcement (`hugrgate.privacy_localonly`):
+  `LocalOnlyPolicy` strip/strict modes, nested-aware stripping with
+  pruning, deep-copy safety; `PrivacyGuard.enforce_local_only`.
+  New `LocalOnlyViolation` error (code `local_only_violation`).
+
 ### Added (slice 230)
 - Jurisdiction metadata (`hugrgate.privacy_jurisdiction`):
   `JurisdictionRegistry` (fail-closed `"unknown"` default for
