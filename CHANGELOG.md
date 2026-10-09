@@ -13,6 +13,11 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 242)
+- Encrypted provenance option: `SealedProvenanceStore`
+  (`hugrgate.privacy_provenance`) — sealed record bodies, plaintext
+  chain index, tamper-evident `verify_chain`, chain-safe purge.
+
 ### Added (slice 241)
 - Encrypted cache option (`hugrgate.privacy_crypto`): stdlib
   `SealedBox` authenticated encryption + HKDF, and

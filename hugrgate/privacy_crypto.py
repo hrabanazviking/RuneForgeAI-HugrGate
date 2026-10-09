@@ -45,6 +45,7 @@ __all__ = [
     "EncryptedDecisionCache",
     "SealedBox",
     "hkdf",
+    "require_key",
 ]
 
 _KEY_BYTES = 32
@@ -71,7 +72,7 @@ def hkdf(key: bytes, *, salt: bytes = b"", info: bytes = b"",
     return okm[:length]
 
 
-def _require_key(key: bytes) -> bytes:
+def require_key(key: bytes) -> bytes:
     """Validate a 32-byte key; return it as immutable bytes."""
     if not isinstance(key, (bytes, bytearray)) or len(key) != _KEY_BYTES:
         size = len(key) if isinstance(key, (bytes, bytearray)) else "?"
@@ -97,13 +98,13 @@ def _xor(left: bytes, right: bytes) -> bytes:
 
 
 class SealedBox:
-    """Nonce-misuse-resistant-ish sealed box (see module docs)."""
+    """Authenticated encryption: seal() / open()."""
 
     @staticmethod
     def seal(key: bytes, plaintext: bytes,
              associated: bytes = b"") -> bytes:
         """Seal ``plaintext``; returns ``nonce || ciphertext || tag``."""
-        key = _require_key(key)
+        key = require_key(key)
         if not isinstance(plaintext, (bytes, bytearray)):
             raise TypeError("plaintext must be bytes")
         nonce = secrets.token_bytes(_NONCE_BYTES)
@@ -125,7 +126,7 @@ class SealedBox:
             Wrong key, truncated blob, or failed authentication —
             the blob must not be trusted.
         """
-        key = _require_key(key)
+        key = require_key(key)
         if not isinstance(blob, (bytes, bytearray)):
             raise SealError("sealed blob must be bytes",
                             reason="type")
@@ -170,7 +171,7 @@ class EncryptedDecisionCache(DecisionCache):
     def __init__(self, key: bytes, *, ttl_seconds: float = 300.0,
                  max_size: int = 1000, namespace: str = "decision-cache"):
         super().__init__(ttl_seconds=ttl_seconds, max_size=max_size)
-        self._key = _require_key(key)
+        self._key = require_key(key)
         self._namespace = str(namespace)
 
     def _associated(self, state: Mapping[str, Any], spec: DecisionSpec,
