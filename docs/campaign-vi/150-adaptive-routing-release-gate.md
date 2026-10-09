@@ -6,13 +6,13 @@ release blockers.
 ## Full test suite (real result)
 
 ```
-726 tests: 724 passed, 2 failed → both fixed → re-run green
+762 passed, 0 failed (final run on the rebased tree, ~2.5 minutes)
 ```
 
-Command: `venv/bin/python -m pytest tests/ -q -p no:cacheprovider`
-(final full run: **726 passed, 0 failed**, ~2 minutes).
+Command: `venv/bin/python -m pytest tests/ -q -p no:cacheprovider`.
 
-The two failures found during the gate, and their fixes:
+During the gate, two failures were found and fixed before the final
+runs (both were integration-doc sync issues, not logic bugs):
 
 1. `test_dead_code.py::test_no_unused_imports_in_package` — 9 unused
    imports across 6 new adaptive modules (leftover `field`, `Optional`,
