@@ -37,11 +37,12 @@ print(result.backend)       # "rules"
 ## The Intelligence Ladder
 
 ```python
-from hugrgate.ladder import LadderRouter
+from hugrgate import BackendRegistry
+from hugrgate.ladder import LadderRouter, LadderRung
 
-router = LadderRouter([
-    {"backend": "rules", "min_confidence": 0.9},
-    {"backend": "logreg", "min_confidence": 0.8},
+router = LadderRouter(BackendRegistry(), rungs=[
+    LadderRung("rules", min_confidence=0.9),
+    LadderRung("logreg", min_confidence=0.8),
 ])
 # Easy cases stop at rules; hard cases climb.
 ```

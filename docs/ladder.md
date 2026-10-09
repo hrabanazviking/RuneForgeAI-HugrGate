@@ -8,12 +8,13 @@ should never reach expensive inference.
 ## Configuration
 
 ```python
-from hugrgate.ladder import LadderRouter
+from hugrgate import BackendRegistry
+from hugrgate.ladder import LadderRouter, LadderRung
 
-router = LadderRouter([
-    {"backend": "rules",     "min_confidence": 0.90},
-    {"backend": "logreg",    "min_confidence": 0.80},
-    {"backend": "prototype", "min_confidence": 0.70},
+router = LadderRouter(BackendRegistry(), rungs=[
+    LadderRung("rules",     min_confidence=0.90),
+    LadderRung("logreg",    min_confidence=0.80),
+    LadderRung("prototype", min_confidence=0.70),
     # NLI / LLM rungs added when models are available
 ])
 ```

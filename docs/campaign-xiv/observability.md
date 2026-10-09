@@ -55,6 +55,7 @@ Every observability surface carries **metadata, never payload**:
 ## Quickstart
 
 ```python
+# noexec: illustrative fragment — needs spec/policy/gate in scope
 from hugrgate.observability.dashboard import HealthDashboard
 from hugrgate.observability.trace import Tracer
 from hugrgate.observability.spans_decision import decision_span, annotate_decision
