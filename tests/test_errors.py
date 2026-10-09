@@ -35,6 +35,7 @@ from hugrgate.errors import (
     GGUFError,
     GpuschedError,
     HugrGateError,
+    InputTooLarge,
     JurisdictionViolation,
     KeyProviderError,
     LocalOnlyViolation,
@@ -113,6 +114,7 @@ ALL_ERRORS = [
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
     # Campaign XVII security-forge errors (slice 404+).
     PluginTrustError,
+    InputTooLarge,
     SandboxViolation,
     SignatureVerificationFailed,
     SupplyChainViolation,

@@ -655,3 +655,14 @@ class SandboxViolation(HugrGateError):
     """
     code = "sandbox_violation"
     recoverable = False
+
+
+class InputTooLarge(HugrGateError):
+    """An input exceeded the configured size limits.
+    Slice 409.  Raised by :mod:`hugrgate.security.input_limits`
+    when a state payload, batch, or prompt crosses its limit.  Not
+    recoverable: the same bytes will fail again — shrink the input
+    or raise the limit deliberately.
+    """
+    code = "input_too_large"
+    recoverable = False

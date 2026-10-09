@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 372 · **public names:** 2282
+**Modules:** 373 · **public names:** 2290
 
 ## API stability policy
 
@@ -3967,6 +3967,7 @@ that this document never drifts from the code.
 | `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
 | `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
 | `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
@@ -3982,6 +3983,9 @@ that this document never drifts from the code.
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
 | `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
 | `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
+| `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
 | `enforce_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
@@ -4030,6 +4034,15 @@ that this document never drifts from the code.
 | `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.input_limits`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
+| `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_prompt` | function | `(prompt: 'str', limits: 'InputLimits | None' = None) -> 'int'` |
+| `check_state` | function | `(state: 'Mapping[str, Any]', limits: 'InputLimits | None' = None) -> 'int'` |
 
 ### `hugrgate.security.model_signing`
 

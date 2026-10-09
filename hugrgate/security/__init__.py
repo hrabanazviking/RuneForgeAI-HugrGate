@@ -78,6 +78,12 @@ from hugrgate.security.depscan import (
 from hugrgate.security.depscan import (
     Finding as DependencyFinding,
 )
+from hugrgate.security.input_limits import (
+    InputLimits,
+    check_batch,
+    check_prompt,
+    check_state,
+)
 from hugrgate.security.model_signing import (
     ModelSigner,
     SignedMetadata,
@@ -118,6 +124,7 @@ __all__ = [
     "ChecksumManifest",
     "DependencyFinding",
     "DependencyRecord",
+    "InputLimits",
     "ModelChecksumGate",
     "ModelSigner",
     "PluginManifest",
@@ -133,6 +140,9 @@ __all__ = [
     "TrustBoundary",
     "TrustedModelStore",
     "build_manifest",
+    "check_batch",
+    "check_prompt",
+    "check_state",
     "curated_surface",
     "default_threat_model",
     "enforce_manifest",

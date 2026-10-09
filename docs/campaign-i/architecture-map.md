@@ -1818,12 +1818,15 @@ flowchart TD
     security --> security_attack_surface
     security --> security_checksums
     security --> security_depscan
+    security --> security_input_limits
     security --> security_model_signing
     security --> security_plugins
     security --> security_sandbox
     security --> security_supply_chain
     security --> security_threat_model
     security_checksums --> errors
+    security_input_limits --> errors
+    security_input_limits --> validation
     security_model_signing --> errors
     security_model_signing --> privacy_crypto
     security_plugins --> errors
@@ -3278,12 +3281,15 @@ flowchart TD
 | `security` | `security.attack_surface` | no |
 | `security` | `security.checksums` | no |
 | `security` | `security.depscan` | no |
+| `security` | `security.input_limits` | no |
 | `security` | `security.model_signing` | no |
 | `security` | `security.plugins` | no |
 | `security` | `security.sandbox` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
 | `security.checksums` | `errors` | no |
+| `security.input_limits` | `errors` | no |
+| `security.input_limits` | `validation` | no |
 | `security.model_signing` | `errors` | no |
 | `security.model_signing` | `privacy_crypto` | no |
 | `security.plugins` | `errors` | no |
