@@ -35,13 +35,20 @@ from hugrgate.chaos.framework import (
     ProbeOutcome,
     SteadyStateProbe,
 )
+from hugrgate.chaos.model_faults import (
+    CORRUPTION_KINDS,
+    MUST_REJECT_KINDS,
+    ModelCorruptor,
+)
 
 __all__ = [
+    "CORRUPTION_KINDS",
     "CRASH",
     "ERROR_RATE",
     "HANG",
     "LATENCY",
     "MALFORMED",
+    "MUST_REJECT_KINDS",
     "BlastRadius",
     "ChaosExperiment",
     "ExperimentReport",
@@ -50,6 +57,7 @@ __all__ = [
     "FaultResult",
     "FaultSpec",
     "FaultyBackend",
+    "ModelCorruptor",
     "ProbeOutcome",
     "SteadyStateProbe",
 ]
