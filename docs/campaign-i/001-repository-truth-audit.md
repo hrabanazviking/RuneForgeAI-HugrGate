@@ -1,6 +1,6 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T15:45:49.568674+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T15:53:30.845099+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
