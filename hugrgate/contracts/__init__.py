@@ -41,6 +41,7 @@ __all__ = [
     "deadlines",
     "context",
     "features",
+    "explanations",
 ]
 
 
@@ -52,7 +53,8 @@ def __getattr__(name: str):
     if name in ("negotiation", "nested", "hierarchy", "composite",
                 "conditional", "crossfield", "ordinal", "uncertainty",
                 "distributions", "multilabel", "cost", "utility",
-                "risk", "deadlines", "context", "features"):
+                "risk", "deadlines", "context", "features",
+                "explanations"):
         import importlib
         module = importlib.import_module(f"{__name__}.{name}")
         globals()[name] = module

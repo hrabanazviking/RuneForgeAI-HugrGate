@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:40:24.360537+00:00",
-  "module_count": 60,
+  "generated_utc": "2026-10-09T11:41:51.969188+00:00",
+  "module_count": 61,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 60,
+      "loc": 62,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -698,6 +698,26 @@
         "distribution_violations",
         "validate_distribution",
         "check_distribution",
+        "describe"
+      ]
+    },
+    "hugrgate.contracts.explanations": {
+      "docstring": "Output explanation contracts \u2014 decisions must show their work.\n\nGjallarbr\u00fa slice 043.\n\nExplanations currently live as ad-hoc ``DecisionResult.metadata`` keys:\nnothing requires one, nothing checks its shape, and nothing verifies it\neven mentions the decided value. :class:`ExplanationContract` (kind\n``\"explanation\"``) contracts the explanation itself:\n\n- ``required_fields`` \u2014 keys the explanation mapping must carry;\n- ``text_field`` / ``min_length`` \u2014 the narrative and its minimum length;\n- ``reasons_field`` / ``min_reasons`` \u2014 a structured reason list with a\n  minimum count;\n- ``must_mention_value`` \u2014 faithfulness: the text must name the decided\n  value (every element, for collection values), case-insensitively;\n- ``forbidden_phrases`` \u2014 strings that must not appear (case-insensitive).\n\n:func:`check_result` / :meth:`ExplanationContract.check_result` pull the\nvalue and the explanation (``metadata[\"explanation\"]``) straight off a\n:class:`DecisionResult`, so existing results validate without modification.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 216,
+      "path": "hugrgate/contracts/explanations.py",
+      "public_defs": [
+        "ExplanationContract",
+        "violations",
+        "validate_explanation",
+        "validate_value",
+        "check_result",
+        "validate_result",
         "describe"
       ]
     },
@@ -1414,6 +1434,7 @@
     "test_contracts_040.py",
     "test_contracts_041.py",
     "test_contracts_042.py",
+    "test_contracts_043.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1424,5 +1445,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11550
+  "total_loc": 11768
 }

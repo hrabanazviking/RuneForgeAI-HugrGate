@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 60 · **public names:** 266
+**Modules:** 61 · **public names:** 269
 
 ## API stability policy
 
@@ -252,6 +252,7 @@ that this document never drifts from the code.
 | `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/hatch/wor` |
 | `context` | constant | `<module 'hugrgate.contracts.context' from '/home/hatch/works` |
 | `features` | constant | `<module 'hugrgate.contracts.features' from '/home/hatch/work` |
+| `explanations` | constant | `<module 'hugrgate.contracts.explanations' from '/home/hatch/` |
 
 ### `hugrgate.contracts.composite`
 
@@ -309,6 +310,13 @@ that this document never drifts from the code.
 | `DistributionConstraint` | class | `(op: 'str', threshold: 'float' = 0.0, labels: 'Tuple[str, ...]' = (), description: 'str' = '') -> None` |
 | `DistributionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, outcomes: 'List[str]' = <factory>, constraints: 'List[DistributionConstraint]' = <factory>) -> None` |
 | `shannon_entropy` | function | `(distribution: 'Mapping[str, float]') -> 'float'` |
+
+### `hugrgate.contracts.explanations`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EXPLANATION_METADATA_KEY` | constant | `'explanation'` |
+| `ExplanationContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, required_fields: 'List[str]' = <factory>, text_field: 'str' = 'text', min_length: 'int' = 0, reasons_field: 'str' = 'reasons', min_reasons: 'int' = 0, must_mention_value: 'bool' = True, forbidden_phrases: 'List[str]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.features`
 
