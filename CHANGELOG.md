@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 250)
+- Privacy Fortress release gate (`tests/test_privacy_fortress_gate.py`,
+  gate-marked): asserts all 25 slices' artifacts — module imports,
+  slice docs, taxonomy rows, CHANGELOG coverage, error taxonomy,
+  plus end-to-end holds (exfil suite, audit chain, sealed
+  round-trip, dry-run) and the stdlib-only crypto contract.
+
 ### Added (slice 249)
 - Privacy benchmark suite (`benchmarks/privacy_bench_249.py` +
   `benchmarks/privacy_bench_249.json`): real per-operation
