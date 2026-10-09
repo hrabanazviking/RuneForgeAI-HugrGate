@@ -191,6 +191,7 @@ flowchart TD
     server --> errors
     spec --> errors
     threshold --> abstain
+    threshold --> errors
     threshold --> policy
     threshold --> result
     threshold --> spec
@@ -343,6 +344,7 @@ flowchart TD
 | `server` | `errors` | no |
 | `spec` | `errors` | no |
 | `threshold` | `abstain` | no |
+| `threshold` | `errors` | no |
 | `threshold` | `policy` | no |
 | `threshold` | `result` | no |
 | `threshold` | `spec` | no |

@@ -583,7 +583,7 @@ class TestThresholding:
         r = DecisionResult(value="low", probability=0.9,
                            distribution={"low": 0.9, "moderate": 0.05,
                                          "high": 0.05})
-        with pytest.raises(ValueError):
+        with pytest.raises(PolicyError):
             ordinal_cumulative_probability(r, ORD_SPEC, "extreme")
 
     def test_numeric_band_classification(self):
@@ -629,7 +629,7 @@ class TestThresholding:
         assert out.accepted is True
 
     def test_invalid_band_rejected(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(PolicyError):
             NumericBand("bad", lo=5.0, hi=1.0)
 
 

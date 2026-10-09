@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from hugrgate.abstain import abstain
+from hugrgate.errors import PolicyError
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -45,10 +46,10 @@ class NumericBand:
 
     def __post_init__(self):
         if self.lo > self.hi:
-            raise ValueError(
+            raise PolicyError(
                 f"NumericBand {self.name!r}: lo ({self.lo}) > hi ({self.hi})")
         if not 0.0 <= self.min_probability <= 1.0:
-            raise ValueError("min_probability must be in [0,1]")
+            raise PolicyError("min_probability must be in [0,1]")
 
     def contains(self, value: float) -> bool:
         return self.lo <= value <= self.hi
@@ -64,15 +65,23 @@ class ThresholdConfig:
 
     def __post_init__(self):
         for opt, thr in self.per_option.items():
+            if not isinstance(opt, str) or not opt:
+                raise PolicyError(
+                    f"per-option threshold keys must be non-empty strings, "
+                    f"got {opt!r}")
             if not 0.0 <= thr <= 1.0:
-                raise ValueError(
+                raise PolicyError(
                     f"per-option threshold for {opt!r} must be in [0,1]")
         if self.ordinal_minimum is not None:
             level, thr = self.ordinal_minimum
+            if not isinstance(level, str) or not level:
+                raise PolicyError(
+                    f"ordinal_minimum level must be a non-empty string, "
+                    f"got {level!r}")
             if not 0.0 <= thr <= 1.0:
-                raise ValueError("ordinal threshold must be in [0,1]")
+                raise PolicyError("ordinal threshold must be in [0,1]")
         if self.global_minimum is not None and not 0.0 <= self.global_minimum <= 1.0:
-            raise ValueError("global_minimum must be in [0,1]")
+            raise PolicyError("global_minimum must be in [0,1]")
 
 
 def ordinal_cumulative_probability(result: DecisionResult,
@@ -84,9 +93,11 @@ def ordinal_cumulative_probability(result: DecisionResult,
     Falls back to the result probability when the distribution is empty.
     """
     if spec.type != "ordinal" or not spec.levels:
-        raise ValueError("ordinal_cumulative_probability needs an ordinal spec")
+        raise PolicyError(
+            "ordinal_cumulative_probability needs an ordinal spec")
     if level not in spec.levels:
-        raise ValueError(f"level {level!r} not in spec levels {spec.levels}")
+        raise PolicyError(
+            f"level {level!r} not in spec levels {spec.levels}")
     idx = spec.levels.index(level)
     if not result.distribution:
         return result.probability

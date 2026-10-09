@@ -46,7 +46,12 @@ class DecisionPolicy:
         if self.max_cost is not None and self.max_cost < 0:
             raise PolicyError("max_cost must be >= 0")
         if self.review_band:
-            lo, hi = self.review_band
+            band = tuple(self.review_band)
+            if len(band) != 2:
+                raise PolicyError(
+                    f"review_band must be a (lo, hi) pair, got "
+                    f"{self.review_band!r}")
+            lo, hi = band
             if not 0.0 <= lo <= hi <= 1.0:
                 raise PolicyError("review_band must be within [0,1]")
 
