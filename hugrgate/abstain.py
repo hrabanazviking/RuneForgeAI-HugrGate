@@ -15,7 +15,7 @@ exception-free when they prefer values over control flow.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
@@ -23,14 +23,14 @@ from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "abstain",
-    "mark_for_review",
     "apply_abstention_policy",
+    "mark_for_review",
 ]
 
 
 def abstain(spec: DecisionSpec, reason: str = "below_threshold",
             backend: str = "unknown",
-            metadata: Optional[Dict[str, Any]] = None) -> DecisionResult:
+            metadata: dict[str, Any] | None = None) -> DecisionResult:
     """Build an abstention result: no value, not accepted.
 
     The distribution is uniform over the spec's value space (empty for
@@ -55,7 +55,7 @@ def abstain(spec: DecisionSpec, reason: str = "below_threshold",
 
 
 def mark_for_review(result: DecisionResult, reason: str,
-                    reviewer: Optional[str] = None) -> DecisionResult:
+                    reviewer: str | None = None) -> DecisionResult:
     """Flag an existing result for human review.
 
     The value and probability are preserved; ``accepted`` becomes False

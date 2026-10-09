@@ -13,7 +13,7 @@ instead of failing at import time. Tests inject a plain callable
 
 from __future__ import annotations
 
-from typing import Callable, Dict, Mapping, Optional
+from collections.abc import Callable, Mapping
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable
@@ -27,7 +27,7 @@ __all__ = [
 
 try:  # optional dependency — the module must import without it
     from transformers import pipeline as _hf_pipeline
-except Exception:  # pragma: no cover - absence is the common path in CI
+except Exception:  # noqa: BLE001 - any import failure means 'no nli'
     _hf_pipeline = None
 
 #: State keys inspected (in order) for the premise text.
@@ -49,12 +49,12 @@ class NLIBackend(Backend):
     name = "nli"
 
     def __init__(self,
-                 nli_fn: Optional[Callable[[str, str], float]] = None,
+                 nli_fn: Callable[[str, str], float] | None = None,
                  model_name: str = "facebook/bart-large-mnli"):
         self.nli_fn = nli_fn
         self.model_name = model_name
         self._pipe = None
-        self._engine_error: Optional[str] = None
+        self._engine_error: str | None = None
 
     # -- engine ----------------------------------------------------------
 
@@ -106,7 +106,7 @@ class NLIBackend(Backend):
 
     # -- Backend contract ------------------------------------------------
 
-    def capabilities(self) -> Dict:
+    def capabilities(self) -> dict:
         return {
             "spec_types": ["binary"],
             "engine": "injected" if self.nli_fn is not None else "transformers",
@@ -125,7 +125,7 @@ class NLIBackend(Backend):
         return " ".join(str(v) for v in state.values())
 
     def evaluate(self, state: Mapping, spec: DecisionSpec,
-                 context: Optional[Mapping] = None) -> DecisionResult:
+                 context: Mapping | None = None) -> DecisionResult:
         if spec.type != "binary":
             raise BackendError(
                 f"NLIBackend is constrained to binary specs, got {spec.type}")
@@ -141,10 +141,10 @@ class NLIBackend(Backend):
             model=self.model_name if self.nli_fn is None else "injected-fn",
             metadata={"entailment_probability": round(p_entail, 4)})
 
-    def health(self) -> Dict:
+    def health(self) -> dict:
         ready = self.nli_fn is not None or self.engine_available()
         status = "ok" if ready else "unavailable"
-        info: Dict = {"status": status, "backend": self.name}
+        info: dict = {"status": status, "backend": self.name}
         if self._engine_error:
             info["error"] = self._engine_error
         return info

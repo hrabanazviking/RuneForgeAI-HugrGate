@@ -18,8 +18,9 @@ abstention (via :mod:`hugrgate.abstain`) whose reason names the gate.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any
 
 from hugrgate.abstain import abstain
 from hugrgate.errors import PolicyError
@@ -30,9 +31,9 @@ from hugrgate.spec import DecisionSpec
 __all__ = [
     "NumericBand",
     "ThresholdConfig",
-    "ordinal_cumulative_probability",
-    "classify_numeric_band",
     "apply_thresholds",
+    "classify_numeric_band",
+    "ordinal_cumulative_probability",
 ]
 
 
@@ -54,12 +55,12 @@ class NumericBand:
     def contains(self, value: float) -> bool:
         return self.lo <= value <= self.hi
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {"name": self.name, "lo": self.lo, "hi": self.hi,
                 "min_probability": self.min_probability}
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "NumericBand":
+    def from_dict(cls, d: Mapping[str, Any]) -> NumericBand:
         return cls(name=d["name"], lo=d["lo"], hi=d["hi"],
                    min_probability=d.get("min_probability", 0.0))
 
@@ -67,10 +68,10 @@ class NumericBand:
 @dataclass
 class ThresholdConfig:
     """Finer-than-policy acceptance gates."""
-    per_option: Dict[str, float] = field(default_factory=dict)
-    ordinal_minimum: Optional[Tuple[str, float]] = None  # (level, min P(>=level))
-    numeric_bands: List[NumericBand] = field(default_factory=list)
-    global_minimum: Optional[float] = None  # overrides policy floor if set
+    per_option: dict[str, float] = field(default_factory=dict)
+    ordinal_minimum: tuple[str, float] | None = None  # (level, min P(>=level))
+    numeric_bands: list[NumericBand] = field(default_factory=list)
+    global_minimum: float | None = None  # overrides policy floor if set
 
     def __post_init__(self):
         for opt, thr in self.per_option.items():
@@ -92,7 +93,7 @@ class ThresholdConfig:
         if self.global_minimum is not None and not 0.0 <= self.global_minimum <= 1.0:
             raise PolicyError("global_minimum must be in [0,1]")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "per_option": dict(self.per_option),
             "ordinal_minimum": (list(self.ordinal_minimum)
@@ -102,7 +103,7 @@ class ThresholdConfig:
         }
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "ThresholdConfig":
+    def from_dict(cls, d: Mapping[str, Any]) -> ThresholdConfig:
         unknown = set(d) - {"per_option", "ordinal_minimum",
                              "numeric_bands", "global_minimum"}
         if unknown:
@@ -135,11 +136,11 @@ def ordinal_cumulative_probability(result: DecisionResult,
     idx = spec.levels.index(level)
     if not result.distribution:
         return result.probability
-    return sum(result.distribution.get(l, 0.0) for l in spec.levels[idx:])
+    return sum(result.distribution.get(lv, 0.0) for lv in spec.levels[idx:])
 
 
 def classify_numeric_band(value: float,
-                           bands: List[NumericBand]) -> Optional[NumericBand]:
+                           bands: list[NumericBand]) -> NumericBand | None:
     """First band containing ``value``; None when the value is unbanned."""
     for band in bands:
         if band.contains(value):
@@ -148,8 +149,8 @@ def classify_numeric_band(value: float,
 
 
 def apply_thresholds(result: DecisionResult, spec: DecisionSpec,
-                     config: Optional[ThresholdConfig] = None,
-                     policy: Optional[DecisionPolicy] = None
+                     config: ThresholdConfig | None = None,
+                     policy: DecisionPolicy | None = None
                      ) -> DecisionResult:
     """Apply the policy floor and the configured gates to a result.
 

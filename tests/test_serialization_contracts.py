@@ -13,7 +13,8 @@ import json
 import pytest
 
 from hugrgate.client import (
-    policy_from_dict, policy_to_dict, result_from_dict,
+    policy_from_dict,
+    result_from_dict,
 )
 from hugrgate.errors import PolicyError, SpecError
 from hugrgate.ladder import LadderRung

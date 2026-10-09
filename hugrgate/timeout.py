@@ -17,7 +17,8 @@ when the policy sets a latency cap, else
 from __future__ import annotations
 
 import threading
-from typing import Any, Callable, Dict, Mapping, Optional
+from collections.abc import Callable, Mapping
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.errors import TimeoutError
@@ -26,10 +27,10 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "run_with_deadline",
+    "TimeoutBackend",
     "deadline_ms_for",
     "evaluate_with_timeout",
-    "TimeoutBackend",
+    "run_with_deadline",
 ]
 
 
@@ -64,7 +65,7 @@ def run_with_deadline(fn: Callable[[], Any], deadline_s: float,
 
 
 def deadline_ms_for(backend: Backend,
-                    policy: Optional[DecisionPolicy] = None,
+                    policy: DecisionPolicy | None = None,
                     headroom: float = 1.5) -> float:
     """Compute the per-decision deadline for a backend in milliseconds."""
     estimate = max(backend.estimated_latency(), 0.1) * headroom
@@ -75,7 +76,7 @@ def deadline_ms_for(backend: Backend,
 
 def evaluate_with_timeout(backend: Backend, state: Mapping[str, Any],
                           spec: DecisionSpec, deadline_ms: float,
-                          context: Optional[Mapping[str, Any]] = None
+                          context: Mapping[str, Any] | None = None
                           ) -> DecisionResult:
     """Evaluate a backend, raising :class:`TimeoutError` past the deadline."""
     return run_with_deadline(
@@ -95,9 +96,9 @@ class TimeoutBackend(Backend):
     """
 
     def __init__(self, backend: Backend,
-                 policy: Optional[DecisionPolicy] = None,
+                 policy: DecisionPolicy | None = None,
                  headroom: float = 1.5,
-                 explicit_deadline_ms: Optional[float] = None):
+                 explicit_deadline_ms: float | None = None):
         self.wrapped = backend
         self.name = backend.name
         self.is_remote = backend.is_remote
@@ -111,7 +112,7 @@ class TimeoutBackend(Backend):
             return self.explicit_deadline_ms
         return deadline_ms_for(self.wrapped, self.policy, self.headroom)
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         caps = dict(self.wrapped.capabilities())
         caps["timeout_guarded"] = True
         caps["deadline_ms"] = self.deadline_ms
@@ -123,13 +124,13 @@ class TimeoutBackend(Backend):
     def estimated_latency(self) -> float:
         return self.deadline_ms
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         h = dict(self.wrapped.health())
         h["timeout_guarded"] = True
         return h
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         result = evaluate_with_timeout(
             self.wrapped, state, spec, self.deadline_ms, context)

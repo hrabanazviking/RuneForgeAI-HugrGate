@@ -22,15 +22,16 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Any, Callable, Dict, Optional
+from collections.abc import Callable
+from typing import Any
 
 from hugrgate.log import get_logger
 
 logger = get_logger(__name__)
 __all__ = [
     "CLOSED",
-    "OPEN",
     "HALF_OPEN",
+    "OPEN",
     "CircuitBreaker",
     "CircuitRegistry",
 ]
@@ -59,7 +60,7 @@ class CircuitBreaker:
         self._clock = clock
         self._state = CLOSED
         self._consecutive_failures = 0
-        self._opened_at: Optional[float] = None
+        self._opened_at: float | None = None
         self._half_open_inflight = 0
         self._lock = threading.Lock()
 
@@ -126,7 +127,7 @@ class CircuitBreaker:
         self._opened_at = None
         self._half_open_inflight = 0
 
-    def snapshot(self) -> Dict[str, object]:
+    def snapshot(self) -> dict[str, object]:
         with self._lock:
             self._maybe_half_open()
             return {"name": self.name, "state": self._state,
@@ -140,13 +141,13 @@ class CircuitRegistry:
                  reset_timeout_s: float = 30.0,
                  half_open_max_probes: int = 1,
                  clock: Callable[[], float] = time.monotonic):
-        self._defaults: Dict[str, Any] = {
+        self._defaults: dict[str, Any] = {
             "failure_threshold": failure_threshold,
             "reset_timeout_s": reset_timeout_s,
             "half_open_max_probes": half_open_max_probes,
         }
         self._clock = clock
-        self._breakers: Dict[str, CircuitBreaker] = {}
+        self._breakers: dict[str, CircuitBreaker] = {}
         self._lock = threading.Lock()
 
     def get(self, name: str) -> CircuitBreaker:
@@ -167,7 +168,7 @@ class CircuitRegistry:
             self._breakers[name] = breaker
             return breaker
 
-    def snapshot(self) -> Dict[str, Dict[str, object]]:
+    def snapshot(self) -> dict[str, dict[str, object]]:
         with self._lock:
             breakers = list(self._breakers.values())
         return {b.name: b.snapshot() for b in breakers}

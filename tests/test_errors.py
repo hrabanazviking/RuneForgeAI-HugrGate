@@ -11,10 +11,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import pytest
-
 import hugrgate
-from hugrgate import errors
 from hugrgate.errors import (
     Abstention,
     BackendError,

@@ -8,7 +8,8 @@ means violate monotonicity, and predict with the resulting step function.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -38,12 +39,12 @@ class IsotonicCalibrator(Calibrator):
 
     def __init__(self):
         super().__init__()
-        self._xs: List[float] = []   # block left edges, ascending
-        self._ys: List[float] = []   # block mean label (non-decreasing)
+        self._xs: list[float] = []   # block left edges, ascending
+        self._ys: list[float] = []   # block mean label (non-decreasing)
         self.n_samples = 0
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "IsotonicCalibrator":
+            labels: Sequence[int]) -> IsotonicCalibrator:
         _require_numpy()
         s, y = self._as_arrays(scores, labels)
         n_pos = int(y.sum())
@@ -57,9 +58,9 @@ class IsotonicCalibrator(Calibrator):
         y_sorted = y[order]
 
         # Each block: (weight, sum of labels, min score).
-        weights: List[float] = [1.0] * len(s_sorted)
-        sums: List[float] = [float(v) for v in y_sorted]
-        edges: List[float] = [float(v) for v in s_sorted]
+        weights: list[float] = [1.0] * len(s_sorted)
+        sums: list[float] = [float(v) for v in y_sorted]
+        edges: list[float] = [float(v) for v in s_sorted]
 
         # Pool Adjacent Violators: merge while a block's mean exceeds the
         # next block's mean.
@@ -96,13 +97,13 @@ class IsotonicCalibrator(Calibrator):
         idx = min(max(idx, 0), len(self._ys) - 1)
         return float(min(1.0, max(0.0, self._ys[idx])))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {"xs": list(self._xs), "ys": list(self._ys),
                 "n_samples": self.n_samples}
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "IsotonicCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> IsotonicCalibrator:
         obj = cls()
         obj._xs = [float(x) for x in params["xs"]]
         obj._ys = [float(v) for v in params["ys"]]

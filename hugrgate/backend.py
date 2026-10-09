@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Mapping, Optional
 import threading
+from abc import ABC, abstractmethod
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import BackendUnavailable, SpecError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
+
+# Alias: BackendRegistry.list() shadows the builtin inside the class
+# body, so annotations there cannot spell `list[...]` directly.
+_StrList = list[str]
+_BackendList = list["Backend"]
 
 __all__ = [
     "Backend",
@@ -26,7 +32,7 @@ class Backend(ABC):
     is_remote: bool = False
 
     @abstractmethod
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         """What this backend can do: spec types, features, limits."""
 
     @abstractmethod
@@ -35,18 +41,18 @@ class Backend(ABC):
 
     @abstractmethod
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         """Make a decision. Must respect the spec's value space."""
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         return {"status": "ok", "backend": self.name}
 
     # Optional capabilities
-    def warmup(self) -> None:
+    def warmup(self) -> None:  # noqa: B027 - intentional no-op hook
         pass
 
-    def close(self) -> None:
+    def close(self) -> None:  # noqa: B027 - intentional no-op hook
         """Release resources held by this backend (slice 019).
 
         Default is a no-op. Backends holding model weights, file
@@ -54,12 +60,12 @@ class Backend(ABC):
         calls it best-effort on every registered backend.
         """
 
-    def batch(self, states: List[Mapping[str, Any]], spec: DecisionSpec,
-              context: Optional[Mapping[str, Any]] = None
-              ) -> List[DecisionResult]:
+    def batch(self, states: list[Mapping[str, Any]], spec: DecisionSpec,
+              context: Mapping[str, Any] | None = None
+              ) -> list[DecisionResult]:
         return [self.evaluate(s, spec, context) for s in states]
 
-    def calibration_info(self) -> Dict[str, Any]:
+    def calibration_info(self) -> dict[str, Any]:
         return {"calibrated": False}
 
     def estimated_latency(self) -> float:
@@ -68,10 +74,10 @@ class Backend(ABC):
     def estimated_cost(self) -> float:
         return 0.0
 
-    def privacy_properties(self) -> Dict[str, Any]:
+    def privacy_properties(self) -> dict[str, Any]:
         return {"remote": self.is_remote, "data_retained": False}
 
-    def hardware_requirements(self) -> Dict[str, Any]:
+    def hardware_requirements(self) -> dict[str, Any]:
         return {}
 
 
@@ -86,7 +92,7 @@ class BackendRegistry:
     """
 
     def __init__(self):
-        self._backends: Dict[str, Backend] = {}
+        self._backends: dict[str, Backend] = {}
         self._lock = threading.RLock()
 
     def register(self, backend: Backend, *, replace: bool = False) -> None:
@@ -116,7 +122,7 @@ class BackendRegistry:
         with self._lock:
             return self._backends.pop(name, None) is not None
 
-    def get(self, name: str) -> Optional[Backend]:
+    def get(self, name: str) -> Backend | None:
         with self._lock:
             return self._backends.get(name)
 
@@ -128,11 +134,11 @@ class BackendRegistry:
             raise BackendUnavailable(f"unknown backend: {name}")
         return backend
 
-    def list(self) -> List[str]:
+    def list(self) -> _StrList:
         with self._lock:
             return list(self._backends.keys())
 
-    def supporting(self, spec: DecisionSpec) -> List[Backend]:
+    def supporting(self, spec: DecisionSpec) -> _BackendList:
         with self._lock:
             return [b for b in self._backends.values() if b.supports(spec)]
 

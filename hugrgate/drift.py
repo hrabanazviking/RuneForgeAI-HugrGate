@@ -21,14 +21,14 @@ from __future__ import annotations
 import math
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 __all__ = [
-    "PSI_WATCH",
     "PSI_ALERT",
-    "population_stability_index",
-    "DriftReport",
+    "PSI_WATCH",
     "DriftMonitor",
+    "DriftReport",
+    "population_stability_index",
     "recalibration_advisory",
 ]
 
@@ -37,19 +37,19 @@ PSI_ALERT = 0.25
 _EPS = 1e-6
 
 
-def population_stability_index(reference: List[float],
-                               live: List[float]) -> float:
+def population_stability_index(reference: list[float],
+                               live: list[float]) -> float:
     """PSI between two same-length probability-mass lists."""
     psi = 0.0
-    for r, l in zip(reference, live):
-        r = max(r, _EPS)
-        l = max(l, _EPS)
-        psi += (l - r) * math.log(l / r)
+    for ref, lv in zip(reference, live, strict=True):
+        ref = max(ref, _EPS)
+        lv = max(lv, _EPS)
+        psi += (lv - ref) * math.log(lv / ref)
     return psi
 
 
-def _categorical_psi(ref_labels: List[Any],
-                     live_labels: List[Any]) -> float:
+def _categorical_psi(ref_labels: list[Any],
+                     live_labels: list[Any]) -> float:
     """PSI between two label-frequency distributions (eps-smoothed)."""
     labels = set(ref_labels) | set(live_labels)
     ref_total = max(len(ref_labels), 1)
@@ -61,7 +61,7 @@ def _categorical_psi(ref_labels: List[Any],
     return population_stability_index(ref, live)
 
 
-def _histogram(values: List[float], n_bins: int) -> List[float]:
+def _histogram(values: list[float], n_bins: int) -> list[float]:
     counts = [0] * n_bins
     for v in values:
         v = min(max(v, 0.0), 1.0)
@@ -80,11 +80,11 @@ class DriftReport:
     n_reference: int
     n_live: int
     n_bins: int
-    reference_hist: List[float] = field(default_factory=list)
-    live_hist: List[float] = field(default_factory=list)
+    reference_hist: list[float] = field(default_factory=list)
+    live_hist: list[float] = field(default_factory=list)
     observed_at: float = field(default_factory=time.time)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "psi": self.psi,
             "alert": self.alert,
@@ -121,18 +121,18 @@ class DriftMonitor:
         self.alert_threshold = alert_threshold
         self.watch_threshold = watch_threshold
         self.min_live_samples = min_live_samples
-        self._reference_hist: Optional[List[float]] = None
+        self._reference_hist: list[float] | None = None
         self._n_reference = 0
-        self._history: List[DriftReport] = []
+        self._history: list[DriftReport] = []
         # Streaming mode: per-prediction (label, confidence) observations.
-        self._stream: List[tuple] = []
+        self._stream: list[tuple] = []
         self._last_stream_psi: float = 0.0
 
     @property
     def has_reference(self) -> bool:
         return self._reference_hist is not None
 
-    def fit_reference(self, confidences: List[float]) -> None:
+    def fit_reference(self, confidences: list[float]) -> None:
         """Snapshot the calibration-time confidence distribution."""
         if not confidences:
             raise ValueError("reference confidences must be non-empty")
@@ -140,7 +140,7 @@ class DriftMonitor:
         self._n_reference = len(confidences)
 
     def observe(self, label_or_confidences: Any,
-                confidence: Optional[float] = None) -> Optional[DriftReport]:
+                confidence: float | None = None) -> DriftReport | None:
         """Record predictions, in either of two modes.
 
         - ``observe([0.9, 0.7, ...])`` — histogram mode: compare a live
@@ -158,7 +158,7 @@ class DriftMonitor:
                 "histogram observe needs a list of confidences")
         return self._observe_window(list(label_or_confidences))
 
-    def _observe_window(self, confidences: List[float]) -> DriftReport:
+    def _observe_window(self, confidences: list[float]) -> DriftReport:
         """Compare a live window against the reference; return a report."""
         if not self.has_reference:
             raise ValueError("no reference fitted — call fit_reference first")
@@ -207,11 +207,11 @@ class DriftMonitor:
     def stream_count(self) -> int:
         return len(self._stream)
 
-    def history(self) -> List[DriftReport]:
+    def history(self) -> list[DriftReport]:
         return list(self._history)
 
 
-def recalibration_advisory(report: DriftReport) -> Dict[str, Any]:
+def recalibration_advisory(report: DriftReport) -> dict[str, Any]:
     """Turn a drift report into an actionable recalibration recommendation."""
     if report.severity == "none":
         return {"action": "none",

@@ -21,12 +21,16 @@ an auditable trail, both in the result's metadata and, optionally, in a
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.errors import (
-    Abstention, BackendError, BackendUnavailable, SpecError,
+    Abstention,
+    BackendError,
+    BackendUnavailable,
+    SpecError,
 )
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
@@ -36,18 +40,18 @@ from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
 __all__ = [
+    "RUNG_ABSTAINED",
     "RUNG_ACCEPTED",
     "RUNG_BELOW_CONFIDENCE",
+    "RUNG_ERROR",
+    "RUNG_SKIPPED_LATENCY",
+    "RUNG_SKIPPED_PRIVACY",
     "RUNG_SKIPPED_UNKNOWN",
     "RUNG_SKIPPED_UNSUPPORTED",
-    "RUNG_SKIPPED_PRIVACY",
-    "RUNG_SKIPPED_LATENCY",
     "RUNG_UNAVAILABLE",
-    "RUNG_ERROR",
-    "RUNG_ABSTAINED",
-    "LadderRung",
     "LadderAuditEntry",
     "LadderRouter",
+    "LadderRung",
 ]
 
 #: Audit outcomes for a single rung.
@@ -77,7 +81,7 @@ class LadderRung:
     """
     backend_name: str
     min_confidence: float = 0.0
-    latency_budget_ms: Optional[float] = None
+    latency_budget_ms: float | None = None
 
     def __post_init__(self):
         if not 0.0 <= self.min_confidence <= 1.0:
@@ -86,7 +90,7 @@ class LadderRung:
         if self.latency_budget_ms is not None and self.latency_budget_ms < 0:
             raise SpecError("latency_budget_ms must be non-negative")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend_name": self.backend_name,
             "min_confidence": self.min_confidence,
@@ -94,7 +98,7 @@ class LadderRung:
         }
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "LadderRung":
+    def from_dict(cls, d: Mapping[str, Any]) -> LadderRung:
         """Rebuild a rung from :meth:`to_dict` output.
 
         Unknown keys raise ``SpecError`` (ladder configuration is
@@ -117,10 +121,10 @@ class LadderAuditEntry:
     backend_name: str
     outcome: str
     detail: str = ""
-    probability: Optional[float] = None
+    probability: float | None = None
     latency_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "rung_index": self.rung_index,
             "backend_name": self.backend_name,
@@ -147,10 +151,10 @@ class LadderRouter:
     """
 
     def __init__(self, registry: BackendRegistry,
-                 rungs: Optional[List[LadderRung]] = None, *,
-                 ladders: Optional[Dict[str, List[LadderRung]]] = None,
-                 provenance: Optional[ProvenanceStore] = None,
-                 privacy_guard: Optional[PrivacyGuard] = None):
+                 rungs: list[LadderRung] | None = None, *,
+                 ladders: dict[str, list[LadderRung]] | None = None,
+                 provenance: ProvenanceStore | None = None,
+                 privacy_guard: PrivacyGuard | None = None):
         if not rungs and not ladders:
             raise SpecError("LadderRouter needs rungs or per-type ladders")
         self.registry = registry
@@ -158,19 +162,19 @@ class LadderRouter:
         self.ladders = {k: list(v) for k, v in (ladders or {}).items()}
         self.provenance = provenance
         self.privacy_guard = privacy_guard or PrivacyGuard()
-        self.last_audit: List[LadderAuditEntry] = []
+        self.last_audit: list[LadderAuditEntry] = []
 
     # -- ladder selection ------------------------------------------------
 
-    def ladder_for(self, spec: DecisionSpec) -> List[LadderRung]:
+    def ladder_for(self, spec: DecisionSpec) -> list[LadderRung]:
         """The rung list governing this spec type."""
         return self.ladders.get(spec.type, self.rungs)
 
     # -- routing ---------------------------------------------------------
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
-               policy: Optional[DecisionPolicy] = None,
-               context: Optional[Mapping[str, Any]] = None
+               policy: DecisionPolicy | None = None,
+               context: Mapping[str, Any] | None = None
                ) -> DecisionResult:
         """Climb the ladder until a rung clears its confidence gate.
 
@@ -186,7 +190,7 @@ class LadderRouter:
         if not rungs:
             raise SpecError(f"no ladder configured for spec type {spec.type!r}")
 
-        audit: List[LadderAuditEntry] = []
+        audit: list[LadderAuditEntry] = []
         started = time.perf_counter()
 
         for i, rung in enumerate(rungs):
@@ -244,7 +248,7 @@ class LadderRouter:
 
     def _latency_skip(self, backend: Backend, rung: LadderRung,
                       policy: DecisionPolicy, started: float
-                      ) -> Optional[str]:
+                      ) -> str | None:
         """Return a skip reason, or None if the rung may run."""
         estimate = backend.estimated_latency()
         if (rung.latency_budget_ms is not None
@@ -260,9 +264,9 @@ class LadderRouter:
         return None
 
     def _attempt(self, backend: Backend, state: Mapping[str, Any],
-                 spec: DecisionSpec, context: Optional[Mapping[str, Any]],
-                 audit: List[LadderAuditEntry], rung_index: int
-                 ) -> Optional[DecisionResult]:
+                 spec: DecisionSpec, context: Mapping[str, Any] | None,
+                 audit: list[LadderAuditEntry], rung_index: int
+                 ) -> DecisionResult | None:
         """Run one rung. Returns the result, or None (audited) on failure."""
         t0 = time.perf_counter()
         try:
@@ -288,7 +292,7 @@ class LadderRouter:
             # propagate: like validate_result below, they are never
             # swallowed into a rung audit entry (slice 012).
             raise
-        except Exception as e:  # never let one rung kill the climb
+        except Exception as e:  # noqa: BLE001 - never let one rung kill the climb
             audit.append(LadderAuditEntry(
                 rung_index, backend.name, RUNG_ERROR,
                 detail=f"unexpected {type(e).__name__}: {e}",

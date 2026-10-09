@@ -13,20 +13,19 @@ client can reconstruct the exact error class from an HTTP error body.
 
 from __future__ import annotations
 
-from typing import Any, ClassVar, Dict, Type
-
+from typing import Any, ClassVar
 
 __all__ = [
-    "HugrGateError",
-    "SpecError",
-    "PolicyError",
+    "Abstention",
     "BackendError",
     "BackendUnavailable",
     "CalibrationError",
-    "TimeoutError",
+    "HugrGateError",
+    "PolicyError",
     "PrivacyViolation",
     "QueueFull",
-    "Abstention",
+    "SpecError",
+    "TimeoutError",
 ]
 
 
@@ -35,7 +34,7 @@ class HugrGateError(Exception):
     code: ClassVar[str] = "hugrgate_error"
     recoverable: ClassVar[bool] = True
 
-    _registry: ClassVar[Dict[str, Type["HugrGateError"]]] = {}
+    _registry: ClassVar[dict[str, type[HugrGateError]]] = {}
 
     def __init__(self, message: str = "", **details: Any):
         super().__init__(message)
@@ -48,7 +47,7 @@ class HugrGateError(Exception):
         if cls.code != HugrGateError.code:
             HugrGateError._registry[cls.code] = cls
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Lossless wire representation of this error."""
         return {
             "code": self.code,
@@ -58,7 +57,7 @@ class HugrGateError(Exception):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HugrGateError":
+    def from_dict(cls, data: dict[str, Any]) -> HugrGateError:
         """Rebuild the exact error subclass from :meth:`to_dict` output.
 
         Unknown codes fall back to the base class rather than raising —
@@ -130,13 +129,13 @@ class Abstention(HugrGateError):
         super().__init__(message, reason=reason, **details)
         self.reason = reason
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = super().to_dict()
         data["reason"] = self.reason
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Abstention":
+    def from_dict(cls, data: dict[str, Any]) -> Abstention:
         return cls(data.get("message", "insufficient confidence"),
                    reason=data.get("reason", "below_threshold"),
                    **data.get("details", {}))

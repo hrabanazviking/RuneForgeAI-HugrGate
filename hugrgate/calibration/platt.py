@@ -9,7 +9,8 @@ no code is copied from scikit-learn or any other library.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -47,7 +48,7 @@ class PlattCalibrator(Calibrator):
     """Sigmoid (Platt) calibration with an independent Newton solver.
 
     Parameters ``A`` and ``B`` minimize
-    ``-Σ [tᵢ log pᵢ + (1-tᵢ) log(1-pᵢ)]`` where ``pᵢ = σ(A·sᵢ + B)`` and the
+    ``-sum[tᵢ log pᵢ + (1-tᵢ) log(1-pᵢ)]`` where ``pᵢ = sigmoid(A·sᵢ + B)`` and the
     targets ``tᵢ`` use Platt's smoothing: ``(N₊+1)/(N₊+2)`` for positives,
     ``1/(N₋+2)`` for negatives.  Newton updates solve ``H·δ = g`` for the
     gradient ``g`` and Hessian ``H`` derived below.
@@ -64,7 +65,7 @@ class PlattCalibrator(Calibrator):
         self.n_samples = 0
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "PlattCalibrator":
+            labels: Sequence[int]) -> PlattCalibrator:
         _require_numpy()
         s, y = self._as_arrays(scores, labels)
         n_pos = int(y.sum())
@@ -116,12 +117,12 @@ class PlattCalibrator(Calibrator):
         p = float(_sigmoid(np.array([self.A * score + self.B]))[0])
         return min(1.0, max(0.0, p))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {"A": self.A, "B": self.B, "n_samples": self.n_samples}
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "PlattCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> PlattCalibrator:
         obj = cls()
         obj.A = float(params["A"])
         obj.B = float(params["B"])

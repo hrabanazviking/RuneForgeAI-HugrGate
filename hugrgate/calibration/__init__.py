@@ -22,15 +22,15 @@ from __future__ import annotations
 # Base classes live in ._base so submodules can import them without
 # creating a parent<->child import cycle with this __init__ (slice 002).
 from hugrgate.calibration._base import Calibrator, CalibratorRegistry
-
+from hugrgate.calibration.isotonic import IsotonicCalibrator
 
 # Submodule imports register their calibrator classes with the registry.
-from hugrgate.calibration.platt import PlattCalibrator          # noqa: E402
-from hugrgate.calibration.isotonic import IsotonicCalibrator    # noqa: E402
-from hugrgate.calibration.temperature import (                 # noqa: E402
+from hugrgate.calibration.platt import PlattCalibrator
+from hugrgate.calibration.temperature import (
     TemperatureCalibrator,
 )
-from . import metrics, profiles                                 # noqa: E402
+
+from . import metrics, profiles
 
 CalibratorRegistry.register("platt", PlattCalibrator)
 CalibratorRegistry.register("isotonic", IsotonicCalibrator)
@@ -39,8 +39,8 @@ CalibratorRegistry.register("temperature", TemperatureCalibrator)
 __all__ = [
     "Calibrator",
     "CalibratorRegistry",
-    "PlattCalibrator",
     "IsotonicCalibrator",
+    "PlattCalibrator",
     "TemperatureCalibrator",
     "metrics",
     "profiles",

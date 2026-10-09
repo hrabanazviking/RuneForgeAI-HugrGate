@@ -24,19 +24,19 @@ import json
 import signal
 import threading
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field, fields
-from typing import Any, Dict, List, Mapping, Optional, Tuple
+from typing import Any
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from hugrgate.core import HugrGate
-from hugrgate.errors import Abstention
+from hugrgate.errors import Abstention, QueueFull
+from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
-from hugrgate.errors import QueueFull
-from hugrgate.log import get_logger
 from hugrgate.server import build_gate, create_app
 
 logger = get_logger(__name__)
@@ -44,14 +44,14 @@ logger = get_logger(__name__)
 __all__ = [
     "DEFAULT_HOST",
     "DEFAULT_PORT",
+    "BatchingQueue",
+    "Daemon",
     "DaemonConfig",
     "QueueFull",
-    "BatchingQueue",
-    "load_client_policies",
     "create_daemon_app",
-    "Daemon",
-    "serve_forever",
+    "load_client_policies",
     "main",
+    "serve_forever",
 ]
 
 DEFAULT_HOST = "127.0.0.1"
@@ -63,11 +63,11 @@ class DaemonConfig:
     """Operator configuration for the daemon."""
     host: str = DEFAULT_HOST
     port: int = DEFAULT_PORT
-    unix_socket: Optional[str] = None
+    unix_socket: str | None = None
     batch_window_ms: float = 5.0
     max_batch: int = 32
     max_queue: int = 1024
-    client_policies_path: Optional[str] = None
+    client_policies_path: str | None = None
     client_id_header: str = "x-client-id"
     drain_timeout_s: float = 10.0
 
@@ -86,7 +86,7 @@ class DaemonConfig:
         if not self.client_id_header or not self.client_id_header.strip():
             raise ValueError("client_id_header must be a non-empty string")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Plain dict round-trip for operator config files."""
         return {
             "host": self.host,
@@ -101,7 +101,7 @@ class DaemonConfig:
         }
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "DaemonConfig":
+    def from_dict(cls, d: Mapping[str, Any]) -> DaemonConfig:
         known = {f.name for f in fields(cls)}
         unknown = set(d) - known
         if unknown:
@@ -113,12 +113,12 @@ class DaemonConfig:
 
 @dataclass
 class _QueuedDecision:
-    state: Dict[str, Any]
-    spec_dict: Dict[str, Any]
-    policy_dict: Optional[Dict[str, Any]]
-    backend_name: Optional[str]
-    context: Optional[Dict[str, Any]]
-    future: "asyncio.Future[DecisionResult]"
+    state: dict[str, Any]
+    spec_dict: dict[str, Any]
+    policy_dict: dict[str, Any] | None
+    backend_name: str | None
+    context: dict[str, Any] | None
+    future: asyncio.Future[DecisionResult]
     enqueued_at: float = field(default_factory=time.perf_counter)
 
 
@@ -137,9 +137,9 @@ class BatchingQueue:
         self.window_s = window_ms / 1000.0
         self.max_batch = max_batch
         self.max_queue = max_queue
-        self._queue: "asyncio.Queue[_QueuedDecision]" = asyncio.Queue(
+        self._queue: asyncio.Queue[_QueuedDecision] = asyncio.Queue(
             maxsize=max_queue)
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
         self._accepting = True
         self._batches = 0
         self._decisions = 0
@@ -149,7 +149,7 @@ class BatchingQueue:
     async def start(self) -> None:
         self._task = asyncio.create_task(self._worker())
 
-    async def __aenter__(self) -> "BatchingQueue":
+    async def __aenter__(self) -> BatchingQueue:
         await self.start()
         return self
 
@@ -195,10 +195,10 @@ class BatchingQueue:
             await asyncio.sleep(0.01)
 
     async def submit(self, state: Mapping[str, Any],
-                     spec_dict: Dict[str, Any],
-                     policy_dict: Optional[Dict[str, Any]],
-                     backend_name: Optional[str],
-                     context: Optional[Mapping[str, Any]]) -> DecisionResult:
+                     spec_dict: dict[str, Any],
+                     policy_dict: dict[str, Any] | None,
+                     backend_name: str | None,
+                     context: Mapping[str, Any] | None) -> DecisionResult:
         if not self._accepting:
             raise QueueFull("daemon is shutting down")
         loop = asyncio.get_running_loop()
@@ -210,11 +210,11 @@ class BatchingQueue:
             self._queue.put_nowait(item)
         except asyncio.QueueFull:
             raise QueueFull(
-                f"decision queue full ({self.max_queue}); try again later")
+                f"decision queue full ({self.max_queue}); try again later"
+            ) from None
         return await future
 
     async def _worker(self) -> None:
-        from hugrgate.spec import DecisionSpec
         while True:
             try:
                 first = await self._queue.get()
@@ -240,10 +240,10 @@ class BatchingQueue:
             finally:
                 self._in_flight -= 1
 
-    async def _execute_batch(self, batch: List[_QueuedDecision]) -> None:
+    async def _execute_batch(self, batch: list[_QueuedDecision]) -> None:
         await self._run_batch(batch)
 
-    async def _run_batch(self, batch: List[_QueuedDecision]) -> None:
+    async def _run_batch(self, batch: list[_QueuedDecision]) -> None:
         from hugrgate.spec import DecisionSpec
 
         async def _one(item: _QueuedDecision) -> None:
@@ -272,7 +272,7 @@ class BatchingQueue:
         self._decisions += len(batch)
         self._max_batch_seen = max(self._max_batch_seen, len(batch))
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {"batches": self._batches,
                 "decisions": self._decisions,
                 "max_batch_seen": self._max_batch_seen,
@@ -281,13 +281,13 @@ class BatchingQueue:
                 "queued": self._queue.qsize()}
 
 
-def load_client_policies(path: str) -> Dict[str, DecisionPolicy]:
+def load_client_policies(path: str) -> dict[str, DecisionPolicy]:
     """Load per-client policies from a JSON file.
 
     Format: ``{"client-id": {<policy dict>}, ...}`` where each policy dict
     matches :func:`hugrgate.client.policy_to_dict` output.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         raw = json.load(f)
     if not isinstance(raw, dict):
         raise ValueError("client policies file must be a JSON object")
@@ -295,17 +295,19 @@ def load_client_policies(path: str) -> Dict[str, DecisionPolicy]:
 
 
 def create_daemon_app(config: DaemonConfig,
-                      gate: Optional[HugrGate] = None):
+                      gate: HugrGate | None = None):
     """Build the daemon FastAPI app: batching + per-client policies."""
-    from hugrgate.spec import DecisionSpec
     from hugrgate.errors import (
-        BackendError, BackendUnavailable, HugrGateError, PolicyError,
+        BackendError,
+        BackendUnavailable,
+        HugrGateError,
+        PolicyError,
         SpecError,
     )
     from hugrgate.server import _error_response
 
     gate = gate or build_gate()
-    client_policies: Dict[str, DecisionPolicy] = {}
+    client_policies: dict[str, DecisionPolicy] = {}
     if config.client_policies_path:
         client_policies = load_client_policies(config.client_policies_path)
 
@@ -343,7 +345,7 @@ def create_daemon_app(config: DaemonConfig,
     async def decide_batched(request: Request) -> JSONResponse:
         try:
             body = await request.json()
-        except Exception:
+        except Exception:  # noqa: BLE001 - any parse failure is bad_request
             return JSONResponse(status_code=400, content={
                 "error": {"code": "bad_request",
                           "message": "request body must be JSON",
@@ -383,7 +385,7 @@ def create_daemon_app(config: DaemonConfig,
         return JSONResponse(status_code=200, content=result.to_dict())
 
     @app.get("/daemon")
-    def daemon_info() -> Dict[str, Any]:
+    def daemon_info() -> dict[str, Any]:
         return {"batching": queue.stats(),
                 "client_policies": sorted(client_policies),
                 "warm_pool": gate.registry.list()}
@@ -396,12 +398,12 @@ def create_daemon_app(config: DaemonConfig,
 class Daemon:
     """Owns the daemon's listener threads and lifecycle."""
 
-    def __init__(self, config: Optional[DaemonConfig] = None,
-                 gate: Optional[HugrGate] = None) -> None:
+    def __init__(self, config: DaemonConfig | None = None,
+                 gate: HugrGate | None = None) -> None:
         self.config = config or DaemonConfig()
         self.gate = gate or build_gate()
         self.app = create_daemon_app(self.config, self.gate)
-        self._servers: List[Tuple[Any, threading.Thread]] = []
+        self._servers: list[tuple[Any, threading.Thread]] = []
         self._stopped = threading.Event()
 
     def start(self) -> None:
@@ -442,7 +444,7 @@ class Daemon:
             thread.join()
 
 
-def serve_forever(config: Optional[DaemonConfig] = None) -> None:
+def serve_forever(config: DaemonConfig | None = None) -> None:
     """Run the daemon until SIGINT/SIGTERM, then shut down gracefully."""
     daemon = Daemon(config or DaemonConfig())
     daemon.start()
@@ -458,7 +460,7 @@ def serve_forever(config: Optional[DaemonConfig] = None) -> None:
     daemon.join()
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """``hugrgate-server`` entry point."""
     import argparse
     parser = argparse.ArgumentParser(

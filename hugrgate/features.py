@@ -15,8 +15,9 @@ from __future__ import annotations
 
 import math
 from abc import ABC, abstractmethod
+from collections.abc import Iterable, Mapping, Sequence
 from enum import Enum
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -35,12 +36,12 @@ def _require_numpy() -> None:
         )
 
 __all__ = [
-    "MissingValuePolicy",
-    "FeatureExtractor",
-    "NumericEncoder",
     "CategoricalEncoder",
-    "TextLengthEncoder",
+    "FeatureExtractor",
+    "MissingValuePolicy",
+    "NumericEncoder",
     "Pipeline",
+    "TextLengthEncoder",
 ]
 
 
@@ -63,17 +64,17 @@ class FeatureExtractor(ABC):
         """True once :meth:`fit` has been called (or for stateless encoders)."""
         return self._fitted
 
-    def fit(self, states: Iterable[Mapping[str, Any]]) -> "FeatureExtractor":
+    def fit(self, states: Iterable[Mapping[str, Any]]) -> FeatureExtractor:
         """Learn encoder state from a sample of states. Default: no-op."""
         self._fitted = True
         return self
 
     @abstractmethod
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
         """Extract features from a single state."""
 
     @abstractmethod
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Column names, in the order used by :meth:`transform_batch`."""
 
     def transform_batch(self, states: Sequence[Mapping[str, Any]]) -> np.ndarray:
@@ -88,7 +89,7 @@ class FeatureExtractor(ABC):
             except KeyError as exc:
                 raise BackendError(
                     f"extractor {type(self).__name__} did not emit "
-                    f"feature {exc}; declared names: {names}")
+                    f"feature {exc}; declared names: {names}") from exc
         return np.asarray(rows, dtype=float)
 
 
@@ -115,10 +116,10 @@ class NumericEncoder(FeatureExtractor):
             raise ValueError("NumericEncoder needs at least one field")
         self.fields = list(fields)
         self.missing = missing
-        self._means: Dict[str, float] = {f: 0.0 for f in self.fields}
+        self._means: dict[str, float] = {f: 0.0 for f in self.fields}
         self._fitted = True  # stateless unless MEAN policy needs fit data
 
-    def fit(self, states: Iterable[Mapping[str, Any]]) -> "NumericEncoder":
+    def fit(self, states: Iterable[Mapping[str, Any]]) -> NumericEncoder:
         if self.missing is MissingValuePolicy.MEAN:
             totals = {f: 0.0 for f in self.fields}
             counts = {f: 0 for f in self.fields}
@@ -144,8 +145,8 @@ class NumericEncoder(FeatureExtractor):
             return self._means[field]
         return 0.0
 
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
-        out: Dict[str, float] = {}
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
+        out: dict[str, float] = {}
         for f in self.fields:
             v = state.get(f)
             if v is None:
@@ -157,7 +158,7 @@ class NumericEncoder(FeatureExtractor):
                 out[f] = self._handle_missing(f)
         return out
 
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         return list(self.fields)
 
 
@@ -170,22 +171,22 @@ class CategoricalEncoder(FeatureExtractor):
     """
 
     def __init__(self, field: str,
-                 categories: Optional[Sequence[str]] = None,
+                 categories: Sequence[str] | None = None,
                  handle_unknown: str = "ignore"):
         super().__init__()
         if handle_unknown not in ("ignore", "error"):
             raise ValueError("handle_unknown must be 'ignore' or 'error'")
         self.field = field
         self.handle_unknown = handle_unknown
-        self._categories: List[str] = list(categories) if categories else []
+        self._categories: list[str] = list(categories) if categories else []
         if categories:
             self._fitted = True
 
     @property
-    def categories(self) -> List[str]:
+    def categories(self) -> list[str]:
         return list(self._categories)
 
-    def fit(self, states: Iterable[Mapping[str, Any]]) -> "CategoricalEncoder":
+    def fit(self, states: Iterable[Mapping[str, Any]]) -> CategoricalEncoder:
         seen = set()
         for state in states:
             v = state.get(self.field)
@@ -198,7 +199,7 @@ class CategoricalEncoder(FeatureExtractor):
     def _column(self, category: str) -> str:
         return f"{self.field}__{category}"
 
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
         if not self._fitted:
             raise BackendError(
                 f"CategoricalEncoder({self.field!r}) used before fit")
@@ -212,7 +213,7 @@ class CategoricalEncoder(FeatureExtractor):
         return {self._column(c): 1.0 if c == sval else 0.0
                 for c in self._categories}
 
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         return [self._column(c) for c in self._categories]
 
 
@@ -224,7 +225,7 @@ class TextLengthEncoder(FeatureExtractor):
     """
 
     def __init__(self, field: str, include_words: bool = True,
-                 normalize: Optional[float] = None):
+                 normalize: float | None = None):
         super().__init__()
         self.field = field
         self.include_words = include_words
@@ -235,7 +236,7 @@ class TextLengthEncoder(FeatureExtractor):
         v = state.get(self.field)
         return v if isinstance(v, str) else ""
 
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
         text = self._text(state)
         length = float(len(text))
         out = {f"{self.field}__len": length}
@@ -245,7 +246,7 @@ class TextLengthEncoder(FeatureExtractor):
             out = {k: v / self.normalize for k, v in out.items()}
         return out
 
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         names = [f"{self.field}__len"]
         if self.include_words:
             names.append(f"{self.field}__words")
@@ -265,7 +266,7 @@ class Pipeline(FeatureExtractor):
             raise ValueError("Pipeline needs at least one extractor")
         self.extractors = list(extractors)
 
-    def fit(self, states: Iterable[Mapping[str, Any]]) -> "Pipeline":
+    def fit(self, states: Iterable[Mapping[str, Any]]) -> Pipeline:
         states = list(states)
         for ext in self.extractors:
             ext.fit(states)
@@ -277,14 +278,14 @@ class Pipeline(FeatureExtractor):
         self._fitted = True
         return self
 
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
-        out: Dict[str, float] = {}
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
+        out: dict[str, float] = {}
         for ext in self.extractors:
             out.update(ext.extract(state))
         return out
 
-    def feature_names(self) -> List[str]:
-        names: List[str] = []
+    def feature_names(self) -> list[str]:
+        names: list[str] = []
         for ext in self.extractors:
             names.extend(ext.feature_names())
         return names

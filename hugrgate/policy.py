@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hugrgate.errors import PolicyError
 from hugrgate.result import DecisionResult
@@ -17,14 +17,14 @@ __all__ = [
 class DecisionPolicy:
     """Thresholds belong to the application, not the model."""
     minimum_probability: float = 0.0
-    maximum_latency_ms: Optional[float] = None
+    maximum_latency_ms: float | None = None
     remote_inference: bool = False
-    allowed_backends: Optional[List[str]] = None
-    preferred_backends: Optional[List[str]] = None
+    allowed_backends: list[str] | None = None
+    preferred_backends: list[str] | None = None
     fallback_behavior: str = "abstain"  # abstain|safe_default|escalate
     privacy_class: str = "standard"     # standard|strict
-    max_cost: Optional[float] = None
-    review_band: Optional[tuple] = None  # (low, high) → "review"
+    max_cost: float | None = None
+    review_band: tuple | None = None  # (low, high) → "review"
 
     #: The only privacy classes with defined semantics. Anything else is
     #: a typo, not a new class — rejected loudly (slice 008), because a
@@ -55,7 +55,7 @@ class DecisionPolicy:
             if not 0.0 <= lo <= hi <= 1.0:
                 raise PolicyError("review_band must be within [0,1]")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize to a plain JSON-compatible dict.
 
         The canonical mapping; :func:`hugrgate.client.policy_to_dict`

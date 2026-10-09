@@ -5,15 +5,16 @@ from __future__ import annotations
 
 import json
 import math
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import SpecError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "validate_state",
     "validate_result",
+    "validate_state",
 ]
 
 #: Default cap on the serialized state size (1 MiB). Guards the cache-key
@@ -90,7 +91,7 @@ def validate_state(state: Mapping[str, Any],
         payload = json.dumps(dict(state), sort_keys=True, allow_nan=False)
     except (TypeError, ValueError) as e:
         raise SpecError(f"state is not JSON-serializable: {e}",
-                        code="state_not_serializable")
+                        code="state_not_serializable") from e
     if len(payload.encode("utf-8")) > max_bytes:
         raise SpecError(
             f"state serialized size exceeds {max_bytes} bytes",

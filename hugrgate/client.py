@@ -12,7 +12,8 @@ compatibility.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 import httpx
 
@@ -29,10 +30,10 @@ from hugrgate.serde import (
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "policy_to_dict",
-    "policy_from_dict",
-    "result_from_dict",
     "HugrGateClient",
+    "policy_from_dict",
+    "policy_to_dict",
+    "result_from_dict",
 ]
 
 
@@ -48,10 +49,10 @@ class HugrGateClient:
     the result carries ``metadata["client_fallback"] = "inprocess"``.
     """
 
-    def __init__(self, url: Optional[str] = None,
-                 socket_path: Optional[str] = None,
-                 gate: Optional[HugrGate] = None,
-                 extra_backends: Optional[List[Backend]] = None,
+    def __init__(self, url: str | None = None,
+                 socket_path: str | None = None,
+                 gate: HugrGate | None = None,
+                 extra_backends: list[Backend] | None = None,
                  timeout: float = 10.0,
                  fallback_inprocess: bool = True) -> None:
         """Create a client.
@@ -72,7 +73,7 @@ class HugrGateClient:
         self.timeout = timeout
         self.fallback_inprocess = fallback_inprocess
         self._extra_backends = extra_backends or []
-        self._gate: Optional[HugrGate] = gate
+        self._gate: HugrGate | None = gate
         self._direct_gate = gate is not None
         # trust_env=False: this client talks to a local daemon; proxy
         # environment variables must never reroute loopback IPC. (It also
@@ -100,16 +101,16 @@ class HugrGateClient:
         return gate
 
     def _fallback_decide(self, state: Mapping[str, Any], spec: DecisionSpec,
-                         policy: Optional[DecisionPolicy],
-                         backend_name: Optional[str],
-                         context: Optional[Mapping[str, Any]]) -> DecisionResult:
+                         policy: DecisionPolicy | None,
+                         backend_name: str | None,
+                         context: Mapping[str, Any] | None) -> DecisionResult:
         result = self._inprocess_gate().decide(
             state, spec, policy, context=context, backend_name=backend_name)
         result.metadata["client_fallback"] = "inprocess"
         return result
 
     # -- HTTP transport -----------------------------------------------------
-    def _post_decide(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def _post_decide(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.socket_path:
             transport = httpx.HTTPTransport(uds=self.socket_path)
             client = httpx.Client(transport=transport, timeout=self.timeout,
@@ -125,9 +126,9 @@ class HugrGateClient:
         return response.json()
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
-               policy: Optional[DecisionPolicy] = None,
-               backend_name: Optional[str] = None,
-               context: Optional[Mapping[str, Any]] = None
+               policy: DecisionPolicy | None = None,
+               backend_name: str | None = None,
+               context: Mapping[str, Any] | None = None
                ) -> DecisionResult:
         """Make a decision via the service (or the in-process fallback)."""
         if self._direct_gate:
@@ -138,7 +139,7 @@ class HugrGateClient:
                                  backend_name=backend_name)
             result.metadata["client_transport"] = "inprocess"
             return result
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "spec": spec.to_dict(),
             "state": dict(state),
             "backend_name": backend_name,
@@ -153,7 +154,7 @@ class HugrGateClient:
             if self.fallback_inprocess:
                 return self._fallback_decide(state, spec, policy,
                                              backend_name, context)
-            raise BackendError(f"hugrgate service unreachable: {e}")
+            raise BackendError(f"hugrgate service unreachable: {e}") from e
         if body.get("abstained"):
             raise Abstention(body.get("message") or "service abstained",
                              reason=body.get("reason") or "below_threshold")
@@ -168,7 +169,7 @@ class HugrGateClient:
             "unix-socket" if self.socket_path else "http")
         return result
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         """Liveness probe. Never raises: reports reachability."""
         if self._direct_gate:
             gate = self._direct()
@@ -184,7 +185,7 @@ class HugrGateClient:
         except Exception as e:  # noqa: BLE001 - reachability probe
             return {"reachable": False, "error": str(e)}
 
-    def backends(self) -> List[Dict[str, Any]]:
+    def backends(self) -> list[dict[str, Any]]:
         """List backends known to the service (or the in-process gate)."""
         if self._direct_gate:
             gate = self._direct()

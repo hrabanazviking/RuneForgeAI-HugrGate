@@ -39,8 +39,9 @@ Comparison type errors (e.g. gt between str and int) never match.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Any
 
 import yaml
 
@@ -162,11 +163,11 @@ class Rule:
     ``condition`` is None for a default rule (always matches; evaluated
     after every non-default rule regardless of priority).
     """
-    condition: Optional[Dict[str, Any]]
+    condition: dict[str, Any] | None
     then: Any
     confidence: float = 1.0
     priority: int = 0
-    name: Optional[str] = None
+    name: str | None = None
 
     def __post_init__(self):
         if not 0.0 <= self.confidence <= 1.0:
@@ -180,7 +181,7 @@ class Rule:
         return self.condition is None
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "Rule":
+    def from_dict(cls, d: Mapping[str, Any]) -> Rule:
         if not isinstance(d, Mapping):
             raise SpecError(f"rule must be a mapping, got {d!r}")
         if "default" in d:
@@ -205,8 +206,8 @@ class Rule:
             name=d.get("name"),
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"then": self.then,
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"then": self.then,
                              "confidence": self.confidence,
                              "priority": self.priority}
         if self.name:
@@ -233,49 +234,49 @@ class RuleBackend(Backend):
     Default rules (``{"default": outcome}``) are always evaluated last.
     """
 
-    def __init__(self, rules: Optional[List[Rule]] = None,
+    def __init__(self, rules: list[Rule] | None = None,
                  name: str = "rules", model_name: str = "ruleset"):
         self.name = name
         self.model_name = model_name
-        self._rules: List[Rule] = list(rules or [])
+        self._rules: list[Rule] = list(rules or [])
         # Priority order: non-default rules sorted by (-priority, order),
         # then default rules in declaration order.
-        ordered: List[Rule] = []
-        defaults: List[Rule] = []
+        ordered: list[Rule] = []
+        defaults: list[Rule] = []
         for rule in self._rules:
             (defaults if rule.is_default else ordered).append(rule)
         ordered.sort(key=lambda r: -r.priority)  # stable: ties keep order
-        self._ordered: List[Rule] = ordered + defaults
+        self._ordered: list[Rule] = ordered + defaults
 
     # -- construction helpers ------------------------------------------------
     @classmethod
-    def from_rules(cls, rules: List[Rule], **kwargs) -> "RuleBackend":
+    def from_rules(cls, rules: list[Rule], **kwargs) -> RuleBackend:
         return cls(rules=rules, **kwargs)
 
     @classmethod
-    def from_dicts(cls, dicts: List[Mapping[str, Any]],
-                   **kwargs) -> "RuleBackend":
+    def from_dicts(cls, dicts: list[Mapping[str, Any]],
+                   **kwargs) -> RuleBackend:
         return cls(rules=[Rule.from_dict(d) for d in dicts], **kwargs)
 
     @classmethod
-    def from_yaml_text(cls, text: str, **kwargs) -> "RuleBackend":
+    def from_yaml_text(cls, text: str, **kwargs) -> RuleBackend:
         try:
             data = yaml.safe_load(text)
         except yaml.YAMLError as e:
-            raise SpecError(f"invalid YAML rule set: {e}")
+            raise SpecError(f"invalid YAML rule set: {e}") from e
         return cls._from_yaml_data(data, **kwargs)
 
     @classmethod
-    def from_yaml_file(cls, path: str, **kwargs) -> "RuleBackend":
+    def from_yaml_file(cls, path: str, **kwargs) -> RuleBackend:
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
         except yaml.YAMLError as e:
-            raise SpecError(f"invalid YAML rule set in {path}: {e}")
+            raise SpecError(f"invalid YAML rule set in {path}: {e}") from e
         return cls._from_yaml_data(data, **kwargs)
 
     @classmethod
-    def _from_yaml_data(cls, data: Any, **kwargs) -> "RuleBackend":
+    def _from_yaml_data(cls, data: Any, **kwargs) -> RuleBackend:
         if isinstance(data, Mapping) and "rules" in data:
             name = data.get("name", kwargs.pop("name", "rules"))
             return cls.from_dicts(list(data["rules"]), name=name, **kwargs)
@@ -284,11 +285,11 @@ class RuleBackend(Backend):
         raise SpecError("YAML rule set must be a list or a "
                         "{name, rules} mapping")
 
-    def to_dicts(self) -> List[Dict[str, Any]]:
+    def to_dicts(self) -> list[dict[str, Any]]:
         return [r.to_dict() for r in self._rules]
 
     # -- Backend contract -----------------------------------------------------
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "spec_types": ["categorical", "binary", "ordinal"],
             "deterministic": True,
@@ -301,7 +302,7 @@ class RuleBackend(Backend):
     def estimated_latency(self) -> float:
         return 2.0  # ms: rule evaluation is cheap
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         return {"status": "ok", "backend": self.name,
                 "rules": len(self._rules)}
 
@@ -312,14 +313,14 @@ class RuleBackend(Backend):
         return outcome
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         start = time.perf_counter()
         if not self.supports(spec):
             raise BackendUnavailable(
                 f"RuleBackend does not support spec type {spec.type!r}")
 
-        matched: Optional[Rule] = None
+        matched: Rule | None = None
         matched_index: int = -1
         for i, rule in enumerate(self._ordered):
             if rule.matches(state):
@@ -362,8 +363,8 @@ class RuleBackend(Backend):
         return result
 
     @staticmethod
-    def _distribution(space: List[str], winner: Any,
-                      confidence: float) -> Dict[str, float]:
+    def _distribution(space: list[str], winner: Any,
+                      confidence: float) -> dict[str, float]:
         """Winner gets confidence; the remainder is split uniformly."""
         others = [o for o in space if o != winner]
         dist = {winner: confidence}

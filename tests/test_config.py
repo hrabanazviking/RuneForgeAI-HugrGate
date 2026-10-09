@@ -16,7 +16,6 @@ from hugrgate.daemon import DaemonConfig
 from hugrgate.errors import PolicyError, SpecError
 from hugrgate.spec import DecisionSpec
 
-
 # --- DecisionPolicy ------------------------------------------------------------
 
 def test_policy_rejects_unknown_privacy_class():

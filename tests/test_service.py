@@ -1,15 +1,14 @@
 """Tests for Batch E (Slices 41-50): service & ecosystem."""
 
 import pytest
-
 from fastapi.testclient import TestClient
 
-from hugrgate import DecisionSpec, DecisionPolicy, HugrGate
+from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
 from hugrgate.backends.rules import RuleBackend
-from hugrgate.server import create_app, build_gate
-from hugrgate.client import HugrGateClient, policy_from_dict
 from hugrgate.bench import run_benchmark
+from hugrgate.client import HugrGateClient, policy_from_dict
 from hugrgate.drift import DriftMonitor
+from hugrgate.server import build_gate, create_app
 
 
 @pytest.fixture
@@ -124,32 +123,32 @@ import os as _os
 import socket as _socket
 import sys as _sys
 
+import hugrgate.server as _server_mod
 from hugrgate import Abstention as _Abstention
 from hugrgate import DecisionResult as _DecisionResult
-from hugrgate.daemon import (BatchingQueue as _BatchingQueue,
-                             Daemon as _Daemon,
-                             DaemonConfig as _DaemonConfig,
-                             create_daemon_app as _create_daemon_app,
-                             load_client_policies as _load_client_policies)
-from hugrgate.client import (HugrGateClient as _Client2,
-                             policy_to_dict as _policy_to_dict,
-                             result_from_dict as _result_from_dict)
-from hugrgate.bench import (run_benchmark as _run_benchmark,
-                            Benchmark as _Benchmark,
-                            accuracy as _accuracy,
-                            brier_score as _brier,
-                            expected_calibration_error as _ece)
-from hugrgate.bench_report import (render_markdown as _render_markdown,
-                                   ascii_reliability_diagram as _ascii_diag,
-                                   write_report as _write_report)
-from hugrgate.drift import (DriftMonitor as _DriftMonitor2,
-                            recalibration_advisory as _advisory,
-                            population_stability_index as _psi_fn)
 from hugrgate import cli as _cli
-from hugrgate.server import (KeywordBackend as _KeywordBackend,
-                             UniformBackend as _UniformBackend,
-                             build_gate as _build_gate2)
-import hugrgate.server as _server_mod
+from hugrgate.bench import Benchmark as _Benchmark
+from hugrgate.bench import accuracy as _accuracy
+from hugrgate.bench import brier_score as _brier
+from hugrgate.bench import expected_calibration_error as _ece
+from hugrgate.bench import run_benchmark as _run_benchmark
+from hugrgate.bench_report import ascii_reliability_diagram as _ascii_diag
+from hugrgate.bench_report import render_markdown as _render_markdown
+from hugrgate.bench_report import write_report as _write_report
+from hugrgate.client import HugrGateClient as _Client2
+from hugrgate.client import policy_to_dict as _policy_to_dict
+from hugrgate.client import result_from_dict as _result_from_dict
+from hugrgate.daemon import BatchingQueue as _BatchingQueue
+from hugrgate.daemon import Daemon as _Daemon
+from hugrgate.daemon import DaemonConfig as _DaemonConfig
+from hugrgate.daemon import create_daemon_app as _create_daemon_app
+from hugrgate.daemon import load_client_policies as _load_client_policies
+from hugrgate.drift import DriftMonitor as _DriftMonitor2
+from hugrgate.drift import population_stability_index as _psi_fn
+from hugrgate.drift import recalibration_advisory as _advisory
+from hugrgate.server import KeywordBackend as _KeywordBackend
+from hugrgate.server import UniformBackend as _UniformBackend
+from hugrgate.server import build_gate as _build_gate2
 
 _TRIAGE_SPEC = {"type": "categorical",
                 "options": ["ignore", "log", "investigate", "escalate"]}
@@ -315,7 +314,7 @@ def test_daemon_lifecycle_threaded():
                                  timeout=2)
                     if r.status_code == 200:
                         break
-                except Exception:
+                except Exception:  # noqa: BLE001 - retry until the server answers
                     import time
                     time.sleep(0.1)
             else:
@@ -556,7 +555,7 @@ def test_dataset_schema(kind):
 def test_dataset_checksums():
     base = _os.path.join(_os.path.dirname(__file__), "..", "benchmarks")
     lines = open(_os.path.join(base, "CHECKSUMS.sha256")).read().split()
-    for digest, name in zip(lines[0::2], lines[1::2]):
+    for digest, name in zip(lines[0::2], lines[1::2], strict=True):
         actual = _hashlib.sha256(
             open(_os.path.join(base, name), "rb").read()).hexdigest()
         assert actual == digest, name
@@ -567,6 +566,7 @@ def test_dataset_builder_deterministic():
     if _sys_path not in _sys.path:
         _sys.path.insert(0, _sys_path)
     import build as _builder
+
     from hugrgate.bench import dataset_fingerprint as _fp
     assert _fp(_builder.build_dataset("triage")) == _fp(
         _builder.build_dataset("triage"))

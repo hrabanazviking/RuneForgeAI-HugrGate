@@ -8,15 +8,16 @@ both sides import from here, and neither imports the other.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.errors import PolicyError
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 
 __all__ = [
-    "policy_to_dict",
     "policy_from_dict",
+    "policy_to_dict",
     "result_from_dict",
 ]
 
@@ -30,7 +31,7 @@ _POLICY_KEYS = frozenset({
 })
 
 
-def policy_to_dict(policy: DecisionPolicy) -> Dict[str, Any]:
+def policy_to_dict(policy: DecisionPolicy) -> dict[str, Any]:
     """Serialize a :class:`DecisionPolicy` to plain JSON-compatible dict."""
     return policy.to_dict()
 

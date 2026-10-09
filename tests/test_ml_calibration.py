@@ -40,7 +40,6 @@ from hugrgate.features import (
 from hugrgate.models import ModelManifest, ModelStore
 from hugrgate.spec import DecisionSpec
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
@@ -68,7 +67,7 @@ def _pipeline():
 def _trained_logreg(seed: int = 0):
     states, labels = _toy_states(seed=seed)
     be = LogisticRegressionBackend("toy", _pipeline(), C=1.0)
-    be.train(list(zip(states, labels)))
+    be.train(list(zip(states, labels, strict=True)))
     return be, states, labels
 
 
@@ -231,9 +230,9 @@ class TestLogregBackend:
 
     def test_binary_spec(self):
         states, labels = _toy_states()
-        blabels = ["true" if l == "pos" else "false" for l in labels]
+        blabels = ["true" if lab == "pos" else "false" for lab in labels]
         be = LogisticRegressionBackend("b", _pipeline())
-        be.train(list(zip(states, blabels)))
+        be.train(list(zip(states, blabels, strict=True)))
         spec = DecisionSpec(type="binary", statement="positive?")
         r = be.evaluate(states[0], spec)
         assert r.value in ("true", "false")
@@ -244,7 +243,7 @@ class TestForestBackend:
     def _trained(self):
         states, labels = _toy_states(n=120, seed=1)
         be = RandomForestBackend("toy-f", _pipeline())
-        be.train(list(zip(states, labels)))
+        be.train(list(zip(states, labels, strict=True)))
         return be, states
 
     def test_contract_parity(self):
@@ -262,7 +261,7 @@ class TestForestBackend:
         assert set(imp) == set(be._pipeline.feature_names())
 
     def test_save_load(self, tmp_path):
-        be, states = self._trained()
+        be, _states = self._trained()
         path = str(tmp_path / "f.pkl")
         be.save(path)
         loaded = RandomForestBackend.load(path)
@@ -274,7 +273,7 @@ class TestBoostingBackend:
     def test_contract_parity(self):
         states, labels = _toy_states(n=300, seed=2)
         be = GradientBoostingBackend("toy-b", _pipeline())
-        be.train(list(zip(states, labels)))
+        be.train(list(zip(states, labels, strict=True)))
         r = be.evaluate(states[0], SPEC)
         assert abs(sum(r.distribution.values()) - 1.0) < 1e-6
         assert r.value in ("neg", "pos")
@@ -287,7 +286,7 @@ class TestBoostingBackend:
         states, labels = _toy_states(n=300, seed=2)
         be = GradientBoostingBackend("toy-b", _pipeline(),
                                      early_stopping=False)
-        be.train(list(zip(states, labels)))
+        be.train(list(zip(states, labels, strict=True)))
         path = str(tmp_path / "b.pkl")
         be.save(path)
         loaded = GradientBoostingBackend.load(path)
@@ -532,7 +531,7 @@ def _profile_for(backend) -> CalibrationProfile:
     params, scores_all, labels_all = {}, [], []
     for cls in ("neg", "pos"):
         scores = [d[cls] for d in raw]
-        labs = [1 if l == cls else 0 for l in labels]
+        labs = [1 if lab == cls else 0 for lab in labels]
         params[cls] = PlattCalibrator().fit(scores, labs).get_params()
         scores_all.extend(scores)
         labels_all.extend(labs)
@@ -617,10 +616,10 @@ class TestCalibratedMilestone:
                       for i in range(n)]
             labels = [classes[int(k)] for k in idx]
             if shift:  # prior shift: oversample "escalate" in training
-                extra = [(dict(s), l) for s, l in zip(states, labels)
-                         if l == "escalate"] * 2
+                extra = [(dict(s), lab) for s, lab in zip(states, labels, strict=True)
+                         if lab == "escalate"] * 2
                 states += [s for s, _ in extra]
-                labels += [l for _, l in extra]
+                labels += [lab for _, lab in extra]
             return states, labels
 
         tr_s, tr_l = gen(800, shift=True)
@@ -629,14 +628,14 @@ class TestCalibratedMilestone:
 
         pipe = Pipeline([NumericEncoder(["severity", "error_rate"])])
         be = LogisticRegressionBackend("ms", pipe, C=1.0)
-        be.train(list(zip(tr_s, tr_l)))
+        be.train(list(zip(tr_s, tr_l, strict=True)))
         spec = DecisionSpec(type="categorical", options=classes)
 
         raw_va = [be.predict_proba_dict(s) for s in va_s]
         params = {}
         for cls in classes:
             scores = [d[cls] for d in raw_va]
-            labs = [1 if l == cls else 0 for l in va_l]
+            labs = [1 if lab == cls else 0 for lab in va_l]
             params[cls] = PlattCalibrator().fit(scores, labs).get_params()
         prof = CalibrationProfile(name="ms-platt", calibrator_name="platt",
                                   calibrator_params=params,

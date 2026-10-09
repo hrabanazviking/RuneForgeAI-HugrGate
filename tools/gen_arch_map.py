@@ -67,7 +67,7 @@ class EdgeVisitor(ast.NodeVisitor):
         self.edges: dict[str, bool] = {}  # target -> is_lazy
         self._depth = 0
 
-    def visit_FunctionDef(self, node):  # noqa: N802
+    def visit_FunctionDef(self, node):
         self._depth += 1
         self.generic_visit(node)
         self._depth -= 1
@@ -82,13 +82,13 @@ class EdgeVisitor(ast.NodeVisitor):
             if not lazy:
                 self.edges[module] = False
 
-    def visit_Import(self, node):  # noqa: N802
+    def visit_Import(self, node):
         for a in node.names:
             if a.name.startswith("hugrgate"):
                 self._record(a.name)
         self.generic_visit(node)
 
-    def visit_ImportFrom(self, node):  # noqa: N802
+    def visit_ImportFrom(self, node):
         if node.module and node.module.startswith("hugrgate"):
             self._record(node.module)
         self.generic_visit(node)
@@ -165,7 +165,7 @@ def main() -> int:
     for layer, mods in LAYERS.items():
         node_ids = [short(m).replace(".", "_") for m in mods]
         lines.append(f"    subgraph {layer}[{layer}]")
-        for m, nid in zip(mods, node_ids):
+        for m, nid in zip(mods, node_ids, strict=True):
             lines.append(f"        {nid}[{short(m)}]")
         lines.append("    end")
     lines.append("")

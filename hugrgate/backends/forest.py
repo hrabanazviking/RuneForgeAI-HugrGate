@@ -6,7 +6,7 @@ Same train/predict/save/load contract as :class:`LogisticRegressionBackend`
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 try:
     import numpy as np
@@ -42,7 +42,7 @@ class RandomForestBackend(SklearnClassifierBackend):
 
     def __init__(self,
                  model_name: str,
-                 feature_pipeline: Optional[FeatureExtractor] = None,
+                 feature_pipeline: FeatureExtractor | None = None,
                  version: str = "1.0.0",
                  **classifier_kwargs: Any):
         kwargs = {"n_estimators": 200, "random_state": 42, "n_jobs": -1}
@@ -53,7 +53,7 @@ class RandomForestBackend(SklearnClassifierBackend):
         _require_ml()
         return RandomForestClassifier(**self._classifier_kwargs)
 
-    def _extra_metadata(self) -> Dict[str, Any]:
+    def _extra_metadata(self) -> dict[str, Any]:
         if not self.is_trained:
             return {}
         _require_ml()
@@ -62,11 +62,11 @@ class RandomForestBackend(SklearnClassifierBackend):
         return {
             "feature_importances": {
                 name: float(imp)
-                for name, imp in zip(names, importances)
+                for name, imp in zip(names, importances, strict=True)
             },
         }
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         caps = super().capabilities()
         caps["algorithm"] = "random_forest"
         caps["ensemble"] = True

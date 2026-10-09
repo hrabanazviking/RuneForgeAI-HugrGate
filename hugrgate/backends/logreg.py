@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import pickle
 import time
+from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any
 
 try:
     import numpy as np
@@ -39,8 +40,8 @@ def _require_ml() -> None:
         )
 
 __all__ = [
-    "SklearnClassifierBackend",
     "LogisticRegressionBackend",
+    "SklearnClassifierBackend",
 ]
 
 _SUPPORTED_TYPES = ("categorical", "binary")
@@ -60,7 +61,7 @@ class SklearnClassifierBackend(Backend):
 
     def __init__(self,
                  model_name: str,
-                 feature_pipeline: Optional[FeatureExtractor] = None,
+                 feature_pipeline: FeatureExtractor | None = None,
                  version: str = "1.0.0",
                  **classifier_kwargs: Any):
         self._model_name = model_name
@@ -69,16 +70,16 @@ class SklearnClassifierBackend(Backend):
             feature_pipeline if feature_pipeline is not None else Pipeline([]))
         self._classifier_kwargs = classifier_kwargs
         self._clf: Any = None
-        self._classes: List[str] = []
+        self._classes: list[str] = []
         self._trained_at: str = ""
-        self._train_metrics: Dict[str, float] = {}
+        self._train_metrics: dict[str, float] = {}
         self._last_latency_ms: float = 0.0
 
     # -- subclass hooks -------------------------------------------------
     def _make_classifier(self) -> Any:
         raise NotImplementedError
 
-    def _extra_metadata(self) -> Dict[str, Any]:
+    def _extra_metadata(self) -> dict[str, Any]:
         return {}
 
     # -- training --------------------------------------------------------
@@ -94,9 +95,9 @@ class SklearnClassifierBackend(Backend):
         if not self._pipeline.fitted:
             self._pipeline.fit(states)
 
-    def train(self, pairs: Sequence[Tuple[Mapping[str, Any], str]],
-              sample_weight: Optional[Sequence[float]] = None
-              ) -> Dict[str, float]:
+    def train(self, pairs: Sequence[tuple[Mapping[str, Any], str]],
+              sample_weight: Sequence[float] | None = None
+              ) -> dict[str, float]:
         """Fit the classifier. Returns training metrics."""
         _require_ml()
         if len(pairs) < 2:
@@ -113,7 +114,7 @@ class SklearnClassifierBackend(Backend):
         y = np.asarray(labels)
 
         self._clf = self._make_classifier()
-        fit_kwargs: Dict[str, Any] = {}
+        fit_kwargs: dict[str, Any] = {}
         if sample_weight is not None:
             fit_kwargs["sample_weight"] = np.asarray(sample_weight, dtype=float)
         self._clf.fit(X, y)
@@ -135,15 +136,15 @@ class SklearnClassifierBackend(Backend):
             raise BackendUnavailable(
                 f"{self.name}: model {self._model_name!r} is not trained yet")
 
-    def predict_proba_dict(self, state: Mapping[str, Any]) -> Dict[str, float]:
+    def predict_proba_dict(self, state: Mapping[str, Any]) -> dict[str, float]:
         """Raw class-probability dict for one state (no calibration)."""
         self._check_trained()
         X = self._pipeline.transform_batch([state])
         proba = self._clf.predict_proba(X)[0]
-        return {cls: float(p) for cls, p in zip(self._classes, proba)}
+        return {cls: float(p) for cls, p in zip(self._classes, proba, strict=True)}
 
     # -- Backend contract -------------------------------------------------
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "spec_types": list(_SUPPORTED_TYPES),
             "trainable": True,
@@ -163,7 +164,7 @@ class SklearnClassifierBackend(Backend):
         return True
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         if not self.supports(spec):
             raise BackendError(
@@ -184,7 +185,7 @@ class SklearnClassifierBackend(Backend):
         probability = distribution[value]
         latency_ms = (time.perf_counter() - started) * 1000.0
         self._last_latency_ms = latency_ms
-        metadata: Dict[str, Any] = {
+        metadata: dict[str, Any] = {
             "model": self._model_name,
             "model_version": self._model_version,
             "trained_at": self._trained_at,
@@ -203,7 +204,7 @@ class SklearnClassifierBackend(Backend):
             metadata=metadata,
         )
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         return {
             "status": "ok" if self.is_trained else "untrained",
             "backend": self.name,
@@ -215,7 +216,7 @@ class SklearnClassifierBackend(Backend):
     def estimated_latency(self) -> float:
         return self._last_latency_ms or 5.0
 
-    def calibration_info(self) -> Dict[str, Any]:
+    def calibration_info(self) -> dict[str, Any]:
         return {"calibrated": False,
                 "note": "attach a CalibrationProfile via "
                         "hugrgate.calibration.profiles.CalibratedBackend"}
@@ -262,7 +263,7 @@ class SklearnClassifierBackend(Backend):
         return path
 
     @classmethod
-    def load(cls, path: str) -> "SklearnClassifierBackend":
+    def load(cls, path: str) -> SklearnClassifierBackend:
         """Load a model saved with :meth:`save` (manifest verified)."""
         with open(path, "rb") as fh:
             payload = fh.read()
@@ -296,7 +297,7 @@ class LogisticRegressionBackend(SklearnClassifierBackend):
         kwargs.update(self._classifier_kwargs)
         return LogisticRegression(**kwargs)
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         caps = super().capabilities()
         caps["algorithm"] = "logistic_regression"
         caps["linear"] = True

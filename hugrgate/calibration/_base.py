@@ -11,7 +11,8 @@ Not part of the public API: import ``Calibrator`` and
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Sequence, Type
+from collections.abc import Sequence
+from typing import Any, ClassVar
 
 try:
     import numpy as np
@@ -48,7 +49,7 @@ class Calibrator(ABC):
 
     @abstractmethod
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "Calibrator":
+            labels: Sequence[int]) -> Calibrator:
         """Learn the calibration map. ``labels`` are 0/1."""
 
     @abstractmethod
@@ -60,12 +61,12 @@ class Calibrator(ABC):
         return np.asarray([self.calibrate(float(s)) for s in scores])
 
     @abstractmethod
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         """JSON-serializable fitted parameters."""
 
     @classmethod
     @abstractmethod
-    def from_params(cls, params: Dict[str, Any]) -> "Calibrator":
+    def from_params(cls, params: dict[str, Any]) -> Calibrator:
         """Rebuild a fitted calibrator from :meth:`get_params` output."""
 
     def _check_fitted(self) -> None:
@@ -94,27 +95,27 @@ class Calibrator(ABC):
 class CalibratorRegistry:
     """Name → calibrator class registry with param-based rebuilding."""
 
-    _registry: Dict[str, Type[Calibrator]] = {}
+    _registry: ClassVar[dict[str, type[Calibrator]]] = {}
 
     @classmethod
-    def register(cls, name: str, calibrator_cls: Type[Calibrator]) -> None:
+    def register(cls, name: str, calibrator_cls: type[Calibrator]) -> None:
         cls._registry[name] = calibrator_cls
 
     @classmethod
-    def get(cls, name: str) -> Type[Calibrator]:
+    def get(cls, name: str) -> type[Calibrator]:
         try:
             return cls._registry[name]
-        except KeyError:
+        except KeyError as e:
             raise CalibrationError(
                 f"unknown calibrator {name!r}; "
-                f"known: {sorted(cls._registry)}")
+                f"known: {sorted(cls._registry)}") from e
 
     @classmethod
-    def build(cls, name: str, params: Dict[str, Any]) -> Calibrator:
+    def build(cls, name: str, params: dict[str, Any]) -> Calibrator:
         return cls.get(name).from_params(params)
 
     @classmethod
-    def list(cls) -> Dict[str, Type[Calibrator]]:
+    def list(cls) -> dict[str, type[Calibrator]]:
         return dict(cls._registry)
 
 

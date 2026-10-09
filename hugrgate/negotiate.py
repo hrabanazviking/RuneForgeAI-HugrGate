@@ -11,7 +11,7 @@ can decide what "no candidate" means for their policy.
 
 from __future__ import annotations
 
-from typing import Callable, List, Mapping, Optional
+from collections.abc import Callable, Mapping
 
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.policy import DecisionPolicy
@@ -29,7 +29,7 @@ ACCURACY_WEIGHT = 0.7
 CALIBRATION_WEIGHT = 0.3
 
 
-def _quality(stats: Optional[Mapping[str, float]]) -> float:
+def _quality(stats: Mapping[str, float] | None) -> float:
     """Historical quality in [0,1]; neutral 0.5 when nothing is known."""
     if not stats:
         return 0.5
@@ -45,11 +45,11 @@ def select_backend(
     policy: DecisionPolicy,
     registry: BackendRegistry,
     *,
-    privacy_guard: Optional[PrivacyGuard] = None,
-    health: Optional[Callable[[str], float]] = None,
+    privacy_guard: PrivacyGuard | None = None,
+    health: Callable[[str], float] | None = None,
     min_health: float = 0.0,
-    stats: Optional[Mapping[str, Mapping[str, float]]] = None,
-) -> List[Backend]:
+    stats: Mapping[str, Mapping[str, float]] | None = None,
+) -> list[Backend]:
     """Return backends ordered best-first for ``(spec, policy)``.
 
     Filters (in order):
@@ -67,7 +67,7 @@ def select_backend(
     lower estimated latency, then name — fully deterministic.
     """
     guard = privacy_guard or PrivacyGuard()
-    candidates: List[Backend] = []
+    candidates: list[Backend] = []
     for backend in registry.supporting(spec):
         if not guard.remote_allowed(backend, policy):
             continue
@@ -82,7 +82,7 @@ def select_backend(
         if health is not None:
             try:
                 score = float(health(backend.name))
-            except Exception:
+            except Exception:  # noqa: BLE001 - unhealthy on any probe failure
                 score = 0.0
             if score < min_health:
                 continue

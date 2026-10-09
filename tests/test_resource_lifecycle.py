@@ -124,7 +124,6 @@ def test_max_records_bounds_memory_and_keeps_chain_valid():
     assert store.evicted_count() == 7
     assert store.verify_chain() is True
     # newest records are the ones kept
-    kept = [r.metadata for r in store.recent(3)]
     assert store.recent(3)[-1].request_hash == _record(9).request_hash
 
 

@@ -27,7 +27,7 @@ def _record(value="a", prob=0.8):
 
 def _store(n=3):
     s = ProvenanceStore()
-    for i in range(n):
+    for _ in range(n):
         s.append(_record())
     return s
 

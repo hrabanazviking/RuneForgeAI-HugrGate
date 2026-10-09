@@ -22,7 +22,6 @@ from __future__ import annotations
 import threading
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Deque, Dict, List, Optional
 
 __all__ = [
     "BackendStats",
@@ -30,7 +29,7 @@ __all__ = [
 ]
 
 
-def _percentile(sorted_values: List[float], pct: float) -> float:
+def _percentile(sorted_values: list[float], pct: float) -> float:
     """Nearest-rank percentile over an already-sorted list."""
     if not sorted_values:
         return 0.0
@@ -41,7 +40,7 @@ def _percentile(sorted_values: List[float], pct: float) -> float:
 @dataclass
 class BackendStats:
     """Rolling statistics for one backend."""
-    latencies: Deque[float] = field(default_factory=deque)
+    latencies: deque[float] = field(default_factory=deque)
     errors: int = 0
     samples: int = 0
     consecutive_failures: int = 0
@@ -62,7 +61,7 @@ class HealthMonitor:
         self.max_consecutive_failures = max_consecutive_failures
         self.latency_target_ms = latency_target_ms
         self.min_samples = min_samples
-        self._stats: Dict[str, BackendStats] = {}
+        self._stats: dict[str, BackendStats] = {}
         # RLock: is_quarantined() calls score() while holding the lock.
         self._lock = threading.RLock()
 
@@ -86,7 +85,7 @@ class HealthMonitor:
                 stats.errors += 1
                 stats.consecutive_failures += 1
 
-    def stats(self, backend_name: str) -> Dict[str, float]:
+    def stats(self, backend_name: str) -> dict[str, float]:
         """p50/p99 latency, error rate, consecutive failures, sample count."""
         with self._lock:
             stats = self._stats.get(backend_name)
@@ -126,13 +125,13 @@ class HealthMonitor:
                 return False
             return self.score(backend_name) < self.quarantine_threshold
 
-    def quarantined(self) -> List[str]:
+    def quarantined(self) -> list[str]:
         """Names of all currently quarantined backends."""
         with self._lock:
             names = list(self._stats.keys())
         return [n for n in names if self.is_quarantined(n)]
 
-    def reset(self, backend_name: Optional[str] = None) -> None:
+    def reset(self, backend_name: str | None = None) -> None:
         """Forget stats (one backend, or all when no name is given)."""
         with self._lock:
             if backend_name is None:

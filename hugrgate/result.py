@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hugrgate.errors import SpecError
 
@@ -21,9 +21,9 @@ class DecisionResult:
     - distribution keys ⊆ spec value space, values ∈ [0,1], sum ≈ 1
     - value ∈ spec value space (or None for abstention)
     """
-    value: Optional[Any]
+    value: Any | None
     probability: float
-    distribution: Dict[str, float] = field(default_factory=dict)
+    distribution: dict[str, float] = field(default_factory=dict)
     uncertainty: float = 0.0
     accepted: bool = True
     backend: str = "unknown"
@@ -31,7 +31,7 @@ class DecisionResult:
     latency_ms: float = 0.0
     calibration_profile: str = "none"
     fallback_used: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not 0.0 <= self.probability <= 1.0:
@@ -66,7 +66,7 @@ class DecisionResult:
                         f"distribution[{self.value!r}]={mass} != "
                         f"probability={self.probability}")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "value": self.value,
             "probability": self.probability,

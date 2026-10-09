@@ -12,8 +12,9 @@ the privacy class forbids it.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from dataclasses import replace
-from typing import Any, Iterable, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendUnavailable, PrivacyViolation
@@ -24,8 +25,8 @@ from hugrgate.provenance import DecisionRecord
 logger = get_logger(__name__)
 
 __all__ = [
-    "REMOTE_MODES",
     "NON_CACHEABLE_PRIVACY_CLASSES",
+    "REMOTE_MODES",
     "PrivacyGuard",
 ]
 
@@ -92,7 +93,7 @@ class PrivacyGuard:
                 backend=backend.name)
 
     def filter_backends(self, backends: Iterable[Backend],
-                        policy: DecisionPolicy) -> List[Backend]:
+                        policy: DecisionPolicy) -> list[Backend]:
         """Selection-time filter: blocked backends never become candidates."""
         return [b for b in backends if self.remote_allowed(b, policy)]
 
@@ -122,7 +123,7 @@ class PrivacyGuard:
         return replace(record, metadata=metadata)
 
     def provenance_redaction_needed(self,
-                                    policy: Optional[DecisionPolicy]) -> bool:
+                                    policy: DecisionPolicy | None) -> bool:
         """Whether records for this policy must be redacted."""
         if self.redact_provenance:
             return True

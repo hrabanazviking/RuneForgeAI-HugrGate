@@ -14,14 +14,14 @@ import shutil
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from hugrgate.errors import HugrGateError
 
 __all__ = [
-    "sha256_bytes",
     "ModelManifest",
     "ModelStore",
+    "sha256_bytes",
 ]
 
 
@@ -42,12 +42,12 @@ class ModelManifest:
     version: str
     backend: str
     spec_type: str
-    features: List[str]
-    classes: List[str]
+    features: list[str]
+    classes: list[str]
     trained_at: str = field(default_factory=_utcnow_iso)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     payload_hash: str = ""
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.name:
@@ -57,14 +57,14 @@ class ModelManifest:
         if len(set(self.classes)) != len(self.classes):
             raise HugrGateError("manifest classes must be unique")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "ModelManifest":
+    def from_dict(cls, d: dict[str, Any]) -> ModelManifest:
         return cls(
             name=d["name"],
             version=d["version"],
@@ -79,7 +79,7 @@ class ModelManifest:
         )
 
     @classmethod
-    def from_json(cls, text: str) -> "ModelManifest":
+    def from_json(cls, text: str) -> ModelManifest:
         return cls.from_dict(json.loads(text))
 
     def verify(self, payload: bytes) -> None:
@@ -124,7 +124,7 @@ class ModelStore:
         return vdir
 
     def get(self, name: str,
-            version: Optional[str] = None) -> Tuple[ModelManifest, bytes]:
+            version: str | None = None) -> tuple[ModelManifest, bytes]:
         """Fetch ``(manifest, payload)``; latest version when omitted.
 
         The payload hash is verified before anything is returned.
@@ -140,7 +140,7 @@ class ModelStore:
         manifest.verify(payload)
         return manifest, payload
 
-    def list_versions(self, name: str) -> List[str]:
+    def list_versions(self, name: str) -> list[str]:
         ndir = self.root / name
         if not ndir.is_dir():
             return []
@@ -152,7 +152,7 @@ class ModelStore:
             raise HugrGateError(f"no stored versions of model {name!r}")
         return versions[-1]
 
-    def list_models(self) -> List[str]:
+    def list_models(self) -> list[str]:
         return sorted(p.name for p in self.root.iterdir() if p.is_dir())
 
     def delete(self, name: str, version: str) -> None:

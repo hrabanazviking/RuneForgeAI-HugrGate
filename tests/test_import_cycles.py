@@ -47,9 +47,9 @@ def _find_cycle(graph):
         color[node] = GRAY
         for nxt in sorted(graph[node]):
             if color[nxt] == GRAY:
-                return stack + [node, nxt]
+                return [*stack, node, nxt]
             if color[nxt] == WHITE:
-                hit = visit(nxt, stack + [node])
+                hit = visit(nxt, [*stack, node])
                 if hit:
                     return hit
         color[node] = BLACK
@@ -84,10 +84,12 @@ def test_serde_is_neutral_ground():
 
 def test_client_still_reexports_serde_helpers():
     """Backward compatibility: the helpers moved, the import path did not."""
-    from hugrgate.client import (
-        policy_from_dict, policy_to_dict, result_from_dict,
-    )
     from hugrgate import serde
+    from hugrgate.client import (
+        policy_from_dict,
+        policy_to_dict,
+        result_from_dict,
+    )
     assert policy_from_dict is serde.policy_from_dict
     assert policy_to_dict is serde.policy_to_dict
     assert result_from_dict is serde.result_from_dict

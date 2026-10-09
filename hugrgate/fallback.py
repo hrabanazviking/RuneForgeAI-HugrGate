@@ -28,15 +28,16 @@ are reported back to their breakers.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.backend import Backend
 from hugrgate.circuit import CircuitRegistry
 from hugrgate.errors import Abstention, BackendError, PolicyError
 from hugrgate.log import get_logger
+from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
-from hugrgate.policy import DecisionPolicy
 
 logger = get_logger(__name__)
 
@@ -50,10 +51,10 @@ class FallbackChain(Backend):
 
     name = "fallback-chain"
 
-    def __init__(self, backends: List[Backend],
-                 policy: Optional[DecisionPolicy] = None,
+    def __init__(self, backends: list[Backend],
+                 policy: DecisionPolicy | None = None,
                  safe_default: Any = None,
-                 circuits: Optional[CircuitRegistry] = None,
+                 circuits: CircuitRegistry | None = None,
                  name: str = "fallback-chain"):
         if not backends:
             raise PolicyError("FallbackChain needs at least one backend")
@@ -67,7 +68,7 @@ class FallbackChain(Backend):
             raise PolicyError(
                 "fallback_behavior='safe_default' requires a safe_default value")
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "spec_types": sorted({t for b in self.backends
                                   for t in b.capabilities().get("spec_types", [])}),
@@ -86,9 +87,9 @@ class FallbackChain(Backend):
         return self.circuits.get(backend.name)
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
-        trace: List[Dict[str, Any]] = []
+        trace: list[dict[str, Any]] = []
         for index, backend in enumerate(self.backends):
             breaker = self._breaker(backend)
             if breaker is not None and not breaker.allow():
@@ -120,7 +121,7 @@ class FallbackChain(Backend):
         return self._exhausted(state, spec, trace)
 
     def _exhausted(self, state: Mapping[str, Any], spec: DecisionSpec,
-                   trace: List[Dict[str, Any]]) -> DecisionResult:
+                   trace: list[dict[str, Any]]) -> DecisionResult:
         behavior = self.policy.fallback_behavior
         if behavior == "abstain":
             raise Abstention(
@@ -165,6 +166,6 @@ class FallbackChain(Backend):
         )
         return result
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         return {"status": "ok", "backend": self.name,
                 "chain": [b.health() for b in self.backends]}

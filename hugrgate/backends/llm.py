@@ -13,8 +13,8 @@ engine — no model download required.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Dict, List, Mapping, Optional
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable, TimeoutError
@@ -23,15 +23,15 @@ from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "MAX_STATE_CHARS",
+    "LLMBackend",
     "LLMChoice",
     "LLMEngine",
     "LlamaCppEngine",
-    "LLMBackend",
 ]
 
 try:  # optional dependency — the module must import without it
     from llama_cpp import Llama as _Llama
-except Exception:  # pragma: no cover - absence is the common path in CI
+except Exception:  # noqa: BLE001 - any import failure means 'no llm'
     _Llama = None
 
 #: How much state text the prompt may carry (characters).
@@ -50,7 +50,7 @@ class LLMEngine:
 
     name = "llm-engine"
 
-    def generate(self, prompt: str, choices: List[str], max_tokens: int,
+    def generate(self, prompt: str, choices: list[str], max_tokens: int,
                  timeout_s: float) -> LLMChoice:
         """Return exactly one of ``choices`` (the constrained decision)."""
         raise NotImplementedError
@@ -80,7 +80,7 @@ class LlamaCppEngine(LLMEngine):
     def available() -> bool:
         return _Llama is not None
 
-    def generate(self, prompt: str, choices: List[str], max_tokens: int,
+    def generate(self, prompt: str, choices: list[str], max_tokens: int,
                  timeout_s: float) -> LLMChoice:
         import time
         deadline = time.monotonic() + timeout_s
@@ -114,7 +114,7 @@ class LLMBackend(Backend):
 
     name = "local-llm"
 
-    def __init__(self, engine: Optional[LLMEngine] = None,
+    def __init__(self, engine: LLMEngine | None = None,
                  max_tokens: int = 32, timeout_s: float = 30.0):
         self.engine = engine
         self.max_tokens = max_tokens
@@ -123,7 +123,7 @@ class LLMBackend(Backend):
     # -- constrained decoding --------------------------------------------
 
     @staticmethod
-    def _allowed_values(spec: DecisionSpec) -> List[str]:
+    def _allowed_values(spec: DecisionSpec) -> list[str]:
         if spec.type == "categorical":
             return list(spec.options or [])
         if spec.type == "ordinal":
@@ -158,7 +158,7 @@ class LLMBackend(Backend):
 
     @staticmethod
     def _prompt(state: Mapping, spec: DecisionSpec,
-                allowed: List[str]) -> str:
+                allowed: list[str]) -> str:
         state_text = " ".join(f"{k}={v}" for k, v in state.items())
         state_text = state_text[:MAX_STATE_CHARS]
         if spec.type == "binary":
@@ -177,7 +177,7 @@ class LLMBackend(Backend):
 
     # -- Backend contract ------------------------------------------------
 
-    def capabilities(self) -> Dict:
+    def capabilities(self) -> dict:
         return {
             "spec_types": ["categorical", "ordinal", "binary"],
             "engine": self.engine.name if self.engine else None,
@@ -191,7 +191,7 @@ class LLMBackend(Backend):
         return spec.type in ("categorical", "ordinal", "binary")
 
     def evaluate(self, state: Mapping, spec: DecisionSpec,
-                 context: Optional[Mapping] = None) -> DecisionResult:
+                 context: Mapping | None = None) -> DecisionResult:
         if self.engine is None:
             raise BackendUnavailable(
                 "no LLM engine configured; attach an LLMEngine "
@@ -234,14 +234,14 @@ class LLMBackend(Backend):
                       "allowed_tokens": allowed,
                       "max_tokens": self.max_tokens})
 
-    def health(self) -> Dict:
+    def health(self) -> dict:
         return {"status": "ok" if self.engine is not None else "unavailable",
                 "backend": self.name}
 
     def estimated_latency(self) -> float:
         return 2500.0  # ms: local LLM, conservative
 
-    def privacy_properties(self) -> Dict:
+    def privacy_properties(self) -> dict:
         props = super().privacy_properties()
         props["remote"] = False
         return props

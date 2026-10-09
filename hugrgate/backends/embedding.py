@@ -15,7 +15,7 @@ from __future__ import annotations
 import hashlib
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from collections.abc import Iterable, Mapping, Sequence
 
 try:
     import numpy as np
@@ -75,7 +75,7 @@ class HashEmbedder(Embedder):
     """
 
     def __init__(self, dim: int = 256,
-                 ngram_range: Tuple[int, int] = (3, 5)):
+                 ngram_range: tuple[int, int] = (3, 5)):
         if dim < 8:
             raise SpecError(f"dim must be >= 8, got {dim}")
         lo, hi = ngram_range
@@ -136,7 +136,7 @@ class PrototypeBackend(Backend):
 
     name = "prototype-embedder"
 
-    def __init__(self, embedder: Optional[Embedder] = None,
+    def __init__(self, embedder: Embedder | None = None,
                  temperature: float = 0.25,
                  text_fields: Sequence[str] = TEXT_FIELDS):
         _require_numpy()
@@ -145,16 +145,16 @@ class PrototypeBackend(Backend):
             raise SpecError(f"temperature must be > 0, got {temperature}")
         self.temperature = temperature
         self.text_fields = tuple(text_fields)
-        self._prototypes: Dict[str, np.ndarray] = {}
-        self._classes: List[str] = []
+        self._prototypes: dict[str, np.ndarray] = {}
+        self._classes: list[str] = []
         self._n_examples = 0
 
     # -- training ------------------------------------------------------
 
-    def fit(self, examples: Iterable[Tuple[str, str]]) -> "PrototypeBackend":
+    def fit(self, examples: Iterable[tuple[str, str]]) -> PrototypeBackend:
         """Build class prototypes from ``(text, label)`` pairs."""
         _require_numpy()
-        by_class: Dict[str, List[str]] = {}
+        by_class: dict[str, list[str]] = {}
         for text, label in examples:
             if not isinstance(text, str) or not text.strip():
                 raise SpecError("prototype examples need non-empty text")
@@ -182,12 +182,12 @@ class PrototypeBackend(Backend):
         return bool(self._prototypes)
 
     @property
-    def classes(self) -> List[str]:
+    def classes(self) -> list[str]:
         return list(self._classes)
 
     # -- Backend contract ----------------------------------------------
 
-    def capabilities(self) -> Dict:
+    def capabilities(self) -> dict:
         return {
             "spec_types": ["categorical", "binary"],
             "embedder": self.embedder.name,
@@ -208,7 +208,7 @@ class PrototypeBackend(Backend):
         # Fall back to the whole state rendered as text.
         return " ".join(str(v) for v in state.values())
 
-    def _class_order(self, spec: DecisionSpec) -> List[str]:
+    def _class_order(self, spec: DecisionSpec) -> list[str]:
         if spec.type == "categorical":
             order = list(spec.options or [])
         else:
@@ -221,7 +221,7 @@ class PrototypeBackend(Backend):
         return order
 
     def evaluate(self, state: Mapping, spec: DecisionSpec,
-                 context: Optional[Mapping] = None) -> DecisionResult:
+                 context: Mapping | None = None) -> DecisionResult:
         _require_numpy()
         if not self.fitted:
             raise BackendUnavailable(
@@ -233,7 +233,7 @@ class PrototypeBackend(Backend):
         sims = protos @ vec  # cosine: rows are unit length
         probs = _softmax(sims, self.temperature)
         best = int(np.argmax(probs))
-        distribution = {c: float(p) for c, p in zip(order, probs)}
+        distribution = {c: float(p) for c, p in zip(order, probs, strict=True)}
         return DecisionResult(
             value=order[best],
             probability=float(probs[best]),
@@ -243,18 +243,18 @@ class PrototypeBackend(Backend):
             model=f"{self.embedder.name}-prototypes-v1",
             metadata={
                 "cosine_similarities": {c: round(float(s), 4)
-                                        for c, s in zip(order, sims)},
+                                        for c, s in zip(order, sims, strict=True)},
                 "temperature": self.temperature,
                 "n_examples": self._n_examples,
             })
 
-    def health(self) -> Dict:
+    def health(self) -> dict:
         return {"status": "ok" if self.fitted else "untrained",
                 "backend": self.name}
 
     def estimated_latency(self) -> float:
         return 15.0  # ms: hashing embedder, no model
 
-    def calibration_info(self) -> Dict:
+    def calibration_info(self) -> dict:
         return {"calibrated": False,
                 "note": "softmax over cosine similarities is not calibrated"}

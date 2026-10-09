@@ -22,42 +22,43 @@ from __future__ import annotations
 import math
 import re
 import time
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from hugrgate import __version__ as HUGRGATE_VERSION
 from hugrgate.backend import Backend
 from hugrgate.core import HugrGate
 from hugrgate.errors import (
     Abstention,
     BackendError,
     BackendUnavailable,
+    HugrGateError,
     PolicyError,
     SpecError,
 )
 from hugrgate.result import DecisionResult
-from hugrgate.spec import DecisionSpec
-from hugrgate import __version__ as HUGRGATE_VERSION
 from hugrgate.serde import policy_from_dict
-from hugrgate.errors import HugrGateError
+from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "UniformBackend",
     "KeywordBackend",
     "ModelInfo",
-    "register_model",
-    "list_models",
+    "UniformBackend",
     "build_gate",
     "create_app",
+    "list_models",
+    "register_model",
     "run",
 ]
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 
 
-def _tokens(text: str) -> List[str]:
+def _tokens(text: str) -> list[str]:
     return _WORD_RE.findall(text.lower())
 
 
@@ -81,14 +82,14 @@ def _overlap(state_tokens: set, keywords: set) -> int:
     return score
 
 
-def _softmax(scores: Dict[str, float]) -> Dict[str, float]:
+def _softmax(scores: dict[str, float]) -> dict[str, float]:
     maximum = max(scores.values())
     exps = {k: math.exp(v - maximum) for k, v in scores.items()}
     total = sum(exps.values())
     return {k: v / total for k, v in exps.items()}
 
 
-def _normalized_entropy(dist: Dict[str, float]) -> float:
+def _normalized_entropy(dist: dict[str, float]) -> float:
     n = len(dist)
     if n <= 1:
         return 0.0
@@ -105,7 +106,7 @@ class UniformBackend(Backend):
 
     name = "uniform"
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "spec_types": ["categorical", "binary", "ordinal", "numeric",
                            "multilabel"],
@@ -118,7 +119,7 @@ class UniformBackend(Backend):
                              "multilabel")
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         if spec.type == "numeric":
             # _validate_numeric guarantees both bounds are set.
@@ -151,7 +152,7 @@ class KeywordBackend(Backend):
 
     name = "keyword"
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         return {
             "spec_types": ["categorical", "binary", "ordinal"],
             "description": "Keyword overlap + softmax baseline.",
@@ -161,7 +162,7 @@ class KeywordBackend(Backend):
     def supports(self, spec: DecisionSpec) -> bool:
         return spec.type in ("categorical", "binary", "ordinal")
 
-    def _label_keywords(self, spec: DecisionSpec) -> Dict[str, set]:
+    def _label_keywords(self, spec: DecisionSpec) -> dict[str, set]:
         if spec.type == "binary":
             return {
                 "true": set(_tokens(spec.statement or "")),
@@ -171,7 +172,7 @@ class KeywordBackend(Backend):
         return {label: set(_tokens(label)) for label in labels}
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         text = " ".join(
             str(v) for v in state.values()
@@ -204,13 +205,13 @@ class ModelInfo:
     name: str
     version: str = "1.0"
     backend: str = "unknown"
-    spec_types: List[str] = field(default_factory=list)
+    spec_types: list[str] = field(default_factory=list)
     description: str = ""
-    trained_at: Optional[str] = None
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    trained_at: str | None = None
+    metrics: dict[str, Any] = field(default_factory=dict)
 
 
-_MODEL_CATALOG: List[ModelInfo] = [
+_MODEL_CATALOG: list[ModelInfo] = [
     ModelInfo(name="uniform-1.0", backend="uniform",
               spec_types=["categorical", "binary", "ordinal", "numeric",
                           "multilabel"],
@@ -226,11 +227,11 @@ def register_model(info: ModelInfo) -> None:
     _MODEL_CATALOG.append(info)
 
 
-def list_models() -> List[ModelInfo]:
+def list_models() -> list[ModelInfo]:
     return list(_MODEL_CATALOG)
 
 
-def build_gate(extra_backends: Optional[List[Backend]] = None) -> HugrGate:
+def build_gate(extra_backends: list[Backend] | None = None) -> HugrGate:
     """Build a :class:`HugrGate` wired with the built-in backends."""
     gate = HugrGate()
     gate.register(UniformBackend())
@@ -250,7 +251,7 @@ def _error_response(error: HugrGateError, status: int) -> JSONResponse:
     )
 
 
-def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
+def create_app(gate: HugrGate | None = None) -> FastAPI:
     """Create the FastAPI application serving ``gate``."""
     gate = gate or build_gate()
     app = FastAPI(title="HugrGate", version=HUGRGATE_VERSION)
@@ -258,21 +259,21 @@ def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
     started_at = time.time()
 
     @app.get("/")
-    def root() -> Dict[str, Any]:
+    def root() -> dict[str, Any]:
         return {"service": "hugrgate", "version": HUGRGATE_VERSION,
                 "motto": "Deterministic where possible. "
                          "Probabilistic where useful. "
                          "Generative only where necessary."}
 
     @app.get("/health")
-    def health() -> Dict[str, Any]:
+    def health() -> dict[str, Any]:
         return {"status": "ok", "version": HUGRGATE_VERSION,
                 "backends": gate.registry.list(),
                 "uptime_s": round(time.time() - started_at, 3),
                 "decisions_served": gate.provenance.count()}
 
     @app.get("/backends")
-    def backends() -> List[Dict[str, Any]]:
+    def backends() -> list[dict[str, Any]]:
         infos = []
         for name in gate.registry.list():
             backend = gate.registry.get(name)
@@ -291,7 +292,7 @@ def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
         return infos
 
     @app.get("/models")
-    def models() -> List[Dict[str, Any]]:
+    def models() -> list[dict[str, Any]]:
         return [asdict(m) for m in list_models()]
 
     @app.post("/decide")
@@ -304,7 +305,7 @@ def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
         """
         try:
             body = await request.json()
-        except Exception:
+        except Exception:  # noqa: BLE001 - any parse failure is bad_request
             return JSONResponse(
                 status_code=400,
                 content={"error": {"code": "bad_request",
@@ -357,12 +358,13 @@ def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
 
 
 def run(host: str = "127.0.0.1", port: int = 8377,
-        gate: Optional[HugrGate] = None) -> None:
+        gate: HugrGate | None = None) -> None:
     """Serve the API. Binds localhost only unless told otherwise."""
     import uvicorn
     if host not in ("127.0.0.1", "::1", "localhost"):
         import warnings
         warnings.warn(
             f"HugrGate binding to non-localhost {host!r}; the API has no "
-            f"authentication — only do this behind a trusted boundary.")
+            f"authentication — only do this behind a trusted boundary.",
+            stacklevel=2)
     uvicorn.run(create_app(gate), host=host, port=port, log_level="warning")

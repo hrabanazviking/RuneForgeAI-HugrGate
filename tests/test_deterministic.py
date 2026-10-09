@@ -9,22 +9,34 @@ from pathlib import Path
 import pytest
 
 from hugrgate import (
-    Backend, DecisionPolicy, DecisionResult, DecisionSpec,
-    Abstention, BackendError, PolicyError, SpecError, TimeoutError,
+    Abstention,
+    Backend,
+    BackendError,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    PolicyError,
+    SpecError,
+    TimeoutError,
 )
-from hugrgate.backends.rules import Rule, RuleBackend
-from hugrgate.fallback import FallbackChain
 from hugrgate.abstain import abstain, apply_abstention_policy, mark_for_review
-from hugrgate.threshold import (
-    NumericBand, ThresholdConfig, apply_thresholds,
-    classify_numeric_band, ordinal_cumulative_probability,
-)
+from hugrgate.backends.rules import Rule, RuleBackend
+from hugrgate.circuit import CLOSED, HALF_OPEN, OPEN, CircuitBreaker, CircuitRegistry
+from hugrgate.fallback import FallbackChain
 from hugrgate.health import HealthMonitor
-from hugrgate.circuit import CircuitBreaker, CircuitRegistry, CLOSED, HALF_OPEN, OPEN
-from hugrgate.timeout import (
-    TimeoutBackend, deadline_ms_for, evaluate_with_timeout, run_with_deadline,
+from hugrgate.threshold import (
+    NumericBand,
+    ThresholdConfig,
+    apply_thresholds,
+    classify_numeric_band,
+    ordinal_cumulative_probability,
 )
-
+from hugrgate.timeout import (
+    TimeoutBackend,
+    deadline_ms_for,
+    evaluate_with_timeout,
+    run_with_deadline,
+)
 
 # --------------------------------------------------------------------------
 # Helpers
@@ -861,7 +873,7 @@ class TestTimeouts:
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 sys.path.insert(0, str(EXAMPLES_DIR))
-import event_triage  # noqa: E402
+import event_triage
 
 
 class TestMilestone:

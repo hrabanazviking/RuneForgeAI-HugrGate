@@ -9,12 +9,9 @@ and the eager import graph must be acyclic (lazy edges excluded).
 from __future__ import annotations
 
 import importlib.util
-import re
 import subprocess
 import sys
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 MAP = ROOT / "docs" / "campaign-i" / "architecture-map.md"
@@ -82,10 +79,10 @@ def test_eager_import_graph_is_acyclic():
         color[node] = GRAY
         for nxt in sorted(edges[node]):
             if color[nxt] == GRAY:
-                cycle = " -> ".join(stack + [node, nxt])
+                cycle = " -> ".join([*stack, node, nxt])
                 raise AssertionError(f"eager import cycle: {cycle}")
             if color[nxt] == WHITE:
-                visit(nxt, stack + [node])
+                visit(nxt, [*stack, node])
         color[node] = BLACK
 
     for mod in sorted(edges):
@@ -103,7 +100,6 @@ def test_generator_rejects_unmapped_module():
 
 
 def test_cycle_detector_catches_a_cycle():
-    gen = _load_gen()
     graph = {"a": {"b": False}, "b": {"a": False}}
 
     WHITE, GRAY, BLACK = 0, 1, 2
@@ -114,9 +110,9 @@ def test_cycle_detector_catches_a_cycle():
         color[node] = GRAY
         for nxt in graph[node]:
             if color[nxt] == GRAY:
-                found.append(" -> ".join(stack + [node, nxt]))
+                found.append(" -> ".join([*stack, node, nxt]))
             elif color[nxt] == WHITE:
-                visit(nxt, stack + [node])
+                visit(nxt, [*stack, node])
         color[node] = BLACK
 
     for m in graph:

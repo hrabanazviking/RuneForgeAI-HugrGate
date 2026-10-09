@@ -15,8 +15,11 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.threshold import (
-    NumericBand, ThresholdConfig, apply_thresholds,
-    classify_numeric_band, ordinal_cumulative_probability,
+    NumericBand,
+    ThresholdConfig,
+    apply_thresholds,
+    classify_numeric_band,
+    ordinal_cumulative_probability,
 )
 
 CAT_SPEC = DecisionSpec(type="categorical", options=["a", "b", "c"])

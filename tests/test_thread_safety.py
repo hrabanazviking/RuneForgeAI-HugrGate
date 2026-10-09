@@ -86,8 +86,8 @@ def test_registry_concurrent_register_unregister():
             name = f"be-{i % 24}"
             try:
                 reg.register(StubBackend(name))
-            except Exception:
-                pass  # duplicate race is fine; the invariant is no corruption
+            except Exception:  # noqa: BLE001 - duplicate race is fine
+                pass  # the invariant is no corruption
             reg.get(name)
             reg.supporting(SPEC)
             reg.list()

@@ -10,7 +10,6 @@ its old keyword calling convention.
 from __future__ import annotations
 
 import ast
-from dataclasses import asdict
 from pathlib import Path
 
 import pytest
@@ -75,7 +74,7 @@ def test_register_model_round_trips_through_catalogue():
 
 
 def test_benchmark_config_drives_run_benchmark():
-    from hugrgate import DecisionSpec, HugrGate
+    from hugrgate import HugrGate
     from hugrgate.backends.rules import Rule, RuleBackend
 
     dataset = {

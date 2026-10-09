@@ -1,6 +1,6 @@
 """Temperature scaling. Slice 27.
 
-Single-parameter calibration: ``p_cal = σ(logit(p_raw) / T)`` with ``T > 0``
+Single-parameter calibration: ``p_cal = sigmoid(logit(p_raw) / T)`` with ``T > 0``
 fit by minimizing the negative log-likelihood with an independent 1-D
 Newton solver in ``u = log T`` space.  Because ``T > 0``, the map is strictly
 increasing — the ranking of scores is always preserved.
@@ -8,7 +8,8 @@ increasing — the ranking of scores is always preserved.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -65,7 +66,7 @@ class TemperatureCalibrator(Calibrator):
         return np.clip(p, _EPS, 1.0 - _EPS)
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "TemperatureCalibrator":
+            labels: Sequence[int]) -> TemperatureCalibrator:
         _require_numpy()
         p_raw, y = self._as_arrays(scores, labels)
         if int(y.sum()) == 0 or int(y.sum()) == y.size:
@@ -79,7 +80,7 @@ class TemperatureCalibrator(Calibrator):
             qc = self._clip(q)
             return float(-(y * np.log(qc) + (1.0 - y) * np.log(1.0 - qc)).sum())
 
-        # Newton in u = log T.  With q = σ(z·e^{-u}) and w = z·e^{-u}:
+        # Newton in u = log T.  With q = sigmoid(z·e^{-u}) and w = z·e^{-u}:
         #   g = dNLL/du = Σ (y - q)·w
         #   H = d²NLL/du² = Σ [q(1-q)·w² - (y-q)·w]
         u = 0.0
@@ -120,13 +121,13 @@ class TemperatureCalibrator(Calibrator):
         q = float(_sigmoid(np.array([z / self.temperature]))[0])
         return min(1.0, max(0.0, q))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {"temperature": self.temperature,
                 "n_samples": self.n_samples}
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "TemperatureCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> TemperatureCalibrator:
         obj = cls()
         obj.temperature = float(params["temperature"])
         if obj.temperature <= 0:

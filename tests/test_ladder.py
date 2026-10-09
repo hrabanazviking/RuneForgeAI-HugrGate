@@ -7,9 +7,18 @@ import time
 import pytest
 
 from hugrgate import (
-    Backend, BackendRegistry, DecisionPolicy, DecisionResult, DecisionSpec,
-    HugrGate, Abstention, BackendError, BackendUnavailable,
-    PrivacyViolation, SpecError, TimeoutError,
+    Abstention,
+    Backend,
+    BackendError,
+    BackendRegistry,
+    BackendUnavailable,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    HugrGate,
+    PrivacyViolation,
+    SpecError,
+    TimeoutError,
 )
 from hugrgate.backends.embedding import HashEmbedder, PrototypeBackend
 from hugrgate.backends.llm import LLMBackend, LLMChoice, LLMEngine
@@ -19,7 +28,6 @@ from hugrgate.ladder import LadderRouter, LadderRung
 from hugrgate.negotiate import select_backend
 from hugrgate.privacy import PrivacyGuard
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
-
 
 # --------------------------------------------------------------------------
 # Test doubles

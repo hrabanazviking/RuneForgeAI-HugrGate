@@ -12,10 +12,9 @@ import importlib.util
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
-import pytest
+import tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
 GEN = ROOT / "tools" / "gen_arch_map.py"
@@ -118,6 +117,7 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "httpx": {"server"},
     "pytest": {"test"},
     "mypy": {"typecheck"},
+    "ruff": {"lint"},
     "onnxruntime": {"onnx"},
 }
 # Declared extras with no current importer (documented reservations).

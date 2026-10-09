@@ -9,7 +9,8 @@ Produces a human-readable report with:
 
 from __future__ import annotations
 
-from typing import Any, List, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 __all__ = [
     "ascii_reliability_diagram",
@@ -40,7 +41,7 @@ def _metric_table(backends: Mapping[str, Mapping[str, Any]]) -> str:
     return "\n".join(rows)
 
 
-def ascii_reliability_diagram(bins: List[Mapping[str, Any]],
+def ascii_reliability_diagram(bins: list[Mapping[str, Any]],
                               width: int = 30) -> str:
     """Render reliability bins as ASCII: accuracy bars vs confidence marks.
 
@@ -57,9 +58,9 @@ def ascii_reliability_diagram(bins: List[Mapping[str, Any]],
             bar = "(empty)".ljust(width)
             conf_mark = ""
         else:
-            filled = int(round(b["accuracy"] * width))
+            filled = round(b["accuracy"] * width)
             bar = ("#" * filled).ljust(width)
-            pos = min(int(round(b["avg_confidence"] * width)), width - 1)
+            pos = min(round(b["avg_confidence"] * width), width - 1)
             conf_mark = " " * pos + "|"
         lines.append(
             f"[{b['bin_low']:.1f}-{b['bin_high']:.1f}] "

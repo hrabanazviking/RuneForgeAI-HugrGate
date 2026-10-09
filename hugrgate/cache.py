@@ -23,24 +23,25 @@ import json
 import threading
 import time
 from collections import OrderedDict
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from typing import Any
 
+from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
-from hugrgate.log import get_logger
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "cache_key",
     "DecisionCache",
+    "cache_key",
 ]
 
 logger = get_logger(__name__)
 
 
-def _policy_fingerprint(policy: DecisionPolicy) -> Dict[str, Any]:
+def _policy_fingerprint(policy: DecisionPolicy) -> dict[str, Any]:
     """The policy fields that can change a decision outcome."""
     return {
         "minimum_probability": policy.minimum_probability,
@@ -84,7 +85,7 @@ class DecisionCache:
             raise ValueError("max_size must be >= 1")
         self.ttl_seconds = ttl_seconds
         self.max_size = max_size
-        self._entries: "OrderedDict[str, _Entry]" = OrderedDict()
+        self._entries: OrderedDict[str, _Entry] = OrderedDict()
         self.hits = 0
         self.misses = 0
         # RLock: stats() calls len(self), which also takes the lock.
@@ -93,13 +94,13 @@ class DecisionCache:
     # -- core API ----------------------------------------------------------
 
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
-            policy: DecisionPolicy) -> Optional[DecisionResult]:
+            policy: DecisionPolicy) -> DecisionResult | None:
         """Return the cached result, or None on miss/expiry/privacy."""
         with self._lock:
             return self._get_locked(state, spec, policy)
 
     def _get_locked(self, state: Mapping[str, Any], spec: DecisionSpec,
-                    policy: DecisionPolicy) -> Optional[DecisionResult]:
+                    policy: DecisionPolicy) -> DecisionResult | None:
         if not PrivacyGuard.cache_allowed(policy):
             return None
         key = cache_key(state, spec, policy)
@@ -147,7 +148,7 @@ class DecisionCache:
             return len(doomed)
 
     def invalidate_model(self, backend_name: str,
-                         model_version: Optional[str] = None) -> int:
+                         model_version: str | None = None) -> int:
         """Alias: a new model version invalidates the backend's entries."""
         return self.invalidate_backend(backend_name)
 
@@ -167,7 +168,7 @@ class DecisionCache:
                 del self._entries[k]
             return len(self._entries)
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         with self._lock:
             total = self.hits + self.misses
             return {

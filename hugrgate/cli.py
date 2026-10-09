@@ -18,23 +18,23 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hugrgate.policy import DecisionPolicy
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
+    "build_parser",
+    "cmd_backends",
+    "cmd_bench",
+    "cmd_decide",
+    "cmd_health",
+    "cmd_models",
+    "cmd_report",
+    "cmd_serve",
+    "load_policy",
     "load_spec",
     "load_state",
-    "load_policy",
-    "cmd_decide",
-    "cmd_backends",
-    "cmd_models",
-    "cmd_health",
-    "cmd_serve",
-    "cmd_bench",
-    "cmd_report",
-    "build_parser",
     "main",
 ]
 
@@ -42,7 +42,7 @@ __all__ = [
 def _load_doc(path: str) -> Any:
     """Load a JSON or YAML document (YAML is a superset of JSON)."""
     import yaml
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -53,7 +53,7 @@ def load_spec(path: str) -> DecisionSpec:
     return DecisionSpec.from_dict(doc)
 
 
-def load_state(path: str) -> Dict[str, Any]:
+def load_state(path: str) -> dict[str, Any]:
     doc = _load_doc(path)
     if not isinstance(doc, dict):
         raise ValueError(f"state file {path} must contain a mapping")
@@ -135,8 +135,9 @@ def cmd_models(args: argparse.Namespace) -> int:
         response.raise_for_status()
         _print_json(response.json())
     else:
-        from hugrgate.server import list_models
         from dataclasses import asdict
+
+        from hugrgate.server import list_models
         _print_json({"models": [asdict(m) for m in list_models()]})
     return 0
 
@@ -167,7 +168,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
 def cmd_bench(args: argparse.Namespace) -> int:
     from hugrgate.bench import run_benchmark
     from hugrgate.server import build_gate
-    with open(args.dataset, "r", encoding="utf-8") as f:
+    with open(args.dataset, encoding="utf-8") as f:
         dataset = json.load(f)
     policy = load_policy(args.policy) if args.policy else None
     backends = args.backends.split(",") if args.backends else None
@@ -189,7 +190,7 @@ def cmd_bench(args: argparse.Namespace) -> int:
 
 def cmd_report(args: argparse.Namespace) -> int:
     from hugrgate.bench_report import render_markdown
-    with open(args.report, "r", encoding="utf-8") as f:
+    with open(args.report, encoding="utf-8") as f:
         report = json.load(f)
     text = render_markdown(report)
     if args.out:
@@ -255,7 +256,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     """``hugrgate`` entry point."""
     parser = build_parser()
     args = parser.parse_args(argv)

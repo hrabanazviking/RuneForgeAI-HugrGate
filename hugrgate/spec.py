@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from hugrgate.errors import SpecError
 
@@ -23,13 +23,13 @@ class DecisionSpec:
     HOW to make it. The result value is always within this spec's space.
     """
     type: str
-    options: Optional[List[str]] = None      # categorical
-    statement: Optional[str] = None           # binary
-    levels: Optional[List[str]] = None        # ordinal
-    minimum: Optional[float] = None           # numeric
-    maximum: Optional[float] = None           # numeric
-    labels: Optional[List[str]] = None        # multilabel
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    options: list[str] | None = None      # categorical
+    statement: str | None = None           # binary
+    levels: list[str] | None = None        # ordinal
+    minimum: float | None = None           # numeric
+    maximum: float | None = None           # numeric
+    labels: list[str] | None = None        # multilabel
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.type not in SPEC_TYPES:
@@ -74,7 +74,7 @@ class DecisionSpec:
         if len(set(self.labels)) != len(self.labels):
             raise SpecError("multilabel labels must be unique")
 
-    def value_space(self) -> List[str]:
+    def value_space(self) -> list[str]:
         """All legal result values for this spec."""
         # __post_init__ validation guarantees the relevant field is set
         # for each type; the asserts below make that visible to checkers.
@@ -91,8 +91,8 @@ class DecisionSpec:
             return list(self.labels)
         return []  # numeric: continuous
 
-    def to_dict(self) -> Dict[str, Any]:
-        d: Dict[str, Any] = {"type": self.type}
+    def to_dict(self) -> dict[str, Any]:
+        d: dict[str, Any] = {"type": self.type}
         for k in ("options", "statement", "levels", "minimum",
                   "maximum", "labels", "metadata"):
             v = getattr(self, k)
@@ -109,7 +109,7 @@ class DecisionSpec:
     })
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "DecisionSpec":
+    def from_dict(cls, d: dict[str, Any]) -> DecisionSpec:
         unknown = set(d) - cls._KEYS
         if unknown:
             raise SpecError(

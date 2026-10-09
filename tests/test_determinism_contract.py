@@ -18,8 +18,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
 from hugrgate.backends.rules import Rule, RuleBackend
 from hugrgate.client import policy_to_dict

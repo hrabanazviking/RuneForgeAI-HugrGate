@@ -8,7 +8,7 @@ classifier.  Early stopping is configurable via constructor kwargs
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 try:
     from sklearn.ensemble import HistGradientBoostingClassifier
@@ -40,7 +40,7 @@ class GradientBoostingBackend(SklearnClassifierBackend):
 
     def __init__(self,
                  model_name: str,
-                 feature_pipeline: Optional[FeatureExtractor] = None,
+                 feature_pipeline: FeatureExtractor | None = None,
                  version: str = "1.0.0",
                  **classifier_kwargs: Any):
         kwargs = {
@@ -60,7 +60,7 @@ class GradientBoostingBackend(SklearnClassifierBackend):
         _require_ml()
         return HistGradientBoostingClassifier(**self._classifier_kwargs)
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         caps = super().capabilities()
         caps["algorithm"] = "hist_gradient_boosting"
         caps["ensemble"] = True

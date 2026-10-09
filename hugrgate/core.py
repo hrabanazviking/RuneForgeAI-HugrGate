@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import Any, Mapping, Optional
+from collections.abc import Mapping
+from typing import Any
 
 from hugrgate.backend import Backend, BackendRegistry
-from hugrgate.errors import BackendUnavailable, BackendError, Abstention
+from hugrgate.errors import Abstention, BackendError, BackendUnavailable
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
@@ -31,7 +32,7 @@ class HugrGate:
         result = gate.decide(state, spec, policy)
     """
 
-    def __init__(self, registry: Optional[BackendRegistry] = None):
+    def __init__(self, registry: BackendRegistry | None = None):
         self.registry = registry or BackendRegistry()
         self.provenance = ProvenanceStore()
 
@@ -54,7 +55,7 @@ class HugrGate:
             except Exception as e:  # noqa: BLE001 - best effort
                 logger.warning("backend %r close() failed: %s", name, e)
 
-    def __enter__(self) -> "HugrGate":
+    def __enter__(self) -> HugrGate:
         return self
 
     def __exit__(self, *exc: Any) -> None:
@@ -79,9 +80,9 @@ class HugrGate:
         return candidates[0]
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
-               policy: Optional[DecisionPolicy] = None,
-               context: Optional[Mapping[str, Any]] = None,
-               backend_name: Optional[str] = None) -> DecisionResult:
+               policy: DecisionPolicy | None = None,
+               context: Mapping[str, Any] | None = None,
+               backend_name: str | None = None) -> DecisionResult:
         """Make a bounded machine judgment.
 
         Never returns a value outside the spec's decision space.
@@ -113,7 +114,7 @@ class HugrGate:
         except Exception as e:
             logger.warning("backend %r raised unexpected %s",
                            backend.name, type(e).__name__)
-            raise BackendError(f"backend {backend.name} failed: {e}")
+            raise BackendError(f"backend {backend.name} failed: {e}") from e
 
         result.latency_ms = (time.perf_counter() - start) * 1000
         result.backend = backend.name
@@ -140,14 +141,14 @@ class HugrGate:
         return result
 
     def decide_batch(self, states: list, spec: DecisionSpec,
-                     policy: Optional[DecisionPolicy] = None) -> list:
+                     policy: DecisionPolicy | None = None) -> list:
         return [self.decide(s, spec, policy) for s in states]
 
     async def adecide(self, state: Mapping[str, Any],
                       spec: DecisionSpec,
-                      policy: Optional[DecisionPolicy] = None,
-                      context: Optional[Mapping[str, Any]] = None,
-                      backend_name: Optional[str] = None) -> DecisionResult:
+                      policy: DecisionPolicy | None = None,
+                      context: Mapping[str, Any] | None = None,
+                      backend_name: str | None = None) -> DecisionResult:
         """Async variant of :meth:`decide` (slice 018).
 
         Backend inference is synchronous and may block; this runs it in

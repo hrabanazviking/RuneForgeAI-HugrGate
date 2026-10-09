@@ -7,8 +7,9 @@ import hashlib
 import json
 import threading
 import time
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -28,7 +29,7 @@ def _hash_request(state: Mapping[str, Any], spec: DecisionSpec) -> str:
 @dataclass
 class DecisionRecord:
     request_hash: str
-    spec: Dict[str, Any]
+    spec: dict[str, Any]
     backend: str
     model: str
     model_version: str = "unknown"
@@ -38,10 +39,10 @@ class DecisionRecord:
     policy_threshold: float = 0.0
     accepted: bool = True
     fallback_used: bool = False
-    fallback_trace: List[str] = field(default_factory=list)
+    fallback_trace: list[str] = field(default_factory=list)
     latency_ms: float = 0.0
     timestamp: float = field(default_factory=time.time)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     # Integrity chain (slice 015): each appended record commits to the
     # previous record's hash, so silent edits break verify_chain().
     prev_hash: str = ""
@@ -51,7 +52,7 @@ class DecisionRecord:
     def from_decision(cls, state: Mapping[str, Any], spec: DecisionSpec,
                       result: DecisionResult,
                       policy_threshold: float = 0.0,
-                      redact_input: bool = False) -> "DecisionRecord":
+                      redact_input: bool = False) -> DecisionRecord:
         return cls(
             request_hash=_hash_request(state, spec),
             spec=spec.to_dict(),
@@ -67,7 +68,7 @@ class DecisionRecord:
             metadata={} if redact_input else {"state_keys": list(state.keys())},
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "request_hash": self.request_hash,
             "spec": dict(self.spec),
@@ -89,7 +90,7 @@ class DecisionRecord:
         }
 
     @classmethod
-    def from_dict(cls, d: Mapping[str, Any]) -> "DecisionRecord":
+    def from_dict(cls, d: Mapping[str, Any]) -> DecisionRecord:
         """Rebuild a record from :meth:`to_dict` output.
 
         Raises ``SpecError`` when required keys are missing.
@@ -138,11 +139,11 @@ class ProvenanceStore:
     ``verify_chain`` treats it as the valid starting link.
     """
 
-    def __init__(self, max_records: Optional[int] = None):
+    def __init__(self, max_records: int | None = None):
         if max_records is not None and max_records < 1:
             raise ValueError("max_records must be >= 1")
         self._max_records = max_records
-        self._records: List[DecisionRecord] = []
+        self._records: list[DecisionRecord] = []
         self._floor_hash = ""  # record_hash of the last evicted record
         self._evicted = 0
         self._lock = threading.RLock()
@@ -177,7 +178,7 @@ class ProvenanceStore:
         with self._lock:
             return self._evicted
 
-    def by_hash(self, request_hash: str) -> Optional[DecisionRecord]:
+    def by_hash(self, request_hash: str) -> DecisionRecord | None:
         with self._lock:
             records = list(self._records)
         for r in reversed(records):
@@ -185,7 +186,7 @@ class ProvenanceStore:
                 return copy.deepcopy(r)
         return None
 
-    def recent(self, n: int = 10) -> List[DecisionRecord]:
+    def recent(self, n: int = 10) -> list[DecisionRecord]:
         if n < 0:
             raise ValueError(f"recent(n) needs n >= 0, got {n}")
         if n == 0:

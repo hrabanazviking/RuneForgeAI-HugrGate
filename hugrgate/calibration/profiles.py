@@ -15,10 +15,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -40,10 +41,10 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "hash_dataset",
+    "CalibratedBackend",
     "CalibrationProfile",
     "CalibrationProfileStore",
-    "CalibratedBackend",
+    "hash_dataset",
 ]
 
 
@@ -71,8 +72,8 @@ class CalibrationProfile:
     model_version: str = ""
     calibrator_name: str = "platt"
     # One fitted calibrator parameter set per class (one-vs-rest).
-    calibrator_params: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    calibrator_params: dict[str, dict[str, Any]] = field(default_factory=dict)
+    metrics: dict[str, float] = field(default_factory=dict)
     dataset_hash: str = ""
     n_samples: int = 0
     created_at: str = field(
@@ -88,17 +89,17 @@ class CalibrationProfile:
         CalibratorRegistry.get(self.calibrator_name)
 
     @property
-    def classes(self) -> List[str]:
+    def classes(self) -> list[str]:
         return sorted(self.calibrator_params.keys())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2, sort_keys=True)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "CalibrationProfile":
+    def from_dict(cls, d: dict[str, Any]) -> CalibrationProfile:
         return cls(
             name=d["name"],
             version=d.get("version", "1.0.0"),
@@ -116,10 +117,10 @@ class CalibrationProfile:
         )
 
     @classmethod
-    def from_json(cls, text: str) -> "CalibrationProfile":
+    def from_json(cls, text: str) -> CalibrationProfile:
         return cls.from_dict(json.loads(text))
 
-    def build_calibrators(self) -> Dict[str, Calibrator]:
+    def build_calibrators(self) -> dict[str, Calibrator]:
         """Rebuild the fitted per-class calibrators from stored params."""
         return {
             cls_name: CalibratorRegistry.build(self.calibrator_name, params)
@@ -155,7 +156,7 @@ class CalibrationProfileStore:
         return path
 
     def get(self, name: str,
-            version: Optional[str] = None) -> CalibrationProfile:
+            version: str | None = None) -> CalibrationProfile:
         if version is None:
             version = self.latest_version(name)
         path = self._path(name, version)
@@ -164,7 +165,7 @@ class CalibrationProfileStore:
                 f"no calibration profile {name}@{version}")
         return CalibrationProfile.from_json(path.read_text())
 
-    def list_versions(self, name: str) -> List[str]:
+    def list_versions(self, name: str) -> list[str]:
         ndir = self.root / name
         if not ndir.is_dir():
             return []
@@ -176,7 +177,7 @@ class CalibrationProfileStore:
             raise HugrGateError(f"no stored profiles named {name!r}")
         return versions[-1]
 
-    def list_profiles(self) -> List[str]:
+    def list_profiles(self) -> list[str]:
         return sorted(p.name for p in self.root.iterdir() if p.is_dir())
 
 
@@ -190,7 +191,7 @@ class CalibratedBackend(Backend):
     """
 
     def __init__(self, inner: Backend, profile: CalibrationProfile,
-                 calibrators: Optional[Dict[str, Calibrator]] = None):
+                 calibrators: dict[str, Calibrator] | None = None):
         if not hasattr(inner, "predict_proba_dict"):
             raise CalibrationError(
                 f"inner backend {inner.name!r} has no predict_proba_dict; "
@@ -210,7 +211,7 @@ class CalibratedBackend(Backend):
     def profile(self) -> CalibrationProfile:
         return self._profile
 
-    def capabilities(self) -> Dict[str, Any]:
+    def capabilities(self) -> dict[str, Any]:
         caps = self._inner.capabilities()
         caps["calibrated"] = True
         caps["calibration_profile"] = self._profile.qualified_name()
@@ -220,7 +221,7 @@ class CalibratedBackend(Backend):
         return self._inner.supports(spec)
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 context: Optional[Mapping[str, Any]] = None
+                 context: Mapping[str, Any] | None = None
                  ) -> DecisionResult:
         result = self._inner.evaluate(state, spec, context)
         raw = dict(result.distribution)
@@ -248,12 +249,12 @@ class CalibratedBackend(Backend):
         }
         return result
 
-    def health(self) -> Dict[str, Any]:
+    def health(self) -> dict[str, Any]:
         h = self._inner.health()
         h["calibration_profile"] = self._profile.qualified_name()
         return h
 
-    def calibration_info(self) -> Dict[str, Any]:
+    def calibration_info(self) -> dict[str, Any]:
         return {
             "calibrated": True,
             "profile": self._profile.qualified_name(),

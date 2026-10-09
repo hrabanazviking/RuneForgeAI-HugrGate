@@ -3,12 +3,18 @@
 import pytest
 
 from hugrgate import (
-    DecisionSpec, DecisionResult, DecisionPolicy,
-    Backend, BackendRegistry, HugrGate,
-    SpecError, PolicyError, BackendUnavailable, Abstention,
+    Abstention,
+    Backend,
+    BackendRegistry,
+    BackendUnavailable,
+    DecisionPolicy,
+    DecisionResult,
+    DecisionSpec,
+    HugrGate,
+    SpecError,
 )
-from hugrgate.validation import validate_result, validate_state
 from hugrgate.provenance import ProvenanceStore
+from hugrgate.validation import validate_result, validate_state
 
 
 class StubBackend(Backend):
@@ -50,14 +56,14 @@ def test_ordinal_valid():
     assert s.value_space() == ["low", "high"]
 
 def test_numeric_valid():
-    s = DecisionSpec(type="numeric", minimum=0.0, maximum=100.0)
+    DecisionSpec(type="numeric", minimum=0.0, maximum=100.0)
 
 def test_numeric_rejects_inverted():
     with pytest.raises(SpecError):
         DecisionSpec(type="numeric", minimum=100.0, maximum=0.0)
 
 def test_multilabel_valid():
-    s = DecisionSpec(type="multilabel", labels=["a", "b"])
+    DecisionSpec(type="multilabel", labels=["a", "b"])
 
 def test_spec_roundtrip():
     s = DecisionSpec(type="categorical", options=["x", "y"])
