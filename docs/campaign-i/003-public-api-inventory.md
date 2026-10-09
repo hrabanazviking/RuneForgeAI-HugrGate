@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 53 · **public names:** 242
+**Modules:** 54 · **public names:** 245
 
 ## API stability policy
 
@@ -339,6 +339,14 @@ that this document never drifts from the code.
 | `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
 | `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
 | `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
+
+### `hugrgate.edge.residency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
 
 ### `hugrgate.edge.routing`
 
