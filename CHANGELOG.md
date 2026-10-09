@@ -13,6 +13,11 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 240)
+- Secure deletion hooks (`hugrgate.privacy_deletion`):
+  `shred_bytes`, `SecureBuffer`, `SecureDeleter` with
+  `DeletionReceipt`, `CryptoShredder` for key-destruction deletion.
+
 ### Added (slice 239)
 - Retention policies (`hugrgate.privacy_retention`): per-class
   maximum ages, `purge_expired` with `on_purge` hook,
