@@ -142,34 +142,6 @@ flowchart TD
         bench_report[bench_report]
         log[log]
     end
-    subgraph memory[memory]
-        memory[memory]
-        memory_access[memory.access]
-        memory_adversarial[memory.adversarial]
-        memory_assisted_calibration[memory.assisted_calibration]
-        memory_assisted_routing[memory.assisted_routing]
-        memory_backend_history[memory.backend_history]
-        memory_benchmarks[memory.benchmarks]
-        memory_compaction[memory.compaction]
-        memory_conditioned[memory.conditioned]
-        memory_contract_history[memory.contract_history]
-        memory_counterfactuals[memory.counterfactuals]
-        memory_decay[memory.decay]
-        memory_domain_profiles[memory.domain_profiles]
-        memory_frequency[memory.frequency]
-        memory_groundtruth[memory.groundtruth]
-        memory_history[memory.history]
-        memory_io[memory.io]
-        memory_outcomes[memory.outcomes]
-        memory_policies[memory.policies]
-        memory_query[memory.query]
-        memory_recency[memory.recency]
-        memory_replay[memory.replay]
-        memory_retention[memory.retention]
-        memory_retrieval[memory.retrieval]
-        memory_similarity[memory.similarity]
-        memory_types[memory.types]
-    end
     subgraph backends[backends]
         backends_rules[backends.rules]
         backends_logreg[backends.logreg]
@@ -362,31 +334,31 @@ flowchart TD
         chaos_soak[chaos.soak]
         chaos_scorecard[chaos.scorecard]
     end
-    subgraph observability[observability]
-        observability[observability]
-        observability_metrics[observability.metrics]
-        observability_otel[observability.otel]
-        observability_trace[observability.trace]
-        observability_spans_decision[observability.spans_decision]
-        observability_spans_backend[observability.spans_backend]
-        observability_spans_routing[observability.spans_routing]
-        observability_spans_calibration[observability.spans_calibration]
-        observability_logschema[observability.logschema]
-        observability_prometheus[observability.prometheus]
-        observability_dashboard[observability.dashboard]
-        observability_histograms[observability.histograms]
-        observability_confidence[observability.confidence]
-        observability_abstention[observability.abstention]
-        observability_escalation[observability.escalation]
-        observability_cost[observability.cost]
-        observability_energy[observability.energy]
-        observability_privacy_metrics[observability.privacy_metrics]
-        observability_alerts[observability.alerts]
-        observability_slo[observability.slo]
-        observability_slo_eval[observability.slo_eval]
-        observability_explain[observability.explain]
-        observability_replay[observability.replay]
-        observability_load[observability.load]
+    subgraph evaluation-lab[evaluation-lab]
+        evlab[evlab]
+        evlab_api[evlab.api]
+        evlab_dataset[evlab.dataset]
+        evlab_splits[evlab.splits]
+        evlab_stratified[evlab.stratified]
+        evlab_crossval[evlab.crossval]
+        evlab_bootstrap[evlab.bootstrap]
+        evlab_significance[evlab.significance]
+        evlab_compare[evlab.compare]
+        evlab_calibration[evlab.calibration]
+        evlab_selective[evlab.selective]
+        evlab_costaware[evlab.costaware]
+        evlab_latency[evlab.latency]
+        evlab_energy[evlab.energy]
+        evlab_privacy[evlab.privacy]
+        evlab_robustness[evlab.robustness]
+        evlab_shift[evlab.shift]
+        evlab_fairness[evlab.fairness]
+        evlab_history[evlab.history]
+        evlab_artifacts[evlab.artifacts]
+        evlab_repro[evlab.repro]
+        evlab_gates[evlab.gates]
+        evlab_report[evlab.report]
+        evlab_release[evlab.release]
     end
 
     hugrgate --> backend
@@ -1184,6 +1156,139 @@ flowchart TD
     ensemble_voting --> ensemble_base
     ensemble_voting --> errors
     ensemble_voting --> result
+    evlab --> evlab_api
+    evlab --> evlab_artifacts
+    evlab --> evlab_bootstrap
+    evlab --> evlab_calibration
+    evlab --> evlab_compare
+    evlab --> evlab_costaware
+    evlab --> evlab_crossval
+    evlab --> evlab_dataset
+    evlab --> evlab_energy
+    evlab --> evlab_fairness
+    evlab --> evlab_gates
+    evlab --> evlab_history
+    evlab --> evlab_latency
+    evlab --> evlab_privacy
+    evlab --> evlab_release
+    evlab --> evlab_report
+    evlab --> evlab_repro
+    evlab --> evlab_robustness
+    evlab --> evlab_selective
+    evlab --> evlab_shift
+    evlab --> evlab_significance
+    evlab --> evlab_splits
+    evlab --> evlab_stratified
+    evlab_api --> hugrgate
+    evlab_api --> bench
+    evlab_api --> core
+    evlab_api --> errors
+    evlab_api --> log
+    evlab_api --> policy
+    evlab_api --> spec
+    evlab_artifacts --> hugrgate
+    evlab_artifacts --> errors
+    evlab_artifacts --> evlab_api
+    evlab_artifacts --> evlab_dataset
+    evlab_artifacts --> evlab_repro
+    evlab_bootstrap --> bench
+    evlab_bootstrap --> core
+    evlab_bootstrap --> errors
+    evlab_bootstrap --> policy
+    evlab_bootstrap --> result
+    evlab_bootstrap --> spec
+    evlab_calibration --> core
+    evlab_calibration --> errors
+    evlab_calibration --> policy
+    evlab_calibration --> result
+    evlab_calibration --> spec
+    evlab_compare --> core
+    evlab_compare --> errors
+    evlab_compare --> evlab_bootstrap
+    evlab_compare --> evlab_significance
+    evlab_compare --> policy
+    evlab_compare --> result
+    evlab_compare --> spec
+    evlab_costaware --> bench
+    evlab_costaware --> core
+    evlab_costaware --> errors
+    evlab_costaware --> policy
+    evlab_costaware --> result
+    evlab_costaware --> spec
+    evlab_crossval --> bench
+    evlab_crossval --> core
+    evlab_crossval --> errors
+    evlab_crossval --> evlab_api
+    evlab_crossval --> evlab_splits
+    evlab_crossval --> policy
+    evlab_dataset --> errors
+    evlab_energy --> bench
+    evlab_energy --> core
+    evlab_energy --> edge_power
+    evlab_energy --> errors
+    evlab_energy --> evlab_costaware
+    evlab_energy --> policy
+    evlab_energy --> result
+    evlab_energy --> spec
+    evlab_fairness --> core
+    evlab_fairness --> errors
+    evlab_fairness --> evlab_api
+    evlab_fairness --> evlab_stratified
+    evlab_fairness --> policy
+    evlab_fairness --> spec
+    evlab_gates --> errors
+    evlab_gates --> evlab_api
+    evlab_history --> errors
+    evlab_history --> evlab_api
+    evlab_latency --> core
+    evlab_latency --> errors
+    evlab_latency --> policy
+    evlab_latency --> result
+    evlab_latency --> spec
+    evlab_privacy --> bench
+    evlab_privacy --> core
+    evlab_privacy --> errors
+    evlab_privacy --> policy
+    evlab_privacy --> privacy_pii
+    evlab_privacy --> result
+    evlab_privacy --> spec
+    evlab_release --> errors
+    evlab_release --> evlab_api
+    evlab_release --> evlab_gates
+    evlab_release --> evlab_history
+    evlab_release --> evlab_repro
+    evlab_report --> bench_report
+    evlab_report --> errors
+    evlab_report --> evlab_api
+    evlab_repro --> hugrgate
+    evlab_repro --> errors
+    evlab_repro --> evlab_api
+    evlab_repro --> evlab_dataset
+    evlab_repro --> policy
+    evlab_robustness --> bench
+    evlab_robustness --> core
+    evlab_robustness --> errors
+    evlab_robustness --> policy
+    evlab_robustness --> result
+    evlab_robustness --> spec
+    evlab_selective --> core
+    evlab_selective --> errors
+    evlab_selective --> policy
+    evlab_selective --> spec
+    evlab_shift --> bench
+    evlab_shift --> core
+    evlab_shift --> errors
+    evlab_shift --> evlab_api
+    evlab_shift --> policy
+    evlab_significance --> errors
+    evlab_significance --> result
+    evlab_splits --> errors
+    evlab_splits --> evlab_dataset
+    evlab_stratified --> bench
+    evlab_stratified --> core
+    evlab_stratified --> errors
+    evlab_stratified --> evlab_api
+    evlab_stratified --> policy
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -1210,99 +1315,6 @@ flowchart TD
     ladder --> spec
     ladder --> validation
     lockaudit --> log
-    memory --> memory_access
-    memory --> memory_adversarial
-    memory --> memory_assisted_calibration
-    memory --> memory_assisted_routing
-    memory --> memory_backend_history
-    memory --> memory_compaction
-    memory --> memory_conditioned
-    memory --> memory_contract_history
-    memory --> memory_counterfactuals
-    memory --> memory_decay
-    memory --> memory_domain_profiles
-    memory --> memory_frequency
-    memory --> memory_groundtruth
-    memory --> memory_history
-    memory --> memory_io
-    memory --> memory_outcomes
-    memory --> memory_policies
-    memory --> memory_query
-    memory --> memory_recency
-    memory --> memory_replay
-    memory --> memory_retention
-    memory --> memory_retrieval
-    memory --> memory_similarity
-    memory_access --> errors
-    memory_access --> memory_query
-    memory_access --> memory_types
-    memory_access --> privacy
-    memory_adversarial --> memory_groundtruth
-    memory_adversarial --> memory_query
-    memory_adversarial --> memory_types
-    memory_assisted_calibration --> errors
-    memory_assisted_calibration --> memory_query
-    memory_assisted_calibration --> memory_types
-    memory_assisted_routing --> memory_counterfactuals
-    memory_assisted_routing --> memory_types
-    memory_backend_history --> memory_decay
-    memory_backend_history --> memory_query
-    memory_backend_history --> memory_types
-    memory_benchmarks --> memory
-    memory_benchmarks --> provenance
-    memory_compaction --> memory_query
-    memory_compaction --> memory_types
-    memory_conditioned --> memory_groundtruth
-    memory_conditioned --> memory_outcomes
-    memory_conditioned --> memory_query
-    memory_conditioned --> memory_retrieval
-    memory_conditioned --> memory_types
-    memory_contract_history --> memory_query
-    memory_contract_history --> memory_types
-    memory_counterfactuals --> memory_query
-    memory_counterfactuals --> memory_similarity
-    memory_counterfactuals --> memory_types
-    memory_domain_profiles --> memory_decay
-    memory_domain_profiles --> memory_query
-    memory_domain_profiles --> memory_types
-    memory_frequency --> memory_decay
-    memory_frequency --> memory_query
-    memory_frequency --> memory_types
-    memory_groundtruth --> memory_outcomes
-    memory_history --> errors
-    memory_history --> memory_compaction
-    memory_history -.-> memory_groundtruth
-    memory_history --> memory_outcomes
-    memory_history --> memory_policies
-    memory_history --> memory_query
-    memory_history --> privacy
-    memory_history --> provenance
-    memory_io --> errors
-    memory_io --> memory_compaction
-    memory_io --> memory_history
-    memory_io --> memory_query
-    memory_io --> memory_types
-    memory_policies --> privacy
-    memory_policies --> provenance
-    memory_query --> errors
-    memory_query --> memory_types
-    memory_query --> provenance
-    memory_recency --> memory_decay
-    memory_recency --> memory_query
-    memory_recency --> memory_similarity
-    memory_recency --> memory_types
-    memory_replay --> memory_query
-    memory_replay --> memory_types
-    memory_retention --> errors
-    memory_retention --> memory_query
-    memory_retention --> memory_types
-    memory_retention --> privacy_retention
-    memory_retrieval --> memory_decay
-    memory_retrieval --> memory_query
-    memory_retrieval --> memory_similarity
-    memory_retrieval --> memory_types
-    memory_similarity --> memory_types
-    memory_types --> provenance
     millionbench --> backend
     millionbench --> core
     millionbench --> log
@@ -1318,68 +1330,6 @@ flowchart TD
     negotiate --> spec
     numa --> errors
     numa --> log
-    observability_abstention --> errors
-    observability_abstention --> observability_metrics
-    observability_abstention --> result
-    observability_alerts --> drift
-    observability_alerts --> errors
-    observability_confidence --> errors
-    observability_confidence --> observability_metrics
-    observability_cost --> errors
-    observability_cost --> observability_metrics
-    observability_dashboard --> errors
-    observability_dashboard --> health
-    observability_dashboard --> observability_metrics
-    observability_energy --> errors
-    observability_energy --> observability_metrics
-    observability_escalation --> errors
-    observability_escalation --> observability_metrics
-    observability_explain --> errors
-    observability_explain --> observability_spans_decision
-    observability_explain --> observability_trace
-    observability_explain --> provenance
-    observability_explain --> result
-    observability_explain --> spec
-    observability_histograms --> errors
-    observability_histograms --> observability_metrics
-    observability_load --> errors
-    observability_load --> observability_dashboard
-    observability_load --> observability_metrics
-    observability_load --> observability_spans_backend
-    observability_load --> observability_spans_decision
-    observability_load --> observability_trace
-    observability_load --> policy
-    observability_load --> result
-    observability_load --> spec
-    observability_logschema --> errors
-    observability_logschema --> log
-    observability_logschema --> observability_trace
-    observability_metrics --> errors
-    observability_otel --> errors
-    observability_otel --> observability_trace
-    observability_privacy_metrics --> errors
-    observability_privacy_metrics --> observability_metrics
-    observability_privacy_metrics --> observability_trace
-    observability_prometheus --> errors
-    observability_prometheus --> observability_metrics
-    observability_replay --> errors
-    observability_replay --> observability_trace
-    observability_slo --> errors
-    observability_slo_eval --> errors
-    observability_slo_eval --> observability_slo
-    observability_spans_backend --> errors
-    observability_spans_backend --> observability_trace
-    observability_spans_calibration --> errors
-    observability_spans_calibration --> observability_trace
-    observability_spans_decision --> errors
-    observability_spans_decision --> observability_trace
-    observability_spans_decision --> policy
-    observability_spans_decision --> result
-    observability_spans_decision --> spec
-    observability_spans_routing --> adaptive_telemetry
-    observability_spans_routing --> errors
-    observability_spans_routing --> observability_trace
-    observability_trace --> errors
     perfgate -.-> cache
     perfgate --> errors
     perfgate --> log
@@ -1679,7 +1629,6 @@ flowchart TD
 | privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
-| memory | `memory`, `memory.access`, `memory.adversarial`, `memory.assisted_calibration`, `memory.assisted_routing`, `memory.backend_history`, `memory.benchmarks`, `memory.compaction`, `memory.conditioned`, `memory.contract_history`, `memory.counterfactuals`, `memory.decay`, `memory.domain_profiles`, `memory.frequency`, `memory.groundtruth`, `memory.history`, `memory.io`, `memory.outcomes`, `memory.policies`, `memory.query`, `memory.recency`, `memory.replay`, `memory.retention`, `memory.retrieval`, `memory.similarity`, `memory.types` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
@@ -1690,7 +1639,7 @@ flowchart TD
 | performance | `profiling`, `flame`, `hotpaths`, `allocprof`, `zerocopy`, `asyncx`, `async_backend`, `scheduler`, `backpressure`, `pool`, `lockaudit`, `multiproc`, `supervision`, `numa`, `gpusched`, `perfgate`, `millionbench` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
-| observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
+| evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
 
 ## Internal dependency edges
 
@@ -2491,6 +2440,139 @@ flowchart TD
 | `ensemble.voting` | `ensemble.base` | no |
 | `ensemble.voting` | `errors` | no |
 | `ensemble.voting` | `result` | no |
+| `evlab` | `evlab.api` | no |
+| `evlab` | `evlab.artifacts` | no |
+| `evlab` | `evlab.bootstrap` | no |
+| `evlab` | `evlab.calibration` | no |
+| `evlab` | `evlab.compare` | no |
+| `evlab` | `evlab.costaware` | no |
+| `evlab` | `evlab.crossval` | no |
+| `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.energy` | no |
+| `evlab` | `evlab.fairness` | no |
+| `evlab` | `evlab.gates` | no |
+| `evlab` | `evlab.history` | no |
+| `evlab` | `evlab.latency` | no |
+| `evlab` | `evlab.privacy` | no |
+| `evlab` | `evlab.release` | no |
+| `evlab` | `evlab.report` | no |
+| `evlab` | `evlab.repro` | no |
+| `evlab` | `evlab.robustness` | no |
+| `evlab` | `evlab.selective` | no |
+| `evlab` | `evlab.shift` | no |
+| `evlab` | `evlab.significance` | no |
+| `evlab` | `evlab.splits` | no |
+| `evlab` | `evlab.stratified` | no |
+| `evlab.api` | `hugrgate` | no |
+| `evlab.api` | `bench` | no |
+| `evlab.api` | `core` | no |
+| `evlab.api` | `errors` | no |
+| `evlab.api` | `log` | no |
+| `evlab.api` | `policy` | no |
+| `evlab.api` | `spec` | no |
+| `evlab.artifacts` | `hugrgate` | no |
+| `evlab.artifacts` | `errors` | no |
+| `evlab.artifacts` | `evlab.api` | no |
+| `evlab.artifacts` | `evlab.dataset` | no |
+| `evlab.artifacts` | `evlab.repro` | no |
+| `evlab.bootstrap` | `bench` | no |
+| `evlab.bootstrap` | `core` | no |
+| `evlab.bootstrap` | `errors` | no |
+| `evlab.bootstrap` | `policy` | no |
+| `evlab.bootstrap` | `result` | no |
+| `evlab.bootstrap` | `spec` | no |
+| `evlab.calibration` | `core` | no |
+| `evlab.calibration` | `errors` | no |
+| `evlab.calibration` | `policy` | no |
+| `evlab.calibration` | `result` | no |
+| `evlab.calibration` | `spec` | no |
+| `evlab.compare` | `core` | no |
+| `evlab.compare` | `errors` | no |
+| `evlab.compare` | `evlab.bootstrap` | no |
+| `evlab.compare` | `evlab.significance` | no |
+| `evlab.compare` | `policy` | no |
+| `evlab.compare` | `result` | no |
+| `evlab.compare` | `spec` | no |
+| `evlab.costaware` | `bench` | no |
+| `evlab.costaware` | `core` | no |
+| `evlab.costaware` | `errors` | no |
+| `evlab.costaware` | `policy` | no |
+| `evlab.costaware` | `result` | no |
+| `evlab.costaware` | `spec` | no |
+| `evlab.crossval` | `bench` | no |
+| `evlab.crossval` | `core` | no |
+| `evlab.crossval` | `errors` | no |
+| `evlab.crossval` | `evlab.api` | no |
+| `evlab.crossval` | `evlab.splits` | no |
+| `evlab.crossval` | `policy` | no |
+| `evlab.dataset` | `errors` | no |
+| `evlab.energy` | `bench` | no |
+| `evlab.energy` | `core` | no |
+| `evlab.energy` | `edge.power` | no |
+| `evlab.energy` | `errors` | no |
+| `evlab.energy` | `evlab.costaware` | no |
+| `evlab.energy` | `policy` | no |
+| `evlab.energy` | `result` | no |
+| `evlab.energy` | `spec` | no |
+| `evlab.fairness` | `core` | no |
+| `evlab.fairness` | `errors` | no |
+| `evlab.fairness` | `evlab.api` | no |
+| `evlab.fairness` | `evlab.stratified` | no |
+| `evlab.fairness` | `policy` | no |
+| `evlab.fairness` | `spec` | no |
+| `evlab.gates` | `errors` | no |
+| `evlab.gates` | `evlab.api` | no |
+| `evlab.history` | `errors` | no |
+| `evlab.history` | `evlab.api` | no |
+| `evlab.latency` | `core` | no |
+| `evlab.latency` | `errors` | no |
+| `evlab.latency` | `policy` | no |
+| `evlab.latency` | `result` | no |
+| `evlab.latency` | `spec` | no |
+| `evlab.privacy` | `bench` | no |
+| `evlab.privacy` | `core` | no |
+| `evlab.privacy` | `errors` | no |
+| `evlab.privacy` | `policy` | no |
+| `evlab.privacy` | `privacy_pii` | no |
+| `evlab.privacy` | `result` | no |
+| `evlab.privacy` | `spec` | no |
+| `evlab.release` | `errors` | no |
+| `evlab.release` | `evlab.api` | no |
+| `evlab.release` | `evlab.gates` | no |
+| `evlab.release` | `evlab.history` | no |
+| `evlab.release` | `evlab.repro` | no |
+| `evlab.report` | `bench_report` | no |
+| `evlab.report` | `errors` | no |
+| `evlab.report` | `evlab.api` | no |
+| `evlab.repro` | `hugrgate` | no |
+| `evlab.repro` | `errors` | no |
+| `evlab.repro` | `evlab.api` | no |
+| `evlab.repro` | `evlab.dataset` | no |
+| `evlab.repro` | `policy` | no |
+| `evlab.robustness` | `bench` | no |
+| `evlab.robustness` | `core` | no |
+| `evlab.robustness` | `errors` | no |
+| `evlab.robustness` | `policy` | no |
+| `evlab.robustness` | `result` | no |
+| `evlab.robustness` | `spec` | no |
+| `evlab.selective` | `core` | no |
+| `evlab.selective` | `errors` | no |
+| `evlab.selective` | `policy` | no |
+| `evlab.selective` | `spec` | no |
+| `evlab.shift` | `bench` | no |
+| `evlab.shift` | `core` | no |
+| `evlab.shift` | `errors` | no |
+| `evlab.shift` | `evlab.api` | no |
+| `evlab.shift` | `policy` | no |
+| `evlab.significance` | `errors` | no |
+| `evlab.significance` | `result` | no |
+| `evlab.splits` | `errors` | no |
+| `evlab.splits` | `evlab.dataset` | no |
+| `evlab.stratified` | `bench` | no |
+| `evlab.stratified` | `core` | no |
+| `evlab.stratified` | `errors` | no |
+| `evlab.stratified` | `evlab.api` | no |
+| `evlab.stratified` | `policy` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
@@ -2517,99 +2599,6 @@ flowchart TD
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
 | `lockaudit` | `log` | no |
-| `memory` | `memory.access` | no |
-| `memory` | `memory.adversarial` | no |
-| `memory` | `memory.assisted_calibration` | no |
-| `memory` | `memory.assisted_routing` | no |
-| `memory` | `memory.backend_history` | no |
-| `memory` | `memory.compaction` | no |
-| `memory` | `memory.conditioned` | no |
-| `memory` | `memory.contract_history` | no |
-| `memory` | `memory.counterfactuals` | no |
-| `memory` | `memory.decay` | no |
-| `memory` | `memory.domain_profiles` | no |
-| `memory` | `memory.frequency` | no |
-| `memory` | `memory.groundtruth` | no |
-| `memory` | `memory.history` | no |
-| `memory` | `memory.io` | no |
-| `memory` | `memory.outcomes` | no |
-| `memory` | `memory.policies` | no |
-| `memory` | `memory.query` | no |
-| `memory` | `memory.recency` | no |
-| `memory` | `memory.replay` | no |
-| `memory` | `memory.retention` | no |
-| `memory` | `memory.retrieval` | no |
-| `memory` | `memory.similarity` | no |
-| `memory.access` | `errors` | no |
-| `memory.access` | `memory.query` | no |
-| `memory.access` | `memory.types` | no |
-| `memory.access` | `privacy` | no |
-| `memory.adversarial` | `memory.groundtruth` | no |
-| `memory.adversarial` | `memory.query` | no |
-| `memory.adversarial` | `memory.types` | no |
-| `memory.assisted_calibration` | `errors` | no |
-| `memory.assisted_calibration` | `memory.query` | no |
-| `memory.assisted_calibration` | `memory.types` | no |
-| `memory.assisted_routing` | `memory.counterfactuals` | no |
-| `memory.assisted_routing` | `memory.types` | no |
-| `memory.backend_history` | `memory.decay` | no |
-| `memory.backend_history` | `memory.query` | no |
-| `memory.backend_history` | `memory.types` | no |
-| `memory.benchmarks` | `memory` | no |
-| `memory.benchmarks` | `provenance` | no |
-| `memory.compaction` | `memory.query` | no |
-| `memory.compaction` | `memory.types` | no |
-| `memory.conditioned` | `memory.groundtruth` | no |
-| `memory.conditioned` | `memory.outcomes` | no |
-| `memory.conditioned` | `memory.query` | no |
-| `memory.conditioned` | `memory.retrieval` | no |
-| `memory.conditioned` | `memory.types` | no |
-| `memory.contract_history` | `memory.query` | no |
-| `memory.contract_history` | `memory.types` | no |
-| `memory.counterfactuals` | `memory.query` | no |
-| `memory.counterfactuals` | `memory.similarity` | no |
-| `memory.counterfactuals` | `memory.types` | no |
-| `memory.domain_profiles` | `memory.decay` | no |
-| `memory.domain_profiles` | `memory.query` | no |
-| `memory.domain_profiles` | `memory.types` | no |
-| `memory.frequency` | `memory.decay` | no |
-| `memory.frequency` | `memory.query` | no |
-| `memory.frequency` | `memory.types` | no |
-| `memory.groundtruth` | `memory.outcomes` | no |
-| `memory.history` | `errors` | no |
-| `memory.history` | `memory.compaction` | no |
-| `memory.history` | `memory.groundtruth` | yes |
-| `memory.history` | `memory.outcomes` | no |
-| `memory.history` | `memory.policies` | no |
-| `memory.history` | `memory.query` | no |
-| `memory.history` | `privacy` | no |
-| `memory.history` | `provenance` | no |
-| `memory.io` | `errors` | no |
-| `memory.io` | `memory.compaction` | no |
-| `memory.io` | `memory.history` | no |
-| `memory.io` | `memory.query` | no |
-| `memory.io` | `memory.types` | no |
-| `memory.policies` | `privacy` | no |
-| `memory.policies` | `provenance` | no |
-| `memory.query` | `errors` | no |
-| `memory.query` | `memory.types` | no |
-| `memory.query` | `provenance` | no |
-| `memory.recency` | `memory.decay` | no |
-| `memory.recency` | `memory.query` | no |
-| `memory.recency` | `memory.similarity` | no |
-| `memory.recency` | `memory.types` | no |
-| `memory.replay` | `memory.query` | no |
-| `memory.replay` | `memory.types` | no |
-| `memory.retention` | `errors` | no |
-| `memory.retention` | `memory.query` | no |
-| `memory.retention` | `memory.types` | no |
-| `memory.retention` | `privacy_retention` | no |
-| `memory.retrieval` | `memory.decay` | no |
-| `memory.retrieval` | `memory.query` | no |
-| `memory.retrieval` | `memory.similarity` | no |
-| `memory.retrieval` | `memory.types` | no |
-| `memory.similarity` | `memory.types` | no |
-| `memory.types` | `provenance` | no |
 | `millionbench` | `backend` | no |
 | `millionbench` | `core` | no |
 | `millionbench` | `log` | no |
@@ -2625,68 +2614,6 @@ flowchart TD
 | `negotiate` | `spec` | no |
 | `numa` | `errors` | no |
 | `numa` | `log` | no |
-| `observability.abstention` | `errors` | no |
-| `observability.abstention` | `observability.metrics` | no |
-| `observability.abstention` | `result` | no |
-| `observability.alerts` | `drift` | no |
-| `observability.alerts` | `errors` | no |
-| `observability.confidence` | `errors` | no |
-| `observability.confidence` | `observability.metrics` | no |
-| `observability.cost` | `errors` | no |
-| `observability.cost` | `observability.metrics` | no |
-| `observability.dashboard` | `errors` | no |
-| `observability.dashboard` | `health` | no |
-| `observability.dashboard` | `observability.metrics` | no |
-| `observability.energy` | `errors` | no |
-| `observability.energy` | `observability.metrics` | no |
-| `observability.escalation` | `errors` | no |
-| `observability.escalation` | `observability.metrics` | no |
-| `observability.explain` | `errors` | no |
-| `observability.explain` | `observability.spans_decision` | no |
-| `observability.explain` | `observability.trace` | no |
-| `observability.explain` | `provenance` | no |
-| `observability.explain` | `result` | no |
-| `observability.explain` | `spec` | no |
-| `observability.histograms` | `errors` | no |
-| `observability.histograms` | `observability.metrics` | no |
-| `observability.load` | `errors` | no |
-| `observability.load` | `observability.dashboard` | no |
-| `observability.load` | `observability.metrics` | no |
-| `observability.load` | `observability.spans_backend` | no |
-| `observability.load` | `observability.spans_decision` | no |
-| `observability.load` | `observability.trace` | no |
-| `observability.load` | `policy` | no |
-| `observability.load` | `result` | no |
-| `observability.load` | `spec` | no |
-| `observability.logschema` | `errors` | no |
-| `observability.logschema` | `log` | no |
-| `observability.logschema` | `observability.trace` | no |
-| `observability.metrics` | `errors` | no |
-| `observability.otel` | `errors` | no |
-| `observability.otel` | `observability.trace` | no |
-| `observability.privacy_metrics` | `errors` | no |
-| `observability.privacy_metrics` | `observability.metrics` | no |
-| `observability.privacy_metrics` | `observability.trace` | no |
-| `observability.prometheus` | `errors` | no |
-| `observability.prometheus` | `observability.metrics` | no |
-| `observability.replay` | `errors` | no |
-| `observability.replay` | `observability.trace` | no |
-| `observability.slo` | `errors` | no |
-| `observability.slo_eval` | `errors` | no |
-| `observability.slo_eval` | `observability.slo` | no |
-| `observability.spans_backend` | `errors` | no |
-| `observability.spans_backend` | `observability.trace` | no |
-| `observability.spans_calibration` | `errors` | no |
-| `observability.spans_calibration` | `observability.trace` | no |
-| `observability.spans_decision` | `errors` | no |
-| `observability.spans_decision` | `observability.trace` | no |
-| `observability.spans_decision` | `policy` | no |
-| `observability.spans_decision` | `result` | no |
-| `observability.spans_decision` | `spec` | no |
-| `observability.spans_routing` | `adaptive.telemetry` | no |
-| `observability.spans_routing` | `errors` | no |
-| `observability.spans_routing` | `observability.trace` | no |
-| `observability.trace` | `errors` | no |
 | `perfgate` | `cache` | yes |
 | `perfgate` | `errors` | no |
 | `perfgate` | `log` | no |

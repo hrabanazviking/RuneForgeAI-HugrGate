@@ -25,9 +25,12 @@ from hugrgate.errors import (
     ClusterAuthError,
     ContractError,
     DataFlowDenied,
+    DatasetError,
     EdgeAffinityError,
     EdgeCacheError,
     EdgeMemoryError,
+    EvalError,
+    EvalGateError,
     GateError,
     GGUFError,
     GpuschedError,
@@ -90,6 +93,9 @@ ALL_ERRORS = [
     StorageError, TelemetryError, WatchdogError,
     ClusterAuthError,
     DataFlowDenied,
+    DatasetError,
+    EvalError,
+    EvalGateError,
     JurisdictionViolation,
     LocalOnlyViolation,
     SecretDetected,
@@ -160,6 +166,9 @@ EXPECTED_CODES = {
     TraceError: "trace_error",
     SLOError: "slo_error",
     AlertError: "alert_error",
+    DatasetError: "dataset_error",
+    EvalError: "eval_error",
+    EvalGateError: "eval_gate_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -225,6 +234,9 @@ EXPECTED_RECOVERABLE = {
     TraceError: True,
     SLOError: False,
     AlertError: True,
+    DatasetError: False,
+    EvalError: False,
+    EvalGateError: False,
 }
 
 

@@ -27,9 +27,12 @@ __all__ = [
     "ClusterAuthError",
     "ContractError",
     "DataFlowDenied",
+    "DatasetError",
     "EdgeAffinityError",
     "EdgeCacheError",
     "EdgeMemoryError",
+    "EvalError",
+    "EvalGateError",
     "GGUFError",
     "GateError",
     "GpuschedError",
@@ -534,58 +537,57 @@ class PerfGateError(HugrGateError):
 # metric name, invalid SLO) are caller bugs and not recoverable.
 class ObservabilityError(HugrGateError):
     """Base for all Campaign XIV observability failures.
-
     Slice 326.  A failed metric recording, dropped span, or missed alert
     must never fail the decision it observes; subclasses keep that
     promise unless the failure is a caller-side definition bug.
     """
     code = "observability_error"
     recoverable = True
-
-
 class MetricError(ObservabilityError):
     """A metric definition or recording was invalid.
-
     Slice 326.  Bad metric names, wrong label sets, negative counter
     increments, non-finite observations, and label-cardinality overflow
     all surface here.  Recording is best-effort — the gate must keep
     deciding — so this is recoverable; *definition* bugs should still be
     fixed rather than retried blindly.
-    """
     code = "metric_error"
-    recoverable = True
-
-
 class TraceError(ObservabilityError):
     """A trace/span invariant was violated.
-
     Slice 328.  Malformed traceparent headers, forbidden (payload)
     attribute keys, or a broken span lifecycle surface here.
     Recoverable: a dropped span loses one observation, never the
     decision.
-    """
     code = "trace_error"
-    recoverable = True
-
-
 class SLOError(ObservabilityError):
     """An SLO definition or evaluation was invalid.
-
     Slice 344.  Targets outside (0, 1], non-positive windows, or
     evaluations over empty sample sets surface here.  Not recoverable:
     a bad SLO definition is a configuration bug — fix it, do not retry
     the same definition.
-    """
     code = "slo_error"
     recoverable = False
-
-
 class AlertError(ObservabilityError):
     """An alert rule or alert delivery failed.
-
     Slice 343.  Bad rule configuration is a caller bug, but a missed
     delivery must never cascade — recoverable so the alerter can keep
     evaluating the remaining rules.
-    """
     code = "alert_error"
-    recoverable = True
+class DatasetError(HugrGateError):
+    """A dataset manifest is malformed, fails validation, or is unusable.
+    Slice 352.  Deliberately *not* recoverable: a broken manifest is a
+    data-integrity signal, not a transient fault.  Fix the dataset or
+    its manifest; retrying the same bytes cannot succeed.
+    code = "dataset_error"
+class EvalError(HugrGateError):
+    """An evaluation-lab operation failed (bad experiment, empty run).
+    Slice 351.  Deliberately *not* recoverable: evaluation failures
+    signal misconfiguration or empty data, not transient faults.  Fix
+    the experiment definition and re-run.
+    code = "eval_error"
+class EvalGateError(HugrGateError):
+    """An evaluation quality gate failed (CI red).
+    Slice 373.  Raised by :func:`hugrgate.evlab.gates.assert_gates`
+    when one or more declared gates do not pass.  Not recoverable:
+    the numbers missed their thresholds — change the code, the data,
+    or the gate, then re-run.
+    code = "eval_gate_error"

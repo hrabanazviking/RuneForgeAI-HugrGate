@@ -299,6 +299,20 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.observability.replay",
         "hugrgate.observability.load",
     ],
+    "evaluation-lab": [  # Gjallarbrú campaign XV, slices 351-375
+        "hugrgate.evlab", "hugrgate.evlab.api",
+        "hugrgate.evlab.dataset", "hugrgate.evlab.splits",
+        "hugrgate.evlab.stratified", "hugrgate.evlab.crossval",
+        "hugrgate.evlab.bootstrap", "hugrgate.evlab.significance",
+        "hugrgate.evlab.compare", "hugrgate.evlab.calibration",
+        "hugrgate.evlab.selective", "hugrgate.evlab.costaware",
+        "hugrgate.evlab.latency", "hugrgate.evlab.energy",
+        "hugrgate.evlab.privacy", "hugrgate.evlab.robustness",
+        "hugrgate.evlab.shift", "hugrgate.evlab.fairness",
+        "hugrgate.evlab.history", "hugrgate.evlab.artifacts",
+        "hugrgate.evlab.repro", "hugrgate.evlab.gates",
+        "hugrgate.evlab.report", "hugrgate.evlab.release",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}
