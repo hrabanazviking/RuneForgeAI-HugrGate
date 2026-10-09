@@ -135,6 +135,10 @@ class DistributedRouter:
             self._boundary.check_outbound_allowed(policy)
         except PrivacyViolation as e:
             return False, e.message
+        cost = self._node.costs.cost_of(peer.node_id)
+        if policy.max_cost is not None and cost > policy.max_cost:
+            return False, (f"cost {cost} exceeds max_cost "
+                           f"{policy.max_cost}")
         return True, "ok"
 
     def route(self, spec: DecisionSpec,

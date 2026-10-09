@@ -32,6 +32,7 @@ from hugrgate.cluster.node import (
     InboundHook,
     NodeAuthenticator,
 )
+from hugrgate.cluster.node_cost import CostModel
 from hugrgate.cluster.node_health import (
     DEFAULT_QUARANTINE_THRESHOLD,
     NodeHealthMonitor,
@@ -103,6 +104,7 @@ __all__ = [
     "ClusterKey",
     "ClusterMessage",
     "ClusterNode",
+    "CostModel",
     "Discovery",
     "DiscoveryRegistry",
     "DistributedRouter",

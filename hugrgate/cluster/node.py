@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
 from hugrgate.cluster.identity import NodeIdentity
+from hugrgate.cluster.node_cost import CostModel
 from hugrgate.cluster.node_health import NodeHealthMonitor
 from hugrgate.cluster.node_latency import LatencyTracker
 from hugrgate.cluster.policy_sync import PolicyPropagator
@@ -110,12 +111,14 @@ class ClusterNode:
         }
         #: Cluster policy propagation (slice 210).
         self.policy_sync = PolicyPropagator(node_id=identity.node_id)
-        #: Distributed routing (slice 212).
-        self.router = DistributedRouter(self)
         #: Node health scoring (slice 213).
         self.health = NodeHealthMonitor()
         #: Node latency scoring (slice 214).
         self.latency = LatencyTracker()
+        #: Node cost scoring (slice 215).
+        self.costs = CostModel()
+        #: Distributed routing (slice 212).
+        self.router = DistributedRouter(self)
 
     # -- local facts --------------------------------------------------------
 
@@ -185,7 +188,7 @@ class ClusterNode:
             self.router.set_scores(node_id, PeerScores(
                 health=self.health.score(node_id),
                 latency=self.latency.score(node_id),
-                cost=1.0,      # slice 215
+                cost=self.costs.score(node_id),
             ))
 
     # -- inbound ------------------------------------------------------------

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 61 · **public names:** 294
+**Modules:** 62 · **public names:** 296
 
 ## API stability policy
 
@@ -245,6 +245,7 @@ that this document never drifts from the code.
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
+| `CostModel` | class | `() -> 'None'` |
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
 | `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
@@ -333,6 +334,12 @@ that this document never drifts from the code.
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
+
+### `hugrgate.cluster.node_cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostModel` | class | `() -> 'None'` |
 
 ### `hugrgate.cluster.node_health`
 

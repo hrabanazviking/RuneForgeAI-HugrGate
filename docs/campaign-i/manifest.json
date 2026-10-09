@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:27:25.123295+00:00",
-  "module_count": 61,
+  "generated_utc": "2026-10-09T13:28:14.554421+00:00",
+  "module_count": 62,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 145,
+      "loc": 147,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -689,7 +689,7 @@
         "time",
         "typing"
       ],
-      "loc": 439,
+      "loc": 442,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -711,6 +711,25 @@
         "handle_decide",
         "handle_batch",
         "fail"
+      ]
+    },
+    "hugrgate.cluster.node_cost": {
+      "docstring": "Node cost scoring. Slice 215.\n\nSome peers charge for inference (credits, dollars, energy \u2014 the unit\nis the operator's; this module only compares). Two mechanisms:\n\n1. **Scoring** \u2014 ``score = 1 / (1 + cost)``: a free peer scores 1.0,\n   cost 1 scores 0.5, cost 9 scores 0.1. Diminishing, so cost is a\n   preference, not a veto.\n\n2. **Budget filtering** \u2014 a *veto*: when ``DecisionPolicy.max_cost``\n   is set, any peer whose cost per decision exceeds it is excluded\n   from routing entirely (the router's ``_peer_allowed`` enforces\n   this). Fail-closed on budgets: a peer with unknown cost is treated\n   as free (0.0), never excluded \u2014 exclusion requires evidence.\n\nCosts are operator-set per peer (static config, slice 205) and reset\nwhen a peer rejoins clean (slice 220).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "math",
+        "threading"
+      ],
+      "loc": 70,
+      "path": "hugrgate/cluster/node_cost.py",
+      "public_defs": [
+        "CostModel",
+        "set_cost",
+        "cost_of",
+        "score",
+        "affordable",
+        "reset"
       ]
     },
     "hugrgate.cluster.node_health": {
@@ -853,7 +872,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 222,
+      "loc": 226,
       "path": "hugrgate/cluster/routing.py",
       "public_defs": [
         "PeerScores",
@@ -1464,6 +1483,7 @@
     "test_cluster_discovery.py",
     "test_cluster_identity.py",
     "test_cluster_lan.py",
+    "test_cluster_node_cost.py",
     "test_cluster_node_health.py",
     "test_cluster_node_latency.py",
     "test_cluster_policy_sync.py",
@@ -1500,5 +1520,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11380
+  "total_loc": 11459
 }
