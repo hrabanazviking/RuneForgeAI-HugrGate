@@ -46,6 +46,8 @@ from hugrgate.evlab.dataset import (
     COLUMN_TYPES,
     ColumnSpec,
     DatasetManifest,
+    DatasetRegistry,
+    DatasetVersion,
     fingerprint_items,
 )
 
@@ -54,6 +56,8 @@ __all__ = [
     "DEFAULT_METRICS",
     "ColumnSpec",
     "DatasetManifest",
+    "DatasetRegistry",
+    "DatasetVersion",
     "EvaluationLab",
     "Experiment",
     "MetricSet",

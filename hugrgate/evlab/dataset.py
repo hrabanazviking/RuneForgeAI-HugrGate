@@ -27,9 +27,11 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from functools import total_ordering
 from typing import Any
 
 from hugrgate.errors import DatasetError
@@ -38,6 +40,8 @@ __all__ = [
     "COLUMN_TYPES",
     "ColumnSpec",
     "DatasetManifest",
+    "DatasetRegistry",
+    "DatasetVersion",
 ]
 
 #: Declared column value types understood by the manifest validator.
@@ -254,6 +258,30 @@ class DatasetManifest:
                 actual=actual,
             )
 
+    def bumped(self, kind: str = "patch") -> DatasetManifest:
+        """Copy with a bumped version (slice 353).
+
+        The copy's fingerprint is cleared — it must be re-sealed
+        against the (possibly changed) items.  ``kind`` is one of
+        ``"major"``, ``"minor"``, ``"patch"``.
+        """
+        version = DatasetVersion.parse(self.version)
+        bump = {
+            "major": version.bump_major,
+            "minor": version.bump_minor,
+            "patch": version.bump_patch,
+        }.get(kind)
+        if bump is None:
+            raise DatasetError(
+                f"unknown bump kind {kind!r}; "
+                "expected 'major', 'minor', or 'patch'"
+            )
+        nxt = copy.deepcopy(self)
+        nxt.version = str(bump())
+        nxt.fingerprint = ""
+        nxt.created_at = _utc_now()
+        return nxt
+
     def to_bench_dataset(
         self, items: list[Mapping[str, Any]]
     ) -> dict[str, Any]:
@@ -325,3 +353,236 @@ class DatasetManifest:
             created_at=data.get("created_at", ""),
             extra=dict(data.get("extra", {})),
         )
+
+
+# ---------------------------------------------------------------------------
+# Slice 353 — dataset versioning
+# ---------------------------------------------------------------------------
+
+_VERSION_RE = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$"
+)
+
+
+@total_ordering
+@dataclass(frozen=True)
+class DatasetVersion:
+    """Semantic version for datasets (slice 353).
+
+    ``major`` bumps mark breaking changes (removed columns, type
+    narrowing, redefined semantics); ``minor``/``patch`` are
+    backward-compatible.  Ordering follows semver: a prerelease sorts
+    below its release; build metadata is ignored for precedence.
+    """
+
+    major: int
+    minor: int
+    patch: int
+    prerelease: str = ""
+    build: str = ""
+
+    @classmethod
+    def parse(cls, text: str) -> DatasetVersion:
+        """Parse ``MAJOR.MINOR.PATCH[-pre][+build]``; DatasetError on bad."""
+        if not isinstance(text, str):
+            raise DatasetError(
+                f"version must be a string, got {type(text).__name__}"
+            )
+        match = _VERSION_RE.match(text.strip())
+        if not match:
+            raise DatasetError(
+                f"invalid dataset version {text!r}; expected "
+                "MAJOR.MINOR.PATCH[-prerelease][+build]",
+                version=text,
+            )
+        major, minor, patch, pre, build = match.groups()
+        return cls(int(major), int(minor), int(patch), pre or "",
+                   build or "")
+
+    @classmethod
+    def parse_partial(cls, text: str) -> DatasetVersion:
+        """Parse ``MAJOR[.MINOR[.PATCH]]`` for caret constraints.
+
+        Missing components are zero-filled: ``"^1.2"`` means
+        ``>=1.2.0, <2.0.0``.
+        """
+        if not isinstance(text, str):
+            raise DatasetError(
+                f"version constraint must be a string, got "
+                f"{type(text).__name__}"
+            )
+        parts = text.strip().split(".")
+        if not 1 <= len(parts) <= 3 or not all(
+            p.isdigit() for p in parts
+        ):
+            raise DatasetError(
+                f"invalid version constraint {text!r}; expected "
+                "MAJOR[.MINOR[.PATCH]]",
+                constraint=text,
+            )
+        nums = [int(p) for p in parts] + [0] * (3 - len(parts))
+        return cls(nums[0], nums[1], nums[2])
+
+    def bump_major(self) -> DatasetVersion:
+        return DatasetVersion(self.major + 1, 0, 0)
+
+    def bump_minor(self) -> DatasetVersion:
+        return DatasetVersion(self.major, self.minor + 1, 0)
+
+    def bump_patch(self) -> DatasetVersion:
+        return DatasetVersion(self.major, self.minor, self.patch + 1)
+
+    def is_prerelease(self) -> bool:
+        return bool(self.prerelease)
+
+    def is_compatible_with(self, other: DatasetVersion) -> bool:
+        """Same-major compatibility (semver ^ semantics)."""
+        return self.major == other.major
+
+    def _precedence(self) -> tuple:
+        # Release (no prerelease) sorts above any prerelease of the same
+        # triple; prereleases order lexicographically by identifier.
+        pre: tuple = (1,) if not self.prerelease else (0, self.prerelease)
+        return (self.major, self.minor, self.patch, pre)
+
+    def __lt__(self, other: DatasetVersion) -> bool:
+        if not isinstance(other, DatasetVersion):
+            return NotImplemented
+        return self._precedence() < other._precedence()
+
+    def __str__(self) -> str:
+        text = f"{self.major}.{self.minor}.{self.patch}"
+        if self.prerelease:
+            text += f"-{self.prerelease}"
+        if self.build:
+            text += f"+{self.build}"
+        return text
+
+
+class DatasetRegistry:
+    """Versioned store of dataset manifests (slice 353).
+
+    Register sealed manifests; resolve by exact version, ``"latest"``,
+    or caret constraint (``"^1.2"`` → newest compatible 1.x); diff
+    versions for schema drift; check backward compatibility.
+    """
+
+    def __init__(self) -> None:
+        self._store: dict[tuple[str, str], DatasetManifest] = {}
+
+    def register(self, manifest: DatasetManifest) -> DatasetManifest:
+        manifest.validate_decl()
+        key = (manifest.name, manifest.version)
+        if key in self._store:
+            raise DatasetError(
+                f"dataset {manifest.name!r} version {manifest.version!r} "
+                "is already registered",
+                name=manifest.name, version=manifest.version,
+            )
+        # Registry entries must be parseable versions.
+        DatasetVersion.parse(manifest.version)
+        self._store[key] = manifest
+        return manifest
+
+    def versions(self, name: str) -> list[str]:
+        """All registered versions of ``name``, oldest first."""
+        found = [DatasetVersion.parse(v)
+                 for (n, v) in self._store if n == name]
+        return [str(v) for v in sorted(found)]
+
+    def get(self, name: str, version: str) -> DatasetManifest:
+        try:
+            return self._store[(name, version)]
+        except KeyError:
+            raise DatasetError(
+                f"unknown dataset {name!r} version {version!r}; "
+                f"known: {self.versions(name) or 'none'}",
+                name=name, version=version,
+            ) from None
+
+    def latest(self, name: str,
+               include_prerelease: bool = False) -> DatasetManifest:
+        """Newest registered version (releases preferred by default)."""
+        candidates = [
+            m for (n, _), m in self._store.items() if n == name
+        ]
+        if not candidates:
+            raise DatasetError(f"unknown dataset {name!r}", name=name)
+        if not include_prerelease:
+            releases = [m for m in candidates
+                        if not DatasetVersion.parse(m.version).is_prerelease()]
+            if releases:
+                candidates = releases
+        return max(candidates,
+                   key=lambda m: DatasetVersion.parse(m.version))
+
+    def resolve(self, name: str, constraint: str = "latest") -> DatasetManifest:
+        """Resolve ``name`` under ``constraint``.
+
+        Constraints: ``"latest"``, an exact version (``"1.2.3"``), or a
+        caret constraint (``"^1.2"`` → newest 1.x >= 1.2.0).
+        """
+        if constraint == "latest":
+            return self.latest(name)
+        if constraint.startswith("^"):
+            base = DatasetVersion.parse_partial(constraint[1:])
+            compatible = [
+                m for (n, _), m in self._store.items()
+                if n == name
+                and DatasetVersion.parse(m.version).is_compatible_with(base)
+                and DatasetVersion.parse(m.version) >= base
+            ]
+            if not compatible:
+                raise DatasetError(
+                    f"no version of {name!r} satisfies {constraint!r}",
+                    name=name, constraint=constraint,
+                )
+            return max(compatible,
+                       key=lambda m: DatasetVersion.parse(m.version))
+        return self.get(name, str(DatasetVersion.parse(constraint)))
+
+    @staticmethod
+    def diff(old: DatasetManifest, new: DatasetManifest) -> dict[str, Any]:
+        """Schema/content drift between two manifests of one dataset."""
+        if old.name != new.name:
+            raise DatasetError(
+                f"cannot diff different datasets: {old.name!r} vs {new.name!r}"
+            )
+        old_cols = {c.name: c for c in old.columns}
+        new_cols = {c.name: c for c in new.columns}
+        added = sorted(set(new_cols) - set(old_cols))
+        removed = sorted(set(old_cols) - set(new_cols))
+        changed = sorted(
+            name for name in set(old_cols) & set(new_cols)
+            if old_cols[name].to_dict() != new_cols[name].to_dict()
+        )
+        return {
+            "dataset": old.name,
+            "from_version": old.version,
+            "to_version": new.version,
+            "added_columns": added,
+            "removed_columns": removed,
+            "changed_columns": changed,
+            "fingerprint_changed": old.fingerprint != new.fingerprint,
+            "sensitivity_changed": old.sensitivity != new.sensitivity,
+            "breaking": bool(removed or changed),
+        }
+
+    @staticmethod
+    def check_compatible(old: DatasetManifest,
+                         new: DatasetManifest) -> bool:
+        """True when ``new`` is a safe replacement for ``old``.
+
+        Requires: same major version, no removed columns, no changed
+        column declarations (type narrowing included).
+        """
+        try:
+            old_v = DatasetVersion.parse(old.version)
+            new_v = DatasetVersion.parse(new.version)
+        except DatasetError:
+            return False
+        if not new_v.is_compatible_with(old_v):
+            return False
+        drift = DatasetRegistry.diff(old, new)
+        return not drift["removed_columns"] and not drift["changed_columns"]
