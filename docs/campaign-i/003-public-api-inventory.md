@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 297 · **public names:** 1801
+**Modules:** 298 · **public names:** 1807
 
 ## API stability policy
 
@@ -2257,6 +2257,7 @@ that this document never drifts from the code.
 | `ACQUISITIONS` | constant | `('download', 'generated', 'derived', 'synthetic', 'manual')` |
 | `COLUMN_TYPES` | constant | `('string', 'number', 'boolean', 'categorical', 'list', 'mapp` |
 | `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
+| `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
 | `BootstrapCI` | class | `(metric: 'str', estimate: 'float', ci_low: 'float', ci_high: 'float', ci_level: 'float', n_boot: 'int', n_items: 'int', seed: 'int') -> None` |
 | `CVReport` | class | `(k: 'int', seed: 'int', n_items: 'int', folds: 'list[FoldResult]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]') -> None` |
 | `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
@@ -2274,7 +2275,9 @@ that this document never drifts from the code.
 | `StratifiedReport` | class | `(stratify_key: 'str', strata: 'list[str]', stratum_sizes: 'dict[str, int]', per_stratum: 'dict[str, dict[str, dict[str, Any]]]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]', n_items: 'int' = 0) -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
+| `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+| `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
 | `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
@@ -2301,7 +2304,15 @@ that this document never drifts from the code.
 |---|---|---|
 | `BootstrapCI` | class | `(metric: 'str', estimate: 'float', ci_low: 'float', ci_high: 'float', ci_level: 'float', n_boot: 'int', n_items: 'int', seed: 'int') -> None` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
+| `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
+
+### `hugrgate.evlab.compare`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
+| `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
 
 ### `hugrgate.evlab.crossval`
 

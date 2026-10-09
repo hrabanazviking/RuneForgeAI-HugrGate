@@ -45,8 +45,10 @@ from hugrgate.evlab.api import (
 from hugrgate.evlab.bootstrap import (
     BootstrapCI,
     bootstrap_backend_ci,
+    bootstrap_mean_ci,
     bootstrap_metric_ci,
 )
+from hugrgate.evlab.compare import BackendComparison, compare_backends
 from hugrgate.evlab.crossval import CVReport, FoldResult, cross_validate
 from hugrgate.evlab.dataset import (
     ACQUISITIONS,
@@ -77,6 +79,7 @@ __all__ = [
     "ACQUISITIONS",
     "COLUMN_TYPES",
     "DEFAULT_METRICS",
+    "BackendComparison",
     "BootstrapCI",
     "CVReport",
     "ColumnSpec",
@@ -94,7 +97,9 @@ __all__ = [
     "StratifiedReport",
     "TransformStep",
     "bootstrap_backend_ci",
+    "bootstrap_mean_ci",
     "bootstrap_metric_ci",
+    "compare_backends",
     "compare_paired_correctness",
     "cross_validate",
     "fingerprint_items",

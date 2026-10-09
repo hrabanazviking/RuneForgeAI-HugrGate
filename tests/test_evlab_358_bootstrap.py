@@ -183,3 +183,39 @@ def test_bootstrap_backend_ci_with_abstaining_backend(gate_with_stub):
                               "accuracy", n_boot=300, seed=22)
     assert ci.n_items == 20  # half abstained
     assert ci.contains(ci.estimate)
+
+
+# --- bootstrap_mean_ci (added in slice 360) -------------------------------------
+
+def test_mean_ci_basics():
+    from hugrgate.evlab import bootstrap_mean_ci
+    ci = bootstrap_mean_ci([1.0] * 60 + [0.0] * 40, n_boot=500, seed=1)
+    assert ci.metric == "mean"
+    assert ci.estimate == pytest.approx(0.6)
+    assert ci.contains(0.6)
+    assert ci.width > 0
+
+
+def test_mean_ci_degenerate():
+    from hugrgate.evlab import bootstrap_mean_ci
+    ci = bootstrap_mean_ci([2.5] * 50, n_boot=200, seed=2)
+    assert ci.ci_low == pytest.approx(2.5)
+    assert ci.ci_high == pytest.approx(2.5)
+
+
+def test_mean_ci_validation():
+    from hugrgate.evlab import bootstrap_mean_ci as bmc
+    with pytest.raises(EvalError):
+        bmc([1.0])
+    with pytest.raises(EvalError):
+        bmc([1.0, float("nan")])
+    with pytest.raises(EvalError):
+        bmc([1.0, 2.0], n_boot=50)
+
+
+def test_mean_ci_deterministic():
+    from hugrgate.evlab import bootstrap_mean_ci
+    vals = [float(i % 3) for i in range(90)]
+    c1 = bootstrap_mean_ci(vals, n_boot=400, seed=4)
+    c2 = bootstrap_mean_ci(vals, n_boot=400, seed=4)
+    assert c1.to_dict() == c2.to_dict()

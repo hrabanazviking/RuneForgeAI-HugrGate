@@ -5,10 +5,12 @@ different claim than on 40,000.  This module adds percentile bootstrap
 CIs over per-item outcomes, reusing the v1 metric functions from
 :mod:`hugrgate.bench`:
 
-- :func:`bootstrap_metric_ci` — CI for any metric computed from
+ - :func:`bootstrap_metric_ci` — CI for any metric computed from
   ``(expected, DecisionResult)`` pairs;
 - :func:`bootstrap_backend_ci` — lab-friendly: evaluates one backend
-  over a dataset once, then bootstraps the named metric.
+  over a dataset once, then bootstraps the named metric;
+- :func:`bootstrap_mean_ci` — CI for the mean of plain per-item
+  scores (e.g. paired differences).
 
 Resampling uses a dedicated ``random.Random(seed)`` — deterministic
 for a fixed seed, invisible to the global RNG.  The percentile method
@@ -18,6 +20,7 @@ deliberately out of scope for this slice.
 
 from __future__ import annotations
 
+import math
 import random
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
@@ -33,6 +36,7 @@ from hugrgate.spec import DecisionSpec
 __all__ = [
     "BootstrapCI",
     "bootstrap_backend_ci",
+    "bootstrap_mean_ci",
     "bootstrap_metric_ci",
 ]
 
@@ -167,25 +171,88 @@ def bootstrap_metric_ci(
         # strata); skip it rather than poisoning the distribution.
         if value is not None:
             boot.append(value)
+    return _finish_bootstrap(
+        boot=boot,
+        estimate=float(estimate),
+        metric=name,
+        ci=ci,
+        seed=seed,
+        n_items=n,
+    )
+
+
+def _finish_bootstrap(
+    *,
+    boot: list[float],
+    estimate: float,
+    metric: str,
+    ci: float,
+    seed: int,
+    n_items: int,
+) -> BootstrapCI:
+    """Build the percentile interval from a bootstrap distribution."""
     if len(boot) < _MIN_BOOT:
         raise EvalError(
             f"only {len(boot)} usable bootstrap replicates; "
-            "the metric is undefined on too many resamples"
+            "the statistic is undefined on too many resamples"
         )
     boot.sort()
     alpha = 1.0 - ci
     return BootstrapCI(
-        metric=name,
-        estimate=float(estimate),
+        metric=metric,
+        estimate=estimate,
         ci_low=_percentile(boot, 100 * alpha / 2),
         ci_high=_percentile(boot, 100 * (1 - alpha / 2)),
         ci_level=ci,
         n_boot=len(boot),
-        n_items=n,
+        n_items=n_items,
         seed=seed,
     )
 
 
+def bootstrap_mean_ci(
+    values: Sequence[float],
+    *,
+    n_boot: int = 2000,
+    ci: float = 0.95,
+    seed: int = 0,
+    metric_name: str = "mean",
+) -> BootstrapCI:
+    """Percentile bootstrap CI for the mean of plain float values.
+
+    For per-item score lists (e.g. paired differences in
+    :mod:`hugrgate.evlab.compare`) where no ``(expected, result)``
+    pairs exist.
+    """
+    vals = [float(v) for v in values]
+    if len(vals) < 2:
+        raise EvalError(
+            f"bootstrap needs at least 2 values, got {len(vals)}"
+        )
+    if not 0.0 < ci < 1.0:
+        raise EvalError(f"ci must be in (0, 1), got {ci}")
+    if n_boot < _MIN_BOOT:
+        raise EvalError(
+            f"n_boot must be >= {_MIN_BOOT} for a meaningful interval, "
+            f"got {n_boot}"
+        )
+    for v in vals:
+        if not math.isfinite(v):
+            raise EvalError(f"values must be finite, got {v!r}")
+    rng = random.Random(seed)
+    n = len(vals)
+    boot = [
+        sum(vals[rng.randrange(n)] for _ in range(n)) / n
+        for _ in range(n_boot)
+    ]
+    return _finish_bootstrap(
+        boot=boot,
+        estimate=sum(vals) / n,
+        metric=metric_name,
+        ci=ci,
+        seed=seed,
+        n_items=n,
+    )
 def _evaluate_pairs(
     gate: HugrGate,
     dataset: Mapping[str, Any],
