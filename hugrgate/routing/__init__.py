@@ -60,6 +60,12 @@ from hugrgate.routing.memory import (
     MemoryAwarePlanner,
     MemoryModel,
 )
+from hugrgate.routing.qos import (
+    QOS_PROFILES,
+    QoSClass,
+    QoSProfile,
+    qos_profile,
+)
 from hugrgate.routing.privacy import (
     BackendClearance,
     DataClassifier,
@@ -110,6 +116,10 @@ __all__ = [
     "PrivacyTier",
     "BackendClearance",
     "DataClassifier",
+    "QOS_PROFILES",
+    "QoSClass",
+    "QoSProfile",
+    "qos_profile",
     "DEFAULT_LOCAL_MEMORY_MB",
     "DEFAULT_REMOTE_MEMORY_MB",
     "QOS_DEPTH_CAPS",

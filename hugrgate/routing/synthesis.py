@@ -19,6 +19,7 @@ from hugrgate.backend import Backend
 from hugrgate.routing.architecture import (RouterContext, RungMode, RungNode,
                                             RungPlanner, RoutingPlan)
 from hugrgate.routing.capability import CapabilityScorer
+from hugrgate.routing.qos import QOS_PROFILES, qos_profile
 from hugrgate.routing.rungs import RungBuilder
 
 __all__ = [
@@ -28,20 +29,13 @@ __all__ = [
     "LadderSynthesizer",
 ]
 
-#: Max rungs a synthesized ladder may hold, by QoS class.
+#: Backward-compatible views over the slice-063 QoS profiles (single source
+#: of truth now lives in hugrgate.routing.qos).
 QOS_DEPTH_CAPS: Dict[str, int] = {
-    "best_effort": 2,
-    "standard": 4,
-    "priority": 6,
-    "critical": 8,
+    c.value: p.depth_cap for c, p in QOS_PROFILES.items()
 }
-
-#: Blending weights (capability, 1/latency, 1/cost) by QoS class.
 QOS_WEIGHTS: Dict[str, tuple] = {
-    "best_effort": (0.2, 0.4, 0.4),
-    "standard": (0.4, 0.3, 0.3),
-    "priority": (0.6, 0.25, 0.15),
-    "critical": (0.8, 0.15, 0.05),
+    c.value: p.weights for c, p in QOS_PROFILES.items()
 }
 
 
@@ -69,8 +63,9 @@ class LadderSynthesizer(RungPlanner):
 
     def plan(self, ctx: RouterContext) -> RoutingPlan:
         candidates = self.builder.candidates(self.registry, ctx)
-        weights = QOS_WEIGHTS[ctx.options.qos]
-        cap = QOS_DEPTH_CAPS[ctx.options.qos]
+        profile = qos_profile(ctx.options.qos)
+        weights = profile.weights
+        cap = profile.depth_cap
 
         scored = [(self._blend(b, ctx, weights), b) for b in candidates]
         scored.sort(key=lambda t: (-t[0], t[1].name))
