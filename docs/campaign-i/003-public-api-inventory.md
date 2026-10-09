@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 313 · **public names:** 1818
+**Modules:** 339 · **public names:** 1992
 
 ## API stability policy
 
@@ -2221,6 +2221,9 @@ that this document never drifts from the code.
 | `JurisdictionViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `KeyProviderError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `LocalOnlyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MemoryAccessDenied` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MemoryQuotaExceeded` | class | `(message: 'str' = '', **details: 'Any')` |
 | `MultiprocError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NumaError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2332,6 +2335,307 @@ that this document never drifts from the code.
 | `JsonFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
 | `configure_logging` | function | `(level: 'str' = 'WARNING', stream: 'TextIO | None' = None, json_format: 'bool' = False) -> 'logging.Logger'` |
 | `get_logger` | function | `(name: 'str') -> 'logging.Logger'` |
+
+### `hugrgate.memory`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_DOMAIN` | constant | `'default'` |
+| `OUTCOME_KINDS` | constant | `('success', 'failure', 'partial')` |
+| `ROLE_PERMISSIONS` | constant | `{'owner': RolePermission(max_class='forbidden', redact_at=No` |
+| `AdversarialReport` | class | `(findings: 'list[Finding]' = <factory>) -> None` |
+| `BackendCounterfactual` | class | `(backend: 'str', n: 'int', success_rate: 'float | None', wilson_lo: 'float', wilson_hi: 'float', mean_score: 'float | None', sufficient_data: 'bool') -> None` |
+| `BackendHistory` | class | `(backend: 'str', decision_count: 'int', accepted_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, mean_probability: 'float | None' = None, decayed_mean_probability: 'float | None' = None, mean_latency_ms: 'float | None' = None, first_seen: 'float | None' = None, last_seen: 'float | None' = None, models: 'tuple[str, ...]' = ()) -> None` |
+| `CalibrationMap` | class | `(bin_centers: 'tuple[float, ...]', corrected: 'tuple[float, ...]') -> None` |
+| `CalibrationValidation` | class | `(n_fit: 'int', n_validate: 'int', ece_before: 'float', ece_after: 'float', brier_before: 'float', brier_after: 'float') -> None` |
+| `CompactionSummary` | class | `(window_start: 'float', window_end: 'float', episode_count: 'int', backend_counts: 'dict[str, int]' = <factory>, outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, mean_probability: 'float | None' = None, privacy_class_counts: 'dict[str, int]' = <factory>, compacted_episode_ids: 'tuple[str, ...]' = (), created_at: 'float' = 0.0) -> None` |
+| `ContractHistory` | class | `(key: 'str', contract_id: 'str | None', synthetic: 'bool', spec_type: 'str', decision_count: 'int', accepted_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, backends: 'tuple[str, ...]' = (), mean_probability: 'float | None' = None, first_seen: 'float | None' = None, last_seen: 'float | None' = None) -> None` |
+| `DecisionHistory` | class | `(max_episodes: 'int | None' = None) -> 'None'` |
+| `DomainProfile` | class | `(domain: 'str', decision_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, top_backends: 'tuple[tuple[str, int], ...]' = (), spec_types: 'tuple[str, ...]' = (), mean_probability: 'float | None' = None, activity: 'float' = 0.0, first_seen: 'float | None' = None, last_seen: 'float | None' = None) -> None` |
+| `Episode` | class | `(episode_id: 'str', record: 'DecisionRecord', recorded_at: 'float' = <factory>, privacy_class: 'str' = 'standard', tags: 'tuple[str, ...]' = (), outcome: 'Outcome | None' = None, ground_truth: 'GroundTruth | None' = None, annotations: 'dict[str, Any]' = <factory>) -> None` |
+| `ExportReport` | class | `(path: 'str', episodes: 'int', summaries: 'int', bytes: 'int') -> None` |
+| `Finding` | class | `(detector: 'str', severity: 'str', detail: 'str', episode_ids: 'tuple[str, ...]' = ()) -> None` |
+| `FrequencyEntry` | class | `(key: 'str', count: 'int', decayed_count: 'float', first_seen: 'float', last_seen: 'float', outcome_counts: 'dict[str, int]' = <factory>) -> None` |
+| `FrequencyTable` | class | `(entries: 'dict[str, FrequencyEntry]', total: 'int', decayed_total: 'float') -> None` |
+| `GroundTruth` | class | `(label: 'Any', confidence: 'float' = 1.0, source: 'str' = 'unknown', verified_at: 'float' = 0.0, note: 'str' = '') -> None` |
+| `GuardedHistory` | class | `(history: 'HistoryLike', role: 'str', policy: 'MemoryAccessPolicy | None' = None) -> 'None'` |
+| `ImportReport` | class | `(imported: 'int' = 0, summaries_imported: 'int' = 0, skipped_bad: 'int' = 0, skipped_duplicates: 'int' = 0, errors: 'list[str]' = <factory>) -> None` |
+| `MemoryAccessPolicy` | class | `(permissions: 'dict[str, RolePermission] | None' = None) -> 'None'` |
+| `MemoryAction` | constant | `typing.Literal['record', 'drop', 'redact']` |
+| `MemoryDecision` | class | `(action: 'MemoryAction', rule: 'str', reason: 'str' = '') -> None` |
+| `MemoryPolicy` | class | `(rules: 'list[MemoryRule] | tuple[MemoryRule, ...]' = ()) -> 'None'` |
+| `MemoryQuery` | class | `(backends: 'Collection[str] | None' = None, models: 'Collection[str] | None' = None, accepted: 'bool | None' = None, fallback_used: 'bool | None' = None, recorded_after: 'float | None' = None, recorded_before: 'float | None' = None, privacy_classes: 'Collection[str] | None' = None, tags_any: 'Collection[str] | None' = None, tags_all: 'Collection[str] | None' = None, outcome_kinds: 'Collection[str] | None' = None, has_outcome: 'bool | None' = None, has_ground_truth: 'bool | None' = None, min_probability: 'float | None' = None, max_probability: 'float | None' = None, request_hashes: 'Collection[str] | None' = None, sort_by: 'str' = 'recorded_at', descending: 'bool' = True, limit: 'int | None' = None, offset: 'int' = 0) -> None` |
+| `MemoryQuota` | class | `(max_episodes: 'int | None' = None, max_bytes: 'int | None' = None, warn_bytes: 'int | None' = None, ttl_overrides: 'dict[str, float | None] | None' = None) -> None` |
+| `MemoryRule` | class | `(name: 'str', predicate: 'RulePredicate', action: 'MemoryAction', reason: 'str' = '') -> None` |
+| `Outcome` | class | `(kind: 'str', score: 'float | None' = None, observed_at: 'float' = 0.0, note: 'str' = '', latency_ms: 'float | None' = None) -> None` |
+| `QuotaStatus` | class | `(status: 'str', episodes: 'int', bytes: 'int', quota: 'MemoryQuota') -> None` |
+| `RecencyFeatures` | class | `(time_since_last_similar: 'float | None', last_outcome_kind: 'str | None', success_streak: 'int', failure_streak: 'int', similar_count: 'int', effective_similar_count: 'float', mean_similarity: 'float') -> None` |
+| `ReplayReport` | class | `(total: 'int' = 0, replayed: 'int' = 0, value_matches: 'int' = 0, errors: 'int' = 0, mean_abs_prob_drift: 'float | None' = None, mismatches: 'list[ReplayResult]' = <factory>, error_episodes: 'list[str]' = <factory>) -> None` |
+| `ReplayResult` | class | `(episode_id: 'str', recorded_value: 'Any', replayed_value: 'Any', value_match: 'bool', recorded_probability: 'float', replayed_probability: 'float | None', prob_drift: 'float | None') -> None` |
+| `RetentionReport` | class | `(ttl_purged: 'int' = 0, count_evicted: 'int' = 0, bytes_evicted: 'int' = 0, bytes_before: 'int' = 0, bytes_after: 'int' = 0, episodes_before: 'int' = 0, episodes_after: 'int' = 0) -> None` |
+| `RetrievalResult` | class | `(episode: 'EpisodeLike', score: 'float', similarity: 'float', recency: 'float', outcome_bonus: 'float') -> None` |
+| `RolePermission` | class | `(max_class: 'str', redact_at: 'str | None', write: 'bool') -> None` |
+| `RoutingAdvice` | class | `(chosen: 'str | None', candidates: 'tuple[str, ...]', estimates: 'tuple[BackendCounterfactual, ...]' = (), sufficient_data: 'bool' = False, reason: 'str' = '') -> None` |
+| `SimilarityHit` | class | `(episode: 'EpisodeLike', score: 'float', shared_features: 'tuple[str, ...]' = <factory>) -> None` |
+| `ValueCounterfactual` | class | `(value: 'Any', n: 'int', success_rate: 'float | None', wilson_lo: 'float', wilson_hi: 'float', sufficient_data: 'bool') -> None` |
+| `advise_route` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', candidates: 'list[str] | tuple[str, ...]', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'RoutingAdvice'` |
+| `assess_calibration` | function | `(history: 'HistoryLike', *, n_bins: 'int' = 10, fit_fraction: 'float' = 0.7) -> 'tuple[CalibrationMap, CalibrationValidation]'` |
+| `backend_histories` | function | `(history: 'HistoryLike', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'dict[str, BackendHistory]'` |
+| `brier_score` | function | `(probabilities: 'list[float]', labels: 'list[int]') -> 'float'` |
+| `by_backend` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_backend_value` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_model` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_outcome_kind` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `calibrate_from_memory` | function | `(history: 'HistoryLike', *, n_bins: 'int' = 10) -> 'CalibrationMap'` |
+| `check_quota` | function | `(history: 'HistoryLike', quota: 'MemoryQuota') -> 'QuotaStatus'` |
+| `compact` | function | `(history: 'HistoryLike', *, older_than_seconds: 'float', keep_with_ground_truth: 'bool' = True, now: 'float | None' = None) -> 'CompactionSummary | None'` |
+| `contract_histories` | function | `(history: 'HistoryLike', *, limit: 'int' = 5000, query: 'MemoryQuery | None' = None) -> 'dict[str, ContractHistory]'` |
+| `contract_key_for` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `cosine` | function | `(a: 'dict[str, float]', b: 'dict[str, float]') -> 'float'` |
+| `count_by` | function | `(history: 'HistoryLike', key_fn: 'KeyFn', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'FrequencyTable'` |
+| `counterfactual_backends` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'list[BackendCounterfactual]'` |
+| `counterfactual_value` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', value: 'Any', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'ValueCounterfactual'` |
+| `decay_weight` | function | `(age_seconds: 'float', half_life_seconds: 'float') -> 'float'` |
+| `decayed_mean` | function | `(values: 'Sequence[float]', ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'` |
+| `domain_for` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `domain_profiles` | function | `(history: 'HistoryLike', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'dict[str, DomainProfile]'` |
+| `drop_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
+| `drop_forbidden` | function | `() -> 'MemoryRule'` |
+| `drop_unaccepted` | function | `() -> 'MemoryRule'` |
+| `effective_count` | function | `(ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'` |
+| `enforce_quotas` | function | `(history: 'HistoryLike', quota: 'MemoryQuota', *, now: 'float | None' = None) -> 'RetentionReport'` |
+| `expected_calibration_error` | function | `(probabilities: 'list[float]', labels: 'list[int]', n_bins: 'int' = 10) -> 'float'` |
+| `export_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, include_summaries: 'bool' = True) -> 'ExportReport'` |
+| `featurize_episode` | function | `(episode: 'EpisodeLike') -> 'dict[str, float]'` |
+| `featurize_query` | function | `(*, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, fallback_used: 'bool | None' = None, latency_ms: 'float | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None) -> 'dict[str, float]'` |
+| `find_in_provenance` | function | `(store: 'ProvenanceStore', query: 'MemoryQuery') -> 'list[DecisionRecord]'` |
+| `half_life_for_horizon` | function | `(horizon_seconds: 'float', target_weight: 'float' = 0.01) -> 'float'` |
+| `import_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, skip_bad_lines: 'bool' = True) -> 'ImportReport'` |
+| `most_similar` | function | `(query_features: 'dict[str, float]', episodes: 'Sequence[EpisodeLike]', *, k: 'int' = 5, exclude_ids: 'set[str] | frozenset[str]' = frozenset()) -> 'list[SimilarityHit]'` |
+| `outcome_agrees` | function | `(truth: 'GroundTruth', outcome: 'Outcome') -> 'bool | None'` |
+| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
+| `recency_features` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, similarity_threshold: 'float' = 0.5, half_life_seconds: 'float' = 86400.0, max_candidates: 'int' = 500, now: 'float | None' = None) -> 'RecencyFeatures'` |
+| `record_only_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
+| `redact_above` | function | `(privacy_class: 'str') -> 'MemoryRule'` |
+| `replay` | function | `(history: 'HistoryLike', decide: 'DecideFn', *, query: 'MemoryQuery | None' = None, limit: 'int' = 1000) -> 'ReplayReport'` |
+| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
+| `retrieve_conditioned` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, outcome_kinds: 'set[str] | frozenset[str] | None' = frozenset({'success'}), include_unknown: 'bool' = False, require_truth_agreement: 'bool' = False, **retrieve_kwargs) -> 'list[RetrievalResult]'` |
+| `scan` | function | `(history: 'HistoryLike', *, outcome_flood_window_seconds: 'float' = 60.0, outcome_flood_threshold: 'int' = 100, duplicate_threshold: 'int' = 20, future_tolerance_seconds: 'float' = 3600.0, now: 'float | None' = None) -> 'AdversarialReport'` |
+| `wilson_interval` | function | `(successes: 'int', n: 'int', z: 'float' = 1.96) -> 'tuple[float, float]'` |
+
+### `hugrgate.memory.access`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ROLE_PERMISSIONS` | constant | `{'owner': RolePermission(max_class='forbidden', redact_at=No` |
+| `GuardedHistory` | class | `(history: 'HistoryLike', role: 'str', policy: 'MemoryAccessPolicy | None' = None) -> 'None'` |
+| `MemoryAccessPolicy` | class | `(permissions: 'dict[str, RolePermission] | None' = None) -> 'None'` |
+| `RolePermission` | class | `(max_class: 'str', redact_at: 'str | None', write: 'bool') -> None` |
+
+### `hugrgate.memory.adversarial`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AdversarialReport` | class | `(findings: 'list[Finding]' = <factory>) -> None` |
+| `Finding` | class | `(detector: 'str', severity: 'str', detail: 'str', episode_ids: 'tuple[str, ...]' = ()) -> None` |
+| `scan` | function | `(history: 'HistoryLike', *, outcome_flood_window_seconds: 'float' = 60.0, outcome_flood_threshold: 'int' = 100, duplicate_threshold: 'int' = 20, future_tolerance_seconds: 'float' = 3600.0, now: 'float | None' = None) -> 'AdversarialReport'` |
+
+### `hugrgate.memory.assisted_calibration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationMap` | class | `(bin_centers: 'tuple[float, ...]', corrected: 'tuple[float, ...]') -> None` |
+| `CalibrationValidation` | class | `(n_fit: 'int', n_validate: 'int', ece_before: 'float', ece_after: 'float', brier_before: 'float', brier_after: 'float') -> None` |
+| `assess_calibration` | function | `(history: 'HistoryLike', *, n_bins: 'int' = 10, fit_fraction: 'float' = 0.7) -> 'tuple[CalibrationMap, CalibrationValidation]'` |
+| `brier_score` | function | `(probabilities: 'list[float]', labels: 'list[int]') -> 'float'` |
+| `calibrate_from_memory` | function | `(history: 'HistoryLike', *, n_bins: 'int' = 10) -> 'CalibrationMap'` |
+| `expected_calibration_error` | function | `(probabilities: 'list[float]', labels: 'list[int]', n_bins: 'int' = 10) -> 'float'` |
+
+### `hugrgate.memory.assisted_routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RoutingAdvice` | class | `(chosen: 'str | None', candidates: 'tuple[str, ...]', estimates: 'tuple[BackendCounterfactual, ...]' = (), sufficient_data: 'bool' = False, reason: 'str' = '') -> None` |
+| `advise_route` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', candidates: 'list[str] | tuple[str, ...]', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'RoutingAdvice'` |
+
+### `hugrgate.memory.backend_history`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackendHistory` | class | `(backend: 'str', decision_count: 'int', accepted_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, mean_probability: 'float | None' = None, decayed_mean_probability: 'float | None' = None, mean_latency_ms: 'float | None' = None, first_seen: 'float | None' = None, last_seen: 'float | None' = None, models: 'tuple[str, ...]' = ()) -> None` |
+| `backend_histories` | function | `(history: 'HistoryLike', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'dict[str, BackendHistory]'` |
+
+### `hugrgate.memory.benchmarks`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `compare_reports` | function | `(new: 'dict[str, Any]', baseline: 'dict[str, Any]') -> 'dict[str, Any]'` |
+| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `run_memory_benchmarks` | function | `(n_episodes: 'int' = 2000, n_queries: 'int' = 100, n_recalls: 'int' = 50, seed: 'int' = 324) -> 'dict[str, Any]'` |
+| `save_artifact` | function | `(report: 'dict[str, Any]', path: 'str | Path') -> 'Path'` |
+
+### `hugrgate.memory.compaction`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CompactionSummary` | class | `(window_start: 'float', window_end: 'float', episode_count: 'int', backend_counts: 'dict[str, int]' = <factory>, outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, mean_probability: 'float | None' = None, privacy_class_counts: 'dict[str, int]' = <factory>, compacted_episode_ids: 'tuple[str, ...]' = (), created_at: 'float' = 0.0) -> None` |
+| `compact` | function | `(history: 'HistoryLike', *, older_than_seconds: 'float', keep_with_ground_truth: 'bool' = True, now: 'float | None' = None) -> 'CompactionSummary | None'` |
+
+### `hugrgate.memory.conditioned`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `retrieve_conditioned` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, outcome_kinds: 'set[str] | frozenset[str] | None' = frozenset({'success'}), include_unknown: 'bool' = False, require_truth_agreement: 'bool' = False, **retrieve_kwargs) -> 'list[RetrievalResult]'` |
+
+### `hugrgate.memory.contract_history`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ContractHistory` | class | `(key: 'str', contract_id: 'str | None', synthetic: 'bool', spec_type: 'str', decision_count: 'int', accepted_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, backends: 'tuple[str, ...]' = (), mean_probability: 'float | None' = None, first_seen: 'float | None' = None, last_seen: 'float | None' = None) -> None` |
+| `contract_histories` | function | `(history: 'HistoryLike', *, limit: 'int' = 5000, query: 'MemoryQuery | None' = None) -> 'dict[str, ContractHistory]'` |
+| `contract_key_for` | function | `(episode: 'EpisodeLike') -> 'str'` |
+
+### `hugrgate.memory.counterfactuals`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackendCounterfactual` | class | `(backend: 'str', n: 'int', success_rate: 'float | None', wilson_lo: 'float', wilson_hi: 'float', mean_score: 'float | None', sufficient_data: 'bool') -> None` |
+| `ValueCounterfactual` | class | `(value: 'Any', n: 'int', success_rate: 'float | None', wilson_lo: 'float', wilson_hi: 'float', sufficient_data: 'bool') -> None` |
+| `counterfactual_backends` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'list[BackendCounterfactual]'` |
+| `counterfactual_value` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', value: 'Any', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'ValueCounterfactual'` |
+| `wilson_interval` | function | `(successes: 'int', n: 'int', z: 'float' = 1.96) -> 'tuple[float, float]'` |
+
+### `hugrgate.memory.decay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `decay_weight` | function | `(age_seconds: 'float', half_life_seconds: 'float') -> 'float'` |
+| `decayed_mean` | function | `(values: 'Sequence[float]', ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'` |
+| `effective_count` | function | `(ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'` |
+| `half_life_for_horizon` | function | `(horizon_seconds: 'float', target_weight: 'float' = 0.01) -> 'float'` |
+
+### `hugrgate.memory.domain_profiles`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_DOMAIN` | constant | `'default'` |
+| `DomainProfile` | class | `(domain: 'str', decision_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, top_backends: 'tuple[tuple[str, int], ...]' = (), spec_types: 'tuple[str, ...]' = (), mean_probability: 'float | None' = None, activity: 'float' = 0.0, first_seen: 'float | None' = None, last_seen: 'float | None' = None) -> None` |
+| `domain_for` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `domain_profiles` | function | `(history: 'HistoryLike', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'dict[str, DomainProfile]'` |
+
+### `hugrgate.memory.frequency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FrequencyEntry` | class | `(key: 'str', count: 'int', decayed_count: 'float', first_seen: 'float', last_seen: 'float', outcome_counts: 'dict[str, int]' = <factory>) -> None` |
+| `FrequencyTable` | class | `(entries: 'dict[str, FrequencyEntry]', total: 'int', decayed_total: 'float') -> None` |
+| `by_backend` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_backend_value` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_model` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `by_outcome_kind` | function | `(episode: 'EpisodeLike') -> 'str'` |
+| `count_by` | function | `(history: 'HistoryLike', key_fn: 'KeyFn', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'FrequencyTable'` |
+
+### `hugrgate.memory.groundtruth`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GroundTruth` | class | `(label: 'Any', confidence: 'float' = 1.0, source: 'str' = 'unknown', verified_at: 'float' = 0.0, note: 'str' = '') -> None` |
+| `outcome_agrees` | function | `(truth: 'GroundTruth', outcome: 'Outcome') -> 'bool | None'` |
+
+### `hugrgate.memory.history`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DecisionHistory` | class | `(max_episodes: 'int | None' = None) -> 'None'` |
+| `Episode` | class | `(episode_id: 'str', record: 'DecisionRecord', recorded_at: 'float' = <factory>, privacy_class: 'str' = 'standard', tags: 'tuple[str, ...]' = (), outcome: 'Outcome | None' = None, ground_truth: 'GroundTruth | None' = None, annotations: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.memory.io`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MEMORY_EXPORT_VERSION` | constant | `1` |
+| `ExportReport` | class | `(path: 'str', episodes: 'int', summaries: 'int', bytes: 'int') -> None` |
+| `ImportReport` | class | `(imported: 'int' = 0, summaries_imported: 'int' = 0, skipped_bad: 'int' = 0, skipped_duplicates: 'int' = 0, errors: 'list[str]' = <factory>) -> None` |
+| `export_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, include_summaries: 'bool' = True) -> 'ExportReport'` |
+| `import_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, skip_bad_lines: 'bool' = True) -> 'ImportReport'` |
+
+### `hugrgate.memory.outcomes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OUTCOME_KINDS` | constant | `('success', 'failure', 'partial')` |
+| `Outcome` | class | `(kind: 'str', score: 'float | None' = None, observed_at: 'float' = 0.0, note: 'str' = '', latency_ms: 'float | None' = None) -> None` |
+
+### `hugrgate.memory.policies`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemoryAction` | constant | `typing.Literal['record', 'drop', 'redact']` |
+| `MemoryDecision` | class | `(action: 'MemoryAction', rule: 'str', reason: 'str' = '') -> None` |
+| `MemoryPolicy` | class | `(rules: 'list[MemoryRule] | tuple[MemoryRule, ...]' = ()) -> 'None'` |
+| `MemoryRule` | class | `(name: 'str', predicate: 'RulePredicate', action: 'MemoryAction', reason: 'str' = '') -> None` |
+| `drop_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
+| `drop_forbidden` | function | `() -> 'MemoryRule'` |
+| `drop_unaccepted` | function | `() -> 'MemoryRule'` |
+| `record_only_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
+| `redact_above` | function | `(privacy_class: 'str') -> 'MemoryRule'` |
+
+### `hugrgate.memory.query`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemoryQuery` | class | `(backends: 'Collection[str] | None' = None, models: 'Collection[str] | None' = None, accepted: 'bool | None' = None, fallback_used: 'bool | None' = None, recorded_after: 'float | None' = None, recorded_before: 'float | None' = None, privacy_classes: 'Collection[str] | None' = None, tags_any: 'Collection[str] | None' = None, tags_all: 'Collection[str] | None' = None, outcome_kinds: 'Collection[str] | None' = None, has_outcome: 'bool | None' = None, has_ground_truth: 'bool | None' = None, min_probability: 'float | None' = None, max_probability: 'float | None' = None, request_hashes: 'Collection[str] | None' = None, sort_by: 'str' = 'recorded_at', descending: 'bool' = True, limit: 'int | None' = None, offset: 'int' = 0) -> None` |
+| `find_in_provenance` | function | `(store: 'ProvenanceStore', query: 'MemoryQuery') -> 'list[DecisionRecord]'` |
+
+### `hugrgate.memory.recency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RecencyFeatures` | class | `(time_since_last_similar: 'float | None', last_outcome_kind: 'str | None', success_streak: 'int', failure_streak: 'int', similar_count: 'int', effective_similar_count: 'float', mean_similarity: 'float') -> None` |
+| `recency_features` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, similarity_threshold: 'float' = 0.5, half_life_seconds: 'float' = 86400.0, max_candidates: 'int' = 500, now: 'float | None' = None) -> 'RecencyFeatures'` |
+
+### `hugrgate.memory.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReplayReport` | class | `(total: 'int' = 0, replayed: 'int' = 0, value_matches: 'int' = 0, errors: 'int' = 0, mean_abs_prob_drift: 'float | None' = None, mismatches: 'list[ReplayResult]' = <factory>, error_episodes: 'list[str]' = <factory>) -> None` |
+| `ReplayResult` | class | `(episode_id: 'str', recorded_value: 'Any', replayed_value: 'Any', value_match: 'bool', recorded_probability: 'float', replayed_probability: 'float | None', prob_drift: 'float | None') -> None` |
+| `replay` | function | `(history: 'HistoryLike', decide: 'DecideFn', *, query: 'MemoryQuery | None' = None, limit: 'int' = 1000) -> 'ReplayReport'` |
+
+### `hugrgate.memory.retention`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemoryQuota` | class | `(max_episodes: 'int | None' = None, max_bytes: 'int | None' = None, warn_bytes: 'int | None' = None, ttl_overrides: 'dict[str, float | None] | None' = None) -> None` |
+| `QuotaStatus` | class | `(status: 'str', episodes: 'int', bytes: 'int', quota: 'MemoryQuota') -> None` |
+| `RetentionReport` | class | `(ttl_purged: 'int' = 0, count_evicted: 'int' = 0, bytes_evicted: 'int' = 0, bytes_before: 'int' = 0, bytes_after: 'int' = 0, episodes_before: 'int' = 0, episodes_after: 'int' = 0) -> None` |
+| `check_quota` | function | `(history: 'HistoryLike', quota: 'MemoryQuota') -> 'QuotaStatus'` |
+| `enforce_quotas` | function | `(history: 'HistoryLike', quota: 'MemoryQuota', *, now: 'float | None' = None) -> 'RetentionReport'` |
+
+### `hugrgate.memory.retrieval`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RetrievalResult` | class | `(episode: 'EpisodeLike', score: 'float', similarity: 'float', recency: 'float', outcome_bonus: 'float') -> None` |
+| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
+| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
+
+### `hugrgate.memory.similarity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SimilarityHit` | class | `(episode: 'EpisodeLike', score: 'float', shared_features: 'tuple[str, ...]' = <factory>) -> None` |
+| `cosine` | function | `(a: 'dict[str, float]', b: 'dict[str, float]') -> 'float'` |
+| `featurize_episode` | function | `(episode: 'EpisodeLike') -> 'dict[str, float]'` |
+| `featurize_query` | function | `(*, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, fallback_used: 'bool | None' = None, latency_ms: 'float | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None) -> 'dict[str, float]'` |
+| `most_similar` | function | `(query_features: 'dict[str, float]', episodes: 'Sequence[EpisodeLike]', *, k: 'int' = 5, exclude_ids: 'set[str] | frozenset[str]' = frozenset()) -> 'list[SimilarityHit]'` |
+
+### `hugrgate.memory.types`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EpisodeLike` | class | `(*args, **kwargs)` |
+| `HistoryLike` | class | `(*args, **kwargs)` |
 
 ### `hugrgate.millionbench`
 

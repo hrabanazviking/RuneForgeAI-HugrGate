@@ -216,6 +216,19 @@ class ProvenanceStore:
                 return copy.deepcopy(r)
         return None
 
+    def scan(self, predicate) -> list[DecisionRecord]:
+        """Return deep copies of every record matching ``predicate``.
+
+        Slice 302: the primitive that makes the provenance store
+        queryable. ``predicate`` receives a stored record (never a
+        live reference — it is already a deep copy) and returns
+        truthy to keep it. Thread-safe; the snapshot is taken under
+        the lock so concurrent appends cannot skew the result.
+        """
+        with self._lock:
+            snapshot = copy.deepcopy(self._records)
+        return [r for r in snapshot if predicate(r)]
+
     def recent(self, n: int = 10) -> list[DecisionRecord]:
         if n < 0:
             raise ValueError(f"recent(n) needs n >= 0, got {n}")
@@ -227,6 +240,23 @@ class ProvenanceStore:
     def count(self) -> int:
         with self._lock:
             return len(self._records)
+
+    def estimate_bytes(self) -> int:
+        """Rough in-memory footprint of the retained records.
+
+        Slice 316: the Campaign XII finding (+1.3 GB RSS over 1M
+        decisions) showed unbounded provenance growth needs
+        measurement before it needs control. Canonical JSON length
+        per record plus a fixed per-record overhead for Python object
+        headers — a budgeting aid, not an allocator reading.
+        """
+        with self._lock:
+            records = list(self._records)
+        total = 0
+        for record in records:
+            body = self._canonical(record)
+            total += len(body.encode("utf-8")) + 512
+        return total
 
     def verify_chain(self) -> bool:
         """Recompute every link. True iff the stored history is intact.

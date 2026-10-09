@@ -37,6 +37,9 @@ __all__ = [
     "JurisdictionViolation",
     "KeyProviderError",
     "LocalOnlyViolation",
+    "MemoryAccessDenied",
+    "MemoryError",
+    "MemoryQuotaExceeded",
     "MultiprocError",
     "NPUError",
     "NumaError",
@@ -238,6 +241,39 @@ class KeyProviderError(HugrGateError):
     """
 
     code = "key_provider_error"
+    recoverable = False
+
+
+class MemoryError(HugrGateError):
+    """Base for decision-memory failures (slice 301).
+
+    Raised for operational memory problems — unknown episode ids,
+    corrupt imports, failed attachments. Recoverable: the history
+    itself is intact; the caller should fix the request.
+    """
+
+    code = "memory_error"
+    recoverable = True
+
+
+class MemoryQuotaExceeded(MemoryError):
+    """Raised when a record would exceed the memory quota (slice 316).
+
+    Recoverable: evict, compact, or raise the quota, then retry.
+    """
+
+    code = "memory_quota_exceeded"
+    recoverable = True
+
+
+class MemoryAccessDenied(MemoryError):
+    """Raised when a role may not read or mutate an episode (slice 315).
+
+    Not recoverable by blind retry: the caller needs a different
+    role or the episode's privacy class must change.
+    """
+
+    code = "memory_access_denied"
     recoverable = False
 
 

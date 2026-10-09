@@ -35,6 +35,9 @@ from hugrgate.errors import (
     JurisdictionViolation,
     KeyProviderError,
     LocalOnlyViolation,
+    MemoryAccessDenied,
+    MemoryError,
+    MemoryQuotaExceeded,
     MetricError,
     MultiprocError,
     NPUError,
@@ -92,6 +95,10 @@ ALL_ERRORS = [
     SecretDetected,
     SealError,
     KeyProviderError,
+    # Campaign XIII decision-memory errors (slice 301 taxonomy promotion).
+    MemoryAccessDenied,
+    MemoryError,
+    MemoryQuotaExceeded,
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
 ]
@@ -144,6 +151,9 @@ EXPECTED_CODES = {
     SecretDetected: "secret_detected",
     SealError: "seal_error",
     KeyProviderError: "key_provider_error",
+    MemoryError: "memory_error",
+    MemoryQuotaExceeded: "memory_quota_exceeded",
+    MemoryAccessDenied: "memory_access_denied",
     # Campaign XIV observability errors (slice 326).
     ObservabilityError: "observability_error",
     MetricError: "metric_error",
@@ -204,6 +214,9 @@ EXPECTED_RECOVERABLE = {
     SecretDetected: False,
     SealError: False,
     KeyProviderError: False,
+    MemoryError: True,
+    MemoryQuotaExceeded: True,
+    MemoryAccessDenied: False,
     # Campaign XIV observability errors (slice 326): recording failures
     # must never take down a decision (recoverable); a bad SLO
     # definition is a configuration bug (not recoverable).
