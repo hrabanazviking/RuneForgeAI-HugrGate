@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 53 · **public names:** 241
+**Modules:** 53 · **public names:** 242
 
 ## API stability policy
 
@@ -296,6 +296,7 @@ that this document never drifts from the code.
 | `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPURegistry` | class | `()` |
+| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
 
 ### `hugrgate.edge.platform`
 

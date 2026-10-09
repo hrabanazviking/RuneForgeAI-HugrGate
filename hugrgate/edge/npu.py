@@ -34,6 +34,7 @@ __all__ = [
     "NPUCapability",
     "NPUError",
     "NPURegistry",
+    "OpenVINOAdapter",
 ]
 
 #: Precisions an adapter may advertise, ordered by bit-width.
@@ -440,4 +441,71 @@ class JetsonAdapter(NPUAdapter):
                 raise NPUError(f"unknown Jetson model handle {handle!r}")
         raise NPUError(
             "Jetson infer() needs TensorRT on-device; "
+            "NEEDS_HARDWARE_VALIDATION")
+
+
+class OpenVINOAdapter(NPUAdapter):
+    """OpenVINO NPU path (slice 188).
+
+    Detection: the ``openvino`` package must import and its
+    ``Core().available_devices`` must list an ``NPU`` device. Either
+    missing → ``None``. The injected ``core`` object stands in for
+    ``openvino.Core()`` in tests.
+    """
+
+    name = "openvino"
+    vendor = "intel"
+
+    def __init__(self, core: Any | None = None):
+        self._core = core
+        self._lock = threading.RLock()
+        self._models: dict[str, str] = {}
+
+    def _load_core(self) -> Any | None:
+        if self._core is not None:
+            return self._core
+        try:
+            import openvino as ov
+            return ov.Core()
+        except ImportError:
+            return None
+
+    def detect(self) -> NPUCapability | None:
+        core = self._load_core()
+        if core is None:
+            return None
+        try:
+            devices = list(core.available_devices or [])
+        except Exception:  # noqa: BLE001 - detection must not raise
+            return None
+        npu_devices = [d for d in devices
+                       if str(d).upper().startswith("NPU")]
+        if not npu_devices:
+            return None
+        return NPUCapability(
+            vendor="intel", device=str(npu_devices[0]),
+            tops_int8=10.0, precisions=("int8", "fp16"),
+            power_mw=None,
+            notes="NEEDS_HARDWARE_VALIDATION: TOPS is a conservative "
+                  "planning figure; verify per-SKU on-device")
+
+    def load_model(self, model_path: str, **kwargs: Any) -> str:
+        self.require_available()
+        if not model_path.endswith(".xml"):
+            raise NPUError(
+                f"OpenVINO models must be IR (.xml + .bin), got "
+                f"{model_path!r}")
+        handle = f"openvino-npu://{model_path}"
+        with self._lock:
+            self._models[handle] = model_path
+        return handle
+
+    def infer(self, handle: str, inputs: Any) -> Any:
+        self.require_available()
+        with self._lock:
+            if handle not in self._models:
+                raise NPUError(
+                    f"unknown OpenVINO model handle {handle!r}")
+        raise NPUError(
+            "OpenVINO NPU infer() needs the runtime on-device; "
             "NEEDS_HARDWARE_VALIDATION")

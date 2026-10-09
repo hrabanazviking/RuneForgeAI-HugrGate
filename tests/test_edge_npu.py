@@ -286,3 +286,70 @@ def test_jetson_registry_best_for_prefers_tops():
                               pci_vendor_ids=["0x1e60"]))
     best = reg.best_for("int8")
     assert best is not None and best.name == "jetson"  # 40 > 13 TOPS
+
+
+# --- slice 188: OpenVINO NPU path ----------------------------------------------
+
+from hugrgate.edge.npu import OpenVINOAdapter
+
+
+class _FakeOvCore:
+    def __init__(self, devices):
+        self.available_devices = devices
+
+
+def test_openvino_detect_npu_present():
+    adapter = OpenVINOAdapter(core=_FakeOvCore(["CPU", "NPU.0"]))
+    cap = adapter.detect()
+    assert cap is not None
+    assert cap.vendor == "intel"
+    assert cap.device == "NPU.0"
+    assert cap.supports("int8") and cap.supports("fp16")
+    assert not cap.supports("fp32")
+    assert adapter.is_available()
+
+
+def test_openvino_absent_without_npu_device():
+    adapter = OpenVINOAdapter(core=_FakeOvCore(["CPU", "GPU.0"]))
+    assert adapter.detect() is None
+    assert not adapter.is_available()
+
+
+def test_openvino_absent_without_package():
+    assert OpenVINOAdapter(core=None).detect() is None
+
+
+def test_openvino_broken_core_reports_absent():
+    class Broken:
+        @property
+        def available_devices(self):
+            raise RuntimeError("driver exploded")
+    assert OpenVINOAdapter(core=Broken()).detect() is None
+
+
+def test_openvino_load_model_requires_ir_xml():
+    adapter = OpenVINOAdapter(core=_FakeOvCore(["NPU"]))
+    handle = adapter.load_model("models/tiny.xml")
+    assert handle == "openvino-npu://models/tiny.xml"
+    with pytest.raises(NPUError, match=r"\.xml"):
+        adapter.load_model("models/tiny.onnx")
+
+
+def test_openvino_infer_marks_hardware_validation():
+    adapter = OpenVINOAdapter(core=_FakeOvCore(["NPU"]))
+    handle = adapter.load_model("models/tiny.xml")
+    with pytest.raises(NPUError, match="NEEDS_HARDWARE_VALIDATION"):
+        adapter.infer(handle, {})
+    with pytest.raises(NPUError, match="unknown OpenVINO model handle"):
+        adapter.infer("openvino-npu://nope.xml", {})
+
+
+def test_openvino_registry_coexists_with_vendors():
+    reg = NPURegistry()
+    reg.register(OpenVINOAdapter(core=_FakeOvCore(["NPU"])))
+    reg.register(HailoAdapter(sdk=_FakeHailoSdk(),
+                              pci_vendor_ids=["0x1e60"]))
+    found = reg.detect_all()
+    assert set(found) == {"openvino", "hailo"}
+    # Hailo-8L (13) beats the conservative OpenVINO figure (10)
+    assert reg.best_for("int8").name == "hailo"  # type: ignore[union-attr]
