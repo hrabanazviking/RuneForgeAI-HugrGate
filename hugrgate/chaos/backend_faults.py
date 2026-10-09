@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import random
 import threading
+import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
@@ -93,7 +94,7 @@ class FaultyBackend(Backend):
     """
 
     #: Fault modes with working injectors in this build.
-    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG)
+    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG, LATENCY)
 
     def __init__(self, backend: Backend):
         if not isinstance(backend, Backend):
@@ -183,10 +184,12 @@ class FaultyBackend(Backend):
                 f"chaos: injected crash of backend {self.name!r}")
         if mode == HANG:
             return self._inject_hang(state, spec, context)
-        # Further modes (latency, error_rate, malformed) are wired by
-        # slices 254-256, which extend _WIRED_MODES and add their branch
-        # here. _roll_fault can only return a wired mode because arm()
-        # rejects the rest.
+        if mode == LATENCY:
+            return self._inject_latency(state, spec, context)
+        # Further modes (error_rate, malformed) are wired by slices
+        # 255-256, which extend _WIRED_MODES and add their branch here.
+        # _roll_fault can only return a wired mode because arm() rejects
+        # the rest.
         return self._backend.evaluate(state, spec, context)
 
     def _roll_fault(self) -> str | None:
@@ -219,6 +222,12 @@ class FaultyBackend(Backend):
                 raise SpecError(
                     f"hang fault param 'hang_s' must be None or >= 0, "
                     f"got {hang_s!r}")
+        if spec.mode == LATENCY:
+            delay_s = spec.params.get("delay_s")
+            if (not isinstance(delay_s, (int, float)) or delay_s < 0):
+                raise SpecError(
+                    f"latency fault param 'delay_s' is required and must "
+                    f"be >= 0, got {delay_s!r}")
 
     def _inject_hang(self, state: Mapping[str, Any], spec: DecisionSpec,
                      context: Mapping[str, Any] | None) -> DecisionResult:
@@ -235,4 +244,17 @@ class FaultyBackend(Backend):
             threading.Event().wait()  # never set: hangs forever
             raise AssertionError("unreachable")  # pragma: no cover
         threading.Event().wait(float(hang_s))
+        return self._backend.evaluate(state, spec, context)
+
+    def _inject_latency(self, state: Mapping[str, Any], spec: DecisionSpec,
+                        context: Mapping[str, Any] | None) -> DecisionResult:
+        """Sleep ``delay_s`` seconds, then delegate to the wrapped backend.
+
+        The sleep models queueing/network delay *before* the backend
+        starts work. Observed latency is measured by the caller with a
+        monotonic clock; see the slice-254 measurement artifact.
+        """
+        delay_s = float(self._spec_for(LATENCY).params["delay_s"])
+        if delay_s:
+            time.sleep(delay_s)
         return self._backend.evaluate(state, spec, context)

@@ -1,0 +1,39 @@
+{
+  "schema": "hugrgate.chaos-latency/1",
+  "slice": 254,
+  "timestamp": "2026-10-09T14:58:21.706358+00:00",
+  "config": {
+    "fault_mode": "latency",
+    "injected_delay_s": 0.05,
+    "rate": 1.0,
+    "seed": 254,
+    "calls_per_arm": 30,
+    "warmup_calls": 3
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-7.0.0-39-generic-x86_64-with-glibc2.39",
+    "git_sha": "dca64ff"
+  },
+  "baseline": {
+    "n": 30,
+    "mean_s": 4.640299903257983e-06,
+    "min_s": 3.7359995985752903e-06,
+    "max_s": 1.8046999684884213e-05,
+    "stdev_s": 2.6685548206331577e-06
+  },
+  "injected": {
+    "n": 30,
+    "mean_s": 0.05020808269994935,
+    "min_s": 0.05012066400013282,
+    "max_s": 0.051301175999469706,
+    "stdev_s": 0.00022764709010027114
+  },
+  "comparison": {
+    "mean_delta_s": 0.050203442400046094,
+    "mean_ratio": 10820.008134538448,
+    "injected_min_ge_delay": true,
+    "baseline_max_lt_delay": true
+  },
+  "note": "Every injected call observed >= the configured delay; the clean baseline of the identical wrapper stayed below it. Regenerate: run this slice's measurement script against the worktree with the repo venv python."
+}
