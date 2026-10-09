@@ -77,6 +77,12 @@ from hugrgate.cluster.protocol import (
     encode_message,
     new_trace_id,
 )
+from hugrgate.cluster.provenance_dist import (
+    DEFAULT_PROVENANCE_PULL_LIMIT,
+    MAX_PROVENANCE_PULL_LIMIT,
+    ProvenanceExchange,
+    attribute_record,
+)
 from hugrgate.cluster.recovery import (
     DEFAULT_RECOVERY_BASE_DELAY_S,
     DEFAULT_RECOVERY_MAX_DELAY_S,
@@ -123,12 +129,14 @@ __all__ = [
     "DEFAULT_LATENCY_TARGET_MS",
     "DEFAULT_MAX_BATCH_SIZE",
     "DEFAULT_PARTITION_STALE_AFTER_S",
+    "DEFAULT_PROVENANCE_PULL_LIMIT",
     "DEFAULT_QUARANTINE_THRESHOLD",
     "DEFAULT_RECOVERY_BASE_DELAY_S",
     "DEFAULT_RECOVERY_MAX_DELAY_S",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
+    "MAX_PROVENANCE_PULL_LIMIT",
     "MAX_STEAL_BATCH",
     "PROTOCOL_VERSION",
     "SENSITIVE_PREFIX",
@@ -162,6 +170,7 @@ __all__ = [
     "PolicyPropagator",
     "PolicyVersion",
     "PrivacyBoundary",
+    "ProvenanceExchange",
     "RPCClient",
     "RecoveryManager",
     "RemoteBackend",
@@ -171,6 +180,7 @@ __all__ = [
     "StealJob",
     "StealableQueue",
     "TLSServer",
+    "attribute_record",
     "cert_fingerprint",
     "decode_message",
     "enable_mutual_auth",

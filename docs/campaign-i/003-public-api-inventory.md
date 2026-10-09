@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 67 · **public names:** 326
+**Modules:** 68 · **public names:** 333
 
 ## API stability policy
 
@@ -239,12 +239,14 @@ that this document never drifts from the code.
 | `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
 | `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
 | `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
+| `DEFAULT_PROVENANCE_PULL_LIMIT` | constant | `100` |
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
 | `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
+| `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
 | `MAX_STEAL_BATCH` | constant | `64` |
 | `PROTOCOL_VERSION` | constant | `1` |
 | `SENSITIVE_PREFIX` | constant | `'private_'` |
@@ -278,6 +280,7 @@ that this document never drifts from the code.
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
 | `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
 | `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
+| `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
@@ -287,6 +290,7 @@ that this document never drifts from the code.
 | `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
 | `StealableQueue` | class | `() -> 'None'` |
 | `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `attribute_record` | function | `(record: 'DecisionRecord', node_id: 'str') -> 'DecisionRecord'` |
 | `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `enable_mutual_auth` | function | `(node: 'ClusterNode', key: 'ClusterKey') -> 'Callable[[bytes], str]'` |
@@ -423,6 +427,14 @@ that this document never drifts from the code.
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.provenance_dist`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_PROVENANCE_PULL_LIMIT` | constant | `100` |
+| `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
+| `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
 
 ### `hugrgate.cluster.recovery`
 

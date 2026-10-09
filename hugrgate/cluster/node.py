@@ -34,6 +34,7 @@ from hugrgate.cluster.protocol import (
     MessageType,
     new_trace_id,
 )
+from hugrgate.cluster.provenance_dist import ProvenanceExchange
 from hugrgate.cluster.recovery import RecoveryManager
 from hugrgate.cluster.routing import DistributedRouter, PeerScores
 from hugrgate.cluster.rpc import RPCClient, error_envelope
@@ -123,6 +124,7 @@ class ClusterNode:
             MessageType.BATCH_REQUEST: self.handle_batch,
             MessageType.STEAL_REQUEST: self.handle_steal_request,
             MessageType.HEARTBEAT: self.handle_heartbeat,
+            MessageType.PROVENANCE_PULL: self.handle_provenance_pull,
             MessageType.POLICY_PUSH: self.handle_policy_push,
             MessageType.POLICY_PULL: self.handle_policy_pull,
         }
@@ -150,6 +152,8 @@ class ClusterNode:
         self.enforce_quorum = enforce_quorum
         #: Offline peer recovery (slice 220).
         self.recovery = RecoveryManager()
+        #: Distributed provenance (slice 221).
+        self.provenance_exchange = ProvenanceExchange(self)
 
     # -- local facts --------------------------------------------------------
 
@@ -241,6 +245,21 @@ class ClusterNode:
             message, MessageType.HEARTBEAT,
             {"alive": True, "node_id": self.node_id,
              "peers": len(self.peers())})
+
+    def handle_provenance_pull(self,
+                               message: ClusterMessage) -> ClusterMessage:
+        """Serve a slice of this node's decision history (slice 221)."""
+        payload = message.payload
+        since = payload.get("since")
+        limit = payload.get("limit", 100)
+        try:
+            records = self.provenance_exchange.serve_pull(since, limit)
+        except SpecError as e:
+            return error_envelope(e, self.node_id, self.next_seq(),
+                                  message.trace_id)
+        return self._respond(message, MessageType.PROVENANCE_RESPONSE,
+                             {"records": records,
+                              "node_id": self.node_id})
 
     def ping(self, peer: PeerRecord,
              trace_id: str | None = None) -> dict[str, Any]:

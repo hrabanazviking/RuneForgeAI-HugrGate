@@ -361,6 +361,31 @@ class RPCClient:
                 f"{reply.msg_type.value}")
         return reply.payload
 
+    def pull_provenance(self, peer: PeerRecord,
+                        since: float | None = None,
+                        limit: int = 100,
+                        trace_id: str | None = None) -> list[dict]:
+        """Fetch a peer's decision history (slice 221).
+
+        Returns raw record dicts; the caller validates them (the
+        exchange does). The serving node clamps ``limit``. Control-
+        plane read: never shed, never gated.
+        """
+        if not isinstance(limit, int) or limit < 1:
+            raise SpecError("provenance pull needs a positive int limit")
+        message = self._prepare(MessageType.PROVENANCE_PULL,
+                                {"since": since, "limit": limit}, trace_id)
+        reply = self.send(peer, message)
+        if reply.msg_type is not MessageType.PROVENANCE_RESPONSE:
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… sent unexpected "
+                f"{reply.msg_type.value}")
+        records = reply.payload.get("records")
+        if not isinstance(records, list):
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… returned no provenance records")
+        return records
+
 
 class RemoteBackend(Backend):
     """A peer node exposed as an ordinary backend.

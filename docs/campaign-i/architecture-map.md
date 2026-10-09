@@ -90,6 +90,7 @@ flowchart TD
         cluster_backpressure[cluster.backpressure]
         cluster_partition[cluster.partition]
         cluster_recovery[cluster.recovery]
+        cluster_provenance_dist[cluster.provenance_dist]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -196,6 +197,7 @@ flowchart TD
     cluster --> cluster_policy_sync
     cluster --> cluster_privacy_boundary
     cluster --> cluster_protocol
+    cluster --> cluster_provenance_dist
     cluster --> cluster_recovery
     cluster --> cluster_routing
     cluster --> cluster_rpc
@@ -240,6 +242,7 @@ flowchart TD
     cluster_node --> cluster_partition
     cluster_node --> cluster_policy_sync
     cluster_node --> cluster_protocol
+    cluster_node --> cluster_provenance_dist
     cluster_node --> cluster_recovery
     cluster_node --> cluster_routing
     cluster_node --> cluster_rpc
@@ -260,6 +263,12 @@ flowchart TD
     cluster_privacy_boundary --> errors
     cluster_privacy_boundary --> policy
     cluster_protocol --> errors
+    cluster_provenance_dist --> cluster_discovery
+    cluster_provenance_dist --> cluster_protocol
+    cluster_provenance_dist --> cluster_rpc
+    cluster_provenance_dist --> core
+    cluster_provenance_dist --> errors
+    cluster_provenance_dist --> provenance
     cluster_recovery --> errors
     cluster_routes --> cluster_node
     cluster_routes --> cluster_protocol
@@ -376,7 +385,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -484,6 +493,7 @@ flowchart TD
 | `cluster` | `cluster.policy_sync` | no |
 | `cluster` | `cluster.privacy_boundary` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster` | `cluster.provenance_dist` | no |
 | `cluster` | `cluster.recovery` | no |
 | `cluster` | `cluster.routing` | no |
 | `cluster` | `cluster.rpc` | no |
@@ -528,6 +538,7 @@ flowchart TD
 | `cluster.node` | `cluster.partition` | no |
 | `cluster.node` | `cluster.policy_sync` | no |
 | `cluster.node` | `cluster.protocol` | no |
+| `cluster.node` | `cluster.provenance_dist` | no |
 | `cluster.node` | `cluster.recovery` | no |
 | `cluster.node` | `cluster.routing` | no |
 | `cluster.node` | `cluster.rpc` | no |
@@ -548,6 +559,12 @@ flowchart TD
 | `cluster.privacy_boundary` | `errors` | no |
 | `cluster.privacy_boundary` | `policy` | no |
 | `cluster.protocol` | `errors` | no |
+| `cluster.provenance_dist` | `cluster.discovery` | no |
+| `cluster.provenance_dist` | `cluster.protocol` | no |
+| `cluster.provenance_dist` | `cluster.rpc` | no |
+| `cluster.provenance_dist` | `core` | no |
+| `cluster.provenance_dist` | `errors` | no |
+| `cluster.provenance_dist` | `provenance` | no |
 | `cluster.recovery` | `errors` | no |
 | `cluster.routes` | `cluster.node` | no |
 | `cluster.routes` | `cluster.protocol` | no |
