@@ -357,7 +357,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecisionRecord` | class | `(request_hash: 'str', spec: 'Dict[str, Any]', backend: 'str', model: 'str', model_version: 'str' = 'unknown', calibration_profile: 'str' = 'none', value: 'Any' = None, probability: 'float' = 0.0, policy_threshold: 'float' = 0.0, accepted: 'bool' = True, fallback_used: 'bool' = False, fallback_trace: 'List[str]' = <factory>, latency_ms: 'float' = 0.0, timestamp: 'float' = <factory>, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `DecisionRecord` | class | `(request_hash: 'str', spec: 'Dict[str, Any]', backend: 'str', model: 'str', model_version: 'str' = 'unknown', calibration_profile: 'str' = 'none', value: 'Any' = None, probability: 'float' = 0.0, policy_threshold: 'float' = 0.0, accepted: 'bool' = True, fallback_used: 'bool' = False, fallback_trace: 'List[str]' = <factory>, latency_ms: 'float' = 0.0, timestamp: 'float' = <factory>, metadata: 'Dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
 | `ProvenanceStore` | class | `()` |
 
 ### `hugrgate.result`

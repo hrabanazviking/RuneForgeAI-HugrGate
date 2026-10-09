@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Mapping, Optional
 
 from hugrgate.result import DecisionResult
@@ -40,6 +41,10 @@ class DecisionRecord:
     latency_ms: float = 0.0
     timestamp: float = field(default_factory=time.time)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    # Integrity chain (slice 015): each appended record commits to the
+    # previous record's hash, so silent edits break verify_chain().
+    prev_hash: str = ""
+    record_hash: str = ""
 
     @classmethod
     def from_decision(cls, state: Mapping[str, Any], spec: DecisionSpec,
@@ -63,22 +68,62 @@ class DecisionRecord:
 
 
 class ProvenanceStore:
-    """Append-only store of decision records."""
+    """Append-only store of decision records.
+
+    Integrity model: records are deep-copied on the way in and on the
+    way out, so no caller can mutate history through a held reference.
+    Each stored record carries ``prev_hash`` / ``record_hash`` forming
+    a hash chain over the canonical record content; ``verify_chain``
+    detects any tampering with the stored list itself.
+    """
 
     def __init__(self):
         self._records: List[DecisionRecord] = []
 
+    @staticmethod
+    def _canonical(record: DecisionRecord) -> str:
+        body = asdict(record)
+        body.pop("record_hash", None)
+        return json.dumps(body, sort_keys=True, default=str)
+
     def append(self, record: DecisionRecord) -> None:
-        self._records.append(record)
+        if not isinstance(record, DecisionRecord):
+            raise TypeError(
+                f"ProvenanceStore only stores DecisionRecord, got "
+                f"{type(record).__name__}")
+        stored = copy.deepcopy(record)
+        stored.prev_hash = (self._records[-1].record_hash
+                            if self._records else "")
+        stored.record_hash = hashlib.sha256(
+            (stored.prev_hash + self._canonical(stored)).encode()
+        ).hexdigest()
+        self._records.append(stored)
 
     def by_hash(self, request_hash: str) -> Optional[DecisionRecord]:
         for r in reversed(self._records):
             if r.request_hash == request_hash:
-                return r
+                return copy.deepcopy(r)
         return None
 
     def recent(self, n: int = 10) -> List[DecisionRecord]:
-        return self._records[-n:]
+        if n < 0:
+            raise ValueError(f"recent(n) needs n >= 0, got {n}")
+        if n == 0:
+            return []
+        return copy.deepcopy(self._records[-n:])
 
     def count(self) -> int:
         return len(self._records)
+
+    def verify_chain(self) -> bool:
+        """Recompute every link. True iff the stored history is intact."""
+        prev = ""
+        for r in self._records:
+            if r.prev_hash != prev:
+                return False
+            body = self._canonical(r)
+            if r.record_hash != hashlib.sha256(
+                    (prev + body).encode()).hexdigest():
+                return False
+            prev = r.record_hash
+        return True
