@@ -40,6 +40,10 @@ from hugrgate.ensemble.blending import (
     log_loss,
     project_simplex,
 )
+from hugrgate.ensemble.calibration import (
+    EnsembleCalibrator,
+    expected_calibration_error,
+)
 from hugrgate.ensemble.consensus import (
     ConsensusConfig,
     apply_consensus,
@@ -126,6 +130,8 @@ __all__ = [
     "blending_combine",
     "project_simplex",
     "log_loss",
+    "EnsembleCalibrator",
+    "expected_calibration_error",
     "ExpertRouter",
     "moe_combine",
     "ReliabilityTracker",
