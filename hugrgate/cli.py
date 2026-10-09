@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 from typing import Any
 
 from hugrgate.policy import DecisionPolicy
@@ -521,6 +522,49 @@ def cmd_check_backend(args: argparse.Namespace) -> int:
     return 1
 
 
+def cmd_check_contract(args: argparse.Namespace) -> int:
+    """Run the contract conformance battery (slice 441)."""
+    import json
+    from hugrgate.contracts.conformance import (
+        assert_conformance,
+        run_contract_conformance,
+        run_template_conformance,
+    )
+    from hugrgate.contracts.schema import contract_from_dict
+    from hugrgate.contracts.templates import ContractTemplate
+    from hugrgate.errors import ConformanceError, ContractError
+    try:
+        data = json.loads(Path(args.file).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        print(f"hugrgate: cannot read template file: {e}",
+              file=sys.stderr)
+        return 2
+    try:
+        if args.instance:
+            target = contract_from_dict(data)
+            report = run_contract_conformance(target)
+        else:
+            report = run_template_conformance(
+                ContractTemplate.from_dict(data))
+    except ContractError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    _emit(args, report.to_dict(),
+          ([{"check": c.name,
+             "passed": "ok" if c.passed else "FAIL",
+             "detail": c.detail} for c in report.checks],
+           ["check", "passed", "detail"]))
+    if report.passed:
+        print(f"{args.file} is conformant "
+              f"({len(report.checks)} checks)")
+        return 0
+    try:
+        assert_conformance(report)
+    except ConformanceError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+    return 1
+
+
 def cmd_inspect(args: argparse.Namespace) -> int:
     """Drop into the interactive inspector REPL (slice 436)."""
     from hugrgate.inspect import run_inspect
@@ -687,6 +731,13 @@ def build_parser() -> argparse.ArgumentParser:
                        help="run the backend conformance battery")
     p.add_argument("name", help="backend name (registry or plugin)")
     p.set_defaults(func=cmd_check_backend)
+
+    p = sub.add_parser("check-contract",
+                       help="run the contract conformance battery")
+    p.add_argument("file", help="template JSON file")
+    p.add_argument("--instance", action="store_true",
+                   help="check a serialized contract instead of a template")
+    p.set_defaults(func=cmd_check_contract)
 
     p = sub.add_parser("new", help="scaffold a new HugrGate project")
     p.add_argument("name", help="project name (lowercase, valid package)")
