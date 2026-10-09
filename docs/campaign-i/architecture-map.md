@@ -39,6 +39,7 @@ flowchart TD
         contracts_context[contracts.context]
         contracts_features[contracts.features]
         contracts_explanations[contracts.explanations]
+        contracts_inheritance[contracts.inheritance]
     end
     subgraph runtime[runtime]
         core[core]
@@ -185,6 +186,9 @@ flowchart TD
     contracts_features --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
+    contracts_inheritance --> contracts_schema
+    contracts_inheritance --> errors
+    contracts_inheritance -.-> spec
     contracts_multilabel --> contracts_schema
     contracts_multilabel --> errors
     contracts_negotiation --> contracts_schema
@@ -267,7 +271,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -375,6 +379,9 @@ flowchart TD
 | `contracts.features` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
+| `contracts.inheritance` | `contracts.schema` | no |
+| `contracts.inheritance` | `errors` | no |
+| `contracts.inheritance` | `spec` | yes |
 | `contracts.multilabel` | `contracts.schema` | no |
 | `contracts.multilabel` | `errors` | no |
 | `contracts.negotiation` | `contracts.schema` | no |

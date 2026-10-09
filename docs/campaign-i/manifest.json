@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:41:51.969188+00:00",
-  "module_count": 61,
+  "generated_utc": "2026-10-09T11:44:24.583961+00:00",
+  "module_count": 62,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 62,
+      "loc": 63,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -707,9 +707,10 @@
         "__future__",
         "dataclasses",
         "hugrgate",
+        "re",
         "typing"
       ],
-      "loc": 216,
+      "loc": 227,
       "path": "hugrgate/contracts/explanations.py",
       "public_defs": [
         "ExplanationContract",
@@ -780,6 +781,22 @@
         "describe",
         "visit",
         "walk"
+      ]
+    },
+    "hugrgate.contracts.inheritance": {
+      "docstring": "Contract inheritance \u2014 derive, specialize, and check compatibility.\n\nGjallarbr\u00fa slice 044.\n\nContracts are standalone: there is no way to say \"a triage contract is\nthe base clinical contract with tighter bounds\". This module adds:\n\n- :func:`derive_contract`: build a child contract of the same kind from\n  a base, overriding fields by name. Metadata deep-merges (child wins);\n  the base's canonical hash is recorded as ``derived_from`` (provenance).\n- :func:`is_compatible`: the Liskov check \u2014 is every value the child\n  accepts also accepted by the base? Implemented per kind over the\n  *value space* (what ``validate_value`` accepts), with conservative\n  fallbacks where implication is undecidable.\n\nCompatibility is about values, not matrices: a cost-sensitive child with\ndifferent prices but the same outcomes is compatible, because any label\nit can decide is a label the base can decide.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 339,
+      "path": "hugrgate/contracts/inheritance.py",
+      "public_defs": [
+        "derive_contract",
+        "is_compatible"
       ]
     },
     "hugrgate.contracts.multilabel": {
@@ -1435,6 +1452,7 @@
     "test_contracts_041.py",
     "test_contracts_042.py",
     "test_contracts_043.py",
+    "test_contracts_044.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1445,5 +1463,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 11768
+  "total_loc": 12119
 }
