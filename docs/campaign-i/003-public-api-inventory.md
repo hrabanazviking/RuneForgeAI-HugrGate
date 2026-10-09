@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 53 · **public names:** 235
+**Modules:** 54 · **public names:** 237
 
 ## API stability policy
 
@@ -245,6 +245,7 @@ that this document never drifts from the code.
 | `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/hatch/works` |
 | `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/hatch/w` |
 | `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/hatch` |
+| `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/hatch/wo` |
 
 ### `hugrgate.contracts.composite`
 
@@ -287,6 +288,12 @@ that this document never drifts from the code.
 | `HierarchicalLabelContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, edges: 'List[Tuple[str, str]]' = <factory>, labels: 'List[str]' = <factory>) -> None` |
 | `hierarchical_precision` | function | `(predicted: 'Collection[str]', truth: 'Collection[str]', hierarchy: 'LabelHierarchy') -> 'float'` |
 | `hierarchical_recall` | function | `(predicted: 'Collection[str]', truth: 'Collection[str]', hierarchy: 'LabelHierarchy') -> 'float'` |
+
+### `hugrgate.contracts.multilabel`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MultilabelContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, labels: 'List[str]' = <factory>, min_count: 'int' = 0, max_count: 'int' = 0, exact_count: 'int' = -1, required: 'List[str]' = <factory>, forbidden: 'List[str]' = <factory>, implies: 'Dict[str, List[str]]' = <factory>, excludes: 'Dict[str, List[str]]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.negotiation`
 

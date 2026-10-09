@@ -31,6 +31,7 @@ flowchart TD
         contracts_ordinal[contracts.ordinal]
         contracts_uncertainty[contracts.uncertainty]
         contracts_distributions[contracts.distributions]
+        contracts_multilabel[contracts.multilabel]
     end
     subgraph runtime[runtime]
         core[core]
@@ -164,6 +165,8 @@ flowchart TD
     contracts_distributions --> errors
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
+    contracts_multilabel --> contracts_schema
+    contracts_multilabel --> errors
     contracts_negotiation --> contracts_schema
     contracts_negotiation --> errors
     contracts_nested --> contracts_schema
@@ -238,7 +241,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -333,6 +336,8 @@ flowchart TD
 | `contracts.distributions` | `errors` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
+| `contracts.multilabel` | `contracts.schema` | no |
+| `contracts.multilabel` | `errors` | no |
 | `contracts.negotiation` | `contracts.schema` | no |
 | `contracts.negotiation` | `errors` | no |
 | `contracts.nested` | `contracts.schema` | no |

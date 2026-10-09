@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:23:52.928024+00:00",
-  "module_count": 53,
+  "generated_utc": "2026-10-09T11:25:28.668568+00:00",
+  "module_count": 54,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 52,
+      "loc": 53,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -657,6 +657,23 @@
         "describe",
         "visit",
         "walk"
+      ]
+    },
+    "hugrgate.contracts.multilabel": {
+      "docstring": "Multilabel cardinality constraints \u2014 how many, which, with what.\n\nGjallarbr\u00fa slice 036.\n\nHierarchical contracts (slice 029) validate *membership* of label sets.\nThey say nothing about *shape*: \"pick 1\u20133\", \"exactly 2\", \"'urgent' is\nmandatory\", \"'a' and 'c' never co-occur\", \"'x' implies 'y'\".\n:class:`MultilabelContract` (kind ``\"multilabel-cardinality\"``) adds:\n\n- ``min_count`` / ``max_count`` / ``exact_count`` (exact wins when set);\n- ``required`` / ``forbidden`` label lists;\n- ``implies``: selecting a label requires its consequents;\n- ``excludes``: selecting a label forbids its antagonists (symmetrized at\n  construction \u2014 exclusion is inherently mutual).\n\nAll violations aggregate into a single error; construction rejects\nincoherent rule sets (e.g. a label both required and forbidden).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 269,
+      "path": "hugrgate/contracts/multilabel.py",
+      "public_defs": [
+        "MultilabelContract",
+        "violations",
+        "validate_value",
+        "describe"
       ]
     },
     "hugrgate.contracts.negotiation": {
@@ -1233,6 +1250,7 @@
     "test_contracts_033.py",
     "test_contracts_034.py",
     "test_contracts_035.py",
+    "test_contracts_036.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1243,5 +1261,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 9733
+  "total_loc": 10003
 }
