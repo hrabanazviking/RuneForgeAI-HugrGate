@@ -9,13 +9,36 @@ from __future__ import annotations
 
 from typing import Dict, List, Sequence
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
+
+from hugrgate.errors import CalibrationError
+
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise CalibrationError(
+            "numpy is required for calibration; install the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
+
+__all__ = [
+    "brier_score",
+    "log_loss",
+    "reliability_diagram",
+    "expected_calibration_error",
+    "maximum_calibration_error",
+    "ece_multiclass",
+]
 
 _EPS = 1e-15
 
 
 def _check_binary(y_true: Sequence[int],
                   y_prob: Sequence[float]) -> tuple[np.ndarray, np.ndarray]:
+    _require_numpy()
     y = np.asarray(list(y_true), dtype=float)
     p = np.asarray(list(y_prob), dtype=float)
     if y.shape != p.shape:
@@ -31,6 +54,7 @@ def _check_binary(y_true: Sequence[int],
 
 def brier_score(y_true: Sequence[int], y_prob: Sequence[float]) -> float:
     """Mean squared error between predicted probabilities and 0/1 labels."""
+    _require_numpy()
     y, p = _check_binary(y_true, y_prob)
     return float(np.mean((p - y) ** 2))
 
@@ -38,6 +62,7 @@ def brier_score(y_true: Sequence[int], y_prob: Sequence[float]) -> float:
 def log_loss(y_true: Sequence[int], y_prob: Sequence[float],
              eps: float = _EPS) -> float:
     """Binary cross-entropy (natural log)."""
+    _require_numpy()
     y, p = _check_binary(y_true, y_prob)
     pc = np.clip(p, eps, 1.0 - eps)
     return float(-np.mean(y * np.log(pc) + (1.0 - y) * np.log(1.0 - pc)))
@@ -50,6 +75,7 @@ def reliability_diagram(y_true: Sequence[int], y_prob: Sequence[float],
     Equal-width bins over [0, 1]; the last bin is closed on the right so a
     probability of exactly 1.0 lands somewhere.
     """
+    _require_numpy()
     y, p = _check_binary(y_true, y_prob)
     if n_bins < 1:
         raise ValueError("n_bins must be ≥ 1")

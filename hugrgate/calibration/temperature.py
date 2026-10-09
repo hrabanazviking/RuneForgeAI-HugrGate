@@ -10,15 +10,31 @@ from __future__ import annotations
 
 from typing import Any, Dict, Sequence
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
 
-from hugrgate.calibration import Calibrator
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise CalibrationError(
+            "numpy is required for calibration; install the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
+
+from hugrgate.calibration._base import Calibrator
 from hugrgate.errors import CalibrationError
+
+__all__ = [
+    "TemperatureCalibrator",
+]
 
 _EPS = 1e-12
 
 
 def _sigmoid(x: np.ndarray) -> np.ndarray:
+    _require_numpy()
     out = np.empty_like(x, dtype=float)
     pos = x >= 0
     out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
@@ -45,10 +61,12 @@ class TemperatureCalibrator(Calibrator):
 
     @staticmethod
     def _clip(p: np.ndarray) -> np.ndarray:
+        _require_numpy()
         return np.clip(p, _EPS, 1.0 - _EPS)
 
     def fit(self, scores: Sequence[float],
             labels: Sequence[int]) -> "TemperatureCalibrator":
+        _require_numpy()
         p_raw, y = self._as_arrays(scores, labels)
         if int(y.sum()) == 0 or int(y.sum()) == y.size:
             raise CalibrationError(
@@ -56,6 +74,7 @@ class TemperatureCalibrator(Calibrator):
         z = np.log(self._clip(p_raw) / (1.0 - self._clip(p_raw)))  # logits
 
         def nll(u: float) -> float:
+            _require_numpy()
             q = _sigmoid(z * np.exp(-u))
             qc = self._clip(q)
             return float(-(y * np.log(qc) + (1.0 - y) * np.log(1.0 - qc)).sum())
@@ -92,6 +111,7 @@ class TemperatureCalibrator(Calibrator):
         return self
 
     def calibrate(self, score: float) -> float:
+        _require_numpy()
         self._check_fitted()
         if not np.isfinite(score):
             raise CalibrationError("cannot calibrate a non-finite score")

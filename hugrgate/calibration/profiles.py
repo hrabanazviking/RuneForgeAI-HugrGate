@@ -20,18 +20,37 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
+
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise CalibrationError(
+            "numpy is required for calibration; install the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
 
 from hugrgate.backend import Backend
-from hugrgate.calibration import Calibrator, CalibratorRegistry
+from hugrgate.calibration._base import Calibrator, CalibratorRegistry
 from hugrgate.errors import CalibrationError, HugrGateError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
+
+__all__ = [
+    "hash_dataset",
+    "CalibrationProfile",
+    "CalibrationProfileStore",
+    "CalibratedBackend",
+]
 
 
 def hash_dataset(scores: Sequence[float],
                  labels: Sequence[int]) -> str:
     """Stable SHA-256 fingerprint of a calibration dataset."""
+    _require_numpy()
     s = np.asarray(list(scores), dtype=float)
     y = np.asarray(list(labels), dtype=int)
     h = hashlib.sha256()

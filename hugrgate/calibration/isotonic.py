@@ -10,10 +10,25 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Sequence
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - optional dependency
+    np = None  # type: ignore[assignment]
 
-from hugrgate.calibration import Calibrator
+
+def _require_numpy() -> None:
+    """Deliberate error when the optional numpy dependency is absent."""
+    if np is None:  # pragma: no cover - optional dependency
+        raise CalibrationError(
+            "numpy is required for calibration; install the 'ml' extra: pip install 'hugrgate[ml]'"
+        )
+
+from hugrgate.calibration._base import Calibrator
 from hugrgate.errors import CalibrationError
+
+__all__ = [
+    "IsotonicCalibrator",
+]
 
 
 class IsotonicCalibrator(Calibrator):
@@ -29,6 +44,7 @@ class IsotonicCalibrator(Calibrator):
 
     def fit(self, scores: Sequence[float],
             labels: Sequence[int]) -> "IsotonicCalibrator":
+        _require_numpy()
         s, y = self._as_arrays(scores, labels)
         n_pos = int(y.sum())
         if n_pos == 0 or n_pos == y.size:
@@ -69,6 +85,7 @@ class IsotonicCalibrator(Calibrator):
         return self
 
     def calibrate(self, score: float) -> float:
+        _require_numpy()
         self._check_fitted()
         if not np.isfinite(score):
             raise CalibrationError("cannot calibrate a non-finite score")

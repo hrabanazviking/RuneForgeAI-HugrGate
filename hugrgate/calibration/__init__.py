@@ -19,104 +19,18 @@ renormalizes (see :mod:`hugrgate.calibration.profiles`).
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Sequence, Type
-
-import numpy as np
-
-from hugrgate.errors import CalibrationError
+# Base classes live in ._base so submodules can import them without
+# creating a parent<->child import cycle with this __init__ (slice 002).
+from hugrgate.calibration._base import Calibrator, CalibratorRegistry
 
 
-class Calibrator(ABC):
-    """Maps raw classifier scores to calibrated probabilities."""
-
-    name: str = "calibrator"
-
-    def __init__(self):
-        self._fitted = False
-
-    @property
-    def fitted(self) -> bool:
-        return self._fitted
-
-    @abstractmethod
-    def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "Calibrator":
-        """Learn the calibration map. ``labels`` are 0/1."""
-
-    @abstractmethod
-    def calibrate(self, score: float) -> float:
-        """Map one raw score to a calibrated probability in [0, 1]."""
-
-    def calibrate_batch(self, scores: Sequence[float]) -> np.ndarray:
-        return np.asarray([self.calibrate(float(s)) for s in scores])
-
-    @abstractmethod
-    def get_params(self) -> Dict[str, Any]:
-        """JSON-serializable fitted parameters."""
-
-    @classmethod
-    @abstractmethod
-    def from_params(cls, params: Dict[str, Any]) -> "Calibrator":
-        """Rebuild a fitted calibrator from :meth:`get_params` output."""
-
-    def _check_fitted(self) -> None:
-        if not self._fitted:
-            raise CalibrationError(
-                f"{self.name} used before fit")
-
-    @staticmethod
-    def _as_arrays(scores: Sequence[float],
-                   labels: Sequence[int]) -> tuple[np.ndarray, np.ndarray]:
-        s = np.asarray(list(scores), dtype=float)
-        y = np.asarray(list(labels), dtype=float)
-        if s.shape != y.shape:
-            raise CalibrationError(
-                f"scores/labels length mismatch: {s.shape} vs {y.shape}")
-        if s.size == 0:
-            raise CalibrationError("cannot fit on empty data")
-        if np.any(~np.isfinite(s)):
-            raise CalibrationError("scores must be finite")
-        if not np.all(np.isin(y, (0.0, 1.0))):
-            raise CalibrationError("labels must be 0/1")
-        return s, y
-
-
-class CalibratorRegistry:
-    """Name → calibrator class registry with param-based rebuilding."""
-
-    _registry: Dict[str, Type[Calibrator]] = {}
-
-    @classmethod
-    def register(cls, name: str, calibrator_cls: Type[Calibrator]) -> None:
-        cls._registry[name] = calibrator_cls
-
-    @classmethod
-    def get(cls, name: str) -> Type[Calibrator]:
-        try:
-            return cls._registry[name]
-        except KeyError:
-            raise CalibrationError(
-                f"unknown calibrator {name!r}; "
-                f"known: {sorted(cls._registry)}")
-
-    @classmethod
-    def build(cls, name: str, params: Dict[str, Any]) -> Calibrator:
-        return cls.get(name).from_params(params)
-
-    @classmethod
-    def list(cls) -> Dict[str, Type[Calibrator]]:
-        return dict(cls._registry)
-
-
-# Submodule imports come last: they reference Calibrator/CalibratorRegistry
-# defined above, then register themselves here.
+# Submodule imports register their calibrator classes with the registry.
 from hugrgate.calibration.platt import PlattCalibrator          # noqa: E402
 from hugrgate.calibration.isotonic import IsotonicCalibrator    # noqa: E402
 from hugrgate.calibration.temperature import (                 # noqa: E402
     TemperatureCalibrator,
 )
-from hugrgate.calibration import metrics, profiles              # noqa: E402
+from . import metrics, profiles                                 # noqa: E402
 
 CalibratorRegistry.register("platt", PlattCalibrator)
 CalibratorRegistry.register("isotonic", IsotonicCalibrator)
