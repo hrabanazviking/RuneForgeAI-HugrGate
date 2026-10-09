@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import threading
 import time
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 __all__ = [
     "CLOSED",
@@ -131,7 +131,7 @@ class CircuitRegistry:
                  reset_timeout_s: float = 30.0,
                  half_open_max_probes: int = 1,
                  clock: Callable[[], float] = time.monotonic):
-        self._defaults = {
+        self._defaults: Dict[str, Any] = {
             "failure_threshold": failure_threshold,
             "reset_timeout_s": reset_timeout_s,
             "half_open_max_probes": half_open_max_probes,

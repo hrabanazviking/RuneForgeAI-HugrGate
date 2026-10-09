@@ -20,7 +20,7 @@ except ImportError:  # pragma: no cover - optional dependency
 try:
     from sklearn.linear_model import LogisticRegression
 except ImportError:  # pragma: no cover - optional dependency
-    LogisticRegression = None  # type: ignore[assignment]
+    LogisticRegression = None
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendError, BackendUnavailable

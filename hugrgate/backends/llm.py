@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 try:  # optional dependency — the module must import without it
-    from llama_cpp import Llama as _Llama  # type: ignore
+    from llama_cpp import Llama as _Llama
 except Exception:  # pragma: no cover - absence is the common path in CI
     _Llama = None
 
@@ -149,9 +149,9 @@ class LLMBackend(Backend):
                 else list(spec.levels or [])
             if text in options:
                 return text
-            lowered = {o.lower(): o for o in options}
-            if text.lower() in lowered:
-                return lowered[text.lower()]
+            by_lower = {o.lower(): o for o in options}
+            if text.lower() in by_lower:
+                return by_lower[text.lower()]
         raise BackendError(
             f"LLM engine emitted out-of-spec value {raw!r} for "
             f"{spec.type} spec; refusing to guess")

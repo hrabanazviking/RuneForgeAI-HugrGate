@@ -17,7 +17,7 @@ when the policy sets a latency cap, else
 from __future__ import annotations
 
 import threading
-from typing import Any, Callable, Mapping, Optional
+from typing import Any, Callable, Dict, Mapping, Optional
 
 from hugrgate.backend import Backend
 from hugrgate.errors import TimeoutError

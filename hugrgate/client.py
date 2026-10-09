@@ -131,6 +131,16 @@ class HugrGateClient:
             self._gate = build_gate(self._extra_backends)
         return self._gate
 
+    def _direct(self) -> HugrGate:
+        """The caller-supplied in-process gate.
+
+        Invariant: ``_direct_gate`` is true exactly when ``_gate`` was
+        given at construction; the assert makes that visible to checkers.
+        """
+        gate = self._gate
+        assert gate is not None, "direct-gate client without a gate"
+        return gate
+
     def _fallback_decide(self, state: Mapping[str, Any], spec: DecisionSpec,
                          policy: Optional[DecisionPolicy],
                          backend_name: Optional[str],
@@ -164,9 +174,10 @@ class HugrGateClient:
         """Make a decision via the service (or the in-process fallback)."""
         if self._direct_gate:
             # Caller-supplied in-process gate: no HTTP at all.
-            result = self._gate.decide(state, spec, policy,
-                                       context=context,
-                                       backend_name=backend_name)
+            gate = self._direct()
+            result = gate.decide(state, spec, policy,
+                                 context=context,
+                                 backend_name=backend_name)
             result.metadata["client_transport"] = "inprocess"
             return result
         payload: Dict[str, Any] = {
@@ -202,8 +213,9 @@ class HugrGateClient:
     def health(self) -> Dict[str, Any]:
         """Liveness probe. Never raises: reports reachability."""
         if self._direct_gate:
+            gate = self._direct()
             return {"reachable": True, "status": "ok",
-                    "backends": self._gate.registry.list(),
+                    "backends": gate.registry.list(),
                     "mode": "inprocess"}
         try:
             response = self._http.get(f"{self.url}/health")
@@ -217,10 +229,15 @@ class HugrGateClient:
     def backends(self) -> List[Dict[str, Any]]:
         """List backends known to the service (or the in-process gate)."""
         if self._direct_gate:
-            return [{"name": n, "is_remote": False,
-                     "capabilities": self._gate.registry.get(n)
-                     .capabilities()}
-                    for n in self._gate.registry.list()]
+            gate = self._direct()
+            infos = []
+            for n in gate.registry.list():
+                backend = gate.registry.get(n)
+                if backend is None:  # defensive: list/get disagree
+                    continue
+                infos.append({"name": n, "is_remote": False,
+                              "capabilities": backend.capabilities()})
+            return infos
         try:
             response = self._http.get(f"{self.url}/backends")
             response.raise_for_status()
@@ -230,9 +247,14 @@ class HugrGateClient:
         except Exception:
             if self.fallback_inprocess:
                 gate = self._inprocess_gate()
-                return [{"name": n, "is_remote": False,
-                         "capabilities": gate.registry.get(n).capabilities()}
-                        for n in gate.registry.list()]
+                infos = []
+                for n in gate.registry.list():
+                    backend = gate.registry.get(n)
+                    if backend is None:  # defensive: list/get disagree
+                        continue
+                    infos.append({"name": n, "is_remote": False,
+                                  "capabilities": backend.capabilities()})
+                return infos
             raise
 
     def close(self) -> None:

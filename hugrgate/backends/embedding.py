@@ -118,7 +118,7 @@ def _softmax(scores: np.ndarray, temperature: float) -> np.ndarray:
     if temperature <= 0:
         raise SpecError(f"temperature must be > 0, got {temperature}")
     z = scores / temperature
-    z = z - z.max()
+    z = z - np.max(z)
     exp = np.exp(z)
     return exp / exp.sum()
 
@@ -210,7 +210,7 @@ class PrototypeBackend(Backend):
 
     def _class_order(self, spec: DecisionSpec) -> List[str]:
         if spec.type == "categorical":
-            order = list(spec.options)
+            order = list(spec.options or [])
         else:
             order = ["true", "false"]
         missing = [c for c in order if c not in self._prototypes]

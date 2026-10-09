@@ -219,9 +219,10 @@ class Rule:
         return d
 
     def matches(self, state: Mapping[str, Any]) -> bool:
-        if self.is_default:
+        condition = self.condition
+        if condition is None:
             return True
-        return _eval_condition(self.condition, state)
+        return _eval_condition(condition, state)
 
 
 class RuleBackend(Backend):

@@ -121,6 +121,8 @@ class UniformBackend(Backend):
                  context: Optional[Mapping[str, Any]] = None
                  ) -> DecisionResult:
         if spec.type == "numeric":
+            # _validate_numeric guarantees both bounds are set.
+            assert spec.minimum is not None and spec.maximum is not None
             mid = (spec.minimum + spec.maximum) / 2.0
             return DecisionResult(value=mid, probability=0.5, distribution={},
                                   uncertainty=1.0, backend=self.name,
@@ -274,6 +276,8 @@ def create_app(gate: Optional[HugrGate] = None) -> FastAPI:
         infos = []
         for name in gate.registry.list():
             backend = gate.registry.get(name)
+            if backend is None:  # defensive: list/get disagree
+                continue
             infos.append({
                 "name": backend.name,
                 "is_remote": backend.is_remote,

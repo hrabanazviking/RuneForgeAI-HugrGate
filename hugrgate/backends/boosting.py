@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional
 try:
     from sklearn.ensemble import HistGradientBoostingClassifier
 except ImportError:  # pragma: no cover - optional dependency
-    HistGradientBoostingClassifier = None  # type: ignore[assignment]
+    HistGradientBoostingClassifier = None
 
 from hugrgate.backends.logreg import SklearnClassifierBackend
 from hugrgate.errors import BackendError

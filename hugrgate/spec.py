@@ -76,13 +76,18 @@ class DecisionSpec:
 
     def value_space(self) -> List[str]:
         """All legal result values for this spec."""
+        # __post_init__ validation guarantees the relevant field is set
+        # for each type; the asserts below make that visible to checkers.
         if self.type == "categorical":
+            assert self.options is not None
             return list(self.options)
         if self.type == "binary":
             return ["true", "false"]
         if self.type == "ordinal":
+            assert self.levels is not None
             return list(self.levels)
         if self.type == "multilabel":
+            assert self.labels is not None
             return list(self.labels)
         return []  # numeric: continuous
 

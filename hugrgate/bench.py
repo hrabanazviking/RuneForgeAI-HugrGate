@@ -59,7 +59,7 @@ def accuracy(results: List[Tuple[Any, DecisionResult]]) -> Optional[float]:
     hits = 0
     for expected, result in scored:
         if isinstance(expected, list):  # multilabel: set equality
-            if set(result.value) == set(expected):
+            if set(result.value or []) == set(expected):
                 hits += 1
         elif result.value == expected:
             hits += 1
@@ -100,7 +100,7 @@ def reliability_bins(results: List[Tuple[Any, DecisionResult]],
         b["count"] += 1
         hit = 1.0
         if isinstance(expected, list):
-            hit = 1.0 if set(result.value) == set(expected) else 0.0
+            hit = 1.0 if set(result.value or []) == set(expected) else 0.0
         elif result.value != expected:
             hit = 0.0
         b["accuracy"] += hit
@@ -248,8 +248,9 @@ def run_benchmark(dataset: Mapping[str, Any], gate: HugrGate,
             "reliability_bins": bins,
             "backend": name,
             "model": "unknown",
-            "calibration": (gate.registry.get(name).calibration_info()
-                            if gate.registry.get(name) else {}),
+            "calibration": (rb.calibration_info()
+                            if (rb := gate.registry.get(name)) is not None
+                            else {}),
         }
         report["backends"][name] = metrics
 

@@ -113,12 +113,15 @@ def cmd_backends(args: argparse.Namespace) -> int:
     else:
         from hugrgate.server import build_gate
         gate = build_gate()
-        infos = [
-            {"name": n,
-             "capabilities": gate.registry.get(n).capabilities(),
-             "is_remote": gate.registry.get(n).is_remote}
-            for n in gate.registry.list()
-        ]
+        infos = []
+        for n in gate.registry.list():
+            backend = gate.registry.get(n)
+            if backend is None:  # defensive: list/get disagree
+                continue
+            infos.append({
+                "name": n,
+                "capabilities": backend.capabilities(),
+                "is_remote": backend.is_remote})
     _print_json({"backends": infos})
     return 0
 

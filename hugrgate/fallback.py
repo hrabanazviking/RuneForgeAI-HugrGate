@@ -133,6 +133,8 @@ class FallbackChain(Backend):
         value = self.safe_default
         space = spec.value_space()
         if spec.type == "numeric":
+            # _validate_numeric guarantees both bounds are set.
+            assert spec.minimum is not None and spec.maximum is not None
             ok = isinstance(value, (int, float)) and spec.minimum <= value <= spec.maximum
         elif spec.type == "multilabel":
             ok = isinstance(value, list) and all(v in space for v in value)

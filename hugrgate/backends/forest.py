@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover - optional dependency
 try:
     from sklearn.ensemble import RandomForestClassifier
 except ImportError:  # pragma: no cover - optional dependency
-    RandomForestClassifier = None  # type: ignore[assignment]
+    RandomForestClassifier = None
 
 from hugrgate.backends.logreg import SklearnClassifierBackend
 from hugrgate.errors import BackendError

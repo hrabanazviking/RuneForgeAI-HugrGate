@@ -36,6 +36,8 @@ def validate_result(result: DecisionResult, spec: DecisionSpec) -> None:
         if not isinstance(result.value, (int, float)):
             raise SpecError(f"numeric result must be a number, "
                             f"got {type(result.value).__name__}")
+        # _validate_numeric guarantees both bounds are set.
+        assert spec.minimum is not None and spec.maximum is not None
         if not (spec.minimum <= result.value <= spec.maximum):
             raise SpecError(f"numeric result {result.value} outside "
                             f"[{spec.minimum}, {spec.maximum}]")

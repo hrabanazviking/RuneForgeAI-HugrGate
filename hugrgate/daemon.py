@@ -233,7 +233,10 @@ def create_daemon_app(config: DaemonConfig,
     async def _lifespan(app):
         # Model warm pool: pay load cost once, up front.
         for name in gate.registry.list():
-            gate.registry.get(name).warmup()
+            backend = gate.registry.get(name)
+            if backend is None:  # defensive: list/get disagree
+                continue
+            backend.warmup()
         await queue.start()
         try:
             yield

@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 try:  # optional dependency — the module must import without it
-    from transformers import pipeline as _hf_pipeline  # type: ignore
+    from transformers import pipeline as _hf_pipeline
 except Exception:  # pragma: no cover - absence is the common path in CI
     _hf_pipeline = None
 
@@ -91,9 +91,13 @@ class NLIBackend(Backend):
                     f"nli_fn returned out-of-range probability: {p}")
             return p
         self._ensure_engine()
+        pipe = self._pipe
+        if pipe is None:  # defensive: _ensure_engine raises on failure
+            raise BackendUnavailable("NLI engine unavailable",
+                                     backend=self.name)
         try:
-            out = self._pipe(premise, candidate_labels=[statement],
-                             hypothesis_template="{}")
+            out = pipe(premise, candidate_labels=[statement],
+                       hypothesis_template="{}")
             return float(out["scores"][0])
         except BackendError:
             raise
