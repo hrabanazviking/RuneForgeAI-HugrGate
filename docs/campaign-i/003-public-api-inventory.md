@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 59 · **public names:** 282
+**Modules:** 60 · **public names:** 288
 
 ## API stability policy
 
@@ -234,6 +234,7 @@ that this document never drifts from the code.
 | `CLUSTER_RPC_PATH` | constant | `'/cluster/rpc'` |
 | `DEFAULT_LAN_GROUP` | constant | `'239.0.9.77'` |
 | `DEFAULT_LAN_PORT` | constant | `18377` |
+| `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
@@ -252,8 +253,10 @@ that this document never drifts from the code.
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
 | `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+| `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
 | `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
@@ -327,6 +330,14 @@ that this document never drifts from the code.
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
+
+### `hugrgate.cluster.node_health`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
+| `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
+| `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
 
 ### `hugrgate.cluster.policy_sync`
 

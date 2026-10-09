@@ -32,6 +32,11 @@ from hugrgate.cluster.node import (
     InboundHook,
     NodeAuthenticator,
 )
+from hugrgate.cluster.node_health import (
+    DEFAULT_QUARANTINE_THRESHOLD,
+    NodeHealthMonitor,
+    PeerHealth,
+)
 from hugrgate.cluster.policy_sync import (
     PolicyPropagator,
     PolicyVersion,
@@ -82,6 +87,7 @@ __all__ = [
     "CLUSTER_RPC_PATH",
     "DEFAULT_LAN_GROUP",
     "DEFAULT_LAN_PORT",
+    "DEFAULT_QUARANTINE_THRESHOLD",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
@@ -100,8 +106,10 @@ __all__ = [
     "MulticastConfig",
     "NodeAuthenticator",
     "NodeCapabilities",
+    "NodeHealthMonitor",
     "NodeIdentity",
     "OutboundHook",
+    "PeerHealth",
     "PeerRecord",
     "PeerScores",
     "PolicyPropagator",

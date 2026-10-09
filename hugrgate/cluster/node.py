@@ -19,13 +19,14 @@ from typing import TYPE_CHECKING, Any, Protocol
 from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.discovery import DiscoveryRegistry, PeerRecord
 from hugrgate.cluster.identity import NodeIdentity
+from hugrgate.cluster.node_health import NodeHealthMonitor
 from hugrgate.cluster.policy_sync import PolicyPropagator
 from hugrgate.cluster.protocol import (
     ClusterMessage,
     MessageType,
     new_trace_id,
 )
-from hugrgate.cluster.routing import DistributedRouter
+from hugrgate.cluster.routing import DistributedRouter, PeerScores
 from hugrgate.cluster.rpc import RPCClient, error_envelope
 from hugrgate.core import HugrGate
 from hugrgate.errors import (
@@ -110,6 +111,8 @@ class ClusterNode:
         self.policy_sync = PolicyPropagator(node_id=identity.node_id)
         #: Distributed routing (slice 212).
         self.router = DistributedRouter(self)
+        #: Node health scoring (slice 213).
+        self.health = NodeHealthMonitor()
 
     # -- local facts --------------------------------------------------------
 
@@ -146,11 +149,35 @@ class ClusterNode:
                       backend_name: str | None = None,
                       context: Mapping[str, Any] | None = None,
                       trace_id: str | None = None) -> DecisionResult:
-        """Ask a peer to decide (trace-correlated, slice 222)."""
-        return self.rpc.decide(peer, spec, state, policy=policy,
-                               backend_name=backend_name,
-                               context=context,
-                               trace_id=trace_id or new_trace_id())
+        """Ask a peer to decide (trace-correlated, slice 222).
+
+        Every outcome feeds the health monitor (slice 213): transport
+        and backend failures count against the peer, successes heal it.
+        """
+        try:
+            result = self.rpc.decide(peer, spec, state, policy=policy,
+                                     backend_name=backend_name,
+                                     context=context,
+                                     trace_id=trace_id or new_trace_id())
+        except BackendError:
+            self.health.record_failure(peer.node_id)
+            raise
+        self.health.record_success(peer.node_id)
+        return result
+
+    def refresh_scores(self) -> None:
+        """Push monitor readings into the router (slices 213-215).
+
+        Called opportunistically — after RPCs, on heartbeat ticks —
+        never on the hot path's critical section.
+        """
+        for peer in self.peers():
+            node_id = peer.node_id
+            self.router.set_scores(node_id, PeerScores(
+                health=self.health.score(node_id),
+                latency=1.0,   # slice 214
+                cost=1.0,      # slice 215
+            ))
 
     # -- inbound ------------------------------------------------------------
 
