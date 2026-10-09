@@ -13,7 +13,6 @@ embedder. No model download, no network, works fully offline — the ladder's
 from __future__ import annotations
 
 import hashlib
-import math
 import re
 from abc import ABC, abstractmethod
 from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple

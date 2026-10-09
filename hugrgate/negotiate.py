@@ -11,7 +11,7 @@ can decide what "no candidate" means for their policy.
 
 from __future__ import annotations
 
-from typing import Callable, Dict, List, Mapping, Optional
+from typing import Callable, List, Mapping, Optional
 
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.policy import DecisionPolicy

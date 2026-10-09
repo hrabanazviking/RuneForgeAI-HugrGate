@@ -33,7 +33,6 @@ from hugrgate import (
     Backend,
     BackendError,
     BackendUnavailable,
-    DecisionPolicy,
     DecisionResult,
     DecisionSpec,
     HugrGate,

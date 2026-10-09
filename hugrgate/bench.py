@@ -22,7 +22,7 @@ import hashlib
 import json
 import platform
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from hugrgate import (
@@ -171,8 +171,21 @@ def _evaluate_one(gate: HugrGate, item: Mapping[str, Any],
 def run_benchmark(dataset: Mapping[str, Any], gate: HugrGate,
                   backends: Optional[List[str]] = None,
                   policy: Optional[DecisionPolicy] = None,
-                  max_items: Optional[int] = None) -> Dict[str, Any]:
-    """Run ``dataset`` through each backend; return the JSON report dict."""
+                  max_items: Optional[int] = None,
+                  config: Optional[BenchmarkConfig] = None) -> Dict[str, Any]:
+    """Run ``dataset`` through each backend; return the JSON report dict.
+
+    ``config`` is a :class:`BenchmarkConfig` alternative to the individual
+    keyword arguments: any field it sets (non-None) fills in for the
+    corresponding keyword left at its default. Explicit keywords win.
+    """
+    if config is not None:
+        if backends is None:
+            backends = config.backends
+        if policy is None:
+            policy = config.policy
+        if max_items is None:
+            max_items = config.max_items
     spec = DecisionSpec.from_dict(dataset["spec"])
     policy = policy or DecisionPolicy()
     items = list(dataset.get("items", []))

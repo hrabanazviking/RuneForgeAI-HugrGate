@@ -18,7 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Optional
 
 from hugrgate import DecisionPolicy, DecisionSpec
 
@@ -89,7 +89,6 @@ def cmd_decide(args: argparse.Namespace) -> int:
         finally:
             client.close()
     else:
-        from hugrgate import Abstention as _A  # noqa: F401
         from hugrgate.server import build_gate
         gate = build_gate()
         try:
@@ -149,7 +148,7 @@ def cmd_health(args: argparse.Namespace) -> int:
 
 
 def cmd_serve(args: argparse.Namespace) -> int:
-    from hugrgate.daemon import DaemonConfig, main as daemon_main
+    from hugrgate.daemon import main as daemon_main
     daemon_argv = ["--host", args.host, "--port", str(args.port),
                    "--batch-window-ms", str(args.batch_window_ms),
                    "--max-batch", str(args.max_batch),

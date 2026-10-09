@@ -114,7 +114,7 @@ that this document never drifts from the code.
 | `expected_calibration_error` | function | `(results: 'List[Tuple[Any, DecisionResult]]', n_bins: 'int' = 10) -> 'Optional[float]'` |
 | `dataset_fingerprint` | function | `(dataset: 'Mapping[str, Any]') -> 'str'` |
 | `BenchmarkConfig` | class | `(backends: 'Optional[List[str]]' = None, policy: 'Optional[DecisionPolicy]' = None, max_items: 'Optional[int]' = None) -> None` |
-| `run_benchmark` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Optional[List[str]]' = None, policy: 'Optional[DecisionPolicy]' = None, max_items: 'Optional[int]' = None) -> 'Dict[str, Any]'` |
+| `run_benchmark` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Optional[List[str]]' = None, policy: 'Optional[DecisionPolicy]' = None, max_items: 'Optional[int]' = None, config: 'Optional[BenchmarkConfig]' = None) -> 'Dict[str, Any]'` |
 | `Benchmark` | class | `(gate: 'HugrGate', dataset: 'Any') -> 'None'` |
 
 ### `hugrgate.bench_report`

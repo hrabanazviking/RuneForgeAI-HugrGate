@@ -9,7 +9,7 @@ Produces a human-readable report with:
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping
+from typing import Any, List, Mapping
 
 __all__ = [
     "ascii_reliability_diagram",

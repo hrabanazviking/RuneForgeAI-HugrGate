@@ -21,7 +21,7 @@ an auditable trail, both in the result's metadata and, optionally, in a
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional
 
 from hugrgate.backend import Backend, BackendRegistry
