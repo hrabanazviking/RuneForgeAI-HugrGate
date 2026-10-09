@@ -9,8 +9,11 @@
 - **hard** (102): one ballot per member; majority wins, ties broken
   deterministically (most confident tied camp, then earliest ballot,
   then lexicographic).
+- **weighted** (104): hard voting where each ballot counts with its
+  member weight; the winner is the argmax of weighted scores and its
+  probability is the weighted vote share.
 
-Slices 104-105 add weighted and confidence-weighted voting here.
+Slice 105 adds confidence-weighted voting here.
 
 All combiners share the contract from :mod:`hugrgate.ensemble.base`:
 never raise on ordinary disagreement, always return a valid
@@ -36,6 +39,7 @@ from hugrgate.result import DecisionResult
 __all__ = [
     "soft_voting",
     "hard_voting",
+    "weighted_voting",
 ]
 
 
@@ -113,6 +117,53 @@ def soft_voting(votes: List[MemberVote],
         extra={"averaged_distribution": dict(averaged),
                "completed_distributions": completed},
         model="ensemble:soft",
+    )
+
+
+def weighted_voting(votes: List[MemberVote],
+                    ctx: StrategyContext) -> DecisionResult:
+    """Ballots counted with their member weights.
+
+    ``score(v) = Σᵢ wᵢ·[valueᵢ == v]``; the winner is the argmax of
+    weighted scores and its probability is the weighted vote share
+    (``score(winner) / Σw``). Uncertainty is ``1 - share``. This is
+    hard voting where trusted members count more — distinct from soft
+    voting, which averages whole distributions.
+    """
+    require_discrete_spec(ctx.spec, "weighted")
+    ballots = _ballots(votes)
+    if not ballots:
+        raise BackendError("weighted voting: no countable ballots")
+    total_w = sum(v.weight for v in ballots)
+    if total_w <= 0:
+        raise BackendError(
+            "weighted voting: total member weight must be positive, "
+            f"got {total_w}")
+    scores: Dict[str, float] = {}
+    first_seen: Dict[str, int] = {}
+    for i, v in enumerate(ballots):
+        key = str(v.value)
+        scores[key] = scores.get(key, 0.0) + v.weight
+        if key not in first_seen:
+            first_seen[key] = i
+    peak = max(scores.values())
+    tied = [k for k, s in scores.items() if s == peak]
+    winner = break_tie(tied, scores, first_seen)
+    share = scores[winner] / total_w
+    space = ctx.spec.value_space()
+    distribution = {opt: scores.get(opt, 0.0) / total_w for opt in space}
+    return finalize_result(
+        strategy="weighted",
+        spec=ctx.spec,
+        votes=votes,
+        weights={v.backend: v.weight for v in ballots},
+        value=winner,
+        probability=share,
+        distribution=distribution,
+        uncertainty=1.0 - share,
+        winner_share=share,
+        extra={"weighted_tally": dict(scores)},
+        model="ensemble:weighted",
     )
 
 

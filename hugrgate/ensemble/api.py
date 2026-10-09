@@ -30,7 +30,11 @@ from hugrgate.ensemble.base import (
     collect_votes,
     normalize_weights,
 )
-from hugrgate.ensemble.voting import hard_voting, soft_voting
+from hugrgate.ensemble.voting import (
+    hard_voting,
+    soft_voting,
+    weighted_voting,
+)
 from hugrgate.errors import BackendError, PolicyError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -78,6 +82,7 @@ def get_strategy(name: str) -> Combiner:
 
 register_strategy("soft", soft_voting)
 register_strategy("hard", hard_voting)
+register_strategy("weighted", weighted_voting)
 
 
 class EnsembleConfig:

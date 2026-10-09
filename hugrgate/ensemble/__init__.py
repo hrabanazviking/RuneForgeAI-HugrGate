@@ -28,7 +28,11 @@ from hugrgate.ensemble.base import (
     require_discrete_spec,
     shannon_entropy,
 )
-from hugrgate.ensemble.voting import hard_voting, soft_voting
+from hugrgate.ensemble.voting import (
+    hard_voting,
+    soft_voting,
+    weighted_voting,
+)
 
 __all__ = [
     "Ensemble",
@@ -49,4 +53,5 @@ __all__ = [
     "finalize_result",
     "soft_voting",
     "hard_voting",
+    "weighted_voting",
 ]
