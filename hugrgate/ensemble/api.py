@@ -32,6 +32,7 @@ from hugrgate.ensemble.base import (
     normalize_weights,
 )
 from hugrgate.ensemble.blending import blending_combine
+from hugrgate.ensemble.moe import moe_combine
 from hugrgate.ensemble.stacking import stacking_combine
 from hugrgate.ensemble.voting import (
     confidence_weighted_voting,
@@ -91,6 +92,7 @@ register_strategy("confidence", confidence_weighted_voting)
 register_strategy("bma", bma_combine)
 register_strategy("stacking", stacking_combine)
 register_strategy("blending", blending_combine)
+register_strategy("moe", moe_combine)
 
 
 class EnsembleConfig:
@@ -204,7 +206,8 @@ class Ensemble(Backend):
         ctx = StrategyContext(
             spec=spec,
             options=dict(self.config.strategy_options),
-            fitted=self.fitted)
+            fitted=self.fitted,
+            state=state)
         result = combiner(votes, ctx)
         result.backend = self.name
         result.latency_ms = (time.perf_counter() - start) * 1000.0

@@ -92,6 +92,7 @@ class StrategyContext:
     spec: DecisionSpec
     options: Dict[str, Any] = field(default_factory=dict)
     fitted: Any = None  # learned meta-model (stacking/blending/MoE/BMA)
+    state: Optional[Mapping[str, Any]] = None  # input state (MoE routing)
 
 
 #: A combiner turns member votes into one decision. It must return a

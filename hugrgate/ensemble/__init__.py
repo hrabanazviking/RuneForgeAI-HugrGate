@@ -40,6 +40,7 @@ from hugrgate.ensemble.blending import (
     log_loss,
     project_simplex,
 )
+from hugrgate.ensemble.moe import ExpertRouter, moe_combine
 from hugrgate.ensemble.stacking import (
     SoftmaxRegression,
     StackingEngine,
@@ -84,4 +85,6 @@ __all__ = [
     "blending_combine",
     "project_simplex",
     "log_loss",
+    "ExpertRouter",
+    "moe_combine",
 ]
