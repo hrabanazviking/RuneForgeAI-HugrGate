@@ -60,6 +60,12 @@ from hugrgate.evlab.calibration import (
     expected_calibration_error,
 )
 from hugrgate.evlab.compare import BackendComparison, compare_backends
+from hugrgate.evlab.costaware import (
+    CostModel,
+    CostReport,
+    cost_aware_evaluate,
+    pareto_frontier,
+)
 from hugrgate.evlab.crossval import CVReport, FoldResult, cross_validate
 from hugrgate.evlab.dataset import (
     ACQUISITIONS,
@@ -105,6 +111,8 @@ __all__ = [
     "CVReport",
     "CalibrationComparison",
     "ColumnSpec",
+    "CostModel",
+    "CostReport",
     "DatasetManifest",
     "DatasetProvenance",
     "DatasetRegistry",
@@ -133,6 +141,7 @@ __all__ = [
     "compare_backends",
     "compare_calibrators",
     "compare_paired_correctness",
+    "cost_aware_evaluate",
     "coverage_at_risk",
     "cross_validate",
     "expected_calibration_error",
@@ -143,6 +152,7 @@ __all__ = [
     "mcnemar_test",
     "oracle_aurc",
     "paired_permutation_test",
+    "pareto_frontier",
     "risk_at_coverage",
     "risk_coverage_curve",
     "selective_evaluate",

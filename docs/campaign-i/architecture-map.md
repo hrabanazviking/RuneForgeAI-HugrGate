@@ -1160,6 +1160,7 @@ flowchart TD
     evlab --> evlab_bootstrap
     evlab --> evlab_calibration
     evlab --> evlab_compare
+    evlab --> evlab_costaware
     evlab --> evlab_crossval
     evlab --> evlab_dataset
     evlab --> evlab_selective
@@ -1191,6 +1192,12 @@ flowchart TD
     evlab_compare --> policy
     evlab_compare --> result
     evlab_compare --> spec
+    evlab_costaware --> hugrgate
+    evlab_costaware --> core
+    evlab_costaware --> errors
+    evlab_costaware --> policy
+    evlab_costaware --> result
+    evlab_costaware --> spec
     evlab_crossval --> bench
     evlab_crossval --> core
     evlab_crossval --> errors
@@ -2366,6 +2373,7 @@ flowchart TD
 | `evlab` | `evlab.bootstrap` | no |
 | `evlab` | `evlab.calibration` | no |
 | `evlab` | `evlab.compare` | no |
+| `evlab` | `evlab.costaware` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
 | `evlab` | `evlab.selective` | no |
@@ -2397,6 +2405,12 @@ flowchart TD
 | `evlab.compare` | `policy` | no |
 | `evlab.compare` | `result` | no |
 | `evlab.compare` | `spec` | no |
+| `evlab.costaware` | `hugrgate` | no |
+| `evlab.costaware` | `core` | no |
+| `evlab.costaware` | `errors` | no |
+| `evlab.costaware` | `policy` | no |
+| `evlab.costaware` | `result` | no |
+| `evlab.costaware` | `spec` | no |
 | `evlab.crossval` | `bench` | no |
 | `evlab.crossval` | `core` | no |
 | `evlab.crossval` | `errors` | no |

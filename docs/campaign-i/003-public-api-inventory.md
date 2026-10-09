@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 300 · **public names:** 1841
+**Modules:** 301 · **public names:** 1849
 
 ## API stability policy
 
@@ -2262,6 +2262,8 @@ that this document never drifts from the code.
 | `CVReport` | class | `(k: 'int', seed: 'int', n_items: 'int', folds: 'list[FoldResult]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]') -> None` |
 | `CalibrationComparison` | class | `(methods: 'dict[str, dict[str, float]]', n_calib: 'int', n_eval: 'int', n_bins: 'int' = 10) -> None` |
 | `ColumnSpec` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = True, options: 'list[str] | None' = None) -> None` |
+| `CostModel` | class | `(rates: 'dict[str, float]' = <factory>, default_rate: 'float' = 0.0, currency: 'str' = 'USD') -> None` |
+| `CostReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', currency: 'str', n_items: 'int') -> None` |
 | `DatasetManifest` | class | `(name: 'str', version: 'str', columns: 'list[ColumnSpec]' = <factory>, description: 'str' = '', license: 'str' = 'unknown', spec: 'dict[str, Any]' = <factory>, sensitivity: 'str' = 'public', fingerprint: 'str' = '', created_at: 'str' = '', provenance: 'DatasetProvenance | None' = None, extra: 'dict[str, Any]' = <factory>) -> None` |
 | `DatasetProvenance` | class | `(source_uri: 'str' = '', acquisition: 'str' = 'manual', creator: 'str' = '', created_at: 'str' = '', license: 'str' = 'unknown', parents: 'list[dict[str, str]]' = <factory>, steps: 'list[TransformStep]' = <factory>) -> None` |
 | `DatasetRegistry` | class | `() -> 'None'` |
@@ -2290,6 +2292,7 @@ that this document never drifts from the code.
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
 | `compare_calibrators` | function | `(calib_confidences: 'Sequence[float]', calib_correct: 'Sequence[int]', eval_confidences: 'Sequence[float]', eval_correct: 'Sequence[int]', calibrators: 'Sequence[LabCalibrator]', n_bins: 'int' = 10) -> 'CalibrationComparison'` |
 | `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
+| `cost_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, cost_model: 'CostModel | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'CostReport'` |
 | `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
@@ -2300,6 +2303,7 @@ that this document never drifts from the code.
 | `mcnemar_test` | function | `(b01: 'int', b10: 'int', *, alpha: 'float' = 0.05) -> 'SignificanceResult'` |
 | `oracle_aurc` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
 | `paired_permutation_test` | function | `(scores_a: 'Sequence[float]', scores_b: 'Sequence[float]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alternative: 'str' = 'two-sided', alpha: 'float' = 0.05) -> 'SignificanceResult'` |
+| `pareto_frontier` | function | `(points: 'Mapping[str, tuple[float, float]]') -> 'list[str]'` |
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
 | `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
@@ -2344,6 +2348,15 @@ that this document never drifts from the code.
 |---|---|---|
 | `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
+
+### `hugrgate.evlab.costaware`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostModel` | class | `(rates: 'dict[str, float]' = <factory>, default_rate: 'float' = 0.0, currency: 'str' = 'USD') -> None` |
+| `CostReport` | class | `(backends: 'dict[str, dict[str, Any]]', pareto: 'list[str]', currency: 'str', n_items: 'int') -> None` |
+| `cost_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, cost_model: 'CostModel | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'CostReport'` |
+| `pareto_frontier` | function | `(points: 'Mapping[str, tuple[float, float]]') -> 'list[str]'` |
 
 ### `hugrgate.evlab.crossval`
 
