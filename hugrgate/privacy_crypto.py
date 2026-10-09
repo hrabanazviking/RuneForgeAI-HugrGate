@@ -39,7 +39,16 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
 from hugrgate.privacy_retention import RetentionPolicy
 from hugrgate.result import DecisionResult
+from hugrgate.security.serde_guards import (
+    register_safe_class,
+    restricted_loads,
+)
 from hugrgate.spec import DecisionSpec
+
+# Slice 411: sealed blobs are HMAC-authenticated before unpickling,
+# and the unpickle itself goes through the allowlist anyway
+# (defense in depth — a key-compromise must not become code exec).
+register_safe_class(DecisionResult)
 
 __all__ = [
     "EncryptedDecisionCache",
@@ -231,7 +240,7 @@ class EncryptedDecisionCache(DecisionCache):
         plaintext = SealedBox.open(
             self._key, sealed.blob,
             associated=self._associated(state, spec, policy))
-        result = pickle.loads(plaintext)
+        result = restricted_loads(plaintext)
         if not isinstance(result, DecisionResult):
             raise SealError("sealed payload is not a DecisionResult",
                             reason="unexpected-type")

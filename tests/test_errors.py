@@ -26,6 +26,7 @@ from hugrgate.errors import (
     ContractError,
     DataFlowDenied,
     DatasetError,
+    DeserializationBlocked,
     EdgeAffinityError,
     EdgeCacheError,
     EdgeMemoryError,
@@ -115,6 +116,7 @@ ALL_ERRORS = [
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
     # Campaign XVII security-forge errors (slice 404+).
     PluginTrustError,
+    DeserializationBlocked,
     InputTooLarge,
     ResourceBudgetExceeded,
     SandboxViolation,

@@ -571,6 +571,7 @@ flowchart TD
     backends_logreg --> features
     backends_logreg --> models
     backends_logreg --> result
+    backends_logreg --> security_serde_guards
     backends_logreg --> spec
     backends_nli --> backend
     backends_nli --> errors
@@ -1594,6 +1595,7 @@ flowchart TD
     privacy_crypto --> privacy
     privacy_crypto --> privacy_retention
     privacy_crypto --> result
+    privacy_crypto --> security_serde_guards
     privacy_crypto --> spec
     privacy_deletion --> provenance
     privacy_dryrun --> backend
@@ -1639,6 +1641,7 @@ flowchart TD
     privacy_provenance --> privacy_redact
     privacy_provenance --> provenance
     privacy_provenance --> result
+    privacy_provenance --> security_serde_guards
     privacy_provenance --> spec
     privacy_redact --> privacy_labels
     privacy_redact --> provenance
@@ -1823,13 +1826,14 @@ flowchart TD
     security --> security_plugins
     security --> security_resource_guards
     security --> security_sandbox
+    security --> security_serde_guards
     security --> security_supply_chain
     security --> security_threat_model
     security_checksums --> errors
     security_input_limits --> errors
     security_input_limits --> validation
     security_model_signing --> errors
-    security_model_signing --> privacy_crypto
+    security_model_signing -.-> privacy_crypto
     security_plugins --> errors
     security_plugins --> security_model_signing
     security_resource_guards --> errors
@@ -1837,6 +1841,7 @@ flowchart TD
     security_sandbox --> errors
     security_sandbox --> result
     security_sandbox --> spec
+    security_serde_guards --> errors
     security_supply_chain --> errors
     serde --> errors
     serde --> policy
@@ -2036,6 +2041,7 @@ flowchart TD
 | `backends.logreg` | `features` | no |
 | `backends.logreg` | `models` | no |
 | `backends.logreg` | `result` | no |
+| `backends.logreg` | `security.serde_guards` | no |
 | `backends.logreg` | `spec` | no |
 | `backends.nli` | `backend` | no |
 | `backends.nli` | `errors` | no |
@@ -3059,6 +3065,7 @@ flowchart TD
 | `privacy_crypto` | `privacy` | no |
 | `privacy_crypto` | `privacy_retention` | no |
 | `privacy_crypto` | `result` | no |
+| `privacy_crypto` | `security.serde_guards` | no |
 | `privacy_crypto` | `spec` | no |
 | `privacy_deletion` | `provenance` | no |
 | `privacy_dryrun` | `backend` | no |
@@ -3104,6 +3111,7 @@ flowchart TD
 | `privacy_provenance` | `privacy_redact` | no |
 | `privacy_provenance` | `provenance` | no |
 | `privacy_provenance` | `result` | no |
+| `privacy_provenance` | `security.serde_guards` | no |
 | `privacy_provenance` | `spec` | no |
 | `privacy_redact` | `privacy_labels` | no |
 | `privacy_redact` | `provenance` | no |
@@ -3288,13 +3296,14 @@ flowchart TD
 | `security` | `security.plugins` | no |
 | `security` | `security.resource_guards` | no |
 | `security` | `security.sandbox` | no |
+| `security` | `security.serde_guards` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
 | `security.checksums` | `errors` | no |
 | `security.input_limits` | `errors` | no |
 | `security.input_limits` | `validation` | no |
 | `security.model_signing` | `errors` | no |
-| `security.model_signing` | `privacy_crypto` | no |
+| `security.model_signing` | `privacy_crypto` | yes |
 | `security.plugins` | `errors` | no |
 | `security.plugins` | `security.model_signing` | no |
 | `security.resource_guards` | `errors` | no |
@@ -3302,6 +3311,7 @@ flowchart TD
 | `security.sandbox` | `errors` | no |
 | `security.sandbox` | `result` | no |
 | `security.sandbox` | `spec` | no |
+| `security.serde_guards` | `errors` | no |
 | `security.supply_chain` | `errors` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |

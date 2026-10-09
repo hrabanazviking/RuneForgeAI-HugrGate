@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 374 · **public names:** 2297
+**Modules:** 375 · **public names:** 2308
 
 ## API stability policy
 
@@ -3968,12 +3968,14 @@ that this document never drifts from the code.
 | `CostLedger` | class | `(budget_units: 'int', name: 'str' = 'cost') -> 'None'` |
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
 | `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `DeserializationPolicy` | class | `(allow_pickle: 'bool' = True, allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = <factory>) -> None` |
 | `InputLimits` | class | `(max_state_bytes: 'int' = 1000000, max_state_depth: 'int' = 64, max_state_keys: 'int' = 10000, max_key_length: 'int' = 1024, max_batch_size: 'int' = 1024, max_batch_bytes: 'int' = 4000000, max_prompt_chars: 'int' = 100000) -> None` |
 | `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
 | `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
+| `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
 | `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
 | `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
@@ -3995,8 +3997,11 @@ that this document never drifts from the code.
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
+| `register_safe_class` | function | `(cls: 'type') -> 'type'` |
+| `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
+| `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
 | `sign_manifest` | function | `(manifest: 'PluginManifest', signer: 'ModelSigner') -> 'PluginManifest'` |
@@ -4084,6 +4089,17 @@ that this document never drifts from the code.
 | `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Callable'` |
+
+### `hugrgate.security.serde_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PICKLE_MAGIC` | constant | `(b'\x80\x02', b'\x80\x03', b'\x80\x04', b'\x80\x05', b'(l', ` |
+| `DeserializationPolicy` | class | `(allow_pickle: 'bool' = True, allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = <factory>) -> None` |
+| `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
+| `register_safe_class` | function | `(cls: 'type') -> 'type'` |
+| `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
+| `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 
 ### `hugrgate.security.supply_chain`
 

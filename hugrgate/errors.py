@@ -677,3 +677,15 @@ class ResourceBudgetExceeded(HugrGateError):
     """
     code = "resource_budget_exceeded"
     recoverable = False
+
+
+class DeserializationBlocked(HugrGateError):
+    """Untrusted bytes were refused deserialization.
+    Slice 411.  Raised by :mod:`hugrgate.security.serde_guards`
+    when a pickle payload references a class outside the allowlist,
+    when pickle is disabled by policy, or when opaque bytes are not
+    a recognized safe encoding.  Not recoverable: the bytes are
+    hostile or the policy forbids them.
+    """
+    code = "deserialization_blocked"
+    recoverable = False

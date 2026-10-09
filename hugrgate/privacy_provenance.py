@@ -41,7 +41,11 @@ from hugrgate.privacy_crypto import SealedBox, require_key
 from hugrgate.privacy_redact import redact_metadata
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 from hugrgate.result import DecisionResult
+from hugrgate.security.serde_guards import register_safe_class, restricted_loads
 from hugrgate.spec import DecisionSpec
+
+# Slice 411: see privacy_crypto — authenticated-then-allowlisted.
+register_safe_class(DecisionRecord)
 
 __all__ = [
     "PrivacyAwareProvenanceStore",
@@ -178,7 +182,7 @@ class SealedProvenanceStore(PrivacyAwareProvenanceStore):
             raise SealError("provenance entry is not sealed",
                             reason="unexpected-type")
         try:
-            inner = pickle.loads(SealedBox.open(
+            inner = restricted_loads(SealedBox.open(
                 self._key, bytes(blob),
                 associated=self._associated(wrapper.record_hash)))
         except SealError as e:

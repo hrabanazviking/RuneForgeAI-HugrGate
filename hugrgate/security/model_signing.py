@@ -32,7 +32,6 @@ from pathlib import Path
 from typing import Any
 
 from hugrgate.errors import SignatureVerificationFailed
-from hugrgate.privacy_crypto import require_key
 
 __all__ = [
     "ALGORITHM",
@@ -44,6 +43,18 @@ __all__ = [
 
 #: Algorithm tag pinned into every envelope.
 ALGORITHM = "HMAC-SHA256/hugrgate-metadata-v1"
+
+
+def _require_key(key: bytes) -> bytes:
+    """Validate a 32-byte key.
+
+    Imported lazily: :mod:`hugrgate.privacy_crypto` imports
+    :mod:`hugrgate.security.serde_guards`, so an eager import here
+    would close a runtime import cycle through the ``security``
+    package ``__init__``.
+    """
+    from hugrgate.privacy_crypto import require_key
+    return require_key(key)
 
 
 def canonical_json(payload: Mapping[str, Any]) -> bytes:
@@ -106,7 +117,7 @@ class ModelSigner:
     """Signs and verifies model metadata with a named key."""
 
     def __init__(self, key: bytes, key_id: str) -> None:
-        self._key = require_key(key)
+        self._key = _require_key(key)
         if not key_id or not isinstance(key_id, str):
             raise ValueError("key_id must be a non-empty string")
         self._key_id = key_id
@@ -145,7 +156,7 @@ class ModelSigner:
             raise SignatureVerificationFailed(
                 f"unknown key id {envelope.key_id!r}",
                 key_id=envelope.key_id)
-        key = require_key(raw)
+        key = _require_key(raw)
         expected = hmac.new(key, ALGORITHM.encode() + b"\x00"
                             + canonical_json(envelope.metadata),
                             hashlib.sha256).hexdigest()
@@ -181,7 +192,7 @@ class TrustedModelStore:
     def __init__(self, keys: Mapping[str, bytes]) -> None:
         if not keys:
             raise ValueError("TrustedModelStore needs at least one key")
-        self._keys = {kid: require_key(k) for kid, k in keys.items()}
+        self._keys = {kid: _require_key(k) for kid, k in keys.items()}
         self._store: dict[str, SignedMetadata] = {}
         self._verifier = ModelSigner(next(iter(self._keys.values())),
                                     next(iter(self._keys)))
@@ -206,7 +217,7 @@ class TrustedModelStore:
         for name, envelope in list(self._store.items()):
             metadata = self._verifier.verify(envelope, self._keys)
             self._store[name] = signer.sign(metadata)
-        self._keys = {new_key_id: require_key(new_key)}
+        self._keys = {new_key_id: _require_key(new_key)}
         self._verifier = signer
         return len(self._store)
 
