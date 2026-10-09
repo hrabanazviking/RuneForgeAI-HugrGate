@@ -83,6 +83,11 @@ def test_marks_match_the_doc():
 
 
 def test_conftest_fixtures_import_cleanly():
-    import tests.conftest as cf
-    assert hasattr(cf, "StubBackend")
-    assert hasattr(cf, "gate_with_stub")
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "hugrgate_conftest", str(TESTS / "conftest.py"))
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert hasattr(module, "StubBackend")
+    assert hasattr(module, "gate_with_stub")
