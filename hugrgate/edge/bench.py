@@ -46,6 +46,7 @@ __all__ = [
     "compare_artifacts",
     "edge_bench_suite",
     "load_artifact",
+    "pi_bench_suite",
 ]
 
 #: Artifact schema version. Bump when the JSON layout changes.
@@ -345,4 +346,41 @@ def edge_bench_suite(name: str = "edge-suite",
         tel.record("bench", 1.0)
 
     bench.add("telemetry/record", telemetry_record, iterations=iterations)
+    return bench
+
+
+def pi_bench_suite(board_label: str = "Raspberry Pi 5",
+                   iterations: int = 200) -> EdgeBenchmark:
+    """Slice 197: Pi-bound benchmark suite.
+
+    The standard edge suite bound to a Pi board baseline, plus two
+    Pi-relevant cases: ``platform/audit`` (ARM64 audit cost — paid on
+    every bootstrap) and ``memory/refresh`` (mode-derivation cost).
+    On non-ARM64 hosts the artifact is explicitly marked SURROGATE
+    HOST; the numbers calibrate the harness, not the board.
+    """
+    from hugrgate.edge.memory import MemoryManager
+    from hugrgate.edge.platform import PlatformProbe, audit_arm64, pi_baseline
+
+    baseline = pi_baseline(board_label)
+    bench = edge_bench_suite(
+        name=f"pi-suite-{baseline.board.lower().replace(' ', '-')}",
+        baseline_board=baseline, iterations=iterations)
+
+    probe = PlatformProbe()
+    info = probe.probe()
+
+    def platform_audit() -> None:
+        audit_arm64(info)
+
+    bench.add("platform/audit", platform_audit, iterations=iterations)
+
+    meminfo = (f"MemTotal:        {baseline.ram_mb * 1024} kB\n"
+               f"MemAvailable:    {baseline.ram_mb * 768} kB\n")
+    memory = MemoryManager(meminfo_text=meminfo)
+
+    def memory_refresh() -> None:
+        memory.refresh()
+
+    bench.add("memory/refresh", memory_refresh, iterations=iterations)
     return bench

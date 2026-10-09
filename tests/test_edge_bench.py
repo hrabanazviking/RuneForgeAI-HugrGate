@@ -153,3 +153,34 @@ def test_edge_bench_suite_runs():
                             "telemetry/record"}
     for r in results.values():
         assert r.mean_s >= 0 and r.iterations == 5
+
+
+# --- slice 197: Pi benchmark suite -------------------------------------------------
+
+from hugrgate.edge.bench import pi_bench_suite
+
+
+def test_pi_bench_suite_binds_baseline():
+    bench = pi_bench_suite("Raspberry Pi 5", iterations=5)
+    assert bench.baseline_board is not None
+    assert bench.baseline_board.board == "Raspberry Pi 5"
+    assert "raspberry-pi-5" in bench.name
+    results = bench.run()
+    assert {"platform/audit", "memory/refresh"} <= set(results)
+    assert len(results) == 7  # 5 standard + 2 Pi-specific
+
+
+def test_pi_bench_suite_marks_surrogate_host():
+    bench = pi_bench_suite("Raspberry Pi Zero 2 W", iterations=3)
+    bench.run()
+    note = bench.artifact()["hardware_note"]
+    assert "Raspberry Pi Zero 2 W" in note
+    # this host is x86_64 -> surrogate marking required
+    import platform as _platform
+    if _platform.machine().lower() not in ("aarch64", "arm64"):
+        assert "SURROGATE HOST" in note
+
+
+def test_pi_bench_suite_unknown_board_raises():
+    with pytest.raises(ValueError, match="known models"):
+        pi_bench_suite("Raspberry Pi 400")

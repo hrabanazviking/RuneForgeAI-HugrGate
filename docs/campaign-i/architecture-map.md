@@ -196,7 +196,8 @@ flowchart TD
     edge_bench -.-> hugrgate
     edge_bench -.-> backends_rules
     edge_bench -.-> edge
-    edge_bench --> edge_platform
+    edge_bench -.-> edge_memory
+    edge_bench -.-> edge_platform
     edge_bench -.-> edge_storage
     edge_bench -.-> edge_telemetry
     edge_bench --> errors
@@ -412,7 +413,8 @@ flowchart TD
 | `edge.bench` | `hugrgate` | yes |
 | `edge.bench` | `backends.rules` | yes |
 | `edge.bench` | `edge` | yes |
-| `edge.bench` | `edge.platform` | no |
+| `edge.bench` | `edge.memory` | yes |
+| `edge.bench` | `edge.platform` | yes |
 | `edge.bench` | `edge.storage` | yes |
 | `edge.bench` | `edge.telemetry` | yes |
 | `edge.bench` | `errors` | no |
