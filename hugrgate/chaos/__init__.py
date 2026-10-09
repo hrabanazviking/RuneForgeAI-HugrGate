@@ -28,6 +28,7 @@ from hugrgate.chaos.backend_faults import (
 from hugrgate.chaos.bulkhead import BulkheadExecutor
 from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.clock import SkewedClock, audit_deadline_clocks
+from hugrgate.chaos.crash import CrashOnlyHarness, CrashReport
 from hugrgate.chaos.degradation import (
     DegradationPlan,
     DegradationPlanRegistry,
@@ -109,6 +110,8 @@ __all__ = [
     "CPUStarvationSimulator",
     "CacheCorruptor",
     "ChaosExperiment",
+    "CrashOnlyHarness",
+    "CrashReport",
     "DegradationPlan",
     "DegradationPlanRegistry",
     "DegradationReport",

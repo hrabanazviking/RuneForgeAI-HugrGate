@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 234 · **public names:** 1429
+**Modules:** 249 · **public names:** 1550
 
 ## API stability policy
 
@@ -681,6 +681,200 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `SlidingWindowCalibrator` | class | `(factory: 'Callable[[], Calibrator]', window_size: 'int' = 500, refit_every: 'int' = 50, min_samples: 'int' = 20)` |
+
+### `hugrgate.chaos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CHAOS_LAB` | constant | `'chaos-lab'` |
+| `CORRUPTION_KINDS` | constant | `('flip_magic', 'bad_version', 'truncate', 'kv_bomb', 'zero_o` |
+| `CRASH` | constant | `'crash'` |
+| `CRITICAL` | constant | `'critical'` |
+| `DOWN` | constant | `'down'` |
+| `ERROR_RATE` | constant | `'error_rate'` |
+| `HANG` | constant | `'hang'` |
+| `LATENCY` | constant | `'latency'` |
+| `MALFORMED` | constant | `'malformed'` |
+| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
+| `OK` | constant | `'ok'` |
+| `UP` | constant | `'up'` |
+| `WARN` | constant | `'warn'` |
+| `BlastRadius` | class | `(allowed_targets: 'frozenset[str]' = frozenset(), dry_run: 'bool' = False) -> None` |
+| `BulkheadExecutor` | class | `(default_cap: 'int' = 8, caps: 'dict[str, int] | None' = None) -> 'None'` |
+| `CPUStarvationSimulator` | class | `(share: 'float' = 1.0)` |
+| `CacheCorruptor` | class | `(cache: 'DecisionCache')` |
+| `ChaosExperiment` | class | `(name: 'str', hypothesis: 'str', faults: 'tuple[Fault, ...]' = (), probes: 'tuple[SteadyStateProbe, ...]' = (), blast_radius: 'BlastRadius' = <factory>, seed: 'int | None' = None) -> None` |
+| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
+| `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
+| `DegradationPlan` | class | `(name: 'str', description: 'str', triggers: 'tuple[str, ...]', steps: 'tuple[DegradationStep, ...]' = <factory>) -> None` |
+| `DegradationPlanRegistry` | class | `() -> 'None'` |
+| `DegradationReport` | class | `(plan_name: 'str', failure_code: 'str', steps: 'list[_StepOutcome]', started_at: 'float', finished_at: 'float') -> None` |
+| `DegradationStep` | class | `(name: 'str', description: 'str', run: 'StepAction') -> None` |
+| `DependencyMatrix` | class | `()` |
+| `DependencyScenario` | class | `(name: 'str', description: 'str', break_it: 'Callable[[], Callable[[], None]]', check: 'Callable[[], None]') -> None` |
+| `ExperimentReport` | class | `(experiment: 'str', hypothesis: 'str', target: 'str', seed: 'int | None', dry_run: 'bool', steady_before: 'dict[str, ProbeOutcome]' = <factory>, steady_after: 'dict[str, ProbeOutcome]' = <factory>, faults: 'list[FaultResult]' = <factory>, started_at: 'float' = 0.0, finished_at: 'float' = 0.0) -> None` |
+| `ExperimentRunner` | class | `(clock: 'Callable[[], float]' = <built-in function monotonic>)` |
+| `Fault` | class | `(name: 'str', description: 'str', inject: 'Callable[[dict[str, Any]], None]', verify: 'Callable[[dict[str, Any]], None]', rollback: 'Callable[[dict[str, Any]], None] | None' = None) -> None` |
+| `FaultResult` | class | `(name: 'str', injected: 'bool', verified: 'bool', rolled_back: 'bool', detail: 'str' = '') -> None` |
+| `FaultSpec` | class | `(mode: 'str', rate: 'float' = 1.0, seed: 'int | None' = None, params: 'dict[str, Any]' = <factory>) -> None` |
+| `FaultyBackend` | class | `(backend: 'Backend')` |
+| `MemoryPressureSimulator` | class | `(total_bytes: 'int' = 8589934592)` |
+| `MemoryReading` | class | `(total_bytes: 'int', available_bytes: 'int') -> None` |
+| `ModelCorruptor` | class | `(seed: 'int | None' = None)` |
+| `NetworkGuard` | class | `(backend: 'Backend', network: 'NetworkSimulator', host: 'str | None' = None)` |
+| `NetworkSimulator` | class | `()` |
+| `ProbeOutcome` | class | `(ok: 'bool', detail: 'str' = '') -> None` |
+| `RecoveryProbe` | class | `(name: 'str', description: 'str', check: 'ProbeCheck') -> None` |
+| `RecoveryReport` | class | `(verifier_name: 'str', probes: 'list[_ProbeOutcome]', started_at: 'float', finished_at: 'float') -> None` |
+| `RecoveryVerifier` | class | `(name: 'str', probes: 'list[RecoveryProbe] | tuple[RecoveryProbe, ...]', sleep: 'Callable[[float], None]' = <built-in function sleep>) -> 'None'` |
+| `ResourceGuard` | class | `(reader: 'Callable[[], MemoryReading]', warn_ratio: 'float' = 0.75, critical_ratio: 'float' = 0.9)` |
+| `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
+| `ServiceUnderTest` | class | `(backends: 'Sequence[Backend]', breakable: 'Collection[str]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None)` |
+| `SkewedClock` | class | `(base: 'Callable[[], float]' = <built-in function monotonic>)` |
+| `SteadyStateProbe` | class | `(name: 'str', check: 'Callable[[], ProbeOutcome]') -> None` |
+| `audit_deadline_clocks` | function | `() -> 'dict[str, str]'` |
+| `backend_health_probe` | function | `(backend: 'Any') -> 'RecoveryProbe'` |
+| `builtin_degradation_plans` | function | `() -> 'DegradationPlanRegistry'` |
+| `builtin_dependency_matrix` | function | `() -> 'DependencyMatrix'` |
+| `circuit_closed_probe` | function | `(get_state: 'Callable[[], str]', backend_name: 'str') -> 'RecoveryProbe'` |
+| `decision_smoke_probe` | function | `(gate: 'Any', state: 'Mapping[str, Any]', spec: 'Any', backend_name: 'str | None' = None) -> 'RecoveryProbe'` |
+| `default_retry_policy` | function | `(exc: 'BaseException') -> 'bool'` |
+| `dependency_failure_matrix` | function | `() -> 'dict[str, Any]'` |
+| `disk_full` | function | `(errno_code: 'int' = 28) -> 'Iterator[None]'` |
+| `partial_service_failure_experiment` | function | `(service: 'ServiceUnderTest', failing_names: 'Collection[str]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', *, name: 'str' = 'partial-service-failure', seed: 'int | None' = 266, simultaneous: 'bool' = False) -> 'ChaosExperiment'` |
+| `read_only` | function | `(errno_code: 'int' = 30) -> 'Iterator[None]'` |
+| `retry_with_budget` | function | `(fn: 'Callable[[], T]', budget: 'RetryBudget', *, is_retryable: 'Callable[[BaseException], bool] | None' = None, on_retry: 'Callable[[int, BaseException], None] | None' = None) -> 'T'` |
+| `run_experiment_on_lab` | function | `(experiment: 'ChaosExperiment') -> 'dict[str, Any]'` |
+
+### `hugrgate.chaos.backend_faults`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CRASH` | constant | `'crash'` |
+| `ERROR_RATE` | constant | `'error_rate'` |
+| `HANG` | constant | `'hang'` |
+| `LATENCY` | constant | `'latency'` |
+| `MALFORMED` | constant | `'malformed'` |
+| `FaultSpec` | class | `(mode: 'str', rate: 'float' = 1.0, seed: 'int | None' = None, params: 'dict[str, Any]' = <factory>) -> None` |
+| `FaultyBackend` | class | `(backend: 'Backend')` |
+
+### `hugrgate.chaos.bulkhead`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BulkheadExecutor` | class | `(default_cap: 'int' = 8, caps: 'dict[str, int] | None' = None) -> 'None'` |
+
+### `hugrgate.chaos.cache_faults`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CacheCorruptor` | class | `(cache: 'DecisionCache')` |
+
+### `hugrgate.chaos.clock`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SkewedClock` | class | `(base: 'Callable[[], float]' = <built-in function monotonic>)` |
+| `audit_deadline_clocks` | function | `() -> 'dict[str, str]'` |
+
+### `hugrgate.chaos.crash`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
+| `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
+| `worker_main` | function | `(directory: 'str', count: 'int') -> 'int'` |
+
+### `hugrgate.chaos.degradation`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DegradationPlan` | class | `(name: 'str', description: 'str', triggers: 'tuple[str, ...]', steps: 'tuple[DegradationStep, ...]' = <factory>) -> None` |
+| `DegradationPlanRegistry` | class | `() -> 'None'` |
+| `DegradationReport` | class | `(plan_name: 'str', failure_code: 'str', steps: 'list[_StepOutcome]', started_at: 'float', finished_at: 'float') -> None` |
+| `DegradationStep` | class | `(name: 'str', description: 'str', run: 'StepAction') -> None` |
+| `builtin_degradation_plans` | function | `() -> 'DegradationPlanRegistry'` |
+
+### `hugrgate.chaos.experiments`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CHAOS_LAB` | constant | `'chaos-lab'` |
+| `DependencyMatrix` | class | `()` |
+| `DependencyScenario` | class | `(name: 'str', description: 'str', break_it: 'Callable[[], Callable[[], None]]', check: 'Callable[[], None]') -> None` |
+| `ServiceUnderTest` | class | `(backends: 'Sequence[Backend]', breakable: 'Collection[str]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None)` |
+| `builtin_dependency_matrix` | function | `() -> 'DependencyMatrix'` |
+| `dependency_failure_matrix` | function | `() -> 'dict[str, Any]'` |
+| `partial_service_failure_experiment` | function | `(service: 'ServiceUnderTest', failing_names: 'Collection[str]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', *, name: 'str' = 'partial-service-failure', seed: 'int | None' = 266, simultaneous: 'bool' = False) -> 'ChaosExperiment'` |
+| `run_experiment_on_lab` | function | `(experiment: 'ChaosExperiment') -> 'dict[str, Any]'` |
+
+### `hugrgate.chaos.filesystem`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `disk_full` | function | `(errno_code: 'int' = 28) -> 'Iterator[None]'` |
+| `read_only` | function | `(errno_code: 'int' = 30) -> 'Iterator[None]'` |
+
+### `hugrgate.chaos.framework`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BlastRadius` | class | `(allowed_targets: 'frozenset[str]' = frozenset(), dry_run: 'bool' = False) -> None` |
+| `ChaosExperiment` | class | `(name: 'str', hypothesis: 'str', faults: 'tuple[Fault, ...]' = (), probes: 'tuple[SteadyStateProbe, ...]' = (), blast_radius: 'BlastRadius' = <factory>, seed: 'int | None' = None) -> None` |
+| `ExperimentReport` | class | `(experiment: 'str', hypothesis: 'str', target: 'str', seed: 'int | None', dry_run: 'bool', steady_before: 'dict[str, ProbeOutcome]' = <factory>, steady_after: 'dict[str, ProbeOutcome]' = <factory>, faults: 'list[FaultResult]' = <factory>, started_at: 'float' = 0.0, finished_at: 'float' = 0.0) -> None` |
+| `ExperimentRunner` | class | `(clock: 'Callable[[], float]' = <built-in function monotonic>)` |
+| `Fault` | class | `(name: 'str', description: 'str', inject: 'Callable[[dict[str, Any]], None]', verify: 'Callable[[dict[str, Any]], None]', rollback: 'Callable[[dict[str, Any]], None] | None' = None) -> None` |
+| `FaultResult` | class | `(name: 'str', injected: 'bool', verified: 'bool', rolled_back: 'bool', detail: 'str' = '') -> None` |
+| `ProbeOutcome` | class | `(ok: 'bool', detail: 'str' = '') -> None` |
+| `SteadyStateProbe` | class | `(name: 'str', check: 'Callable[[], ProbeOutcome]') -> None` |
+
+### `hugrgate.chaos.model_faults`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CORRUPTION_KINDS` | constant | `('flip_magic', 'bad_version', 'truncate', 'kv_bomb', 'zero_o` |
+| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
+| `ModelCorruptor` | class | `(seed: 'int | None' = None)` |
+
+### `hugrgate.chaos.network`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DOWN` | constant | `'down'` |
+| `UP` | constant | `'up'` |
+| `NetworkGuard` | class | `(backend: 'Backend', network: 'NetworkSimulator', host: 'str | None' = None)` |
+| `NetworkSimulator` | class | `()` |
+
+### `hugrgate.chaos.recovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RecoveryProbe` | class | `(name: 'str', description: 'str', check: 'ProbeCheck') -> None` |
+| `RecoveryReport` | class | `(verifier_name: 'str', probes: 'list[_ProbeOutcome]', started_at: 'float', finished_at: 'float') -> None` |
+| `RecoveryVerifier` | class | `(name: 'str', probes: 'list[RecoveryProbe] | tuple[RecoveryProbe, ...]', sleep: 'Callable[[float], None]' = <built-in function sleep>) -> 'None'` |
+| `backend_health_probe` | function | `(backend: 'Any') -> 'RecoveryProbe'` |
+| `circuit_closed_probe` | function | `(get_state: 'Callable[[], str]', backend_name: 'str') -> 'RecoveryProbe'` |
+| `decision_smoke_probe` | function | `(gate: 'Any', state: 'Mapping[str, Any]', spec: 'Any', backend_name: 'str | None' = None) -> 'RecoveryProbe'` |
+
+### `hugrgate.chaos.resources`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CRITICAL` | constant | `'critical'` |
+| `OK` | constant | `'ok'` |
+| `WARN` | constant | `'warn'` |
+| `CPUStarvationSimulator` | class | `(share: 'float' = 1.0)` |
+| `MemoryPressureSimulator` | class | `(total_bytes: 'int' = 8589934592)` |
+| `MemoryReading` | class | `(total_bytes: 'int', available_bytes: 'int') -> None` |
+| `ResourceGuard` | class | `(reader: 'Callable[[], MemoryReading]', warn_ratio: 'float' = 0.75, critical_ratio: 'float' = 0.9)` |
+
+### `hugrgate.chaos.retry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
+| `default_retry_policy` | function | `(exc: 'BaseException') -> 'bool'` |
+| `retry_with_budget` | function | `(fn: 'Callable[[], T]', budget: 'RetryBudget', *, is_retryable: 'Callable[[BaseException], bool] | None' = None, on_retry: 'Callable[[int, BaseException], None] | None' = None) -> 'T'` |
 
 ### `hugrgate.circuit`
 
@@ -1377,7 +1571,7 @@ that this document never drifts from the code.
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
 | `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]', pre_check: 'Callable[[], None] | None' = None, post_check: 'Callable[[], None] | None' = None) -> None` |
 | `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
 | `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
 | `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
@@ -1504,7 +1698,7 @@ that this document never drifts from the code.
 | `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
 | `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
 | `ChaosRunner` | class | `()` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]', pre_check: 'Callable[[], None] | None' = None, post_check: 'Callable[[], None] | None' = None) -> None` |
 | `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
 
 ### `hugrgate.edge.gate`
@@ -1953,6 +2147,7 @@ that this document never drifts from the code.
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BulkheadRejected` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -1972,6 +2167,7 @@ that this document never drifts from the code.
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
