@@ -12,9 +12,11 @@
 from __future__ import annotations
 
 import statistics
+import time
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
+from uuid import uuid4
 
 from hugrgate.autotune.controller import (
     Disposition,
@@ -27,6 +29,8 @@ from hugrgate.autotune.controller import (
 from hugrgate.errors import AutotuneError
 
 __all__ = [
+    "CanaryDriver",
+    "CanaryLease",
     "OfflineDriver",
     "ShadowDriver",
 ]
@@ -154,3 +158,128 @@ class ShadowDriver(ModeDriver):
             detail={"verdict": verdict, "delta": delta,
                     "live_mean": live, "shadow_mean": shadow,
                     "journal_index": len(self.journal) - 1})
+
+
+@dataclass
+class CanaryLease:
+    """One in-flight canary: applied changes plus the way back."""
+
+    lease_id: str
+    proposal_id: str
+    changes: dict[str, Any]
+    previous: dict[str, Any]
+    fraction: float
+    started_at: float
+    ends_at: float
+    status: str = "active"  # active | promoted | rolled_back | expired
+    events: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CanaryDriver(ModeDriver):
+    """Apply proposals to a traffic fraction with guardrails.
+
+    Slice 468. The canary driver *does* apply the proposal — through
+    the store, so type/bounds validation still holds — but records a
+    :class:`CanaryLease` with the pre-canary snapshot, the traffic
+    fraction, and an expiry. :meth:`poll` is the heartbeat:
+
+    - guardrail breach -> restore the snapshot (``rolled_back``);
+    - lease expiry without promotion -> restore (``expired``);
+    - :meth:`promote` marks the canary good (``promoted``, stays
+      applied).
+
+    Only one canary may be active at a time; a second proposal while
+    one is active is REJECTED, not queued. Guardrails are
+    zero-argument callables returning ``(ok, reason)``; a raising
+    guardrail counts as a breach (fail closed). Slice 469 builds the
+    declarative rollback triggers on top of this mechanism.
+    """
+
+    mode: Mode = Mode.CANARY
+    fraction: float = 0.05
+    lease_seconds: float = 600.0
+    guardrails: list[Callable[[], tuple[bool, str]]] = field(
+        default_factory=list)
+    clock: Callable[[], float] = time.time
+    leases: list[CanaryLease] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not 0.0 < self.fraction < 1.0:
+            raise AutotuneError("canary fraction must be in (0, 1)",
+                                fraction=self.fraction)
+        if self.lease_seconds <= 0:
+            raise AutotuneError("lease_seconds must be positive")
+
+    def _active(self) -> CanaryLease | None:
+        return next((lease for lease in self.leases
+                     if lease.status == "active"), None)
+
+    def handle(self, proposal: Proposal, ctx: TuningContext) -> DriverResult:
+        if self._active() is not None:
+            return DriverResult(
+                proposal_id=proposal.proposal_id,
+                disposition=Disposition.REJECTED,
+                detail={"reason": "canary already active"})
+        previous = ctx.store.snapshot()
+        applied = ctx.store.apply(proposal.changes)
+        now = self.clock()
+        lease = CanaryLease(
+            lease_id=f"canary-{uuid4().hex[:10]}",
+            proposal_id=proposal.proposal_id,
+            changes=dict(applied),
+            previous=previous,
+            fraction=self.fraction,
+            started_at=now,
+            ends_at=now + self.lease_seconds,
+            events=[f"applied at {now:.1f}"])
+        self.leases.append(lease)
+        return DriverResult(
+            proposal_id=proposal.proposal_id,
+            disposition=Disposition.CANARIED,
+            detail={"lease_id": lease.lease_id,
+                    "fraction": self.fraction,
+                    "applied": applied})
+
+    def poll(self, ctx: TuningContext) -> list[dict[str, Any]]:
+        """Heartbeat: enforce guardrails and expiry. Returns actions."""
+        actions: list[dict[str, Any]] = []
+        lease = self._active()
+        if lease is None:
+            return actions
+        now = self.clock()
+        if now >= lease.ends_at:
+            ctx.store.restore(lease.previous)
+            lease.status = "expired"
+            lease.events.append(f"expired at {now:.1f}; config restored")
+            actions.append({"lease_id": lease.lease_id,
+                            "action": "expired_rollback"})
+            return actions
+        for guard in self.guardrails:
+            try:
+                ok, reason = guard()
+            except Exception as exc:  # noqa: BLE001 - fail closed on guardrail crash
+                ok, reason = False, f"guardrail raised: {exc!r}"
+            if not ok:
+                ctx.store.restore(lease.previous)
+                lease.status = "rolled_back"
+                lease.events.append(f"guardrail breach at {now:.1f}: "
+                                    f"{reason}; config restored")
+                actions.append({"lease_id": lease.lease_id,
+                                "action": "guardrail_rollback",
+                                "reason": reason})
+                return actions
+        actions.append({"lease_id": lease.lease_id, "action": "hold"})
+        return actions
+
+    def promote(self, lease_id: str) -> None:
+        for lease in self.leases:
+            if lease.lease_id == lease_id:
+                if lease.status != "active":
+                    raise AutotuneError("only active leases promote",
+                                        lease=lease_id,
+                                        status=lease.status)
+                lease.status = "promoted"
+                lease.events.append("promoted by operator")
+                return
+        raise AutotuneError("unknown lease", lease=lease_id)
