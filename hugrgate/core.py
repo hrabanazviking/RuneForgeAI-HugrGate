@@ -173,12 +173,17 @@ class HugrGate:
         if contract_id is not None:
             result.metadata["contract_id"] = contract_id
 
-        # Provenance
+        # Provenance is observability, not the decision: a failing
+        # provenance store must never fail a decision the backend
+        # already made (slice 267 hardening). Degrade to a warning.
         redact = policy.privacy_class == "strict"
-        self.provenance.append(DecisionRecord.from_decision(
-            state, spec, result,
-            policy_threshold=policy.minimum_probability,
-            redact_input=redact))
+        try:
+            self.provenance.append(DecisionRecord.from_decision(
+                state, spec, result,
+                policy_threshold=policy.minimum_probability,
+                redact_input=redact))
+        except Exception as e:  # noqa: BLE001 - provenance must not fail decide
+            logger.warning("provenance append failed; decision kept: %s", e)
 
         return result
 

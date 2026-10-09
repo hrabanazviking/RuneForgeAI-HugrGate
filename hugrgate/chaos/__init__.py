@@ -29,7 +29,11 @@ from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.clock import SkewedClock, audit_deadline_clocks
 from hugrgate.chaos.experiments import (
     CHAOS_LAB,
+    DependencyMatrix,
+    DependencyScenario,
     ServiceUnderTest,
+    builtin_dependency_matrix,
+    dependency_failure_matrix,
     partial_service_failure_experiment,
     run_experiment_on_lab,
 )
@@ -83,6 +87,8 @@ __all__ = [
     "CPUStarvationSimulator",
     "CacheCorruptor",
     "ChaosExperiment",
+    "DependencyMatrix",
+    "DependencyScenario",
     "ExperimentReport",
     "ExperimentRunner",
     "Fault",
@@ -100,6 +106,8 @@ __all__ = [
     "SkewedClock",
     "SteadyStateProbe",
     "audit_deadline_clocks",
+    "builtin_dependency_matrix",
+    "dependency_failure_matrix",
     "disk_full",
     "partial_service_failure_experiment",
     "read_only",

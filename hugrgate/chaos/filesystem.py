@@ -46,7 +46,13 @@ def _faulty_open_factory(errno_code: int, real_open):  # type: ignore[no-untyped
     def faulty_open(file: Any, mode: str = "r", *args: Any,
                     **kwargs: Any) -> Any:
         if _is_write_mode(mode):
-            raise OSError(errno_code, os.strerror(errno_code), str(file))
+            # Attribute form, like cluster/chaos.py's httpx.ConnectError:
+            # this raise IS the simulated OS failure. It must stay a
+            # genuine OSError so storage code's OSError->StorageError
+            # mapping is exercised; a taxonomy error here would defeat
+            # the simulation.
+            raise builtins.OSError(errno_code, os.strerror(errno_code),
+                                   str(file))
         return real_open(file, mode, *args, **kwargs)
     return faulty_open
 

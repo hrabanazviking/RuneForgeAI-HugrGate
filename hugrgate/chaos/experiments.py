@@ -16,8 +16,11 @@ experiment can break and heal them.
 
 from __future__ import annotations
 
-from collections.abc import Collection, Mapping, Sequence
+import threading
+from collections.abc import Callable, Collection, Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
+from unittest import mock
 
 from hugrgate.backend import Backend
 from hugrgate.chaos.backend_faults import CRASH, FaultSpec, FaultyBackend
@@ -29,7 +32,7 @@ from hugrgate.chaos.framework import (
     ProbeOutcome,
     SteadyStateProbe,
 )
-from hugrgate.errors import Abstention, SpecError
+from hugrgate.errors import Abstention, BackendError, SpecError
 from hugrgate.fallback import FallbackChain
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
@@ -38,7 +41,11 @@ from hugrgate.validation import validate_result
 
 __all__ = [
     "CHAOS_LAB",
+    "DependencyMatrix",
+    "DependencyScenario",
     "ServiceUnderTest",
+    "builtin_dependency_matrix",
+    "dependency_failure_matrix",
     "partial_service_failure_experiment",
     "run_experiment_on_lab",
 ]
@@ -280,3 +287,212 @@ def run_experiment_on_lab(experiment: ChaosExperiment) -> dict[str, Any]:
     JSON-serializable report."""
     report = ExperimentRunner().run(experiment, CHAOS_LAB)
     return report.to_dict()
+
+
+# --- dependency failure matrix (slice 267) -----------------------------------------------
+
+@dataclass(frozen=True)
+class DependencyScenario:
+    """One dependency outage: how to break it, how to check the
+    system degraded gracefully.
+
+    ``break_it`` puts the dependency into its failed state and
+    returns a ``restore()`` callable; ``check`` raises
+    ``AssertionError`` when the degradation was *not* graceful
+    (wrong exception type, leaked ``ImportError``, hung, or
+    corrupted state). ``restore`` runs even when ``check`` raises.
+    """
+
+    name: str
+    description: str
+    break_it: Callable[[], Callable[[], None]]
+    check: Callable[[], None]
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise SpecError("dependency scenario name must be non-empty")
+        if not self.description.strip():
+            raise SpecError(
+                "dependency scenario description must be non-empty")
+
+
+@dataclass
+class _ScenarioOutcome:
+    name: str
+    survived: bool
+    detail: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"name": self.name, "survived": self.survived,
+                "detail": self.detail}
+
+
+class DependencyMatrix:
+    """A matrix of dependency-failure scenarios with a report.
+
+    Like the experiment runner, ``run_all`` never aborts: a raising
+    scenario is a recorded non-survival, and every scenario's
+    ``restore`` runs regardless.
+    """
+
+    def __init__(self):
+        self._lock = threading.RLock()
+        self._scenarios: dict[str, DependencyScenario] = {}
+
+    def add(self, scenario: DependencyScenario) -> DependencyMatrix:
+        if not isinstance(scenario, DependencyScenario):
+            raise SpecError(
+                "can only add DependencyScenario, got "
+                f"{type(scenario).__name__}")
+        with self._lock:
+            if scenario.name in self._scenarios:
+                raise SpecError(
+                    f"duplicate dependency scenario {scenario.name!r}")
+            self._scenarios[scenario.name] = scenario
+        return self
+
+    def scenarios(self) -> list[str]:
+        with self._lock:
+            return sorted(self._scenarios)
+
+    def run_all(self) -> dict[str, Any]:
+        outcomes: list[_ScenarioOutcome] = []
+        with self._lock:
+            scenarios = [self._scenarios[n]
+                         for n in sorted(self._scenarios)]
+        for scenario in scenarios:
+            restore = None
+            try:
+                restore = scenario.break_it()
+            except Exception as e:  # noqa: BLE001 - recorded per scenario
+                outcomes.append(_ScenarioOutcome(
+                    scenario.name, False,
+                    f"break_it failed: {type(e).__name__}: {e}"))
+                continue
+            try:
+                try:
+                    scenario.check()
+                except Exception as e:  # noqa: BLE001 - recorded
+                    outcomes.append(_ScenarioOutcome(
+                        scenario.name, False,
+                        f"did not degrade gracefully: "
+                        f"{type(e).__name__}: {e}"))
+                else:
+                    outcomes.append(_ScenarioOutcome(scenario.name, True))
+            finally:
+                if restore is not None:
+                    try:
+                        restore()
+                    except Exception as e:  # noqa: BLE001 - recorded
+                        outcomes[-1].detail += (
+                            f"; restore failed: {type(e).__name__}: {e}")
+                        outcomes[-1].survived = False
+        failed = [o.name for o in outcomes if not o.survived]
+        return {"scenarios": len(outcomes),
+                "survived": len(outcomes) - len(failed),
+                "failed": failed,
+                "results": [o.to_dict() for o in outcomes],
+                "all_survived": not failed and bool(outcomes)}
+
+
+def _patch_module_attr(module_name: str, attr: str,
+                       value: Any) -> Callable[[], None]:
+    """Break a module attribute; return the restore callable."""
+    import importlib
+    module = importlib.import_module(module_name)
+    patcher = mock.patch.object(module, attr, value)
+    patcher.start()
+    return patcher.stop
+
+
+def _expect_backend_error_hint(call: Callable[[], None],
+                               hint: str = "install") -> None:
+    """Assert ``call`` raises BackendError with a helpful message —
+    the graceful shape of a missing optional dependency."""
+    try:
+        call()
+    except BackendError as e:
+        if hint not in str(e).lower():
+            raise AssertionError(
+                f"missing-dependency error lacks an install hint: {e}"
+            ) from e
+        return
+    except Exception as e:
+        raise AssertionError(
+            f"missing dependency leaked {type(e).__name__}: {e} "
+            f"(expected BackendError)") from e
+    raise AssertionError("missing dependency did not raise at all")
+
+
+def builtin_dependency_matrix() -> DependencyMatrix:
+    """The shipped matrix: optional-dependency outages.
+
+    Each scenario simulates an absent optional dependency and
+    asserts the failure surfaces as a helpful ``BackendError``
+    (taxonomy, recoverable, with an install hint) — never a leaked
+    ``ImportError`` or ``AttributeError``.
+    """
+    matrix = DependencyMatrix()
+
+    def break_numpy():
+        return _patch_module_attr(
+            "hugrgate.backends.logreg", "np", None)
+
+    def check_numpy():
+        from hugrgate.backends.logreg import LogisticRegressionBackend
+        from hugrgate.features import NumericEncoder, Pipeline
+        backend = LogisticRegressionBackend(
+            model_name="chaos-probe",
+            feature_pipeline=Pipeline([NumericEncoder(["x"])]))
+        _expect_backend_error_hint(
+            lambda: backend.train([({"x": 1}, "a"), ({"x": 2}, "b")]))
+
+    matrix.add(DependencyScenario(
+        "ml-numpy-missing",
+        "numpy absent: sklearn backend train() must raise BackendError "
+        "with an install hint",
+        break_numpy, check_numpy))
+
+    def break_sklearn():
+        return _patch_module_attr(
+            "hugrgate.backends.logreg", "LogisticRegression", None)
+
+    def check_sklearn():
+        from hugrgate.backends.logreg import LogisticRegressionBackend
+        from hugrgate.features import NumericEncoder, Pipeline
+        backend = LogisticRegressionBackend(
+            model_name="chaos-probe",
+            feature_pipeline=Pipeline([NumericEncoder(["x"])]))
+        _expect_backend_error_hint(
+            lambda: backend.train([({"x": 1}, "a"), ({"x": 2}, "b")]))
+
+    matrix.add(DependencyScenario(
+        "ml-sklearn-missing",
+        "scikit-learn absent: sklearn backend train() must raise "
+        "BackendError with an install hint",
+        break_sklearn, check_sklearn))
+
+    def break_embedding_numpy():
+        return _patch_module_attr(
+            "hugrgate.backends.embedding", "np", None)
+
+    def check_embedding_numpy():
+        from hugrgate.backends.embedding import PrototypeBackend
+        _expect_backend_error_hint(lambda: PrototypeBackend())
+
+    matrix.add(DependencyScenario(
+        "embedding-numpy-missing",
+        "numpy absent: PrototypeBackend() must raise BackendError "
+        "with an install hint",
+        break_embedding_numpy, check_embedding_numpy))
+
+    return matrix
+
+
+def dependency_failure_matrix() -> dict[str, Any]:
+    """Run the built-in dependency failure matrix; return the
+    JSON-serializable report."""
+    import json
+    report = builtin_dependency_matrix().run_all()
+    json.dumps(report)  # contract: always serializable
+    return report
