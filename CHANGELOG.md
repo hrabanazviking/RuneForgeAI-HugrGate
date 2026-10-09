@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 245)
+- Privacy dry-run mode (`hugrgate.privacy_dryrun`):
+  `PrivacyDryRun(guard).evaluate(...)` simulates the outbound
+  pipeline stage-by-stage and returns a `DryRunReport` with a
+  `summary()` — no execution, no mutation, no raises.
+
 ### Added (slice 244)
 - Policy violation audit (`hugrgate.privacy_audit`):
   append-only hash-chained `PrivacyAuditLog` with `FileAuditSink`;
