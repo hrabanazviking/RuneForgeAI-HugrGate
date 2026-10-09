@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 51 · **public names:** 230
+**Modules:** 54 · **public names:** 242
 
 ## API stability policy
 
@@ -238,18 +238,24 @@ that this document never drifts from the code.
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
 | `PROTOCOL_VERSION` | constant | `1` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
+| `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `MessageType` | class | `(*values)` |
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
 | `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
+| `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
+| `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
 | `example_config` | function | `() -> 'dict[str, Any]'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 | `new_trace_id` | function | `() -> 'str'` |
@@ -285,6 +291,13 @@ that this document never drifts from the code.
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
 
+### `hugrgate.cluster.node`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
+| `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+
 ### `hugrgate.cluster.protocol`
 
 | Name | Kind | Signature / value |
@@ -297,6 +310,20 @@ that this document never drifts from the code.
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.routes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `build_cluster_router` | function | `(node: 'ClusterNode') -> 'APIRouter'` |
+
+### `hugrgate.cluster.rpc`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
+| `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
+| `error_envelope` | function | `(error: 'HugrGateError', sender: 'str', seq: 'int', trace_id: 'str') -> 'ClusterMessage'` |
 
 ### `hugrgate.cluster.static_config`
 
@@ -323,7 +350,7 @@ that this document never drifts from the code.
 | `Daemon` | class | `(config: 'DaemonConfig | None' = None, gate: 'HugrGate | None' = None) -> 'None'` |
 | `DaemonConfig` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, unix_socket: 'str | None' = None, batch_window_ms: 'float' = 5.0, max_batch: 'int' = 32, max_queue: 'int' = 1024, client_policies_path: 'str | None' = None, client_id_header: 'str' = 'x-client-id', drain_timeout_s: 'float' = 10.0) -> None` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
-| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'HugrGate | None' = None)` |
+| `create_daemon_app` | function | `(config: 'DaemonConfig', gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None)` |
 | `load_client_policies` | function | `(path: 'str') -> 'dict[str, DecisionPolicy]'` |
 | `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
 | `serve_forever` | function | `(config: 'DaemonConfig | None' = None) -> 'None'` |
@@ -463,7 +490,7 @@ that this document never drifts from the code.
 | `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
 | `UniformBackend` | class | `()` |
 | `build_gate` | function | `(extra_backends: 'list[Backend] | None' = None) -> 'HugrGate'` |
-| `create_app` | function | `(gate: 'HugrGate | None' = None) -> 'FastAPI'` |
+| `create_app` | function | `(gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None) -> 'FastAPI'` |
 | `list_models` | function | `() -> 'list[ModelInfo]'` |
 | `register_model` | function | `(info: 'ModelInfo') -> 'None'` |
 | `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'HugrGate | None' = None) -> 'None'` |

@@ -74,6 +74,9 @@ flowchart TD
         cluster_discovery[cluster.discovery]
         cluster_static_config[cluster.static_config]
         cluster_lan[cluster.lan]
+        cluster_rpc[cluster.rpc]
+        cluster_node[cluster.node]
+        cluster_routes[cluster.routes]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -169,7 +172,9 @@ flowchart TD
     cluster --> cluster_discovery
     cluster --> cluster_identity
     cluster --> cluster_lan
+    cluster --> cluster_node
     cluster --> cluster_protocol
+    cluster --> cluster_rpc
     cluster --> cluster_static_config
     cluster_capabilities --> hugrgate
     cluster_capabilities --> backend
@@ -186,7 +191,29 @@ flowchart TD
     cluster_lan --> cluster_identity
     cluster_lan --> cluster_protocol
     cluster_lan --> errors
+    cluster_node --> cluster_capabilities
+    cluster_node --> cluster_discovery
+    cluster_node --> cluster_identity
+    cluster_node --> cluster_protocol
+    cluster_node --> cluster_rpc
+    cluster_node --> core
+    cluster_node --> errors
+    cluster_node --> policy
+    cluster_node --> result
+    cluster_node --> serde
+    cluster_node --> spec
     cluster_protocol --> errors
+    cluster_routes --> cluster_node
+    cluster_routes --> cluster_protocol
+    cluster_routes --> errors
+    cluster_rpc --> backend
+    cluster_rpc --> cluster_discovery
+    cluster_rpc --> cluster_protocol
+    cluster_rpc --> errors
+    cluster_rpc --> policy
+    cluster_rpc --> result
+    cluster_rpc --> serde
+    cluster_rpc --> spec
     cluster_static_config --> cluster_discovery
     cluster_static_config --> errors
     core --> backend
@@ -198,6 +225,7 @@ flowchart TD
     core --> spec
     core --> validation
     daemon -.-> client
+    daemon --> cluster_node
     daemon --> core
     daemon -.-> errors
     daemon -.-> log
@@ -243,6 +271,8 @@ flowchart TD
     serde --> result
     server --> hugrgate
     server --> backend
+    server --> cluster_node
+    server -.-> cluster_routes
     server --> core
     server --> errors
     server --> result
@@ -275,7 +305,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -372,7 +402,9 @@ flowchart TD
 | `cluster` | `cluster.discovery` | no |
 | `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.lan` | no |
+| `cluster` | `cluster.node` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
 | `cluster.capabilities` | `hugrgate` | no |
 | `cluster.capabilities` | `backend` | no |
@@ -389,7 +421,29 @@ flowchart TD
 | `cluster.lan` | `cluster.identity` | no |
 | `cluster.lan` | `cluster.protocol` | no |
 | `cluster.lan` | `errors` | no |
+| `cluster.node` | `cluster.capabilities` | no |
+| `cluster.node` | `cluster.discovery` | no |
+| `cluster.node` | `cluster.identity` | no |
+| `cluster.node` | `cluster.protocol` | no |
+| `cluster.node` | `cluster.rpc` | no |
+| `cluster.node` | `core` | no |
+| `cluster.node` | `errors` | no |
+| `cluster.node` | `policy` | no |
+| `cluster.node` | `result` | no |
+| `cluster.node` | `serde` | no |
+| `cluster.node` | `spec` | no |
 | `cluster.protocol` | `errors` | no |
+| `cluster.routes` | `cluster.node` | no |
+| `cluster.routes` | `cluster.protocol` | no |
+| `cluster.routes` | `errors` | no |
+| `cluster.rpc` | `backend` | no |
+| `cluster.rpc` | `cluster.discovery` | no |
+| `cluster.rpc` | `cluster.protocol` | no |
+| `cluster.rpc` | `errors` | no |
+| `cluster.rpc` | `policy` | no |
+| `cluster.rpc` | `result` | no |
+| `cluster.rpc` | `serde` | no |
+| `cluster.rpc` | `spec` | no |
 | `cluster.static_config` | `cluster.discovery` | no |
 | `cluster.static_config` | `errors` | no |
 | `core` | `backend` | no |
@@ -401,6 +455,7 @@ flowchart TD
 | `core` | `spec` | no |
 | `core` | `validation` | no |
 | `daemon` | `client` | yes |
+| `daemon` | `cluster.node` | no |
 | `daemon` | `core` | no |
 | `daemon` | `errors` | yes |
 | `daemon` | `log` | yes |
@@ -446,6 +501,8 @@ flowchart TD
 | `serde` | `result` | no |
 | `server` | `hugrgate` | no |
 | `server` | `backend` | no |
+| `server` | `cluster.node` | no |
+| `server` | `cluster.routes` | yes |
 | `server` | `core` | no |
 | `server` | `errors` | no |
 | `server` | `result` | no |

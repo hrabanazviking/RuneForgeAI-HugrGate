@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:00:28.628941+00:00",
-  "module_count": 51,
+  "generated_utc": "2026-10-09T13:04:51.756263+00:00",
+  "module_count": 54,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 65,
+      "loc": 78,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -651,6 +651,31 @@
         "stats"
       ]
     },
+    "hugrgate.cluster.node": {
+      "docstring": "ClusterNode \u2014 one HugrGate node in a cluster. Slice 207 (grows).\n\nA node binds the campaign's pieces: identity (202), capabilities\n(203), discovery (204-206), RPC (207), and the local :class:`HugrGate`.\nLater slices register more message handlers and subsystems on the same\nobject (policy sync in 210, work stealing in 216, \u2026) instead of\nbuilding parallel node types.\n\nInbound dispatch is a handler table keyed by :class:`MessageType`;\nunknown types get a typed ERROR envelope, never a guess.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "typing"
+      ],
+      "loc": 277,
+      "path": "hugrgate/cluster/node.py",
+      "public_defs": [
+        "ClusterNode",
+        "node_id",
+        "capabilities",
+        "peers",
+        "next_seq",
+        "register_handler",
+        "close",
+        "decide_remote",
+        "dispatch",
+        "handle_decide",
+        "handle_batch"
+      ]
+    },
     "hugrgate.cluster.protocol": {
       "docstring": "Gjallarbr\u00fa node wire protocol. Slice 201.\n\nEvery inter-node exchange in a HugrGate cluster is a\n:class:`ClusterMessage`: a small versioned JSON envelope carried over\nHTTP ``POST /cluster/rpc`` (slice 207) or UDP multicast for discovery\n(slice 206). The envelope is deliberately boring \u2014 JSON, UTF-8, length\nchecked \u2014 so any future transport can carry it unchanged.\n\nWire format (all keys required unless noted)::\n\n    {\n      \"protocol_version\": 1,\n      \"msg_type\": \"decide_request\",\n      \"sender\": \"<64-hex node id>\",\n      \"seq\": 41,                 # per-sender monotonic sequence\n      \"trace_id\": \"<32-hex>\",    # slice 222 correlation\n      \"timestamp\": 1728470000.5, # sender clock, informational only\n      \"payload\": {...}           # message-type-specific body\n    }\n\nReceivers MUST reject (with :class:`SpecError`) any envelope whose\n``protocol_version`` is newer than :data:`PROTOCOL_VERSION` \u2014 a node\nmust never silently misread a future protocol \u2014 and any envelope\nover :data:`MAX_MESSAGE_BYTES`.",
       "imports": [
@@ -674,6 +699,50 @@
         "message_id",
         "to_dict",
         "from_dict"
+      ]
+    },
+    "hugrgate.cluster.routes": {
+      "docstring": "Cluster HTTP routes \u2014 ``/cluster/*``. Slice 207.\n\nThe router is built bound to a :class:`ClusterNode`\n(:func:`build_cluster_router`) and mounted by ``create_app`` /\n``create_daemon_app`` only when a node is supplied, so the standalone\nserver is untouched.\n\nRoutes (all localhost-scoped like the rest of the API):\n\n- ``POST /cluster/rpc`` \u2014 the envelope endpoint: decodes the\n  :class:`ClusterMessage`, runs ``node.dispatch``, returns the reply\n  envelope. Undecodable bodies are HTTP 400; application outcomes\n  (including typed errors) are HTTP 200 envelopes.\n- ``GET /cluster/peers`` \u2014 the node's current peer table.\n- ``GET /cluster/health`` \u2014 node identity, capabilities summary, and\n  peer count (liveness for load balancers).",
+      "imports": [
+        "__future__",
+        "fastapi",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 80,
+      "path": "hugrgate/cluster/routes.py",
+      "public_defs": [
+        "build_cluster_router",
+        "cluster_rpc",
+        "cluster_peers",
+        "cluster_health"
+      ]
+    },
+    "hugrgate.cluster.rpc": {
+      "docstring": "Remote decision RPC. Slice 207.\n\n:mod:`hugrgate.client` already speaks HTTP to ``/decide``; the cluster\nRPC is a different animal: versioned :class:`ClusterMessage` envelopes\nover ``POST /cluster/rpc`` carrying a ``trace_id`` for cross-node\ncorrelation (slice 222), typed error envelopes, and batch calls.\n\n- :class:`RPCClient` \u2014 sends envelopes to a peer, maps the reply.\n- :class:`RemoteBackend` \u2014 a :class:`Backend` (``is_remote=True``) that\n  routes ``evaluate()`` to a peer, so the existing core, ladder, and\n  policy machinery treat remote nodes as ordinary backends. The core's\n  ``policy.backend_allowed`` gate already keeps remote backends out\n  unless ``policy.remote_inference=True``; this module enforces the\n  same rule on both ends of the wire (defense in depth).\n\nPrivacy is fail-closed: a remote call without ``remote_inference``\nraises :class:`PrivacyViolation`, never silently downgrades to local.",
+      "imports": [
+        "__future__",
+        "collections",
+        "httpx",
+        "hugrgate",
+        "threading",
+        "typing"
+      ],
+      "loc": 333,
+      "path": "hugrgate/cluster/rpc.py",
+      "public_defs": [
+        "error_envelope",
+        "RPCClient",
+        "RemoteBackend",
+        "close",
+        "next_seq",
+        "send",
+        "decide",
+        "batch",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "estimated_latency"
       ]
     },
     "hugrgate.cluster.static_config": {
@@ -739,7 +808,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 494,
+      "loc": 502,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -1094,7 +1163,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 370,
+      "loc": 386,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -1214,6 +1283,7 @@
     "test_cluster_identity.py",
     "test_cluster_lan.py",
     "test_cluster_protocol.py",
+    "test_cluster_rpc.py",
     "test_cluster_static_config.py",
     "test_config.py",
     "test_coverage_attack.py",
@@ -1242,5 +1312,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 9199
+  "total_loc": 9926
 }

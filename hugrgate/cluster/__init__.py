@@ -21,6 +21,7 @@ from hugrgate.cluster.lan import (
     LANDiscoveryAdapter,
     MulticastConfig,
 )
+from hugrgate.cluster.node import ClusterNode, InboundHook
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     MAX_MESSAGE_BYTES,
@@ -30,6 +31,12 @@ from hugrgate.cluster.protocol import (
     decode_message,
     encode_message,
     new_trace_id,
+)
+from hugrgate.cluster.rpc import (
+    OutboundHook,
+    RemoteBackend,
+    RPCClient,
+    error_envelope,
 )
 from hugrgate.cluster.static_config import (
     StaticDiscovery,
@@ -47,18 +54,24 @@ __all__ = [
     "MAX_MESSAGE_BYTES",
     "PROTOCOL_VERSION",
     "ClusterMessage",
+    "ClusterNode",
     "Discovery",
     "DiscoveryRegistry",
+    "InboundHook",
     "LANDiscoveryAdapter",
     "MessageType",
     "MulticastConfig",
     "NodeCapabilities",
     "NodeIdentity",
+    "OutboundHook",
     "PeerRecord",
+    "RPCClient",
+    "RemoteBackend",
     "StaticDiscovery",
     "StaticPeerConfig",
     "decode_message",
     "encode_message",
+    "error_envelope",
     "example_config",
     "load_static_config",
     "new_trace_id",
