@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 61 · **public names:** 280
+**Modules:** 61 · **public names:** 282
 
 ## API stability policy
 
@@ -284,6 +284,8 @@ that this document never drifts from the code.
 | `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
 | `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
 | `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
+| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
 | `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
 | `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
 

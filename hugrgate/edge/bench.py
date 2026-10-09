@@ -45,6 +45,8 @@ __all__ = [
     "EdgeBenchmark",
     "compare_artifacts",
     "edge_bench_suite",
+    "jetson_baseline",
+    "jetson_bench_suite",
     "load_artifact",
     "pi_bench_suite",
 ]
@@ -383,4 +385,76 @@ def pi_bench_suite(board_label: str = "Raspberry Pi 5",
         memory.refresh()
 
     bench.add("memory/refresh", memory_refresh, iterations=iterations)
+    return bench
+
+
+#: Jetson board baselines (published figures; NEEDS_HARDWARE_VALIDATION).
+_JETSON_BASELINES: dict[str, EdgeBaseline] = {
+    "jetson-orin-nano": EdgeBaseline(
+        board="Jetson Orin Nano", cpu_count=6,
+        cpu_desc="6-core Cortex-A78AE ARMv8.2 @ 1.7 GHz", ram_mb=8192,
+        recommended_cache_entries=2000,
+        recommended_max_resident_models=4,
+        recommended_power_budget_mw=15000,
+        notes=("40 INT8 TOPS via Ampere GPU + DLA; JetPack required",
+               "power modes (7W/15W) change the envelope at runtime")),
+    "jetson-orin-nx": EdgeBaseline(
+        board="Jetson Orin NX", cpu_count=8,
+        cpu_desc="8-core Cortex-A78AE ARMv8.2 @ 2.0 GHz", ram_mb=16384,
+        recommended_cache_entries=4000,
+        recommended_max_resident_models=8,
+        recommended_power_budget_mw=25000,
+        notes=("100 INT8 TOPS; 16 GB variant assumed",
+               "NVMe recommended: eMMC wears under model churn")),
+    "jetson-xavier-nx": EdgeBaseline(
+        board="Jetson Xavier NX", cpu_count=6,
+        cpu_desc="6-core Carmel ARMv8.2 @ 1.9 GHz", ram_mb=8192,
+        recommended_cache_entries=1500,
+        recommended_max_resident_models=3,
+        recommended_power_budget_mw=20000,
+        notes=("21 INT8 TOPS; older JetPack branch",
+               "thermal solution mandatory for sustained inference")),
+}
+
+
+def jetson_baseline(label: str) -> EdgeBaseline:
+    """Resolve a Jetson board label; raises listing known boards."""
+    norm = label.lower().replace(" ", "-").removeprefix("jetson-")
+    for known_key, baseline in _JETSON_BASELINES.items():
+        if known_key.removeprefix("jetson-") == norm:
+            return baseline
+    raise ValueError(
+        f"unknown Jetson board {label!r}; known: "
+        f"{sorted(_JETSON_BASELINES)}")
+
+
+def jetson_bench_suite(board_label: str = "jetson-orin-nano",
+                       iterations: int = 200) -> EdgeBenchmark:
+    """Slice 198: Jetson-bound benchmark suite.
+
+    The standard edge suite bound to a Jetson board baseline, plus an
+    ``npu/detect`` case (adapter detection cost — paid on every
+    bootstrap and on every NPU reselection). Surrogate-host marking
+    follows the same rule as the Pi suite.
+    """
+    from hugrgate.edge.npu import (
+        JetsonAdapter,
+        MockNPUAdapter,
+        NPURegistry,
+    )
+
+    baseline = jetson_baseline(board_label)
+    bench = edge_bench_suite(
+        name=f"jetson-suite-{baseline.board.lower().replace(' ', '-')}",
+        baseline_board=baseline, iterations=iterations)
+
+    registry = NPURegistry()
+    registry.register(MockNPUAdapter())
+    registry.register(JetsonAdapter(
+        model_text="NVIDIA Jetson Orin Nano Developer Kit"))
+
+    def npu_detect() -> None:
+        registry.detect_all()
+
+    bench.add("npu/detect", npu_detect, iterations=iterations)
     return bench

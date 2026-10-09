@@ -184,3 +184,42 @@ def test_pi_bench_suite_marks_surrogate_host():
 def test_pi_bench_suite_unknown_board_raises():
     with pytest.raises(ValueError, match="known models"):
         pi_bench_suite("Raspberry Pi 400")
+
+
+# --- slice 198: Jetson benchmark suite -------------------------------------------
+
+from hugrgate.edge.bench import jetson_baseline, jetson_bench_suite
+
+
+def test_jetson_baseline_known_boards():
+    base = jetson_baseline("jetson-orin-nano")
+    assert base.board == "Jetson Orin Nano"
+    assert base.ram_mb == 8192
+    assert jetson_baseline("Jetson Orin NX").recommended_power_budget_mw \
+        == 25000
+    assert jetson_baseline("xavier-nx").board == "Jetson Xavier NX"
+
+
+def test_jetson_baseline_unknown_raises():
+    with pytest.raises(ValueError, match="known:"):
+        jetson_baseline("jetson-thor")
+
+
+def test_jetson_bench_suite_binds_baseline():
+    bench = jetson_bench_suite("jetson-orin-nano", iterations=5)
+    assert bench.baseline_board is not None
+    assert bench.baseline_board.board == "Jetson Orin Nano"
+    assert "jetson-orin-nano" in bench.name
+    results = bench.run()
+    assert "npu/detect" in results
+    assert len(results) == 6  # 5 standard + npu/detect
+
+
+def test_jetson_bench_suite_marks_surrogate_host():
+    bench = jetson_bench_suite(iterations=3)
+    bench.run()
+    note = bench.artifact()["hardware_note"]
+    assert "Jetson Orin Nano" in note
+    import platform as _platform
+    if _platform.machine().lower() not in ("aarch64", "arm64"):
+        assert "SURROGATE HOST" in note
