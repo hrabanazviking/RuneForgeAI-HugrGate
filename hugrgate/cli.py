@@ -30,6 +30,7 @@ __all__ = [
     "cmd_decide",
     "cmd_health",
     "cmd_models",
+    "cmd_openapi",
     "cmd_report",
     "cmd_serve",
     "load_policy",
@@ -205,6 +206,20 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_openapi(args: argparse.Namespace) -> int:
+    """Dump the stabilized OpenAPI schema (slice 427)."""
+    from hugrgate.server import dump_openapi_schema
+    schema = dump_openapi_schema()
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(schema, f, indent=2)
+            f.write("\n")
+        print(f"wrote OpenAPI schema: {args.out}")
+    else:
+        _print_json(schema)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hugrgate",
@@ -255,6 +270,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--report", required=True)
     p.add_argument("--out", default=None)
     p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("openapi", help="dump the stabilized OpenAPI schema")
+    p.add_argument("--out", default=None,
+                   help="write schema JSON to a file (default: stdout)")
+    p.set_defaults(func=cmd_openapi)
 
     return parser
 
