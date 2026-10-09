@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 432 · **public names:** 2613
+**Modules:** 468 · **public names:** 2756
 
 ## API stability policy
 
@@ -568,6 +568,227 @@ that this document never drifts from the code.
 | `evaluate_async` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Mapping[str, Any] | None' = None) -> 'Any'` |
 | `is_async_backend` | function | `(backend: 'Any') -> 'bool'` |
 
+### `hugrgate.autotune`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `__version__` | constant | `'19.0.0'` |
+
+### `hugrgate.autotune.adversarial`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AttackResult` | class | `(name: 'str', measurements: 'dict[str, Any]' = <factory>, notes: 'str' = '') -> None` |
+| `crash_storm_attack` | function | `(controller: 'OptimizationController', n_crashers: 'int' = 5) -> 'AttackResult'` |
+| `label_poisoning_attack` | function | `(tuner_factory: 'Callable[[Sequence[tuple[float, int]]], BaseTuner]', dataset: 'Sequence[tuple[float, int]]', clean_metric: 'Callable[[float], float]', param: 'str', poison_fraction: 'float' = 0.2, seed: 'int' = 0) -> 'AttackResult'` |
+| `latency_spike_attack` | function | `(tuner_factory: 'Callable[[Mapping[str, Sequence[float]]], BaseTuner]', samples: 'Mapping[str, Sequence[float]]', total_budget_ms: 'float', min_stage_ms: 'float', spike_fraction: 'float' = 0.1, spike_factor: 'float' = 10.0, seed: 'int' = 0) -> 'AttackResult'` |
+| `malicious_tuner_attack` | function | `(controller: 'OptimizationController', malicious_changes: 'Mapping[str, Any]', tuner_name: 'str' = 'malicious') -> 'AttackResult'` |
+| `poison_labels` | function | `(dataset: 'Sequence[tuple[float, int]]', fraction: 'float', seed: 'int') -> 'list[tuple[float, int]]'` |
+| `spike_samples` | function | `(samples: 'Mapping[str, Sequence[float]]', fraction: 'float', spike_factor: 'float', seed: 'int') -> 'dict[str, list[float]]'` |
+
+### `hugrgate.autotune.benchmark`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AutotuneBenchmark` | class | `(scenarios: 'Sequence[BenchmarkScenario]') -> 'None'` |
+| `BenchmarkReport` | class | `(seed: 'int', results: 'list[BenchmarkResult]' = <factory>, generated_at: 'float' = <factory>) -> None` |
+| `BenchmarkResult` | class | `(scenario: 'str', baseline_score: 'float', tuned_score: 'float', improvement: 'float', seconds: 'float', proposal_id: 'str', data_fingerprint: 'str') -> None` |
+| `BenchmarkScenario` | class | `(name: 'str', tuner: 'BaseTuner', params: 'Sequence[TunableParameter]', replay: 'Callable[[Mapping[str, Any]], float]', data_fingerprint: 'str' = '', baseline_note: 'str' = '') -> None` |
+
+### `hugrgate.autotune.constraints`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConstraintSet` | class | `(constraints: 'Sequence[ConstraintSpec]' = ()) -> 'None'` |
+| `ConstraintSpec` | class | `(constraint_id: 'str', predicate: 'Callable[[Mapping[str, Any]], bool]', message: 'str', severity: 'str' = 'hard') -> None` |
+| `Violation` | class | `(constraint_id: 'str', message: 'str', severity: 'str' = 'hard') -> None` |
+| `change_within` | function | `(param: 'str', baseline: 'Mapping[str, Any]', max_delta: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `implies` | function | `(param_a: 'str', value_a: 'Any', param_b: 'str', allowed: 'Sequence[Any]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `mutual_exclusion` | function | `(params: 'Sequence[str]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `requires` | function | `(param: 'str', predicate: 'Callable[[Any], bool]', message: 'str', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `sum_leq` | function | `(params: 'Sequence[str]', cap: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `within_bounds` | function | `(param: 'str', lo: 'float', hi: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+
+### `hugrgate.autotune.controller`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MODES` | constant | `('offline', 'shadow', 'canary', 'applied')` |
+| `ConfigStore` | class | `() -> 'None'` |
+| `Disposition` | class | `(*values)` |
+| `DriverResult` | class | `(proposal_id: 'str', disposition: 'Disposition', detail: 'dict[str, Any]' = <factory>) -> None` |
+| `Mode` | class | `(*values)` |
+| `ModeDriver` | class | `(*args, **kwargs)` |
+| `OptimizationController` | class | `(store: 'ConfigStore | None' = None) -> 'None'` |
+| `Proposal` | class | `(proposal_id: 'str', tuner: 'str', changes: 'dict[str, Any]', objective_id: 'str', baseline: 'float', estimate: 'float', seed: 'int', created_at: 'float' = <factory>, evidence: 'dict[str, Any]' = <factory>) -> None` |
+| `TunableParameter` | class | `(name: 'str', dtype: 'str', default: 'Any', description: 'str' = '', owner: 'str' = '', lo: 'float | None' = None, hi: 'float | None' = None, choices: 'tuple[str, ...] | None' = None) -> None` |
+| `Tuner` | class | `(*args, **kwargs)` |
+| `TuningContext` | class | `(store: 'ConfigStore', objectives: 'Mapping[str, Callable[[Mapping[str, Any]], float]]', constraints: 'Sequence[Callable[[Mapping[str, Any]], None]]', seed: 'int', mode: 'Mode', run_id: 'str', data: 'Mapping[str, Any]' = <factory>) -> None` |
+| `TuningRun` | class | `(run_id: 'str', mode: 'Mode', seed: 'int', started_at: 'float', finished_at: 'float', results: 'list[DriverResult]' = <factory>, notes: 'list[str]' = <factory>) -> None` |
+
+### `hugrgate.autotune.limits`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SafetyEnforcer` | class | `(limits: 'SafetyLimits | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'` |
+| `SafetyLimits` | class | `(kill_switch: 'bool' = False, frozen_params: 'tuple[str, ...]' = (), max_params_per_proposal: 'int' = 5, max_step_fraction: 'float' = 0.25, allowed_modes: 'tuple[Mode, ...]' = (<Mode.OFFLINE: 'offline'>, <Mode.SHADOW: 'shadow'>, <Mode.CANARY: 'canary'>), max_cycles_per_hour: 'int' = 12) -> None` |
+
+### `hugrgate.autotune.modes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CanaryDriver` | class | `(mode: 'Mode' = <Mode.CANARY: 'canary'>, fraction: 'float' = 0.05, lease_seconds: 'float' = 600.0, guardrails: 'list[Callable[[], tuple[bool, str]]]' = <factory>, clock: 'Callable[[], float]' = <built-in function time>, leases: 'list[CanaryLease]' = <factory>) -> None` |
+| `CanaryLease` | class | `(lease_id: 'str', proposal_id: 'str', changes: 'dict[str, Any]', previous: 'dict[str, Any]', fraction: 'float', started_at: 'float', ends_at: 'float', status: 'str' = 'active', events: 'list[str]' = <factory>) -> None` |
+| `OfflineDriver` | class | `(mode: 'Mode' = <Mode.OFFLINE: 'offline'>, journal: 'list[dict[str, Any]]' = <factory>, seen: 'dict[str, Proposal]' = <factory>) -> None` |
+| `ShadowDriver` | class | `(mode: 'Mode' = <Mode.SHADOW: 'shadow'>, samples: 'Sequence[Mapping[str, Any]]' = <factory>, live_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, shadow_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, min_delta: 'float' = 0.005, journal: 'list[dict[str, Any]]' = <factory>) -> None` |
+
+### `hugrgate.autotune.objectives`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Direction` | class | `(*values)` |
+| `GuardedObjective` | class | `(objective_id: 'str', primary: 'ObjectiveSpec', guards: 'tuple[tuple[ObjectiveSpec, float], ...]' = ()) -> None` |
+| `LexicographicObjective` | class | `(objective_id: 'str', specs: 'tuple[ObjectiveSpec, ...]', tolerance: 'float' = 1e-09) -> None` |
+| `ObjectiveSpec` | class | `(objective_id: 'str', evaluate: 'Callable[[Mapping[str, Any]], float]', direction: 'Direction' = <Direction.MAXIMIZE: 'maximize'>, bounds: 'tuple[float, float]' = (0.0, 1.0), target: 'float | None' = None, description: 'str' = '') -> None` |
+| `WeightedObjective` | class | `(objective_id: 'str', parts: 'tuple[tuple[ObjectiveSpec, float], ...]') -> None` |
+
+### `hugrgate.autotune.provenance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OptimizationProvenance` | class | `(max_records: 'int | None' = None) -> 'None'` |
+| `OptimizationRecord` | class | `(record_id: 'str', timestamp: 'float', tuner: 'str', proposal_id: 'str', mode: 'str', disposition: 'str', changes: 'dict[str, Any]', config_before_hash: 'str', config_after_hash: 'str', data_fingerprint: 'str', seed: 'int', evidence_summary: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
+| `ProvenanceTracker` | class | `(store: 'OptimizationProvenance | None' = None, clock: 'Any' = <built-in function time>) -> 'None'` |
+| `hash_mapping` | function | `(mapping: 'Mapping[str, Any]') -> 'str'` |
+
+### `hugrgate.autotune.release`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HOLD` | constant | `'hold'` |
+| `RELEASE` | constant | `'release'` |
+| `ReleaseCheck` | class | `(name: 'str', run: 'Callable[[], tuple[bool, str]]') -> None` |
+| `ReleaseVerdict` | class | `(verdict: 'str', results: 'list[dict[str, Any]]' = <factory>, generated_at: 'str' = <factory>) -> None` |
+| `assert_release` | function | `(verdict: 'ReleaseVerdict') -> 'None'` |
+| `campaign_checks` | function | `() -> 'list[ReleaseCheck]'` |
+| `release_gate` | function | `(checks: 'Sequence[ReleaseCheck] | None' = None) -> 'ReleaseVerdict'` |
+
+### `hugrgate.autotune.repro`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RunManifest` | class | `(run_id: 'str', seed: 'int', mode: 'str', tuners: 'dict[str, dict[str, Any]]', objective_ids: 'list[str]', objective_refs: 'dict[str, str]', constraint_refs: 'list[str]', data_fingerprint: 'str', config_before: 'dict[str, Any]', config_before_hash: 'str', proposal_signatures: 'list[list[str]]' = <factory>, code_version: 'str' = 'gjallarbu-campaign-xix', recorded_at: 'float' = <factory>) -> None` |
+| `record_manifest` | function | `(controller: 'OptimizationController', run: 'TuningRun', tuners: 'Mapping[str, Any]', proposals: 'Mapping[str, Proposal] | None' = None, data_fingerprint: 'str' = '') -> 'RunManifest'` |
+| `restore_bundle` | function | `(bundle: 'bytes') -> 'dict[str, Any]'` |
+| `snapshot_bundle` | function | `(values: 'Mapping[str, Any]') -> 'bytes'` |
+| `verify_replay` | function | `(manifest: 'RunManifest', make_controller: 'Callable[[], tuple[OptimizationController, Callable[[], Mapping[str, Proposal]]]]') -> 'dict[str, Any]'` |
+
+### `hugrgate.autotune.rollback`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RollbackController` | class | `(restore: 'Callable[[], None] | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'` |
+| `RollbackEvent` | class | `(trigger: 'str', fired_at: 'float', breaches: 'int', reason: 'str') -> None` |
+| `RollbackTrigger` | class | `(name: 'str', metric: 'Callable[[], float]', direction: 'str', threshold: 'float', sustained: 'int' = 3, description: 'str' = '') -> None` |
+
+### `hugrgate.autotune.tuners`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.autotune.tuners._base`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BaseTuner` | class | `(name: 'str' = 'base_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005) -> None` |
+| `kfold_indices` | function | `(n: 'int', labels: 'Sequence[int]', n_folds: 'int', seed: 'int') -> 'list[tuple[list[int], list[int]]]'` |
+| `linspace` | function | `(lo: 'float', hi: 'float', n: 'int') -> 'list[float]'` |
+| `seeded_rng` | function | `(seed: 'int') -> 'random.Random'` |
+
+### `hugrgate.autotune.tuners.backends`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackendOrderTuner` | class | `(name: 'str' = 'backend_order_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, backends: 'Sequence[str]' = <factory>, stats: 'Mapping[str, tuple[float, float]]' = <factory>, rank_prefix: 'str' = 'backend.rank') -> None` |
+| `expected_chain_cost` | function | `(order: 'Sequence[str]', stats: 'Mapping[str, tuple[float, float]]') -> 'float'` |
+
+### `hugrgate.autotune.tuners.batching`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BatchSizeTuner` | class | `(name: 'str' = 'batch_size_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, samples: 'Sequence[tuple[int, float, float]]' = <factory>, latency_cap_ms: 'float' = 100.0, memory_cap_mb: 'float' = 4096.0, min_r_squared: 'float' = 0.5) -> None` |
+| `fit_linear` | function | `(xs: 'Sequence[float]', ys: 'Sequence[float]') -> 'tuple[float, float, float]'` |
+| `powers_of_two` | function | `(lo: 'int', hi: 'int') -> 'list[int]'` |
+
+### `hugrgate.autotune.tuners.cache`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CachePolicyTuner` | class | `(name: 'str' = 'cache_policy_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, ttl_param: 'str' = '', size_param: 'str' = '', eviction_param: 'str' = '', trace: 'Sequence[TraceEvent]' = <factory>, ttl_grid: 'int' = 9, size_ladder: 'Sequence[int]' = (32, 128, 512, 2048, 8192)) -> None` |
+| `simulate_trace` | function | `(trace: 'Sequence[TraceEvent]', ttl: 'float', max_size: 'int', eviction: 'str') -> 'dict[str, float]'` |
+
+### `hugrgate.autotune.tuners.calibration_select`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationSelectorTuner` | class | `(name: 'str' = 'calibration_selector_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, scores: 'Sequence[float]' = <factory>, labels: 'Sequence[int]' = <factory>, candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, min_win: 'float' = 0.0) -> None` |
+
+### `hugrgate.autotune.tuners.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostAwareTuner` | class | `(name: 'str' = 'cost_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, cost: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', cost_budget: 'float' = 1.0, quality_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.energy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnergyAwareTuner` | class | `(name: 'str' = 'energy_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, energy_j: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', energy_budget_j: 'float' = 1.0, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.gates`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConfidenceGateTuner` | class | `(name: 'str' = 'confidence_gate_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, bool]]' = <factory>, mode: 'str' = 'accuracy_floor', floor: 'float' = 0.8, target: 'float' = 0.8, alpha: 'float' = 0.05, grid: 'int' = 41, train_fraction: 'float' = 0.7) -> None` |
+| `wilson_lower_bound` | function | `(successes: 'int', trials: 'int', alpha: 'float' = 0.05) -> 'float'` |
+
+### `hugrgate.autotune.tuners.hardware`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HardwareAwareTuner` | class | `(name: 'str' = 'hardware_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, tiers: 'list[HardwareTier]' = <factory>, injected_hardware: 'HardwareProfile | None' = None) -> None` |
+| `HardwareProfile` | class | `(cpu_count: 'int', memory_mb: 'float', arch: 'str', system: 'str') -> None` |
+| `HardwareTier` | class | `(name: 'str', min_cpu: 'int', min_memory_mb: 'float', profile: 'Mapping[str, Any]') -> None` |
+| `detect_hardware` | function | `() -> 'HardwareProfile'` |
+
+### `hugrgate.autotune.tuners.latency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LatencyBudgetTuner` | class | `(name: 'str' = 'latency_budget_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, stages: 'Sequence[str]' = <factory>, samples: 'Mapping[str, Sequence[float]]' = <factory>, total_budget_ms: 'float' = 1000.0, seed_quantile: 'float' = 0.99, refine_steps: 'int' = 200, step_ms: 'float' = 1.0, min_stage_ms: 'float' = 1.0) -> None` |
+| `empirical_tail` | function | `(samples: 'Sequence[float]', budget: 'float') -> 'float'` |
+| `quantile` | function | `(samples: 'Sequence[float]', q: 'float') -> 'float'` |
+
+### `hugrgate.autotune.tuners.privacy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyConstrainedTuner` | class | `(name: 'str' = 'privacy_constrained_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, privacy_class: 'Mapping[str, str]' = <factory>, epsilon: 'Mapping[str, float]' = <factory>, utility: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', epsilon_budget: 'float' = 1.0, utility_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.thresholds`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ThresholdTuner` | class | `(name: 'str' = 'threshold_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, int]]' = <factory>, metric: 'str' = 'f1', n_folds: 'int' = 5, grid: 'int' = 41) -> None` |
+| `threshold_metric` | function | `(metric: 'str', scores: 'Sequence[float]', labels: 'Sequence[int]', threshold: 'float') -> 'float'` |
+
+### `hugrgate.autotune.tuners.weights`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnsembleWeightTuner` | class | `(name: 'str' = 'ensemble_weight_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, members: 'Sequence[str]' = <factory>, votes: 'Sequence[Sequence[Sequence[float]]]' = <factory>, labels: 'Sequence[int]' = <factory>, weight_prefix: 'str' = 'ensemble.weight', max_iter: 'int' = 200, tol: 'float' = 1e-06) -> None` |
+| `mean_log_likelihood` | function | `(votes: 'Sequence[Sequence[Sequence[float]]]', labels: 'Sequence[int]', weights: 'Sequence[float]') -> 'float'` |
+
 ### `hugrgate.backend`
 
 | Name | Kind | Signature / value |
@@ -733,8 +954,10 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DEFAULT_CANDIDATES` | constant | `['beta-binomial', 'ensemble', 'isotonic', 'platt', 'temperat` |
-| `SelectionResult` | class | `(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '') -> None` |
-| `auto_select` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True) -> 'SelectionResult'` |
+| `NONE_CANDIDATE` | constant | `'none'` |
+| `SelectionResult` | class | `(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '', incumbent: 'str | None' = None, kept_incumbent: 'bool' = False, paired_win_vs_incumbent: 'float | None' = None) -> None` |
+| `auto_select` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True, incumbent: 'str | None' = None, min_win: 'float' = 0.0) -> 'SelectionResult'` |
+| `paired_win` | function | `(challenger: 'dict[int, float]', incumbent: 'dict[int, float]') -> 'float | None'` |
 
 ### `hugrgate.calibration.bayes`
 
@@ -1185,9 +1408,17 @@ that this document never drifts from the code.
 | `build_parser` | function | `() -> 'argparse.ArgumentParser'` |
 | `cmd_backends` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_bench` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_completion` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_decide` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_doctor` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_gen` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_health` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_init` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_inspect` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_models` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_new` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_openapi` | function | `(args: 'argparse.Namespace') -> 'int'` |
+| `cmd_plugins` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_report` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `cmd_serve` | function | `(args: 'argparse.Namespace') -> 'int'` |
 | `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
@@ -1529,6 +1760,33 @@ that this document never drifts from the code.
 | `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
 | `StealableQueue` | class | `() -> 'None'` |
 
+### `hugrgate.compat`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `migrate_contract` | function | `(d: 'Mapping[str, Any]', to_version: 'str' = '2.0') -> 'tuple[DecisionContract, MigrationReport]'` |
+| `upgrade_client` | function | `(client: 'HugrGateClient', *, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'HugrGateSDK'` |
+
+### `hugrgate.configgen`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `generate_daemon_config` | function | `(**overrides: 'Any') -> 'str'` |
+| `generate_policy` | function | `(**overrides: 'Any') -> 'str'` |
+| `generate_spec` | function | `(spec_type: 'str' = 'categorical', **fields: 'Any') -> 'str'` |
+| `init_project` | function | `(directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'` |
+| `load_daemon_config` | function | `(path: 'str | Path') -> 'Any'` |
+| `write_new` | function | `(path: 'str | Path', content: 'str', force: 'bool' = False) -> 'Path'` |
+
+### `hugrgate.conformance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ConformanceReport` | class | `(backend: 'str', checks: 'list[ConformanceCheck]' = <factory>) -> None` |
+| `assert_conformance` | function | `(report: 'ConformanceReport') -> 'None'` |
+| `run_backend_conformance` | function | `(backend: 'Backend') -> 'ConformanceReport'` |
+
 ### `hugrgate.contracts`
 
 | Name | Kind | Signature / value |
@@ -1588,6 +1846,16 @@ that this document never drifts from the code.
 | `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
 | `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'dict[str, Any]' = <factory>, fields: 'dict[str, FieldContract]' = <factory>, conditions: 'dict[str, FieldCondition]' = <factory>) -> None` |
 | `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
+
+### `hugrgate.contracts.conformance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TemplateConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `TemplateConformanceReport` | class | `(template_id: 'str', checks: 'list[TemplateConformanceCheck]' = <factory>) -> None` |
+| `assert_conformance` | function | `(report: 'TemplateConformanceReport') -> 'None'` |
+| `run_contract_conformance` | function | `(contract: 'DecisionContract') -> 'TemplateConformanceReport'` |
+| `run_template_conformance` | function | `(template: 'ContractTemplate', fuzz_runs: 'int' = 25, seed: 'int' = 441) -> 'TemplateConformanceReport'` |
 
 ### `hugrgate.contracts.context`
 
@@ -2880,9 +3148,9 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/pyproject.` |
+| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproj` |
 | `DEPRECATED_PATTERNS` | constant | `(('\\byaml\\.load\\s*\\(', 'yaml.load() without Loader (use ` |
-| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')` |
 | `DepReport` | class | `(statuses: 'tuple[DepStatus, ...]') -> None` |
 | `DepRequirement` | class | `(name: 'str', minimum: 'str | None') -> None` |
 | `DepStatus` | class | `(name: 'str', minimum: 'str | None', installed: 'str | None', ok: 'bool', reason: 'str') -> None` |
@@ -2890,9 +3158,9 @@ that this document never drifts from the code.
 | `installed_version` | function | `(name: 'str') -> 'str | None'` |
 | `latest_audit` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'dict[str, dict[str, str | bool | None]]'` |
 | `parse_requirement` | function | `(spec: 'str') -> 'DepRequirement'` |
-| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
+| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
 | `render_min_requirements` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'str'` |
-| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'tuple[tuple[str, int, str], ...]'` |
+| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'tuple[tuple[str, int, str], ...]'` |
 | `version_key` | function | `(version: 'str') -> 'tuple[int, ...]'` |
 | `write_min_requirements` | function | `(path: 'str | Path') -> 'Path'` |
 
@@ -2907,14 +3175,14 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/release/fr` |
+| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/releas` |
 | `ChangeRequest` | class | `(kind: 'str', description: 'str', touches_public_api: 'bool' = False, adds_dependency: 'bool' = False, waiver_id: 'str | None' = None) -> None` |
 | `FreezeManifest` | class | `(version: 'str', frozen_at: 'str', allowed_kinds: 'frozenset[str]', waivers: 'tuple[Waiver, ...]' = ()) -> None` |
 | `FreezeVerdict` | class | `(verdict: 'VerdictKind', reasons: 'tuple[str, ...]' = ()) -> None` |
 | `Waiver` | class | `(id: 'str', change: 'str', reason: 'str', approved_by: 'str') -> None` |
 | `check_public_api_growth` | function | `(baseline: 'set[str] | frozenset[str]', current: 'set[str] | frozenset[str]') -> 'dict[str, Any]'` |
 | `evaluate` | function | `(change: 'ChangeRequest', manifest: 'FreezeManifest') -> 'FreezeVerdict'` |
-| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/release/freeze.toml')) -> 'FreezeManifest'` |
+| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/release/freeze.toml')) -> 'FreezeManifest'` |
 
 ### `hugrgate.gauntlet.fuzz`
 
@@ -2995,12 +3263,12 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')` |
 | `SUPPORTED_MINORS` | constant | `((3, 10), (3, 11), (3, 12), (3, 13))` |
 | `MatrixReport` | class | `(requires_python: 'str', min_minor: 'tuple[int, int]', matrix: 'tuple[tuple[int, int], ...]', files_checked: 'int', syntax_failures: 'tuple[str, ...]') -> None` |
 | `check_syntax_compat` | function | `(root: 'str | Path', min_minor: 'tuple[int, int]') -> 'tuple[int, tuple[str, ...]]'` |
 | `read_requires_python` | function | `(pyproject: 'str | Path') -> 'str'` |
-| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'MatrixReport'` |
+| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'MatrixReport'` |
 
 ### `hugrgate.gauntlet.racehunt`
 
@@ -3061,6 +3329,13 @@ that this document never drifts from the code.
 | `HotFunction` | class | `(function: 'str', cumtime_ms: 'float', tottime_ms: 'float', calls: 'int', runs_seen: 'int', share: 'float' = 0.0) -> None` |
 | `HotPathInventory` | class | `(runs: 'int', total_ms: 'float', functions: 'list[HotFunction]' = <factory>, label: 'str' = '') -> None` |
 
+### `hugrgate.inspect`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InspectSession` | class | `(url: 'str | None' = None) -> 'None'` |
+| `run_inspect` | function | `(url: 'str | None' = None) -> 'int'` |
+
 ### `hugrgate.ladder`
 
 | Name | Kind | Signature / value |
@@ -3078,6 +3353,14 @@ that this document never drifts from the code.
 | `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'float | None' = None, latency_ms: 'float' = 0.0) -> None` |
 | `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'list[LadderRung] | None' = None, *, ladders: 'dict[str, list[LadderRung]] | None' = None, provenance: 'ProvenanceStore | None' = None, privacy_guard: 'PrivacyGuard | None' = None)` |
 | `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'float | None' = None) -> None` |
+
+### `hugrgate.loaders`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `load_policy` | function | `(path: 'str') -> 'DecisionPolicy'` |
+| `load_spec` | function | `(path: 'str') -> 'DecisionSpec'` |
+| `load_state` | function | `(path: 'str') -> 'dict[str, Any]'` |
 
 ### `hugrgate.lockaudit`
 
@@ -3649,6 +3932,16 @@ that this document never drifts from the code.
 | `PerfGate` | class | `(baseline_path: 'str | Path' = PosixPath('benchmarks/perf_baseline.json')) -> 'None'` |
 | `default_gates` | function | `() -> 'list[tuple]'` |
 
+### `hugrgate.plugins`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PluginInfo` | class | `(name: 'str', entry_point: 'EntryPoint | None' = None, backend: 'Backend | None' = None, error: 'PluginError | None' = None) -> None` |
+| `discover_plugins` | function | `(on_error: "Literal['raise', 'collect']" = 'collect') -> 'tuple[list[PluginInfo], list[PluginInfo]]'` |
+| `load_plugin` | function | `(name: 'str', entry_point: 'EntryPoint | None' = None) -> 'Backend'` |
+| `register_discovered_plugins` | function | `(registry: 'BackendRegistry', on_error: "Literal['raise', 'collect']" = 'collect', replace: 'bool' = False) -> 'PluginReport'` |
+| `validate_plugin` | function | `(backend: 'Any', name: 'str' = '?') -> 'None'` |
+
 ### `hugrgate.policy`
 
 | Name | Kind | Signature / value |
@@ -3869,6 +4162,17 @@ that this document never drifts from the code.
 | `ProfileReport` | class | `(wall_ms: 'float', total_calls: 'int', primitive_calls: 'int', entries: 'list[ProfileEntry]' = <factory>, label: 'str' = '') -> None` |
 | `profile_region` | function | `(name: 'str')` |
 | `region_report` | function | `(reset: 'bool' = True) -> 'dict[str, dict[str, float]]'` |
+
+### `hugrgate.protocol`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PROTOCOL_VERSION` | constant | `'1.0'` |
+| `SUPPORTED_PROTOCOL_VERSIONS` | constant | `('1.0')` |
+| `Envelope` | class | `(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0', server_version: 'str' = '') -> None` |
+| `build_envelope` | function | `(payload: 'dict[str, Any]', protocol_version: 'str' = '1.0') -> 'dict[str, Any]'` |
+| `negotiate_version` | function | `(requested: 'Any') -> 'str'` |
+| `parse_protocol_version` | function | `(value: 'Any') -> 'tuple[int, int]'` |
 
 ### `hugrgate.provenance`
 
@@ -4378,6 +4682,14 @@ that this document never drifts from the code.
 | `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
 | `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
+### `hugrgate.scaffold`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCAFFOLD_FILES` | constant | `('pyproject.toml', 'README.md', '.gitignore', 'spec.yaml', '` |
+| `scaffold_project` | function | `(name: 'str', directory: 'str | Path' = '.', force: 'bool' = False) -> 'list[Path]'` |
+| `validate_project_name` | function | `(name: 'str') -> 'str'` |
+
 ### `hugrgate.scheduler`
 
 | Name | Kind | Signature / value |
@@ -4387,6 +4699,13 @@ that this document never drifts from the code.
 | `BatchScheduler` | class | `(config: 'SchedulerConfig | None' = None, executor: 'BatchExecutor | None' = None, backpressure: 'BackpressureEngine | None' = None) -> 'None'` |
 | `SchedulerConfig` | class | `(max_batch_size: 'int' = 32, batch_window_s: 'float' = 0.005, max_queue_depth: 'int' = 1024, max_workers: 'int' = 8, shutdown_timeout_s: 'float' = 10.0, adaptive: 'bool' = False, min_batch_size: 'int' = 1, target_batch_latency_s: 'float' = 0.05, priority_enabled: 'bool' = False, starvation_horizon_s: 'float' = 30.0, deadline_enabled: 'bool' = False, drop_late: 'bool' = True) -> None` |
 | `ThreadPoolBatchExecutor` | class | `(max_workers: 'int' = 8) -> 'None'` |
+
+### `hugrgate.sdk`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SDK_VERSION` | constant | `'2.0'` |
+| `HugrGateSDK` | class | `(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True, max_retries: 'int' = 3, retry_backoff_s: 'float' = 0.1) -> 'None'` |
 
 ### `hugrgate.security`
 
@@ -4729,11 +5048,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `DecideRequest` | class | `(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, typing.Any] | None = None, policy: dict[str, typing.Any] | None = None, **extra_data: Any) -> None` |
+| `ErrorBody` | class | `(*, error: dict[str, typing.Any]) -> None` |
 | `KeywordBackend` | class | `()` |
 | `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
+| `ProtocolBody` | class | `(*, protocol_version: str, supported_versions: list[str], service_version: str) -> None` |
 | `UniformBackend` | class | `()` |
 | `build_gate` | function | `(extra_backends: 'list[Backend] | None' = None) -> 'HugrGate'` |
 | `create_app` | function | `(gate: 'HugrGate | None' = None, node: 'ClusterNode | None' = None) -> 'FastAPI'` |
+| `dump_openapi_schema` | function | `() -> 'dict[str, Any]'` |
 | `list_models` | function | `() -> 'list[ModelInfo]'` |
 | `register_model` | function | `(info: 'ModelInfo') -> 'None'` |
 | `run` | function | `(host: 'str' = '127.0.0.1', port: 'int' = 8377, gate: 'HugrGate | None' = None) -> 'None'` |
