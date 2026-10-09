@@ -27,6 +27,10 @@ from hugrgate.backend import Backend
 from hugrgate.errors import BackendUnavailable, PrivacyViolation
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
+from hugrgate.privacy_jurisdiction import (
+    JurisdictionRegistry,
+    JurisdictionViolation,
+)
 from hugrgate.privacy_trust import (
     TRUST_ORDER,
     BackendTrustRegistry,
@@ -162,23 +166,51 @@ class PrivacyGuard:
         of attested backend trust levels (slice 229). When absent, the
         slice-226 defaults apply (in-process = ``"enclave"``,
         remote = ``"basic"``).
+    jurisdiction_registry:
+        Optional :class:`~hugrgate.privacy_jurisdiction.JurisdictionRegistry`
+        of backend jurisdiction declarations (slice 230).
+    jurisdictions_allowed:
+        Optional set of jurisdiction codes remote data may flow to.
+        ``None`` (default) means no restriction. Local backends are
+        always allowed.
     """
 
     def __init__(self, remote_inference: str = "allow",
                  redact_provenance: bool = True,
-                 trust_registry: BackendTrustRegistry | None = None):
+                 trust_registry: BackendTrustRegistry | None = None,
+                 jurisdiction_registry: JurisdictionRegistry | None = None,
+                 jurisdictions_allowed: set[str] | frozenset[str] | None = None):
         if remote_inference not in REMOTE_MODES:
             raise ValueError(f"remote_inference must be one of {REMOTE_MODES}, "
                              f"got {remote_inference!r}")
         self.remote_inference = remote_inference
         self.redact_provenance = redact_provenance
         self.trust_registry = trust_registry
+        self.jurisdiction_registry = jurisdiction_registry or \
+            JurisdictionRegistry()
+        self.jurisdictions_allowed = \
+            frozenset(jurisdictions_allowed) \
+            if jurisdictions_allowed is not None else None
 
     def _trust_level(self, backend: Backend) -> str:
         """Effective trust level, attested when a registry is present."""
         if self.trust_registry is not None:
             return self.trust_registry.level_for(backend)
         return default_trust_level(backend)
+
+    def _jurisdiction(self, backend: Backend) -> str:
+        """Jurisdiction code for a backend (declared or default)."""
+        return self.jurisdiction_registry.jurisdiction_for(backend)
+
+    def _jurisdiction_blocked(self, backend: Backend) -> str | None:
+        """Return a denial reason when jurisdiction blocks the backend."""
+        if not backend.is_remote or self.jurisdictions_allowed is None:
+            return None
+        jurisdiction = self._jurisdiction(backend)
+        if jurisdiction not in self.jurisdictions_allowed:
+            return (f"jurisdiction {jurisdiction!r} not in allowed "
+                    f"{sorted(self.jurisdictions_allowed)}")
+        return None
 
     # -- selection-time enforcement -------------------------------------
 
@@ -203,8 +235,10 @@ class PrivacyGuard:
         return None
 
     def remote_allowed(self, backend: Backend, policy: DecisionPolicy) -> bool:
-        """True only if guard, class semantics, and policy all permit."""
+        """True only if guard, class, jurisdiction, and policy all permit."""
         if self._class_remote_blocked(backend, policy) is not None:
+            return False
+        if self._jurisdiction_blocked(backend) is not None:
             return False
         if backend.is_remote and self.remote_inference == "forbidden":
             return False
@@ -235,6 +269,14 @@ class PrivacyGuard:
             raise PrivacyViolation(f"backend {backend.name!r} blocked: {denial}",
                                    backend=backend.name,
                                    privacy_class=policy.privacy_class)
+        jdenial = self._jurisdiction_blocked(backend)
+        if jdenial is not None:
+            logger.warning("privacy: backend %r blocked (%s)",
+                           backend.name, jdenial)
+            raise JurisdictionViolation(
+                f"backend {backend.name!r} blocked: {jdenial}",
+                backend=backend.name,
+                jurisdiction=self._jurisdiction(backend))
         if not policy.backend_allowed(backend.name, backend.is_remote):
             logger.debug("privacy: backend %r excluded by decision policy",
                          backend.name)

@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 230)
+- Jurisdiction metadata (`hugrgate.privacy_jurisdiction`):
+  `JurisdictionRegistry` (fail-closed `"unknown"` default for
+  undeclared remotes) + `JurisdictionPolicy`; `PrivacyGuard`
+  enforces `jurisdictions_allowed` at selection/attempt time.
+  New `JurisdictionViolation` error (code `jurisdiction_violation`).
+
 ### Added (slice 229)
 - Backend trust levels (`hugrgate.privacy_trust`):
   `TrustAttestation` + `BackendTrustRegistry` with expiry/revocation

@@ -31,6 +31,7 @@ __all__ = [
     "GGUFError",
     "GateError",
     "HugrGateError",
+    "JurisdictionViolation",
     "NPUError",
     "OfflineBootstrapError",
     "PolicyError",
@@ -138,6 +139,19 @@ class DataFlowDenied(PrivacyViolation):
     """
 
     code = "data_flow_denied"
+    recoverable = False
+
+
+class JurisdictionViolation(PrivacyViolation):
+    """Raised when data would cross into a disallowed jurisdiction.
+
+    Subclass of :class:`PrivacyViolation`. Not recoverable by blind
+    retry: the destination's jurisdiction is a fact about the world,
+    not a transient failure — route to an allowed jurisdiction or
+    change the policy.
+    """
+
+    code = "jurisdiction_violation"
     recoverable = False
 
 
