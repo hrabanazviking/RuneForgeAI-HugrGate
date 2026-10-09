@@ -194,6 +194,23 @@ class EncryptedDecisionCache(DecisionCache):
         return super().put(state, spec, policy, sealed,  # type: ignore[arg-type]
                            retention=retention)
 
+    def _verify_entry(self, entry, state: Mapping[str, Any],
+                      spec: DecisionSpec, policy: DecisionPolicy) -> None:
+        """Authenticate the sealed blob before the integrity seal runs.
+
+        A tampered blob must fail closed with ``SealError`` — the
+        integrity checksum would otherwise silently evict the entry
+        as corrupt and return a miss, hiding the tampering.
+        """
+        sealed = entry.result
+        if not isinstance(sealed, _SealedEntry):
+            raise SealError("cache entry is not sealed",
+                            reason="unexpected-type")
+        # Raises SealError on authentication failure.
+        SealedBox.open(
+            self._key, sealed.blob,
+            associated=self._associated(state, spec, policy))
+
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy) -> DecisionResult | None:
         """Return the unsealed cached result, or None.

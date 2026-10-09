@@ -25,6 +25,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import pickle
 import threading
 import time
 from collections import OrderedDict
@@ -82,14 +83,21 @@ class _Entry:
     checksum: str  # integrity seal over the stored result (slice 258)
 
 
-def _result_checksum(result: DecisionResult) -> str:
-    """Canonical content hash of a result.
+def _result_checksum(result: Any) -> str:
+    """Canonical content hash of a cached value.
 
-    Any in-process mutation of the stored result — bit rot, a buggy
+    Any in-process mutation of the stored value — bit rot, a buggy
     writer, memory corruption beneath the cache API — changes the
     hash, so ``get`` can refuse to serve the damaged entry.
+
+    ``DecisionResult`` values hash over their ``to_dict()`` mapping;
+    anything else (e.g. the encrypted cache's opaque sealed entries)
+    hashes over a stable pickle.
     """
-    canonical = json.dumps(result.to_dict(), sort_keys=True, default=str)
+    if hasattr(result, "to_dict"):
+        canonical = json.dumps(result.to_dict(), sort_keys=True, default=str)
+    else:
+        canonical = repr(pickle.dumps(result, protocol=4))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -133,6 +141,11 @@ class DecisionCache:
             self.misses += 1
             logger.debug("cache miss (expired)")
             return None
+        # Subclass verification runs before the integrity seal: a cache
+        # with stronger guarantees (e.g. the encrypted cache's AEAD)
+        # must fail closed with its own error rather than have the
+        # entry silently evicted as corrupt.
+        self._verify_entry(entry, state, spec, policy)
         if _result_checksum(entry.result) != entry.checksum:
             # The stored result was corrupted beneath the cache API.
             # Fail safe: evict the damaged entry and report a miss so
@@ -146,6 +159,15 @@ class DecisionCache:
         self.hits += 1
         logger.debug("cache hit")
         return copy.deepcopy(entry.result)
+
+    def _verify_entry(self, entry: _Entry, state: Mapping[str, Any],
+                      spec: DecisionSpec, policy: DecisionPolicy) -> None:
+        """Subclass hook: verify an entry before the integrity seal.
+
+        The base implementation does nothing. ``EncryptedDecisionCache``
+        overrides this to authenticate the sealed blob (raising
+        ``SealError`` on tampering) before the entry is served.
+        """
 
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy, result: DecisionResult,

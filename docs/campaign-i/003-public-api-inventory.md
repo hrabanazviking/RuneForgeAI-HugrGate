@@ -2195,9 +2195,9 @@ that this document never drifts from the code.
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
 | `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
-| `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
