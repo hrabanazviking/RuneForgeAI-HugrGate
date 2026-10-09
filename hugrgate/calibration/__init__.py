@@ -34,6 +34,7 @@ from hugrgate.calibration.online import OnlineCalibrator       # noqa: E402
 from hugrgate.calibration.window import SlidingWindowCalibrator  # noqa: E402
 from hugrgate.calibration.bayes import BetaBinomialCalibrator   # noqa: E402
 from hugrgate.calibration.perclass import _ConstantCalibrator   # noqa: E402
+from hugrgate.calibration.ensemble import CalibratorEnsemble    # noqa: E402
 
 # Registrations run BEFORE the submodule imports below: several submodules
 # (autoselect, registry) read the registry at import time (slice 092).
@@ -44,6 +45,7 @@ CalibratorRegistry.register("online", OnlineCalibrator)
 CalibratorRegistry.register("sliding-window", SlidingWindowCalibrator)
 CalibratorRegistry.register("beta-binomial", BetaBinomialCalibrator)
 CalibratorRegistry.register("constant-prior", _ConstantCalibrator)
+CalibratorRegistry.register("ensemble", CalibratorEnsemble)
 
 from . import (  # noqa: E402
     autoselect, conformal, conformal_regression, coverage, drift, group,
@@ -60,6 +62,7 @@ __all__ = [
     "OnlineCalibrator",
     "SlidingWindowCalibrator",
     "BetaBinomialCalibrator",
+    "CalibratorEnsemble",
     "autoselect",
     "conformal",
     "conformal_regression",

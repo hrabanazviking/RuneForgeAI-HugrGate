@@ -94,6 +94,12 @@ _METADATA: Dict[str, Dict[str, Any]] = {
         "needs_both_classes": False, "streaming": False,
         "description": "Fallback: always emits the class prior.",
     },
+    "ensemble": {
+        "family": "nonparametric", "monotone": False,
+        "needs_both_classes": False, "streaming": False,
+        "description": "Weighted average of member calibrator maps.",
+        "extra": {"monotone": "iff all members are monotone"},
+    },
 }
 
 
