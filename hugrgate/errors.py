@@ -35,6 +35,7 @@ __all__ = [
     "PolicyError",
     "PowerBudgetError",
     "PrivacyViolation",
+    "ProfilingError",
     "QuantError",
     "QueueFull",
     "RecoveryError",
@@ -247,3 +248,11 @@ class WatchdogError(HugrGateError):
     """A watchdog invariant was violated."""
     code = "edge_watchdog_error"
     recoverable = False
+
+
+class ProfilingError(HugrGateError):
+    """A profiler run was misconfigured or failed to execute. Slice 276."""
+    code = "profiling_error"
+    # A failed profile never invalidates the decision itself; retrying
+    # without (or with fixed) profiler settings can plausibly succeed.
+    recoverable = True

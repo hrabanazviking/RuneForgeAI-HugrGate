@@ -32,6 +32,7 @@ from hugrgate.errors import (
     PolicyError,
     PowerBudgetError,
     PrivacyViolation,
+    ProfilingError,
     QuantError,
     QueueFull,
     RecoveryError,
@@ -52,6 +53,8 @@ ALL_ERRORS = [
     GGUFError,
     # Campaign VIII edge-intelligence errors (slice 200 taxonomy promotion).
     EdgeAffinityError, BenchmarkError, OfflineBootstrapError, EdgeCacheError,
+    # Campaign XII performance-forge errors (slice 276+).
+    ProfilingError,
     ChaosError, GateError, EdgeMemoryError, NPUError, PowerBudgetError,
     QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
     WatchdogError,
@@ -80,6 +83,7 @@ EXPECTED_CODES = {
     EdgeMemoryError: "edge_memory_error",
     NPUError: "edge_npu_error",
     PowerBudgetError: "edge_power_budget_error",
+    ProfilingError: "profiling_error",
     QuantError: "edge_quant_error",
     RecoveryError: "edge_recovery_error",
     ResidencyError: "edge_residency_error",
@@ -115,6 +119,7 @@ EXPECTED_RECOVERABLE = {
     EdgeMemoryError: True,
     NPUError: True,
     PowerBudgetError: True,
+    ProfilingError: True,
     QuantError: False,
     RecoveryError: True,
     ResidencyError: True,
