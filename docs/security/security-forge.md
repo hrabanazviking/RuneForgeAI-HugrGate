@@ -29,7 +29,7 @@ hash-chained provenance (slice 015), cluster mutual auth (slice
 | 415 | `hugrgate/security/malicious_backend.py` — malicious-backend fixtures | done |
 | 416 | `hugrgate/security/provenance_guards.py` — provenance tamper detection | done |
 | 417 | `hugrgate/security/cache_poisoning.py` — cache-poisoning defenses | done |
-| 418 | `hugrgate/security/replay.py` — replay attack defenses | pending |
+| 418 | `hugrgate/security/replay.py` — replay attack defenses | done |
 | 419 | `hugrgate/security/authz.py` — service authorization policy | pending |
 | 420 | `hugrgate/security/rate_limit.py` — rate limiting | pending |
 | 421 | `hugrgate/security/secret_audit.py` — secret-handling audit | pending |

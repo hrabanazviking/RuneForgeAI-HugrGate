@@ -13,6 +13,7 @@ unknown types get a typed ERROR envelope, never a guess.
 from __future__ import annotations
 
 import threading
+from collections import OrderedDict
 from collections.abc import Callable, Mapping
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -120,7 +121,15 @@ class ClusterNode:
         self.authenticator: NodeAuthenticator | None = None
         self.require_auth = False
         self._seq = 0
-        self._last_seq: dict[str, int] = {}  # sender -> highest seq seen
+        # Slice 418: bounded sender window. The seq map used to grow
+        # without limit (one entry per sender id, forever) — a
+        # sender-id flood was a memory-exhaustion vector. Now an
+        # LRU with a generous cap; eviction only happens under
+        # >_MAX_SENDERS distinct senders, at which point the shared
+        # key is already compromised (a key holder can mint fresh
+        # messages anyway), so the replay tradeoff is nil.
+        self._last_seq: OrderedDict[str, int] = OrderedDict()
+        self._max_senders = 4096
         # RLock: _check_auth holds the lock while fail() -> next_seq()
         # re-enters it.
         self._lock = threading.RLock()
@@ -379,6 +388,9 @@ class ClusterNode:
             if message.seq <= last:
                 return fail("replayed or stale message: seq not monotonic")
             self._last_seq[message.sender] = message.seq
+            self._last_seq.move_to_end(message.sender)
+            while len(self._last_seq) > self._max_senders:
+                self._last_seq.popitem(last=False)
         return None
 
     def _respond(self, request: ClusterMessage,

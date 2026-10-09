@@ -710,3 +710,14 @@ class PromptInjectionBlocked(HugrGateError):
     """
     code = "prompt_injection_blocked"
     recoverable = False
+
+
+class ReplayDetected(HugrGateError):
+    """A replayed or stale message was rejected.
+    Slice 418.  Raised by :mod:`hugrgate.security.replay` when a
+    nonce repeats inside the window, a timestamp is outside the
+    freshness window, or a signed envelope fails verification.
+    Not recoverable: the message itself is hostile or stale.
+    """
+    code = "replay_detected"
+    recoverable = False

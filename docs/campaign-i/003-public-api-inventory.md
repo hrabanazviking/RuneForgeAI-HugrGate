@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 381 · **public names:** 2361
+**Modules:** 382 · **public names:** 2367
 
 ## API stability policy
 
@@ -3977,6 +3977,7 @@ that this document never drifts from the code.
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+| `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
 | `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
 | `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
 | `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
@@ -4007,6 +4008,7 @@ that this document never drifts from the code.
 | `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
 | `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
 | `neutralize` | function | `(payload: 'str', context: 'str') -> 'str'` |
+| `open_request` | function | `(envelope: 'Mapping[str, Any]', keys: 'Mapping[str, bytes]', guard: 'ReplayGuard') -> 'dict[str, Any]'` |
 | `register_safe_class` | function | `(cls: 'type') -> 'type'` |
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
 | `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
@@ -4022,6 +4024,7 @@ that this document never drifts from the code.
 | `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+| `seal_request` | function | `(payload: 'Mapping[str, Any]', key: 'bytes', key_id: 'str') -> 'dict[str, Any]'` |
 | `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
 | `shell_quote` | function | `(arg: 'str') -> 'str'` |
 | `sign_manifest` | function | `(manifest: 'PluginManifest', signer: 'ModelSigner') -> 'PluginManifest'` |
@@ -4154,6 +4157,14 @@ that this document never drifts from the code.
 | `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
 | `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
+
+### `hugrgate.security.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
+| `open_request` | function | `(envelope: 'Mapping[str, Any]', keys: 'Mapping[str, bytes]', guard: 'ReplayGuard') -> 'dict[str, Any]'` |
+| `seal_request` | function | `(payload: 'Mapping[str, Any]', key: 'bytes', key_id: 'str') -> 'dict[str, Any]'` |
 
 ### `hugrgate.security.resource_guards`
 

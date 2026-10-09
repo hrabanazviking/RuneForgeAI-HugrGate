@@ -127,6 +127,11 @@ from hugrgate.security.provenance_guards import (
     seal_tip,
     verify_tip,
 )
+from hugrgate.security.replay import (
+    ReplayGuard,
+    open_request,
+    seal_request,
+)
 from hugrgate.security.resource_guards import (
     CostLedger,
     ResourceBudget,
@@ -179,6 +184,7 @@ __all__ = [
     "ModelSigner",
     "PluginManifest",
     "PluginRegistry",
+    "ReplayGuard",
     "ResourceBudget",
     "SafeUnpickler",
     "SandboxPolicy",
@@ -209,6 +215,7 @@ __all__ = [
     "guarded",
     "is_within",
     "neutralize",
+    "open_request",
     "register_safe_class",
     "restricted_loads",
     "run_corpus",
@@ -224,6 +231,7 @@ __all__ = [
     "scan_for_pickle",
     "scan_project",
     "scan_requirements",
+    "seal_request",
     "seal_tip",
     "shell_quote",
     "sign_manifest",
