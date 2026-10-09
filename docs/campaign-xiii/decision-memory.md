@@ -219,3 +219,15 @@ it into an opaque agent.
   `compaction_summaries()`). Ground-truth-bearing episodes are spared
   by default — verified labels are irreplaceable by aggregates.
 - Tests: `tests/test_memory_compaction.py` (9 tests).
+
+### Slice 318 — Memory export/import
+- `hugrgate/memory/io.py`: `export_jsonl()` writes versioned JSONL
+  envelopes (episodes chronological + compaction summaries);
+  `import_jsonl()` restores with id preservation, duplicate skipping,
+  corrupt-line reports, strict mode raising `MemoryError`, unknown
+  schema/version rejection, missing-file errors. Export is
+  documented as owner-grade (all privacy classes verbatim).
+- `Episode.from_dict()` + `DecisionHistory.import_episode()` (new-id
+  preservation, duplicate-id `MemoryError`); `to_dict` added to the
+  `EpisodeLike` protocol.
+- Tests: `tests/test_memory_io.py` (9 tests).

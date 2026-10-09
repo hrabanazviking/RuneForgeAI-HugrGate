@@ -31,6 +31,7 @@ import json
 import threading
 import time
 import uuid
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -97,6 +98,39 @@ class Episode:
                              if self.ground_truth is not None else None),
             "annotations": dict(self.annotations),
         }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> Episode:
+        """Rebuild from :meth:`to_dict`.
+
+        Raises ``ValueError`` on malformed envelopes and
+        :class:`SpecError` when the embedded record is malformed.
+        """
+        if not isinstance(d, Mapping):
+            raise ValueError(
+                f"Episode.from_dict needs a mapping, got "
+                f"{type(d).__name__}")
+        try:
+            episode_id = d["episode_id"]
+            record_d = d["record"]
+        except KeyError as exc:
+            raise ValueError(
+                f"Episode.from_dict missing key: {exc}") from exc
+        record = DecisionRecord.from_dict(record_d)
+        outcome_d = d.get("outcome")
+        truth_d = d.get("ground_truth")
+        return cls(
+            episode_id=episode_id,
+            record=record,
+            recorded_at=d.get("recorded_at") or time.time(),
+            privacy_class=d.get("privacy_class", "standard"),
+            tags=tuple(d.get("tags") or ()),
+            outcome=(Outcome.from_dict(outcome_d)
+                     if outcome_d is not None else None),
+            ground_truth=(GroundTruth.from_dict(truth_d)
+                          if truth_d is not None else None),
+            annotations=dict(d.get("annotations") or {}),
+        )
 
 
 class DecisionHistory:
@@ -232,6 +266,27 @@ class DecisionHistory:
             return copy.deepcopy(
                 [e for e in self._episodes
                  if start <= e.recorded_at <= end])
+
+    def import_episode(self, episode: Episode) -> str:
+        """Restore a previously exported episode (slice 318).
+
+        The episode keeps its original ``episode_id``; raises
+        :class:`MemoryError` on a duplicate id. Returns the id.
+        """
+        if not isinstance(episode, Episode):
+            raise TypeError(
+                f"import_episode needs an Episode, got "
+                f"{type(episode).__name__}")
+        with self._lock:
+            if episode.episode_id in self._by_id:
+                raise MemoryError(
+                    f"duplicate episode_id on import: "
+                    f"{episode.episode_id!r}",
+                    episode_id=episode.episode_id)
+            stored = copy.deepcopy(episode)
+            self._episodes.append(stored)
+            self._by_id[stored.episode_id] = stored
+            return stored.episode_id
 
     def clear(self) -> int:
         """Remove all episodes; return how many were removed."""

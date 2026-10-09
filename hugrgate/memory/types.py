@@ -33,6 +33,10 @@ class EpisodeLike(Protocol):
     ground_truth: Any
     annotations: dict[str, Any]
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the episode (record + annotations)."""
+        ...  # pragma: no cover - protocol stub
+
 
 class HistoryLike(Protocol):
     """Structural shape of :class:`hugrgate.memory.history.DecisionHistory`."""
@@ -79,4 +83,8 @@ class HistoryLike(Protocol):
 
     def purge(self, predicate: Any) -> int:
         """Remove episodes matching ``predicate``; return the count."""
+        ...  # pragma: no cover - protocol stub
+
+    def import_episode(self, episode: Any) -> str:
+        """Restore an exported episode; raise on duplicate id."""
         ...  # pragma: no cover - protocol stub

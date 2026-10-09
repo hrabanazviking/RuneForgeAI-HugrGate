@@ -55,6 +55,7 @@ from hugrgate.memory.frequency import (
 )
 from hugrgate.memory.groundtruth import GroundTruth, outcome_agrees
 from hugrgate.memory.history import DecisionHistory, Episode
+from hugrgate.memory.io import ExportReport, ImportReport, export_jsonl, import_jsonl
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
 from hugrgate.memory.policies import (
     MemoryAction,
@@ -95,10 +96,12 @@ __all__ = [
     "DecisionHistory",
     "DomainProfile",
     "Episode",
+    "ExportReport",
     "FrequencyEntry",
     "FrequencyTable",
     "GroundTruth",
     "GuardedHistory",
+    "ImportReport",
     "MemoryAccessPolicy",
     "MemoryAction",
     "MemoryDecision",
@@ -133,10 +136,12 @@ __all__ = [
     "drop_unaccepted",
     "effective_count",
     "enforce_quotas",
+    "export_jsonl",
     "featurize_episode",
     "featurize_query",
     "find_in_provenance",
     "half_life_for_horizon",
+    "import_jsonl",
     "most_similar",
     "outcome_agrees",
     "recall",
