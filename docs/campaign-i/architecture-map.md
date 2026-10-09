@@ -70,6 +70,7 @@ flowchart TD
         cluster[cluster]
         cluster_protocol[cluster.protocol]
         cluster_identity[cluster.identity]
+        cluster_capabilities[cluster.capabilities]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -161,8 +162,15 @@ flowchart TD
     client --> serde
     client -.-> server
     client --> spec
+    cluster --> cluster_capabilities
     cluster --> cluster_identity
     cluster --> cluster_protocol
+    cluster_capabilities --> hugrgate
+    cluster_capabilities --> backend
+    cluster_capabilities --> cluster_identity
+    cluster_capabilities --> cluster_protocol
+    cluster_capabilities --> errors
+    cluster_capabilities --> spec
     cluster_identity --> cluster_protocol
     cluster_identity --> errors
     cluster_protocol --> errors
@@ -252,7 +260,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -345,8 +353,15 @@ flowchart TD
 | `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
+| `cluster` | `cluster.capabilities` | no |
 | `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster.capabilities` | `hugrgate` | no |
+| `cluster.capabilities` | `backend` | no |
+| `cluster.capabilities` | `cluster.identity` | no |
+| `cluster.capabilities` | `cluster.protocol` | no |
+| `cluster.capabilities` | `errors` | no |
+| `cluster.capabilities` | `spec` | no |
 | `cluster.identity` | `cluster.protocol` | no |
 | `cluster.identity` | `errors` | no |
 | `cluster.protocol` | `errors` | no |

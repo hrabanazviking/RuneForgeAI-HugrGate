@@ -7,6 +7,7 @@ modules (routes, transport servers) stay behind their own imports.
 
 from __future__ import annotations
 
+from hugrgate.cluster.capabilities import NodeCapabilities
 from hugrgate.cluster.identity import KEY_BYTES, NodeIdentity
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
@@ -26,6 +27,7 @@ __all__ = [
     "PROTOCOL_VERSION",
     "ClusterMessage",
     "MessageType",
+    "NodeCapabilities",
     "NodeIdentity",
     "decode_message",
     "encode_message",

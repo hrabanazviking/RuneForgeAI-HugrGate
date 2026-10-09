@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:54:46.752542+00:00",
-  "module_count": 47,
+  "generated_utc": "2026-10-09T12:55:22.586795+00:00",
+  "module_count": 48,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,9 +544,33 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 33,
+      "loc": 35,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
+    },
+    "hugrgate.cluster.capabilities": {
+      "docstring": "Node capability advertisement. Slice 203.\n\nBefore a cluster can route work, every node must be able to say what it\n*is*: which backends it serves, which spec types those cover, what it\ncosts, and what hardware stands behind it. :class:`NodeCapabilities`\nis that self-description \u2014 built from the live\n:class:`BackendRegistry` (never hand-written, so it cannot drift from\nreality) and exchanged during discovery (slices 204\u2013206) and routing\n(slice 212).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "os",
+        "typing"
+      ],
+      "loc": 168,
+      "path": "hugrgate/cluster/capabilities.py",
+      "public_defs": [
+        "NodeCapabilities",
+        "from_registry",
+        "from_gate",
+        "backend_names",
+        "spec_types",
+        "matches",
+        "supports_backend",
+        "describe",
+        "to_dict",
+        "from_dict"
+      ]
     },
     "hugrgate.cluster.identity": {
       "docstring": "Node identity \u2014 stable, unforgeable node ids. Slice 202.\n\nA node's identity is a 256-bit secret generated once and persisted with\nowner-only permissions. The public node id is ``sha256(secret)``: stable\nacross restarts (same key file \u2192 same id), unforgeable without the key\nfile, and never transmitted in full \u2014 peers see only the id, never the\nsecret. Slice 208 (mutual authentication) builds on this by proving\npossession of the secret via challenge-response.",
@@ -1105,6 +1129,7 @@
     "test_arch_map.py",
     "test_async_readiness.py",
     "test_backend_registry.py",
+    "test_cluster_capabilities.py",
     "test_cluster_identity.py",
     "test_cluster_protocol.py",
     "test_config.py",
@@ -1134,5 +1159,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8356
+  "total_loc": 8526
 }
