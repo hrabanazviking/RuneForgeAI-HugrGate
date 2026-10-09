@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T18:47:52.126309+00:00",
-  "module_count": 415,
+  "generated_utc": "2026-10-09T20:11:53.127504+00:00",
+  "module_count": 432,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -2390,7 +2390,7 @@
         "time",
         "typing"
       ],
-      "loc": 165,
+      "loc": 176,
       "path": "hugrgate/chaos/crash.py",
       "public_defs": [
         "worker_main",
@@ -2398,6 +2398,7 @@
         "CrashOnlyHarness",
         "recovered_cleanly",
         "to_dict",
+        "default_kill_signal",
         "run_worker"
       ]
     },
@@ -4156,7 +4157,7 @@
         "time",
         "typing"
       ],
-      "loc": 325,
+      "loc": 366,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -5312,7 +5313,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 775,
+      "loc": 803,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -5333,6 +5334,7 @@
         "MemoryError",
         "MemoryQuotaExceeded",
         "MemoryAccessDenied",
+        "MigrationError",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -6138,6 +6140,410 @@
         "render_svg"
       ]
     },
+    "hugrgate.gauntlet.__init__": {
+      "docstring": "Campaign XX gauntlet utilities \u2014 HugrGate 1.0 release hardening.\n\nEach module in this subpackage is one slice of the 1.0 Gauntlet\n(slices 476-500): release gates, platform/dependency matrices,\nadversarial harnesses, and audit tooling. None of these names are\nre-exported from the ``hugrgate`` package root; the root surface\nstays frozen per slice 476.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 12,
+      "path": "hugrgate/gauntlet/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.gauntlet.api_audit": {
+      "docstring": "API compatibility audit for the 1.0 release (slice 486).\n\nThe package surface is append-only within a major version\n(slice 003's policy); this module makes the policy executable:\n\n- :func:`snapshot_package`: capture every ``hugrgate`` module's\n  ``__all__`` contract as ``{module: {name: {kind, sig}}}``.\n- :func:`save_baseline` / :func:`load_baseline`: the JSON baseline\n  lives at ``docs/gauntlet/api-baseline-1.0.json``.\n- :func:`diff_snapshots`: classify drift as additive (new modules /\n  names \u2014 allowed under the freeze only with a waiver, slice 476),\n  breaking (removed modules / names, signature narrowings, kind\n  changes), or clean.\n- :func:`signatures_compatible`: a new signature is compatible when\n  every call the old signature accepted still binds \u2014 new\n  *defaulted* parameters are fine, new required parameters or\n  removed parameters are not.\n\nBreaking drift fails the 1.0 release gate; additive drift needs a\nfreeze waiver.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "importlib",
+        "inspect",
+        "json",
+        "pathlib"
+      ],
+      "loc": 233,
+      "path": "hugrgate/gauntlet/api_audit.py",
+      "public_defs": [
+        "snapshot_package",
+        "save_baseline",
+        "load_baseline",
+        "signatures_compatible",
+        "ApiDiff",
+        "diff_snapshots",
+        "breaking",
+        "additive",
+        "summary"
+      ]
+    },
+    "hugrgate.gauntlet.calibration_audit": {
+      "docstring": "Calibration truth audit (slice 494).\n\nThe calibration metrics (``expected_calibration_error`` et al.)\nare only as trustworthy as their agreement with ground truth.\nThis module audits the ECE metric itself against synthetic data\nwith *known* true probabilities:\n\n- a perfect forecaster (reports the true p) must score ECE near\n  zero \u2014 within statistical noise;\n- a deliberately miscalibrated forecaster (overconfidence map\n  ``q = clip(0.5 + s*(p - 0.5))``) must score clearly above zero;\n- ECE must grow monotonically with the miscalibration severity\n  ``s`` \u2014 the metric is sensitive, not just thresholded.\n\nAll randomness is seeded; reruns are bit-identical.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "itertools",
+        "numpy",
+        "typing"
+      ],
+      "loc": 141,
+      "path": "hugrgate/gauntlet/calibration_audit.py",
+      "public_defs": [
+        "synthetic_bernoulli",
+        "overconfidence_map",
+        "CalibrationAuditReport",
+        "run_calibration_audit",
+        "perfect_within_noise",
+        "miscalibration_detected",
+        "monotone",
+        "passed",
+        "to_markdown"
+      ]
+    },
+    "hugrgate.gauntlet.deps": {
+      "docstring": "Dependency matrices for the 1.0 release (slices 483-484).\n\nSlice 483 (minimums): ``pyproject.toml`` declares minimum versions\n(``pyyaml>=6.0``). This module parses them, renders a\n``requirements-min.txt`` pinning every runtime dependency at its\ndeclared floor, and checks the running environment against those\nfloors. The check is dependency-free (no ``packaging`` import \u2014\n``packaging`` is not a runtime dependency of HugrGate): version\ncomparison is numeric over dot-separated segments, which is exact\nfor the ``>=X.Y`` floors we declare.\n\nSlice 484 (latest) lives in :func:`latest_audit`.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "tomllib"
+      ],
+      "loc": 286,
+      "path": "hugrgate/gauntlet/deps.py",
+      "public_defs": [
+        "DepRequirement",
+        "DepStatus",
+        "DepReport",
+        "parse_requirement",
+        "read_runtime_dependencies",
+        "version_key",
+        "installed_version",
+        "check_minimums",
+        "render_min_requirements",
+        "write_min_requirements",
+        "scan_deprecated_api",
+        "latest_audit",
+        "ok",
+        "violations"
+      ]
+    },
+    "hugrgate.gauntlet.exhaustion": {
+      "docstring": "Resource exhaustion gauntlet (slice 492).\n\nInput limits existed (``hugrgate/security/input_limits.py``) but\n``HugrGate.decide_batch`` never called ``check_batch`` \u2014 an\nunbounded batch fanned out without limit (fixed in slice 492).\nThis module is the gauntlet proving exhaustion scenarios are\ncontained end to end through the live gate:\n\n- oversized / over-deep / non-serializable states \u2192 ``SpecError``\n  via :meth:`HugrGate.decide`;\n- oversized batches (count or total bytes) \u2192 ``InputTooLarge``\n  via :meth:`HugrGate.decide_batch`;\n- after every rejection the gate still serves (no poisoning);\n- a control batch passes untouched.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 93,
+      "path": "hugrgate/gauntlet/exhaustion.py",
+      "public_defs": [
+        "ExhaustionReport",
+        "run_exhaustion_gauntlet",
+        "contained"
+      ]
+    },
+    "hugrgate.gauntlet.freeze": {
+      "docstring": "Feature-freeze enforcement for the HugrGate 1.0 release (slice 476).\n\nThe freeze is real machinery, not a sign on the door:\n\n- :class:`FreezeManifest` loads ``release/freeze.toml`` \u2014 the frozen\n  version, the freeze date, the allowed change kinds, and the recorded\n  waivers.\n- :class:`ChangeRequest` describes a proposed change; :func:`evaluate`\n  returns a :class:`FreezeVerdict` of ``allow``, ``deny``, or\n  ``waiver-required`` with human-readable reasons.\n- :func:`check_public_api_growth` diffs a baseline public-name set\n  against the live one so the freeze gate can catch undeclared API\n  additions (the full audit lives in slice 486).\n\nChange kinds follow conventional-commit vocabulary. Only kinds that\ncannot grow the public surface or the dependency closure may land\nwithout a waiver: ``bugfix``, ``security``, ``docs``, ``tests``,\n``refactor``, ``perf``. ``feature``, ``api-add``, and\n``dependency-add`` are denied unless a waiver recorded in the\nmanifest names the exact change.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "pathlib",
+        "tomllib",
+        "typing"
+      ],
+      "loc": 201,
+      "path": "hugrgate/gauntlet/freeze.py",
+      "public_defs": [
+        "Waiver",
+        "ChangeRequest",
+        "FreezeVerdict",
+        "FreezeManifest",
+        "load_manifest",
+        "evaluate",
+        "check_public_api_growth",
+        "waiver_ids"
+      ]
+    },
+    "hugrgate.gauntlet.fuzz": {
+      "docstring": "Public-interface fuzzer (slice 489).\n\nPrivacy (slice 247) and security (slice 422) already fuzz their own\ncorners; this module is the *generic* harness: enumerate public\nentry points, feed them seeded garbage (hostile shapes included \u2014\nhuge strings, deep nesting, NaN/Inf, wrong types), and prove that\nonly documented exception kinds ever escape.\n\nA public function may raise:\n\n- any :class:`hugrgate.errors.HugrGateError` (the taxonomy), or\n- stdlib validation errors: ``ValueError``, ``TypeError``,\n  ``KeyError``, ``AttributeError``, ``NotImplementedError``.\n\nAnything else (``IndexError``, ``ZeroDivisionError``,\n``RecursionError``, ``SystemExit``, ...) is recorded as an\n*unexpected* escape \u2014 a robustness bug, since callers cannot be\nexpected to catch what the contract never names.\n\n:func:`fuzz_targets` runs the curated 1.0 target list;\n:func:`fuzz_callable` fuzzes one function; both are deterministic\nfor a fixed seed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "random",
+        "sys",
+        "traceback",
+        "typing"
+      ],
+      "loc": 194,
+      "path": "hugrgate/gauntlet/fuzz.py",
+      "public_defs": [
+        "generate_garbage",
+        "FuzzReport",
+        "fuzz_callable",
+        "fuzz_targets",
+        "clean",
+        "raise_if_dirty"
+      ]
+    },
+    "hugrgate.gauntlet.hostile": {
+      "docstring": "Hostile backend doubles for the backend gauntlet (slice 490).\n\nReal backends fail in boring ways; hostile ones fail in *adversarial*\nways: raising outside ``Exception``, returning garbage instead of a\n``DecisionResult``, or contradicting the spec. The gate's contract\nis total containment \u2014 ``HugrGate.decide`` must only ever let\ntaxonomy errors escape \u2014 and these doubles prove it.\n\nEach double is a real :class:`hugrgate.backend.Backend`; the tests\ndrive them through the live ``HugrGate.decide`` path.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 141,
+      "path": "hugrgate/gauntlet/hostile.py",
+      "public_defs": [
+        "HostileBackend",
+        "ExplodingBackend",
+        "BaseExceptionBackend",
+        "KeyboardInterruptBackend",
+        "SystemExitBackend",
+        "NaNBackend",
+        "WrongTypeBackend",
+        "NoneBackend",
+        "OutOfSpaceBackend",
+        "BadDistributionBackend",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.leakscan": {
+      "docstring": "Privacy leak gauntlet (slice 493).\n\nRedaction machinery exists (``privacy_redact``, ``privacy_pii``,\nper-class provenance modes); this module proves no canary secret\nescapes through the *observable* surfaces of a decision:\n\n- log records emitted during ``decide`` (captured handler),\n- exception messages from failing decisions,\n- provenance records for restrictive privacy classes,\n- cached-decision log lines on repeat calls.\n\nCanaries are obviously fake (``sk-canary-...``) and documented as\ntest fixtures \u2014 never real credentials.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "logging",
+        "typing"
+      ],
+      "loc": 160,
+      "path": "hugrgate/gauntlet/leakscan.py",
+      "public_defs": [
+        "scan_text",
+        "LeakScanner",
+        "LeakReport",
+        "run_leak_gauntlet",
+        "log_text",
+        "findings",
+        "emit",
+        "clean"
+      ]
+    },
+    "hugrgate.gauntlet.license_audit": {
+      "docstring": "License/provenance audit (slice 497).\n\nHugrGate 1.0 ships a dependency tree; the tree's licenses must be\nknown. This module inventories installed distributions via\n``importlib.metadata``, normalizes their declared license into an\nSPDX-ish token set, and classifies each package:\n\n- ``allow`` \u2014 permissive license on the allowlist;\n- ``review`` \u2014 copyleft (GPL/AGPL/LGPL family) or unknown: legal\n  review required, surfaced loudly, never silently passed.\n\nCompound ``License-Expression`` values (``A AND B``) are split and\neach token classified; the package takes the strictest token\nverdict. The repo itself is Apache-2.0 (pyproject.toml).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "typing"
+      ],
+      "loc": 229,
+      "path": "hugrgate/gauntlet/license_audit.py",
+      "public_defs": [
+        "classify_license",
+        "PackageLicense",
+        "LicenseReport",
+        "audit_installed",
+        "runtime_closure",
+        "audit_runtime",
+        "by_status",
+        "needs_review",
+        "clean",
+        "to_dict"
+      ]
+    },
+    "hugrgate.gauntlet.partition": {
+      "docstring": "Network partition gauntlet (slice 491).\n\n``hugrgate/chaos/network.py`` simulates partitions; this module is\nthe *gauntlet* that proves the decision path stays fail-closed\nunder them. The invariant under test, end to end through the live\n``HugrGate.decide`` path:\n\n- while a remote backend's host is partitioned, decisions fail\n  *fast* with :class:`BackendUnavailable` \u2014 never by silently\n  weakening the policy (no lowered ``minimum_probability``, no\n  flipped ``remote_inference``, no mutated policy object);\n- partial failure (one of two remotes down) does not take down the\n  reachable one;\n- after healing, decisions succeed again with the policy\n  byte-identical to before the partition.\n\n:func:`run_partition_scenario` drives the three phases (up \u2192\npartitioned \u2192 healed) and returns a :class:`PartitionReport`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 138,
+      "path": "hugrgate/gauntlet/partition.py",
+      "public_defs": [
+        "snapshot_policy",
+        "assert_policy_intact",
+        "PartitionReport",
+        "run_partition_scenario",
+        "fail_closed_ok"
+      ]
+    },
+    "hugrgate.gauntlet.platforms": {
+      "docstring": "Platform/architecture matrix for the 1.0 release (slices 479-482).\n\nThe supported-platform matrix is built from *actually validated*\nplatforms only \u2014 never from hope. This module provides:\n\n- :class:`PlatformInfo` / :func:`current_platform`: the machine we\n  are standing on.\n- :data:`VALIDATED_PLATFORMS`: platforms the gauntlet has proven by\n  running its checks there. Entries are added by the per-OS slices\n  (479 Linux, 480 Windows, 481 macOS) only after their checks pass.\n- :func:`scan_posix_only`: AST scan for POSIX-only stdlib APIs\n  (``fcntl``, ``pty``, ``pwd``, ``grp``, ``termios``,\n  ``os.fork``/``os.posix_spawn``, ``signal.SIGKILL``/``SIGSTOP``)\n  and whether each use site is guarded (``try/except ImportError``,\n  ``sys.platform``/``os.name`` checks, or ``getattr`` with a\n  default). Unguarded uses are import-time crashes on Windows.\n- :func:`linux_live_checks`: runtime probes that only make sense on\n  Linux (epoll, ``/proc/self``, ``uname``).\n\nSlice 482 extends the machine axis (x86_64 vs ARM64).",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "os",
+        "pathlib",
+        "platform",
+        "select",
+        "sys"
+      ],
+      "loc": 410,
+      "path": "hugrgate/gauntlet/platforms.py",
+      "public_defs": [
+        "normalize_arch",
+        "PlatformInfo",
+        "PosixFinding",
+        "current_platform",
+        "record_validated",
+        "is_validated",
+        "scan_posix_only",
+        "check_arch_assumptions",
+        "check_windows_import_safety",
+        "MacOSFinding",
+        "check_macos_assumptions",
+        "linux_live_checks",
+        "os_key",
+        "arch_key",
+        "platform_key"
+      ]
+    },
+    "hugrgate.gauntlet.pymatrix": {
+      "docstring": "Python-version matrix validation for the 1.0 release (slice 478).\n\nHugrGate declares ``requires-python = \">=3.10\"``. This module turns\nthat declaration into a checked matrix instead of a hope:\n\n- :data:`SUPPORTED_MINORS` \u2014 the minor versions the 1.0 release\n  claims: 3.10 through 3.13.\n- :func:`read_requires_python` \u2014 parse the lower bound out of\n  ``pyproject.toml``.\n- :func:`check_syntax_compat` \u2014 prove every ``hugrgate`` source file\n  parses under the *oldest* supported grammar via\n  ``ast.parse(feature_version=...)``. New syntax (``match`` is fine\n  on 3.10; ``except*``, ``type`` aliases are not) is caught here,\n  not on a user's 3.10 box.\n- :func:`validate_matrix` \u2014 the whole claim in one call: declared\n  lower bound, matrix coverage, and syntax compatibility.\n\nThe runnable form is ``tools/matrix/python_matrix.py``.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "re",
+        "tomllib"
+      ],
+      "loc": 127,
+      "path": "hugrgate/gauntlet/pymatrix.py",
+      "public_defs": [
+        "MatrixReport",
+        "read_requires_python",
+        "check_syntax_compat",
+        "validate_matrix",
+        "ok"
+      ]
+    },
+    "hugrgate.gauntlet.racehunt": {
+      "docstring": "Concurrency race hunt harness (slice 487).\n\nThread-safety was audited in slices 017/293; this module keeps it\nhonest with a reusable hammer: N threads start behind a\n``threading.Barrier`` (so they truly contend rather than politely\ntaking turns), run a workload M iterations each, and every\nexception is captured and reported. The caller supplies an\n*invariant* \u2014 a predicate over the final state \u2014 which is the\nactual race detector: races that corrupt state fail the invariant\neven when no exception escapes.\n\n:func:`hammer` is the workhorse; :func:`hammer_cache` and\n:func:`hammer_registry` are the two production targets the 1.0\ngauntlet pins (``DecisionCache`` and ``BackendRegistry``).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "traceback",
+        "typing"
+      ],
+      "loc": 208,
+      "path": "hugrgate/gauntlet/racehunt.py",
+      "public_defs": [
+        "RaceHuntError",
+        "HammerReport",
+        "hammer",
+        "hammer_cache",
+        "hammer_registry",
+        "ok",
+        "raise_if_failed",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.repro": {
+      "docstring": "Benchmark reproducibility audit (slice 495).\n\nBenchmarks are only useful if they measure the code, not the\nweather. This module provides:\n\n- :func:`run_workload` \u2014 a deterministic decision workload\n  (seeded states, fixed stub backend) returning a content digest\n  plus timing;\n- :func:`run_reproducibility_audit` \u2014 runs the workload ``runs``\n  times and asserts (a) identical digests across runs\n  (determinism) and (b) timing within a documented noise band;\n- :func:`compare_with_baseline` \u2014 compares a fresh measurement\n  against an explicit recorded baseline JSON (never invented).\n\nTiming is inherently noisy; the audit is honest about that: the\ndigest assertion is exact, the timing assertion is a band.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "numpy",
+        "platform",
+        "time",
+        "typing"
+      ],
+      "loc": 159,
+      "path": "hugrgate/gauntlet/repro.py",
+      "public_defs": [
+        "run_workload",
+        "ReproReport",
+        "run_reproducibility_audit",
+        "compare_with_baseline",
+        "digests",
+        "deterministic",
+        "timing_cv",
+        "timing_stable",
+        "passed",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.soak": {
+      "docstring": "Long-duration soak with memory-growth detection (slice 488).\n\n``hugrgate/chaos/soak.py`` drives workloads under faults and checks\ninvariants \u2014 but none of its invariants watched memory, so a slow\nleak could soak for hours undetected. This module adds the missing\ninvariant:\n\n- :func:`rss_mb`: current-process RSS in MiB (``resource.getrusage``,\n  guarded for non-Unix; None when unobservable).\n- :class:`MemoryGrowthInvariant`: a zero-arg callable for\n  ``SoakRunner`` invariants \u2014 snapshots RSS on first call, raises\n  ``AssertionError`` when growth since the snapshot exceeds\n  ``budget_mb``. The snapshot refreshes after ``window_ops``\n  checks so a slow sawtooth (grow then settle) does not false-positive.\n- :func:`run_gate_soak`: the 1.0 soak \u2014 drives ``HugrGate.decide``\n  end to end under ``SoakRunner`` with the memory invariant armed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "resource",
+        "time",
+        "typing"
+      ],
+      "loc": 148,
+      "path": "hugrgate/gauntlet/soak.py",
+      "public_defs": [
+        "rss_mb",
+        "MemoryGrowthInvariant",
+        "SoakSummary",
+        "run_gate_soak",
+        "ok",
+        "capabilities",
+        "supports",
+        "evaluate"
+      ]
+    },
+    "hugrgate.gauntlet.store_migrate": {
+      "docstring": "Upgrade/migration gauntlet for on-disk state (slice 485).\n\n``hugrgate/contracts/migration.py`` migrates spec *dicts*; nothing\nmigrated on-disk *store files* \u2014 ``hugrgate/memory/io.py`` hard\nrejected any export whose version was not current, turning old\nbackups into garbage after a format bump. This module is the\ngeneric machinery:\n\n- :class:`Migration`: one ``from_version -> to_version`` step for a\n  named schema, carrying a pure ``payload -> payload`` function.\n- :class:`MigrationRegistry`: ``register()`` steps;\n  :meth:`plan` finds the shortest path with BFS (multi-hop\n  ``1 -> 2 -> 3`` works without registering ``1 -> 3``);\n  :meth:`migrate` applies the chain and records history.\n- :func:`migrate_envelope_file`: whole-file JSON envelopes\n  (``{\"schema\", \"version\", \"payload\"}``) migrated in place with a\n  ``.bak`` backup; idempotent \u2014 files already at the target are\n  left untouched.\n\nFailures raise :class:`hugrgate.errors.MigrationError` (not\nrecoverable: the registry or the bytes must change).\n\nThe memory export path wires this in: see\n:func:`hugrgate.memory.io.register_memory_migration`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 202,
+      "path": "hugrgate/gauntlet/store_migrate.py",
+      "public_defs": [
+        "Migration",
+        "MigrationRegistry",
+        "migrate_envelope_file",
+        "register",
+        "step",
+        "plan",
+        "migrate"
+      ]
+    },
     "hugrgate.gpusched": {
       "docstring": "GPU scheduling boundary \u2014 discovery, parsing, device assignment.\n\nSlice 297.\n\n.. warning::\n   **Real-hardware validation needed (Law 13).** No GPU is present on\n   this machine (``nvidia-smi`` absent), so live discovery and device\n   assignment are implemented against the documented ``nvidia-smi``\n   CLI contract and exercised only through (a) parsing of captured\n   sample outputs and (b) a scheduler driven by synthetic\n   inventories.  Nothing here has run against real GPUs.  Do not\n   trust placement decisions until that validation exists.\n\nWhat this module does:\n\n- :func:`discover_gpus`: run ``nvidia-smi --query-gpu=... --format=csv``\n  and parse one :class:`GpuInfo` per device.  Returns ``[]`` when\n  ``nvidia-smi`` is missing or reports no GPUs \u2014 that is a normal\n  CPU-only machine, not an error.\n- :func:`parse_smi_csv`: the pure parser, unit-tested against sample\n  outputs (the samples are fixtures, not measurements).\n- :class:`GpuScheduler`: assigns devices to workers.  Policies:\n  ``\"least-memory-used\"`` (default \u2014 pack onto the emptiest device),\n  ``\"round-robin\"``.  Assignments are tracked and released; over-full\n  devices raise :class:`GpuschedError` only when\n  ``max_workers_per_gpu`` is set and exceeded, otherwise workers\n  share.\n\nPlacement is a hint: every caller must run correctly with\n``device=None`` (CPU fallback).",
       "imports": [
@@ -6632,9 +7038,10 @@
         "pathlib",
         "typing"
       ],
-      "loc": 182,
+      "loc": 213,
       "path": "hugrgate/memory/io.py",
       "public_defs": [
+        "register_memory_migration",
         "ExportReport",
         "ImportReport",
         "export_jsonl",
@@ -8476,16 +8883,17 @@
       ]
     },
     "hugrgate.routing.hardware": {
-      "docstring": "Hardware-aware routing. Slice 061.\n\nA rung is only viable if the backend can actually run *here*.\n:class:`HostProfile` describes this machine (CPUs, RAM, GPU presence,\nplatform); :func:`hardware_compatible` checks a backend's\n``hardware_requirements()`` against it; :class:`HardwareAwarePlanner`\nprunes incompatible rungs at plan time.\n\nRecognized requirement keys (all optional; unknown keys are ignored so\nnew backends never break old routers):\n- ``requires_gpu`` (bool) \u2014 needs ``host.has_gpu``;\n- ``min_memory_mb`` (number) \u2014 needs ``host.memory_mb >=`` it;\n- ``min_cpu_count`` (int) \u2014 needs ``host.cpu_count >=`` it;\n- ``platforms`` (list of ``sys.platform`` strings) \u2014 host must be listed.\n\n``HostProfile.detect()`` builds a profile from the real machine using\nthe standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or a\nconservative fallback), ``sys.platform``, and ``nvidia-smi`` presence\nfor GPU detection. GPU detection is best-effort and documented as such.",
+      "docstring": "Hardware-aware routing. Slice 061.\n\nA rung is only viable if the backend can actually run *here*.\n:class:`HostProfile` describes this machine (CPUs, RAM, GPU presence,\nplatform); :func:`hardware_compatible` checks a backend's\n``hardware_requirements()`` against it; :class:`HardwareAwarePlanner`\nprunes incompatible rungs at plan time.\n\nRecognized requirement keys (all optional; unknown keys are ignored so\nnew backends never break old routers):\n- ``requires_gpu`` (bool) \u2014 needs ``host.has_gpu``;\n- ``min_memory_mb`` (number) \u2014 needs ``host.memory_mb >=`` it;\n- ``min_cpu_count`` (int) \u2014 needs ``host.cpu_count >=`` it;\n- ``platforms`` (list of ``sys.platform`` strings) \u2014 host must be listed.\n\n``HostProfile.detect()`` builds a profile from the real machine using\nthe standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or\n``sysctl hw.memsize`` on macOS, or a conservative fallback),\n``sys.platform``, and ``nvidia-smi`` presence\nfor GPU detection. GPU detection is best-effort and documented as such.",
       "imports": [
         "__future__",
         "dataclasses",
         "hugrgate",
         "os",
         "shutil",
+        "subprocess",
         "sys"
       ],
-      "loc": 135,
+      "loc": 152,
       "path": "hugrgate/routing/hardware.py",
       "public_defs": [
         "HostProfile",
@@ -10231,7 +10639,7 @@
       ]
     }
   },
-  "pyproject_version": "0.1.0",
+  "pyproject_version": "1.0.0",
   "python_requires": ">=3.10 (per pyproject)",
   "test_files": [
     "test_adaptive_bandit.py",
@@ -10460,6 +10868,31 @@
     "test_evlab_374_report.py",
     "test_evlab_375_release.py",
     "test_foundation.py",
+    "test_gauntlet_476_freeze.py",
+    "test_gauntlet_477_install.py",
+    "test_gauntlet_478_pymatrix.py",
+    "test_gauntlet_479_linux.py",
+    "test_gauntlet_480_windows.py",
+    "test_gauntlet_481_macos.py",
+    "test_gauntlet_482_arm64.py",
+    "test_gauntlet_483_depmin.py",
+    "test_gauntlet_484_deplat.py",
+    "test_gauntlet_485_migration.py",
+    "test_gauntlet_486_api_audit.py",
+    "test_gauntlet_487_racehunt.py",
+    "test_gauntlet_488_soak.py",
+    "test_gauntlet_489_fuzz.py",
+    "test_gauntlet_490_hostile.py",
+    "test_gauntlet_491_partition.py",
+    "test_gauntlet_492_exhaustion.py",
+    "test_gauntlet_493_leakscan.py",
+    "test_gauntlet_494_calibration_audit.py",
+    "test_gauntlet_495_repro.py",
+    "test_gauntlet_496_docsaudit.py",
+    "test_gauntlet_497_license.py",
+    "test_gauntlet_498_rcbuild.py",
+    "test_gauntlet_499_handoff.py",
+    "test_gauntlet_500_release.py",
     "test_import_cycles.py",
     "test_ladder.py",
     "test_localrt_151_interface.py",
@@ -10636,5 +11069,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 89710
+  "total_loc": 92920
 }

@@ -23,7 +23,7 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __all__ = [
     "Abstention",
     "Backend",

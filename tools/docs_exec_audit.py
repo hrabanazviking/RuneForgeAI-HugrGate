@@ -15,6 +15,7 @@ SYNTAX-ERROR.
 from __future__ import annotations
 
 import argparse
+import ast
 import os
 import re
 import subprocess
@@ -72,9 +73,9 @@ def noexec_reason(code: str) -> str | None:
 
 def run_block(code: str, timeout_s: float,
               workdir: Path) -> tuple[str, str]:
-    """Compile then execute a block; return (status, detail)."""
+    """Syntax-check (ast.parse, no code object) then execute a block."""
     try:
-        compile(code, "<docblock>", "exec")
+        ast.parse(code)
     except SyntaxError as exc:
         return "SYNTAX-ERROR", f"{exc.msg} (line {exc.lineno})"
     with tempfile.NamedTemporaryFile("w", suffix=".py",

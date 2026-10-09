@@ -223,7 +223,7 @@ def audit_runtime(pyproject: str = "pyproject.toml",
         packages=[p for p in full.packages
                   if p.name.lower() in closure])
     report.packages.append(PackageLicense(
-        name=project_name, version="1.0.0rc",
+        name=project_name, version="1.0.0",
         declaration=project_license,
         status=classify_license(project_license)))
     return report

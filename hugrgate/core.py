@@ -147,6 +147,12 @@ class HugrGate:
         host's control flow — it becomes a chained ``BackendError``.
         The host's own signals still work: this only contains
         exceptions raised *by the backend callable*.
+
+        Slice 500: ``asyncio.CancelledError`` is exempt — it is the
+        event loop's cancellation protocol, not hostility.
+        Containing it broke ``asyncio.wait_for`` timeouts (the
+        waiter needs the cancellation to propagate so it can raise
+        ``TimeoutError``).
         """
         try:
             return evaluate()
@@ -157,6 +163,8 @@ class HugrGate:
         except BackendError:
             logger.warning("backend %r failed; no failover in core path",
                            backend.name)
+            raise
+        except asyncio.CancelledError:
             raise
         except Exception as e:
             logger.warning("backend %r raised unexpected %s",
@@ -328,6 +336,10 @@ class HugrGate:
         except BackendError:
             logger.warning("backend %r failed; no failover in core path",
                            backend.name)
+            raise
+        except asyncio.CancelledError:
+            # Slice 500: cancellation is control flow, not hostility —
+            # asyncio.wait_for needs it to propagate to raise TimeoutError.
             raise
         except Exception as e:
             logger.warning("backend %r raised unexpected %s",

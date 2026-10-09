@@ -47,10 +47,12 @@ MAX_BASELINE_DRIFT = 0.30
 
 def run_workload(n: int = 2000, seed: int = 495) -> dict[str, Any]:
     """Run the deterministic workload; return digest + timing."""
-    from hugrgate import DecisionResult, DecisionSpec, HugrGate
     from hugrgate.backend import Backend
+    from hugrgate.core import HugrGate
     from hugrgate.policy import DecisionPolicy
+    from hugrgate.result import DecisionResult
     from hugrgate.security.input_limits import InputLimits
+    from hugrgate.spec import DecisionSpec
 
     class _Stub(Backend):
         name = "repro-stub"

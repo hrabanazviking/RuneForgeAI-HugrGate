@@ -347,6 +347,17 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.security.ratelimit", "hugrgate.security.secret_audit",
         "hugrgate.security.fuzzing", "hugrgate.security.gauntlet",
     ],
+    "gauntlet": [  # Gjallarbrú campaign XX, slices 476-500 — 1.0 gauntlet
+        "hugrgate.gauntlet", "hugrgate.gauntlet.freeze",
+        "hugrgate.gauntlet.pymatrix", "hugrgate.gauntlet.platforms",
+        "hugrgate.gauntlet.deps", "hugrgate.gauntlet.store_migrate",
+        "hugrgate.gauntlet.api_audit", "hugrgate.gauntlet.racehunt",
+        "hugrgate.gauntlet.soak", "hugrgate.gauntlet.fuzz",
+        "hugrgate.gauntlet.hostile", "hugrgate.gauntlet.partition",
+        "hugrgate.gauntlet.exhaustion", "hugrgate.gauntlet.leakscan",
+        "hugrgate.gauntlet.calibration_audit",
+        "hugrgate.gauntlet.repro", "hugrgate.gauntlet.license_audit",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}

@@ -138,3 +138,78 @@ def test_backend_error_subclass_propagates_unchanged():
 
     with pytest.raises(BackendUnavailable):
         _decide(_Down())
+
+
+def test_cancelled_error_propagates_in_async_path():
+    """Slice 500 regression: CancelledError is control flow, not hostility.
+
+    Containing it broke asyncio.wait_for timeouts (the waiter needs
+    the cancellation to propagate so it can raise TimeoutError).
+    """
+    import asyncio
+
+    from hugrgate.backend import Backend
+
+    class _Cancelling(Backend):
+        name = "cancelling"
+
+        def capabilities(self):
+            return {"spec_types": ["categorical"]}
+
+        def supports(self, spec):
+            return True
+
+        async def aevaluate(self, state, spec, context=None):
+            raise asyncio.CancelledError("spurious")
+
+        def evaluate(self, state, spec, context=None):
+            raise AssertionError("sync path not under test")
+
+    async def main():
+        gate = HugrGate()
+        gate.register(_Cancelling())
+        try:
+            with pytest.raises(asyncio.CancelledError):
+                await gate.adecide({"x": 1}, SPEC, DecisionPolicy())
+        finally:
+            gate.close()
+
+    asyncio.run(main())
+
+
+def test_wait_for_timeout_still_raises_timeout_error():
+    """End-to-end: a slow backend under wait_for yields TimeoutError."""
+    import asyncio
+
+    from hugrgate.backend import Backend
+    from hugrgate.result import DecisionResult
+
+    class _Slow(Backend):
+        name = "slow"
+
+        def capabilities(self):
+            return {"spec_types": ["categorical"]}
+
+        def supports(self, spec):
+            return True
+
+        def evaluate(self, state, spec, context=None):
+            raise AssertionError("async-only")
+
+        async def aevaluate(self, state, spec, context=None):
+            await asyncio.sleep(30)
+            return DecisionResult(value="a", probability=1.0,
+                                  distribution={"a": 1.0, "b": 0.0})
+
+    async def main():
+        gate = HugrGate()
+        gate.register(_Slow())
+        try:
+            with pytest.raises(TimeoutError):
+                await asyncio.wait_for(
+                    gate.adecide({"x": 1}, SPEC, DecisionPolicy()),
+                    timeout=0.2)
+        finally:
+            gate.close()
+
+    asyncio.run(main())

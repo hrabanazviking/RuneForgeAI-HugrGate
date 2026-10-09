@@ -17,19 +17,19 @@ and verifies the release candidate end to end:
 
 ## Measured evidence (built 2026-10-09, this machine)
 
-- `hugrgate-0.1.0-py3-none-any.whl` (1.2 MB) +
-  `hugrgate-0.1.0.tar.gz` (25.7 MB) — **5/5 checks passed**
-- METADATA: `Name: hugrgate`, `Version: 0.1.0`,
+- `hugrgate-1.0.0-py3-none-any.whl` + `hugrgate-1.0.0.tar.gz` —
+  **5/5 checks passed** (rebuilt and re-verified after the slice
+  500 version bump; the earlier 0.1.0 artifacts verified the same
+  procedure)
+- METADATA: `Name: hugrgate`, `Version: 1.0.0`,
   `Requires-Python: >=3.10`, sole unconditional
   `Requires-Dist: pyyaml>=6.0` (rest are extras)
 - entry points verified present and correct; smoke decision
   returned the expected value
 
 Build deps (`build`, `hatchling`) were installed in a throwaway
-venv (`/tmp/rcbuild-venv`); artifacts went to `/tmp/rc-dist` —
-nothing committed. **Version note:** the tree still says 0.1.0;
-the 1.0 version bump is slice 500's release decision, not this
-slice's.
+venv (`/tmp/rcbuild-venv`); artifacts went to `/tmp/rc-dist-100`
+— nothing committed.
 
 ## Verification
 

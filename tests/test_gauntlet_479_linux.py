@@ -58,7 +58,9 @@ def test_scan_finds_guarded_resource_imports():
     findings = {str(f): f for f in scan_posix_only(ROOT / "hugrgate")}
     guarded = [f for f in findings.values()
                if f.api == "import resource" and f.guarded]
-    assert len(guarded) == 3, [str(f) for f in findings.values()]
+    # Slice 488 added the fourth: hugrgate/gauntlet/soak.py's guarded
+    # import for its RSS-growth invariant.
+    assert len(guarded) == 4, [str(f) for f in findings.values()]
 
 
 def test_scan_flags_unguarded_sigkill(tmp_path):

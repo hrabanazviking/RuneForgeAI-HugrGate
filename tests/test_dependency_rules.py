@@ -195,6 +195,8 @@ _STDLIB = {
     "multiprocessing",
     # Campaign XVI (slice 383): attention priority queue.
     "heapq",
+    "select",  # Campaign XX (slice 479): platforms.py resource scan.
+    "py_compile",  # Campaign XX (slice 477): install gauntlet probe.
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

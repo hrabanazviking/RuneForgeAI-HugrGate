@@ -105,9 +105,12 @@ def run_gate_soak(*, iterations: int = 500, rss_budget_mb: float = 50.0,
     ``duration_s``) with a deterministic stub backend under
     ``SoakRunner``, armed with the memory-growth invariant.
     """
-    from hugrgate import DecisionPolicy, DecisionResult, DecisionSpec, HugrGate
     from hugrgate.backend import Backend
     from hugrgate.chaos.soak import SoakConfig, SoakRunner
+    from hugrgate.core import HugrGate
+    from hugrgate.policy import DecisionPolicy
+    from hugrgate.result import DecisionResult
+    from hugrgate.spec import DecisionSpec
 
     class _Stub(Backend):
         name = "soak-stub"

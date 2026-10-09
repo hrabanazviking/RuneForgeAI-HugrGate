@@ -3,7 +3,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from hugrgate import DecisionPolicy, DecisionSpec, HugrGate
+from hugrgate import DecisionPolicy, DecisionSpec, HugrGate, __version__
 from hugrgate.backends.rules import RuleBackend
 from hugrgate.bench import run_benchmark
 from hugrgate.client import HugrGateClient, policy_from_dict
@@ -183,7 +183,7 @@ def _tiny_dataset(n=20):
 
 def test_health_reports_version_and_backends(client):
     body = client.get("/health").json()
-    assert body["version"] == "0.1.0"
+    assert body["version"] == __version__
     assert {b["name"] for b in client.get("/backends").json()} >= {
         "uniform", "keyword"}
 

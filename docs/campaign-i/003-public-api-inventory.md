@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 415 · **public names:** 2508
+**Modules:** 432 · **public names:** 2613
 
 ## API stability policy
 
@@ -1250,7 +1250,7 @@ that this document never drifts from the code.
 | `MessageType` | class | `(*values)` |
 | `MulticastConfig` | class | `(group: 'str' = '239.0.9.77', port: 'int' = 18377, ttl: 'int' = 1, interface: 'str' = '127.0.0.1', announce_interval_s: 'float' = 2.0, socket_timeout_s: 'float' = 0.2) -> None` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
-| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '1.0.0', protocol_version: 'int' = 1) -> None` |
 | `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
@@ -1335,7 +1335,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+| `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '1.0.0', protocol_version: 'int' = 1) -> None` |
 
 ### `hugrgate.cluster.chaos`
 
@@ -2470,6 +2470,7 @@ that this document never drifts from the code.
 | `MemoryAccessDenied` | class | `(message: 'str' = '', **details: 'Any')` |
 | `MemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `MemoryQuotaExceeded` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MigrationError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `MultiprocError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NumaError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2850,6 +2851,193 @@ that this document never drifts from the code.
 | `baseline_metadata` | function | `(label: 'str') -> 'dict[str, Any]'` |
 | `write_baseline` | function | `(stacks: 'FoldedStacks', svg: 'str', directory: 'str | Path', label: 'str') -> 'dict[str, Path]'` |
 
+### `hugrgate.gauntlet`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.gauntlet.api_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ApiDiff` | class | `(added_modules: 'list[str]' = <factory>, removed_modules: 'list[str]' = <factory>, added_names: 'list[tuple[str, str]]' = <factory>, removed_names: 'list[tuple[str, str]]' = <factory>, changed: 'list[tuple[str, str, str, str]]' = <factory>) -> None` |
+| `diff_snapshots` | function | `(baseline: 'dict', current: 'dict') -> 'ApiDiff'` |
+| `load_baseline` | function | `(path: 'str | Path') -> 'dict'` |
+| `save_baseline` | function | `(path: 'str | Path', snapshot: 'dict | None' = None) -> 'Path'` |
+| `signatures_compatible` | function | `(old_sig: 'str', new_sig: 'str') -> 'bool'` |
+| `snapshot_package` | function | `(root: 'str | Path | None' = None) -> 'dict[str, dict[str, dict[str, str]]]'` |
+
+### `hugrgate.gauntlet.calibration_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationAuditReport` | class | `(n: 'int', n_bins: 'int', seed: 'int', ece_perfect: 'float', ece_by_severity: 'dict[float, float]' = <factory>, perfect_bins: 'list[dict[str, Any]]' = <factory>, tolerance: 'float' = 0.03, min_miscalibrated_ece: 'float' = 0.04) -> None` |
+| `overconfidence_map` | function | `(severity: 'float') -> 'Callable[[np.ndarray], np.ndarray]'` |
+| `run_calibration_audit` | function | `(n: 'int' = 20000, n_bins: 'int' = 15, seed: 'int' = 494, severities: 'tuple[float, ...]' = (1.0, 1.25, 1.5)) -> 'CalibrationAuditReport'` |
+| `synthetic_bernoulli` | function | `(n: 'int', seed: 'int') -> 'tuple[np.ndarray, np.ndarray]'` |
+
+### `hugrgate.gauntlet.deps`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/pyproject.` |
+| `DEPRECATED_PATTERNS` | constant | `(('\\byaml\\.load\\s*\\(', 'yaml.load() without Loader (use ` |
+| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')` |
+| `DepReport` | class | `(statuses: 'tuple[DepStatus, ...]') -> None` |
+| `DepRequirement` | class | `(name: 'str', minimum: 'str | None') -> None` |
+| `DepStatus` | class | `(name: 'str', minimum: 'str | None', installed: 'str | None', ok: 'bool', reason: 'str') -> None` |
+| `check_minimums` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'DepReport'` |
+| `installed_version` | function | `(name: 'str') -> 'str | None'` |
+| `latest_audit` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'dict[str, dict[str, str | bool | None]]'` |
+| `parse_requirement` | function | `(spec: 'str') -> 'DepRequirement'` |
+| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
+| `render_min_requirements` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'str'` |
+| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'tuple[tuple[str, int, str], ...]'` |
+| `version_key` | function | `(version: 'str') -> 'tuple[int, ...]'` |
+| `write_min_requirements` | function | `(path: 'str | Path') -> 'Path'` |
+
+### `hugrgate.gauntlet.exhaustion`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ExhaustionReport` | class | `(scenarios: 'list[dict[str, Any]]' = <factory>) -> None` |
+| `run_exhaustion_gauntlet` | function | `(gate: 'Any', spec: 'Any', policy: 'Any') -> 'ExhaustionReport'` |
+
+### `hugrgate.gauntlet.freeze`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/release/fr` |
+| `ChangeRequest` | class | `(kind: 'str', description: 'str', touches_public_api: 'bool' = False, adds_dependency: 'bool' = False, waiver_id: 'str | None' = None) -> None` |
+| `FreezeManifest` | class | `(version: 'str', frozen_at: 'str', allowed_kinds: 'frozenset[str]', waivers: 'tuple[Waiver, ...]' = ()) -> None` |
+| `FreezeVerdict` | class | `(verdict: 'VerdictKind', reasons: 'tuple[str, ...]' = ()) -> None` |
+| `Waiver` | class | `(id: 'str', change: 'str', reason: 'str', approved_by: 'str') -> None` |
+| `check_public_api_growth` | function | `(baseline: 'set[str] | frozenset[str]', current: 'set[str] | frozenset[str]') -> 'dict[str, Any]'` |
+| `evaluate` | function | `(change: 'ChangeRequest', manifest: 'FreezeManifest') -> 'FreezeVerdict'` |
+| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20/release/freeze.toml')) -> 'FreezeManifest'` |
+
+### `hugrgate.gauntlet.fuzz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ALLOWED_EXCEPTIONS` | constant | `(<class 'hugrgate.errors.HugrGateError'>, <class 'ValueError` |
+| `FuzzReport` | class | `(target: 'str', cases: 'int', ok_cases: 'int' = 0, allowed_raises: 'int' = 0, unexpected: 'tuple[tuple[str, str], ...]' = ()) -> None` |
+| `fuzz_callable` | function | `(func: 'Any', *, seed: 'int' = 489, cases: 'int' = 300, name: 'str | None' = None) -> 'FuzzReport'` |
+| `fuzz_targets` | function | `(*, seed: 'int' = 489, cases: 'int' = 300) -> 'list[FuzzReport]'` |
+| `generate_garbage` | function | `(rng: 'random.Random', depth: 'int' = 0) -> 'Any'` |
+
+### `hugrgate.gauntlet.hostile`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BadDistributionBackend` | class | `()` |
+| `BaseExceptionBackend` | class | `()` |
+| `ExplodingBackend` | class | `()` |
+| `HostileBackend` | class | `()` |
+| `KeyboardInterruptBackend` | class | `()` |
+| `NaNBackend` | class | `()` |
+| `NoneBackend` | class | `()` |
+| `OutOfSpaceBackend` | class | `()` |
+| `SystemExitBackend` | class | `()` |
+| `WrongTypeBackend` | class | `()` |
+
+### `hugrgate.gauntlet.leakscan`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CANARIES` | constant | `('canary-secret-0001', 'canary.user@example.test', 'CANARY-S` |
+| `LeakReport` | class | `(findings: 'list[dict[str, Any]]' = <factory>) -> None` |
+| `LeakScanner` | class | `(logger_name: 'str' = 'hugrgate') -> 'None'` |
+| `run_leak_gauntlet` | function | `(gate: 'Any', spec: 'Any', canaries: 'tuple[str, ...]' = ('canary-secret-0001', 'canary.user@example.test', 'CANARY-SSN-000-00-0000')) -> 'LeakReport'` |
+| `scan_text` | function | `(text: 'str', canaries: 'tuple[str, ...]' = ('canary-secret-0001', 'canary.user@example.test', 'CANARY-SSN-000-00-0000')) -> 'list[str]'` |
+
+### `hugrgate.gauntlet.license_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ALLOWLIST` | constant | `{'0BSD', 'APACHE-2.0', 'BSD-2-CLAUSE', 'BSD-3-CLAUSE', 'BSL-` |
+| `LicenseReport` | class | `(packages: 'list[PackageLicense]' = <factory>) -> None` |
+| `PackageLicense` | class | `(name: 'str', version: 'str', declaration: 'str | None', status: 'str') -> None` |
+| `audit_installed` | function | `() -> 'LicenseReport'` |
+| `audit_runtime` | function | `(pyproject: 'str' = 'pyproject.toml', project_name: 'str' = 'hugrgate', project_license: 'str' = 'Apache-2.0') -> 'LicenseReport'` |
+| `classify_license` | function | `(declaration: 'str | None') -> 'str'` |
+| `runtime_closure` | function | `(pyproject: 'str' = 'pyproject.toml') -> 'set[str]'` |
+
+### `hugrgate.gauntlet.partition`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PartitionReport` | class | `(phases: 'list[dict[str, Any]]' = <factory>, policy_drift: 'dict[str, Any]' = <factory>) -> None` |
+| `assert_policy_intact` | function | `(policy: 'Any', snapshot: 'dict[str, Any]') -> 'None'` |
+| `run_partition_scenario` | function | `(gate: 'Any', decide: 'Any', simulator: 'Any', host: 'str', *, policy: 'Any' = None) -> 'PartitionReport'` |
+| `snapshot_policy` | function | `(policy: 'Any') -> 'dict[str, Any]'` |
+
+### `hugrgate.gauntlet.platforms`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `POSIX_ONLY_MODULES` | constant | `{'curses', 'fcntl', 'grp', 'pty', 'pwd', 'resource', 'termio` |
+| `VALIDATED_PLATFORMS` | constant | `()` |
+| `MacOSFinding` | class | `(path: 'str', lineno: 'int', what: 'str') -> None` |
+| `PlatformInfo` | class | `(os_name: 'str', sys_platform: 'str', machine: 'str', bits: 'int') -> None` |
+| `PosixFinding` | class | `(path: 'str', lineno: 'int', api: 'str', guarded: 'bool') -> None` |
+| `check_arch_assumptions` | function | `(root: 'str | Path') -> 'tuple[MacOSFinding, ...]'` |
+| `check_macos_assumptions` | function | `(root: 'str | Path') -> 'tuple[MacOSFinding, ...]'` |
+| `check_windows_import_safety` | function | `(root: 'str | Path') -> 'tuple[PosixFinding, ...]'` |
+| `current_platform` | function | `() -> 'PlatformInfo'` |
+| `is_validated` | function | `(info: 'PlatformInfo') -> 'bool'` |
+| `linux_live_checks` | function | `() -> 'dict[str, bool]'` |
+| `normalize_arch` | function | `(machine: 'str') -> 'str'` |
+| `record_validated` | function | `(info: 'PlatformInfo') -> 'tuple[tuple[str, str], ...]'` |
+| `scan_posix_only` | function | `(root: 'str | Path') -> 'tuple[PosixFinding, ...]'` |
+
+### `hugrgate.gauntlet.pymatrix`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')` |
+| `SUPPORTED_MINORS` | constant | `((3, 10), (3, 11), (3, 12), (3, 13))` |
+| `MatrixReport` | class | `(requires_python: 'str', min_minor: 'tuple[int, int]', matrix: 'tuple[tuple[int, int], ...]', files_checked: 'int', syntax_failures: 'tuple[str, ...]') -> None` |
+| `check_syntax_compat` | function | `(root: 'str | Path', min_minor: 'tuple[int, int]') -> 'tuple[int, tuple[str, ...]]'` |
+| `read_requires_python` | function | `(pyproject: 'str | Path') -> 'str'` |
+| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/wt-gjallarbu-c20')) -> 'MatrixReport'` |
+
+### `hugrgate.gauntlet.racehunt`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HammerReport` | class | `(threads: 'int', iterations: 'int', elapsed_s: 'float', errors: 'tuple[str, ...]' = (), invariant_ok: 'bool' = True, invariant_detail: 'str' = '') -> None` |
+| `RaceHuntError` | class | — |
+| `hammer` | function | `(workload: 'Callable[[int, int], None]', *, threads: 'int' = 8, iterations: 'int' = 200, invariant: 'Callable[[], tuple[bool, str]] | None' = None, timeout_s: 'float' = 120.0) -> 'HammerReport'` |
+| `hammer_cache` | function | `(*, threads: 'int' = 8, iterations: 'int' = 200) -> 'HammerReport'` |
+| `hammer_registry` | function | `(*, threads: 'int' = 8, iterations: 'int' = 200) -> 'HammerReport'` |
+
+### `hugrgate.gauntlet.repro`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReproReport` | class | `(runs: 'list[dict[str, Any]]' = <factory>) -> None` |
+| `compare_with_baseline` | function | `(measurement: 'dict[str, Any]', baseline: 'dict[str, Any]') -> 'dict[str, Any]'` |
+| `run_reproducibility_audit` | function | `(runs: 'int' = 3, n: 'int' = 2000, seed: 'int' = 495) -> 'ReproReport'` |
+| `run_workload` | function | `(n: 'int' = 2000, seed: 'int' = 495) -> 'dict[str, Any]'` |
+
+### `hugrgate.gauntlet.soak`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemoryGrowthInvariant` | class | `(budget_mb: 'float' = 50.0, window_ops: 'int' = 4) -> 'None'` |
+| `SoakSummary` | class | `(ops: 'int', violations: 'tuple[str, ...]', errors: 'dict[str, int]', max_rss_growth_mb: 'float', elapsed_s: 'float') -> None` |
+| `rss_mb` | function | `() -> 'float | None'` |
+| `run_gate_soak` | function | `(*, iterations: 'int' = 500, rss_budget_mb: 'float' = 50.0, duration_s: 'float' = 30.0) -> 'SoakSummary'` |
+
+### `hugrgate.gauntlet.store_migrate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Migration` | class | `(schema: 'str', from_version: 'Any', to_version: 'Any', migrate: 'Any') -> None` |
+| `MigrationRegistry` | class | `() -> 'None'` |
+| `migrate_envelope_file` | function | `(path: 'str | Path', registry: 'MigrationRegistry', target_version: 'Any', *, backup: 'bool' = True) -> 'dict[str, Any]'` |
+
 ### `hugrgate.gpusched`
 
 | Name | Kind | Signature / value |
@@ -3126,10 +3314,12 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `MEMORY_EXPORT_VERSION` | constant | `1` |
+| `MEMORY_MIGRATIONS` | constant | `<hugrgate.gauntlet.store_migrate.MigrationRegistry object at` |
 | `ExportReport` | class | `(path: 'str', episodes: 'int', summaries: 'int', bytes: 'int') -> None` |
 | `ImportReport` | class | `(imported: 'int' = 0, summaries_imported: 'int' = 0, skipped_bad: 'int' = 0, skipped_duplicates: 'int' = 0, errors: 'list[str]' = <factory>) -> None` |
 | `export_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, include_summaries: 'bool' = True) -> 'ExportReport'` |
 | `import_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, skip_bad_lines: 'bool' = True) -> 'ImportReport'` |
+| `register_memory_migration` | function | `(schema: 'str', from_version: 'Any', to_version: 'Any', func: 'Any') -> 'Migration'` |
 
 ### `hugrgate.memory.outcomes`
 
@@ -4205,7 +4395,7 @@ that this document never drifts from the code.
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
 | `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
@@ -4308,7 +4498,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
