@@ -28,6 +28,13 @@ from hugrgate.chaos.backend_faults import (
 from hugrgate.chaos.bulkhead import BulkheadExecutor
 from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.clock import SkewedClock, audit_deadline_clocks
+from hugrgate.chaos.degradation import (
+    DegradationPlan,
+    DegradationPlanRegistry,
+    DegradationReport,
+    DegradationStep,
+    builtin_degradation_plans,
+)
 from hugrgate.chaos.experiments import (
     CHAOS_LAB,
     DependencyMatrix,
@@ -94,6 +101,10 @@ __all__ = [
     "CPUStarvationSimulator",
     "CacheCorruptor",
     "ChaosExperiment",
+    "DegradationPlan",
+    "DegradationPlanRegistry",
+    "DegradationReport",
+    "DegradationStep",
     "DependencyMatrix",
     "DependencyScenario",
     "ExperimentReport",
@@ -114,6 +125,7 @@ __all__ = [
     "SkewedClock",
     "SteadyStateProbe",
     "audit_deadline_clocks",
+    "builtin_degradation_plans",
     "builtin_dependency_matrix",
     "default_retry_policy",
     "dependency_failure_matrix",
