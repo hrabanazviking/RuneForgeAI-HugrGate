@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 43 · **public names:** 181
+**Modules:** 68 · **public names:** 318
 
 ## API stability policy
 
@@ -44,6 +44,268 @@ that this document never drifts from the code.
 | `abstain` | function | `(spec: 'DecisionSpec', reason: 'str' = 'below_threshold', backend: 'str' = 'unknown', metadata: 'Optional[Dict[str, Any]]' = None) -> 'DecisionResult'` |
 | `mark_for_review` | function | `(result: 'DecisionResult', reason: 'str', reviewer: 'Optional[str]' = None) -> 'DecisionResult'` |
 | `apply_abstention_policy` | function | `(result: 'DecisionResult', spec: 'DecisionSpec', policy: 'DecisionPolicy') -> 'DecisionResult'` |
+
+### `hugrgate.adaptive`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TELEMETRY_SCHEMA_VERSION` | constant | `'adaptive-telemetry/v1'` |
+| `RouteEvent` | class | `(request_id: 'str', timestamp: 'float', spec: 'Dict[str, Any]', features: 'Dict[str, float]', candidates: 'List[str]', propensities: 'Dict[str, float]', chosen: 'str', policy_version: 'str', privacy_class: 'str', latency_ms: 'float' = 0.0, cost: 'float' = 0.0, energy_wh: 'float' = 0.0, immediate_quality: 'float' = 0.0, outcome: 'Optional[Dict[str, Any]]' = None, shadow: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `TelemetryStore` | class | `(path: 'Optional[str]' = None, max_records: 'int' = 100000) -> 'None'` |
+| `OUTCOME_LABELS` | constant | `('success', 'failure', 'partial')` |
+| `OutcomeRecord` | class | `(request_id: 'str', quality: 'float', label: 'Optional[str]' = None, source: 'str' = 'human', received_at: 'float' = 0.0) -> None` |
+| `OutcomeFeedbackAPI` | class | `(store: 'TelemetryStore') -> 'None'` |
+| `DelayedLabel` | class | `(request_id: 'str', quality: 'float', label: 'Optional[str]' = None, source: 'str' = 'human', received_at: 'float' = <factory>) -> None` |
+| `DelayedLabelIngestion` | class | `(feedback: 'OutcomeFeedbackAPI', *, ttl_s: 'float' = 3600.0, max_pending: 'int' = 10000) -> 'None'` |
+| `SweepReport` | class | `(applied: 'int' = 0, expired: 'int' = 0, still_pending: 'int' = 0) -> None` |
+| `ROUTER_SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal', 'numeric', 'multilabel'` |
+| `RouteContext` | class | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'Optional[DecisionPolicy]', candidates: 'Sequence[str]', candidate_stats: 'Optional[Mapping[str, Mapping[str, float]]]' = None) -> 'None'` |
+| `RouterFeatureExtractor` | class | `() -> 'None'` |
+| `BanditDecision` | class | `(arm: 'str', expected_reward: 'float', ucb: 'float', per_arm: 'Dict[str, float]') -> None` |
+| `ContextualBanditAdapter` | class | `(feature_names: 'Sequence[str]', *, alpha: 'float' = 1.0, ridge: 'float' = 1.0) -> 'None'` |
+| `LearningDiagnostics` | class | `(n_events: 'int' = 0, n_used: 'int' = 0, n_unlabeled: 'int' = 0, n_shadow: 'int' = 0, n_bad_propensity: 'int' = 0, n_clipped: 'int' = 0, effective_sample_size: 'float' = 0.0, arms: 'List[str]' = None) -> None` |
+| `OfflinePolicyLearning` | class | `(feature_names: 'Sequence[str]', *, alpha: 'float' = 1.0, ridge: 'float' = 1.0, min_propensity: 'float' = 0.001, max_weight: 'float' = 100.0, min_events: 'int' = 1) -> 'None'` |
+| `RoutingCandidate` | class | `(name: 'str', quality: 'float', cost: 'float', latency_ms: 'float', energy_wh: 'float', privacy_ok: 'bool' = True, is_remote: 'bool' = False, data_retained: 'bool' = False) -> None` |
+| `RouteObjective` | class | `()` |
+| `CostQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, cost_weight: 'float' = 1.0, cost_scale: 'float' = 1.0) -> 'None'` |
+| `LatencyMeasurement` | class | `(n_runs: 'int', mean_ms: 'float', p50_ms: 'float', p95_ms: 'float', min_ms: 'float', max_ms: 'float', label: 'str' = '') -> None` |
+| `LatencyQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, latency_weight: 'float' = 1.0, latency_scale: 'float' = 1000.0) -> 'None'` |
+| `measure_latency` | function | `(fn: 'Callable[[], Any]', n_runs: 'int' = 50, label: 'str' = '') -> 'LatencyMeasurement'` |
+| `compare_to_baseline` | function | `(measurement: 'LatencyMeasurement', baseline_mean_ms: 'float', baseline_label: 'str' = 'baseline') -> 'Dict[str, Any]'` |
+| `DEFAULT_LOCAL_WATTS` | constant | `150.0` |
+| `DEFAULT_REMOTE_WATTS` | constant | `25.0` |
+| `EnergyMeasurement` | class | `(latency: 'LatencyMeasurement', watts: 'float', mean_wh: 'float', p95_wh: 'float') -> None` |
+| `EnergyQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, energy_weight: 'float' = 1.0, energy_scale: 'float' = 0.01) -> 'None'` |
+| `estimate_energy_wh` | function | `(latency_ms: 'float', watts: 'float') -> 'float'` |
+| `measure_energy` | function | `(fn: 'Callable[[], Any]', watts: 'float', n_runs: 'int' = 50, label: 'str' = '') -> 'EnergyMeasurement'` |
+| `PrivacyConstrainedObjective` | class | `(objective: 'RouteObjective', policy: 'DecisionPolicy') -> 'None'` |
+| `MULTIOBJECTIVE_MODES` | constant | `('weighted_sum', 'lexicographic')` |
+| `MultiObjectiveRouter` | class | `(objectives: 'Sequence[Tuple[RouteObjective, float]]', mode: 'str' = 'weighted_sum') -> 'None'` |
+| `pareto_frontier` | function | `(candidates: 'Sequence[RoutingCandidate]') -> 'List[RoutingCandidate]'` |
+| `dominates` | function | `(a: 'RoutingCandidate', b: 'RoutingCandidate') -> 'bool'` |
+| `CompetenceProfile` | class | `(backend: 'str', attempts: 'int' = 0, successes: 'int' = 0, quality_sum: 'float' = 0.0, latency_sum_ms: 'float' = 0.0, cost_sum: 'float' = 0.0) -> None` |
+| `BackendCompetenceProfiles` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+| `wilson_lower_bound` | function | `(successes: 'int', trials: 'int', z: 'float' = 1.96) -> 'float'` |
+| `UNKNOWN_DOMAIN` | constant | `'unknown'` |
+| `domain_of_spec` | function | `(spec: 'DecisionSpec') -> 'str'` |
+| `domain_of_event` | function | `(event: 'RouteEvent') -> 'str'` |
+| `PerDomainCompetence` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+| `contract_of_spec` | function | `(spec: 'DecisionSpec') -> 'str'` |
+| `contract_of_event` | function | `(event: 'RouteEvent') -> 'str'` |
+| `PerContractCompetence` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+| `ColdStartRouting` | class | `(profiles: 'BackendCompetenceProfiles', *, prior_strength: 'float' = 10.0, maiden_voyages: 'int' = 5) -> 'None'` |
+| `ExplorationConfig` | class | `(epsilon: 'float' = 0.1, epsilon_min: 'float' = 0.01, decay: 'float' = 0.9995, min_pulls_per_arm: 'int' = 5, max_exploration_share: 'float' = 0.25, enabled: 'bool' = True) -> None` |
+| `ExplorationControls` | class | `(config: 'Optional[ExplorationConfig]' = None, seed: 'Optional[int]' = None) -> 'None'` |
+| `SafeChoice` | class | `(arm: 'str', explored: 'bool', eligible_arms: 'List[str]') -> None` |
+| `SafeExploration` | class | `(controls: 'ExplorationControls', seed: 'Optional[int]' = None) -> 'None'` |
+| `ShadowDivergence` | class | `(n_shadow: 'int', n_diverged: 'int', per_arm_agreement: 'Dict[str, Dict[str, int]]') -> None` |
+| `RouterShadowMode` | class | `(store: 'TelemetryStore', *, enabled: 'bool' = True, policy_version: 'str' = 'shadow') -> 'None'` |
+| `PolicyValueEstimate` | class | `(estimator: 'str', value: 'float', n_events: 'int', n_used: 'int', n_skipped: 'int', effective_sample_size: 'float') -> None` |
+| `COUNTERFACTUAL_ESTIMATORS` | constant | `('ips', 'snips', 'dr')` |
+| `CounterfactualEvaluator` | class | `(feature_names: 'Sequence[str]', *, min_propensity: 'float' = 0.001, max_weight: 'float' = 100.0) -> 'None'` |
+| `Checkpoint` | class | `(checkpoint_id: 'str', created_at: 'float', note: 'str', state: 'Dict[str, Any]') -> None` |
+| `RouterRollback` | class | `(max_checkpoints: 'int' = 20) -> 'None'` |
+| `PolicyVersion` | class | `(version_id: 'str', parent_id: 'Optional[str]', created_at: 'float', note: 'str', state_digest: 'str') -> None` |
+| `AdaptivePolicyVersioning` | class | `() -> 'None'` |
+| `digest_state` | function | `(state: 'Mapping[str, Any]') -> 'str'` |
+| `FeatureContribution` | class | `(feature: 'str', value: 'float', weight: 'float', contribution: 'float') -> None` |
+| `RouteExplanation` | class | `(chosen: 'str', scores: 'Dict[str, float]', runner_up: 'Optional[str]', margin: 'float', top_features: 'List[FeatureContribution]' = <factory>, competence_note: 'Optional[str]' = None, objective_note: 'Optional[str]' = None, text: 'str' = '') -> None` |
+| `AdaptiveRouteExplainer` | class | `(*, profiles: 'Optional[BackendCompetenceProfiles]' = None, top_k_features: 'int' = 3) -> 'None'` |
+| `AdaptiveDriftReport` | class | `(psi_route: 'float', psi_reward: 'float', severity: 'str', n_reference: 'int', n_live: 'int', arms: 'List[str]' = <factory>, advisory: 'str' = '') -> None` |
+| `AdaptiveRouteDriftDetector` | class | `(*, watch_threshold: 'float' = 0.1, alert_threshold: 'float' = 0.25, reward_bins: 'int' = 10) -> 'None'` |
+| `BENCHMARK_POLICIES` | constant | `('uniform', 'round_robin', 'static_first', 'adaptive')` |
+| `BenchmarkArtifact` | class | `(generated_at: 'float', rounds: 'int', seed: 'int', policies: 'Tuple[str, ...]', mean_reward: 'Dict[str, float]', total_reward: 'Dict[str, float]', pulls: 'Dict[str, Dict[str, int]]', winner: 'str', config: 'Dict[str, Any]' = <factory>) -> None` |
+| `AdaptiveRoutingBenchmark` | class | `(*, rounds: 'int' = 2000, seed: 'int' = 7, alpha: 'float' = 1.0, ridge: 'float' = 1.0) -> 'None'` |
+| `default_scenario` | function | `(rng: 'random.Random', round_idx: 'int') -> 'Tuple[Dict[str, float], Dict[str, float]]'` |
+
+### `hugrgate.adaptive.bandit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BanditDecision` | class | `(arm: 'str', expected_reward: 'float', ucb: 'float', per_arm: 'Dict[str, float]') -> None` |
+| `ContextualBanditAdapter` | class | `(feature_names: 'Sequence[str]', *, alpha: 'float' = 1.0, ridge: 'float' = 1.0) -> 'None'` |
+
+### `hugrgate.adaptive.benchmark`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `POLICIES` | constant | `('uniform', 'round_robin', 'static_first', 'adaptive')` |
+| `BenchmarkArtifact` | class | `(generated_at: 'float', rounds: 'int', seed: 'int', policies: 'Tuple[str, ...]', mean_reward: 'Dict[str, float]', total_reward: 'Dict[str, float]', pulls: 'Dict[str, Dict[str, int]]', winner: 'str', config: 'Dict[str, Any]' = <factory>) -> None` |
+| `AdaptiveRoutingBenchmark` | class | `(*, rounds: 'int' = 2000, seed: 'int' = 7, alpha: 'float' = 1.0, ridge: 'float' = 1.0) -> 'None'` |
+| `default_scenario` | function | `(rng: 'random.Random', round_idx: 'int') -> 'Tuple[Dict[str, float], Dict[str, float]]'` |
+| `Scenario` | constant | `typing.Callable[[random.Random, int], typing.Tuple[typing.Di` |
+
+### `hugrgate.adaptive.coldstart`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ColdStartRouting` | class | `(profiles: 'BackendCompetenceProfiles', *, prior_strength: 'float' = 10.0, maiden_voyages: 'int' = 5) -> 'None'` |
+
+### `hugrgate.adaptive.competence`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CompetenceProfile` | class | `(backend: 'str', attempts: 'int' = 0, successes: 'int' = 0, quality_sum: 'float' = 0.0, latency_sum_ms: 'float' = 0.0, cost_sum: 'float' = 0.0) -> None` |
+| `BackendCompetenceProfiles` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+| `wilson_lower_bound` | function | `(successes: 'int', trials: 'int', z: 'float' = 1.96) -> 'float'` |
+
+### `hugrgate.adaptive.contract_competence`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `contract_of_spec` | function | `(spec: 'DecisionSpec') -> 'str'` |
+| `contract_of_event` | function | `(event: 'RouteEvent') -> 'str'` |
+| `PerContractCompetence` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+
+### `hugrgate.adaptive.cost_quality`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RoutingCandidate` | class | `(name: 'str', quality: 'float', cost: 'float', latency_ms: 'float', energy_wh: 'float', privacy_ok: 'bool' = True, is_remote: 'bool' = False, data_retained: 'bool' = False) -> None` |
+| `RouteObjective` | class | `()` |
+| `CostQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, cost_weight: 'float' = 1.0, cost_scale: 'float' = 1.0) -> 'None'` |
+
+### `hugrgate.adaptive.counterfactual`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ESTIMATORS` | constant | `('ips', 'snips', 'dr')` |
+| `PolicyValueEstimate` | class | `(estimator: 'str', value: 'float', n_events: 'int', n_used: 'int', n_skipped: 'int', effective_sample_size: 'float') -> None` |
+| `CounterfactualEvaluator` | class | `(feature_names: 'Sequence[str]', *, min_propensity: 'float' = 0.001, max_weight: 'float' = 100.0) -> 'None'` |
+
+### `hugrgate.adaptive.delayed`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DelayedLabel` | class | `(request_id: 'str', quality: 'float', label: 'Optional[str]' = None, source: 'str' = 'human', received_at: 'float' = <factory>) -> None` |
+| `DelayedLabelIngestion` | class | `(feedback: 'OutcomeFeedbackAPI', *, ttl_s: 'float' = 3600.0, max_pending: 'int' = 10000) -> 'None'` |
+| `SweepReport` | class | `(applied: 'int' = 0, expired: 'int' = 0, still_pending: 'int' = 0) -> None` |
+
+### `hugrgate.adaptive.domain_competence`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `UNKNOWN_DOMAIN` | constant | `'unknown'` |
+| `domain_of_spec` | function | `(spec: 'DecisionSpec') -> 'str'` |
+| `domain_of_event` | function | `(event: 'RouteEvent') -> 'str'` |
+| `PerDomainCompetence` | class | `(*, success_threshold: 'float' = 0.7) -> 'None'` |
+
+### `hugrgate.adaptive.drift_detect`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AdaptiveDriftReport` | class | `(psi_route: 'float', psi_reward: 'float', severity: 'str', n_reference: 'int', n_live: 'int', arms: 'List[str]' = <factory>, advisory: 'str' = '') -> None` |
+| `AdaptiveRouteDriftDetector` | class | `(*, watch_threshold: 'float' = 0.1, alert_threshold: 'float' = 0.25, reward_bins: 'int' = 10) -> 'None'` |
+
+### `hugrgate.adaptive.energy_quality`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_LOCAL_WATTS` | constant | `150.0` |
+| `DEFAULT_REMOTE_WATTS` | constant | `25.0` |
+| `EnergyMeasurement` | class | `(latency: 'LatencyMeasurement', watts: 'float', mean_wh: 'float', p95_wh: 'float') -> None` |
+| `EnergyQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, energy_weight: 'float' = 1.0, energy_scale: 'float' = 0.01) -> 'None'` |
+| `estimate_energy_wh` | function | `(latency_ms: 'float', watts: 'float') -> 'float'` |
+| `measure_energy` | function | `(fn: 'Callable[[], Any]', watts: 'float', n_runs: 'int' = 50, label: 'str' = '') -> 'EnergyMeasurement'` |
+
+### `hugrgate.adaptive.explanations`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FeatureContribution` | class | `(feature: 'str', value: 'float', weight: 'float', contribution: 'float') -> None` |
+| `RouteExplanation` | class | `(chosen: 'str', scores: 'Dict[str, float]', runner_up: 'Optional[str]', margin: 'float', top_features: 'List[FeatureContribution]' = <factory>, competence_note: 'Optional[str]' = None, objective_note: 'Optional[str]' = None, text: 'str' = '') -> None` |
+| `AdaptiveRouteExplainer` | class | `(*, profiles: 'Optional[BackendCompetenceProfiles]' = None, top_k_features: 'int' = 3) -> 'None'` |
+
+### `hugrgate.adaptive.exploration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ExplorationConfig` | class | `(epsilon: 'float' = 0.1, epsilon_min: 'float' = 0.01, decay: 'float' = 0.9995, min_pulls_per_arm: 'int' = 5, max_exploration_share: 'float' = 0.25, enabled: 'bool' = True) -> None` |
+| `ExplorationControls` | class | `(config: 'Optional[ExplorationConfig]' = None, seed: 'Optional[int]' = None) -> 'None'` |
+
+### `hugrgate.adaptive.feedback`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OUTCOME_LABELS` | constant | `('success', 'failure', 'partial')` |
+| `OutcomeRecord` | class | `(request_id: 'str', quality: 'float', label: 'Optional[str]' = None, source: 'str' = 'human', received_at: 'float' = 0.0) -> None` |
+| `OutcomeFeedbackAPI` | class | `(store: 'TelemetryStore') -> 'None'` |
+
+### `hugrgate.adaptive.latency_quality`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LatencyMeasurement` | class | `(n_runs: 'int', mean_ms: 'float', p50_ms: 'float', p95_ms: 'float', min_ms: 'float', max_ms: 'float', label: 'str' = '') -> None` |
+| `LatencyQualityObjective` | class | `(*, quality_weight: 'float' = 1.0, latency_weight: 'float' = 1.0, latency_scale: 'float' = 1000.0) -> 'None'` |
+| `measure_latency` | function | `(fn: 'Callable[[], Any]', n_runs: 'int' = 50, label: 'str' = '') -> 'LatencyMeasurement'` |
+| `compare_to_baseline` | function | `(measurement: 'LatencyMeasurement', baseline_mean_ms: 'float', baseline_label: 'str' = 'baseline') -> 'Dict[str, Any]'` |
+
+### `hugrgate.adaptive.multiobjective`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MODES` | constant | `('weighted_sum', 'lexicographic')` |
+| `MultiObjectiveRouter` | class | `(objectives: 'Sequence[Tuple[RouteObjective, float]]', mode: 'str' = 'weighted_sum') -> 'None'` |
+| `pareto_frontier` | function | `(candidates: 'Sequence[RoutingCandidate]') -> 'List[RoutingCandidate]'` |
+| `dominates` | function | `(a: 'RoutingCandidate', b: 'RoutingCandidate') -> 'bool'` |
+
+### `hugrgate.adaptive.offline`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LearningDiagnostics` | class | `(n_events: 'int' = 0, n_used: 'int' = 0, n_unlabeled: 'int' = 0, n_shadow: 'int' = 0, n_bad_propensity: 'int' = 0, n_clipped: 'int' = 0, effective_sample_size: 'float' = 0.0, arms: 'List[str]' = None) -> None` |
+| `OfflinePolicyLearning` | class | `(feature_names: 'Sequence[str]', *, alpha: 'float' = 1.0, ridge: 'float' = 1.0, min_propensity: 'float' = 0.001, max_weight: 'float' = 100.0, min_events: 'int' = 1) -> 'None'` |
+
+### `hugrgate.adaptive.privacy_objective`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyConstrainedObjective` | class | `(objective: 'RouteObjective', policy: 'DecisionPolicy') -> 'None'` |
+
+### `hugrgate.adaptive.rollback`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Checkpoint` | class | `(checkpoint_id: 'str', created_at: 'float', note: 'str', state: 'Dict[str, Any]') -> None` |
+| `RouterRollback` | class | `(max_checkpoints: 'int' = 20) -> 'None'` |
+
+### `hugrgate.adaptive.router_features`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal', 'numeric', 'multilabel'` |
+| `RouteContext` | class | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'Optional[DecisionPolicy]', candidates: 'Sequence[str]', candidate_stats: 'Optional[Mapping[str, Mapping[str, float]]]' = None) -> 'None'` |
+| `RouterFeatureExtractor` | class | `() -> 'None'` |
+
+### `hugrgate.adaptive.safe_exploration`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SafeChoice` | class | `(arm: 'str', explored: 'bool', eligible_arms: 'List[str]') -> None` |
+| `SafeExploration` | class | `(controls: 'ExplorationControls', seed: 'Optional[int]' = None) -> 'None'` |
+
+### `hugrgate.adaptive.shadow`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ShadowDivergence` | class | `(n_shadow: 'int', n_diverged: 'int', per_arm_agreement: 'Dict[str, Dict[str, int]]') -> None` |
+| `RouterShadowMode` | class | `(store: 'TelemetryStore', *, enabled: 'bool' = True, policy_version: 'str' = 'shadow') -> 'None'` |
+
+### `hugrgate.adaptive.telemetry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCHEMA_VERSION` | constant | `'adaptive-telemetry/v1'` |
+| `RouteEvent` | class | `(request_id: 'str', timestamp: 'float', spec: 'Dict[str, Any]', features: 'Dict[str, float]', candidates: 'List[str]', propensities: 'Dict[str, float]', chosen: 'str', policy_version: 'str', privacy_class: 'str', latency_ms: 'float' = 0.0, cost: 'float' = 0.0, energy_wh: 'float' = 0.0, immediate_quality: 'float' = 0.0, outcome: 'Optional[Dict[str, Any]]' = None, shadow: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `TelemetryStore` | class | `(path: 'Optional[str]' = None, max_records: 'int' = 100000) -> 'None'` |
+
+### `hugrgate.adaptive.versioning`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PolicyVersion` | class | `(version_id: 'str', parent_id: 'Optional[str]', created_at: 'float', note: 'str', state_digest: 'str') -> None` |
+| `AdaptivePolicyVersioning` | class | `() -> 'None'` |
+| `digest_state` | function | `(state: 'Mapping[str, Any]') -> 'str'` |
 
 ### `hugrgate.backend`
 
