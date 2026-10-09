@@ -36,6 +36,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from hugrgate.backpressure import BackpressureEngine
 from hugrgate.errors import SchedulerError
 from hugrgate.log import get_logger
 
@@ -297,13 +298,25 @@ class BatchScheduler:
     config: validated :class:`SchedulerConfig`.
     executor: the :class:`BatchExecutor` that runs each batch.  Defaults
         to a :class:`ThreadPoolBatchExecutor` sized by the config.
+    backpressure: optional :class:`BackpressureEngine` (slice 289).
+        When set, every submission leases an admission slot, released
+        when the task's future settles; saturation raises
+        :class:`BackpressureError` at the producer instead of growing
+        the queue without bound.
     """
 
     def __init__(self, config: SchedulerConfig | None = None,
-                 executor: BatchExecutor | None = None) -> None:
+                 executor: BatchExecutor | None = None,
+                 backpressure: BackpressureEngine | None = None) -> None:
         self.config = config or SchedulerConfig()
         self.executor = executor or ThreadPoolBatchExecutor(
             max_workers=self.config.max_workers)
+        if backpressure is not None and not isinstance(
+                backpressure, BackpressureEngine):
+            raise SchedulerError(
+                f"backpressure must be a BackpressureEngine, got "
+                f"{type(backpressure).__name__}")
+        self.backpressure = backpressure
         self._queue: deque[_Task] = deque()
         self._cond = threading.Condition()
         self._accepting = True
@@ -364,21 +377,36 @@ class BatchScheduler:
                 raise SchedulerError(
                     "deadline is already in the past; refusing to schedule "
                     "work that cannot meet its deadline")
-        with self._cond:
-            if not self._accepting:
-                raise SchedulerError("scheduler is shut down")
-            if len(self._queue) + self._assembly_held > \
-                    self.config.max_queue_depth:
-                raise SchedulerError(
-                    f"queue full ({self.config.max_queue_depth}); "
-                    f"shed load and retry")
-            task = _Task(task_id=next(_task_ids), fn=fn, args=args,
-                         kwargs=kwargs, future=Future(),
-                         submitted_at=time.monotonic(),
-                         priority=priority, deadline=deadline)
-            self._queue.append(task)
-            self._cond.notify()
-            return task.future
+        lease = None
+        if self.backpressure is not None:
+            # Admission control first: saturation surfaces here, at the
+            # producer, as BackpressureError (slice 289).
+            lease = self.backpressure.lease()
+        try:
+            with self._cond:
+                if not self._accepting:
+                    raise SchedulerError("scheduler is shut down")
+                if len(self._queue) + self._assembly_held > \
+                        self.config.max_queue_depth:
+                    raise SchedulerError(
+                        f"queue full ({self.config.max_queue_depth}); "
+                        f"shed load and retry")
+                task = _Task(task_id=next(_task_ids), fn=fn, args=args,
+                             kwargs=kwargs, future=Future(),
+                             submitted_at=time.monotonic(),
+                             priority=priority, deadline=deadline)
+                if lease is not None:
+                    # The slot releases when the task settles — success,
+                    # failure, drop, or executor bug alike.
+                    task.future.add_done_callback(
+                        lambda _f, _lease=lease: _lease.release())
+                self._queue.append(task)
+                self._cond.notify()
+                return task.future
+        except Exception:
+            if lease is not None:
+                lease.release()
+            raise
 
     def queue_depth(self) -> int:
         """Current number of tasks waiting for a batch."""
@@ -596,6 +624,8 @@ class BatchScheduler:
                 "priority_enabled": self.config.priority_enabled,
                 "deadline_enabled": self.config.deadline_enabled,
                 "deadline_misses": deadline_misses,
+                "backpressure": (self.backpressure.stats()
+                                 if self.backpressure is not None else None),
             }
             if self._adaptive is not None:
                 stats["adaptive_controller"] = self._adaptive.snapshot()

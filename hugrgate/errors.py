@@ -19,6 +19,7 @@ __all__ = [
     "Abstention",
     "BackendError",
     "BackendUnavailable",
+    "BackpressureError",
     "BenchmarkError",
     "CalibrationError",
     "ChaosError",
@@ -288,4 +289,14 @@ class SchedulerError(HugrGateError):
     load or retrying later can succeed.
     """
     code = "scheduler_error"
+    recoverable = True
+
+
+class BackpressureError(HugrGateError):
+    """Admission refused: the system is saturated, shed load and retry.
+
+    Slice 289.  Carries ``reason`` ("inflight_cap" | "rate_limit") and,
+    when the rate limiter can compute one, ``retry_after_s``.
+    """
+    code = "backpressure_error"
     recoverable = True
