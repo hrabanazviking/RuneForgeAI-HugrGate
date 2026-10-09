@@ -33,7 +33,10 @@ from fastapi.responses import JSONResponse
 from hugrgate import Abstention, DecisionPolicy, DecisionResult, HugrGate
 from hugrgate.client import policy_from_dict
 from hugrgate.errors import QueueFull
+from hugrgate.log import get_logger
 from hugrgate.server import build_gate, create_app
+
+logger = get_logger(__name__)
 
 __all__ = [
     "DEFAULT_HOST",
@@ -357,6 +360,9 @@ class Daemon:
     def start(self) -> None:
         """Start HTTP (and Unix-socket, if configured) listeners."""
         import uvicorn
+        logger.info("daemon starting: http=%s:%d unix_socket=%s",
+                    self.config.host, self.config.port,
+                    self.config.unix_socket)
         http = uvicorn.Server(uvicorn.Config(
             self.app, host=self.config.host, port=self.config.port,
             log_level="warning"))
@@ -376,11 +382,13 @@ class Daemon:
         """Graceful shutdown: stop listeners, drain the batch queue."""
         if self._stopped.is_set():
             return
+        logger.info("daemon stopping: draining batch queue")
         self._stopped.set()
         for server, _ in self._servers:
             server.should_exit = True
         for _, thread in self._servers:
             thread.join(timeout=timeout / max(len(self._servers), 1))
+        logger.info("daemon stopped")
 
     def join(self) -> None:
         for _, thread in self._servers:
@@ -420,7 +428,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--max-queue", type=int, default=1024)
     parser.add_argument("--client-policies", default=None,
                         help="JSON file mapping client id -> policy")
+    parser.add_argument("--log-level", default="WARNING",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+                        help="hugrgate log level (default: WARNING)")
+    parser.add_argument("--log-json", action="store_true",
+                        help="emit logs as JSON objects")
     args = parser.parse_args(argv)
+    from hugrgate.log import configure_logging
+    configure_logging(args.log_level, json_format=args.log_json)
     config = DaemonConfig(
         host=args.host, port=args.port, unix_socket=args.unix_socket,
         batch_window_ms=args.batch_window_ms, max_batch=args.max_batch,

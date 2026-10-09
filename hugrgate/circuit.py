@@ -24,6 +24,9 @@ import threading
 import time
 from typing import Any, Callable, Dict, Optional
 
+from hugrgate.log import get_logger
+
+logger = get_logger(__name__)
 __all__ = [
     "CLOSED",
     "OPEN",
@@ -72,6 +75,8 @@ class CircuitBreaker:
                 and self._clock() - self._opened_at >= self.reset_timeout_s):
             self._state = HALF_OPEN
             self._half_open_inflight = 0
+            logger.info("circuit breaker %r half-open (probe admitted)",
+                        self.name)
 
     def allow(self) -> bool:
         """True when a call may proceed (consumes a half-open probe slot)."""
@@ -110,8 +115,12 @@ class CircuitBreaker:
     def _open(self) -> None:
         self._state = OPEN
         self._opened_at = self._clock()
+        logger.info("circuit breaker %r opened after %d consecutive failures",
+                    self.name, self._consecutive_failures)
 
     def _close(self) -> None:
+        if self._state != CLOSED:
+            logger.info("circuit breaker %r closed", self.name)
         self._state = CLOSED
         self._consecutive_failures = 0
         self._opened_at = None

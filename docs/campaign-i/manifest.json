@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T10:50:38.026827+00:00",
-  "module_count": 42,
+  "generated_utc": "2026-10-09T11:09:45.835129+00:00",
+  "module_count": 43,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -78,12 +78,11 @@
         "abc",
         "hashlib",
         "hugrgate",
-        "math",
         "numpy",
         "re",
         "typing"
       ],
-      "loc": 261,
+      "loc": 260,
       "path": "hugrgate/backends/embedding.py",
       "public_defs": [
         "Embedder",
@@ -190,7 +189,7 @@
         "transformers",
         "typing"
       ],
-      "loc": 149,
+      "loc": 153,
       "path": "hugrgate/backends/nli.py",
       "public_defs": [
         "NLIBackend",
@@ -212,7 +211,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 379,
+      "loc": 380,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -245,7 +244,7 @@
         "time",
         "typing"
       ],
-      "loc": 332,
+      "loc": 346,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -286,7 +285,7 @@
         "time",
         "typing"
       ],
-      "loc": 161,
+      "loc": 167,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -454,11 +453,12 @@
       "docstring": "Circuit breaker \u2014 per-backend failure containment. Slice 18.\n\nStates:\n\n- **closed**: traffic flows; consecutive failures are counted.\n- **open**: calls are rejected fast (``allow()`` -> False) until\n  ``reset_timeout_s`` has elapsed.\n- **half-open**: after the timeout, a limited number of probe calls\n  (``half_open_max_probes``) are let through. A probe success closes the\n  circuit; a probe failure re-opens it and restarts the timeout.\n\n:class:`CircuitRegistry` owns one breaker per backend name and creates\nthem on demand. :class:`~hugrgate.fallback.FallbackChain` accepts a\nregistry: open circuits are skipped (recorded in the fallback trace)\nand every attempt's outcome is reported back to its breaker.\n\nThe clock is injectable (``clock`` parameter) so tests can drive time\ndeterministically. All methods are thread-safe.",
       "imports": [
         "__future__",
+        "hugrgate",
         "threading",
         "time",
         "typing"
       ],
-      "loc": 164,
+      "loc": 173,
       "path": "hugrgate/circuit.py",
       "public_defs": [
         "CircuitBreaker",
@@ -486,7 +486,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 273,
+      "loc": 275,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -511,7 +511,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 239,
+      "loc": 277,
       "path": "hugrgate/client.py",
       "public_defs": [
         "policy_to_dict",
@@ -532,7 +532,7 @@
         "time",
         "typing"
       ],
-      "loc": 111,
+      "loc": 120,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -558,17 +558,18 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 391,
+      "loc": 445,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
-        "QueueFull",
         "BatchingQueue",
         "load_client_policies",
         "create_daemon_app",
         "Daemon",
         "serve_forever",
         "main",
+        "to_dict",
+        "from_dict",
         "start",
         "stop",
         "submit",
@@ -607,11 +608,12 @@
       ]
     },
     "hugrgate.errors": {
-      "docstring": "Error taxonomy for HugrGate. Slice 10.",
+      "docstring": "Error taxonomy for HugrGate. Slice 10; hardened in slice 007.\n\nEvery HugrGate error carries:\n\n- ``code`` \u2014 a stable machine-readable string (unique across the taxonomy;\n  enforced by ``tests/test_errors.py``), also used on the HTTP wire;\n- ``recoverable`` \u2014 whether retrying the operation can plausibly succeed;\n- ``message`` + ``details`` \u2014 human text and structured context.\n\n``to_dict()`` / ``from_dict()`` give a lossless wire round-trip so a\nclient can reconstruct the exact error class from an HTTP error body.",
       "imports": [
-        "__future__"
+        "__future__",
+        "typing"
       ],
-      "loc": 72,
+      "loc": 142,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -622,7 +624,12 @@
         "CalibrationError",
         "TimeoutError",
         "PrivacyViolation",
-        "Abstention"
+        "QueueFull",
+        "Abstention",
+        "to_dict",
+        "from_dict",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.fallback": {
@@ -632,7 +639,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 163,
+      "loc": 170,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -723,6 +730,24 @@
         "decide"
       ]
     },
+    "hugrgate.log": {
+      "docstring": "Structured logging for HugrGate (slice 009).\n\nLibrary policy:\n\n- Every module logs through ``get_logger(__name__)`` (a child of the\n  ``hugrgate`` logger). The ``hugrgate`` logger carries a\n  :class:`logging.NullHandler` and configures **no** handlers itself, so\n  importing the library never emits output and never hijacks the host\n  application's logging.\n- :func:`configure_logging` is the one explicit opt-in: it sets the\n  level on the ``hugrgate`` logger and attaches a single stream handler\n  (plain or JSON). It is idempotent \u2014 repeated calls do not duplicate\n  handlers.\n- **Privacy rule:** log metadata, never payload. Decision ``state``\n  dicts, raw inputs, and result ``value``\\ s may contain PII; log only\n  backend names, spec types, latencies, probabilities, and error codes.\n\nLevels used across the package:\n\n- ``DEBUG`` \u2014 per-decision internals (backend selection, cache hit/miss,\n  abstention verdicts);\n- ``INFO`` \u2014 lifecycle (daemon start/stop, backend registration,\n  circuit-breaker transitions, fallback engagement);\n- ``WARNING`` \u2014 recoverable failures (backend error, privacy-blocked\n  backend, queue back-pressure);\n- ``ERROR`` \u2014 unrecoverable internal faults.",
+      "imports": [
+        "__future__",
+        "json",
+        "logging",
+        "sys",
+        "typing"
+      ],
+      "loc": 101,
+      "path": "hugrgate/log.py",
+      "public_defs": [
+        "get_logger",
+        "JsonFormatter",
+        "configure_logging",
+        "format"
+      ]
+    },
     "hugrgate.models": {
       "docstring": "Model manifests and a disk-backed versioned model store. Slice 25.\n\nA :class:`ModelManifest` describes *what* a trained model is (name, version,\nbackend, feature schema, classes, training metrics) while the :class:`ModelStore`\nkeeps manifests next to their weight payloads on disk, with a SHA-256\nintegrity hash so tampering or truncated writes are caught on load.",
       "imports": [
@@ -777,7 +802,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 59,
+      "loc": 72,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -793,7 +818,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 123,
+      "loc": 130,
       "path": "hugrgate/privacy.py",
       "public_defs": [
         "PrivacyGuard",
@@ -858,7 +883,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 365,
+      "loc": 368,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -890,7 +915,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 109,
+      "loc": 127,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -950,7 +975,7 @@
         "json",
         "typing"
       ],
-      "loc": 58,
+      "loc": 60,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -963,13 +988,18 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_config.py",
+    "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
+    "test_errors.py",
     "test_foundation.py",
     "test_ladder.py",
+    "test_logging.py",
     "test_ml_calibration.py",
     "test_repo_truth.py",
-    "test_service.py"
+    "test_service.py",
+    "test_typecheck.py"
   ],
-  "total_loc": 7104
+  "total_loc": 7461
 }

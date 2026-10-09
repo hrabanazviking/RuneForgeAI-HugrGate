@@ -36,7 +36,7 @@ LAYERS: dict[str, list[str]] = {
     "state": [
         "hugrgate.provenance", "hugrgate.health", "hugrgate.drift",
         "hugrgate.cache", "hugrgate.models", "hugrgate.features",
-        "hugrgate.bench", "hugrgate.bench_report",
+        "hugrgate.bench", "hugrgate.bench_report", "hugrgate.log",
     ],
     "backends": [
         "hugrgate.backends.rules", "hugrgate.backends.logreg",

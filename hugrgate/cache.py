@@ -27,6 +27,7 @@ from typing import Any, Dict, Mapping, Optional
 
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
+from hugrgate.log import get_logger
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
@@ -34,6 +35,8 @@ __all__ = [
     "cache_key",
     "DecisionCache",
 ]
+
+logger = get_logger(__name__)
 
 
 def _policy_fingerprint(policy: DecisionPolicy) -> Dict[str, Any]:
@@ -95,13 +98,16 @@ class DecisionCache:
         entry = self._entries.get(key)
         if entry is None:
             self.misses += 1
+            logger.debug("cache miss (no entry)")
             return None
         if entry.expires_at <= time.monotonic():
             del self._entries[key]
             self.misses += 1
+            logger.debug("cache miss (expired)")
             return None
         self._entries.move_to_end(key)  # LRU touch
         self.hits += 1
+        logger.debug("cache hit")
         return copy.deepcopy(entry.result)
 
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,

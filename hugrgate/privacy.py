@@ -17,8 +17,11 @@ from typing import Any, Iterable, List, Mapping, Optional
 
 from hugrgate.backend import Backend
 from hugrgate.errors import BackendUnavailable, PrivacyViolation
+from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.provenance import DecisionRecord
+
+logger = get_logger(__name__)
 
 __all__ = [
     "REMOTE_MODES",
@@ -75,11 +78,15 @@ class PrivacyGuard:
             When the decision policy itself disallows the backend.
         """
         if backend.is_remote and self.remote_inference == "forbidden":
+            logger.warning("privacy: remote backend %r blocked (guard=forbidden)",
+                           backend.name)
             raise PrivacyViolation(
                 f"remote backend {backend.name!r} blocked: remote_inference "
                 f"is forbidden by the privacy guard",
                 backend=backend.name)
         if not policy.backend_allowed(backend.name, backend.is_remote):
+            logger.debug("privacy: backend %r excluded by decision policy",
+                         backend.name)
             raise BackendUnavailable(
                 f"backend {backend.name!r} blocked by decision policy",
                 backend=backend.name)

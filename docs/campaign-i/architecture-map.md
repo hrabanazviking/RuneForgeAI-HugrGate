@@ -39,6 +39,7 @@ flowchart TD
         features[features]
         bench[bench]
         bench_report[bench_report]
+        log[log]
     end
     subgraph backends[backends]
         backends_rules[backends.rules]
@@ -108,6 +109,7 @@ flowchart TD
     backends_rules --> result
     backends_rules --> spec
     bench --> hugrgate
+    cache --> log
     cache --> policy
     cache --> privacy
     cache --> result
@@ -129,6 +131,7 @@ flowchart TD
     calibration_profiles --> spec
     calibration_temperature --> calibration__base
     calibration_temperature --> errors
+    circuit --> log
     cli -.-> hugrgate
     cli -.-> bench
     cli -.-> bench_report
@@ -140,6 +143,7 @@ flowchart TD
     client -.-> server
     core --> backend
     core --> errors
+    core --> log
     core --> policy
     core --> provenance
     core --> result
@@ -148,11 +152,13 @@ flowchart TD
     daemon --> hugrgate
     daemon -.-> client
     daemon -.-> errors
+    daemon -.-> log
     daemon -.-> server
     daemon -.-> spec
     fallback --> backend
     fallback --> circuit
     fallback --> errors
+    fallback --> log
     fallback --> policy
     fallback --> result
     fallback --> spec
@@ -174,6 +180,7 @@ flowchart TD
     policy --> result
     privacy --> backend
     privacy --> errors
+    privacy --> log
     privacy --> policy
     privacy --> provenance
     provenance --> result
@@ -204,7 +211,7 @@ flowchart TD
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
-| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
+| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
@@ -254,6 +261,7 @@ flowchart TD
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
 | `bench` | `hugrgate` | no |
+| `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
 | `cache` | `result` | no |
@@ -275,6 +283,7 @@ flowchart TD
 | `calibration.profiles` | `spec` | no |
 | `calibration.temperature` | `calibration._base` | no |
 | `calibration.temperature` | `errors` | no |
+| `circuit` | `log` | no |
 | `cli` | `hugrgate` | yes |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
@@ -286,6 +295,7 @@ flowchart TD
 | `client` | `server` | yes |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
+| `core` | `log` | no |
 | `core` | `policy` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
@@ -294,11 +304,13 @@ flowchart TD
 | `daemon` | `hugrgate` | no |
 | `daemon` | `client` | yes |
 | `daemon` | `errors` | yes |
+| `daemon` | `log` | yes |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
+| `fallback` | `log` | no |
 | `fallback` | `policy` | no |
 | `fallback` | `result` | no |
 | `fallback` | `spec` | no |
@@ -320,6 +332,7 @@ flowchart TD
 | `policy` | `result` | no |
 | `privacy` | `backend` | no |
 | `privacy` | `errors` | no |
+| `privacy` | `log` | no |
 | `privacy` | `policy` | no |
 | `privacy` | `provenance` | no |
 | `provenance` | `result` | no |

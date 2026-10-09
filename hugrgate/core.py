@@ -7,11 +7,14 @@ from typing import Any, Mapping, Optional
 
 from hugrgate.backend import Backend, BackendRegistry
 from hugrgate.errors import BackendUnavailable, BackendError, Abstention
+from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
+
+logger = get_logger(__name__)
 
 __all__ = [
     "HugrGate",
@@ -76,10 +79,16 @@ class HugrGate:
         try:
             result = backend.evaluate(state, spec, context)
         except Abstention:
+            logger.debug("backend %r abstained (spec=%s)", backend.name,
+                         spec.type)
             raise
         except BackendError:
+            logger.warning("backend %r failed; no failover in core path",
+                           backend.name)
             raise
         except Exception as e:
+            logger.warning("backend %r raised unexpected %s",
+                           backend.name, type(e).__name__)
             raise BackendError(f"backend {backend.name} failed: {e}")
 
         result.latency_ms = (time.perf_counter() - start) * 1000

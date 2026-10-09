@@ -33,9 +33,12 @@ from typing import Any, Dict, List, Mapping, Optional
 from hugrgate.backend import Backend
 from hugrgate.circuit import CircuitRegistry
 from hugrgate.errors import Abstention, BackendError, PolicyError
+from hugrgate.log import get_logger
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.policy import DecisionPolicy
+
+logger = get_logger(__name__)
 
 __all__ = [
     "FallbackChain",
@@ -101,6 +104,8 @@ class FallbackChain(Backend):
             except BackendError as e:
                 trace.append({"backend": backend.name, "outcome": "failed",
                               "error": str(e), "code": e.code})
+                logger.warning("fallback: backend %r failed (%s); trying next",
+                               backend.name, e.code)
                 if breaker is not None:
                     breaker.record_failure()
                 continue

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 42 · **public names:** 177
+**Modules:** 43 · **public names:** 181
 
 ## API stability policy
 
@@ -313,6 +313,15 @@ that this document never drifts from the code.
 | `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None) -> None` |
 | `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'Optional[float]' = None, latency_ms: 'float' = 0.0) -> None` |
 | `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'Optional[List[LadderRung]]' = None, *, ladders: 'Optional[Dict[str, List[LadderRung]]]' = None, provenance: 'Optional[ProvenanceStore]' = None, privacy_guard: 'Optional[PrivacyGuard]' = None)` |
+
+### `hugrgate.log`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `get_logger` | function | `(name: 'str') -> 'logging.Logger'` |
+| `configure_logging` | function | `(level: 'str' = 'WARNING', stream: 'Optional[TextIO]' = None, json_format: 'bool' = False) -> 'logging.Logger'` |
+| `JsonFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
+| `PRIVACY_RULE` | constant | `'Log metadata, never payload: decision state dicts and resul` |
 
 ### `hugrgate.models`
 
