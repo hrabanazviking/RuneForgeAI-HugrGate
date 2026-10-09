@@ -174,6 +174,25 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.adaptive.benchmark",
     ],
     "api": ["hugrgate"],
+    "edge": [
+        "hugrgate.edge", "hugrgate.edge.platform",
+        "hugrgate.edge.memory",
+        "hugrgate.edge.affinity",
+        "hugrgate.edge.thermal", "hugrgate.edge.routing",
+        "hugrgate.edge.power",
+        "hugrgate.edge.quant",
+        "hugrgate.edge.npu",
+        "hugrgate.edge.residency",
+        "hugrgate.edge.cachetune",
+        "hugrgate.edge.storage",
+        "hugrgate.edge.bootstrap",
+        "hugrgate.edge.recovery",
+        "hugrgate.edge.watchdog",
+        "hugrgate.edge.telemetry",
+        "hugrgate.edge.bench",
+        "hugrgate.edge.chaos",
+        "hugrgate.edge.gate",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}

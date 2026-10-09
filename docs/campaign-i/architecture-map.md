@@ -20,30 +20,6 @@ flowchart TD
         validation[validation]
         serde[serde]
     end
-    subgraph local-runtimes[local-runtimes]
-        runtimes[runtimes]
-        runtimes_bench_matrix[runtimes.bench_matrix]
-        runtimes_conformance[runtimes.conformance]
-        runtimes_eviction[runtimes.eviction]
-        runtimes_gguf[runtimes.gguf]
-        runtimes_grammar[runtimes.grammar]
-        runtimes_health_probes[runtimes.health_probes]
-        runtimes_jsonschema[runtimes.jsonschema]
-        runtimes_llama_cpp[runtimes.llama_cpp]
-        runtimes_metadata[runtimes.metadata]
-        runtimes_mlx[runtimes.mlx]
-        runtimes_ollama[runtimes.ollama]
-        runtimes_onnx[runtimes.onnx]
-        runtimes_openvino[runtimes.openvino]
-        runtimes_packs[runtimes.packs]
-        runtimes_probe[runtimes.probe]
-        runtimes_residency[runtimes.residency]
-        runtimes_structured[runtimes.structured]
-        runtimes_tensorrt[runtimes.tensorrt]
-        runtimes_transformers_rt[runtimes.transformers_rt]
-        runtimes_vllm[runtimes.vllm]
-        runtimes_warmup[runtimes.warmup]
-    end
     subgraph runtime[runtime]
         core[core]
         abstain[abstain]
@@ -84,65 +60,35 @@ flowchart TD
         calibration_profiles[calibration.profiles]
         calibration_temperature[calibration.temperature]
     end
-    subgraph ensemble[ensemble]
-        ensemble[ensemble]
-        ensemble_base[ensemble.base]
-        ensemble_api[ensemble.api]
-        ensemble_voting[ensemble.voting]
-        ensemble_averaging[ensemble.averaging]
-        ensemble_stacking[ensemble.stacking]
-        ensemble_blending[ensemble.blending]
-        ensemble_moe[ensemble.moe]
-        ensemble_diversity[ensemble.diversity]
-        ensemble_disagreement[ensemble.disagreement]
-        ensemble_consensus[ensemble.consensus]
-        ensemble_correlation[ensemble.correlation]
-        ensemble_reliability[ensemble.reliability]
-        ensemble_membership[ensemble.membership]
-        ensemble_calibration[ensemble.calibration]
-        ensemble_provenance[ensemble.provenance]
-        ensemble_explanations[ensemble.explanations]
-        ensemble_cache[ensemble.cache]
-        ensemble_batch[ensemble.batch]
-        ensemble_adversarial[ensemble.adversarial]
-        ensemble_benchmarks[ensemble.benchmarks]
-        ensemble_release[ensemble.release]
-    end
     subgraph service[service]
         server[server]
         daemon[daemon]
         client[client]
         cli[cli]
     end
-    subgraph adaptive[adaptive]
-        adaptive[adaptive]
-        adaptive_telemetry[adaptive.telemetry]
-        adaptive_feedback[adaptive.feedback]
-        adaptive_delayed[adaptive.delayed]
-        adaptive_router_features[adaptive.router_features]
-        adaptive_bandit[adaptive.bandit]
-        adaptive_offline[adaptive.offline]
-        adaptive_cost_quality[adaptive.cost_quality]
-        adaptive_latency_quality[adaptive.latency_quality]
-        adaptive_energy_quality[adaptive.energy_quality]
-        adaptive_privacy_objective[adaptive.privacy_objective]
-        adaptive_multiobjective[adaptive.multiobjective]
-        adaptive_competence[adaptive.competence]
-        adaptive_domain_competence[adaptive.domain_competence]
-        adaptive_contract_competence[adaptive.contract_competence]
-        adaptive_coldstart[adaptive.coldstart]
-        adaptive_exploration[adaptive.exploration]
-        adaptive_safe_exploration[adaptive.safe_exploration]
-        adaptive_shadow[adaptive.shadow]
-        adaptive_counterfactual[adaptive.counterfactual]
-        adaptive_rollback[adaptive.rollback]
-        adaptive_versioning[adaptive.versioning]
-        adaptive_explanations[adaptive.explanations]
-        adaptive_drift_detect[adaptive.drift_detect]
-        adaptive_benchmark[adaptive.benchmark]
-    end
     subgraph api[api]
         hugrgate[hugrgate]
+    end
+    subgraph edge[edge]
+        edge[edge]
+        edge_platform[edge.platform]
+        edge_memory[edge.memory]
+        edge_affinity[edge.affinity]
+        edge_thermal[edge.thermal]
+        edge_routing[edge.routing]
+        edge_power[edge.power]
+        edge_quant[edge.quant]
+        edge_npu[edge.npu]
+        edge_residency[edge.residency]
+        edge_cachetune[edge.cachetune]
+        edge_storage[edge.storage]
+        edge_bootstrap[edge.bootstrap]
+        edge_recovery[edge.recovery]
+        edge_watchdog[edge.watchdog]
+        edge_telemetry[edge.telemetry]
+        edge_bench[edge.bench]
+        edge_chaos[edge.chaos]
+        edge_gate[edge.gate]
     end
 
     hugrgate --> backend
@@ -154,91 +100,6 @@ flowchart TD
     abstain --> policy
     abstain --> result
     abstain --> spec
-    adaptive --> adaptive_bandit
-    adaptive --> adaptive_benchmark
-    adaptive --> adaptive_coldstart
-    adaptive --> adaptive_competence
-    adaptive --> adaptive_contract_competence
-    adaptive --> adaptive_cost_quality
-    adaptive --> adaptive_counterfactual
-    adaptive --> adaptive_delayed
-    adaptive --> adaptive_domain_competence
-    adaptive --> adaptive_drift_detect
-    adaptive --> adaptive_energy_quality
-    adaptive --> adaptive_explanations
-    adaptive --> adaptive_exploration
-    adaptive --> adaptive_feedback
-    adaptive --> adaptive_latency_quality
-    adaptive --> adaptive_multiobjective
-    adaptive --> adaptive_offline
-    adaptive --> adaptive_privacy_objective
-    adaptive --> adaptive_rollback
-    adaptive --> adaptive_router_features
-    adaptive --> adaptive_safe_exploration
-    adaptive --> adaptive_shadow
-    adaptive --> adaptive_telemetry
-    adaptive --> adaptive_versioning
-    adaptive_bandit --> errors
-    adaptive_benchmark --> adaptive_bandit
-    adaptive_benchmark --> errors
-    adaptive_coldstart --> adaptive_bandit
-    adaptive_coldstart --> adaptive_competence
-    adaptive_coldstart --> errors
-    adaptive_competence --> adaptive_telemetry
-    adaptive_competence --> errors
-    adaptive_contract_competence --> adaptive_competence
-    adaptive_contract_competence --> adaptive_telemetry
-    adaptive_contract_competence --> errors
-    adaptive_contract_competence --> spec
-    adaptive_cost_quality --> errors
-    adaptive_counterfactual --> adaptive_bandit
-    adaptive_counterfactual --> adaptive_offline
-    adaptive_counterfactual --> adaptive_telemetry
-    adaptive_counterfactual --> errors
-    adaptive_delayed --> adaptive_feedback
-    adaptive_delayed --> errors
-    adaptive_domain_competence --> adaptive_competence
-    adaptive_domain_competence --> adaptive_telemetry
-    adaptive_domain_competence --> errors
-    adaptive_domain_competence --> spec
-    adaptive_drift_detect --> adaptive_telemetry
-    adaptive_drift_detect --> drift
-    adaptive_drift_detect --> errors
-    adaptive_energy_quality --> adaptive_cost_quality
-    adaptive_energy_quality --> adaptive_latency_quality
-    adaptive_energy_quality --> errors
-    adaptive_explanations --> adaptive_competence
-    adaptive_explanations --> adaptive_cost_quality
-    adaptive_explanations --> errors
-    adaptive_exploration --> errors
-    adaptive_feedback --> adaptive_telemetry
-    adaptive_feedback --> errors
-    adaptive_feedback --> policy
-    adaptive_feedback --> result
-    adaptive_feedback --> spec
-    adaptive_latency_quality --> adaptive_cost_quality
-    adaptive_latency_quality --> errors
-    adaptive_multiobjective --> adaptive_cost_quality
-    adaptive_multiobjective --> errors
-    adaptive_offline --> adaptive_bandit
-    adaptive_offline --> adaptive_telemetry
-    adaptive_offline --> errors
-    adaptive_privacy_objective --> adaptive_cost_quality
-    adaptive_privacy_objective --> errors
-    adaptive_privacy_objective --> policy
-    adaptive_rollback --> errors
-    adaptive_router_features --> errors
-    adaptive_router_features --> features
-    adaptive_router_features --> policy
-    adaptive_router_features --> spec
-    adaptive_safe_exploration --> adaptive_cost_quality
-    adaptive_safe_exploration --> adaptive_exploration
-    adaptive_safe_exploration --> errors
-    adaptive_safe_exploration --> policy
-    adaptive_shadow --> adaptive_telemetry
-    adaptive_shadow --> errors
-    adaptive_telemetry --> errors
-    adaptive_versioning --> errors
     backend --> errors
     backend --> result
     backend --> spec
@@ -255,8 +116,6 @@ flowchart TD
     backends_llm --> backend
     backends_llm --> errors
     backends_llm --> result
-    backends_llm --> runtimes
-    backends_llm --> runtimes_llama_cpp
     backends_llm --> spec
     backends_logreg --> backend
     backends_logreg --> errors
@@ -335,122 +194,80 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
-    ensemble --> ensemble_adversarial
-    ensemble --> ensemble_api
-    ensemble --> ensemble_averaging
-    ensemble --> ensemble_base
-    ensemble --> ensemble_batch
-    ensemble --> ensemble_benchmarks
-    ensemble --> ensemble_blending
-    ensemble --> ensemble_cache
-    ensemble --> ensemble_calibration
-    ensemble --> ensemble_consensus
-    ensemble --> ensemble_correlation
-    ensemble --> ensemble_disagreement
-    ensemble --> ensemble_diversity
-    ensemble --> ensemble_explanations
-    ensemble --> ensemble_membership
-    ensemble --> ensemble_moe
-    ensemble --> ensemble_provenance
-    ensemble --> ensemble_release
-    ensemble --> ensemble_reliability
-    ensemble --> ensemble_stacking
-    ensemble --> ensemble_voting
-    ensemble_adversarial --> backend
-    ensemble_adversarial --> ensemble_api
-    ensemble_adversarial --> errors
-    ensemble_adversarial --> result
-    ensemble_adversarial --> spec
-    ensemble_api --> backend
-    ensemble_api --> ensemble_averaging
-    ensemble_api --> ensemble_base
-    ensemble_api --> ensemble_batch
-    ensemble_api --> ensemble_blending
-    ensemble_api --> ensemble_consensus
-    ensemble_api --> ensemble_moe
-    ensemble_api --> ensemble_stacking
-    ensemble_api --> ensemble_voting
-    ensemble_api --> errors
-    ensemble_api --> result
-    ensemble_api --> spec
-    ensemble_api --> validation
-    ensemble_averaging --> ensemble_base
-    ensemble_averaging --> errors
-    ensemble_averaging --> result
-    ensemble_base --> backend
-    ensemble_base --> errors
-    ensemble_base --> result
-    ensemble_base --> spec
-    ensemble_base --> validation
-    ensemble_batch --> backend
-    ensemble_batch --> ensemble_base
-    ensemble_batch --> errors
-    ensemble_batch --> result
-    ensemble_batch --> spec
-    ensemble_batch --> validation
-    ensemble_benchmarks --> backend
-    ensemble_benchmarks --> bench
-    ensemble_benchmarks --> ensemble_api
-    ensemble_benchmarks --> errors
-    ensemble_benchmarks --> result
-    ensemble_benchmarks --> spec
-    ensemble_blending --> ensemble_base
-    ensemble_blending --> errors
-    ensemble_blending --> result
-    ensemble_blending --> spec
-    ensemble_cache -.-> ensemble_api
-    ensemble_cache --> errors
-    ensemble_cache --> result
-    ensemble_cache --> spec
-    ensemble_calibration --> ensemble_base
-    ensemble_calibration --> errors
-    ensemble_calibration --> result
-    ensemble_consensus --> abstain
-    ensemble_consensus --> errors
-    ensemble_consensus --> result
-    ensemble_consensus --> spec
-    ensemble_correlation --> ensemble_diversity
-    ensemble_correlation --> errors
-    ensemble_disagreement --> abstain
-    ensemble_disagreement --> backend
-    ensemble_disagreement --> ensemble_base
-    ensemble_disagreement --> ensemble_diversity
-    ensemble_disagreement --> errors
-    ensemble_disagreement --> result
-    ensemble_disagreement --> spec
-    ensemble_diversity --> ensemble_base
-    ensemble_diversity --> errors
-    ensemble_explanations --> errors
-    ensemble_explanations --> result
-    ensemble_membership --> backend
-    ensemble_membership -.-> ensemble_api
-    ensemble_membership --> ensemble_reliability
-    ensemble_membership --> errors
-    ensemble_moe --> ensemble_base
-    ensemble_moe --> errors
-    ensemble_moe --> result
-    ensemble_moe --> spec
-    ensemble_provenance --> errors
-    ensemble_provenance --> provenance
-    ensemble_provenance --> result
-    ensemble_provenance --> spec
-    ensemble_release --> backend
-    ensemble_release --> ensemble_adversarial
-    ensemble_release --> ensemble_batch
-    ensemble_release --> ensemble_benchmarks
-    ensemble_release --> ensemble_correlation
-    ensemble_release --> ensemble_diversity
-    ensemble_release --> errors
-    ensemble_release --> spec
-    ensemble_reliability --> ensemble_correlation
-    ensemble_reliability --> errors
-    ensemble_stacking --> ensemble_base
-    ensemble_stacking --> errors
-    ensemble_stacking --> result
-    ensemble_stacking --> spec
-    ensemble_voting --> ensemble_base
-    ensemble_voting --> errors
-    ensemble_voting --> result
+    edge --> edge_affinity
+    edge --> edge_bench
+    edge --> edge_bootstrap
+    edge --> edge_cachetune
+    edge --> edge_chaos
+    edge --> edge_gate
+    edge --> edge_memory
+    edge --> edge_npu
+    edge --> edge_platform
+    edge --> edge_power
+    edge --> edge_quant
+    edge --> edge_recovery
+    edge --> edge_residency
+    edge --> edge_routing
+    edge --> edge_storage
+    edge --> edge_telemetry
+    edge --> edge_thermal
+    edge --> edge_watchdog
+    edge_affinity --> errors
+    edge_bench -.-> backends_rules
+    edge_bench -.-> core
+    edge_bench -.-> edge_memory
+    edge_bench -.-> edge_npu
+    edge_bench -.-> edge_platform
+    edge_bench -.-> edge_quant
+    edge_bench -.-> edge_storage
+    edge_bench -.-> edge_telemetry
+    edge_bench --> errors
+    edge_bench -.-> policy
+    edge_bench -.-> spec
+    edge_bootstrap --> edge_cachetune
+    edge_bootstrap --> edge_memory
+    edge_bootstrap --> edge_npu
+    edge_bootstrap --> edge_platform
+    edge_bootstrap --> edge_residency
+    edge_bootstrap --> edge_storage
+    edge_bootstrap --> edge_thermal
+    edge_bootstrap --> errors
+    edge_cachetune --> cache
+    edge_cachetune --> edge_memory
+    edge_cachetune --> edge_platform
+    edge_cachetune --> errors
+    edge_cachetune --> policy
+    edge_cachetune --> result
+    edge_cachetune --> spec
+    edge_chaos -.-> backend
+    edge_chaos -.-> edge_cachetune
+    edge_chaos -.-> edge_memory
+    edge_chaos -.-> edge_npu
+    edge_chaos -.-> edge_recovery
+    edge_chaos -.-> edge_residency
+    edge_chaos -.-> edge_routing
+    edge_chaos -.-> edge_storage
+    edge_chaos -.-> edge_thermal
+    edge_chaos -.-> edge_watchdog
+    edge_chaos --> errors
+    edge_chaos -.-> result
+    edge_gate -.-> edge_bench
+    edge_gate -.-> edge_chaos
+    edge_gate --> errors
+    edge_memory --> errors
+    edge_npu --> errors
+    edge_power --> errors
+    edge_quant --> errors
+    edge_recovery --> errors
+    edge_residency --> edge_memory
+    edge_residency --> errors
+    edge_routing --> backend
+    edge_routing --> edge_power
+    edge_routing --> edge_thermal
+    edge_routing --> policy
+    edge_storage --> errors
+    edge_telemetry --> errors
+    edge_watchdog --> errors
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -483,62 +300,6 @@ flowchart TD
     provenance --> result
     provenance --> spec
     result --> errors
-    runtimes --> errors
-    runtimes_bench_matrix --> errors
-    runtimes_bench_matrix --> runtimes
-    runtimes_bench_matrix --> runtimes_conformance
-    runtimes_conformance --> errors
-    runtimes_conformance --> runtimes
-    runtimes_conformance --> runtimes_llama_cpp
-    runtimes_conformance --> runtimes_mlx
-    runtimes_conformance --> runtimes_ollama
-    runtimes_conformance --> runtimes_onnx
-    runtimes_conformance --> runtimes_openvino
-    runtimes_conformance --> runtimes_tensorrt
-    runtimes_conformance --> runtimes_transformers_rt
-    runtimes_conformance --> runtimes_vllm
-    runtimes_eviction --> errors
-    runtimes_eviction --> runtimes_residency
-    runtimes_gguf --> errors
-    runtimes_grammar --> errors
-    runtimes_grammar --> runtimes
-    runtimes_health_probes --> errors
-    runtimes_health_probes --> runtimes
-    runtimes_jsonschema --> errors
-    runtimes_jsonschema --> runtimes
-    runtimes_jsonschema --> runtimes_grammar
-    runtimes_jsonschema --> runtimes_structured
-    runtimes_llama_cpp --> errors
-    runtimes_llama_cpp --> runtimes
-    runtimes_metadata --> runtimes
-    runtimes_metadata -.-> runtimes_gguf
-    runtimes_mlx --> errors
-    runtimes_mlx --> runtimes
-    runtimes_ollama --> errors
-    runtimes_ollama --> runtimes
-    runtimes_onnx --> errors
-    runtimes_onnx --> runtimes
-    runtimes_openvino --> errors
-    runtimes_openvino --> runtimes
-    runtimes_openvino --> runtimes_onnx
-    runtimes_packs --> errors
-    runtimes_packs --> runtimes
-    runtimes_packs --> runtimes_transformers_rt
-    runtimes_probe --> errors
-    runtimes_probe --> runtimes
-    runtimes_residency --> runtimes
-    runtimes_structured --> errors
-    runtimes_structured --> runtimes
-    runtimes_tensorrt --> errors
-    runtimes_tensorrt --> runtimes
-    runtimes_tensorrt --> runtimes_onnx
-    runtimes_transformers_rt --> errors
-    runtimes_transformers_rt --> runtimes
-    runtimes_vllm --> errors
-    runtimes_vllm --> runtimes
-    runtimes_warmup --> backend
-    runtimes_warmup --> errors
-    runtimes_warmup --> runtimes
     serde --> errors
     serde --> policy
     serde --> result
@@ -571,15 +332,13 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
-| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
-| ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
 | service | `server`, `daemon`, `client`, `cli` |
-| adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | api | `hugrgate` |
+| edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 
 ## Internal dependency edges
 
@@ -594,91 +353,6 @@ flowchart TD
 | `abstain` | `policy` | no |
 | `abstain` | `result` | no |
 | `abstain` | `spec` | no |
-| `adaptive` | `adaptive.bandit` | no |
-| `adaptive` | `adaptive.benchmark` | no |
-| `adaptive` | `adaptive.coldstart` | no |
-| `adaptive` | `adaptive.competence` | no |
-| `adaptive` | `adaptive.contract_competence` | no |
-| `adaptive` | `adaptive.cost_quality` | no |
-| `adaptive` | `adaptive.counterfactual` | no |
-| `adaptive` | `adaptive.delayed` | no |
-| `adaptive` | `adaptive.domain_competence` | no |
-| `adaptive` | `adaptive.drift_detect` | no |
-| `adaptive` | `adaptive.energy_quality` | no |
-| `adaptive` | `adaptive.explanations` | no |
-| `adaptive` | `adaptive.exploration` | no |
-| `adaptive` | `adaptive.feedback` | no |
-| `adaptive` | `adaptive.latency_quality` | no |
-| `adaptive` | `adaptive.multiobjective` | no |
-| `adaptive` | `adaptive.offline` | no |
-| `adaptive` | `adaptive.privacy_objective` | no |
-| `adaptive` | `adaptive.rollback` | no |
-| `adaptive` | `adaptive.router_features` | no |
-| `adaptive` | `adaptive.safe_exploration` | no |
-| `adaptive` | `adaptive.shadow` | no |
-| `adaptive` | `adaptive.telemetry` | no |
-| `adaptive` | `adaptive.versioning` | no |
-| `adaptive.bandit` | `errors` | no |
-| `adaptive.benchmark` | `adaptive.bandit` | no |
-| `adaptive.benchmark` | `errors` | no |
-| `adaptive.coldstart` | `adaptive.bandit` | no |
-| `adaptive.coldstart` | `adaptive.competence` | no |
-| `adaptive.coldstart` | `errors` | no |
-| `adaptive.competence` | `adaptive.telemetry` | no |
-| `adaptive.competence` | `errors` | no |
-| `adaptive.contract_competence` | `adaptive.competence` | no |
-| `adaptive.contract_competence` | `adaptive.telemetry` | no |
-| `adaptive.contract_competence` | `errors` | no |
-| `adaptive.contract_competence` | `spec` | no |
-| `adaptive.cost_quality` | `errors` | no |
-| `adaptive.counterfactual` | `adaptive.bandit` | no |
-| `adaptive.counterfactual` | `adaptive.offline` | no |
-| `adaptive.counterfactual` | `adaptive.telemetry` | no |
-| `adaptive.counterfactual` | `errors` | no |
-| `adaptive.delayed` | `adaptive.feedback` | no |
-| `adaptive.delayed` | `errors` | no |
-| `adaptive.domain_competence` | `adaptive.competence` | no |
-| `adaptive.domain_competence` | `adaptive.telemetry` | no |
-| `adaptive.domain_competence` | `errors` | no |
-| `adaptive.domain_competence` | `spec` | no |
-| `adaptive.drift_detect` | `adaptive.telemetry` | no |
-| `adaptive.drift_detect` | `drift` | no |
-| `adaptive.drift_detect` | `errors` | no |
-| `adaptive.energy_quality` | `adaptive.cost_quality` | no |
-| `adaptive.energy_quality` | `adaptive.latency_quality` | no |
-| `adaptive.energy_quality` | `errors` | no |
-| `adaptive.explanations` | `adaptive.competence` | no |
-| `adaptive.explanations` | `adaptive.cost_quality` | no |
-| `adaptive.explanations` | `errors` | no |
-| `adaptive.exploration` | `errors` | no |
-| `adaptive.feedback` | `adaptive.telemetry` | no |
-| `adaptive.feedback` | `errors` | no |
-| `adaptive.feedback` | `policy` | no |
-| `adaptive.feedback` | `result` | no |
-| `adaptive.feedback` | `spec` | no |
-| `adaptive.latency_quality` | `adaptive.cost_quality` | no |
-| `adaptive.latency_quality` | `errors` | no |
-| `adaptive.multiobjective` | `adaptive.cost_quality` | no |
-| `adaptive.multiobjective` | `errors` | no |
-| `adaptive.offline` | `adaptive.bandit` | no |
-| `adaptive.offline` | `adaptive.telemetry` | no |
-| `adaptive.offline` | `errors` | no |
-| `adaptive.privacy_objective` | `adaptive.cost_quality` | no |
-| `adaptive.privacy_objective` | `errors` | no |
-| `adaptive.privacy_objective` | `policy` | no |
-| `adaptive.rollback` | `errors` | no |
-| `adaptive.router_features` | `errors` | no |
-| `adaptive.router_features` | `features` | no |
-| `adaptive.router_features` | `policy` | no |
-| `adaptive.router_features` | `spec` | no |
-| `adaptive.safe_exploration` | `adaptive.cost_quality` | no |
-| `adaptive.safe_exploration` | `adaptive.exploration` | no |
-| `adaptive.safe_exploration` | `errors` | no |
-| `adaptive.safe_exploration` | `policy` | no |
-| `adaptive.shadow` | `adaptive.telemetry` | no |
-| `adaptive.shadow` | `errors` | no |
-| `adaptive.telemetry` | `errors` | no |
-| `adaptive.versioning` | `errors` | no |
 | `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
@@ -695,8 +369,6 @@ flowchart TD
 | `backends.llm` | `backend` | no |
 | `backends.llm` | `errors` | no |
 | `backends.llm` | `result` | no |
-| `backends.llm` | `runtimes` | no |
-| `backends.llm` | `runtimes.llama_cpp` | no |
 | `backends.llm` | `spec` | no |
 | `backends.logreg` | `backend` | no |
 | `backends.logreg` | `errors` | no |
@@ -775,122 +447,80 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
-| `ensemble` | `ensemble.adversarial` | no |
-| `ensemble` | `ensemble.api` | no |
-| `ensemble` | `ensemble.averaging` | no |
-| `ensemble` | `ensemble.base` | no |
-| `ensemble` | `ensemble.batch` | no |
-| `ensemble` | `ensemble.benchmarks` | no |
-| `ensemble` | `ensemble.blending` | no |
-| `ensemble` | `ensemble.cache` | no |
-| `ensemble` | `ensemble.calibration` | no |
-| `ensemble` | `ensemble.consensus` | no |
-| `ensemble` | `ensemble.correlation` | no |
-| `ensemble` | `ensemble.disagreement` | no |
-| `ensemble` | `ensemble.diversity` | no |
-| `ensemble` | `ensemble.explanations` | no |
-| `ensemble` | `ensemble.membership` | no |
-| `ensemble` | `ensemble.moe` | no |
-| `ensemble` | `ensemble.provenance` | no |
-| `ensemble` | `ensemble.release` | no |
-| `ensemble` | `ensemble.reliability` | no |
-| `ensemble` | `ensemble.stacking` | no |
-| `ensemble` | `ensemble.voting` | no |
-| `ensemble.adversarial` | `backend` | no |
-| `ensemble.adversarial` | `ensemble.api` | no |
-| `ensemble.adversarial` | `errors` | no |
-| `ensemble.adversarial` | `result` | no |
-| `ensemble.adversarial` | `spec` | no |
-| `ensemble.api` | `backend` | no |
-| `ensemble.api` | `ensemble.averaging` | no |
-| `ensemble.api` | `ensemble.base` | no |
-| `ensemble.api` | `ensemble.batch` | no |
-| `ensemble.api` | `ensemble.blending` | no |
-| `ensemble.api` | `ensemble.consensus` | no |
-| `ensemble.api` | `ensemble.moe` | no |
-| `ensemble.api` | `ensemble.stacking` | no |
-| `ensemble.api` | `ensemble.voting` | no |
-| `ensemble.api` | `errors` | no |
-| `ensemble.api` | `result` | no |
-| `ensemble.api` | `spec` | no |
-| `ensemble.api` | `validation` | no |
-| `ensemble.averaging` | `ensemble.base` | no |
-| `ensemble.averaging` | `errors` | no |
-| `ensemble.averaging` | `result` | no |
-| `ensemble.base` | `backend` | no |
-| `ensemble.base` | `errors` | no |
-| `ensemble.base` | `result` | no |
-| `ensemble.base` | `spec` | no |
-| `ensemble.base` | `validation` | no |
-| `ensemble.batch` | `backend` | no |
-| `ensemble.batch` | `ensemble.base` | no |
-| `ensemble.batch` | `errors` | no |
-| `ensemble.batch` | `result` | no |
-| `ensemble.batch` | `spec` | no |
-| `ensemble.batch` | `validation` | no |
-| `ensemble.benchmarks` | `backend` | no |
-| `ensemble.benchmarks` | `bench` | no |
-| `ensemble.benchmarks` | `ensemble.api` | no |
-| `ensemble.benchmarks` | `errors` | no |
-| `ensemble.benchmarks` | `result` | no |
-| `ensemble.benchmarks` | `spec` | no |
-| `ensemble.blending` | `ensemble.base` | no |
-| `ensemble.blending` | `errors` | no |
-| `ensemble.blending` | `result` | no |
-| `ensemble.blending` | `spec` | no |
-| `ensemble.cache` | `ensemble.api` | yes |
-| `ensemble.cache` | `errors` | no |
-| `ensemble.cache` | `result` | no |
-| `ensemble.cache` | `spec` | no |
-| `ensemble.calibration` | `ensemble.base` | no |
-| `ensemble.calibration` | `errors` | no |
-| `ensemble.calibration` | `result` | no |
-| `ensemble.consensus` | `abstain` | no |
-| `ensemble.consensus` | `errors` | no |
-| `ensemble.consensus` | `result` | no |
-| `ensemble.consensus` | `spec` | no |
-| `ensemble.correlation` | `ensemble.diversity` | no |
-| `ensemble.correlation` | `errors` | no |
-| `ensemble.disagreement` | `abstain` | no |
-| `ensemble.disagreement` | `backend` | no |
-| `ensemble.disagreement` | `ensemble.base` | no |
-| `ensemble.disagreement` | `ensemble.diversity` | no |
-| `ensemble.disagreement` | `errors` | no |
-| `ensemble.disagreement` | `result` | no |
-| `ensemble.disagreement` | `spec` | no |
-| `ensemble.diversity` | `ensemble.base` | no |
-| `ensemble.diversity` | `errors` | no |
-| `ensemble.explanations` | `errors` | no |
-| `ensemble.explanations` | `result` | no |
-| `ensemble.membership` | `backend` | no |
-| `ensemble.membership` | `ensemble.api` | yes |
-| `ensemble.membership` | `ensemble.reliability` | no |
-| `ensemble.membership` | `errors` | no |
-| `ensemble.moe` | `ensemble.base` | no |
-| `ensemble.moe` | `errors` | no |
-| `ensemble.moe` | `result` | no |
-| `ensemble.moe` | `spec` | no |
-| `ensemble.provenance` | `errors` | no |
-| `ensemble.provenance` | `provenance` | no |
-| `ensemble.provenance` | `result` | no |
-| `ensemble.provenance` | `spec` | no |
-| `ensemble.release` | `backend` | no |
-| `ensemble.release` | `ensemble.adversarial` | no |
-| `ensemble.release` | `ensemble.batch` | no |
-| `ensemble.release` | `ensemble.benchmarks` | no |
-| `ensemble.release` | `ensemble.correlation` | no |
-| `ensemble.release` | `ensemble.diversity` | no |
-| `ensemble.release` | `errors` | no |
-| `ensemble.release` | `spec` | no |
-| `ensemble.reliability` | `ensemble.correlation` | no |
-| `ensemble.reliability` | `errors` | no |
-| `ensemble.stacking` | `ensemble.base` | no |
-| `ensemble.stacking` | `errors` | no |
-| `ensemble.stacking` | `result` | no |
-| `ensemble.stacking` | `spec` | no |
-| `ensemble.voting` | `ensemble.base` | no |
-| `ensemble.voting` | `errors` | no |
-| `ensemble.voting` | `result` | no |
+| `edge` | `edge.affinity` | no |
+| `edge` | `edge.bench` | no |
+| `edge` | `edge.bootstrap` | no |
+| `edge` | `edge.cachetune` | no |
+| `edge` | `edge.chaos` | no |
+| `edge` | `edge.gate` | no |
+| `edge` | `edge.memory` | no |
+| `edge` | `edge.npu` | no |
+| `edge` | `edge.platform` | no |
+| `edge` | `edge.power` | no |
+| `edge` | `edge.quant` | no |
+| `edge` | `edge.recovery` | no |
+| `edge` | `edge.residency` | no |
+| `edge` | `edge.routing` | no |
+| `edge` | `edge.storage` | no |
+| `edge` | `edge.telemetry` | no |
+| `edge` | `edge.thermal` | no |
+| `edge` | `edge.watchdog` | no |
+| `edge.affinity` | `errors` | no |
+| `edge.bench` | `backends.rules` | yes |
+| `edge.bench` | `core` | yes |
+| `edge.bench` | `edge.memory` | yes |
+| `edge.bench` | `edge.npu` | yes |
+| `edge.bench` | `edge.platform` | yes |
+| `edge.bench` | `edge.quant` | yes |
+| `edge.bench` | `edge.storage` | yes |
+| `edge.bench` | `edge.telemetry` | yes |
+| `edge.bench` | `errors` | no |
+| `edge.bench` | `policy` | yes |
+| `edge.bench` | `spec` | yes |
+| `edge.bootstrap` | `edge.cachetune` | no |
+| `edge.bootstrap` | `edge.memory` | no |
+| `edge.bootstrap` | `edge.npu` | no |
+| `edge.bootstrap` | `edge.platform` | no |
+| `edge.bootstrap` | `edge.residency` | no |
+| `edge.bootstrap` | `edge.storage` | no |
+| `edge.bootstrap` | `edge.thermal` | no |
+| `edge.bootstrap` | `errors` | no |
+| `edge.cachetune` | `cache` | no |
+| `edge.cachetune` | `edge.memory` | no |
+| `edge.cachetune` | `edge.platform` | no |
+| `edge.cachetune` | `errors` | no |
+| `edge.cachetune` | `policy` | no |
+| `edge.cachetune` | `result` | no |
+| `edge.cachetune` | `spec` | no |
+| `edge.chaos` | `backend` | yes |
+| `edge.chaos` | `edge.cachetune` | yes |
+| `edge.chaos` | `edge.memory` | yes |
+| `edge.chaos` | `edge.npu` | yes |
+| `edge.chaos` | `edge.recovery` | yes |
+| `edge.chaos` | `edge.residency` | yes |
+| `edge.chaos` | `edge.routing` | yes |
+| `edge.chaos` | `edge.storage` | yes |
+| `edge.chaos` | `edge.thermal` | yes |
+| `edge.chaos` | `edge.watchdog` | yes |
+| `edge.chaos` | `errors` | no |
+| `edge.chaos` | `result` | yes |
+| `edge.gate` | `edge.bench` | yes |
+| `edge.gate` | `edge.chaos` | yes |
+| `edge.gate` | `errors` | no |
+| `edge.memory` | `errors` | no |
+| `edge.npu` | `errors` | no |
+| `edge.power` | `errors` | no |
+| `edge.quant` | `errors` | no |
+| `edge.recovery` | `errors` | no |
+| `edge.residency` | `edge.memory` | no |
+| `edge.residency` | `errors` | no |
+| `edge.routing` | `backend` | no |
+| `edge.routing` | `edge.power` | no |
+| `edge.routing` | `edge.thermal` | no |
+| `edge.routing` | `policy` | no |
+| `edge.storage` | `errors` | no |
+| `edge.telemetry` | `errors` | no |
+| `edge.watchdog` | `errors` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |
@@ -923,62 +553,6 @@ flowchart TD
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
-| `runtimes` | `errors` | no |
-| `runtimes.bench_matrix` | `errors` | no |
-| `runtimes.bench_matrix` | `runtimes` | no |
-| `runtimes.bench_matrix` | `runtimes.conformance` | no |
-| `runtimes.conformance` | `errors` | no |
-| `runtimes.conformance` | `runtimes` | no |
-| `runtimes.conformance` | `runtimes.llama_cpp` | no |
-| `runtimes.conformance` | `runtimes.mlx` | no |
-| `runtimes.conformance` | `runtimes.ollama` | no |
-| `runtimes.conformance` | `runtimes.onnx` | no |
-| `runtimes.conformance` | `runtimes.openvino` | no |
-| `runtimes.conformance` | `runtimes.tensorrt` | no |
-| `runtimes.conformance` | `runtimes.transformers_rt` | no |
-| `runtimes.conformance` | `runtimes.vllm` | no |
-| `runtimes.eviction` | `errors` | no |
-| `runtimes.eviction` | `runtimes.residency` | no |
-| `runtimes.gguf` | `errors` | no |
-| `runtimes.grammar` | `errors` | no |
-| `runtimes.grammar` | `runtimes` | no |
-| `runtimes.health_probes` | `errors` | no |
-| `runtimes.health_probes` | `runtimes` | no |
-| `runtimes.jsonschema` | `errors` | no |
-| `runtimes.jsonschema` | `runtimes` | no |
-| `runtimes.jsonschema` | `runtimes.grammar` | no |
-| `runtimes.jsonschema` | `runtimes.structured` | no |
-| `runtimes.llama_cpp` | `errors` | no |
-| `runtimes.llama_cpp` | `runtimes` | no |
-| `runtimes.metadata` | `runtimes` | no |
-| `runtimes.metadata` | `runtimes.gguf` | yes |
-| `runtimes.mlx` | `errors` | no |
-| `runtimes.mlx` | `runtimes` | no |
-| `runtimes.ollama` | `errors` | no |
-| `runtimes.ollama` | `runtimes` | no |
-| `runtimes.onnx` | `errors` | no |
-| `runtimes.onnx` | `runtimes` | no |
-| `runtimes.openvino` | `errors` | no |
-| `runtimes.openvino` | `runtimes` | no |
-| `runtimes.openvino` | `runtimes.onnx` | no |
-| `runtimes.packs` | `errors` | no |
-| `runtimes.packs` | `runtimes` | no |
-| `runtimes.packs` | `runtimes.transformers_rt` | no |
-| `runtimes.probe` | `errors` | no |
-| `runtimes.probe` | `runtimes` | no |
-| `runtimes.residency` | `runtimes` | no |
-| `runtimes.structured` | `errors` | no |
-| `runtimes.structured` | `runtimes` | no |
-| `runtimes.tensorrt` | `errors` | no |
-| `runtimes.tensorrt` | `runtimes` | no |
-| `runtimes.tensorrt` | `runtimes.onnx` | no |
-| `runtimes.transformers_rt` | `errors` | no |
-| `runtimes.transformers_rt` | `runtimes` | no |
-| `runtimes.vllm` | `errors` | no |
-| `runtimes.vllm` | `runtimes` | no |
-| `runtimes.warmup` | `backend` | no |
-| `runtimes.warmup` | `errors` | no |
-| `runtimes.warmup` | `runtimes` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |

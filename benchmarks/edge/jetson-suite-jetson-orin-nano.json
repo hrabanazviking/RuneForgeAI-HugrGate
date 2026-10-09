@@ -1,0 +1,99 @@
+{
+  "schema": "edge-bench/1",
+  "name": "jetson-suite-jetson-orin-nano",
+  "timestamp": 1791551601.5843694,
+  "platform": {
+    "arch": "x86_64",
+    "system": "Linux",
+    "release": "7.0.0-39-generic",
+    "python_version": [
+      3,
+      12,
+      3
+    ],
+    "python_implementation": "CPython",
+    "cpu_count": 2,
+    "cpu_features": [],
+    "page_size": 4096,
+    "byteorder": "little",
+    "is_64bit": true,
+    "is_arm64": false,
+    "live": true
+  },
+  "baseline_board": {
+    "board": "Jetson Orin Nano",
+    "cpu_count": 6,
+    "cpu_desc": "6-core Cortex-A78AE ARMv8.2 @ 1.7 GHz",
+    "ram_mb": 8192,
+    "recommended_cache_entries": 2000,
+    "recommended_max_resident_models": 4,
+    "recommended_power_budget_mw": 15000,
+    "notes": [
+      "40 INT8 TOPS via Ampere GPU + DLA; JetPack required",
+      "power modes (7W/15W) change the envelope at runtime"
+    ]
+  },
+  "hardware_note": "SURROGATE HOST (x86_64): numbers are not Jetson Orin Nano measurements; NEEDS_HARDWARE_VALIDATION on-device",
+  "cases": {
+    "decide/rules": {
+      "name": "decide/rules",
+      "iterations": 300,
+      "mean_s": 9.723024333046244e-05,
+      "p50_s": 9.200299973599613e-05,
+      "p99_s": 0.00021401367130238178,
+      "min_s": 8.154200077115092e-05,
+      "max_s": 0.000596005000261357,
+      "ops_per_s": 10284.865755207853
+    },
+    "quant/int8-matvec": {
+      "name": "quant/int8-matvec",
+      "iterations": 300,
+      "mean_s": 1.4771383266634075e-05,
+      "p50_s": 1.2128000889788382e-05,
+      "p99_s": 4.7060959641384905e-05,
+      "min_s": 1.195799995912239e-05,
+      "max_s": 0.0005123390001244843,
+      "ops_per_s": 67698.46682259081
+    },
+    "quant/int4-roundtrip": {
+      "name": "quant/int4-roundtrip",
+      "iterations": 300,
+      "mean_s": 4.2318076648371065e-05,
+      "p50_s": 3.803250001510605e-05,
+      "p99_s": 0.00016900308008189284,
+      "min_s": 3.742599983524997e-05,
+      "max_s": 0.0003924390002794098,
+      "ops_per_s": 23630.56356056042
+    },
+    "storage/put-flush": {
+      "name": "storage/put-flush",
+      "iterations": 300,
+      "mean_s": 0.0002179114433298916,
+      "p50_s": 0.0001187230000141426,
+      "p99_s": 0.0006540493899956335,
+      "min_s": 4.665099913836457e-05,
+      "max_s": 0.0013561349987867288,
+      "ops_per_s": 4589.020130008137
+    },
+    "telemetry/record": {
+      "name": "telemetry/record",
+      "iterations": 300,
+      "mean_s": 2.723066657684588e-06,
+      "p50_s": 2.623999534989707e-06,
+      "p99_s": 4.15599970438052e-06,
+      "min_s": 2.534001396270469e-06,
+      "max_s": 4.9270001909462735e-06,
+      "ops_per_s": 367233.0228046256
+    },
+    "npu/detect": {
+      "name": "npu/detect",
+      "iterations": 300,
+      "mean_s": 5.30596733733546e-05,
+      "p50_s": 4.204300057608634e-05,
+      "p99_s": 0.00029654265072167615,
+      "min_s": 4.1040999349206686e-05,
+      "max_s": 0.0005247680001048138,
+      "ops_per_s": 18846.70478394196
+    }
+  }
+}

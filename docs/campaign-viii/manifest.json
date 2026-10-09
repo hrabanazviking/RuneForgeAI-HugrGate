@@ -1,0 +1,447 @@
+{
+  "campaign": "VIII",
+  "generated_utc": "2026-10-09T13:22:52.033760+00:00",
+  "mission": "Edge Intelligence",
+  "module_count": 19,
+  "modules": {
+    "hugrgate.edge.__init__": {
+      "loc": 269,
+      "public_names": [
+        "ARTIFACT_SCHEMA",
+        "BUILTIN_SCENARIOS",
+        "CRITICAL_AVAILABLE_BYTES",
+        "CRITICAL_C",
+        "DEFAULT_BUFFER_BYTES",
+        "DEFAULT_ENTRY_BYTES",
+        "DEFAULT_MAX_EVENTS",
+        "DEFAULT_MAX_VALUE_BYTES",
+        "GATE_CHECKS",
+        "LOW_AVAILABLE_BYTES",
+        "PI_BASELINES",
+        "PRECISIONS",
+        "PROFILES",
+        "QUANT_PROFILES",
+        "THERMAL_CLASSES",
+        "WARN_C",
+        "AffinityController",
+        "Arm64AuditReport",
+        "Arm64Finding",
+        "BenchmarkCase",
+        "BenchmarkError",
+        "BenchmarkResult",
+        "BootstrapContext",
+        "BootstrapPlan",
+        "BootstrapStep",
+        "ChaosResult",
+        "ChaosRunner",
+        "Checkpoint",
+        "CheckpointJournal",
+        "EdgeAffinityError",
+        "EdgeBaseline",
+        "EdgeBenchmark",
+        "EdgeCache",
+        "EdgeCacheConfig",
+        "EdgeCacheError",
+        "EdgeMemoryError",
+        "EdgeRouter",
+        "EdgeWatchdog",
+        "FaultScenario",
+        "GateCheck",
+        "GateReport",
+        "HailoAdapter",
+        "Int4Adapter",
+        "JetsonAdapter",
+        "MemoryInfo",
+        "MemoryManager",
+        "MemoryMode",
+        "MissPolicy",
+        "MockNPUAdapter",
+        "MockPowerSource",
+        "MockThermalSensor",
+        "ModelEntry",
+        "NPUAdapter",
+        "NPUCapability",
+        "NPUError",
+        "NPURegistry",
+        "OfflineBootstrapError",
+        "OpenVINOAdapter",
+        "PiBoard",
+        "PlatformInfo",
+        "PlatformProbe",
+        "PowerBudget",
+        "PowerBudgetError",
+        "PowerSource",
+        "QuantError",
+        "QuantFormat",
+        "QuantProfile",
+        "QuantProfileRegistry",
+        "QuantizedTensor",
+        "RecoveryError",
+        "ResidencyError",
+        "ResidencyManager",
+        "StepOutcome",
+        "StorageError",
+        "SysfsPowerSensor",
+        "SysfsThermalSensor",
+        "TelemetryError",
+        "TelemetryEvent",
+        "TelemetryLite",
+        "ThermalGovernor",
+        "ThermalLevel",
+        "ThermalSensor",
+        "ThermalState",
+        "WatchdogError",
+        "WearAwareStore",
+        "audit_arm64",
+        "build_builtin_runner",
+        "cache_config_for_board",
+        "compare_artifacts",
+        "default_edge_plan",
+        "dequantize_int8",
+        "detect_pi_board",
+        "edge_bench_suite",
+        "edge_cost_of",
+        "edge_release_gate",
+        "estimate",
+        "int8_matvec",
+        "int8_roundtrip_error",
+        "jetson_baseline",
+        "jetson_bench_suite",
+        "load_artifact",
+        "parse_cpu_list",
+        "pi_baseline",
+        "pi_bench_suite",
+        "pin_callable",
+        "quantize_int8",
+        "run_builtin_scenarios",
+        "select_profile",
+        "tune_cache"
+      ]
+    },
+    "hugrgate.edge.affinity": {
+      "loc": 232,
+      "public_names": [
+        "PROFILES",
+        "AffinityController",
+        "EdgeAffinityError",
+        "parse_cpu_list",
+        "pin_callable"
+      ]
+    },
+    "hugrgate.edge.bench": {
+      "loc": 458,
+      "public_names": [
+        "ARTIFACT_SCHEMA",
+        "BenchmarkCase",
+        "BenchmarkError",
+        "BenchmarkResult",
+        "EdgeBenchmark",
+        "compare_artifacts",
+        "edge_bench_suite",
+        "jetson_baseline",
+        "jetson_bench_suite",
+        "load_artifact",
+        "pi_bench_suite"
+      ]
+    },
+    "hugrgate.edge.bootstrap": {
+      "loc": 294,
+      "public_names": [
+        "BootstrapContext",
+        "BootstrapPlan",
+        "BootstrapStep",
+        "OfflineBootstrapError",
+        "StepOutcome",
+        "default_edge_plan"
+      ]
+    },
+    "hugrgate.edge.cachetune": {
+      "loc": 157,
+      "public_names": [
+        "DEFAULT_ENTRY_BYTES",
+        "EdgeCache",
+        "EdgeCacheConfig",
+        "EdgeCacheError",
+        "cache_config_for_board",
+        "tune_cache"
+      ]
+    },
+    "hugrgate.edge.chaos": {
+      "loc": 259,
+      "public_names": [
+        "BUILTIN_SCENARIOS",
+        "ChaosResult",
+        "ChaosRunner",
+        "FaultScenario",
+        "build_builtin_runner"
+      ]
+    },
+    "hugrgate.edge.gate": {
+      "loc": 258,
+      "public_names": [
+        "GATE_CHECKS",
+        "GateCheck",
+        "GateReport",
+        "edge_release_gate"
+      ]
+    },
+    "hugrgate.edge.memory": {
+      "loc": 210,
+      "public_names": [
+        "CRITICAL_AVAILABLE_BYTES",
+        "LOW_AVAILABLE_BYTES",
+        "EdgeMemoryError",
+        "MemoryInfo",
+        "MemoryManager",
+        "MemoryMode"
+      ]
+    },
+    "hugrgate.edge.npu": {
+      "loc": 507,
+      "public_names": [
+        "PRECISIONS",
+        "HailoAdapter",
+        "JetsonAdapter",
+        "MockNPUAdapter",
+        "NPUAdapter",
+        "NPUCapability",
+        "NPUError",
+        "NPURegistry",
+        "OpenVINOAdapter"
+      ]
+    },
+    "hugrgate.edge.platform": {
+      "loc": 472,
+      "public_names": [
+        "Arm64AuditReport",
+        "Arm64Finding",
+        "EdgeBaseline",
+        "PiBoard",
+        "PlatformInfo",
+        "PlatformProbe",
+        "audit_arm64",
+        "detect_pi_board",
+        "pi_baseline"
+      ]
+    },
+    "hugrgate.edge.power": {
+      "loc": 152,
+      "public_names": [
+        "MockPowerSource",
+        "PowerBudget",
+        "PowerBudgetError",
+        "PowerSource",
+        "SysfsPowerSensor"
+      ]
+    },
+    "hugrgate.edge.quant": {
+      "loc": 577,
+      "public_names": [
+        "QUANT_PROFILES",
+        "Int4Adapter",
+        "QuantError",
+        "QuantFormat",
+        "QuantProfile",
+        "QuantProfileRegistry",
+        "QuantizedTensor",
+        "dequantize_int8",
+        "estimate",
+        "int8_matvec",
+        "int8_roundtrip_error",
+        "quantize_int8",
+        "select_profile"
+      ]
+    },
+    "hugrgate.edge.recovery": {
+      "loc": 191,
+      "public_names": [
+        "Checkpoint",
+        "CheckpointJournal",
+        "RecoveryError"
+      ]
+    },
+    "hugrgate.edge.residency": {
+      "loc": 199,
+      "public_names": [
+        "ModelEntry",
+        "ResidencyError",
+        "ResidencyManager"
+      ]
+    },
+    "hugrgate.edge.routing": {
+      "loc": 146,
+      "public_names": [
+        "THERMAL_CLASSES",
+        "EdgeRouter",
+        "edge_cost_of"
+      ]
+    },
+    "hugrgate.edge.storage": {
+      "loc": 283,
+      "public_names": [
+        "DEFAULT_BUFFER_BYTES",
+        "DEFAULT_MAX_VALUE_BYTES",
+        "StorageError",
+        "WearAwareStore"
+      ]
+    },
+    "hugrgate.edge.telemetry": {
+      "loc": 174,
+      "public_names": [
+        "DEFAULT_MAX_EVENTS",
+        "TelemetryError",
+        "TelemetryEvent",
+        "TelemetryLite"
+      ]
+    },
+    "hugrgate.edge.thermal": {
+      "loc": 182,
+      "public_names": [
+        "CRITICAL_C",
+        "WARN_C",
+        "MockThermalSensor",
+        "SysfsThermalSensor",
+        "ThermalGovernor",
+        "ThermalLevel",
+        "ThermalSensor",
+        "ThermalState"
+      ]
+    },
+    "hugrgate.edge.watchdog": {
+      "loc": 164,
+      "public_names": [
+        "EdgeWatchdog",
+        "MissPolicy",
+        "WatchdogError"
+      ]
+    }
+  },
+  "slices": [
+    {
+      "doc": "176-arm64-compatibility-audit.md",
+      "doc_chars": 2404,
+      "slice": 176
+    },
+    {
+      "doc": "177-raspberry-pi-baseline.md",
+      "doc_chars": 2202,
+      "slice": 177
+    },
+    {
+      "doc": "178-low-ram-operating-mode.md",
+      "doc_chars": 1951,
+      "slice": 178
+    },
+    {
+      "doc": "179-cpu-affinity-controls.md",
+      "doc_chars": 2040,
+      "slice": 179
+    },
+    {
+      "doc": "180-thermal-aware-routing.md",
+      "doc_chars": 2182,
+      "slice": 180
+    },
+    {
+      "doc": "181-power-budget-routing.md",
+      "doc_chars": 1799,
+      "slice": 181
+    },
+    {
+      "doc": "182-quantized-model-profiles.md",
+      "doc_chars": 2119,
+      "slice": 182
+    },
+    {
+      "doc": "183-int8-inference-path.md",
+      "doc_chars": 2225,
+      "slice": 183
+    },
+    {
+      "doc": "184-int4-adapter-support.md",
+      "doc_chars": 1905,
+      "slice": 184
+    },
+    {
+      "doc": "185-npu-capability-abstraction.md",
+      "doc_chars": 1949,
+      "slice": 185
+    },
+    {
+      "doc": "186-hailo-adapter-boundary.md",
+      "doc_chars": 1677,
+      "slice": 186
+    },
+    {
+      "doc": "187-jetson-adapter-boundary.md",
+      "doc_chars": 1714,
+      "slice": 187
+    },
+    {
+      "doc": "188-openvino-npu-path.md",
+      "doc_chars": 1554,
+      "slice": 188
+    },
+    {
+      "doc": "189-edge-model-residency.md",
+      "doc_chars": 2023,
+      "slice": 189
+    },
+    {
+      "doc": "190-edge-cache-tuning.md",
+      "doc_chars": 1740,
+      "slice": 190
+    },
+    {
+      "doc": "191-flash-wear-aware-storage.md",
+      "doc_chars": 2076,
+      "slice": 191
+    },
+    {
+      "doc": "192-offline-first-bootstrap.md",
+      "doc_chars": 1967,
+      "slice": 192
+    },
+    {
+      "doc": "193-intermittent-power-recovery.md",
+      "doc_chars": 1884,
+      "slice": 193
+    },
+    {
+      "doc": "194-edge-watchdog.md",
+      "doc_chars": 1678,
+      "slice": 194
+    },
+    {
+      "doc": "195-edge-telemetry-lite.md",
+      "doc_chars": 1527,
+      "slice": 195
+    },
+    {
+      "doc": "196-edge-benchmark-harness.md",
+      "doc_chars": 2417,
+      "slice": 196
+    },
+    {
+      "doc": "197-pi-benchmark-suite.md",
+      "doc_chars": 1981,
+      "slice": 197
+    },
+    {
+      "doc": "198-jetson-benchmark-suite.md",
+      "doc_chars": 1907,
+      "slice": 198
+    },
+    {
+      "doc": "199-edge-failure-testing.md",
+      "doc_chars": 2130,
+      "slice": 199
+    },
+    {
+      "doc": "200-edge-intelligence-release-gate.md",
+      "doc_chars": 3937,
+      "slice": 200
+    }
+  ],
+  "total_public_names": 216
+}

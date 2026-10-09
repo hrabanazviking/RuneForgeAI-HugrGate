@@ -1,0 +1,109 @@
+{
+  "schema": "edge-bench/1",
+  "name": "pi-suite-raspberry-pi-5",
+  "timestamp": 1791551551.2644942,
+  "platform": {
+    "arch": "x86_64",
+    "system": "Linux",
+    "release": "7.0.0-39-generic",
+    "python_version": [
+      3,
+      12,
+      3
+    ],
+    "python_implementation": "CPython",
+    "cpu_count": 2,
+    "cpu_features": [],
+    "page_size": 4096,
+    "byteorder": "little",
+    "is_64bit": true,
+    "is_arm64": false,
+    "live": true
+  },
+  "baseline_board": {
+    "board": "Raspberry Pi 5",
+    "cpu_count": 4,
+    "cpu_desc": "BCM2712 quad Cortex-A76 @ 2.4 GHz",
+    "ram_mb": 8192,
+    "recommended_cache_entries": 2000,
+    "recommended_max_resident_models": 4,
+    "recommended_power_budget_mw": 15000,
+    "notes": [
+      "16 k page-size kernel images exist; audit flags unusual page sizes",
+      "PCIe HATs (Hailo-8, NVMe) raise the power envelope"
+    ]
+  },
+  "hardware_note": "SURROGATE HOST (x86_64): numbers are not Raspberry Pi 5 measurements; NEEDS_HARDWARE_VALIDATION on-device",
+  "cases": {
+    "decide/rules": {
+      "name": "decide/rules",
+      "iterations": 300,
+      "mean_s": 9.179998003673973e-05,
+      "p50_s": 8.577400012654834e-05,
+      "p99_s": 0.00021420875979856642,
+      "min_s": 8.060100026341388e-05,
+      "max_s": 0.0004635960003724904,
+      "ops_per_s": 10893.24855626096
+    },
+    "quant/int8-matvec": {
+      "name": "quant/int8-matvec",
+      "iterations": 300,
+      "mean_s": 1.3647846681124064e-05,
+      "p50_s": 1.2237999726494309e-05,
+      "p99_s": 3.3410290197934897e-05,
+      "min_s": 1.2028000128339045e-05,
+      "max_s": 0.00016526800027349964,
+      "ops_per_s": 73271.63202844816
+    },
+    "quant/int4-roundtrip": {
+      "name": "quant/int4-roundtrip",
+      "iterations": 300,
+      "mean_s": 3.928509003041351e-05,
+      "p50_s": 3.8238000342971645e-05,
+      "p99_s": 4.881620991909585e-05,
+      "min_s": 3.751599979295861e-05,
+      "max_s": 8.015000003069872e-05,
+      "ops_per_s": 25454.949937134563
+    },
+    "storage/put-flush": {
+      "name": "storage/put-flush",
+      "iterations": 300,
+      "mean_s": 0.0001985449232688552,
+      "p50_s": 0.00011367549996066373,
+      "p99_s": 0.00046663801011163745,
+      "min_s": 4.594899928633822e-05,
+      "max_s": 0.000544085999536037,
+      "ops_per_s": 5036.643513900742
+    },
+    "telemetry/record": {
+      "name": "telemetry/record",
+      "iterations": 300,
+      "mean_s": 2.951829992525745e-06,
+      "p50_s": 2.624000444484409e-06,
+      "p99_s": 5.2631201651819755e-06,
+      "min_s": 2.54299993684981e-06,
+      "max_s": 3.7787000110256486e-05,
+      "ops_per_s": 338772.89767096174
+    },
+    "platform/audit": {
+      "name": "platform/audit",
+      "iterations": 300,
+      "mean_s": 4.949829966183946e-06,
+      "p50_s": 4.726999577542301e-06,
+      "p99_s": 1.1366309499862829e-05,
+      "min_s": 4.5469996621250175e-06,
+      "max_s": 2.8593000024557114e-05,
+      "ops_per_s": 202027.14170623248
+    },
+    "memory/refresh": {
+      "name": "memory/refresh",
+      "iterations": 300,
+      "mean_s": 4.2838966692215765e-06,
+      "p50_s": 4.1860002966132015e-06,
+      "p99_s": 4.838000231757177e-06,
+      "min_s": 4.0859995351638645e-06,
+      "max_s": 1.7907000255945604e-05,
+      "ops_per_s": 233432.33444090266
+    }
+  }
+}

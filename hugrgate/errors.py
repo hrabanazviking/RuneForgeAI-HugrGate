@@ -19,15 +19,30 @@ __all__ = [
     "Abstention",
     "BackendError",
     "BackendUnavailable",
+    "BenchmarkError",
     "CalibrationError",
     "ContractError",
     "GGUFError",
+    "ChaosError",
+    "EdgeAffinityError",
+    "EdgeCacheError",
+    "EdgeMemoryError",
+    "GateError",
     "HugrGateError",
+    "NPUError",
+    "OfflineBootstrapError",
     "PolicyError",
+    "PowerBudgetError",
     "PrivacyViolation",
+    "QuantError",
     "QueueFull",
+    "RecoveryError",
+    "ResidencyError",
     "SpecError",
+    "StorageError",
+    "TelemetryError",
     "TimeoutError",
+    "WatchdogError",
 ]
 
 
@@ -155,7 +170,6 @@ class Abstention(HugrGateError):
 
 class GGUFError(HugrGateError):
     """A GGUF model file is corrupt, truncated, or not GGUF at all.
-
     Moved into the taxonomy in slice 175 (was a bare ``Exception``
     in ``hugrgate.runtimes.gguf``). Recoverable: callers such as the
     model metadata scanner skip the file and continue with the next
@@ -163,3 +177,54 @@ class GGUFError(HugrGateError):
     """
     code = "gguf_error"
     recoverable = True
+# --- Campaign VIII: edge-intelligence errors -----------------------------------
+# Each slice owned its error locally; slice 200 promotes them into the
+# taxonomy so every raise site in the package is a taxonomy error or a
+# stdlib validation error (tests/test_errors.py). Codes are unique and
+# stable; recoverable is deliberate per class (see slice 200 doc).
+class EdgeAffinityError(HugrGateError):
+    """An affinity request was invalid or the OS refused it."""
+    code = "edge_affinity_error"
+class BenchmarkError(HugrGateError):
+    """A benchmark definition or artifact was invalid."""
+    code = "edge_benchmark_error"
+class OfflineBootstrapError(HugrGateError):
+    """A bootstrap plan violates the offline-first law."""
+    code = "edge_bootstrap_error"
+    recoverable = False
+class EdgeCacheError(HugrGateError):
+    """A cache-tuning request was invalid."""
+    code = "edge_cache_error"
+class ChaosError(HugrGateError):
+    """A fault-injection scenario failed its verification."""
+    code = "edge_chaos_error"
+class GateError(HugrGateError):
+    """The release gate itself failed to execute (not a check failure)."""
+    code = "edge_gate_error"
+class EdgeMemoryError(HugrGateError):
+    """A memory budget was exceeded or an allocation was invalid."""
+    code = "edge_memory_error"
+class NPUError(HugrGateError):
+    """An NPU operation failed (load/infer on a present device)."""
+    code = "edge_npu_error"
+class PowerBudgetError(HugrGateError):
+    """A power-budget invariant was violated."""
+    code = "edge_power_budget_error"
+class QuantError(HugrGateError):
+    """A quantization profile or operation was invalid."""
+    code = "edge_quant_error"
+class RecoveryError(HugrGateError):
+    """A checkpoint could not be written or recovered."""
+    code = "edge_recovery_error"
+class ResidencyError(HugrGateError):
+    """A residency invariant was violated (unknown model, no room)."""
+    code = "edge_residency_error"
+class StorageError(HugrGateError):
+    """A storage invariant was violated (budget, format, key)."""
+    code = "edge_storage_error"
+class TelemetryError(HugrGateError):
+    """A telemetry invariant was violated."""
+    code = "edge_telemetry_error"
+class WatchdogError(HugrGateError):
+    """A watchdog invariant was violated."""
+    code = "edge_watchdog_error"

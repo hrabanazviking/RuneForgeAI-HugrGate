@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 66 · **public names:** 295
+**Modules:** 63 · **public names:** 415
 
 ## API stability policy
 
@@ -29,7 +29,6 @@ that this document never drifts from the code.
 | `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'float | None' = None, remote_inference: 'bool' = False, allowed_backends: 'list[str] | None' = None, preferred_backends: 'list[str] | None' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'float | None' = None, review_band: 'tuple | None' = None) -> None` |
 | `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
 | `DecisionSpec` | class | `(type: 'str', options: 'list[str] | None' = None, statement: 'str | None' = None, levels: 'list[str] | None' = None, minimum: 'float | None' = None, maximum: 'float | None' = None, labels: 'list[str] | None' = None, metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGate` | class | `(registry: 'BackendRegistry | None' = None)` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -259,6 +258,317 @@ that this document never drifts from the code.
 | `population_stability_index` | function | `(reference: 'list[float]', live: 'list[float]') -> 'float'` |
 | `recalibration_advisory` | function | `(report: 'DriftReport') -> 'dict[str, Any]'` |
 
+### `hugrgate.edge`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
+| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
+| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
+| `CRITICAL_C` | constant | `85.0` |
+| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
+| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
+| `DEFAULT_MAX_EVENTS` | constant | `256` |
+| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
+| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
+| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
+| `PI_BASELINES` | constant | `{'Raspberry Pi 5': EdgeBaseline(board='Raspberry Pi 5', cpu_` |
+| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
+| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
+| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
+| `WARN_C` | constant | `70.0` |
+| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
+| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
+| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
+| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
+| `BootstrapContext` | class | `()` |
+| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
+| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
+| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ChaosRunner` | class | `()` |
+| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
+| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
+| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
+| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
+| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
+| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
+| `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
+| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
+| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
+| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
+| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
+| `MemoryMode` | class | `(*values)` |
+| `MissPolicy` | class | `(*values)` |
+| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
+| `MockPowerSource` | class | `(script: 'list[float | None]')` |
+| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
+| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `NPUAdapter` | class | `()` |
+| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPURegistry` | class | `()` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
+| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
+| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
+| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
+| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerSource` | class | `()` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantFormat` | class | `(*values)` |
+| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
+| `QuantProfileRegistry` | class | `()` |
+| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
+| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
+| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
+| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
+| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
+| `ThermalLevel` | class | `(*values)` |
+| `ThermalSensor` | class | `()` |
+| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
+| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
+| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
+| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
+| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
+| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
+| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
+| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
+| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
+| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
+| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
+| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
+| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
+| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
+| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
+| `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
+| `run_builtin_scenarios` | function | `() -> 'dict[str, Any]'` |
+| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
+| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+
+### `hugrgate.edge.affinity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
+| `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `parse_cpu_list` | function | `(spec: 'str') -> 'frozenset[int]'` |
+| `pin_callable` | function | `(fn: 'Callable[..., Any]', cpus: 'frozenset[int] | str', controller: 'AffinityController | None' = None) -> 'Any'` |
+
+### `hugrgate.edge.bench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ARTIFACT_SCHEMA` | constant | `'edge-bench/1'` |
+| `BenchmarkCase` | class | `(name: 'str', fn: 'Callable[[], Any]', iterations: 'int' = 100, warmup: 'int' = 10) -> None` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkResult` | class | `(name: 'str', iterations: 'int', mean_s: 'float', p50_s: 'float', p99_s: 'float', min_s: 'float', max_s: 'float') -> None` |
+| `EdgeBenchmark` | class | `(name: 'str', platform: 'PlatformInfo | None' = None, baseline_board: 'EdgeBaseline | None' = None, timer: 'Callable[[], float] | None' = None)` |
+| `compare_artifacts` | function | `(current: 'dict[str, Any]', baseline: 'dict[str, Any]', *, threshold: 'float' = 0.1, metric: 'str' = 'mean_s') -> 'dict[str, Any]'` |
+| `edge_bench_suite` | function | `(name: 'str' = 'edge-suite', baseline_board: 'EdgeBaseline | None' = None, iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `jetson_baseline` | function | `(label: 'str') -> 'EdgeBaseline'` |
+| `jetson_bench_suite` | function | `(board_label: 'str' = 'jetson-orin-nano', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+| `load_artifact` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `pi_bench_suite` | function | `(board_label: 'str' = 'Raspberry Pi 5', iterations: 'int' = 200) -> 'EdgeBenchmark'` |
+
+### `hugrgate.edge.bootstrap`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BootstrapContext` | class | `()` |
+| `BootstrapPlan` | class | `(steps: 'list[BootstrapStep] | None' = None)` |
+| `BootstrapStep` | class | `(name: 'str', action: 'Callable[[BootstrapContext], None]', requires_network: 'bool' = False, critical: 'bool' = True, description: 'str' = '') -> None` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `StepOutcome` | class | `(name: 'str', status: 'str', detail: 'str' = '', duration_s: 'float' = 0.0) -> None` |
+| `default_edge_plan` | function | `(store_dir: 'str' = 'edge-store', write_budget_bytes: 'int' = 268435456, ram_budget_bytes: 'int' = 536870912, probe: 'PlatformProbe | None' = None, memory: 'MemoryManager | None' = None, npu_registry: 'NPURegistry | None' = None) -> 'BootstrapPlan'` |
+
+### `hugrgate.edge.cachetune`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_ENTRY_BYTES` | constant | `4096` |
+| `EdgeCache` | class | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0)` |
+| `EdgeCacheConfig` | class | `(max_size: 'int', ttl_seconds: 'float', entry_bytes_estimate: 'int', memory_mode: 'str', source: 'str') -> None` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `cache_config_for_board` | function | `(baseline: 'EdgeBaseline', ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+| `tune_cache` | function | `(memory: 'MemoryManager', entry_bytes_estimate: 'int' = 4096, ttl_seconds: 'float' = 300.0) -> 'EdgeCacheConfig'` |
+
+### `hugrgate.edge.chaos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
+| `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `ChaosRunner` | class | `()` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
+| `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
+
+### `hugrgate.edge.gate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
+| `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
+| `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
+| `edge_release_gate` | function | `(repo_root: 'str | Path | None' = None, *, only: 'list[str] | None' = None, python: 'str | None' = None) -> 'GateReport'` |
+
+### `hugrgate.edge.memory`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CRITICAL_AVAILABLE_BYTES` | constant | `268435456` |
+| `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
+| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
+| `MemoryMode` | class | `(*values)` |
+
+### `hugrgate.edge.npu`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
+| `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
+| `JetsonAdapter` | class | `(trt: 'Any | None' = None, model_text: 'str | None' = None, tegra_release_present: 'bool | None' = None)` |
+| `MockNPUAdapter` | class | `(capability: 'NPUCapability | None' = None, present: 'bool' = True)` |
+| `NPUAdapter` | class | `()` |
+| `NPUCapability` | class | `(vendor: 'str', device: 'str', tops_int8: 'float', precisions: 'tuple[str, ...]', power_mw: 'float | None' = None, driver: 'str | None' = None, notes: 'str' = '') -> None` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPURegistry` | class | `()` |
+| `OpenVINOAdapter` | class | `(core: 'Any | None' = None)` |
+
+### `hugrgate.edge.platform`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
+| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
+| `EdgeBaseline` | class | `(board: 'str', cpu_count: 'int', cpu_desc: 'str', ram_mb: 'int', recommended_cache_entries: 'int', recommended_max_resident_models: 'int', recommended_power_budget_mw: 'int | None', notes: 'tuple[str, ...]' = ()) -> None` |
+| `PiBoard` | class | `(model: 'str', revision: 'str', ram_mb: 'int', detected_live: 'bool' = True) -> None` |
+| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
+| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
+| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
+| `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
+| `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
+
+### `hugrgate.edge.power`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MockPowerSource` | class | `(script: 'list[float | None]')` |
+| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerSource` | class | `()` |
+| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
+
+### `hugrgate.edge.quant`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `Int4Adapter` | class | `(group_size: 'int' = 32)` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantFormat` | class | `(*values)` |
+| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
+| `QuantProfileRegistry` | class | `()` |
+| `QuantizedTensor` | class | `(codes: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', shape: 'tuple[int, ...]', symmetric: 'bool', axis: 'int | None') -> None` |
+| `dequantize_int8` | function | `(q: 'np.ndarray', scales: 'np.ndarray', zero_points: 'np.ndarray', axis: 'int | None' = None) -> 'np.ndarray'` |
+| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
+| `int8_matvec` | function | `(weight_qt: 'QuantizedTensor', x: 'np.ndarray', bias: 'np.ndarray | None' = None) -> 'np.ndarray'` |
+| `int8_roundtrip_error` | function | `(weights: 'np.ndarray') -> 'float'` |
+| `quantize_int8` | function | `(weights: 'np.ndarray', *, symmetric: 'bool' = False, axis: 'int | None' = None) -> 'tuple[np.ndarray, np.ndarray, np.ndarray]'` |
+| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
+
+### `hugrgate.edge.recovery`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Checkpoint` | class | `(seq: 'int', state_id: 'str', payload: 'dict[str, Any]')` |
+| `CheckpointJournal` | class | `(directory: 'str | Path', keep: 'int' = 3)` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+
+### `hugrgate.edge.residency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ModelEntry` | class | `(name: 'str', size_bytes: 'int', profile: 'str' = 'fp32', pinned: 'bool' = False, resident: 'bool' = False, refcount: 'int' = 0, last_used: 'float' = 0.0, metadata: 'dict[str, Any]' = <factory>) -> None` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyManager` | class | `(ram_budget_bytes: 'int', memory: 'MemoryManager | None' = None, clock: 'Any | None' = None)` |
+
+### `hugrgate.edge.routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
+| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
+| `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
+
+### `hugrgate.edge.storage`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_BUFFER_BYTES` | constant | `65536` |
+| `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WearAwareStore` | class | `(directory: 'str | Path', *, write_budget_bytes: 'int', buffer_bytes: 'int' = 65536, max_value_bytes: 'int' = 16777216)` |
+
+### `hugrgate.edge.telemetry`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MAX_EVENTS` | constant | `256` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryEvent` | class | `(seq: 'int', timestamp: 'float', name: 'str', value: 'float', tags: 'tuple[tuple[str, str], ...]' = ()) -> None` |
+| `TelemetryLite` | class | `(max_events: 'int' = 256, clock: 'Callable[[], float] | None' = None)` |
+
+### `hugrgate.edge.thermal`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CRITICAL_C` | constant | `85.0` |
+| `WARN_C` | constant | `70.0` |
+| `MockThermalSensor` | class | `(script: 'list[float | None]')` |
+| `SysfsThermalSensor` | class | `(zone_glob: 'str' = '/sys/class/thermal/thermal_zone*')` |
+| `ThermalGovernor` | class | `(sensor: 'ThermalSensor', warn_c: 'float' = 70.0, critical_c: 'float' = 85.0, hysteresis_c: 'float' = 3.0)` |
+| `ThermalLevel` | class | `(*values)` |
+| `ThermalSensor` | class | `()` |
+| `ThermalState` | class | `(temp_c: 'float | None', level: 'ThermalLevel', derating: 'float') -> None` |
+
+### `hugrgate.edge.watchdog`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
+| `MissPolicy` | class | `(*values)` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
+
 ### `hugrgate.errors`
 
 | Name | Kind | Signature / value |
@@ -266,14 +576,28 @@ that this document never drifts from the code.
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 
@@ -367,225 +691,6 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionResult` | class | `(value: 'Any | None', probability: 'float', distribution: 'dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'dict[str, Any]' = <factory>) -> None` |
-
-### `hugrgate.runtimes`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CAP_CLASSIFY` | constant | `'classify'` |
-| `CAP_EMBED` | constant | `'embed'` |
-| `CAP_GENERATE` | constant | `'generate'` |
-| `CAP_GRAMMAR` | constant | `'grammar'` |
-| `CAP_JSON_SCHEMA` | constant | `'json_schema'` |
-| `CAP_STREAM` | constant | `'stream'` |
-| `CAP_TOKENIZE` | constant | `'tokenize'` |
-| `KNOWN_FORMATS` | constant | `{'.bin': 'pytorch-bin', '.engine': 'tensorrt-engine', '.gguf` |
-| `ClassificationResult` | class | `(label: 'str', scores: 'dict[str, float]') -> None` |
-| `EmbeddingResult` | class | `(vectors: 'list[list[float]]', dim: 'int', model: 'str' = '') -> None` |
-| `FakeRuntime` | class | `(dim: 'int' = 64, latency_s: 'float' = 0.0, supports: 'frozenset[str] | None' = None) -> 'None'` |
-| `GenerationOptions` | class | `(max_tokens: 'int' = 128, temperature: 'float' = 0.0, top_p: 'float' = 1.0, stop: 'tuple[str, ...]' = (), seed: 'int | None' = None, grammar: 'str | None' = None, json_schema: 'dict[str, Any] | None' = None, timeout_s: 'float' = 60.0) -> None` |
-| `GenerationResult` | class | `(text: 'str', finish_reason: 'str', prompt_tokens: 'int' = 0, completion_tokens: 'int' = 0, latency_s: 'float' = 0.0) -> None` |
-| `LocalRuntime` | class | `()` |
-| `ModelRef` | class | `(runtime: 'str', path: 'str', format: 'str' = 'unknown', quant: 'str' = '', alias: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
-| `RuntimeInfo` | class | `(name: 'str', engine: 'str', engine_version: 'str', available: 'bool', devices: 'tuple[str, ...]', formats: 'tuple[str, ...]', capabilities: 'frozenset[str]', model: 'ModelRef | None' = None, remote: 'bool' = False, notes: 'str' = '') -> None` |
-| `RuntimeRegistry` | class | `() -> 'None'` |
-| `format_from_path` | function | `(path: 'str | Path') -> 'str'` |
-
-### `hugrgate.runtimes.bench_matrix`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ARTIFACT_PATH` | constant | `PosixPath('benchmarks/localrt-matrix.json')` |
-| `BenchConfig` | class | `(rounds: 'int' = 10, warmup_rounds: 'int' = 2, prompt: 'str' = 'The capital of Assyria was', max_tokens: 'int' = 8, classify_labels: 'tuple[str, ...]' = ('yes', 'no')) -> None` |
-| `BenchMatrix` | class | `(results: 'list[BenchResult]' = <factory>, config: 'BenchConfig' = <factory>, note: 'str' = '', timestamp: 'str' = <factory>) -> None` |
-| `BenchResult` | class | `(runtime: 'str', operation: 'str', ok: 'bool', latencies_s: 'list[float]' = <factory>, error: 'str | None' = None) -> None` |
-| `bench_all` | function | `(registry: 'RuntimeRegistry', config: 'BenchConfig') -> 'BenchMatrix'` |
-| `bench_runtime` | function | `(runtime: 'LocalRuntime', config: 'BenchConfig') -> 'list[BenchResult]'` |
-| `build_default_registry` | function | `() -> 'tuple[RuntimeRegistry, str]'` |
-| `main` | function | `() -> 'Path'` |
-| `write_artifact` | function | `(path: 'str | Path', matrix: 'BenchMatrix') -> 'Path'` |
-
-### `hugrgate.runtimes.conformance`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ADAPTER_CLASSES` | constant | `(<class 'hugrgate.runtimes.llama_cpp.LlamaCppRuntime'>, <cla` |
-| `HAPPY_PATHS` | constant | `{'LlamaCppRuntime': <function _llama_cpp_happy>, 'OllamaRunt` |
-| `HAPPY_PROBES` | constant | `{'OnnxRuntime': <function _embed_probe>}` |
-| `ConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
-| `ConformanceReport` | class | `(adapter: 'str', runtime_name: 'str', available: 'bool', checks: 'list[ConformanceCheck]' = <factory>) -> None` |
-| `check_adapter` | function | `(cls: 'type[LocalRuntime]', happy_path: 'Callable[[], LocalRuntime] | None' = None, happy_probe: 'Callable[[LocalRuntime], str] | None' = None) -> 'ConformanceReport'` |
-| `conformance_summary` | function | `(reports: 'list[ConformanceReport]') -> 'dict[str, Any]'` |
-| `register_all_adapters` | function | `(registry: 'RuntimeRegistry | None' = None) -> 'RuntimeRegistry'` |
-| `run_conformance` | function | `() -> 'list[ConformanceReport]'` |
-
-### `hugrgate.runtimes.eviction`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CompositePolicy` | class | `(*policies: 'EvictionPolicy') -> 'None'` |
-| `EvictionBudget` | class | `(max_to_evict: 'int | None' = None, protected: 'frozenset[str]' = frozenset()) -> None` |
-| `EvictionDecision` | class | `(runtime_name: 'str', reason: 'str', policy: 'str') -> None` |
-| `EvictionPolicy` | class | `()` |
-| `EvictionReport` | class | `(evicted: 'list[EvictionDecision]' = <factory>, skipped_in_use: 'int' = 0, skipped_protected: 'int' = 0) -> None` |
-| `Evictor` | class | `(manager: 'ResidencyManager', policy: 'EvictionPolicy') -> 'None'` |
-| `LRUPolicy` | class | `(max_idle_s: 'float', evict_in_use: 'bool' = False) -> 'None'` |
-| `MemoryPressurePolicy` | class | `(high_watermark_bytes: 'int', used_bytes_fn: 'Callable[[], int] | None' = None, evict_in_use: 'bool' = False) -> 'None'` |
-| `TTLPolicy` | class | `(ttl_s: 'float', evict_in_use: 'bool' = False) -> 'None'` |
-
-### `hugrgate.runtimes.gguf`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `GGUF_MAGIC` | constant | `b'GGUF'` |
-| `GGUF_VERSION` | constant | `3` |
-| `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `GGUFModel` | class | `(path: 'Path', size_bytes: 'int', architecture: 'str' = 'unknown', name: 'str' = '', context_length: 'int' = 0, embedding_length: 'int' = 0, block_count: 'int' = 0, head_count: 'int' = 0, quantization: 'str' = 'unknown', tensor_count: 'int' = 0, metadata: 'dict[str, Any]' = <factory>, error: 'str | None' = None) -> None` |
-| `discover_gguf_models` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[GGUFModel]'` |
-| `find_gguf_files` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[Path]'` |
-| `gguf_model_size_human` | function | `(size_bytes: 'int') -> 'str'` |
-| `parse_gguf_header` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
-
-### `hugrgate.runtimes.grammar`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `Grammar` | class | `(source: 'str', root: 'str' = 'root') -> None` |
-| `GrammarConstrainedRuntime` | class | `(inner: 'LocalRuntime', name: 'str | None' = None) -> 'None'` |
-| `gbnf_escape` | function | `(text: 'str') -> 'str'` |
-
-### `hugrgate.runtimes.health_probes`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `HealthProbe` | class | `()` |
-| `HealthReport` | class | `(runtime: 'str', results: 'list[ProbeResult]' = <factory>) -> None` |
-| `InferenceProbe` | class | `()` |
-| `LatencyProbe` | class | `(warn_s: 'float' = 5.0, crit_s: 'float' = 30.0) -> 'None'` |
-| `LivenessProbe` | class | `()` |
-| `ModelLoadedProbe` | class | `()` |
-| `ProbeResult` | class | `(probe: 'str', runtime: 'str', ok: 'bool', latency_s: 'float' = 0.0, detail: 'str' = '', checked_at: 'float' = <factory>) -> None` |
-| `probe_all` | function | `(registry: 'RuntimeRegistry', probes: 'tuple[HealthProbe, ...] | None' = None, max_workers: 'int' = 4) -> 'list[HealthReport]'` |
-| `probe_runtime` | function | `(runtime: 'LocalRuntime', probes: 'tuple[HealthProbe, ...] | None' = None) -> 'HealthReport'` |
-
-### `hugrgate.runtimes.jsonschema`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `JsonSchemaConstrainedRuntime` | class | `(inner: 'LocalRuntime', name: 'str | None' = None) -> 'None'` |
-| `json_schema_to_gbnf` | function | `(schema: 'dict[str, Any]', root: 'str' = 'root') -> 'str'` |
-| `uncompilable_keywords` | function | `(schema: 'Any') -> 'list[str]'` |
-
-### `hugrgate.runtimes.llama_cpp`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `LlamaCppRuntime` | class | `(model: 'ModelRef | str | None' = None, n_ctx: 'int' = 4096, n_gpu_layers: 'int' = 0, n_threads: 'int | None' = None, n_batch: 'int' = 512, embedding: 'bool' = False, llama: 'Any' = None) -> 'None'` |
-
-### `hugrgate.runtimes.metadata`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `MODEL_SUFFIXES` | constant | `('.gguf', '.onnx', '.safetensors', '.bin', '.pt', '.pth', '.` |
-| `ModelMetadata` | class | `(path: 'Path', format: 'str', size_bytes: 'int', architecture: 'str' = 'unknown', name: 'str' = '', context_length: 'int' = 0, parameters: 'int' = 0, parameters_estimate: 'float' = 0.0, quantization: 'str' = 'unknown', license: 'str' = '', source: 'str' = '', tokenizer: 'str' = '', languages: 'list[str]' = <factory>, tags: 'list[str]' = <factory>, scan_depth: 'str' = 'full', extra: 'dict[str, Any]' = <factory>, error: 'str | None' = None) -> None` |
-| `scan_directory` | function | `(directories: 'list[str | Path]', recursive: 'bool' = True) -> 'list[ModelMetadata]'` |
-| `scan_model` | function | `(path: 'str | Path') -> 'ModelMetadata'` |
-
-### `hugrgate.runtimes.mlx`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `SUPPORTED_PLATFORM` | constant | `('darwin', 'arm64')` |
-| `MLXRuntime` | class | `(model: 'ModelRef | str | None' = None, platform_info: 'tuple[str, str] | None' = None, engine: 'tuple[Any, Any, Any] | None' = None) -> 'None'` |
-
-### `hugrgate.runtimes.ollama`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DEFAULT_HOST` | constant | `'http://localhost:11434'` |
-| `OllamaRuntime` | class | `(model: 'ModelRef | str | None' = None, host: 'str' = 'http://localhost:11434', timeout_s: 'float' = 120.0, transport: 'Any' = None) -> 'None'` |
-| `TransportFn` | constant | `collections.abc.Callable[[str, str, 'dict[str, Any] | None']` |
-
-### `hugrgate.runtimes.onnx`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `OnnxRuntime` | class | `(model: 'ModelRef | str | None' = None, providers: 'Sequence[str] | None' = None, input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, intra_op_num_threads: 'int' = 0, session: 'Any' = None) -> 'None'` |
-| `softmax` | function | `(logits: 'Sequence[float]') -> 'list[float]'` |
-
-### `hugrgate.runtimes.openvino`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `OpenVINORuntime` | class | `(model: 'ModelRef | str | None' = None, device: 'str' = 'CPU', input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, num_streams: 'int' = 0, compiled: 'Any' = None) -> 'None'` |
-
-### `hugrgate.runtimes.packs`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CLASSIFIER_PACKS` | constant | `(ModelPack(kind='classifier', name='twitter-roberta-sentimen` |
-| `EMBEDDING_PACKS` | constant | `(ModelPack(kind='embedding', name='all-minilm-l6-v2', hf_id=` |
-| `NLI_PACKS` | constant | `(ModelPack(kind='nli', name='bart-large-mnli', hf_id='facebo` |
-| `ModelPack` | class | `(kind: 'str', name: 'str', hf_id: 'str', runtime: 'str' = 'transformers', task: 'str' = '', dims: 'int' = 0, languages: 'tuple[str, ...]' = (), license: 'str' = '', size_mb: 'float' = 0.0, description: 'str' = '', default: 'bool' = False, labels: 'tuple[str, ...]' = (), extra: 'dict[str, Any]' = <factory>) -> None` |
-| `default_pack` | function | `(kind: 'str') -> 'ModelPack'` |
-| `describe_packs` | function | `(kind: 'str | None' = None) -> 'str'` |
-| `find_packs` | function | `(query: 'str', kind: 'str | None' = None) -> 'list[ModelPack]'` |
-| `get_pack` | function | `(kind: 'str', name: 'str') -> 'ModelPack'` |
-| `packs_for` | function | `(kind: 'str') -> 'tuple[ModelPack, ...]'` |
-| `runtime_for_pack` | function | `(pack: 'ModelPack | str', kind: 'str | None' = None, **kwargs: 'Any') -> 'LocalRuntime'` |
-
-### `hugrgate.runtimes.probe`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CapabilityReport` | class | `(runtime: 'str', model: 'ModelRef | None', results: 'list[ProbeResult]' = <factory>, elapsed_s: 'float' = 0.0) -> None` |
-| `ProbeResult` | class | `(name: 'str', passed: 'bool', latency_s: 'float' = 0.0, detail: 'str' = '', skipped: 'bool' = False) -> None` |
-| `probe_capabilities` | function | `(runtime: 'LocalRuntime', model: 'ModelRef | None' = None, probes: 'tuple[str, ...]' = ('load_cycle', 'generate', 'embed', 'classify', 'tokenize'), timeout_s: 'float' = 60.0) -> 'CapabilityReport'` |
-
-### `hugrgate.runtimes.residency`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ResidencyEntry` | class | `(runtime_name: 'str', model: 'ModelRef', refcount: 'int' = 0, acquired_at: 'float' = <factory>, last_used_at: 'float' = <factory>, touches: 'int' = 0) -> None` |
-| `ResidencyLease` | class | `(manager: 'ResidencyManager', runtime_name: 'str', model: 'ModelRef') -> 'None'` |
-| `ResidencyManager` | class | `() -> 'None'` |
-
-### `hugrgate.runtimes.structured`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `IGNORED_KEYWORDS` | constant | `frozenset({'$comment', '$id', '$schema', 'default', 'depreca` |
-| `StructuredRuntime` | class | `(inner: 'LocalRuntime', max_retries: 'int' = 2, name: 'str | None' = None) -> 'None'` |
-| `extract_json` | function | `(text: 'str') -> 'Any'` |
-| `validate` | function | `(instance: 'Any', schema: 'dict[str, Any]', path: 'str' = '$') -> 'list[str]'` |
-
-### `hugrgate.runtimes.tensorrt`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `TensorRTRuntime` | class | `(model: 'ModelRef | str | None' = None, cuda_override: 'bool | None' = None, input_names: 'Sequence[str] | None' = None, output_name: 'str | None' = None, encode_fn: 'EncodeFn | None' = None, executor: 'ExecutorFn | None' = None, engine: 'Any' = None) -> 'None'` |
-| `default_trt_executor` | function | `(engine: 'Any', feed: 'Mapping[str, Any]', input_names: 'Sequence[str]', output_name: 'str') -> 'dict[str, list[list[float]]]'` |
-
-### `hugrgate.runtimes.transformers_rt`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `GENERATION_TASKS` | constant | `frozenset({'text-generation'})` |
-| `TransformersRuntime` | class | `(model: 'ModelRef | str | None' = None, task: 'str' = 'text-generation', device: 'int' = -1, trust_remote_code: 'bool' = False, pipe_kwargs: 'dict[str, Any] | None' = None, pipe: 'Any' = None) -> 'None'` |
-
-### `hugrgate.runtimes.vllm`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DEFAULT_VLLM_HOST` | constant | `'http://localhost:8000'` |
-| `VLLMRuntime` | class | `(model: 'ModelRef | str | None' = None, host: 'str' = 'http://localhost:8000', llm: 'Any' = None, embedding: 'bool' = False, timeout_s: 'float' = 120.0, transport: 'Any' = None) -> 'None'` |
-
-### `hugrgate.runtimes.warmup`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
-| `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
 ### `hugrgate.serde`
 

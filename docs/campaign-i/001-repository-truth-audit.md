@@ -1,25 +1,25 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T13:34:39.613278+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T13:21:49.265355+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 66 Python files under `hugrgate/`
-- **Total LOC:** 15085
+- **Modules:** 63 Python files under `hugrgate/`
+- **Total LOC:** 13300
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_localrt_151_interface.py, test_localrt_152_llamacpp.py, test_localrt_153_ollama.py, test_localrt_154_onnx.py, test_localrt_155_transformers.py, test_localrt_156_vllm.py, test_localrt_157_mlx.py, test_localrt_158_openvino.py, test_localrt_159_tensorrt.py, test_localrt_160_gguf.py, test_localrt_161_metadata.py, test_localrt_162_probe.py, test_localrt_163_structured.py, test_localrt_164_grammar.py, test_localrt_165_jsonschema.py, test_localrt_166_nli_packs.py, test_localrt_167_embedding_packs.py, test_localrt_168_classifier_packs.py, test_localrt_169_warmup.py, test_localrt_170_residency.py, test_localrt_171_eviction.py, test_localrt_172_health_probes.py, test_localrt_173_conformance.py, test_localrt_174_bench_matrix.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_edge_affinity.py, test_edge_bench.py, test_edge_bootstrap.py, test_edge_cachetune.py, test_edge_chaos.py, test_edge_gate.py, test_edge_memory.py, test_edge_npu.py, test_edge_platform.py, test_edge_power.py, test_edge_quant.py, test_edge_recovery.py, test_edge_residency.py, test_edge_storage.py, test_edge_telemetry.py, test_edge_thermal.py, test_edge_watchdog.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
 
 ## Module table
 
 | Module | LOC | Docstring | Internal imports |
 |---|---|---|---|
-| `hugrgate.__init__` | 45 | HugrGate — local-first, model-agnostic probabilistic decision runtime. | hugrgate |
+| `hugrgate.__init__` | 43 | HugrGate — local-first, model-agnostic probabilistic decision runtime. | hugrgate |
 | `hugrgate.abstain` | 111 | Abstention — typed "I don't know" results and review banding. Slice 15. | hugrgate |
 | `hugrgate.backend` | 151 | Backend interface + registry. Slice 6. | hugrgate |
 | `hugrgate.backends.boosting` | 69 | Gradient boosting backend. Slice 24. | hugrgate |
 | `hugrgate.backends.embedding` | 260 | Embedding backend — prototype classifier. Slice 33. | hugrgate |
 | `hugrgate.backends.forest` | 74 | Random forest backend. Slice 23. | hugrgate |
-| `hugrgate.backends.llm` | 237 | Local LLM backend — constrained decoding. Slice 35; slice 152 rewire. | hugrgate |
+| `hugrgate.backends.llm` | 247 | Local LLM backend — constrained decoding. Slice 35. | hugrgate |
 | `hugrgate.backends.logreg` | 304 | Logistic regression backend. Slice 22. | hugrgate |
 | `hugrgate.backends.nli` | 153 | NLI backend — statement entailment as a binary decision. Slice 34. | hugrgate |
 | `hugrgate.backends.rules` | 381 | Rule backend — predicates, decision tables, confidence distributions. | hugrgate |
@@ -39,7 +39,26 @@
 | `hugrgate.core` | 159 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
 | `hugrgate.daemon` | 494 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |
-| `hugrgate.errors` | 154 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
+| `hugrgate.edge.__init__` | 269 | Edge Intelligence runtime — Campaign VIII (slices 176-200). | hugrgate |
+| `hugrgate.edge.affinity` | 232 | CPU affinity controls for edge inference. Slice 179. | hugrgate |
+| `hugrgate.edge.bench` | 458 | Edge benchmark harness and platform suites. Slices 196-198. | hugrgate |
+| `hugrgate.edge.bootstrap` | 294 | Offline-first bootstrap for edge deployment. Slice 192. | hugrgate |
+| `hugrgate.edge.cachetune` | 157 | Edge-tuned decision cache sizing. Slice 190. | hugrgate |
+| `hugrgate.edge.chaos` | 259 | Edge failure testing — deterministic fault injection. Slice 199. | hugrgate |
+| `hugrgate.edge.gate` | 258 | Edge Intelligence release gate. Slice 200. | hugrgate |
+| `hugrgate.edge.memory` | 210 | Low-RAM operating modes for edge deployment. Slice 178. | hugrgate |
+| `hugrgate.edge.npu` | 507 | NPU capability abstraction and vendor adapter boundaries. | hugrgate |
+| `hugrgate.edge.platform` | 472 | Edge platform detection, ARM64 audit, and Raspberry Pi baselines. | — |
+| `hugrgate.edge.power` | 152 | Power-budget routing for edge deployment. Slice 181. | hugrgate |
+| `hugrgate.edge.quant` | 577 | Quantized-model profiles and simulated quantization paths. Slices 182-18 | hugrgate |
+| `hugrgate.edge.recovery` | 191 | Intermittent-power recovery via checkpoint journal. Slice 193. | hugrgate |
+| `hugrgate.edge.residency` | 199 | Edge model residency management. Slice 189. | hugrgate |
+| `hugrgate.edge.routing` | 146 | Edge-aware backend routing. Slices 180-181. | hugrgate |
+| `hugrgate.edge.storage` | 283 | Flash-wear-aware storage for edge devices. Slice 191. | hugrgate |
+| `hugrgate.edge.telemetry` | 174 | Edge telemetry lite — bounded, privacy-safe metrics. Slice 195. | hugrgate |
+| `hugrgate.edge.thermal` | 182 | Thermal sensing and thermal-aware derating. Slice 180. | — |
+| `hugrgate.edge.watchdog` | 164 | Edge watchdog — heartbeat supervision for the edge runtime. Slice 194. | hugrgate |
+| `hugrgate.errors` | 253 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
 | `hugrgate.fallback` | 171 | Fallback engine — ordered failover across backends. Slice 14. | hugrgate |
 | `hugrgate.features` | 291 | Feature preprocessing contract. Slice 21. | hugrgate |
 | `hugrgate.health` | 140 | Backend health scoring — latency, errors, quarantine. Slice 17. | — |
@@ -51,28 +70,6 @@
 | `hugrgate.privacy` | 131 | Privacy enforcement — system-level guardrails. Slice 40. | hugrgate |
 | `hugrgate.provenance` | 218 | Decision provenance — why did the program take this branch? Slice 9. | hugrgate |
 | `hugrgate.result` | 82 | DecisionResult — typed value + probability distribution. Slice 4. | hugrgate |
-| `hugrgate.runtimes.__init__` | 540 | Local Model Fabric — runtime interface v2. Slice 151. | hugrgate |
-| `hugrgate.runtimes.bench_matrix` | 284 | Local runtime benchmark matrix. Slice 174. | hugrgate |
-| `hugrgate.runtimes.conformance` | 394 | Local runtime conformance suite. Slice 173. | hugrgate |
-| `hugrgate.runtimes.eviction` | 281 | Model eviction policy. Slice 171. | hugrgate |
-| `hugrgate.runtimes.gguf` | 310 | GGUF model discovery. Slice 160. | hugrgate |
-| `hugrgate.runtimes.grammar` | 271 | Grammar-constrained decoding. Slice 164. | hugrgate |
-| `hugrgate.runtimes.health_probes` | 251 | Model health probes. Slice 172. | hugrgate |
-| `hugrgate.runtimes.jsonschema` | 392 | JSON-schema constrained decoding. Slice 165. | hugrgate |
-| `hugrgate.runtimes.llama_cpp` | 297 | llama.cpp runtime adapter. Slice 152. | hugrgate |
-| `hugrgate.runtimes.metadata` | 330 | Model metadata scanner. Slice 161. | hugrgate |
-| `hugrgate.runtimes.mlx` | 254 | MLX adapter boundary. Slice 157. | hugrgate |
-| `hugrgate.runtimes.ollama` | 300 | Ollama-compatible runtime adapter. Slice 153. | hugrgate |
-| `hugrgate.runtimes.onnx` | 318 | ONNX Runtime adapter. Slice 154. | hugrgate |
-| `hugrgate.runtimes.openvino` | 289 | OpenVINO runtime adapter. Slice 158. | hugrgate |
-| `hugrgate.runtimes.packs` | 255 | Local model packs. Slices 166-168. | hugrgate |
-| `hugrgate.runtimes.probe` | 218 | Model capability probing. Slice 162. | hugrgate |
-| `hugrgate.runtimes.residency` | 186 | Model residency manager. Slice 170. | hugrgate |
-| `hugrgate.runtimes.structured` | 468 | Structured-output adapter. Slice 163. | hugrgate |
-| `hugrgate.runtimes.tensorrt` | 452 | TensorRT adapter boundary. Slice 159. | hugrgate |
-| `hugrgate.runtimes.transformers_rt` | 376 | Transformers runtime adapter. Slice 155. | hugrgate |
-| `hugrgate.runtimes.vllm` | 388 | vLLM local adapter. Slice 156. | hugrgate |
-| `hugrgate.runtimes.warmup` | 222 | Model warmup manager. Slice 169. | hugrgate |
 | `hugrgate.serde` | 74 | JSON serde helpers shared by the server, daemon, CLI and SDK. | hugrgate |
 | `hugrgate.server` | 370 | HugrGate local HTTP API — FastAPI service. Slice 41. | hugrgate |
 | `hugrgate.spec` | 127 | DecisionSpec — the decision contract. Slices 2-3. | hugrgate |

@@ -152,6 +152,11 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "openvino": {"openvino"},
     "tensorrt": {"tensorrt"},
     "pycuda": {"tensorrt"},
+    # Campaign VIII (slice 185): lazy vendor SDK imports in
+    # hugrgate.edge.npu — absent here, provided by the npu extra.
+    "hailo_platform": {"npu"},
+    "tensorrt": {"npu"},
+    "openvino": {"npu"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
@@ -170,6 +175,7 @@ _STDLIB = {
     "concurrent",
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib", "struct",
     "resource", "concurrent", "types", "builtins",
+    "glob", "struct", "zlib",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes"}
@@ -222,6 +228,7 @@ def test_every_third_party_import_is_declared():
                 "scikit-learn": "sklearn",
                 "llama-cpp-python": "llama_cpp",
                 "mlx-lm": "mlx_lm",
+                "hailort": "hailo_platform",
             }.get(dist, dist),
             set(),
         ).update(exs)
