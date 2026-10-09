@@ -195,6 +195,7 @@ class OfflineBootstrapError(HugrGateError):
 class EdgeCacheError(HugrGateError):
     """A cache-tuning request was invalid."""
     code = "edge_cache_error"
+    recoverable = False
 class ChaosError(HugrGateError):
     """A fault-injection scenario failed its verification."""
     code = "edge_chaos_error"
