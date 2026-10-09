@@ -25,6 +25,7 @@ flowchart TD
         contracts_negotiation[contracts.negotiation]
         contracts_nested[contracts.nested]
         contracts_hierarchy[contracts.hierarchy]
+        contracts_composite[contracts.composite]
     end
     subgraph runtime[runtime]
         core[core]
@@ -145,6 +146,9 @@ flowchart TD
     client --> hugrgate
     client -.-> server
     contracts --> contracts_schema
+    contracts_composite --> contracts_schema
+    contracts_composite --> errors
+    contracts_composite --> spec
     contracts_hierarchy --> contracts_schema
     contracts_hierarchy --> errors
     contracts_negotiation --> contracts_schema
@@ -217,7 +221,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -299,6 +303,9 @@ flowchart TD
 | `client` | `hugrgate` | no |
 | `client` | `server` | yes |
 | `contracts` | `contracts.schema` | no |
+| `contracts.composite` | `contracts.schema` | no |
+| `contracts.composite` | `errors` | no |
+| `contracts.composite` | `spec` | no |
 | `contracts.hierarchy` | `contracts.schema` | no |
 | `contracts.hierarchy` | `errors` | no |
 | `contracts.negotiation` | `contracts.schema` | no |

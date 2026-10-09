@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 47 · **public names:** 207
+**Modules:** 48 · **public names:** 210
 
 ## API stability policy
 
@@ -239,6 +239,14 @@ that this document never drifts from the code.
 | `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
 | `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
 | `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
+| `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
+
+### `hugrgate.contracts.composite`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FieldContract` | constant | `typing.Union[hugrgate.contracts.schema.DecisionContract, hug` |
+| `CompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>) -> None` |
 
 ### `hugrgate.contracts.hierarchy`
 

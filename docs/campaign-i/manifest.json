@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:12:46.691732+00:00",
-  "module_count": 47,
+  "generated_utc": "2026-10-09T11:14:08.474947+00:00",
+  "module_count": 48,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,9 +530,27 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 44,
+      "loc": 45,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
+    },
+    "hugrgate.contracts.composite": {
+      "docstring": "Structured composite decisions. Gjallarbr\u00fa slice 030.\n\nA composite contract is one structured judgment made of named fields,\neach field governed by its own contract: e.g. ``{\"severity\": <ordinal>,\n\"department\": <categorical>, \"eta_minutes\": <numeric>}``.\n\nFields may be v2 :class:`DecisionContract`s *or* v1\n:class:`hugrgate.spec.DecisionSpec`s \u2014 the composite bridges both\ngenerations of the contract system (full v1\u2192v2 migration is slice 047).\nValues are mappings with exactly the declared fields: missing and\nunknown fields are both rejected, so typos never slip through silently.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 187,
+      "path": "hugrgate/contracts/composite.py",
+      "public_defs": [
+        "CompositeContract",
+        "field_names",
+        "field_contract",
+        "validate_value",
+        "describe"
+      ]
     },
     "hugrgate.contracts.hierarchy": {
       "docstring": "Hierarchical labels \u2014 label forests with ancestor semantics.\n\nGjallarbr\u00fa slice 029.\n\nFlat multilabel contracts treat ``\"siamese\"`` and ``\"animal\"`` as unrelated\nstrings. A hierarchical label contract organizes labels into a forest:\nselecting ``\"siamese\"`` *implies* ``\"cat\"``, ``\"mammal\"``, ``\"animal\"``.\nThis module provides:\n\n- :class:`LabelHierarchy`: an immutable label forest built from edges or a\n  nested mapping, with ancestor/descendant queries, depth, lowest common\n  ancestor, and ancestor closure;\n- :class:`HierarchicalLabelContract` (kind ``\"hierarchical-labels\"``): a\n  v2 contract whose values are label sets; validation requires every\n  label to be known, and :meth:`close_value` expands a set with all\n  implied ancestors;\n- hierarchical precision/recall over ancestor-closed sets, so partial\n  credit flows up the tree instead of all-or-nothing flat matching.\n\nThe forest is a true forest: every node has at most one parent, and\ncycles are rejected at construction.",
@@ -1088,6 +1106,7 @@
     "test_contracts_027.py",
     "test_contracts_028.py",
     "test_contracts_029.py",
+    "test_contracts_030.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1098,5 +1117,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8236
+  "total_loc": 8424
 }
