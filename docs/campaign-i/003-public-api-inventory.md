@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 369 · **public names:** 2254
+**Modules:** 370 · **public names:** 2267
 
 ## API stability policy
 
@@ -3964,8 +3964,10 @@ that this document never drifts from the code.
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
 | `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
@@ -3975,14 +3977,18 @@ that this document never drifts from the code.
 | `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
 | `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
+| `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
+| `enforce_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+| `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
+| `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
 
 ### `hugrgate.security.attack_surface`
 
@@ -3992,6 +3998,18 @@ that this document never drifts from the code.
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.checksums`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
+| `ModelChecksumGate` | class | `(manifest: 'ChecksumManifest', strict: 'bool' = False, manifest_name: 'str' = 'checksums.json') -> 'None'` |
+| `VerificationReport` | class | `(ok: 'list[str]' = <factory>, mismatched: 'list[str]' = <factory>, missing: 'list[str]' = <factory>, extra: 'list[str]' = <factory>) -> None` |
+| `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
+| `hash_file` | function | `(path: 'str | Path') -> 'str'` |
+| `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
+| `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
 
 ### `hugrgate.security.depscan`
 

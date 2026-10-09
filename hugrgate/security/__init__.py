@@ -61,6 +61,14 @@ from hugrgate.security.attack_surface import (
     enumerate_surface,
     find_unlisted,
 )
+from hugrgate.security.checksums import (
+    ChecksumManifest,
+    ModelChecksumGate,
+    build_manifest,
+    enforce_manifest,
+    verified_open,
+    verify_manifest,
+)
 from hugrgate.security.depscan import (
     ADVISORIES,
     Advisory,
@@ -97,8 +105,10 @@ __all__ = [
     "Advisory",
     "Asset",
     "AttackSurface",
+    "ChecksumManifest",
     "DependencyFinding",
     "DependencyRecord",
+    "ModelChecksumGate",
     "ModelSigner",
     "SignedMetadata",
     "SupplyChainPolicy",
@@ -108,12 +118,16 @@ __all__ = [
     "ThreatModel",
     "TrustBoundary",
     "TrustedModelStore",
+    "build_manifest",
     "curated_surface",
     "default_threat_model",
+    "enforce_manifest",
     "enumerate_surface",
     "find_unlisted",
     "generate_sbom",
     "sbom_from_installed",
     "scan_project",
     "scan_requirements",
+    "verified_open",
+    "verify_manifest",
 ]
