@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 249 · **public names:** 1550
+**Modules:** 250 · **public names:** 1558
 
 ## API stability policy
 
@@ -729,8 +729,12 @@ that this document never drifts from the code.
 | `RecoveryVerifier` | class | `(name: 'str', probes: 'list[RecoveryProbe] | tuple[RecoveryProbe, ...]', sleep: 'Callable[[float], None]' = <built-in function sleep>) -> 'None'` |
 | `ResourceGuard` | class | `(reader: 'Callable[[], MemoryReading]', warn_ratio: 'float' = 0.75, critical_ratio: 'float' = 0.9)` |
 | `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
+| `ScheduledFault` | class | `(name: 'str', at_s: 'float', until_s: 'float', apply: 'Callable[[], None]', revert: 'Callable[[], None]') -> None` |
 | `ServiceUnderTest` | class | `(backends: 'Sequence[Backend]', breakable: 'Collection[str]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None)` |
 | `SkewedClock` | class | `(base: 'Callable[[], float]' = <built-in function monotonic>)` |
+| `SoakConfig` | class | `(duration_s: 'float' = 2.0, target_ops_per_s: 'float' = 50.0, max_ops: 'int | None' = None, invariant_every_n_ops: 'int' = 25, expected_errors: 'tuple[str, ...]' = ()) -> None` |
+| `SoakReport` | class | `(ops_completed: 'int', errors: 'dict[str, int]', unexpected_errors: 'dict[str, int]', violations: 'list[str]', faults_applied: 'list[str]', duration_s: 'float') -> None` |
+| `SoakRunner` | class | `(workload: 'Callable[[int], None]', invariants: 'list[Callable[[], None]] | None' = None, faults: 'list[ScheduledFault] | None' = None) -> 'None'` |
 | `SteadyStateProbe` | class | `(name: 'str', check: 'Callable[[], ProbeOutcome]') -> None` |
 | `audit_deadline_clocks` | function | `() -> 'dict[str, str]'` |
 | `backend_health_probe` | function | `(backend: 'Any') -> 'RecoveryProbe'` |
@@ -875,6 +879,15 @@ that this document never drifts from the code.
 | `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
 | `default_retry_policy` | function | `(exc: 'BaseException') -> 'bool'` |
 | `retry_with_budget` | function | `(fn: 'Callable[[], T]', budget: 'RetryBudget', *, is_retryable: 'Callable[[BaseException], bool] | None' = None, on_retry: 'Callable[[int, BaseException], None] | None' = None) -> 'T'` |
+
+### `hugrgate.chaos.soak`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ScheduledFault` | class | `(name: 'str', at_s: 'float', until_s: 'float', apply: 'Callable[[], None]', revert: 'Callable[[], None]') -> None` |
+| `SoakConfig` | class | `(duration_s: 'float' = 2.0, target_ops_per_s: 'float' = 50.0, max_ops: 'int | None' = None, invariant_every_n_ops: 'int' = 25, expected_errors: 'tuple[str, ...]' = ()) -> None` |
+| `SoakReport` | class | `(ops_completed: 'int', errors: 'dict[str, int]', unexpected_errors: 'dict[str, int]', violations: 'list[str]', faults_applied: 'list[str]', duration_s: 'float') -> None` |
+| `SoakRunner` | class | `(workload: 'Callable[[int], None]', invariants: 'list[Callable[[], None]] | None' = None, faults: 'list[ScheduledFault] | None' = None) -> 'None'` |
 
 ### `hugrgate.circuit`
 

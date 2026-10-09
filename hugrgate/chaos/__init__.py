@@ -90,6 +90,12 @@ from hugrgate.chaos.retry import (
     default_retry_policy,
     retry_with_budget,
 )
+from hugrgate.chaos.soak import (
+    ScheduledFault,
+    SoakConfig,
+    SoakReport,
+    SoakRunner,
+)
 
 __all__ = [
     "CHAOS_LAB",
@@ -135,8 +141,12 @@ __all__ = [
     "RecoveryVerifier",
     "ResourceGuard",
     "RetryBudget",
+    "ScheduledFault",
     "ServiceUnderTest",
     "SkewedClock",
+    "SoakConfig",
+    "SoakReport",
+    "SoakRunner",
     "SteadyStateProbe",
     "audit_deadline_clocks",
     "backend_health_probe",
