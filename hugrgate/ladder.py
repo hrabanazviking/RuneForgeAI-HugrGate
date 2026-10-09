@@ -143,6 +143,23 @@ class LadderRouter:
         """The rung list governing this spec type."""
         return self.ladders.get(spec.type, self.rungs)
 
+    # -- pre-run pruning (slice 051: extracted so v2 planners can reuse) --
+
+    def skip_reason(self, backend: Backend, rung: LadderRung,
+                    spec: DecisionSpec, policy: DecisionPolicy,
+                    started: float) -> Optional[tuple]:
+        """Full pre-run check: (outcome, detail) or None if the rung may run."""
+        if not backend.supports(spec):
+            return (RUNG_SKIPPED_UNSUPPORTED,
+                    f"backend does not support {spec.type} specs")
+        if not self.privacy_guard.remote_allowed(backend, policy):
+            return (RUNG_SKIPPED_PRIVACY,
+                    "remote backend blocked (policy/guard)")
+        skip = self._latency_skip(backend, rung, policy, started)
+        if skip is not None:
+            return (RUNG_SKIPPED_LATENCY, skip)
+        return None
+
     # -- routing ---------------------------------------------------------
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
@@ -173,20 +190,10 @@ class LadderRouter:
                     i, rung.backend_name, RUNG_SKIPPED_UNKNOWN,
                     detail="backend not in registry"))
                 continue
-            if not backend.supports(spec):
-                audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_UNSUPPORTED,
-                    detail=f"backend does not support {spec.type} specs"))
-                continue
-            if not self.privacy_guard.remote_allowed(backend, policy):
-                audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_PRIVACY,
-                    detail="remote backend blocked (policy/guard)"))
-                continue
-            skip = self._latency_skip(backend, rung, policy, started)
+            skip = self.skip_reason(backend, rung, spec, policy, started)
             if skip is not None:
                 audit.append(LadderAuditEntry(
-                    i, backend.name, RUNG_SKIPPED_LATENCY, detail=skip))
+                    i, backend.name, skip[0], detail=skip[1]))
                 continue
 
             result = self._attempt(backend, state, spec, context, audit, i)
