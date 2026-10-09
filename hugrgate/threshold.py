@@ -19,7 +19,7 @@ abstention (via :mod:`hugrgate.abstain`) whose reason names the gate.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from hugrgate.abstain import abstain
 from hugrgate.errors import PolicyError
@@ -54,6 +54,15 @@ class NumericBand:
     def contains(self, value: float) -> bool:
         return self.lo <= value <= self.hi
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {"name": self.name, "lo": self.lo, "hi": self.hi,
+                "min_probability": self.min_probability}
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "NumericBand":
+        return cls(name=d["name"], lo=d["lo"], hi=d["hi"],
+                   min_probability=d.get("min_probability", 0.0))
+
 
 @dataclass
 class ThresholdConfig:
@@ -82,6 +91,31 @@ class ThresholdConfig:
                 raise PolicyError("ordinal threshold must be in [0,1]")
         if self.global_minimum is not None and not 0.0 <= self.global_minimum <= 1.0:
             raise PolicyError("global_minimum must be in [0,1]")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "per_option": dict(self.per_option),
+            "ordinal_minimum": (list(self.ordinal_minimum)
+                                if self.ordinal_minimum is not None else None),
+            "numeric_bands": [b.to_dict() for b in self.numeric_bands],
+            "global_minimum": self.global_minimum,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "ThresholdConfig":
+        unknown = set(d) - {"per_option", "ordinal_minimum",
+                             "numeric_bands", "global_minimum"}
+        if unknown:
+            raise PolicyError(
+                f"unknown ThresholdConfig key(s): {sorted(unknown)}")
+        ordinal = d.get("ordinal_minimum")
+        return cls(
+            per_option=dict(d.get("per_option") or {}),
+            ordinal_minimum=tuple(ordinal) if ordinal is not None else None,
+            numeric_bands=[NumericBand.from_dict(b)
+                           for b in d.get("numeric_bands") or []],
+            global_minimum=d.get("global_minimum"),
+        )
 
 
 def ordinal_cumulative_probability(result: DecisionResult,

@@ -66,6 +66,61 @@ class DecisionRecord:
             metadata={} if redact_input else {"state_keys": list(state.keys())},
         )
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "request_hash": self.request_hash,
+            "spec": dict(self.spec),
+            "backend": self.backend,
+            "model": self.model,
+            "model_version": self.model_version,
+            "calibration_profile": self.calibration_profile,
+            "value": self.value,
+            "probability": self.probability,
+            "policy_threshold": self.policy_threshold,
+            "accepted": self.accepted,
+            "fallback_used": self.fallback_used,
+            "fallback_trace": list(self.fallback_trace),
+            "latency_ms": self.latency_ms,
+            "timestamp": self.timestamp,
+            "metadata": dict(self.metadata),
+            "prev_hash": self.prev_hash,
+            "record_hash": self.record_hash,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "DecisionRecord":
+        """Rebuild a record from :meth:`to_dict` output.
+
+        Raises ``SpecError`` when required keys are missing.
+        """
+        from hugrgate.errors import SpecError
+        required = {"request_hash", "spec", "backend", "model", "value",
+                    "probability"}
+        missing = required - set(d)
+        if missing:
+            raise SpecError(
+                f"DecisionRecord.from_dict missing key(s): "
+                f"{sorted(missing)}")
+        return cls(
+            request_hash=d["request_hash"],
+            spec=dict(d["spec"]),
+            backend=d["backend"],
+            model=d["model"],
+            model_version=d.get("model_version", "unknown"),
+            calibration_profile=d.get("calibration_profile", "none"),
+            value=d["value"],
+            probability=d["probability"],
+            policy_threshold=d.get("policy_threshold", 0.0),
+            accepted=d.get("accepted", True),
+            fallback_used=d.get("fallback_used", False),
+            fallback_trace=list(d.get("fallback_trace") or []),
+            latency_ms=d.get("latency_ms", 0.0),
+            timestamp=d.get("timestamp", time.time()),
+            metadata=dict(d.get("metadata") or {}),
+            prev_hash=d.get("prev_hash", ""),
+            record_hash=d.get("record_hash", ""),
+        )
+
 
 class ProvenanceStore:
     """Append-only store of decision records.

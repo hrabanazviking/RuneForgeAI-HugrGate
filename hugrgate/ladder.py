@@ -86,6 +86,29 @@ class LadderRung:
         if self.latency_budget_ms is not None and self.latency_budget_ms < 0:
             raise SpecError("latency_budget_ms must be non-negative")
 
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "backend_name": self.backend_name,
+            "min_confidence": self.min_confidence,
+            "latency_budget_ms": self.latency_budget_ms,
+        }
+
+    @classmethod
+    def from_dict(cls, d: Mapping[str, Any]) -> "LadderRung":
+        """Rebuild a rung from :meth:`to_dict` output.
+
+        Unknown keys raise ``SpecError`` (ladder configuration is
+        strict, like ``policy_from_dict``).
+        """
+        unknown = set(d) - {"backend_name", "min_confidence",
+                            "latency_budget_ms"}
+        if unknown:
+            raise SpecError(
+                f"unknown LadderRung key(s): {sorted(unknown)}")
+        return cls(backend_name=d["backend_name"],
+                   min_confidence=d.get("min_confidence", 0.0),
+                   latency_budget_ms=d.get("latency_budget_ms"))
+
 
 @dataclass
 class LadderAuditEntry:

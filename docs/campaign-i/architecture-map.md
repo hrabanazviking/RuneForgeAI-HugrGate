@@ -184,6 +184,7 @@ flowchart TD
     privacy --> log
     privacy --> policy
     privacy --> provenance
+    provenance -.-> errors
     provenance --> result
     provenance --> spec
     result --> errors
@@ -338,6 +339,7 @@ flowchart TD
 | `privacy` | `log` | no |
 | `privacy` | `policy` | no |
 | `privacy` | `provenance` | no |
+| `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
