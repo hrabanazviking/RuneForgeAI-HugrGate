@@ -145,6 +145,8 @@ THIRD_PARTY_PROVIDERS: dict[str, set[str]] = {
     "vllm": {"vllm"},
     "mlx_lm": {"mlx"},
     "openvino": {"openvino"},
+    "tensorrt": {"tensorrt"},
+    "pycuda": {"tensorrt"},
 }
 # Declared extras with no current importer (documented reservations).
 # (The ``onnx`` reservation was retired in slice 154: the future ONNX
@@ -159,7 +161,7 @@ _STDLIB = {
     "signal", "socket", "statistics", "string", "subprocess", "sys",
     "tempfile", "threading", "time", "tomllib", "traceback", "typing",
     "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
-    "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
+    "csv", "gzip", "zipfile", "email", "html", "http", "urllib", "struct",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build"}
