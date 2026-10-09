@@ -33,6 +33,7 @@ from hugrgate.privacy_jurisdiction import (
 )
 from hugrgate.privacy_labels import FieldLabels
 from hugrgate.privacy_localonly import LocalOnlyPolicy, LocalOnlyResult
+from hugrgate.privacy_redact import redact_metadata
 from hugrgate.privacy_trust import (
     TRUST_ORDER,
     BackendTrustRegistry,
@@ -323,13 +324,13 @@ class PrivacyGuard:
     def redact_record(self, record: DecisionRecord) -> DecisionRecord:
         """Return a copy of ``record`` with raw state material scrubbed.
 
-        Drops any state keys/values from ``metadata`` and marks the record
-        as redacted. Idempotent.
+        Slice 232 hardening: the scrub is now *deep* — ``state`` /
+        ``state_keys`` / ``raw_state`` keys are dropped at any nesting
+        depth inside metadata, and remaining string values are
+        pattern-scrubbed. Idempotent.
         """
-        metadata = {k: v for k, v in record.metadata.items()
-                    if k not in ("state_keys", "state", "raw_state")}
-        metadata["redacted"] = True
-        return replace(record, metadata=metadata)
+        return replace(record,
+                       metadata=redact_metadata(record.metadata))
 
     def provenance_redaction_needed(self,
                                     policy: DecisionPolicy | None) -> bool:

@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 232)
+- Redaction pipeline v2 (`hugrgate.privacy_redact`): composable
+  `Redactor` strategies (mask/pattern/hash/drop/token),
+  `RedactionPipeline` with per-field and per-sensitivity strategies,
+  deep metadata scrubbing; `PrivacyGuard.redact_record` hardened to
+  the deep scrub.
+
 ### Added (slice 231)
 - Local-only field enforcement (`hugrgate.privacy_localonly`):
   `LocalOnlyPolicy` strip/strict modes, nested-aware stripping with
