@@ -92,7 +92,8 @@ class ReleaseVerdict:
 
 
 def _check_error_taxonomy() -> tuple[bool, str]:
-    from hugrgate import errors
+    import importlib
+    errors = importlib.import_module("hugrgate.errors")
     missing = [c for c in _CAMPAIGN_XIX_CODES
                if c not in HugrGateError._registry]
     if missing:

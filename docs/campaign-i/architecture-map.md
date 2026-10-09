@@ -212,6 +212,34 @@ flowchart TD
         calibration_viz[calibration.viz]
         calibration_window[calibration.window]
     end
+    subgraph autotune[autotune]
+        autotune[autotune]
+        autotune_adversarial[autotune.adversarial]
+        autotune_benchmark[autotune.benchmark]
+        autotune_constraints[autotune.constraints]
+        autotune_controller[autotune.controller]
+        autotune_limits[autotune.limits]
+        autotune_modes[autotune.modes]
+        autotune_objectives[autotune.objectives]
+        autotune_provenance[autotune.provenance]
+        autotune_release[autotune.release]
+        autotune_repro[autotune.repro]
+        autotune_rollback[autotune.rollback]
+        autotune_tuners[autotune.tuners]
+        autotune_tuners__base[autotune.tuners._base]
+        autotune_tuners_backends[autotune.tuners.backends]
+        autotune_tuners_batching[autotune.tuners.batching]
+        autotune_tuners_cache[autotune.tuners.cache]
+        autotune_tuners_calibration_select[autotune.tuners.calibration_select]
+        autotune_tuners_cost[autotune.tuners.cost]
+        autotune_tuners_energy[autotune.tuners.energy]
+        autotune_tuners_gates[autotune.tuners.gates]
+        autotune_tuners_hardware[autotune.tuners.hardware]
+        autotune_tuners_latency[autotune.tuners.latency]
+        autotune_tuners_privacy[autotune.tuners.privacy]
+        autotune_tuners_thresholds[autotune.tuners.thresholds]
+        autotune_tuners_weights[autotune.tuners.weights]
+    end
     subgraph ensemble[ensemble]
         ensemble[ensemble]
         ensemble_base[ensemble.base]
@@ -655,6 +683,75 @@ flowchart TD
     asyncx --> backend
     asyncx --> log
     asyncx --> spec
+    autotune_adversarial -.-> autotune_controller
+    autotune_adversarial --> autotune_tuners__base
+    autotune_adversarial --> errors
+    autotune_benchmark --> autotune_controller
+    autotune_benchmark --> autotune_modes
+    autotune_benchmark --> autotune_tuners__base
+    autotune_benchmark --> errors
+    autotune_constraints --> errors
+    autotune_controller --> errors
+    autotune_limits --> autotune_controller
+    autotune_limits --> errors
+    autotune_modes --> autotune_controller
+    autotune_modes --> errors
+    autotune_objectives --> errors
+    autotune_provenance --> autotune_controller
+    autotune_provenance --> errors
+    autotune_release -.-> autotune_controller
+    autotune_release -.-> autotune_limits
+    autotune_release -.-> autotune_modes
+    autotune_release -.-> autotune_provenance
+    autotune_release -.-> autotune_repro
+    autotune_release -.-> autotune_tuners__base
+    autotune_release -.-> autotune_tuners_thresholds
+    autotune_release --> errors
+    autotune_repro --> autotune_controller
+    autotune_repro --> autotune_provenance
+    autotune_repro --> errors
+    autotune_rollback --> errors
+    autotune_tuners__base --> autotune_controller
+    autotune_tuners__base --> errors
+    autotune_tuners_backends --> autotune_controller
+    autotune_tuners_backends --> autotune_tuners__base
+    autotune_tuners_backends --> errors
+    autotune_tuners_batching --> autotune_controller
+    autotune_tuners_batching --> autotune_tuners__base
+    autotune_tuners_batching --> errors
+    autotune_tuners_cache --> autotune_controller
+    autotune_tuners_cache --> autotune_tuners__base
+    autotune_tuners_cache --> errors
+    autotune_tuners_calibration_select --> autotune_controller
+    autotune_tuners_calibration_select --> autotune_tuners__base
+    autotune_tuners_calibration_select -.-> calibration_autoselect
+    autotune_tuners_calibration_select --> errors
+    autotune_tuners_cost --> autotune_controller
+    autotune_tuners_cost --> autotune_tuners__base
+    autotune_tuners_cost --> errors
+    autotune_tuners_energy --> autotune_controller
+    autotune_tuners_energy --> autotune_tuners__base
+    autotune_tuners_energy --> errors
+    autotune_tuners_gates --> autotune_controller
+    autotune_tuners_gates --> autotune_tuners__base
+    autotune_tuners_gates --> errors
+    autotune_tuners_hardware --> autotune_controller
+    autotune_tuners_hardware --> autotune_tuners__base
+    autotune_tuners_hardware --> errors
+    autotune_tuners_latency --> autotune_controller
+    autotune_tuners_latency --> autotune_tuners__base
+    autotune_tuners_latency --> errors
+    autotune_tuners_privacy --> autotune_controller
+    autotune_tuners_privacy --> autotune_tuners__base
+    autotune_tuners_privacy --> errors
+    autotune_tuners_privacy --> privacy
+    autotune_tuners_thresholds --> autotune_controller
+    autotune_tuners_thresholds --> autotune_tuners__base
+    autotune_tuners_thresholds --> errors
+    autotune_tuners_weights --> autotune_controller
+    autotune_tuners_weights --> autotune_tuners__base
+    autotune_tuners_weights --> ensemble_blending
+    autotune_tuners_weights --> errors
     backend --> errors
     backend --> result
     backend --> spec
@@ -2060,6 +2157,7 @@ flowchart TD
 | memory | `memory`, `memory.access`, `memory.adversarial`, `memory.assisted_calibration`, `memory.assisted_routing`, `memory.backend_history`, `memory.benchmarks`, `memory.compaction`, `memory.conditioned`, `memory.contract_history`, `memory.counterfactuals`, `memory.decay`, `memory.domain_profiles`, `memory.frequency`, `memory.groundtruth`, `memory.history`, `memory.io`, `memory.outcomes`, `memory.policies`, `memory.query`, `memory.recency`, `memory.replay`, `memory.retention`, `memory.retrieval`, `memory.similarity`, `memory.types` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
+| autotune | `autotune`, `autotune.adversarial`, `autotune.benchmark`, `autotune.constraints`, `autotune.controller`, `autotune.limits`, `autotune.modes`, `autotune.objectives`, `autotune.provenance`, `autotune.release`, `autotune.repro`, `autotune.rollback`, `autotune.tuners`, `autotune.tuners._base`, `autotune.tuners.backends`, `autotune.tuners.batching`, `autotune.tuners.cache`, `autotune.tuners.calibration_select`, `autotune.tuners.cost`, `autotune.tuners.energy`, `autotune.tuners.gates`, `autotune.tuners.hardware`, `autotune.tuners.latency`, `autotune.tuners.privacy`, `autotune.tuners.thresholds`, `autotune.tuners.weights` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
 | service | `server`, `daemon`, `client`, `cli` |
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
@@ -2261,6 +2359,75 @@ flowchart TD
 | `asyncx` | `backend` | no |
 | `asyncx` | `log` | no |
 | `asyncx` | `spec` | no |
+| `autotune.adversarial` | `autotune.controller` | yes |
+| `autotune.adversarial` | `autotune.tuners._base` | no |
+| `autotune.adversarial` | `errors` | no |
+| `autotune.benchmark` | `autotune.controller` | no |
+| `autotune.benchmark` | `autotune.modes` | no |
+| `autotune.benchmark` | `autotune.tuners._base` | no |
+| `autotune.benchmark` | `errors` | no |
+| `autotune.constraints` | `errors` | no |
+| `autotune.controller` | `errors` | no |
+| `autotune.limits` | `autotune.controller` | no |
+| `autotune.limits` | `errors` | no |
+| `autotune.modes` | `autotune.controller` | no |
+| `autotune.modes` | `errors` | no |
+| `autotune.objectives` | `errors` | no |
+| `autotune.provenance` | `autotune.controller` | no |
+| `autotune.provenance` | `errors` | no |
+| `autotune.release` | `autotune.controller` | yes |
+| `autotune.release` | `autotune.limits` | yes |
+| `autotune.release` | `autotune.modes` | yes |
+| `autotune.release` | `autotune.provenance` | yes |
+| `autotune.release` | `autotune.repro` | yes |
+| `autotune.release` | `autotune.tuners._base` | yes |
+| `autotune.release` | `autotune.tuners.thresholds` | yes |
+| `autotune.release` | `errors` | no |
+| `autotune.repro` | `autotune.controller` | no |
+| `autotune.repro` | `autotune.provenance` | no |
+| `autotune.repro` | `errors` | no |
+| `autotune.rollback` | `errors` | no |
+| `autotune.tuners._base` | `autotune.controller` | no |
+| `autotune.tuners._base` | `errors` | no |
+| `autotune.tuners.backends` | `autotune.controller` | no |
+| `autotune.tuners.backends` | `autotune.tuners._base` | no |
+| `autotune.tuners.backends` | `errors` | no |
+| `autotune.tuners.batching` | `autotune.controller` | no |
+| `autotune.tuners.batching` | `autotune.tuners._base` | no |
+| `autotune.tuners.batching` | `errors` | no |
+| `autotune.tuners.cache` | `autotune.controller` | no |
+| `autotune.tuners.cache` | `autotune.tuners._base` | no |
+| `autotune.tuners.cache` | `errors` | no |
+| `autotune.tuners.calibration_select` | `autotune.controller` | no |
+| `autotune.tuners.calibration_select` | `autotune.tuners._base` | no |
+| `autotune.tuners.calibration_select` | `calibration.autoselect` | yes |
+| `autotune.tuners.calibration_select` | `errors` | no |
+| `autotune.tuners.cost` | `autotune.controller` | no |
+| `autotune.tuners.cost` | `autotune.tuners._base` | no |
+| `autotune.tuners.cost` | `errors` | no |
+| `autotune.tuners.energy` | `autotune.controller` | no |
+| `autotune.tuners.energy` | `autotune.tuners._base` | no |
+| `autotune.tuners.energy` | `errors` | no |
+| `autotune.tuners.gates` | `autotune.controller` | no |
+| `autotune.tuners.gates` | `autotune.tuners._base` | no |
+| `autotune.tuners.gates` | `errors` | no |
+| `autotune.tuners.hardware` | `autotune.controller` | no |
+| `autotune.tuners.hardware` | `autotune.tuners._base` | no |
+| `autotune.tuners.hardware` | `errors` | no |
+| `autotune.tuners.latency` | `autotune.controller` | no |
+| `autotune.tuners.latency` | `autotune.tuners._base` | no |
+| `autotune.tuners.latency` | `errors` | no |
+| `autotune.tuners.privacy` | `autotune.controller` | no |
+| `autotune.tuners.privacy` | `autotune.tuners._base` | no |
+| `autotune.tuners.privacy` | `errors` | no |
+| `autotune.tuners.privacy` | `privacy` | no |
+| `autotune.tuners.thresholds` | `autotune.controller` | no |
+| `autotune.tuners.thresholds` | `autotune.tuners._base` | no |
+| `autotune.tuners.thresholds` | `errors` | no |
+| `autotune.tuners.weights` | `autotune.controller` | no |
+| `autotune.tuners.weights` | `autotune.tuners._base` | no |
+| `autotune.tuners.weights` | `ensemble.blending` | no |
+| `autotune.tuners.weights` | `errors` | no |
 | `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |

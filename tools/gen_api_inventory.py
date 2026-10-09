@@ -56,7 +56,7 @@ def _stable_repr(obj: object) -> str:
     if isinstance(obj, (list, tuple)):
         inner = ", ".join(_stable_repr(v) for v in obj)
         return f"[{inner}]" if isinstance(obj, list) else f"({inner})"
-    return repr(obj)
+    return re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
 
 
 def describe(module, name: str) -> tuple[str, str]:
@@ -70,11 +70,6 @@ def describe(module, name: str) -> tuple[str, str]:
     else:
         # Determinism: sort set/frozenset constants (iteration order
         # varies with hash seed) and sanitize memory addresses in reprs.
-        if isinstance(obj, (set, frozenset)):
-            shown = "{" + ", ".join(repr(x) for x in sorted(obj, key=repr)) + "}"
-        else:
-            shown = re.sub(r"0x[0-9a-fA-F]+", "0x…", repr(obj))
-        return "constant", shown[:60]
         return "constant", _stable_repr(obj)[:60]
     try:
         sig = str(inspect.signature(obj))

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 415 · **public names:** 2508
+**Modules:** 441 · **public names:** 2609
 
 ## API stability policy
 
@@ -536,7 +536,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `PRIORITIES` | constant | `('low', 'normal', 'high', 'critical')` |
-| `PRIORITY_RANK` | constant | `{'low': 0, 'normal': 1, 'high': 2, 'critical': 3}` |
+| `PRIORITY_RANK` | constant | `{'critical': 3, 'high': 2, 'low': 0, 'normal': 1}` |
 | `AgentDelivery` | class | `(signal: 'AgentSignal', delivered: 'int' = 0, suppressed: 'int' = 0, dropped: 'int' = 0, errors: 'tuple[str, ...]' = ()) -> None` |
 | `AgentId` | class | — |
 | `AgentSignal` | class | `(topic: 'str', payload: 'Mapping[str, Any]' = <factory>, priority: 'str' = 'normal', trace_id: 'str' = '', dedup_key: 'str' = '', source: 'str' = '') -> None` |
@@ -567,6 +567,227 @@ that this document never drifts from the code.
 | `AsyncBackendBase` | class | `()` |
 | `evaluate_async` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Mapping[str, Any] | None' = None) -> 'Any'` |
 | `is_async_backend` | function | `(backend: 'Any') -> 'bool'` |
+
+### `hugrgate.autotune`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `__version__` | constant | `'19.0.0'` |
+
+### `hugrgate.autotune.adversarial`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AttackResult` | class | `(name: 'str', measurements: 'dict[str, Any]' = <factory>, notes: 'str' = '') -> None` |
+| `crash_storm_attack` | function | `(controller: 'OptimizationController', n_crashers: 'int' = 5) -> 'AttackResult'` |
+| `label_poisoning_attack` | function | `(tuner_factory: 'Callable[[Sequence[tuple[float, int]]], BaseTuner]', dataset: 'Sequence[tuple[float, int]]', clean_metric: 'Callable[[float], float]', param: 'str', poison_fraction: 'float' = 0.2, seed: 'int' = 0) -> 'AttackResult'` |
+| `latency_spike_attack` | function | `(tuner_factory: 'Callable[[Mapping[str, Sequence[float]]], BaseTuner]', samples: 'Mapping[str, Sequence[float]]', total_budget_ms: 'float', min_stage_ms: 'float', spike_fraction: 'float' = 0.1, spike_factor: 'float' = 10.0, seed: 'int' = 0) -> 'AttackResult'` |
+| `malicious_tuner_attack` | function | `(controller: 'OptimizationController', malicious_changes: 'Mapping[str, Any]', tuner_name: 'str' = 'malicious') -> 'AttackResult'` |
+| `poison_labels` | function | `(dataset: 'Sequence[tuple[float, int]]', fraction: 'float', seed: 'int') -> 'list[tuple[float, int]]'` |
+| `spike_samples` | function | `(samples: 'Mapping[str, Sequence[float]]', fraction: 'float', spike_factor: 'float', seed: 'int') -> 'dict[str, list[float]]'` |
+
+### `hugrgate.autotune.benchmark`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AutotuneBenchmark` | class | `(scenarios: 'Sequence[BenchmarkScenario]') -> 'None'` |
+| `BenchmarkReport` | class | `(seed: 'int', results: 'list[BenchmarkResult]' = <factory>, generated_at: 'float' = <factory>) -> None` |
+| `BenchmarkResult` | class | `(scenario: 'str', baseline_score: 'float', tuned_score: 'float', improvement: 'float', seconds: 'float', proposal_id: 'str', data_fingerprint: 'str') -> None` |
+| `BenchmarkScenario` | class | `(name: 'str', tuner: 'BaseTuner', params: 'Sequence[TunableParameter]', replay: 'Callable[[Mapping[str, Any]], float]', data_fingerprint: 'str' = '', baseline_note: 'str' = '') -> None` |
+
+### `hugrgate.autotune.constraints`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConstraintSet` | class | `(constraints: 'Sequence[ConstraintSpec]' = ()) -> 'None'` |
+| `ConstraintSpec` | class | `(constraint_id: 'str', predicate: 'Callable[[Mapping[str, Any]], bool]', message: 'str', severity: 'str' = 'hard') -> None` |
+| `Violation` | class | `(constraint_id: 'str', message: 'str', severity: 'str' = 'hard') -> None` |
+| `change_within` | function | `(param: 'str', baseline: 'Mapping[str, Any]', max_delta: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `implies` | function | `(param_a: 'str', value_a: 'Any', param_b: 'str', allowed: 'Sequence[Any]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `mutual_exclusion` | function | `(params: 'Sequence[str]', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `requires` | function | `(param: 'str', predicate: 'Callable[[Any], bool]', message: 'str', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `sum_leq` | function | `(params: 'Sequence[str]', cap: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+| `within_bounds` | function | `(param: 'str', lo: 'float', hi: 'float', constraint_id: 'str | None' = None) -> 'ConstraintSpec'` |
+
+### `hugrgate.autotune.controller`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_MODES` | constant | `('offline', 'shadow', 'canary', 'applied')` |
+| `ConfigStore` | class | `() -> 'None'` |
+| `Disposition` | class | `(*values)` |
+| `DriverResult` | class | `(proposal_id: 'str', disposition: 'Disposition', detail: 'dict[str, Any]' = <factory>) -> None` |
+| `Mode` | class | `(*values)` |
+| `ModeDriver` | class | `(*args, **kwargs)` |
+| `OptimizationController` | class | `(store: 'ConfigStore | None' = None) -> 'None'` |
+| `Proposal` | class | `(proposal_id: 'str', tuner: 'str', changes: 'dict[str, Any]', objective_id: 'str', baseline: 'float', estimate: 'float', seed: 'int', created_at: 'float' = <factory>, evidence: 'dict[str, Any]' = <factory>) -> None` |
+| `TunableParameter` | class | `(name: 'str', dtype: 'str', default: 'Any', description: 'str' = '', owner: 'str' = '', lo: 'float | None' = None, hi: 'float | None' = None, choices: 'tuple[str, ...] | None' = None) -> None` |
+| `Tuner` | class | `(*args, **kwargs)` |
+| `TuningContext` | class | `(store: 'ConfigStore', objectives: 'Mapping[str, Callable[[Mapping[str, Any]], float]]', constraints: 'Sequence[Callable[[Mapping[str, Any]], None]]', seed: 'int', mode: 'Mode', run_id: 'str', data: 'Mapping[str, Any]' = <factory>) -> None` |
+| `TuningRun` | class | `(run_id: 'str', mode: 'Mode', seed: 'int', started_at: 'float', finished_at: 'float', results: 'list[DriverResult]' = <factory>, notes: 'list[str]' = <factory>) -> None` |
+
+### `hugrgate.autotune.limits`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SafetyEnforcer` | class | `(limits: 'SafetyLimits | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'` |
+| `SafetyLimits` | class | `(kill_switch: 'bool' = False, frozen_params: 'tuple[str, ...]' = (), max_params_per_proposal: 'int' = 5, max_step_fraction: 'float' = 0.25, allowed_modes: 'tuple[Mode, ...]' = (<Mode.OFFLINE: 'offline'>, <Mode.SHADOW: 'shadow'>, <Mode.CANARY: 'canary'>), max_cycles_per_hour: 'int' = 12) -> None` |
+
+### `hugrgate.autotune.modes`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CanaryDriver` | class | `(mode: 'Mode' = <Mode.CANARY: 'canary'>, fraction: 'float' = 0.05, lease_seconds: 'float' = 600.0, guardrails: 'list[Callable[[], tuple[bool, str]]]' = <factory>, clock: 'Callable[[], float]' = <built-in function time>, leases: 'list[CanaryLease]' = <factory>) -> None` |
+| `CanaryLease` | class | `(lease_id: 'str', proposal_id: 'str', changes: 'dict[str, Any]', previous: 'dict[str, Any]', fraction: 'float', started_at: 'float', ends_at: 'float', status: 'str' = 'active', events: 'list[str]' = <factory>) -> None` |
+| `OfflineDriver` | class | `(mode: 'Mode' = <Mode.OFFLINE: 'offline'>, journal: 'list[dict[str, Any]]' = <factory>, seen: 'dict[str, Proposal]' = <factory>) -> None` |
+| `ShadowDriver` | class | `(mode: 'Mode' = <Mode.SHADOW: 'shadow'>, samples: 'Sequence[Mapping[str, Any]]' = <factory>, live_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, shadow_scorer: 'Callable[[Mapping[str, Any], Mapping[str, Any]], float] | None' = None, min_delta: 'float' = 0.005, journal: 'list[dict[str, Any]]' = <factory>) -> None` |
+
+### `hugrgate.autotune.objectives`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Direction` | class | `(*values)` |
+| `GuardedObjective` | class | `(objective_id: 'str', primary: 'ObjectiveSpec', guards: 'tuple[tuple[ObjectiveSpec, float], ...]' = ()) -> None` |
+| `LexicographicObjective` | class | `(objective_id: 'str', specs: 'tuple[ObjectiveSpec, ...]', tolerance: 'float' = 1e-09) -> None` |
+| `ObjectiveSpec` | class | `(objective_id: 'str', evaluate: 'Callable[[Mapping[str, Any]], float]', direction: 'Direction' = <Direction.MAXIMIZE: 'maximize'>, bounds: 'tuple[float, float]' = (0.0, 1.0), target: 'float | None' = None, description: 'str' = '') -> None` |
+| `WeightedObjective` | class | `(objective_id: 'str', parts: 'tuple[tuple[ObjectiveSpec, float], ...]') -> None` |
+
+### `hugrgate.autotune.provenance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `OptimizationProvenance` | class | `(max_records: 'int | None' = None) -> 'None'` |
+| `OptimizationRecord` | class | `(record_id: 'str', timestamp: 'float', tuner: 'str', proposal_id: 'str', mode: 'str', disposition: 'str', changes: 'dict[str, Any]', config_before_hash: 'str', config_after_hash: 'str', data_fingerprint: 'str', seed: 'int', evidence_summary: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
+| `ProvenanceTracker` | class | `(store: 'OptimizationProvenance | None' = None, clock: 'Any' = <built-in function time>) -> 'None'` |
+| `hash_mapping` | function | `(mapping: 'Mapping[str, Any]') -> 'str'` |
+
+### `hugrgate.autotune.release`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HOLD` | constant | `'hold'` |
+| `RELEASE` | constant | `'release'` |
+| `ReleaseCheck` | class | `(name: 'str', run: 'Callable[[], tuple[bool, str]]') -> None` |
+| `ReleaseVerdict` | class | `(verdict: 'str', results: 'list[dict[str, Any]]' = <factory>, generated_at: 'str' = <factory>) -> None` |
+| `assert_release` | function | `(verdict: 'ReleaseVerdict') -> 'None'` |
+| `campaign_checks` | function | `() -> 'list[ReleaseCheck]'` |
+| `release_gate` | function | `(checks: 'Sequence[ReleaseCheck] | None' = None) -> 'ReleaseVerdict'` |
+
+### `hugrgate.autotune.repro`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RunManifest` | class | `(run_id: 'str', seed: 'int', mode: 'str', tuners: 'dict[str, dict[str, Any]]', objective_ids: 'list[str]', objective_refs: 'dict[str, str]', constraint_refs: 'list[str]', data_fingerprint: 'str', config_before: 'dict[str, Any]', config_before_hash: 'str', proposal_signatures: 'list[list[str]]' = <factory>, code_version: 'str' = 'gjallarbu-campaign-xix', recorded_at: 'float' = <factory>) -> None` |
+| `record_manifest` | function | `(controller: 'OptimizationController', run: 'TuningRun', tuners: 'Mapping[str, Any]', proposals: 'Mapping[str, Proposal] | None' = None, data_fingerprint: 'str' = '') -> 'RunManifest'` |
+| `restore_bundle` | function | `(bundle: 'bytes') -> 'dict[str, Any]'` |
+| `snapshot_bundle` | function | `(values: 'Mapping[str, Any]') -> 'bytes'` |
+| `verify_replay` | function | `(manifest: 'RunManifest', make_controller: 'Callable[[], tuple[OptimizationController, Callable[[], Mapping[str, Proposal]]]]') -> 'dict[str, Any]'` |
+
+### `hugrgate.autotune.rollback`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RollbackController` | class | `(restore: 'Callable[[], None] | None' = None, clock: 'Callable[[], float]' = <built-in function time>) -> 'None'` |
+| `RollbackEvent` | class | `(trigger: 'str', fired_at: 'float', breaches: 'int', reason: 'str') -> None` |
+| `RollbackTrigger` | class | `(name: 'str', metric: 'Callable[[], float]', direction: 'str', threshold: 'float', sustained: 'int' = 3, description: 'str' = '') -> None` |
+
+### `hugrgate.autotune.tuners`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.autotune.tuners._base`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BaseTuner` | class | `(name: 'str' = 'base_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005) -> None` |
+| `kfold_indices` | function | `(n: 'int', labels: 'Sequence[int]', n_folds: 'int', seed: 'int') -> 'list[tuple[list[int], list[int]]]'` |
+| `linspace` | function | `(lo: 'float', hi: 'float', n: 'int') -> 'list[float]'` |
+| `seeded_rng` | function | `(seed: 'int') -> 'random.Random'` |
+
+### `hugrgate.autotune.tuners.backends`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackendOrderTuner` | class | `(name: 'str' = 'backend_order_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, backends: 'Sequence[str]' = <factory>, stats: 'Mapping[str, tuple[float, float]]' = <factory>, rank_prefix: 'str' = 'backend.rank') -> None` |
+| `expected_chain_cost` | function | `(order: 'Sequence[str]', stats: 'Mapping[str, tuple[float, float]]') -> 'float'` |
+
+### `hugrgate.autotune.tuners.batching`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BatchSizeTuner` | class | `(name: 'str' = 'batch_size_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, samples: 'Sequence[tuple[int, float, float]]' = <factory>, latency_cap_ms: 'float' = 100.0, memory_cap_mb: 'float' = 4096.0, min_r_squared: 'float' = 0.5) -> None` |
+| `fit_linear` | function | `(xs: 'Sequence[float]', ys: 'Sequence[float]') -> 'tuple[float, float, float]'` |
+| `powers_of_two` | function | `(lo: 'int', hi: 'int') -> 'list[int]'` |
+
+### `hugrgate.autotune.tuners.cache`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CachePolicyTuner` | class | `(name: 'str' = 'cache_policy_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, ttl_param: 'str' = '', size_param: 'str' = '', eviction_param: 'str' = '', trace: 'Sequence[TraceEvent]' = <factory>, ttl_grid: 'int' = 9, size_ladder: 'Sequence[int]' = (32, 128, 512, 2048, 8192)) -> None` |
+| `simulate_trace` | function | `(trace: 'Sequence[TraceEvent]', ttl: 'float', max_size: 'int', eviction: 'str') -> 'dict[str, float]'` |
+
+### `hugrgate.autotune.tuners.calibration_select`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationSelectorTuner` | class | `(name: 'str' = 'calibration_selector_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, scores: 'Sequence[float]' = <factory>, labels: 'Sequence[int]' = <factory>, candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, min_win: 'float' = 0.0) -> None` |
+
+### `hugrgate.autotune.tuners.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostAwareTuner` | class | `(name: 'str' = 'cost_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, cost: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', cost_budget: 'float' = 1.0, quality_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.energy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnergyAwareTuner` | class | `(name: 'str' = 'energy_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, energy_j: 'Mapping[str, Sequence[float]]' = <factory>, quality: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', energy_budget_j: 'float' = 1.0, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.gates`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ConfidenceGateTuner` | class | `(name: 'str' = 'confidence_gate_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, bool]]' = <factory>, mode: 'str' = 'accuracy_floor', floor: 'float' = 0.8, target: 'float' = 0.8, alpha: 'float' = 0.05, grid: 'int' = 41, train_fraction: 'float' = 0.7) -> None` |
+| `wilson_lower_bound` | function | `(successes: 'int', trials: 'int', alpha: 'float' = 0.05) -> 'float'` |
+
+### `hugrgate.autotune.tuners.hardware`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HardwareAwareTuner` | class | `(name: 'str' = 'hardware_aware_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, tiers: 'list[HardwareTier]' = <factory>, injected_hardware: 'HardwareProfile | None' = None) -> None` |
+| `HardwareProfile` | class | `(cpu_count: 'int', memory_mb: 'float', arch: 'str', system: 'str') -> None` |
+| `HardwareTier` | class | `(name: 'str', min_cpu: 'int', min_memory_mb: 'float', profile: 'Mapping[str, Any]') -> None` |
+| `detect_hardware` | function | `() -> 'HardwareProfile'` |
+
+### `hugrgate.autotune.tuners.latency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LatencyBudgetTuner` | class | `(name: 'str' = 'latency_budget_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, stages: 'Sequence[str]' = <factory>, samples: 'Mapping[str, Sequence[float]]' = <factory>, total_budget_ms: 'float' = 1000.0, seed_quantile: 'float' = 0.99, refine_steps: 'int' = 200, step_ms: 'float' = 1.0, min_stage_ms: 'float' = 1.0) -> None` |
+| `empirical_tail` | function | `(samples: 'Sequence[float]', budget: 'float') -> 'float'` |
+| `quantile` | function | `(samples: 'Sequence[float]', q: 'float') -> 'float'` |
+
+### `hugrgate.autotune.tuners.privacy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyConstrainedTuner` | class | `(name: 'str' = 'privacy_constrained_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, choices: 'Sequence[str]' = <factory>, privacy_class: 'Mapping[str, str]' = <factory>, epsilon: 'Mapping[str, float]' = <factory>, utility: 'Mapping[str, Sequence[float]]' = <factory>, mode: 'str' = 'budget', epsilon_budget: 'float' = 1.0, utility_floor: 'float' = 0.8, min_samples: 'int' = 20) -> None` |
+
+### `hugrgate.autotune.tuners.thresholds`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ThresholdTuner` | class | `(name: 'str' = 'threshold_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, dataset: 'Sequence[tuple[float, int]]' = <factory>, metric: 'str' = 'f1', n_folds: 'int' = 5, grid: 'int' = 41) -> None` |
+| `threshold_metric` | function | `(metric: 'str', scores: 'Sequence[float]', labels: 'Sequence[int]', threshold: 'float') -> 'float'` |
+
+### `hugrgate.autotune.tuners.weights`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnsembleWeightTuner` | class | `(name: 'str' = 'ensemble_weight_tuner', param: 'str' = '', objective_id: 'str' = '', seed: 'int' = 0, min_delta: 'float' = 0.005, members: 'Sequence[str]' = <factory>, votes: 'Sequence[Sequence[Sequence[float]]]' = <factory>, labels: 'Sequence[int]' = <factory>, weight_prefix: 'str' = 'ensemble.weight', max_iter: 'int' = 200, tol: 'float' = 1e-06) -> None` |
+| `mean_log_likelihood` | function | `(votes: 'Sequence[Sequence[Sequence[float]]]', labels: 'Sequence[int]', weights: 'Sequence[float]') -> 'float'` |
 
 ### `hugrgate.backend`
 
@@ -733,8 +954,10 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DEFAULT_CANDIDATES` | constant | `['beta-binomial', 'ensemble', 'isotonic', 'platt', 'temperat` |
-| `SelectionResult` | class | `(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '') -> None` |
-| `auto_select` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True) -> 'SelectionResult'` |
+| `NONE_CANDIDATE` | constant | `'none'` |
+| `SelectionResult` | class | `(metric: 'str', n_folds: 'int', seed: 'int', ranking: 'list[dict[str, Any]]', best: 'str', best_params: 'dict[str, Any]', n_samples: 'int', notes: 'str' = '', incumbent: 'str | None' = None, kept_incumbent: 'bool' = False, paired_win_vs_incumbent: 'float | None' = None) -> None` |
+| `auto_select` | function | `(scores: 'Sequence[float]', labels: 'Sequence[int]', candidates: 'Sequence[str] | None' = None, metric: 'str' = 'brier', n_folds: 'int' = 5, seed: 'int' = 0, refit_best: 'bool' = True, incumbent: 'str | None' = None, min_win: 'float' = 0.0) -> 'SelectionResult'` |
+| `paired_win` | function | `(challenger: 'dict[int, float]', incumbent: 'dict[int, float]') -> 'float | None'` |
 
 ### `hugrgate.calibration.bayes`
 
@@ -963,7 +1186,7 @@ that this document never drifts from the code.
 | `HANG` | constant | `'hang'` |
 | `LATENCY` | constant | `'latency'` |
 | `MALFORMED` | constant | `'malformed'` |
-| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
+| `MUST_REJECT_KINDS` | constant | `frozenset({'bad_version', 'flip_magic', 'kv_bomb', 'truncate` |
 | `OK` | constant | `'ok'` |
 | `UP` | constant | `'up'` |
 | `WARN` | constant | `'warn'` |
@@ -1108,7 +1331,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `CORRUPTION_KINDS` | constant | `('flip_magic', 'bad_version', 'truncate', 'kv_bomb', 'zero_o` |
-| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
+| `MUST_REJECT_KINDS` | constant | `frozenset({'bad_version', 'flip_magic', 'kv_bomb', 'truncate` |
 | `ModelCorruptor` | class | `(seed: 'int | None' = None)` |
 
 ### `hugrgate.chaos.network`
@@ -1533,9 +1756,9 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CONTRACT_KINDS` | constant | `{'contract': <class 'hugrgate.contracts.schema.DecisionContr` |
+| `CONTRACT_KINDS` | constant | `{'composite': <class 'hugrgate.contracts.composite.Composite` |
 | `SCHEMA_VERSION` | constant | `'2.0'` |
-| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0',)` |
+| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0')` |
 | `DecisionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'dict[str, Any]' = <factory>) -> None` |
 | `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
 | `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
@@ -1681,7 +1904,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `ERROR` | constant | `'error'` |
 | `INFO` | constant | `'info'` |
-| `LINT_CHECKS` | constant | `[<function _check_documented at 0x…>, <function _check_metad` |
+| `LINT_CHECKS` | constant | `[<function _check_documented>, <function _check_metadata>, <` |
 | `WARNING` | constant | `'warning'` |
 | `LintFinding` | class | `(severity: 'str', code: 'str', message: 'str', contract_id: 'str' = '') -> None` |
 | `LintReport` | class | `(findings: 'list[LintFinding]' = <factory>) -> None` |
@@ -1694,7 +1917,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `MIGRATIONS` | constant | `{('1.0', '2.0'): <function _migrate_v1_dict_to_v2 at 0x…>}` |
+| `MIGRATIONS` | constant | `{('1.0', '2.0'): <function _migrate_v1_dict_to_v2>}` |
 | `MigrationReport` | class | `(source_version: 'str', target_version: 'str', result: 'DecisionContract', warnings: 'list[str]' = <factory>, lossy: 'bool' = False) -> None` |
 | `contract_to_spec` | function | `(contract: 'DecisionContract') -> 'DecisionSpec'` |
 | `migrate` | function | `(d: 'Mapping[str, Any]', to_version: 'str' = '2.0') -> 'DecisionContract'` |
@@ -1750,9 +1973,9 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CONTRACT_KINDS` | constant | `{'contract': <class 'hugrgate.contracts.schema.DecisionContr` |
+| `CONTRACT_KINDS` | constant | `{'composite': <class 'hugrgate.contracts.composite.Composite` |
 | `SCHEMA_VERSION` | constant | `'2.0'` |
-| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0',)` |
+| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0')` |
 | `DecisionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'dict[str, Any]' = <factory>) -> None` |
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
@@ -1835,10 +2058,10 @@ that this document never drifts from the code.
 | `DEFAULT_MAX_VALUE_BYTES` | constant | `16777216` |
 | `GATE_CHECKS` | constant | `('test-suite', 'ruff', 'mypy', 'chaos', 'slice-docs', 'bench` |
 | `LOW_AVAILABLE_BYTES` | constant | `1073741824` |
-| `PI_BASELINES` | constant | `{'Raspberry Pi 5': EdgeBaseline(board='Raspberry Pi 5', cpu_` |
+| `PI_BASELINES` | constant | `{'Raspberry Pi 3 Model B+': EdgeBaseline(board='Raspberry Pi` |
 | `PRECISIONS` | constant | `('int4', 'int8', 'fp16', 'fp32')` |
 | `PROFILES` | constant | `{'full': 'all available CPUs', 'inference': 'all CPUs except` |
-| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `QUANT_PROFILES` | constant | `{'fp16': QuantProfile(name='fp16', format=<QuantFormat.FP16:` |
 | `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
 | `WARN_C` | constant | `70.0` |
 | `AffinityController` | class | `(os_funcs: '_OsFuncs | None' = None, dry_run: 'bool' = False)` |
@@ -2055,7 +2278,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `QUANT_PROFILES` | constant | `{'fp16': QuantProfile(name='fp16', format=<QuantFormat.FP16:` |
 | `Int4Adapter` | class | `(group_size: 'int' = 32)` |
 | `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QuantFormat` | class | `(*values)` |
@@ -2143,7 +2366,7 @@ that this document never drifts from the code.
 | `STATUS_ACTIVE` | constant | `'active'` |
 | `STATUS_RETIRED` | constant | `'retired'` |
 | `STATUS_STANDBY` | constant | `'standby'` |
-| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x…>, 'hard': <function ha` |
+| `STRATEGIES` | constant | `{'blending': <function blending_combine>, 'bma': <function b` |
 | `STRATEGIES_BENCHMARKED` | constant | `('hard', 'soft', 'weighted', 'confidence')` |
 | `AbstainBackend` | class | `(wrapped: 'Backend', every: 'int' = 1)` |
 | `AdversarialCase` | class | `(name: 'str', ensemble: 'Ensemble', states: 'list[Mapping[str, Any]]', spec: 'DecisionSpec') -> None` |
@@ -2248,7 +2471,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `STRATEGIES` | constant | `{'soft': <function soft_voting at 0x…>, 'hard': <function ha` |
+| `STRATEGIES` | constant | `{'blending': <function blending_combine>, 'bma': <function b` |
 | `Ensemble` | class | `(members: 'list[Backend]', strategy: 'str' = 'soft', name: 'str | None' = None, config: 'EnsembleConfig | None' = None, weights: 'Mapping[str, float] | None' = None, min_members: 'int | None' = None, strategy_options: 'dict[str, Any] | None' = None, fitted: 'Any' = None)` |
 | `EnsembleConfig` | class | `(weights: 'Mapping[str, float] | None' = None, min_members: 'int' = 1, strategy_options: 'dict[str, Any] | None' = None)` |
 | `get_strategy` | function | `(name: 'str') -> 'Combiner'` |
@@ -2443,6 +2666,7 @@ that this document never drifts from the code.
 | `AgentLoopDetected` | class | `(message: 'str' = '', **details: 'Any')` |
 | `AgentNotFound` | class | `(message: 'str' = '', **details: 'Any')` |
 | `AgentRunaway` | class | `(message: 'str' = '', **details: 'Any')` |
+| `AutotuneError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackpressureError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2451,6 +2675,7 @@ that this document never drifts from the code.
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ConstraintViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ContractError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `DataFlowDenied` | class | `(message: 'str' = '', **details: 'Any')` |
 | `DatasetError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2473,7 +2698,9 @@ that this document never drifts from the code.
 | `MultiprocError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NumaError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ObjectiveError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ParameterError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PerfGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PoolError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2483,8 +2710,10 @@ that this document never drifts from the code.
 | `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ReproducibilityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RollbackError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SchedulerError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
 | `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2494,6 +2723,8 @@ that this document never drifts from the code.
 | `SupervisionError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `TunerError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `UnsafeProposalError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ZeroCopyError` | class | `(message: 'str' = '', **details: 'Any')` |
 
@@ -2914,7 +3145,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `DEFAULT_DOMAIN` | constant | `'default'` |
 | `OUTCOME_KINDS` | constant | `('success', 'failure', 'partial')` |
-| `ROLE_PERMISSIONS` | constant | `{'owner': RolePermission(max_class='forbidden', redact_at=No` |
+| `ROLE_PERMISSIONS` | constant | `{'analyst': RolePermission(max_class='sensitive', redact_at=` |
 | `AdversarialReport` | class | `(findings: 'list[Finding]' = <factory>) -> None` |
 | `BackendCounterfactual` | class | `(backend: 'str', n: 'int', success_rate: 'float | None', wilson_lo: 'float', wilson_hi: 'float', mean_score: 'float | None', sufficient_data: 'bool') -> None` |
 | `BackendHistory` | class | `(backend: 'str', decision_count: 'int', accepted_count: 'int', accepted_rate: 'float', outcome_counts: 'dict[str, int]' = <factory>, success_rate: 'float | None' = None, mean_probability: 'float | None' = None, decayed_mean_probability: 'float | None' = None, mean_latency_ms: 'float | None' = None, first_seen: 'float | None' = None, last_seen: 'float | None' = None, models: 'tuple[str, ...]' = ()) -> None` |
@@ -2999,7 +3230,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `ROLE_PERMISSIONS` | constant | `{'owner': RolePermission(max_class='forbidden', redact_at=No` |
+| `ROLE_PERMISSIONS` | constant | `{'analyst': RolePermission(max_class='sensitive', redact_at=` |
 | `GuardedHistory` | class | `(history: 'HistoryLike', role: 'str', policy: 'MemoryAccessPolicy | None' = None) -> 'None'` |
 | `MemoryAccessPolicy` | class | `(permissions: 'dict[str, RolePermission] | None' = None) -> 'None'` |
 | `RolePermission` | class | `(max_class: 'str', redact_at: 'str | None', write: 'bool') -> None` |
@@ -3298,7 +3529,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_POWER_W` | constant | `{'default': 65.0, 'cpu': 65.0, 'gpu': 250.0, 'npu': 15.0, 'r` |
+| `DEFAULT_POWER_W` | constant | `{'cpu': 65.0, 'default': 65.0, 'gpu': 250.0, 'npu': 15.0, 'r` |
 | `MAX_LEDGER` | constant | `1000` |
 | `DefaultEnergyEstimator` | class | `(power_w: 'dict[str, float] | None' = None) -> 'None'` |
 | `EnergyEstimator` | class | `(*args, **kwargs)` |
@@ -3336,7 +3567,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `EVENT_SCHEMAS` | constant | `{'decision.completed': {'version': 1, 'required': ('spec_typ` |
+| `EVENT_SCHEMAS` | constant | `{'alert.fired': {'optional': ('details'), 'required': ('aler` |
 | `ObservabilityFormatter` | class | `(fmt=None, datefmt=None, style='%', validate=True, *, defaults=None)` |
 | `TraceLoggerAdapter` | class | `(logger: 'logging.Logger', trace_id: 'str | None' = None, span_id: 'str | None' = None) -> 'None'` |
 | `emit_event` | function | `(logger_name: 'str', event: 'str', fields: 'dict[str, Any]', level: 'int' = 20, trace_id: 'str | None' = None, span_id: 'str | None' = None) -> 'None'` |
@@ -3441,7 +3672,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `FORBIDDEN_ATTRIBUTE_KEYS` | constant | `{'document', 'input', 'password', 'payload', 'pii', 'prompt'` |
+| `FORBIDDEN_ATTRIBUTE_KEYS` | constant | `frozenset({'document', 'input', 'password', 'payload', 'pii'` |
 | `ProbabilisticSampler` | class | `(rate: 'float' = 1.0) -> 'None'` |
 | `Span` | class | `(name: 'str', context: 'SpanContext', parent_span_id: 'str | None' = None, attributes: 'Mapping[str, Any] | None' = None, start_time: 'float | None' = None) -> 'None'` |
 | `SpanContext` | class | `(trace_id: 'str', span_id: 'str', sampled: 'bool' = True) -> None` |
@@ -3477,8 +3708,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CLASS_SEMANTICS` | constant | `{'public': {'min_trust': 'untrusted', 'cacheable': True, 're` |
-| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'forbidden', 'strict'}` |
+| `CLASS_SEMANTICS` | constant | `{'forbidden': {'cacheable': False, 'min_trust': 'enclave', '` |
+| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `frozenset({'forbidden', 'strict'})` |
 | `PRIVACY_CLASS_ORDER` | constant | `('public', 'standard', 'sensitive', 'strict', 'forbidden')` |
 | `REMOTE_MODES` | constant | `('allow', 'forbidden')` |
 | `TRUST_ORDER` | constant | `('untrusted', 'basic', 'verified', 'enclave')` |
@@ -3641,7 +3872,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `RETENTION_DEFAULTS` | constant | `{'public': None, 'standard': 2592000, 'sensitive': 604800, '` |
+| `RETENTION_DEFAULTS` | constant | `{'forbidden': 0, 'public': None, 'sensitive': 604800, 'stand` |
 | `RetentionPolicy` | class | `(max_age_seconds: 'Mapping[str, float | None] | None' = None)` |
 | `purge_expired` | function | `(store: 'ProvenanceStore', policy: 'RetentionPolicy | None' = None, now: 'float | None' = None, on_purge: 'Callable[[DecisionRecord], None] | None' = None) -> 'int'` |
 
@@ -3697,15 +3928,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CAPABILITY_WEIGHTS` | constant | `{'quality': 0.35, 'calibration': 0.2, 'features': 0.2, 'capa` |
+| `CAPABILITY_WEIGHTS` | constant | `{'calibration': 0.2, 'capacity': 0.15, 'features': 0.2, 'qua` |
 | `DEFAULT_LOCAL_MEMORY_MB` | constant | `512.0` |
 | `DEFAULT_LOCAL_WATTS` | constant | `65.0` |
 | `DEFAULT_REMOTE_MEMORY_MB` | constant | `0.0` |
 | `DEFAULT_REMOTE_WATTS` | constant | `5.0` |
-| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'below_confidenc` |
-| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'standard': 4, 'priority': 6, 'critical':` |
+| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'backend_abstain` |
+| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'critical': 8, 'priority': 6, 'standard':` |
 | `QOS_PROFILES` | constant | `{<QoSClass.BEST_EFFORT: 'best_effort'>: QoSProfile(name=<QoS` |
-| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'standard': (0.4, 0.3, 0.3)` |
+| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'critical': (0.8, 0.15, 0.0` |
 | `AvailabilityAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'AvailabilityTracker | None' = None, check_health: 'bool' = True)` |
 | `AvailabilityTracker` | class | `(failure_threshold: 'int' = 3, cooldown_s: 'float' = 60.0)` |
 | `BackendClearance` | class | `()` |
@@ -3855,7 +4086,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'below_confidenc` |
+| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'backend_abstain` |
 | `explain_decision` | function | `(decision: 'RoutingDecision') -> 'str'` |
 | `explain_plan` | function | `(plan: 'RoutingPlan') -> 'str'` |
 | `explain_route` | function | `(audit: 'list[dict]', plan: 'RoutingPlan | None' = None, winner: 'int | None' = None) -> 'str'` |
@@ -3871,7 +4102,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `KNOWN_OUTCOMES` | constant | `{'accepted', 'backend_abstained', 'backend_error', 'backend_` |
+| `KNOWN_OUTCOMES` | constant | `set({'accepted', 'backend_abstained', 'backend_error', 'back` |
 | `FuzzBackend` | class | `(name: 'str', rng: 'random.Random', remote: 'bool')` |
 | `run_fuzz` | function | `(seed: 'int', iterations: 'int' = 100) -> 'dict[str, Any]'` |
 
@@ -3958,8 +4189,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'standard': 4, 'priority': 6, 'critical':` |
-| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'standard': (0.4, 0.3, 0.3)` |
+| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'critical': 8, 'priority': 6, 'standard':` |
+| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'critical': (0.8, 0.15, 0.0` |
 | `LadderSynthesizer` | class | `(registry, builder: 'RungBuilder | None' = None)` |
 | `score_capability` | function | `(backend: 'Backend', ctx: 'RouterContext') -> 'float'` |
 
@@ -3974,7 +4205,7 @@ that this document never drifts from the code.
 | `CAP_JSON_SCHEMA` | constant | `'json_schema'` |
 | `CAP_STREAM` | constant | `'stream'` |
 | `CAP_TOKENIZE` | constant | `'tokenize'` |
-| `KNOWN_FORMATS` | constant | `{'.gguf': 'gguf', '.onnx': 'onnx', '.safetensors': 'safetens` |
+| `KNOWN_FORMATS` | constant | `{'.bin': 'pytorch-bin', '.engine': 'tensorrt-engine', '.gguf` |
 | `ClassificationResult` | class | `(label: 'str', scores: 'dict[str, float]') -> None` |
 | `EmbeddingResult` | class | `(vectors: 'list[list[float]]', dim: 'int', model: 'str' = '') -> None` |
 | `FakeRuntime` | class | `(dim: 'int' = 64, latency_s: 'float' = 0.0, supports: 'frozenset[str] | None' = None) -> 'None'` |
@@ -4005,8 +4236,8 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ADAPTER_CLASSES` | constant | `(<class 'hugrgate.runtimes.llama_cpp.LlamaCppRuntime'>, <cla` |
-| `HAPPY_PATHS` | constant | `{'LlamaCppRuntime': <function _llama_cpp_happy at 0x…>, 'Oll` |
-| `HAPPY_PROBES` | constant | `{'OnnxRuntime': <function _embed_probe at 0x…>}` |
+| `HAPPY_PATHS` | constant | `{'LlamaCppRuntime': <function _llama_cpp_happy>, 'OllamaRunt` |
+| `HAPPY_PROBES` | constant | `{'OnnxRuntime': <function _embed_probe>}` |
 | `ConformanceCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
 | `ConformanceReport` | class | `(adapter: 'str', runtime_name: 'str', available: 'bool', checks: 'list[ConformanceCheck]' = <factory>) -> None` |
 | `check_adapter` | function | `(cls: 'type[LocalRuntime]', happy_path: 'Callable[[], LocalRuntime] | None' = None, happy_probe: 'Callable[[LocalRuntime], str] | None' = None) -> 'ConformanceReport'` |
@@ -4155,7 +4386,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `IGNORED_KEYWORDS` | constant | `{'$comment', '$id', '$schema', 'default', 'deprecated', 'des` |
+| `IGNORED_KEYWORDS` | constant | `frozenset({'$comment', '$id', '$schema', 'default', 'depreca` |
 | `StructuredRuntime` | class | `(inner: 'LocalRuntime', max_retries: 'int' = 2, name: 'str | None' = None) -> 'None'` |
 | `extract_json` | function | `(text: 'str') -> 'Any'` |
 | `validate` | function | `(instance: 'Any', schema: 'dict[str, Any]', path: 'str' = '$') -> 'list[str]'` |
@@ -4171,7 +4402,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `GENERATION_TASKS` | constant | `{'text-generation'}` |
+| `GENERATION_TASKS` | constant | `frozenset({'text-generation'})` |
 | `TransformersRuntime` | class | `(model: 'ModelRef | str | None' = None, task: 'str' = 'text-generation', device: 'int' = -1, trust_remote_code: 'bool' = False, pipe_kwargs: 'dict[str, Any] | None' = None, pipe: 'Any' = None) -> 'None'` |
 
 ### `hugrgate.runtimes.vllm`
@@ -4203,9 +4434,9 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
-| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
+| `ENDPOINT_CAPABILITIES` | constant | `{'DELETE /keys/{id}': 'manage_keys', 'GET /metrics': 'metric` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ROLES` | constant | `{'admin': frozenset({'manage_keys', 'metrics'}), 'caller': f` |
 | `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
@@ -4307,8 +4538,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
-| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'de` |
+| `ENDPOINT_CAPABILITIES` | constant | `{'DELETE /keys/{id}': 'manage_keys', 'GET /metrics': 'metric` |
+| `ROLES` | constant | `{'admin': frozenset({'manage_keys', 'metrics'}), 'caller': f` |
 | `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
@@ -4423,8 +4654,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `BUILTIN_PREFIXES` | constant | `('hugrgate.',)` |
-| `DANGEROUS_CAPABILITIES` | constant | `{'filesystem_write', 'network', 'subprocess'}` |
+| `BUILTIN_PREFIXES` | constant | `('hugrgate.')` |
+| `DANGEROUS_CAPABILITIES` | constant | `frozenset({'filesystem_write', 'network', 'subprocess'})` |
 | `TRUST_LEVELS` | constant | `('denied', 'sandboxed', 'signed', 'builtin')` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
