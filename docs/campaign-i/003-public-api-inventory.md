@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 51 · **public names:** 220
+**Modules:** 52 · **public names:** 227
 
 ## API stability policy
 
@@ -307,6 +307,18 @@ that this document never drifts from the code.
 | `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PowerSource` | class | `()` |
 | `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
+
+### `hugrgate.edge.quant`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `QUANT_PROFILES` | constant | `{'fp32': QuantProfile(name='fp32', format=<QuantFormat.FP32:` |
+| `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `QuantFormat` | class | `(*values)` |
+| `QuantProfile` | class | `(name: 'str', format: 'QuantFormat', size_factor: 'float', latency_factor: 'float', quality_delta_pp: 'float' = 0.0, min_ram_mb: 'int' = 0, notes: 'str' = '') -> None` |
+| `QuantProfileRegistry` | class | `()` |
+| `estimate` | function | `(profile: 'QuantProfile', base_size_mb: 'float', base_latency_ms: 'float') -> 'dict[str, float]'` |
+| `select_profile` | function | `(registry: 'QuantProfileRegistry', ram_budget_mb: 'float', latency_budget_ms: 'float', base_size_mb: 'float', base_latency_ms: 'float', preference: 'str' = 'smallest') -> 'QuantProfile'` |
 
 ### `hugrgate.edge.routing`
 
