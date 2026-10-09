@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:55:22.586795+00:00",
-  "module_count": 48,
+  "generated_utc": "2026-10-09T12:56:24.720635+00:00",
+  "module_count": 49,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,12 +544,12 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 35,
+      "loc": 45,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
     "hugrgate.cluster.capabilities": {
-      "docstring": "Node capability advertisement. Slice 203.\n\nBefore a cluster can route work, every node must be able to say what it\n*is*: which backends it serves, which spec types those cover, what it\ncosts, and what hardware stands behind it. :class:`NodeCapabilities`\nis that self-description \u2014 built from the live\n:class:`BackendRegistry` (never hand-written, so it cannot drift from\nreality) and exchanged during discovery (slices 204\u2013206) and routing\n(slice 212).",
+      "docstring": "Node capability advertisement. Slice 203.\n\nBefore a cluster can route work, every node must be able to say what it\n*is*: which backends it serves, which spec types those cover, what it\ncosts, and what hardware stands behind it. :class:`NodeCapabilities`\nis that self-description \u2014 built from the live\n:class:`BackendRegistry` (never hand-written, so it cannot drift from\nreality) and exchanged during discovery (slices 204-206) and routing\n(slice 212).",
       "imports": [
         "__future__",
         "dataclasses",
@@ -570,6 +570,37 @@
         "describe",
         "to_dict",
         "from_dict"
+      ]
+    },
+    "hugrgate.cluster.discovery": {
+      "docstring": "Node discovery \u2014 finding peers. Slice 204.\n\nDiscovery is a *framework*, not a mechanism: :class:`Discovery` is the\nadapter interface, and :class:`DiscoveryRegistry` merges every\nconfigured adapter (static files in slice 205, LAN multicast in slice\n206, \u2026) into one deduplicated, staleness-pruned peer table.\n\nA peer is identified by its ``node_id``; the same node seen by two\nadapters collapses to one :class:`PeerRecord`, newest ``last_seen``\nwins. Records older than ``stale_after_s`` are pruned on read \u2014 a peer\nnobody has heard from is not a peer, it is a memory.",
+      "imports": [
+        "__future__",
+        "abc",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 175,
+      "path": "hugrgate/cluster/discovery.py",
+      "public_defs": [
+        "PeerRecord",
+        "Discovery",
+        "DiscoveryRegistry",
+        "address",
+        "age_s",
+        "is_stale",
+        "to_dict",
+        "start",
+        "stop",
+        "peers",
+        "add_adapter",
+        "start_all",
+        "stop_all",
+        "peers",
+        "find"
       ]
     },
     "hugrgate.cluster.identity": {
@@ -1130,6 +1161,7 @@
     "test_async_readiness.py",
     "test_backend_registry.py",
     "test_cluster_capabilities.py",
+    "test_cluster_discovery.py",
     "test_cluster_identity.py",
     "test_cluster_protocol.py",
     "test_config.py",
@@ -1159,5 +1191,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8526
+  "total_loc": 8711
 }

@@ -71,6 +71,7 @@ flowchart TD
         cluster_protocol[cluster.protocol]
         cluster_identity[cluster.identity]
         cluster_capabilities[cluster.capabilities]
+        cluster_discovery[cluster.discovery]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -163,6 +164,7 @@ flowchart TD
     client -.-> server
     client --> spec
     cluster --> cluster_capabilities
+    cluster --> cluster_discovery
     cluster --> cluster_identity
     cluster --> cluster_protocol
     cluster_capabilities --> hugrgate
@@ -171,6 +173,8 @@ flowchart TD
     cluster_capabilities --> cluster_protocol
     cluster_capabilities --> errors
     cluster_capabilities --> spec
+    cluster_discovery --> cluster_capabilities
+    cluster_discovery --> errors
     cluster_identity --> cluster_protocol
     cluster_identity --> errors
     cluster_protocol --> errors
@@ -260,7 +264,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -354,6 +358,7 @@ flowchart TD
 | `client` | `server` | yes |
 | `client` | `spec` | no |
 | `cluster` | `cluster.capabilities` | no |
+| `cluster` | `cluster.discovery` | no |
 | `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.protocol` | no |
 | `cluster.capabilities` | `hugrgate` | no |
@@ -362,6 +367,8 @@ flowchart TD
 | `cluster.capabilities` | `cluster.protocol` | no |
 | `cluster.capabilities` | `errors` | no |
 | `cluster.capabilities` | `spec` | no |
+| `cluster.discovery` | `cluster.capabilities` | no |
+| `cluster.discovery` | `errors` | no |
 | `cluster.identity` | `cluster.protocol` | no |
 | `cluster.identity` | `errors` | no |
 | `cluster.protocol` | `errors` | no |
