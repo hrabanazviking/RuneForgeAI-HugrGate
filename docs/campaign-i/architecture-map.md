@@ -1819,6 +1819,7 @@ flowchart TD
     scheduler --> errors
     scheduler --> log
     security --> security_attack_surface
+    security --> security_cache_poisoning
     security --> security_checksums
     security --> security_depscan
     security --> security_injection_corpus
@@ -1834,6 +1835,10 @@ flowchart TD
     security --> security_serde_guards
     security --> security_supply_chain
     security --> security_threat_model
+    security_cache_poisoning --> cache
+    security_cache_poisoning --> policy
+    security_cache_poisoning --> result
+    security_cache_poisoning --> spec
     security_checksums --> errors
     security_checksums --> security_path_guards
     security_injection_corpus -.-> security_prompt_injection
@@ -3309,6 +3314,7 @@ flowchart TD
 | `scheduler` | `errors` | no |
 | `scheduler` | `log` | no |
 | `security` | `security.attack_surface` | no |
+| `security` | `security.cache_poisoning` | no |
 | `security` | `security.checksums` | no |
 | `security` | `security.depscan` | no |
 | `security` | `security.injection_corpus` | no |
@@ -3324,6 +3330,10 @@ flowchart TD
 | `security` | `security.serde_guards` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
+| `security.cache_poisoning` | `cache` | no |
+| `security.cache_poisoning` | `policy` | no |
+| `security.cache_poisoning` | `result` | no |
+| `security.cache_poisoning` | `spec` | no |
 | `security.checksums` | `errors` | no |
 | `security.checksums` | `security.path_guards` | no |
 | `security.injection_corpus` | `security.prompt_injection` | yes |

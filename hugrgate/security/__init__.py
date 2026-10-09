@@ -61,6 +61,10 @@ from hugrgate.security.attack_surface import (
     enumerate_surface,
     find_unlisted,
 )
+from hugrgate.security.cache_poisoning import (
+    BoundCache,
+    run_poison_suite,
+)
 from hugrgate.security.checksums import (
     ChecksumManifest,
     ModelChecksumGate,
@@ -163,6 +167,7 @@ __all__ = [
     "Advisory",
     "Asset",
     "AttackSurface",
+    "BoundCache",
     "BoundaryEnforcer",
     "ChecksumManifest",
     "CostLedger",
@@ -208,6 +213,7 @@ __all__ = [
     "restricted_loads",
     "run_corpus",
     "run_gauntlet",
+    "run_poison_suite",
     "run_sandboxed",
     "run_tamper_suite",
     "safe_join",

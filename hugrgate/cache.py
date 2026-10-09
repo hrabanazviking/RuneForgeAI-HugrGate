@@ -106,12 +106,21 @@ def _isolated_copy(result: DecisionResult) -> DecisionResult:
 
 
 def cache_key(state: Mapping[str, Any], spec: DecisionSpec,
-              policy: DecisionPolicy) -> str:
-    """Stable hash identifying one cacheable decision request."""
+              policy: DecisionPolicy, *, namespace: str = "",
+              model_version: str = "") -> str:
+    """Stable hash identifying one cacheable decision request.
+
+    Slice 417: ``namespace`` isolates tenants sharing one cache
+    (cross-tenant poisoning), and ``model_version`` isolates model
+    generations (stale-model serving). Both default to ``""``,
+    preserving the historical key.
+    """
     payload = json.dumps(
         {"state": _canonicalize(dict(state)),
          "spec": spec.to_dict(),
-         "policy": _policy_fingerprint(policy)},
+         "policy": _policy_fingerprint(policy),
+         "namespace": namespace,
+         "model_version": model_version},
         default=str)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -167,17 +176,22 @@ class DecisionCache:
     # -- core API ----------------------------------------------------------
 
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
-            policy: DecisionPolicy) -> DecisionResult | None:
+            policy: DecisionPolicy, *, namespace: str = "",
+            model_version: str = "") -> DecisionResult | None:
         """Return the cached result, or None on miss/expiry/privacy.
 
         Slice 293: the key computation and the result copy are pure
         functions of the arguments — they run *outside* the lock so
         the critical section holds only the dict probe and the LRU
         touch (~1us instead of ~35us).
+
+        Slice 417: ``namespace``/``model_version`` isolate tenants
+        and model generations sharing one cache.
         """
         if not PrivacyGuard.cache_allowed(policy):
             return None
-        key = cache_key(state, spec, policy)
+        key = cache_key(state, spec, policy, namespace=namespace,
+                        model_version=model_version)
         with self._lock:
             entry = self._entries.get(key)
             if entry is None:
@@ -196,7 +210,9 @@ class DecisionCache:
             # (Only dispatched when overridden — the base no-op is skipped
             # on the hot path.)
             if type(self)._verify_entry is not DecisionCache._verify_entry:
-                self._verify_entry(entry, state, spec, policy)
+                self._verify_entry(entry, state, spec, policy,
+                                   namespace=namespace,
+                                   model_version=model_version)
             if _result_snapshot(entry.result) != entry.checksum:
                 # The stored result was corrupted beneath the cache API.
                 # Fail safe: evict the damaged entry and report a miss so
@@ -215,17 +231,22 @@ class DecisionCache:
         return _isolated_copy(result)
 
     def _verify_entry(self, entry: _Entry, state: Mapping[str, Any],
-                      spec: DecisionSpec, policy: DecisionPolicy) -> None:
+                      spec: DecisionSpec, policy: DecisionPolicy, *,
+                      namespace: str = "", model_version: str = "") -> None:
         """Subclass hook: verify an entry before the integrity seal.
 
         The base implementation does nothing. ``EncryptedDecisionCache``
         overrides this to authenticate the sealed blob (raising
         ``SealError`` on tampering) before the entry is served.
+        Slice 417: the namespace/model_version bindings are threaded
+        through so sealed verification uses the same associated data
+        as sealing did.
         """
 
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy, result: DecisionResult,
-            retention: RetentionPolicy | None = None) -> bool:
+            retention: RetentionPolicy | None = None, *,
+            namespace: str = "", model_version: str = "") -> bool:
         """Store ``result``. Returns False when privacy forbids caching.
 
         When ``retention`` is given, the entry TTL is capped by the
@@ -233,10 +254,14 @@ class DecisionCache:
 
         Slice 293: key computation and the isolation copy are hoisted
         out of the lock (see :meth:`get`).
+
+        Slice 417: ``namespace``/``model_version`` isolate tenants
+        and model generations sharing one cache.
         """
         if not PrivacyGuard.cache_allowed(policy):
             return False
-        key = cache_key(state, spec, policy)
+        key = cache_key(state, spec, policy, namespace=namespace,
+                        model_version=model_version)
         stored = _isolated_copy(result)
         backend = result.backend
         ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \

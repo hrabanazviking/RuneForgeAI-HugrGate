@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 380 · **public names:** 2356
+**Modules:** 381 · **public names:** 2361
 
 ## API stability policy
 
@@ -427,7 +427,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionCache` | class | `(ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000)` |
-| `cache_key` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'DecisionPolicy') -> 'str'` |
+| `cache_key` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', policy: 'DecisionPolicy', *, namespace: 'str' = '', model_version: 'str' = '') -> 'str'` |
 
 ### `hugrgate.calibration`
 
@@ -3965,6 +3965,7 @@ that this document never drifts from the code.
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
 | `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
 | `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
 | `CostLedger` | class | `(budget_units: 'int', name: 'str' = 'cost') -> 'None'` |
@@ -4010,6 +4011,7 @@ that this document never drifts from the code.
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
 | `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
 | `run_gauntlet` | function | `() -> 'GauntletReport'` |
+| `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
@@ -4035,6 +4037,14 @@ that this document never drifts from the code.
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.cache_poisoning`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
+| `PoisonReport` | class | `(attack: 'str', contained: 'bool', detail: 'str' = '') -> None` |
+| `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
 
 ### `hugrgate.security.checksums`
 
