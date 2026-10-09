@@ -42,6 +42,7 @@ from hugrgate.evlab.api import (
     MetricSet,
     RunRecord,
 )
+from hugrgate.evlab.crossval import CVReport, FoldResult, cross_validate
 from hugrgate.evlab.dataset import (
     ACQUISITIONS,
     COLUMN_TYPES,
@@ -65,6 +66,7 @@ __all__ = [
     "ACQUISITIONS",
     "COLUMN_TYPES",
     "DEFAULT_METRICS",
+    "CVReport",
     "ColumnSpec",
     "DatasetManifest",
     "DatasetProvenance",
@@ -72,11 +74,13 @@ __all__ = [
     "DatasetVersion",
     "EvaluationLab",
     "Experiment",
+    "FoldResult",
     "MetricSet",
     "RunRecord",
     "SplitPlan",
     "StratifiedReport",
     "TransformStep",
+    "cross_validate",
     "fingerprint_items",
     "kfold_indices",
     "make_splits",

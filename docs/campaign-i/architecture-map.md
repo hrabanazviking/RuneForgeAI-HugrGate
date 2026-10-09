@@ -1157,6 +1157,7 @@ flowchart TD
     ensemble_voting --> errors
     ensemble_voting --> result
     evlab --> evlab_api
+    evlab --> evlab_crossval
     evlab --> evlab_dataset
     evlab --> evlab_splits
     evlab --> evlab_stratified
@@ -1167,6 +1168,12 @@ flowchart TD
     evlab_api --> log
     evlab_api --> policy
     evlab_api --> spec
+    evlab_crossval --> bench
+    evlab_crossval --> core
+    evlab_crossval --> errors
+    evlab_crossval --> evlab_api
+    evlab_crossval --> evlab_splits
+    evlab_crossval --> policy
     evlab_dataset --> errors
     evlab_splits --> errors
     evlab_splits --> evlab_dataset
@@ -2327,6 +2334,7 @@ flowchart TD
 | `ensemble.voting` | `errors` | no |
 | `ensemble.voting` | `result` | no |
 | `evlab` | `evlab.api` | no |
+| `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
 | `evlab` | `evlab.splits` | no |
 | `evlab` | `evlab.stratified` | no |
@@ -2337,6 +2345,12 @@ flowchart TD
 | `evlab.api` | `log` | no |
 | `evlab.api` | `policy` | no |
 | `evlab.api` | `spec` | no |
+| `evlab.crossval` | `bench` | no |
+| `evlab.crossval` | `core` | no |
+| `evlab.crossval` | `errors` | no |
+| `evlab.crossval` | `evlab.api` | no |
+| `evlab.crossval` | `evlab.splits` | no |
+| `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
 | `evlab.splits` | `errors` | no |
 | `evlab.splits` | `evlab.dataset` | no |
