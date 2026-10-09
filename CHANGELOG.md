@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 246)
+- Privacy explanation reports (`hugrgate.privacy_explain`):
+  `PrivacyExplainer` turns denials, dry-run reports, and
+  provenance records into plain-language what/why/what-to-do
+  reports with per-code remediation.
+
 ### Added (slice 245)
 - Privacy dry-run mode (`hugrgate.privacy_dryrun`):
   `PrivacyDryRun(guard).evaluate(...)` simulates the outbound
