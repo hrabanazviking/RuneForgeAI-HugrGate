@@ -85,6 +85,14 @@ from hugrgate.evlab.energy import (
     energy_aware_evaluate,
 )
 from hugrgate.evlab.latency import LatencyReport, latency_aware_evaluate
+from hugrgate.evlab.privacy import (
+    PIIReport,
+    PrivacyUtilityCurve,
+    PrivacyUtilityPoint,
+    privacy_utility_curve,
+    randomized_response_q,
+    scan_dataset_pii,
+)
 from hugrgate.evlab.selective import (
     SelectivePoint,
     SelectiveReport,
@@ -134,7 +142,10 @@ __all__ = [
     "LabCalibrator",
     "LatencyReport",
     "MetricSet",
+    "PIIReport",
     "PackageCalibrator",
+    "PrivacyUtilityCurve",
+    "PrivacyUtilityPoint",
     "RunRecord",
     "SelectivePoint",
     "SelectiveReport",
@@ -166,8 +177,11 @@ __all__ = [
     "oracle_aurc",
     "paired_permutation_test",
     "pareto_frontier",
+    "privacy_utility_curve",
+    "randomized_response_q",
     "risk_at_coverage",
     "risk_coverage_curve",
+    "scan_dataset_pii",
     "selective_evaluate",
     "stratified_evaluate",
 ]

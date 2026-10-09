@@ -1165,6 +1165,7 @@ flowchart TD
     evlab --> evlab_dataset
     evlab --> evlab_energy
     evlab --> evlab_latency
+    evlab --> evlab_privacy
     evlab --> evlab_selective
     evlab --> evlab_significance
     evlab --> evlab_splits
@@ -1220,6 +1221,13 @@ flowchart TD
     evlab_latency --> policy
     evlab_latency --> result
     evlab_latency --> spec
+    evlab_privacy --> hugrgate
+    evlab_privacy --> core
+    evlab_privacy --> errors
+    evlab_privacy --> policy
+    evlab_privacy --> privacy_pii
+    evlab_privacy --> result
+    evlab_privacy --> spec
     evlab_selective --> core
     evlab_selective --> errors
     evlab_selective --> policy
@@ -2393,6 +2401,7 @@ flowchart TD
 | `evlab` | `evlab.dataset` | no |
 | `evlab` | `evlab.energy` | no |
 | `evlab` | `evlab.latency` | no |
+| `evlab` | `evlab.privacy` | no |
 | `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
@@ -2448,6 +2457,13 @@ flowchart TD
 | `evlab.latency` | `policy` | no |
 | `evlab.latency` | `result` | no |
 | `evlab.latency` | `spec` | no |
+| `evlab.privacy` | `hugrgate` | no |
+| `evlab.privacy` | `core` | no |
+| `evlab.privacy` | `errors` | no |
+| `evlab.privacy` | `policy` | no |
+| `evlab.privacy` | `privacy_pii` | no |
+| `evlab.privacy` | `result` | no |
+| `evlab.privacy` | `spec` | no |
 | `evlab.selective` | `core` | no |
 | `evlab.selective` | `errors` | no |
 | `evlab.selective` | `policy` | no |

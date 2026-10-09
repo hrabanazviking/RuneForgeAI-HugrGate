@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 303 · **public names:** 1861
+**Modules:** 304 · **public names:** 1873
 
 ## API stability policy
 
@@ -2278,7 +2278,10 @@ that this document never drifts from the code.
 | `LabCalibrator` | class | `()` |
 | `LatencyReport` | class | `(backends: 'dict[str, dict[str, Any]]', slo_ms: 'float', n_items: 'int') -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
+| `PIIReport` | class | `(dataset_name: 'str', findings_by_kind: 'dict[str, int]', items_scanned: 'int', items_with_pii: 'int') -> None` |
 | `PackageCalibrator` | class | `(calibrator: 'Any') -> 'None'` |
+| `PrivacyUtilityCurve` | class | `(backend: 'str', baseline_accuracy: 'float | None', points: 'list[PrivacyUtilityPoint]', disclaimer: 'str' = 'Simulation of the privacy/utility tradeoff shape via randomized response. Not a differential-privacy guarantee: no privacy budget is tracked and no mechanism is certified.') -> None` |
+| `PrivacyUtilityPoint` | class | `(epsilon: 'float', flip_q: 'float', accuracy: 'float | None', n: 'int') -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 | `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
 | `SelectiveReport` | class | `(backends: 'dict[str, dict[str, Any]]', n_items: 'int', policy_threshold: 'float | None' = None) -> None` |
@@ -2310,8 +2313,11 @@ that this document never drifts from the code.
 | `oracle_aurc` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
 | `paired_permutation_test` | function | `(scores_a: 'Sequence[float]', scores_b: 'Sequence[float]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alternative: 'str' = 'two-sided', alpha: 'float' = 0.05) -> 'SignificanceResult'` |
 | `pareto_frontier` | function | `(points: 'Mapping[str, tuple[float, float]]') -> 'list[str]'` |
+| `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
+| `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
+| `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
 | `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 
@@ -2400,6 +2406,17 @@ that this document never drifts from the code.
 |---|---|---|
 | `LatencyReport` | class | `(backends: 'dict[str, dict[str, Any]]', slo_ms: 'float', n_items: 'int') -> None` |
 | `latency_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, slo_ms: 'float' = 100.0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'LatencyReport'` |
+
+### `hugrgate.evlab.privacy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PIIReport` | class | `(dataset_name: 'str', findings_by_kind: 'dict[str, int]', items_scanned: 'int', items_with_pii: 'int') -> None` |
+| `PrivacyUtilityCurve` | class | `(backend: 'str', baseline_accuracy: 'float | None', points: 'list[PrivacyUtilityPoint]', disclaimer: 'str' = 'Simulation of the privacy/utility tradeoff shape via randomized response. Not a differential-privacy guarantee: no privacy budget is tracked and no mechanism is certified.') -> None` |
+| `PrivacyUtilityPoint` | class | `(epsilon: 'float', flip_q: 'float', accuracy: 'float | None', n: 'int') -> None` |
+| `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
+| `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
+| `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
 
 ### `hugrgate.evlab.selective`
 
