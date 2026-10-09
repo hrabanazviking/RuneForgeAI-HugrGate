@@ -64,9 +64,11 @@ from hugrgate.security.attack_surface import (
 from hugrgate.security.depscan import (
     ADVISORIES,
     Advisory,
-    Finding as DependencyFinding,
     scan_project,
     scan_requirements,
+)
+from hugrgate.security.depscan import (
+    Finding as DependencyFinding,
 )
 from hugrgate.security.threat_model import (
     STRIDE,
