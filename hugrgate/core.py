@@ -16,6 +16,7 @@ from hugrgate.errors import (
 )
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
+from hugrgate.privacy import provenance_mode_for
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -173,8 +174,9 @@ class HugrGate:
         if contract_id is not None:
             result.metadata["contract_id"] = contract_id
 
-        # Provenance
-        redact = policy.privacy_class == "strict"
+        # Provenance — slice 226: redaction follows the class ladder's
+        # provenance mode, not a hard-coded "strict" comparison.
+        redact = provenance_mode_for(policy.privacy_class) in ("redacted", "none")
         self.provenance.append(DecisionRecord.from_decision(
             state, spec, result,
             policy_threshold=policy.minimum_probability,

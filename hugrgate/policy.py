@@ -22,14 +22,19 @@ class DecisionPolicy:
     allowed_backends: list[str] | None = None
     preferred_backends: list[str] | None = None
     fallback_behavior: str = "abstain"  # abstain|safe_default|escalate
-    privacy_class: str = "standard"     # standard|strict
+    # Slice 226 (privacy classification v2): five ordered classes, lowest
+    # to highest sensitivity. "standard"/"strict" keep their historic
+    # meaning; the new classes extend the ladder in both directions.
+    privacy_class: str = "standard"
     max_cost: float | None = None
     review_band: tuple | None = None  # (low, high) → "review"
 
     #: The only privacy classes with defined semantics. Anything else is
     #: a typo, not a new class — rejected loudly (slice 008), because a
     #: misspelled "strict" must never silently degrade to "standard".
-    PRIVACY_CLASSES = ("standard", "strict")
+    #: Kept in sync with ``hugrgate.privacy.PRIVACY_CLASS_ORDER``
+    #: (enforced by tests/test_privacy_classification.py).
+    PRIVACY_CLASSES = ("public", "standard", "sensitive", "strict", "forbidden")
 
     def __post_init__(self):
         if not 0.0 <= self.minimum_probability <= 1.0:

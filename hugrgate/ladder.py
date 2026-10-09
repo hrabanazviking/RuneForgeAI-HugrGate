@@ -33,7 +33,7 @@ from hugrgate.errors import (
     SpecError,
 )
 from hugrgate.policy import DecisionPolicy
-from hugrgate.privacy import PrivacyGuard
+from hugrgate.privacy import PrivacyGuard, provenance_mode_for
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
@@ -335,7 +335,9 @@ class LadderRouter:
         """Append an attempted rung to the provenance store, if any."""
         if self.provenance is None:
             return
-        redact = policy.privacy_class == "strict"
+        # Slice 226: redaction follows the class ladder's provenance
+        # mode, not a hard-coded "strict" comparison.
+        redact = provenance_mode_for(policy.privacy_class) in ("redacted", "none")
         record = DecisionRecord.from_decision(
             state, spec, result, policy_threshold=gate, redact_input=redact)
         if redact or self.privacy_guard.redact_provenance:

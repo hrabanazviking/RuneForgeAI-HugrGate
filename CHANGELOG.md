@@ -1,5 +1,32 @@
 # Changelog — HugrGate
 
+## Unreleased — Gjallarbrú Campaign X: Privacy Fortress (slices 226–250)
+
+Data sovereignty and enforceable information-flow constraints become
+core architecture: an ordered five-class privacy ladder, field-level
+sensitivity labels, a data-flow policy engine, backend trust levels
+and jurisdiction metadata, local-only enforcement, a redaction
+pipeline, tokenization, secret/PII detection, prompt minimization, a
+remote payload compiler chokepoint, privacy-preserving and encrypted
+provenance, retention and secure deletion, an encrypted cache option,
+a key-provider abstraction, violation auditing, dry-run mode,
+explanation reports, fuzz and exfiltration testing, a privacy
+benchmark suite, and a release gate.
+
+### Added (slice 226)
+- Privacy classification v2: `public < standard < sensitive < strict <
+  forbidden` ladder (`hugrgate.policy.DecisionPolicy.PRIVACY_CLASSES`,
+  `hugrgate.privacy.PRIVACY_CLASS_ORDER` / `CLASS_SEMANTICS` /
+  `TRUST_ORDER` and helpers). `PrivacyGuard` now enforces class
+  semantics at selection and attempt time.
+
+### Changed (behavior, slice 226)
+- `strict`-class data now requires a `verified`-trust remote backend;
+  unattested remotes are denied even when the policy allows remote
+  inference. `forbidden`-class data can never reach a remote backend.
+  Provenance redaction in core/ladder follows the class ladder's
+  provenance mode.
+
 ## Unreleased — Gjallarbrú Campaign VII: Local Model Fabric
 
 New `hugrgate/runtimes/` layer (slices 151–175): a v2 local-runtime

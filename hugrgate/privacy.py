@@ -8,6 +8,13 @@ ever flows to them — and any direct attempt raises ``PrivacyViolation``.
 
 It also owns provenance redaction: records must never carry raw state when
 the privacy class forbids it.
+
+Slice 226 (privacy classification v2) promotes the old binary
+``standard``/``strict`` classes to a five-rung ordered ladder —
+``public`` < ``standard`` < ``sensitive`` < ``strict`` < ``forbidden`` —
+each with machine-enforceable semantics (minimum backend trust, cache
+retention, remote eligibility, provenance mode). The ladder is defined
+here; :class:`DecisionPolicy` accepts exactly these classes.
 """
 
 from __future__ import annotations
@@ -25,15 +32,135 @@ from hugrgate.provenance import DecisionRecord
 logger = get_logger(__name__)
 
 __all__ = [
+    "CLASS_SEMANTICS",
     "NON_CACHEABLE_PRIVACY_CLASSES",
+    "PRIVACY_CLASS_ORDER",
     "REMOTE_MODES",
+    "TRUST_ORDER",
     "PrivacyGuard",
+    "at_least",
+    "class_rank",
+    "default_trust_level",
+    "provenance_mode_for",
+    "semantics_for",
+    "trust_rank",
 ]
 
 REMOTE_MODES = ("allow", "forbidden")
+
+#: Slice 226 — the privacy classification ladder, lowest to highest
+#: sensitivity. Must equal ``DecisionPolicy.PRIVACY_CLASSES`` (enforced
+#: by test); the ordering is load-bearing for ``at_least()``.
+PRIVACY_CLASS_ORDER = ("public", "standard", "sensitive", "strict",
+                       "forbidden")
+
+#: Backend trust ladder, lowest to highest. Slice 226 defines the
+#: ordering and the default mapping; slice 229 adds the attested
+#: ``BackendTrustRegistry`` that can raise a remote backend above
+#: ``"basic"``.
+TRUST_ORDER = ("untrusted", "basic", "verified", "enclave")
+
+#: Machine-enforceable semantics per privacy class.
+#:
+#: - ``min_trust``: minimum backend trust rank for the class's data.
+#: - ``cacheable``: whether decision caching may retain the data.
+#: - ``remote_eligible``: whether remote backends may ever see it.
+#: - ``provenance``: ``"full"`` (state keys + values metadata),
+#:   ``"keys"`` (state keys only), ``"redacted"`` (scrubbed),
+#:   ``"none"`` (no state-derived metadata at all).
+CLASS_SEMANTICS: dict[str, dict[str, Any]] = {
+    "public": {
+        "min_trust": "untrusted",
+        "cacheable": True,
+        "remote_eligible": True,
+        "provenance": "full",
+    },
+    "standard": {
+        "min_trust": "untrusted",
+        "cacheable": True,
+        "remote_eligible": True,
+        "provenance": "keys",
+    },
+    "sensitive": {
+        "min_trust": "basic",
+        "cacheable": True,
+        "remote_eligible": True,
+        "provenance": "keys",
+    },
+    "strict": {
+        # Hardened in slice 226: "strict" data now requires a *verified*
+        # remote backend (attested, slice 229). Previously any remote
+        # backend the policy allowed would receive strict data — an
+        # unverified third party could be handed the most sensitive
+        # payloads the policy still permitted remotely.
+        "min_trust": "verified",
+        "cacheable": False,
+        "remote_eligible": True,
+        "provenance": "redacted",
+    },
+    "forbidden": {
+        # Never leaves the process: no remote backend, no cache, and no
+        # state-derived provenance metadata, regardless of policy or
+        # guard mode. Local-only by construction.
+        "min_trust": "enclave",
+        "cacheable": False,
+        "remote_eligible": False,
+        "provenance": "none",
+    },
+}
+
 #: Privacy classes whose data must never touch the decision cache or
 #: leave the process in provenance records.
-NON_CACHEABLE_PRIVACY_CLASSES = frozenset({"strict"})
+NON_CACHEABLE_PRIVACY_CLASSES = frozenset({"strict", "forbidden"})
+
+
+def class_rank(privacy_class: str) -> int:
+    """Ordinal of a privacy class on the ladder (higher = more sensitive)."""
+    try:
+        return PRIVACY_CLASS_ORDER.index(privacy_class)
+    except ValueError:
+        raise ValueError(
+            f"unknown privacy_class: {privacy_class!r}; expected one of "
+            f"{list(PRIVACY_CLASS_ORDER)}") from None
+
+
+def at_least(privacy_class: str, minimum: str) -> bool:
+    """True when ``privacy_class`` is at least as sensitive as ``minimum``."""
+    return class_rank(privacy_class) >= class_rank(minimum)
+
+
+def semantics_for(privacy_class: str) -> dict[str, Any]:
+    """The enforceable semantics for a privacy class (copy)."""
+    try:
+        return dict(CLASS_SEMANTICS[privacy_class])
+    except KeyError:
+        raise ValueError(
+            f"unknown privacy_class: {privacy_class!r}; expected one of "
+            f"{list(CLASS_SEMANTICS)}") from None
+
+
+def provenance_mode_for(privacy_class: str) -> str:
+    """Provenance mode (``"full"|"keys"|"redacted"|"none"``) for a class."""
+    return semantics_for(privacy_class)["provenance"]
+
+
+def trust_rank(level: str) -> int:
+    """Ordinal of a trust level (higher = more trusted)."""
+    try:
+        return TRUST_ORDER.index(level)
+    except ValueError:
+        raise ValueError(
+            f"unknown trust level: {level!r}; expected one of "
+            f"{list(TRUST_ORDER)}") from None
+
+
+def default_trust_level(backend: Backend) -> str:
+    """Trust level for a backend with no attestation (slice 226 default).
+
+    In-process backends run inside our trust boundary (``"enclave"``);
+    remote backends are ``"basic"`` until attested otherwise (slice 229).
+    """
+    return "enclave" if not backend.is_remote else "basic"
 
 
 class PrivacyGuard:
@@ -61,8 +188,29 @@ class PrivacyGuard:
 
     # -- selection-time enforcement -------------------------------------
 
+    def _class_remote_blocked(self, backend: Backend,
+                              policy: DecisionPolicy) -> str | None:
+        """Return a denial reason when the privacy *class* blocks remote.
+
+        Returns None when the class permits this backend. Slice 226:
+        the class ladder is now enforceable, not advisory.
+        """
+        sem = semantics_for(policy.privacy_class)
+        if backend.is_remote and not sem["remote_eligible"]:
+            return (f"privacy_class {policy.privacy_class!r} forbids "
+                    f"remote inference entirely")
+        need = trust_rank(sem["min_trust"])
+        have = trust_rank(default_trust_level(backend))
+        if have < need:
+            return (f"privacy_class {policy.privacy_class!r} requires "
+                    f"trust >= {sem['min_trust']!r}; backend "
+                    f"{backend.name!r} is {default_trust_level(backend)!r}")
+        return None
+
     def remote_allowed(self, backend: Backend, policy: DecisionPolicy) -> bool:
-        """True only if both the guard and the policy permit remote use."""
+        """True only if guard, class semantics, and policy all permit."""
+        if self._class_remote_blocked(backend, policy) is not None:
+            return False
         if backend.is_remote and self.remote_inference == "forbidden":
             return False
         return policy.backend_allowed(backend.name, backend.is_remote)
@@ -73,8 +221,8 @@ class PrivacyGuard:
         Raises
         ------
         PrivacyViolation
-            When remote inference is forbidden at guard level and the
-            backend is remote.
+            When remote inference is forbidden at guard level, or the
+            privacy class's trust/eligibility rules block the backend.
         BackendUnavailable
             When the decision policy itself disallows the backend.
         """
@@ -85,6 +233,13 @@ class PrivacyGuard:
                 f"remote backend {backend.name!r} blocked: remote_inference "
                 f"is forbidden by the privacy guard",
                 backend=backend.name)
+        denial = self._class_remote_blocked(backend, policy)
+        if denial is not None:
+            logger.warning("privacy: backend %r blocked (%s)",
+                           backend.name, denial)
+            raise PrivacyViolation(f"backend {backend.name!r} blocked: {denial}",
+                                   backend=backend.name,
+                                   privacy_class=policy.privacy_class)
         if not policy.backend_allowed(backend.name, backend.is_remote):
             logger.debug("privacy: backend %r excluded by decision policy",
                          backend.name)
@@ -102,7 +257,7 @@ class PrivacyGuard:
     @staticmethod
     def cache_allowed(policy: DecisionPolicy) -> bool:
         """Never cache when the privacy class forbids retention."""
-        return policy.privacy_class not in NON_CACHEABLE_PRIVACY_CLASSES
+        return semantics_for(policy.privacy_class)["cacheable"]
 
     # -- redaction -------------------------------------------------------
 
