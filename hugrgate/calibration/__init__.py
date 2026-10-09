@@ -48,9 +48,9 @@ CalibratorRegistry.register("constant-prior", _ConstantCalibrator)
 CalibratorRegistry.register("ensemble", CalibratorEnsemble)
 
 from . import (  # noqa: E402
-    autoselect, conformal, conformal_regression, coverage, drift, group,
-    imbalance, metrics, perclass, pipeline, profiles, registry,
-    risk_coverage, selective, sets, shift,
+    autoselect, conformal, conformal_regression, coverage, decomposition,
+    drift, group, imbalance, metrics, perclass, pipeline, profiles,
+    registry, risk_coverage, selective, sets, shift,
 )
 
 __all__ = [
@@ -67,6 +67,7 @@ __all__ = [
     "conformal",
     "conformal_regression",
     "coverage",
+    "decomposition",
     "drift",
     "group",
     "imbalance",
