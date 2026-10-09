@@ -36,6 +36,7 @@ __all__ = [
     "NPUError",
     "NumaError",
     "OfflineBootstrapError",
+    "PerfGateError",
     "PolicyError",
     "PoolError",
     "PowerBudgetError",
@@ -362,3 +363,14 @@ class GpuschedError(HugrGateError):
     """
     code = "gpusched_error"
     recoverable = True
+
+
+class PerfGateError(HugrGateError):
+    """A performance regression gate failed.
+
+    Slice 298.  Deliberately *not* recoverable: a breached gate is a
+    hard quality signal, not a transient fault.  Do not catch-and-
+    retry; fix the regression or consciously re-baseline.
+    """
+    code = "perfgate_error"
+    recoverable = False

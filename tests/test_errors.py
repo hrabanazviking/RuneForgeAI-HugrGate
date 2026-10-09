@@ -33,6 +33,7 @@ from hugrgate.errors import (
     NPUError,
     NumaError,
     OfflineBootstrapError,
+    PerfGateError,
     PolicyError,
     PoolError,
     PowerBudgetError,
@@ -58,6 +59,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ALL_ERRORS = [
     HugrGateError, SpecError, PolicyError, BackendError, BackendUnavailable,
     CalibrationError, TimeoutError, PrivacyViolation, QueueFull, Abstention,
+    PerfGateError,
     ContractError,
     GGUFError,
     # Campaign VIII edge-intelligence errors (slice 200 taxonomy promotion).
@@ -76,6 +78,7 @@ EXPECTED_CODES = {
     HugrGateError: "hugrgate_error",
     SpecError: "spec_error",
     PolicyError: "policy_error",
+    PerfGateError: "perfgate_error",
     PoolError: "pool_error",
     MultiprocError: "multiproc_error",
     SupervisionError: "supervision_error",
@@ -117,6 +120,7 @@ EXPECTED_RECOVERABLE = {
     HugrGateError: True,
     SpecError: False,
     PolicyError: False,
+    PerfGateError: False,
     PoolError: True,
     MultiprocError: True,
     SupervisionError: True,
