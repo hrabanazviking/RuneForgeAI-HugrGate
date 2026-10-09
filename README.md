@@ -2,6 +2,10 @@
 
 ---
 
+[What is HugrGate Podcaste 1](https://github.com/hrabanazviking/RuneForgeAI-HugrGate/raw/refs/heads/main/What_is_HugrGate_Podcaste_1.m4a)
+
+---
+
 # RuneForgeAI HugrGate
 
 > **Working title.** An open-source, local-first, model-agnostic runtime for adding probabilistic machine judgment to ordinary program logic without making software dependent on one AI vendor, one model family, or one inference method.
