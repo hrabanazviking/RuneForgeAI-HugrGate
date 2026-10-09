@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T15:47:10.242320+00:00",
-  "module_count": 251,
+  "generated_utc": "2026-10-09T15:58:43.373525+00:00",
+  "module_count": 271,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -860,7 +860,7 @@
         "time",
         "typing"
       ],
-      "loc": 211,
+      "loc": 219,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -1640,9 +1640,10 @@
         "hugrgate",
         "inspect",
         "threading",
-        "time"
+        "time",
+        "typing"
       ],
-      "loc": 139,
+      "loc": 142,
       "path": "hugrgate/chaos/clock.py",
       "public_defs": [
         "SkewedClock",
@@ -1726,7 +1727,7 @@
         "typing",
         "unittest"
       ],
-      "loc": 498,
+      "loc": 499,
       "path": "hugrgate/chaos/experiments.py",
       "public_defs": [
         "ServiceUnderTest",
@@ -1775,7 +1776,7 @@
         "typing",
         "unittest"
       ],
-      "loc": 80,
+      "loc": 81,
       "path": "hugrgate/chaos/filesystem.py",
       "public_defs": [
         "disk_full",
@@ -3435,7 +3436,7 @@
         "time",
         "typing"
       ],
-      "loc": 235,
+      "loc": 236,
       "path": "hugrgate/core.py",
       "public_defs": [
         "HugrGate",
@@ -4590,7 +4591,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 274,
+      "loc": 362,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4602,6 +4603,12 @@
         "BulkheadRejected",
         "TimeoutError",
         "PrivacyViolation",
+        "DataFlowDenied",
+        "JurisdictionViolation",
+        "LocalOnlyViolation",
+        "SecretDetected",
+        "SealError",
+        "KeyProviderError",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -4718,7 +4725,7 @@
         "time",
         "typing"
       ],
-      "loc": 343,
+      "loc": 368,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -4804,7 +4811,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 96,
+      "loc": 101,
       "path": "hugrgate/policy.py",
       "public_defs": [
         "DecisionPolicy",
@@ -4814,7 +4821,7 @@
       ]
     },
     "hugrgate.privacy": {
-      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.",
+      "docstring": "Privacy enforcement \u2014 system-level guardrails. Slice 40.\n\nThe per-decision ``DecisionPolicy`` already gates remote backends, but policy\nis application-supplied and can be loosened by mistake. ``PrivacyGuard`` is\nthe operator-level backstop: when remote inference is *forbidden* at this\nlevel, remote backends are excluded at **selection time** \u2014 before any state\never flows to them \u2014 and any direct attempt raises ``PrivacyViolation``.\n\nIt also owns provenance redaction: records must never carry raw state when\nthe privacy class forbids it.\n\nSlice 226 (privacy classification v2) promotes the old binary\n``standard``/``strict`` classes to a five-rung ordered ladder \u2014\n``public`` < ``standard`` < ``sensitive`` < ``strict`` < ``forbidden`` \u2014\neach with machine-enforceable semantics (minimum backend trust, cache\nretention, remote eligibility, provenance mode). The ladder is defined\nhere; :class:`DecisionPolicy` accepts exactly these classes.",
       "imports": [
         "__future__",
         "collections",
@@ -4822,17 +4829,550 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 131,
+      "loc": 416,
       "path": "hugrgate/privacy.py",
       "public_defs": [
+        "class_rank",
+        "at_least",
+        "semantics_for",
+        "provenance_mode_for",
         "PrivacyGuard",
+        "compile_outbound",
+        "trust_level_for",
+        "jurisdiction_for",
         "remote_allowed",
         "check_backend",
         "filter_backends",
+        "enforce_local_only",
+        "check_no_secrets",
         "cache_allowed",
         "redact_state",
         "redact_record",
         "provenance_redaction_needed"
+      ]
+    },
+    "hugrgate.privacy_audit": {
+      "docstring": "Policy violation audit log. Slice 244.\n\nEvery privacy denial should leave a trace. :class:`PrivacyAuditLog`\nis an append-only, hash-chained log of privacy-relevant events\n(backend blocks, flow denials, secret detections, jurisdiction and\nlocal-only violations, key rotations, purges). Each event commits\nto the previous event's hash, so silent edits or deletions break\n:meth:`PrivacyAuditLog.verify`.\n\nThe log is in-memory by default; attach a sink (e.g.\n:class:`FileAuditSink`) for durability. Sinks receive the event\ndict and must not raise \u2014 a failing sink would otherwise turn an\naudit trail into a denial of service; sink errors are logged and\nswallowed deliberately (documented).",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 151,
+      "path": "hugrgate/privacy_audit.py",
+      "public_defs": [
+        "PrivacyAuditEvent",
+        "FileAuditSink",
+        "PrivacyAuditLog",
+        "to_dict",
+        "from_dict",
+        "record",
+        "verify",
+        "events",
+        "count",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_crypto": {
+      "docstring": "Authenticated encryption (stdlib only) + encrypted cache. Slice 241.\n\nNo third-party crypto dependency: :class:`SealedBox` is an\nencrypt-then-MAC construction from ``hashlib``/``hmac``/``secrets``:\n\n- key derivation: HKDF-SHA256 (RFC 5869);\n- encryption: HMAC-SHA256 in counter mode as a keystream (a\n  well-studied PRF-based stream cipher), random 128-bit nonce per\n  message;\n- authentication: HMAC-SHA256 over ``domain || nonce || associated\n  || ciphertext``; verification is constant-time and any tampering\n  raises :class:`SealError`.\n\nThis is a deliberately small, auditable construction \u2014 not a\nreplacement for libsodium where available. The threat model:\nprotect cached decisions at rest from offline disk theft and from\ncross-tenant reads in shared storage. It does not protect against\nan attacker who already holds the key.\n\n:class:`EncryptedDecisionCache` wraps :class:`DecisionCache`:\nentries are pickled, sealed, and stored as opaque blobs. The\nprivacy-class cache rules still apply first (``strict`` /\n``forbidden`` are never cached, sealed or not).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "pickle",
+        "secrets",
+        "typing"
+      ],
+      "loc": 230,
+      "path": "hugrgate/privacy_crypto.py",
+      "public_defs": [
+        "hkdf",
+        "require_key",
+        "SealedBox",
+        "EncryptedDecisionCache",
+        "seal",
+        "open",
+        "put",
+        "get",
+        "key_id_hint"
+      ]
+    },
+    "hugrgate.privacy_deletion": {
+      "docstring": "Secure deletion hooks. Slice 240.\n\nDeleting a record should mean it is *gone* \u2014 not merely\nunreferenced. This module provides:\n\n- :func:`shred_bytes` \u2014 multi-pass overwrite of a ``bytearray``\n  (zeros, ones, CSPRNG), plus :class:`SecureBuffer`, a context\n  manager that shreds on exit. Secrets should live in\n  ``bytearray``\\ s, never in immutable ``str`` (which cannot be\n  overwritten).\n- :class:`SecureDeleter` \u2014 a hook registry fired per deleted\n  record: each hook runs, bytearray values in the record's metadata\n  are shredded best-effort, and a :class:`DeletionReceipt` is\n  returned as auditable proof of deletion.\n- :class:`CryptoShredder` \u2014 for encrypted stores: dropping the\n  data-encryption key cryptographically shreds everything sealed\n  under it, without touching the ciphertext.\n\nHonesty note: overwriting reduces a secret's lifetime in memory; it\ncannot guarantee against copies the interpreter, OS paging, or\nhardware already made. The receipt records what *was* done, not a\nforensic guarantee. Encrypted-at-rest data + key destruction\n(crypto-shredding) is the stronger primitive \u2014 prefer it for\nhigh-sensitivity stores (slices 241-242).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "secrets",
+        "time",
+        "typing"
+      ],
+      "loc": 202,
+      "path": "hugrgate/privacy_deletion.py",
+      "public_defs": [
+        "shred_bytes",
+        "SecureBuffer",
+        "DeletionReceipt",
+        "SecureDeleter",
+        "CryptoShredder",
+        "shred",
+        "shredded",
+        "walk",
+        "to_dict",
+        "register",
+        "unregister",
+        "hooks",
+        "shred_key",
+        "shredded_keys"
+      ]
+    },
+    "hugrgate.privacy_dryrun": {
+      "docstring": "Privacy dry-run mode. Slice 245.\n\n:func:`PrivacyDryRun.evaluate` simulates the entire outbound\nprivacy pipeline for a decision \u2014 attempt gate, local-only\nstripping, the remote payload compiler (flow policy,\nminimization, clearance, secret scan, PII scrub, redaction) \u2014\nwithout executing it: nothing is sent, nothing is cached, the\ninput state is not mutated. The returned :class:`DryRunReport`\nsays exactly what *would* happen, stage by stage, so operators\ncan preview the effect of policy changes before they bite.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 172,
+      "path": "hugrgate/privacy_dryrun.py",
+      "public_defs": [
+        "DryRunStage",
+        "DryRunReport",
+        "PrivacyDryRun",
+        "to_dict",
+        "to_dict",
+        "summary",
+        "evaluate"
+      ]
+    },
+    "hugrgate.privacy_exfil": {
+      "docstring": "Exfiltration simulation. Slice 248.\n\nThe fortress claims to stop data exfiltration; this module\nattacks that claim. :class:`ExfilSimulator` runs a suite of\nattacker scenarios against a configured :class:`PrivacyGuard`\n\u2014 direct remote calls, secret smuggling, local-only exfil,\nPII in free text, jurisdiction hops, untrusted backends \u2014\nand reports, per scenario, whether the attempt was\n**blocked** (refused outright), **neutralized** (the data was\nsanitized before leaving), or **allowed** (it got out).\n\nEach scenario declares what it *expects*; the report fails\nwhen reality disagrees. A red-team operator runs the default\nsuite against their production guard configuration: any\n``allowed`` where ``blocked`` was expected is a live hole.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 268,
+      "path": "hugrgate/privacy_exfil.py",
+      "public_defs": [
+        "ExfilAttempt",
+        "ExfilOutcome",
+        "ExfilReport",
+        "default_attacks",
+        "ExfilSimulator",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "passed",
+        "to_dict",
+        "passed",
+        "failures",
+        "to_dict",
+        "summary",
+        "attempt",
+        "run_suite"
+      ]
+    },
+    "hugrgate.privacy_explain": {
+      "docstring": "Privacy explanation reports. Slice 246.\n\nPrivacy denials are cryptic by default \u2014 a bare error code tells\nan operator nothing actionable. :class:`PrivacyExplainer` turns\nany privacy error (or dry-run report, or redacted provenance\nrecord) into a plain-language explanation: what happened, why\nthe policy requires it, and what the operator can do about it.\n\nRemediation advice is advisory only \u2014 it never bypasses the\npolicy; every suggested action goes *through* the policy\n(change the flow, the classification, or the configuration, not\naround it).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 207,
+      "path": "hugrgate/privacy_explain.py",
+      "public_defs": [
+        "PrivacyExplainer",
+        "explain_denial",
+        "explain_denial",
+        "explain_dry_run",
+        "explain_record"
+      ]
+    },
+    "hugrgate.privacy_flow": {
+      "docstring": "Data-flow policy engine. Slice 228.\n\nWhere should data be allowed to move? :class:`DataFlowPolicy`\nanswers that for a single planned flow \u2014 a :class:`FlowRequest`\ndescribing *what* (privacy class, field sensitivity levels,\nlocal-only fields) moves *where* (destination backend, its trust\nlevel, remoteness, jurisdiction) \u2014 and returns a :class:`FlowDecision`\n(``allow`` / ``redact`` / ``deny``) with machine-readable reasons.\nDenials raise :class:`~hugrgate.errors.DataFlowDenied`.\n\nRules are evaluated in a fixed, documented order so decisions are\ndeterministic and explainable (slice 246 renders them):\n\n1. class eligibility \u2014 a ``forbidden``-class payload never flows remote;\n2. trust floor \u2014 destination trust must meet the class minimum;\n3. jurisdiction \u2014 remote destinations outside the allowed set are denied;\n4. field levels \u2014 fields above the remote clearance are stripped\n   (``redact`` mode) or deny the flow (strict mode);\n5. local-only fields are always stripped from remote flows.\n\nThe engine takes abstract inputs (trust levels, jurisdictions) so\nslices 229-230 can supply attested values without changing the rules.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 206,
+      "path": "hugrgate/privacy_flow.py",
+      "public_defs": [
+        "FlowRequest",
+        "FlowDecision",
+        "DataFlowPolicy",
+        "raise_if_denied",
+        "check",
+        "to_dict"
+      ]
+    },
+    "hugrgate.privacy_jurisdiction": {
+      "docstring": "Jurisdiction metadata. Slice 230.\n\nData has a passport: where it is processed matters. This module\ntracks which jurisdiction each backend operates in and enforces\noperator-declared allowed jurisdictions at selection and attempt\ntime.\n\n- :class:`JurisdictionRegistry` maps backend names to jurisdiction\n  codes (``\"local\"``, ``\"EU\"``, ``\"US\"``, ...). Unlisted local\n  backends default to ``\"local\"``; unlisted remote backends default\n  to ``\"unknown\"`` \u2014 and ``\"unknown\"`` is never in an allowed set,\n  so undeclared remotes are denied by default under a jurisdiction\n  policy (fail closed).\n- :class:`JurisdictionPolicy` holds the allowed set (``None`` = no\n  restriction) and raises :class:`JurisdictionViolation` on breach.\n- :class:`~hugrgate.privacy.PrivacyGuard` accepts\n  ``jurisdiction_registry=`` and ``jurisdictions_allowed=`` and\n  enforces them in ``remote_allowed`` / ``check_backend`` /\n  ``filter_backends``.\n\nLocal backends are always jurisdiction-clean: data never crosses a\nborder when it never leaves the process.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 128,
+      "path": "hugrgate/privacy_jurisdiction.py",
+      "public_defs": [
+        "JurisdictionRegistry",
+        "JurisdictionPolicy",
+        "declare",
+        "jurisdiction_for",
+        "to_dict",
+        "from_dict",
+        "check",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_keys": {
+      "docstring": "Key-provider abstraction. Slice 243.\n\nEncryption is only as good as key management. :class:`KeyProvider`\nis the interface every key consumer (encrypted cache, sealed\nprovenance, token vaults) uses; implementations:\n\n- :class:`EnvKeyProvider` \u2014 32-byte key from an environment\n  variable (hex or base64);\n- :class:`FileKeyProvider` \u2014 key from a file (hex, base64, or raw\n  32 bytes; the file should be mode ``0o600`` \u2014 warn otherwise);\n- :class:`EphemeralKeyProvider` \u2014 in-memory CSPRNG keys, generated\n  on first use; gone when the process exits;\n- :class:`RotatingKeyProvider` \u2014 a primary provider plus retired\n  providers: encryption always uses the primary, decryption tries\n  each in turn, so rotation never strands sealed data.\n\n:func:`derive_key` derives per-context subkeys via HKDF, so one\nmaster key safely serves many namespaces (cache vs provenance vs\ntoken vault).",
+      "imports": [
+        "__future__",
+        "abc",
+        "base64",
+        "binascii",
+        "hugrgate",
+        "os",
+        "pathlib",
+        "secrets",
+        "stat",
+        "typing",
+        "warnings"
+      ],
+      "loc": 254,
+      "path": "hugrgate/privacy_keys.py",
+      "public_defs": [
+        "KeyProvider",
+        "EnvKeyProvider",
+        "FileKeyProvider",
+        "EphemeralKeyProvider",
+        "RotatingKeyProvider",
+        "derive_key",
+        "cache_from_provider",
+        "provenance_store_from_provider",
+        "get_key",
+        "key_ids",
+        "forget",
+        "get_key",
+        "key_ids",
+        "get_key",
+        "key_ids",
+        "get_key",
+        "key_ids",
+        "forget",
+        "get_key",
+        "key_ids",
+        "retire_primary",
+        "get_key_any"
+      ]
+    },
+    "hugrgate.privacy_labels": {
+      "docstring": "Field-level sensitivity labels. Slice 227.\n\nThe privacy-class ladder (slice 226) classifies a whole *decision*.\nThis module classifies the *fields inside the state*: each field gets\na :class:`Sensitivity` level, consumers get a clearance, and\n:func:`filter_by_clearance` drops everything above it. Fields can\nalso be marked *local-only* \u2014 they may be processed in-process but\nmust never be compiled into a remote payload (enforced in slice 231).\n\nLabels support dotted paths (``\"user.ssn\"``) for nested mappings; a\nlabel on a parent (``\"user\"``) covers its children unless a more\nspecific dotted label overrides it.",
+      "imports": [
+        "__future__",
+        "collections",
+        "enum",
+        "typing"
+      ],
+      "loc": 190,
+      "path": "hugrgate/privacy_labels.py",
+      "public_defs": [
+        "Sensitivity",
+        "FieldLabels",
+        "filter_by_clearance",
+        "label",
+        "is_local_only",
+        "label_state",
+        "fields_at_or_above",
+        "to_dict",
+        "from_dict",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_localonly": {
+      "docstring": "Local-only field enforcement. Slice 231.\n\nSlice 227 lets operators *mark* fields local-only; this module\n*enforces* the marking. :class:`LocalOnlyPolicy` inspects an\noutbound state against :class:`~hugrgate.privacy_labels.FieldLabels`\nand guarantees no local-only field reaches a remote destination:\n\n- strip mode (default): local-only fields are removed from the\n  outbound copy and reported;\n- strict mode: the mere presence of a local-only field in a\n  remote-bound payload raises :class:`LocalOnlyViolation` \u2014 a hard\n  guarantee for callers that must never silently drop data.\n\nIn-process (local backend) flows are untouched: local-only means\n\"never leaves the process\", not \"never used\".",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 129,
+      "path": "hugrgate/privacy_localonly.py",
+      "public_defs": [
+        "LocalOnlyResult",
+        "LocalOnlyPolicy",
+        "enforce_local_only",
+        "clean",
+        "enforce",
+        "enforce_for_backend",
+        "to_dict"
+      ]
+    },
+    "hugrgate.privacy_minimize": {
+      "docstring": "Prompt / data minimization. Slice 236.\n\nSend the least data that still answers the question. This module\nprovides two mechanisms:\n\n- :func:`minimize_state` \u2014 project a state mapping down to an\n  explicit keep-list (top-level names or dotted paths); everything\n  else is dropped. Nested-aware, non-mutating.\n- :class:`MinimizationPolicy` \u2014 per-backend keep-lists; backends\n  declare the fields they actually need and every outbound payload\n  is projected before compilation.\n- :class:`PromptMinimizer` \u2014 renders the minimized state into a\n  compact prompt string under a character budget, so prompt\n  construction itself can't smuggle undeclared fields.\n\nA backend with no declared keep-list passes state through unchanged\n(documented): minimization is only as good as the declarations, so\ndeclare them.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "json",
+        "typing"
+      ],
+      "loc": 185,
+      "path": "hugrgate/privacy_minimize.py",
+      "public_defs": [
+        "MinimizationReport",
+        "minimize_state",
+        "MinimizationPolicy",
+        "PromptMinimizer",
+        "leaf_paths",
+        "keep_for",
+        "declare",
+        "minimize",
+        "to_dict",
+        "from_dict",
+        "render"
+      ]
+    },
+    "hugrgate.privacy_payload": {
+      "docstring": "Remote payload compiler \u2014 the outbound chokepoint. Slice 237.\n\nEvery byte that leaves the process for a remote backend passes\nthrough :class:`RemotePayloadCompiler.compile`. The compilation is\na fixed, ordered pipeline; each stage is recorded in the\n:attr:`RemotePayload.manifest` so any payload is auditable\nafter the fact:\n\n1. **attempt gate** \u2014 ``PrivacyGuard.check_backend`` (guard mode,\n   class trust floor, jurisdiction); raises on denial;\n2. **local-only enforcement** \u2014 strip (or strict-raise) local-only\n   fields first, so strict mode fires before any other stage can\n   silently drop them;\n3. **data-flow policy** \u2014 ``DataFlowPolicy.check`` on the planned\n   flow; ``redact`` decisions strip the named fields;\n4. **minimization** \u2014 project to the backend's keep-list;\n5. **clearance filter** \u2014 drop fields above the remote clearance;\n6. **secret scan** \u2014 raise ``SecretDetected`` on any hit;\n7. **PII scrub** \u2014 mask/drop PII findings;\n8. **redaction pipeline** \u2014 per-field / per-level strategies.\n\nLocal backends bypass compilation (the data never leaves the\nprocess) and get a passthrough manifest. Compilation is\ndeterministic: the same inputs always produce the same payload and\nmanifest.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 270,
+      "path": "hugrgate/privacy_payload.py",
+      "public_defs": [
+        "RemotePayload",
+        "RemotePayloadCompiler",
+        "to_dict",
+        "compile",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_pii": {
+      "docstring": "PII detector interface. Slice 235.\n\nPluggable personally-identifiable-information detection for outbound\ndata. :class:`PIIDetector` is the interface \u2014 implement\n:meth:`PIIDetector.scan_text` and you get nested state scanning for\nfree. :class:`RegexPIIDetector` is the built-in default with\nvalidated patterns (Luhn-checked credit cards, area-validated SSNs);\n:class:`PIIScrubber` applies mask/drop actions to state.\n\nDesign notes:\n\n- Detectors are *precision-first*: every pattern carries a\n  confidence, and expensive validators (Luhn, SSN area rules) run\n  before a finding is reported, so \"order 1234\" doesn't become a\n  credit-card finding.\n- Findings never carry the raw value \u2014 only a redacted preview.\n- Custom detectors compose: :class:`CompositePIIDetector` unions any\n  set of detectors.",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "dataclasses",
+        "re",
+        "typing"
+      ],
+      "loc": 246,
+      "path": "hugrgate/privacy_pii.py",
+      "public_defs": [
+        "PIIFinding",
+        "PIIDetector",
+        "RegexPIIDetector",
+        "CompositePIIDetector",
+        "PIIScrubber",
+        "to_dict",
+        "scan_text",
+        "scan_state",
+        "scan_text",
+        "scan_text",
+        "scrub_state",
+        "walk",
+        "scrub"
+      ]
+    },
+    "hugrgate.privacy_provenance": {
+      "docstring": "Privacy-preserving provenance. Slice 238.\n\nProvenance must explain a decision without leaking the data behind\nit. :func:`privacy_preserving_record` builds a\n:class:`DecisionRecord` whose state-derived metadata follows the\nprivacy-class ladder (slice 226):\n\n- ``public`` / ``standard`` \u2014 state keys (never values);\n- ``sensitive`` \u2014 state keys, plus optional per-field value\n  fingerprints (prove *what* the input was without storing it);\n- ``strict`` \u2014 fully redacted (deep-scrubbed);\n- ``forbidden`` \u2014 no state-derived metadata at all.\n\nEvery record carries its ``privacy_class`` marker, so the policy is\nauditable from the record alone. The integrity chain\n(``prev_hash``/``record_hash``) is computed over the canonical\nrecord *including* whatever metadata survived, so redacted and\nfingerprinted records verify exactly like full ones.\n\n:class:`PrivacyAwareProvenanceStore` wraps :class:`ProvenanceStore`\nwith a one-call ``append_decision`` entry point, and\n:class:`SealedProvenanceStore` additionally seals every record body\nat rest (slice 242): the on-disk/in-memory chain commits to\n*ciphertext*, while the plaintext record (with its own hashes) rides\ninside the sealed body.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "pickle",
+        "typing"
+      ],
+      "loc": 261,
+      "path": "hugrgate/privacy_provenance.py",
+      "public_defs": [
+        "fingerprint_state",
+        "privacy_preserving_record",
+        "PrivacyAwareProvenanceStore",
+        "SealedProvenanceStore",
+        "append_decision",
+        "append",
+        "recent",
+        "by_hash",
+        "verify_chain",
+        "purge",
+        "key_id_hint"
+      ]
+    },
+    "hugrgate.privacy_redact": {
+      "docstring": "Redaction pipeline v2. Slice 232.\n\nSlice 40's redaction was shallow: ``redact_state`` masked whole\nvalues and ``redact_record`` dropped three top-level metadata keys.\nAnything nested \u2014 a ``{\"state\": {...}}`` dict *inside* metadata, a\nsecret embedded in a longer string \u2014 sailed through.\n\nThis module is a composable redaction pipeline:\n\n- :class:`Redactor` strategies: :class:`MaskRedactor`,\n  :class:`PatternRedactor` (regexes over strings, including nested\n  ones), :class:`HashRedactor` (deterministic salted hash, keeps\n  joinability without reversibility), :class:`DropRedactor` (removes\n  the field), :class:`TokenRedactor` (reversible via a token vault,\n  slice 233).\n- :class:`RedactionPipeline`: per-field redactors, per-\n  :class:`Sensitivity` level strategies applied with\n  :meth:`apply_with_labels`, and free-text scrubbing.\n- :func:`redact_metadata`: deep scrub of provenance metadata \u2014\n  drops ``state``/``state_keys``/``raw_state`` keys at *any* depth\n  and pattern-scrubs string values. :class:`PrivacyGuard.redact_record`\n  now uses it (superset of the old behavior).",
+      "imports": [
+        "__future__",
+        "abc",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 320,
+      "path": "hugrgate/privacy_redact.py",
+      "public_defs": [
+        "Redactor",
+        "MaskRedactor",
+        "PatternRedactor",
+        "HashRedactor",
+        "DropRedactor",
+        "TokenRedactor",
+        "RedactionPipeline",
+        "redact_metadata",
+        "redact_record_deep",
+        "redact",
+        "redact",
+        "redact",
+        "scrub",
+        "redact",
+        "redact",
+        "redact",
+        "apply_to_state",
+        "apply_with_labels",
+        "apply_to_text",
+        "scrub",
+        "leaf_paths"
+      ]
+    },
+    "hugrgate.privacy_retention": {
+      "docstring": "Retention policies. Slice 239.\n\nData should not outlive its purpose. :class:`RetentionPolicy`\ndeclares per-privacy-class maximum ages; :func:`purge_expired`\nremoves overdue records from a :class:`ProvenanceStore` (via the\nchain-safe :meth:`ProvenanceStore.purge`), and\n:meth:`RetentionPolicy.cache_ttl_for` caps decision-cache TTLs.\n\nDefaults (seconds; ``None`` = unbounded):\n\n- ``public`` \u2014 unbounded;\n- ``standard`` \u2014 30 days;\n- ``sensitive`` \u2014 7 days;\n- ``strict`` \u2014 24 hours;\n- ``forbidden`` \u2014 0: never persist (purged on the next sweep).\n\n``forbidden`` records are still *created* (the decision happened and\nthe chain binds it) but must not be *retained* \u2014 the next purge\nremoves them. Operators wanting zero creation should not log at all.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 118,
+      "path": "hugrgate/privacy_retention.py",
+      "public_defs": [
+        "RetentionPolicy",
+        "purge_expired",
+        "max_age_for",
+        "is_expired",
+        "cache_ttl_for",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.privacy_secrets": {
+      "docstring": "Secret detection hooks. Slice 234.\n\nLast line of defense before data leaves the process: scan outbound\nstate (or free text) for secret-shaped values \u2014 API keys, tokens,\nprivate keys, credentials \u2014 and raise :class:`SecretDetected` instead\nof transmitting them.\n\n:class:`SecretScanner` combines:\n\n- curated high-precision patterns (AWS keys, GitHub/Slack tokens,\n  PEM private keys, bearer tokens, credential assignments);\n- a conservative high-entropy heuristic for opaque tokens with no\n  known prefix (off by default \u2014 see below).\n\nFindings carry the dotted field path, the pattern name, a redacted\npreview (never the full secret), and a confidence level. The scanner\nis deliberately *not* a DLP oracle: it catches accidents, not\nadversaries. High-entropy detection stays opt-in because natural\ntext (hashes in logs, base64 blobs) triggers it.\n\nHook points:\n\n- :func:`assert_no_secrets` \u2014 one-shot check; raises on any finding;\n- :meth:`PrivacyGuard.check_no_secrets <hugrgate.privacy.PrivacyGuard.check_no_secrets>` \u2014\n  guard-level convenience used by the remote payload compiler\n  (slice 237).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "re",
+        "typing"
+      ],
+      "loc": 199,
+      "path": "hugrgate/privacy_secrets.py",
+      "public_defs": [
+        "SecretFinding",
+        "SecretScanner",
+        "assert_no_secrets",
+        "to_dict",
+        "scan_text",
+        "scan_state",
+        "assert_no_secrets",
+        "walk"
+      ]
+    },
+    "hugrgate.privacy_tokens": {
+      "docstring": "Tokenization / pseudonymization vault. Slice 233.\n\nReversible redaction: :class:`TokenVault` replaces sensitive values\nwith opaque random tokens (``hgptok_...``) and keeps the\ntoken\u2192value mapping in memory. Tokens reveal nothing without vault\naccess; only the vault holder can detokenize. This is the vault\nbehind :class:`~hugrgate.privacy_redact.TokenRedactor`.\n\nSecurity properties (documented, tested):\n\n- tokens are 192-bit CSPRNG outputs \u2014 unguessable, no structure to\n  exploit;\n- the mapping (the actual secret) never leaves the vault except via\n  explicit ``export``/``import`` for encrypted persistence (slices\n  241-242 seal the export);\n- namespaces isolate token spaces: a token minted in one namespace\n  never detokenizes in another vault;\n- values are deep-copied on the way in and out, so callers cannot\n  mutate vault contents through a reference.\n\nThis is pseudonymization, not anonymization: anyone holding the\nvault (or its export) can reverse it. Treat the vault like a key.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "pickle",
+        "secrets",
+        "typing"
+      ],
+      "loc": 122,
+      "path": "hugrgate/privacy_tokens.py",
+      "public_defs": [
+        "TokenVault",
+        "tokenize",
+        "detokenize",
+        "revoke",
+        "clear",
+        "tokenize_state",
+        "export",
+        "import_vault"
+      ]
+    },
+    "hugrgate.privacy_trust": {
+      "docstring": "Backend trust levels. Slice 229.\n\nNot all backends deserve the same data. :class:`BackendTrustRegistry`\nholds *attestations*: operator-signed claims that a backend meets a\ntrust level (``untrusted`` < ``basic`` < ``verified`` < ``enclave``).\nUnattested backends fall back to :func:`default_trust_level`\n(in-process = ``enclave``, remote = ``basic``). Attestations expire\nand can be revoked; an expired or revoked attestation silently drops\nback to the default \u2014 never to a higher level.\n\nThe registry plugs into :class:`~hugrgate.privacy.PrivacyGuard`\n(``trust_registry=``), so the slice-226 class trust floors are\nevaluated against attested trust rather than bare defaults.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 169,
+      "path": "hugrgate/privacy_trust.py",
+      "public_defs": [
+        "trust_rank",
+        "default_trust_level",
+        "TrustAttestation",
+        "BackendTrustRegistry",
+        "expired",
+        "to_dict",
+        "from_dict",
+        "attest",
+        "revoke",
+        "attestation_for",
+        "level_for",
+        "rank_for",
+        "meets",
+        "to_dict",
+        "from_dict"
       ]
     },
     "hugrgate.provenance": {
@@ -4849,7 +5389,7 @@
         "time",
         "typing"
       ],
-      "loc": 218,
+      "loc": 239,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -4859,6 +5399,7 @@
         "from_dict",
         "append",
         "evicted_count",
+        "purge",
         "by_hash",
         "recent",
         "count",
@@ -4902,7 +5443,7 @@
         "time",
         "typing"
       ],
-      "loc": 403,
+      "loc": 404,
       "path": "hugrgate/routing/architecture.py",
       "public_defs": [
         "RungMode",
@@ -6384,6 +6925,31 @@
     "test_ml_calibration.py",
     "test_package_boundaries.py",
     "test_policy_invariants.py",
+    "test_privacy_audit.py",
+    "test_privacy_bench_249.py",
+    "test_privacy_classification.py",
+    "test_privacy_crypto.py",
+    "test_privacy_deletion.py",
+    "test_privacy_dryrun.py",
+    "test_privacy_exfil.py",
+    "test_privacy_explain.py",
+    "test_privacy_flow.py",
+    "test_privacy_fortress_gate.py",
+    "test_privacy_fuzz.py",
+    "test_privacy_jurisdiction.py",
+    "test_privacy_keys.py",
+    "test_privacy_labels.py",
+    "test_privacy_localonly.py",
+    "test_privacy_minimize.py",
+    "test_privacy_payload.py",
+    "test_privacy_pii.py",
+    "test_privacy_provenance.py",
+    "test_privacy_redact.py",
+    "test_privacy_retention.py",
+    "test_privacy_sealed.py",
+    "test_privacy_secrets.py",
+    "test_privacy_tokens.py",
+    "test_privacy_trust.py",
     "test_provenance_integrity.py",
     "test_release_gate.py",
     "test_repo_truth.py",
@@ -6421,5 +6987,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 53828
+  "total_loc": 58294
 }

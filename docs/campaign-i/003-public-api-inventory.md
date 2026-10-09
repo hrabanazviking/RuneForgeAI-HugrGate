@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 251 · **public names:** 1564
+**Modules:** 271 · **public names:** 1659
 
 ## API stability policy
 
@@ -2176,12 +2176,16 @@ that this document never drifts from the code.
 | `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ContractError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `DataFlowDenied` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `JurisdictionViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `KeyProviderError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `LocalOnlyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2191,6 +2195,8 @@ that this document never drifts from the code.
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
+| `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2275,9 +2281,198 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'strict'}` |
+| `CLASS_SEMANTICS` | constant | `{'public': {'min_trust': 'untrusted', 'cacheable': True, 're` |
+| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'forbidden', 'strict'}` |
+| `PRIVACY_CLASS_ORDER` | constant | `('public', 'standard', 'sensitive', 'strict', 'forbidden')` |
 | `REMOTE_MODES` | constant | `('allow', 'forbidden')` |
-| `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True)` |
+| `TRUST_ORDER` | constant | `('untrusted', 'basic', 'verified', 'enclave')` |
+| `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True, trust_registry: 'BackendTrustRegistry | None' = None, jurisdiction_registry: 'JurisdictionRegistry | None' = None, jurisdictions_allowed: 'set[str] | frozenset[str] | None' = None, audit_log: 'PrivacyAuditLog | None' = None)` |
+| `at_least` | function | `(privacy_class: 'str', minimum: 'str') -> 'bool'` |
+| `class_rank` | function | `(privacy_class: 'str') -> 'int'` |
+| `default_trust_level` | function | `(backend: 'Backend') -> 'str'` |
+| `provenance_mode_for` | function | `(privacy_class: 'str') -> 'str'` |
+| `semantics_for` | function | `(privacy_class: 'str') -> 'dict[str, Any]'` |
+| `trust_rank` | function | `(level: 'str') -> 'int'` |
+
+### `hugrgate.privacy_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FileAuditSink` | class | `(path: 'str | Path')` |
+| `PrivacyAuditEvent` | class | `(event: 'str', timestamp: 'float' = <factory>, details: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', event_hash: 'str' = '') -> None` |
+| `PrivacyAuditLog` | class | `(sink: 'Callable[[dict[str, Any]], None] | None' = None)` |
+
+### `hugrgate.privacy_crypto`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EncryptedDecisionCache` | class | `(key: 'bytes', *, ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000, namespace: 'str' = 'decision-cache')` |
+| `SealedBox` | class | `()` |
+| `hkdf` | function | `(key: 'bytes', *, salt: 'bytes' = b'', info: 'bytes' = b'', length: 'int' = 32) -> 'bytes'` |
+| `require_key` | function | `(key: 'bytes') -> 'bytes'` |
+
+### `hugrgate.privacy_deletion`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CryptoShredder` | class | `(drop_key: 'Callable[[str], None]')` |
+| `DeletionReceipt` | class | `(record_hash: 'str', timestamp: 'float' = <factory>, hooks_fired: 'list[str]' = <factory>, shredded_fields: 'list[str]' = <factory>) -> None` |
+| `SecureBuffer` | class | `(initial: 'bytes | bytearray' = b'', passes: 'int' = 3)` |
+| `SecureDeleter` | class | `()` |
+| `shred_bytes` | function | `(buffer: 'bytearray', passes: 'int' = 3) -> 'None'` |
+
+### `hugrgate.privacy_dryrun`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DryRunReport` | class | `(backend: 'str', allowed: 'bool', stages: 'list[DryRunStage]' = <factory>, stripped_fields: 'list[str]' = <factory>, denied_reason: 'str | None' = None) -> None` |
+| `DryRunStage` | class | `(stage: 'str', action: 'str', reason: 'str', detail: 'dict[str, Any]' = <factory>) -> None` |
+| `PrivacyDryRun` | class | `(guard: 'PrivacyGuard')` |
+
+### `hugrgate.privacy_exfil`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ExfilAttempt` | class | `(name: 'str', state: 'dict[str, Any]', backend_name: 'str' = 'attacker-controlled', trust: 'str' = 'basic', jurisdiction: 'str' = 'unknown', privacy_class: 'str' = 'strict', labels: 'FieldLabels | None' = None, markers: 'list[str]' = <factory>, expect: 'str' = 'blocked') -> None` |
+| `ExfilOutcome` | class | `(name: 'str', verdict: 'str', mechanism: 'str', detail: 'str', expected: 'str') -> None` |
+| `ExfilReport` | class | `(outcomes: 'list[ExfilOutcome]' = <factory>) -> None` |
+| `ExfilSimulator` | class | `(guard: 'PrivacyGuard | None' = None, jurisdictions_allowed: 'frozenset[str] | None' = None)` |
+| `default_attacks` | function | `() -> 'list[ExfilAttempt]'` |
+
+### `hugrgate.privacy_explain`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyExplainer` | class | `()` |
+| `explain_denial` | function | `(error: 'HugrGateError', **context: 'Any') -> 'str'` |
+
+### `hugrgate.privacy_flow`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DataFlowPolicy` | class | `(max_remote_level: 'Sensitivity | str | int' = <Sensitivity.CONFIDENTIAL: 2>, redact_instead_of_deny: 'bool' = False)` |
+| `FlowDecision` | class | `(allowed: 'bool', action: 'str', redactions: 'list[str]' = <factory>, reasons: 'list[str]' = <factory>, _dst: 'str' = '') -> None` |
+| `FlowRequest` | class | `(privacy_class: 'str', dst_name: 'str', dst_remote: 'bool' = False, dst_trust: 'str' = 'enclave', dst_jurisdiction: 'str' = 'local', field_levels: 'Mapping[str, Sensitivity | str | int]' = <factory>, local_only_fields: 'Iterable[str]' = (), jurisdictions_allowed: 'frozenset[str] | set[str] | None' = None) -> None` |
+
+### `hugrgate.privacy_jurisdiction`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LOCAL_JURISDICTION` | constant | `'local'` |
+| `UNKNOWN_JURISDICTION` | constant | `'unknown'` |
+| `JurisdictionPolicy` | class | `(allowed: 'set[str] | frozenset[str] | None' = None, registry: 'JurisdictionRegistry | None' = None)` |
+| `JurisdictionRegistry` | class | `(jurisdictions: 'Mapping[str, str] | None' = None)` |
+
+### `hugrgate.privacy_keys`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnvKeyProvider` | class | `(prefix: 'str' = '', env: 'dict[str, str] | None' = None)` |
+| `EphemeralKeyProvider` | class | `()` |
+| `FileKeyProvider` | class | `(directory: 'str | Path')` |
+| `KeyProvider` | class | `()` |
+| `RotatingKeyProvider` | class | `(primary: 'KeyProvider', retired: 'list[KeyProvider] | None' = None)` |
+| `cache_from_provider` | function | `(provider: 'KeyProvider', key_id: 'str', **kwargs: 'Any') -> 'EncryptedDecisionCache'` |
+| `derive_key` | function | `(provider: 'KeyProvider', key_id: 'str', context: 'str', length: 'int' = 32) -> 'bytes'` |
+| `provenance_store_from_provider` | function | `(provider: 'KeyProvider', key_id: 'str', **kwargs: 'Any') -> 'SealedProvenanceStore'` |
+
+### `hugrgate.privacy_labels`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FieldLabels` | class | `(labels: 'Mapping[str, Sensitivity | str | int] | None' = None, default: 'Sensitivity | str | int' = <Sensitivity.PUBLIC: 0>, local_only: 'Iterable[str] | None' = None)` |
+| `Sensitivity` | class | `(*values)` |
+| `filter_by_clearance` | function | `(state: 'Mapping[str, Any]', labels: 'FieldLabels', clearance: 'Sensitivity | str | int', drop_local_only: 'bool' = True) -> 'dict[str, Any]'` |
+
+### `hugrgate.privacy_localonly`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LocalOnlyPolicy` | class | `(strict: 'bool' = False)` |
+| `LocalOnlyResult` | class | `(state: 'dict[str, Any]', stripped: 'list[str]' = <factory>, remote: 'bool' = False) -> None` |
+| `enforce_local_only` | function | `(state: 'Mapping[str, Any]', labels: 'FieldLabels', *, remote: 'bool', strict: 'bool' = False) -> 'LocalOnlyResult'` |
+
+### `hugrgate.privacy_minimize`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MinimizationPolicy` | class | `(keep_lists: 'Mapping[str, Collection[str]] | None' = None, default_keep: 'Collection[str] | None' = None)` |
+| `MinimizationReport` | class | `(kept: 'list[str]' = <factory>, dropped: 'list[str]' = <factory>, backend: 'str' = '') -> None` |
+| `PromptMinimizer` | class | `(max_chars: 'int' = 4000)` |
+| `minimize_state` | function | `(state: 'Mapping[str, Any]', keep: 'Collection[str]', backend: 'str' = '') -> 'tuple[dict[str, Any], MinimizationReport]'` |
+
+### `hugrgate.privacy_payload`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RemotePayload` | class | `(payload: 'dict[str, Any]', manifest: 'dict[str, Any]', backend: 'str' = '', remote: 'bool' = False) -> None` |
+| `RemotePayloadCompiler` | class | `(guard: 'PrivacyGuard', flow_policy: 'DataFlowPolicy | None' = None, labels: 'FieldLabels | None' = None, minimization: 'MinimizationPolicy | None' = None, pii_detector: 'PIIDetector | None' = None, pii_scrub: 'bool' = True, pii_action: 'str' = 'mask', redaction_pipeline: 'RedactionPipeline | None' = None, local_only_strict: 'bool' = False)` |
+
+### `hugrgate.privacy_pii`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CompositePIIDetector` | class | `(detectors: 'list[PIIDetector]')` |
+| `PIIDetector` | class | `()` |
+| `PIIFinding` | class | `(field: 'str', kind: 'str', confidence: 'str', preview: 'str') -> None` |
+| `PIIScrubber` | class | `(detector: 'PIIDetector | None' = None, action: 'str' = 'mask')` |
+| `RegexPIIDetector` | class | `(kinds: 'list[str] | tuple[str, ...] | None' = None)` |
+
+### `hugrgate.privacy_provenance`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyAwareProvenanceStore` | class | `(max_records: 'int | None' = None)` |
+| `SealedProvenanceStore` | class | `(key: 'bytes', *, namespace: 'str' = 'provenance', max_records: 'int | None' = None)` |
+| `fingerprint_state` | function | `(state: 'Mapping[str, Any]', digest_chars: 'int' = 16) -> 'dict[str, str]'` |
+| `privacy_preserving_record` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', result: 'DecisionResult', policy: 'DecisionPolicy', policy_threshold: 'float' = 0.0, fingerprints: 'bool' = False) -> 'DecisionRecord'` |
+
+### `hugrgate.privacy_redact`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DROP` | constant | `DROP` |
+| `DropRedactor` | class | `()` |
+| `HashRedactor` | class | `(salt: 'str' = 'hugrgate', digest_size: 'int' = 16)` |
+| `MaskRedactor` | class | `(mask: 'str' = '[REDACTED]', keep_last: 'int' = 0)` |
+| `PatternRedactor` | class | `(patterns: 'list[tuple[str, str]] | None' = None)` |
+| `RedactionPipeline` | class | `(field_redactors: 'Mapping[str, Redactor] | None' = None, level_redactors: 'Mapping[Sensitivity, Redactor] | None' = None, text_redactor: 'PatternRedactor | None' = None)` |
+| `Redactor` | class | `()` |
+| `TokenRedactor` | class | `(vault: 'Any')` |
+| `redact_metadata` | function | `(metadata: 'Mapping[str, Any]', text_redactor: 'PatternRedactor | None' = None) -> 'dict[str, Any]'` |
+
+### `hugrgate.privacy_retention`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RETENTION_DEFAULTS` | constant | `{'public': None, 'standard': 2592000, 'sensitive': 604800, '` |
+| `RetentionPolicy` | class | `(max_age_seconds: 'Mapping[str, float | None] | None' = None)` |
+| `purge_expired` | function | `(store: 'ProvenanceStore', policy: 'RetentionPolicy | None' = None, now: 'float | None' = None, on_purge: 'Callable[[DecisionRecord], None] | None' = None) -> 'int'` |
+
+### `hugrgate.privacy_secrets`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SecretFinding` | class | `(field: 'str', pattern: 'str', confidence: 'str', preview: 'str') -> None` |
+| `SecretScanner` | class | `(extra_patterns: 'list[tuple[str, str, str]] | None' = None, entropy_scan: 'bool' = False, min_confidence: 'str' = 'low')` |
+| `assert_no_secrets` | function | `(state: 'Mapping[str, Any]', scanner: 'SecretScanner | None' = None) -> 'None'` |
+
+### `hugrgate.privacy_tokens`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TOKEN_PREFIX` | constant | `'hgptok_'` |
+| `TokenVault` | class | `(namespace: 'str' = 'default')` |
+
+### `hugrgate.privacy_trust`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TRUST_ORDER` | constant | `('untrusted', 'basic', 'verified', 'enclave')` |
+| `BackendTrustRegistry` | class | `()` |
+| `TrustAttestation` | class | `(level: 'str', attested_by: 'str' = '', attested_at: 'float' = <factory>, expires_at: 'float | None' = None, note: 'str' = '') -> None` |
+| `default_trust_level` | function | `(backend: 'Backend') -> 'str'` |
+| `trust_rank` | function | `(level: 'str') -> 'int'` |
 
 ### `hugrgate.provenance`
 
