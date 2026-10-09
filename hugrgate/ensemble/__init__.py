@@ -8,6 +8,16 @@ reliability weighting, calibration, provenance, caching, and release
 gating.
 """
 
+from hugrgate.ensemble.adversarial import (
+    AbstainBackend,
+    AdversarialCase,
+    CorruptBackend,
+    DropoutBackend,
+    SaboteurBackend,
+    SlowBackend,
+    run_adversarial_suite,
+    tie_storm_members,
+)
 from hugrgate.ensemble.api import (
     STRATEGIES,
     Ensemble,
@@ -124,6 +134,14 @@ __all__ = [
     "collect_votes",
     "finalize_result",
     "batch_collect_votes",
+    "SaboteurBackend",
+    "DropoutBackend",
+    "CorruptBackend",
+    "AbstainBackend",
+    "SlowBackend",
+    "tie_storm_members",
+    "AdversarialCase",
+    "run_adversarial_suite",
     "soft_voting",
     "hard_voting",
     "weighted_voting",
