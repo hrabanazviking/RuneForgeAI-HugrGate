@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 229)
+- Backend trust levels (`hugrgate.privacy_trust`):
+  `TrustAttestation` + `BackendTrustRegistry` with expiry/revocation
+  and safe fallback; `PrivacyGuard(trust_registry=...)` evaluates
+  class trust floors against attested trust. Trust primitives moved
+  here from `hugrgate.privacy` (re-exported, no cycle).
+
 ### Added (slice 228)
 - Data-flow policy engine (`hugrgate.privacy_flow`): `FlowRequest` /
   `DataFlowPolicy` / `FlowDecision` with ordered deterministic rules

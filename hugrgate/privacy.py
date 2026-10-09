@@ -27,6 +27,12 @@ from hugrgate.backend import Backend
 from hugrgate.errors import BackendUnavailable, PrivacyViolation
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
+from hugrgate.privacy_trust import (
+    TRUST_ORDER,
+    BackendTrustRegistry,
+    default_trust_level,
+    trust_rank,
+)
 from hugrgate.provenance import DecisionRecord
 
 logger = get_logger(__name__)
@@ -53,12 +59,6 @@ REMOTE_MODES = ("allow", "forbidden")
 #: by test); the ordering is load-bearing for ``at_least()``.
 PRIVACY_CLASS_ORDER = ("public", "standard", "sensitive", "strict",
                        "forbidden")
-
-#: Backend trust ladder, lowest to highest. Slice 226 defines the
-#: ordering and the default mapping; slice 229 adds the attested
-#: ``BackendTrustRegistry`` that can raise a remote backend above
-#: ``"basic"``.
-TRUST_ORDER = ("untrusted", "basic", "verified", "enclave")
 
 #: Machine-enforceable semantics per privacy class.
 #:
@@ -144,25 +144,6 @@ def provenance_mode_for(privacy_class: str) -> str:
     return semantics_for(privacy_class)["provenance"]
 
 
-def trust_rank(level: str) -> int:
-    """Ordinal of a trust level (higher = more trusted)."""
-    try:
-        return TRUST_ORDER.index(level)
-    except ValueError:
-        raise ValueError(
-            f"unknown trust level: {level!r}; expected one of "
-            f"{list(TRUST_ORDER)}") from None
-
-
-def default_trust_level(backend: Backend) -> str:
-    """Trust level for a backend with no attestation (slice 226 default).
-
-    In-process backends run inside our trust boundary (``"enclave"``);
-    remote backends are ``"basic"`` until attested otherwise (slice 229).
-    """
-    return "enclave" if not backend.is_remote else "basic"
-
-
 class PrivacyGuard:
     """Operator-level privacy enforcement.
 
@@ -176,15 +157,28 @@ class PrivacyGuard:
     redact_provenance:
         When True, provenance records produced under this guard have raw
         state material scrubbed.
+    trust_registry:
+        Optional :class:`~hugrgate.privacy_trust.BackendTrustRegistry`
+        of attested backend trust levels (slice 229). When absent, the
+        slice-226 defaults apply (in-process = ``"enclave"``,
+        remote = ``"basic"``).
     """
 
     def __init__(self, remote_inference: str = "allow",
-                 redact_provenance: bool = True):
+                 redact_provenance: bool = True,
+                 trust_registry: BackendTrustRegistry | None = None):
         if remote_inference not in REMOTE_MODES:
             raise ValueError(f"remote_inference must be one of {REMOTE_MODES}, "
                              f"got {remote_inference!r}")
         self.remote_inference = remote_inference
         self.redact_provenance = redact_provenance
+        self.trust_registry = trust_registry
+
+    def _trust_level(self, backend: Backend) -> str:
+        """Effective trust level, attested when a registry is present."""
+        if self.trust_registry is not None:
+            return self.trust_registry.level_for(backend)
+        return default_trust_level(backend)
 
     # -- selection-time enforcement -------------------------------------
 
@@ -200,11 +194,12 @@ class PrivacyGuard:
             return (f"privacy_class {policy.privacy_class!r} forbids "
                     f"remote inference entirely")
         need = trust_rank(sem["min_trust"])
-        have = trust_rank(default_trust_level(backend))
+        level = self._trust_level(backend)
+        have = trust_rank(level)
         if have < need:
             return (f"privacy_class {policy.privacy_class!r} requires "
                     f"trust >= {sem['min_trust']!r}; backend "
-                    f"{backend.name!r} is {default_trust_level(backend)!r}")
+                    f"{backend.name!r} is {level!r}")
         return None
 
     def remote_allowed(self, backend: Backend, policy: DecisionPolicy) -> bool:
