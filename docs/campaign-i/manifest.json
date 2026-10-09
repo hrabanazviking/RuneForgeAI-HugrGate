@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T17:21:07.102432+00:00",
-  "module_count": 313,
+  "generated_utc": "2026-10-09T17:28:48.675125+00:00",
+  "module_count": 363,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -4691,7 +4691,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 526,
+      "loc": 610,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4709,6 +4709,9 @@
         "SecretDetected",
         "SealError",
         "KeyProviderError",
+        "MemoryError",
+        "MemoryQuotaExceeded",
+        "MemoryAccessDenied",
         "ClusterAuthError",
         "QueueFull",
         "ContractError",
@@ -4741,6 +4744,11 @@
         "NumaError",
         "GpuschedError",
         "PerfGateError",
+        "ObservabilityError",
+        "MetricError",
+        "TraceError",
+        "SLOError",
+        "AlertError",
         "DatasetError",
         "EvalError",
         "EvalGateError",
@@ -5631,6 +5639,559 @@
         "format"
       ]
     },
+    "hugrgate.memory.__init__": {
+      "docstring": "Decision memory \u2014 episodic recall for the HugrGate runtime.\n\nCampaign XIII (Decision Memory) gives the runtime useful historical\ncontext without turning it into an opaque agent. The memory layer is\nbuilt on top of :mod:`hugrgate.provenance`, not beside it:\n\n- :class:`~hugrgate.provenance.ProvenanceStore` remains the\n  tamper-evident, hash-chained legal record of *what was decided*;\n- :class:`~hugrgate.memory.history.DecisionHistory` keeps *episodes* \u2014\n  snapshots of decision records annotated with observed outcomes,\n  ground truth, privacy classes, and tags \u2014 so the runtime can recall,\n  compare, and learn from similar past decisions.\n\nEpisodes are deep-copied on the way in and on the way out; the memory\nnever hands out a mutable reference to its own state. All public\nbehavior is typed, thread-safe, and bounded (see\n:mod:`hugrgate.memory.retention`).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 191,
+      "path": "hugrgate/memory/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.memory.access": {
+      "docstring": "Memory privacy controls. Slice 315.\n\nEpisodes carry privacy classes; this module decides *who may see\nwhat*. :class:`MemoryAccessPolicy` maps roles to permissions over the\nprivacy ladder:\n\n- ``owner`` \u2014 the runtime itself: full read/write, every class;\n- ``analyst`` \u2014 reads up to ``sensitive``; ``sensitive`` episodes are\n  returned with metadata and tags stripped (outcome *kinds* stay \u2014\n  aggregates are the analyst's job); no writes;\n- ``auditor`` \u2014 reads up to ``standard``; ``standard`` episodes are\n  metadata-stripped; no writes.\n\n:class:`GuardedHistory` wraps a history with a role: reads are\nfiltered and redacted, writes raise :class:`MemoryAccessDenied` for\nnon-owners. Views are deep copies \u2014 redaction can never leak through\na held reference, and mutating a view cannot touch the store.\n\nDenied reads raise; they never return a partial episode silently.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 212,
+      "path": "hugrgate/memory/access.py",
+      "public_defs": [
+        "RolePermission",
+        "MemoryAccessPolicy",
+        "GuardedHistory",
+        "permission_for",
+        "may_read",
+        "check_read",
+        "check_write",
+        "role",
+        "get",
+        "recent",
+        "find",
+        "count",
+        "by_request_hash",
+        "record",
+        "attach_outcome",
+        "attach_ground_truth",
+        "clear"
+      ]
+    },
+    "hugrgate.memory.adversarial": {
+      "docstring": "Memory adversarial tests. Slice 323.\n\nMemory is only as trustworthy as its inputs. A compromised outcome\nreporter, a replayed request stream, or a skewed clock can poison\neverything downstream (routing, calibration, counterfactuals). This\nmodule scans a history for the classic attacks and reports\n:class:`Finding` objects with severity \u2014 detection, not\nauto-remediation: the operator decides whether to quarantine, purge,\nor investigate.\n\nDetectors:\n\n- ``outcome_flooding`` \u2014 more than ``threshold`` outcomes attached\n  inside ``window_seconds`` (mass-labeling by a rogue reporter);\n  critical.\n- ``chronology_violation`` \u2014 an outcome ``observed_at`` before the\n  episode's ``recorded_at`` (causally impossible); critical.\n- ``duplicate_flood`` \u2014 one ``request_hash`` appearing more than\n  ``threshold`` times (replay attack on the recorder); warn.\n- ``timestamp_anomaly`` \u2014 ``recorded_at`` in the future (beyond\n  tolerance) or before 2020-01-01 (clock skew / fabrication); warn.\n- ``label_conflict`` \u2014 ground truth contradicting the attached\n  outcome (mass contradictions suggest label flipping); warn, with\n  the conflicting episode ids.\n\nThresholds are parameters, not magic: tune them to the deployment's\ntraffic shape.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/memory/adversarial.py",
+      "public_defs": [
+        "Finding",
+        "AdversarialReport",
+        "scan",
+        "to_dict",
+        "has_critical",
+        "by_detector",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.assisted_calibration": {
+      "docstring": "Memory-assisted calibration. Slice 322.\n\nModels are often miscalibrated; memory knows by how much. This\nmodule fits an empirical recalibration map from labeled episodes:\nbin predicted probabilities, measure the observed positive rate per\nbin, and run PAVA (pool adjacent violators) isotonic regression so\nthe corrected curve is monotone. :func:`assess_calibration` splits\nepisodes chronologically (70% fit / 30% validate) and reports ECE\nand Brier score before and after correction on the held-out set \u2014\nthe statistical validation this slice requires.\n\nMetric/coverage assumptions (stated, not hidden):\n\n- labels come from attached outcomes via ``Outcome.is_positive()``\n  (success, or partial with score >= 0.5);\n- bins are equal-width over [0, 1]; empty bins are dropped before\n  PAVA and the map interpolates across them;\n- ``correct()`` is piecewise-linear between bin centers, clamped to\n  [0, 1], constant outside the observed range;\n- the chronological split assumes the miscalibration is stationary;\n  under distribution shift, refit.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 250,
+      "path": "hugrgate/memory/assisted_calibration.py",
+      "public_defs": [
+        "brier_score",
+        "expected_calibration_error",
+        "CalibrationMap",
+        "CalibrationValidation",
+        "calibrate_from_memory",
+        "assess_calibration",
+        "correct",
+        "to_dict",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.assisted_routing": {
+      "docstring": "Memory-assisted routing. Slice 321.\n\nRoute by track record: given candidate backends and the current\ndecision's features, :func:`advise_route` compares the backends'\nhistorical success on similar past decisions (via\n:func:`~hugrgate.memory.counterfactuals.counterfactual_backends`)\nand recommends the best one \u2014 or abstains.\n\nAbstention is a first-class outcome: when no candidate has\n``min_n`` similar labeled decisions, the advice says so explicitly\n(``chosen=None``, ``sufficient_data=False``) instead of crowning a\nchampion on noise. The caller \u2014 not this module \u2014 decides what\ninsufficient history means (fall back, ask, abstain); memory advises,\nit does not command.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 98,
+      "path": "hugrgate/memory/assisted_routing.py",
+      "public_defs": [
+        "RoutingAdvice",
+        "advise_route",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.backend_history": {
+      "docstring": "Backend history features. Slice 312.\n\n\"What do we know about backend X from history?\" One\n:class:`BackendHistory` per serving backend: decision counts,\nacceptance rate, outcome distribution, success rate among labeled\ndecisions, probability and latency means (raw and decay-weighted),\nfirst/last seen, and the models observed behind the backend name.\n\n``success_rate`` is ``None`` \u2014 not 0 \u2014 when no episode carries an\noutcome: absence of evidence is not evidence of failure, and slice\n322's calibration must not mistake the two.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 120,
+      "path": "hugrgate/memory/backend_history.py",
+      "public_defs": [
+        "BackendHistory",
+        "backend_histories",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.benchmarks": {
+      "docstring": "Memory benchmark suite. Slice 324.\n\nReproducible throughput measurements for the decision-memory layer:\nrecord, attach_outcome, find (query), recall (retrieval), and\nexport/import round-trip. Every run is seeded; the artifact records\nthe seed, host, workload, and per-operation timing distributions\n(mean/p50/p95/min/max microseconds), following the\n``benchmarks/`` directory conventions.\n\n``benchmarks/memory_bench.json`` is the checked-in baseline \u2014 the\nfirst real measurement on this machine. Re-run with\n``python -m hugrgate.memory.benchmarks --compare`` to measure again\nand print ratios against that baseline. Never invent numbers: every\nfigure in the artifact was timed.",
+      "imports": [
+        "__future__",
+        "argparse",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "platform",
+        "random",
+        "statistics",
+        "sys",
+        "tempfile",
+        "time",
+        "typing"
+      ],
+      "loc": 265,
+      "path": "hugrgate/memory/benchmarks.py",
+      "public_defs": [
+        "run_memory_benchmarks",
+        "save_artifact",
+        "load_artifact",
+        "compare_reports",
+        "main",
+        "make_record",
+        "do_record",
+        "do_attach",
+        "do_find",
+        "do_recall",
+        "do_export"
+      ]
+    },
+    "hugrgate.memory.compaction": {
+      "docstring": "Memory compaction. Slice 317.\n\nRetention (slice 316) deletes; compaction *summarizes*. Old episodes\nare rolled up into :class:`CompactionSummary` aggregates \u2014 per-backend\ncounts, outcome distribution, success rate, mean probability, privacy\nclass mix \u2014 and the raw episodes are purged. The summary stays on the\nhistory (``compaction_summaries()``), so the past remains queryable as\nstatistics even after its details are gone.\n\nEpisodes carrying ground truth are kept by default: verified labels\nare the scarcest asset in the store, and aggregates cannot replace\nthem. Pass ``keep_with_ground_truth=False`` to compact those too.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 145,
+      "path": "hugrgate/memory/compaction.py",
+      "public_defs": [
+        "CompactionSummary",
+        "compact",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.memory.conditioned": {
+      "docstring": "Outcome-conditioned retrieval. Slice 311.\n\nPlain recall answers \"what happened in similar situations?\".\nConditioned recall answers the sharper questions:\n\n- \"what happened in similar situations *that worked*?\" \u2014\n  ``outcome_kinds={\"success\"}``;\n- \"what went wrong before?\" \u2014 ``outcome_kinds={\"failure\"}``;\n- \"show me only verified precedents\" \u2014\n  ``require_truth_agreement=True`` keeps episodes whose ground truth\n  agrees with the attached outcome (via\n  :func:`~hugrgate.memory.groundtruth.outcome_agrees`).\n\nEpisodes with no outcome attached are excluded unless\n``include_unknown=True`` \u2014 conditioning on an outcome you do not have\nis how survivorship bias sneaks in, so the default is strict.",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 70,
+      "path": "hugrgate/memory/conditioned.py",
+      "public_defs": [
+        "retrieve_conditioned"
+      ]
+    },
+    "hugrgate.memory.contract_history": {
+      "docstring": "Contract history features. Slice 313.\n\n\"How has this *contract* fared over time?\" Contracts group decisions\nby the decision contract they served: the ``contract_id`` carried in\nrecord metadata (propagated by\n:func:`hugrgate.privacy_provenance.privacy_preserving_record` since\nthis slice \u2014 previously it was dropped, making contract history\nimpossible). Decisions without a contract id fall back to a synthetic\nkey derived from the spec's value-space shape, so ad-hoc decisions\nstill aggregate meaningfully; such groups are marked ``synthetic``.\n\nEach :class:`ContractHistory` reports decision counts, acceptance\nrate, outcome distribution, success rate among labeled decisions\n(``None`` when unlabeled \u2014 never 0), the backends that served the\ncontract, mean probability, and first/last seen timestamps.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 148,
+      "path": "hugrgate/memory/contract_history.py",
+      "public_defs": [
+        "contract_key_for",
+        "ContractHistory",
+        "contract_histories",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.counterfactuals": {
+      "docstring": "Historical counterfactuals. Slice 320.\n\n\"What if we had routed these decisions to backend X instead?\" Memory\ncannot rerun the past, but it can compare what *did* happen in\nsimilar situations per backend or per chosen value \u2014 with honest\nuncertainty. Every estimate carries a Wilson score interval, and\nestimates below ``min_n`` samples are flagged\n``sufficient_data=False`` instead of being dressed up.\n\nStated assumptions (Yrsa Execution Law, rule 12 \u2014 never invent what\nthe data cannot support):\n\n- similar past contexts are exchangeable with the query context\n  (cosine >= ``min_similarity`` on auditable features);\n- outcome scores are comparable across episodes;\n- there is no unmeasured confounding \u2014 this is observational\n  comparison, not a randomized trial.\n\nFor propensity-weighted off-policy evaluation on telemetry with\nlogged propensities, see\n:mod:`hugrgate.adaptive.counterfactual` (IPS/SNIPS/DR estimators);\nthat module answers a different question from different data.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 207,
+      "path": "hugrgate/memory/counterfactuals.py",
+      "public_defs": [
+        "wilson_interval",
+        "BackendCounterfactual",
+        "ValueCounterfactual",
+        "counterfactual_backends",
+        "counterfactual_value",
+        "to_dict",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.decay": {
+      "docstring": "Time-decay weighting. Slice 308.\n\nOld decisions should whisper; new ones should speak. This module is\nthe single home for exponential time-decay math across the memory\npackage (slice 306's retrieval used a private copy \u2014 now refactored\nonto this module):\n\n- :func:`decay_weight` \u2014 ``0.5 ** (age / half_life)`` in (0, 1];\n- :func:`half_life_for_horizon` \u2014 pick a half-life from a horizon and\n  a target residual weight;\n- :func:`effective_count` \u2014 recency-weighted sample size (\"how much\n  memory do these episodes amount to?\");\n- :func:`decayed_mean` \u2014 recency-weighted mean of values.\n\nNegative ages (clock skew) are clamped to 0 with the weight of a\nfresh episode rather than raising: a slightly wrong clock must not\nbreak recall.",
+      "imports": [
+        "__future__",
+        "collections",
+        "math"
+      ],
+      "loc": 97,
+      "path": "hugrgate/memory/decay.py",
+      "public_defs": [
+        "decay_weight",
+        "half_life_for_horizon",
+        "effective_count",
+        "decayed_mean"
+      ]
+    },
+    "hugrgate.memory.domain_profiles": {
+      "docstring": "Domain history profiles. Slice 314.\n\nBackends answer \"who served it\", contracts answer \"under what terms\",\ndomains answer \"about what\". A domain is the application-declared\nsubject area of a decision \u2014 ``spec.metadata[\"domain\"]`` first,\n``record.metadata[\"domain\"]`` second, ``\"default\"`` when neither is\nset. Each :class:`DomainProfile` aggregates the domain's volume,\nacceptance, outcomes, top serving backends, spec-type mix, and\ndecay-weighted activity (how *alive* the domain is right now).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 131,
+      "path": "hugrgate/memory/domain_profiles.py",
+      "public_defs": [
+        "domain_for",
+        "DomainProfile",
+        "domain_profiles",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.frequency": {
+      "docstring": "Frequency features. Slice 310.\n\n\"How often has this happened?\" Raw and decay-weighted counts grouped\nby caller-chosen keys (backend, model, backend+value, outcome kind,\n...). :func:`count_by` scans at most ``limit`` episodes newest-first\nand returns a :class:`FrequencyTable` mapping each key to its\n:class:`FrequencyEntry` (raw count, decay-weighted count, first/last\nseen timestamps, per-outcome-kind breakdown).\n\nDecay-weighted counts answer \"how often *lately*\"; raw counts answer\n\"how often *ever*\". Both are reported \u2014 the consumer decides which\nto trust.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 155,
+      "path": "hugrgate/memory/frequency.py",
+      "public_defs": [
+        "by_backend",
+        "by_model",
+        "by_backend_value",
+        "by_outcome_kind",
+        "FrequencyEntry",
+        "FrequencyTable",
+        "count_by",
+        "to_dict",
+        "top",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.groundtruth": {
+      "docstring": "Ground-truth attachment. Slice 304.\n\nOutcomes (slice 303) say what was *observed*; ground truth says what\nwas *verified*. The distinction matters: an observed \"success\" can\nlater be re-labeled a failure by audit, human review, or a delayed\nmeasurement. Ground truth is the verified label stream that slices\n311 (outcome-conditioned retrieval), 320 (counterfactuals), and 322\n(calibration) learn from.\n\nSemantics:\n\n- One ground truth per episode; once set it is immutable unless\n  ``supersede=True`` is passed, in which case the displaced truth is\n  preserved in ``episode.annotations[\"ground_truth_revisions\"]`` \u2014\n  history is corrected, never silently rewritten.\n- ``source`` names who verified the label (human reviewer, audit job,\n  delayed sensor); empty sources are rejected.\n- :func:`outcome_agrees` compares an attached outcome against ground\n  truth when the label is comparable (bool or one of the outcome\n  kinds). :meth:`DecisionHistory.consistency_report <hugrgate.memory.\n  history.DecisionHistory.consistency_report>` scans a history for\n  episodes where verified truth contradicts the observed outcome \u2014\n  the raw material for slice 323's adversarial detectors.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 102,
+      "path": "hugrgate/memory/groundtruth.py",
+      "public_defs": [
+        "GroundTruth",
+        "outcome_agrees",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.memory.history": {
+      "docstring": "Decision history API. Slice 301.\n\nThe campaign's foundation: an :class:`Episode` is one remembered\ndecision \u2014 a deep-copied :class:`~hugrgate.provenance.DecisionRecord`\nplus the annotations the memory layer needs (privacy class, tags,\noutcome, ground truth). :class:`DecisionHistory` is the append-mostly,\nthread-safe, bounded store of episodes.\n\nDesign notes (Yrsa Execution Law, rule 8):\n\n- Episodes *snapshot* provenance records instead of indexing into the\n  :class:`~hugrgate.provenance.ProvenanceStore`. Index-based references\n  break when the provenance store evicts or purges (its\n  :meth:`~hugrgate.provenance.ProvenanceStore.purge` re-chains\n  survivors), while a snapshot stays valid forever. The duplication\n  cost is bounded by ``max_episodes`` and measured by\n  :meth:`DecisionHistory.estimate_bytes` (slice 316 hardens this into\n  quotas \u2014 the Campaign XII finding of +1.3 GB RSS over 1M decisions\n  is addressed there).\n- The provenance ``record_hash`` is carried inside the snapshot, so a\n  memory episode can always be audited back to the tamper-evident\n  chain.\n- ``import_from_provenance`` lets an existing deployment adopt memory\n  without re-running decisions.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "threading",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "loc": 437,
+      "path": "hugrgate/memory/history.py",
+      "public_defs": [
+        "Episode",
+        "DecisionHistory",
+        "to_dict",
+        "from_dict",
+        "record",
+        "import_from_provenance",
+        "get",
+        "recent",
+        "count",
+        "evicted_count",
+        "by_request_hash",
+        "episodes_between",
+        "import_episode",
+        "clear",
+        "purge",
+        "add_compaction_summary",
+        "compaction_summaries",
+        "find",
+        "attach_outcome",
+        "attach_ground_truth",
+        "consistency_report",
+        "estimate_bytes"
+      ]
+    },
+    "hugrgate.memory.io": {
+      "docstring": "Memory export/import. Slice 318.\n\nJSONL backup and restore for decision memory. Each line is a\nself-describing envelope::\n\n    {\"schema\": \"hugrgate.memory/episode\", \"version\": 1, \"payload\": {...}}\n    {\"schema\": \"hugrgate.memory/compaction-summary\", \"version\": 1, ...}\n\n:func:`export_jsonl` writes episodes (in chronological order) and, by\ndefault, compaction summaries. :func:`import_jsonl` rebuilds them:\nepisodes keep their original ids (duplicates are skipped and\nreported, never overwritten); malformed lines are skipped with a\nreport when ``skip_bad_lines=True`` (the default) or raise\n:class:`MemoryError` in strict mode. Unknown schemas or versions are\nnever silently accepted.\n\nExport is an owner-grade operation: the file contains every privacy\nclass verbatim, including ``forbidden``. Treat exports like database\ndumps \u2014 encrypt at rest, restrict access.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 182,
+      "path": "hugrgate/memory/io.py",
+      "public_defs": [
+        "ExportReport",
+        "ImportReport",
+        "export_jsonl",
+        "import_jsonl",
+        "to_dict",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.outcomes": {
+      "docstring": "Outcome attachment. Slice 303.\n\nA decision without an observed outcome is a story without an ending:\n:func:`attach_outcome` records what *actually happened* after the\nruntime acted on a decision \u2014 success, failure, or partial \u2014 plus an\noptional numeric score. Outcomes are what turn the history from a log\ninto training data for slices 305-322 (similarity, retrieval,\ncalibration, counterfactuals).\n\nSemantics:\n\n- One outcome per episode; re-attaching requires ``overwrite=True``\n  so accidental double-reporting is loud, not silent.\n- Outcomes are immutable value objects (frozen dataclass); the\n  history swaps the reference under its lock.\n- ``observed_at`` defaults to now but is settable, so backfilled or\n  delayed outcomes (cf. ``hugrgate.adaptive.feedback``) keep their true\n  timestamps.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "time",
+        "typing"
+      ],
+      "loc": 92,
+      "path": "hugrgate/memory/outcomes.py",
+      "public_defs": [
+        "Outcome",
+        "to_dict",
+        "from_dict",
+        "is_positive"
+      ]
+    },
+    "hugrgate.memory.policies": {
+      "docstring": "Contextual memory policies. Slice 307.\n\nNot every decision deserves remembering. A :class:`MemoryPolicy` is\nan ordered list of :class:`MemoryRule` objects evaluated against each\ncandidate record; the first matching rule wins and the default is to\nrecord. Actions:\n\n- ``\"record\"`` \u2014 remember the episode as-is;\n- ``\"drop\"`` \u2014 do not remember it at all (``DecisionHistory.record``\n  returns ``None``);\n- ``\"redact\"`` \u2014 remember it, but strip the record's ``metadata``\n  (state keys and other context) and mark the episode redacted.\n\nBuilt-in factories cover the common cases; custom rules are plain\npredicates over ``(record, privacy_class, tags)``. The\n:func:`drop_forbidden` factory mirrors\n:mod:`hugrgate.privacy_retention` \u2014 ``forbidden``-class decisions must\nnever persist \u2014 and :func:`redact_above` uses the existing privacy\nladder (:func:`hugrgate.privacy.at_least`) so policy authors think in\nsensitivity levels, not string lists.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 165,
+      "path": "hugrgate/memory/policies.py",
+      "public_defs": [
+        "MemoryRule",
+        "MemoryDecision",
+        "MemoryPolicy",
+        "drop_forbidden",
+        "redact_above",
+        "drop_backend",
+        "record_only_backend",
+        "drop_unaccepted",
+        "decide",
+        "explain"
+      ]
+    },
+    "hugrgate.memory.query": {
+      "docstring": "Queryable provenance store. Slice 302.\n\nTwo complementary surfaces:\n\n1. :class:`MemoryQuery` \u2014 a composable, fully typed query object over\n   :class:`~hugrgate.memory.history.Episode` objects, executed by\n   :meth:`~hugrgate.memory.history.DecisionHistory.find`. Filters,\n   sorting, and limit/offset pagination; :meth:`MemoryQuery.explain`\n   renders the plan as human-readable text for observability.\n2. :func:`find_in_provenance` \u2014 the same query language applied to a\n   raw :class:`~hugrgate.provenance.ProvenanceStore`, built on the new\n   :meth:`~hugrgate.provenance.ProvenanceStore.scan` primitive. Memory-\n   only filters (privacy class, tags, outcome, ground truth) are\n   rejected explicitly rather than silently ignored.\n\nQueries never mutate the store and always return deep copies.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 262,
+      "path": "hugrgate/memory/query.py",
+      "public_defs": [
+        "MemoryQuery",
+        "find_in_provenance",
+        "matches",
+        "matches_record",
+        "apply",
+        "explain"
+      ]
+    },
+    "hugrgate.memory.recency": {
+      "docstring": "Recency features. Slice 309.\n\nRaw timestamps are hard for downstream consumers to use; this module\ndistills \"how recently did something like this happen, and how did it\ngo?\" into a typed feature vector:\n\n- ``time_since_last_similar`` \u2014 seconds since the most recent episode\n  above the similarity threshold (``None`` when nothing is similar);\n- ``last_outcome_kind`` \u2014 the outcome kind of that episode;\n- ``success_streak`` / ``failure_streak`` \u2014 the current consecutive\n  run of positive / negative outcomes among similar episodes ordered\n  newest-first (a streak is a property of the *head* of history);\n- ``similar_count`` / ``effective_similar_count`` \u2014 raw and\n  decay-weighted counts of similar episodes;\n- ``mean_similarity`` \u2014 average cosine of the similar set.\n\n\"Similar\" means cosine >= ``similarity_threshold`` against the query\nfeatures. At most ``max_candidates`` episodes are scanned, newest\nfirst \u2014 recency features must stay cheap on large histories.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time"
+      ],
+      "loc": 126,
+      "path": "hugrgate/memory/recency.py",
+      "public_defs": [
+        "RecencyFeatures",
+        "recency_features",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.replay": {
+      "docstring": "Memory replay. Slice 319.\n\n\"Would today's policy make the same calls on yesterday's traffic?\"\n:func:`replay` re-runs stored episodes through a caller-supplied\n``decide`` function and compares replayed decisions against the\nrecorded ones. This is how policy changes get validated *before*\nthey touch live traffic: a new threshold, a new backend preference,\na recalibrated model \u2014 replay the month, read the drift.\n\n``decide`` receives a copy of the episode's spec dict and returns\n``(value, probability)``. A ``decide`` that raises for an episode is\ncounted in ``errors`` \u2014 one bad episode must not abort the replay.\nValue equality uses ``==`` with a ``repr`` fallback for exotic\nvalues; probability drift is the absolute difference.",
+      "imports": [
+        "__future__",
+        "collections",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 141,
+      "path": "hugrgate/memory/replay.py",
+      "public_defs": [
+        "ReplayResult",
+        "ReplayReport",
+        "replay",
+        "to_dict",
+        "value_match_rate",
+        "to_dict"
+      ]
+    },
+    "hugrgate.memory.retention": {
+      "docstring": "Memory retention controls. Slice 316.\n\nThe Campaign XII worker flagged unbounded ``ProvenanceStore`` growth\n(+1.3 GB RSS over 1M decisions). Memory must not repeat that mistake:\nthis module bounds the episode store three ways.\n\n- **TTL per privacy class** \u2014 reuses\n  :data:`hugrgate.privacy_retention.RETENTION_DEFAULTS` (``forbidden``\n  = 0: purged on the next sweep, exactly like provenance retention);\n- **episode count quota** \u2014 oldest-first eviction;\n- **byte quota** \u2014 oldest-first eviction against\n  :meth:`DecisionHistory.estimate_bytes\n  <hugrgate.memory.history.DecisionHistory.estimate_bytes>`.\n\n:func:`enforce_quotas` applies all three and returns a\n:class:`RetentionReport`. :func:`check_quota` is the non-mutating\nprobe (``ok`` / ``warn`` / ``over``). When ``max_bytes`` is smaller\nthan the smallest retained episode \u2014 so nothing could ever be\nretained \u2014 :func:`enforce_quotas` raises :class:`MemoryQuotaExceeded`\ninstead of silently enforcing total amnesia.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "time",
+        "typing"
+      ],
+      "loc": 188,
+      "path": "hugrgate/memory/retention.py",
+      "public_defs": [
+        "MemoryQuota",
+        "QuotaStatus",
+        "RetentionReport",
+        "check_quota",
+        "enforce_quotas",
+        "max_age_for",
+        "to_dict",
+        "to_dict",
+        "expired"
+      ]
+    },
+    "hugrgate.memory.retrieval": {
+      "docstring": "Decision retrieval. Slice 306.\n\nRecall turns similarity into *advice*: :func:`retrieve` scores past\nepisodes against current context with a transparent three-part score\n\u2014 similarity, recency, outcome \u2014 and returns ranked\n:class:`RetrievalResult` objects that explain their own scores.\n:func:`recall` is the one-call convenience: hand it the current\ndecision's attributes, get back the most relevant precedents.\n\nThe recency term uses :mod:`hugrgate.memory.decay`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 130,
+      "path": "hugrgate/memory/retrieval.py",
+      "public_defs": [
+        "RetrievalResult",
+        "retrieve",
+        "recall",
+        "explain"
+      ]
+    },
+    "hugrgate.memory.similarity": {
+      "docstring": "Historical similarity search. Slice 305.\n\n\"Have we seen a decision like this before?\" :func:`featurize_episode`\nturns an episode into a sparse feature vector over the decision's\nstable attributes (spec shape, backend, model, probability bucket,\nacceptance, fallback use, latency band, state keys, domain); cosine\nsimilarity over those vectors powers :func:`most_similar`.\n\nDeliberate limits (Yrsa Execution Law, rule 14):\n\n- Features are symbolic and auditable \u2014 no opaque embeddings, no\n  third-party vector store. Every hit reports its ``shared_features``\n  so a human can see *why* two decisions matched.\n- Vectors are sparse dicts; similarity is exact, deterministic, and\n  dependency-free.\n- Ties break by recency, so repeated queries are stable.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 172,
+      "path": "hugrgate/memory/similarity.py",
+      "public_defs": [
+        "featurize_query",
+        "featurize_episode",
+        "cosine",
+        "SimilarityHit",
+        "most_similar"
+      ]
+    },
+    "hugrgate.memory.types": {
+      "docstring": "Shared structural types for the memory package. Slice 307.\n\nSpoke modules (query, similarity, retrieval, ...) must never import\n``hugrgate.memory.history`` \u2014 not even under ``TYPE_CHECKING`` \u2014\nbecause the import-cycle gate counts every static edge while\n``history`` is the hub that imports the spokes. These Protocols keep\nthe spokes typed without creating a cycle: ``Episode`` and\n``DecisionHistory`` satisfy them structurally, so no runtime\n``isinstance`` games are needed.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 92,
+      "path": "hugrgate/memory/types.py",
+      "public_defs": [
+        "EpisodeLike",
+        "HistoryLike",
+        "to_dict",
+        "find",
+        "get",
+        "recent",
+        "by_request_hash",
+        "record",
+        "attach_outcome",
+        "attach_ground_truth",
+        "clear",
+        "count",
+        "estimate_bytes",
+        "purge",
+        "import_episode"
+      ]
+    },
     "hugrgate.millionbench": {
       "docstring": "Million-decision benchmark \u2014 sustained decision throughput. Slice 299.\n\nRuns ``n`` real :meth:`HugrGate.decide` calls end to end (spec\nvalidation, backend routing, backend evaluation, result validation,\nprovenance) and reports throughput, latency percentiles, RSS delta,\nand error count.\n\nThe benchmark backend is deliberately instant and deterministic: the\npoint is to measure the *gate pipeline*, not any particular model.\nStates come from a seeded pool (``state_pool_size`` distinct states,\ncycled), so the workload is reproducible.  Whatever the pipeline\ndoes per decision \u2014 including any caching the gate performs \u2014 is\npart of the honest number; the artifact records the exact setup.\n\n``benchmarks/million_decisions.py`` runs the full 1M once and writes\n``benchmarks/million_decisions.json``.  Tests use small ``n``.",
       "imports": [
@@ -5756,6 +6317,540 @@
         "node_of_cpu",
         "distance",
         "to_dict"
+      ]
+    },
+    "hugrgate.observability.__init__": {
+      "docstring": "HugrGate observability (Campaign XIV) \u2014 make every important decision\npath measurable, inspectable, and explainable.\n\nCampaign VI's :mod:`hugrgate.adaptive.telemetry` keeps a routing-decision\ndataset for learning; this package is the *operations* layer around it:\nmetrics (:mod:`metrics`), distributed traces (:mod:`trace`), OpenTelemetry\ninterop (:mod:`otel`), structured logging (:mod:`logschema`), Prometheus\nexport (:mod:`prometheus`), dashboards (:mod:`dashboard`), SLOs\n(:mod:`slo`, :mod:`slo_eval`), alerts (:mod:`alerts`), and explanation\nreports (:mod:`explain`, :mod:`replay`).\n\nThe package is stdlib-only (the OTel SDK itself is an optional extra)\nand sits above ``spec`` / ``result`` / ``backend`` / ``policy``,\nprovenance, privacy, and drift detection \u2014 it never reaches into the\nservice layer.  Submodules are imported individually\n(``from hugrgate.observability import metrics``); this ``__init__``\nstays empty so importing the package never pulls the whole layer in.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 22,
+      "path": "hugrgate/observability/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.observability.abstention": {
+      "docstring": "Abstention metrics. Slice 338.\n\nAbstentions are first-class observability signals: *why* the gate\nrefused to decide matters as much as the decisions it made.\n:class:`AbstentionMetrics` counts abstentions by machine-readable\nreason (the ``abstain_reason`` metadata set by\n:func:`hugrgate.abstain.abstain`), reviews by policy verdict, and keeps\na bounded sliding window for recent abstention *rates*.\n\nAn abstention is never a backend failure \u2014 these counters live\nalongside, not inside, the error metrics.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 99,
+      "path": "hugrgate/observability/abstention.py",
+      "public_defs": [
+        "AbstentionMetrics",
+        "registry",
+        "record",
+        "abstentions_by_reason",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.alerts": {
+      "docstring": "Drift alerts. Slice 343.\n\nDrift *detection* lives in :mod:`hugrgate.drift` (PSI over prediction\ndistributions) and :mod:`hugrgate.adaptive.drift_detect` (route drift);\nthis module is the *alerting* layer on top:\n\n- :func:`alert_for_drift_report` turns a :class:`DriftReport` into an\n  :class:`Alert` (``\"watch\"`` \u2192 warning, ``\"action\"`` \u2192 critical,\n  ``\"none\"`` \u2192 no alert);\n- :class:`AlertManager` evaluates rules with dedup keys and cooldowns:\n  the same condition re-firing inside its cooldown is *suppressed and\n  counted*, never re-emitted \u2014 alert storms are a failure mode, not a\n  feature.\n\nAlerts carry metadata only: names, severities, PSI values, sample\ncounts.  Never distributions, never payloads.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 224,
+      "path": "hugrgate/observability/alerts.py",
+      "public_defs": [
+        "Alert",
+        "alert_for_drift_report",
+        "AlertRule",
+        "AlertManager",
+        "to_dict",
+        "key",
+        "add_rule",
+        "remove_rule",
+        "evaluate",
+        "suppressed_counts",
+        "history",
+        "fire",
+        "evaluate_drift"
+      ]
+    },
+    "hugrgate.observability.confidence": {
+      "docstring": "Confidence histograms for decision observability. Slice 337.\n\n:class:`ConfidenceHistogram` tracks the distribution of decision\nprobabilities: where the gate's confidence *lives*.  A healthy gate\nshows mass near 0 and 1 (decisive); mass piling up mid-range signals\nchronic uncertainty worth investigating.\n\nStatistical validation (slice 332's discipline, applied here): the\ntest feeds the histogram samples from a known ``Beta(2, 2)``\ndistribution (seeded) and checks every bucket against the theoretical\nCDF computed by numeric integration \u2014 the histogram must reproduce\nthe distribution it was fed, within an explicit tolerance.\n\nMetric/coverage assumptions:\n\n- observations are treated as i.i.d. draws; the validation only proves\n  the instrument is faithful, not that the gate is calibrated;\n- buckets are fixed 0.1-wide bands; probabilities outside [0, 1] are\n  rejected, never clipped.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 110,
+      "path": "hugrgate/observability/confidence.py",
+      "public_defs": [
+        "ConfidenceHistogram",
+        "histogram",
+        "observe",
+        "bucket_counts",
+        "total",
+        "mass_in",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.cost": {
+      "docstring": "Cost metrics. Slice 340.\n\nEvery routed decision can carry a cost (see\n:attr:`RouteEvent.cost <hugrgate.adaptive.telemetry.RouteEvent>`).\n:class:`CostMetrics` aggregates spend: totals, per-backend, per-route\ntotals, and a bounded ledger of recent charges for audit.\n\nCosts are non-negative floats in a single configured currency unit\n(``currency`` is a label, not a converter \u2014 HugrGate never invents FX\nrates).  Negative costs raise :class:`~hugrgate.errors.MetricError`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 117,
+      "path": "hugrgate/observability/cost.py",
+      "public_defs": [
+        "CostMetrics",
+        "currency",
+        "registry",
+        "record",
+        "total",
+        "recent_charges",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.dashboard": {
+      "docstring": "Health dashboard data. Slice 335.\n\nThe dashboard is the *aggregation* layer: it funnels one\n:func:`observe` call per decision into the :class:`HealthMonitor`\n(per-backend health, quarantine) and the :class:`MetricRegistry`\n(counters, latency histograms), and :meth:`snapshot` rolls those up \u2014\nplus firing alerts (slice 343) and SLO statuses (slice 345), passed in\nat snapshot time so this module never depends on the alert/SLO\nmodules \u2014 into one JSON-serializable document:\n\n``status`` is ``\"healthy\"`` / ``\"degraded\"`` / ``\"critical\"``:\n\n- ``critical`` \u2014 any backend quarantined, or any firing alert with\n  severity ``\"critical\"``;\n- ``degraded`` \u2014 any firing ``\"warning\"`` alert, or any backend score\n  below 0.5;\n- ``healthy`` \u2014 otherwise.\n\nThe dashboard never invents numbers: every field derives from recorded\nobservations.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 158,
+      "path": "hugrgate/observability/dashboard.py",
+      "public_defs": [
+        "HealthDashboard",
+        "registry",
+        "health",
+        "observe",
+        "snapshot"
+      ]
+    },
+    "hugrgate.observability.energy": {
+      "docstring": "Energy metrics interface. Slice 341.\n\nHugrGate tracks energy the way it tracks cost: as a first-class\nper-decision quantity in watt-hours.  The *interface* is the point of\nthis slice \u2014 real joules need real power telemetry, so:\n\n- :class:`EnergyEstimator` is the protocol: estimate Wh from a\n  backend name and a latency.  Operators plug in RAPL/nvidia-smi\n  readers here.\n- :class:`DefaultEnergyEstimator` is a documented, auditable fallback:\n  per-backend average-power coefficients (watts) times duration.  The\n  coefficients are *clearly marked estimates* \u2014 see\n  ``benchmarks/observability_energy_341.json`` \u2014 and the estimator\n  reports which coefficients it used so nothing is mistaken for a\n  measurement.\n- :class:`EnergyMetrics` aggregates estimated Wh by backend and keeps\n  a bounded ledger, mirroring :class:`CostMetrics\n  <hugrgate.observability.cost.CostMetrics>`.\n\nWhat is *not* claimed: these numbers are not meter readings.  The\nartifact records the model's provenance and a determinism check\n(same inputs \u2192 same outputs) instead of pretending to be hardware\ntruth.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 174,
+      "path": "hugrgate/observability/energy.py",
+      "public_defs": [
+        "EnergyEstimator",
+        "DefaultEnergyEstimator",
+        "EnergyMetrics",
+        "estimate_wh",
+        "describe",
+        "estimate_wh",
+        "describe",
+        "estimator",
+        "registry",
+        "record",
+        "total_wh",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.escalation": {
+      "docstring": "Escalation metrics. Slice 339.\n\nWorker supervision (:mod:`hugrgate.supervision`) restarts dead workers\nand *escalates* when a restart budget is exhausted.  This module makes\nboth visible: restarts by worker, escalations by worker and reason,\nand a bounded history of escalation events for the dashboard and the\nexplanation report.\n\nWire-up is a one-liner \u2014 the metrics object *is* the callback::\n\n    metrics = EscalationMetrics()\n    supervisor = Supervisor(on_escalation=metrics.as_callback(), ...)",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 113,
+      "path": "hugrgate/observability/escalation.py",
+      "public_defs": [
+        "EscalationMetrics",
+        "registry",
+        "record_restart",
+        "record_escalation",
+        "as_callback",
+        "restarts",
+        "recent_escalations",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.explain": {
+      "docstring": "Decision explanation report. Slice 346.\n\nProvenance (:class:`DecisionRecord\n<hugrgate.provenance.DecisionRecord>`) tells you *what* was decided;\ntraces tell you *how long each step took*; neither tells you *why* in\none place.  :class:`DecisionExplainer` joins them into an\n:class:`ExplanationReport`: a verdict summary, the policy reasoning\n(threshold vs. probability, review bands, abstention reasons), the\nfallback chain, the span timeline, and explicit caveats.\n\nPrivacy: the report renders the decision *value* only when\n``include_value=True`` is passed explicitly \u2014 the default redacts it,\nbecause explanation reports get pasted into tickets and dashboards.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 193,
+      "path": "hugrgate/observability/explain.py",
+      "public_defs": [
+        "ExplanationReport",
+        "DecisionExplainer",
+        "to_dict",
+        "render_markdown",
+        "explain",
+        "explain_result"
+      ]
+    },
+    "hugrgate.observability.histograms": {
+      "docstring": "Latency histograms for decision observability. Slice 336.\n\n:class:`LatencyTracker` is the opinionated instrument for decision\nlatency: one histogram per backend with the campaign's standard\nbuckets, millisecond-facing helpers, and an SLA predicate.  It sits on\nthe shared :class:`MetricRegistry` so Prometheus (slice 334) and the\ndashboard (slice 335) see the same numbers.\n\nThe slice's measurement artifact is produced by\n``benchmarks/observability_overhead_336.py`` \u2192 \n``benchmarks/observability_overhead_336.json``: the real overhead of\nthe instrumented observe path, compared against the explicit baseline\n(\u2264 50 \u00b5s p99 per observation on the reference host).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 89,
+      "path": "hugrgate/observability/histograms.py",
+      "public_defs": [
+        "LatencyTracker",
+        "histogram",
+        "observe_ms",
+        "percentile_ms",
+        "summary",
+        "within_sla"
+      ]
+    },
+    "hugrgate.observability.load": {
+      "docstring": "Observability load tests. Slice 348.\n\nAnswers the only load question that matters for an observability\nlayer: *how much does watching cost?*  :class:`ObservabilityLoadHarness`\nruns N iterations of the fully instrumented decision path (tracer +\ndecision/backend spans + dashboard observation + metric recording)\nagainst a bare baseline, and reports per-iteration overhead with p50 /\np99 / max.\n\nThe harness is honest about what it measures: CPython wall-clock on\none host, not production tail latency.  :meth:`assert_within_budget`\nturns the measurement into a gate \u2014 the suite (and CI) fails loudly if\ninstrumentation ever costs more than the declared budget.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "time",
+        "typing"
+      ],
+      "loc": 171,
+      "path": "hugrgate/observability/load.py",
+      "public_defs": [
+        "LoadResult",
+        "ObservabilityLoadHarness",
+        "to_dict",
+        "run",
+        "assert_within_budget",
+        "instrumented",
+        "baseline"
+      ]
+    },
+    "hugrgate.observability.logschema": {
+      "docstring": "Structured log schema for observability events. Slice 333.\n\n:mod:`hugrgate.log` gives us JSON log *formatting* (slice 009); this\nmodule gives us log *semantics*: a versioned schema for every\nobservability event the gate emits, so operators and log pipelines can\nrely on field names instead of grepping free text.\n\n- :data:`EVENT_SCHEMAS`: event name -> version + required/optional\n  fields.  Schemas are append-only: new optional fields may be added,\n  required fields are never removed or renamed (enforced by\n  ``tests/test_observability_logschema.py``).\n- :func:`validate_event` / :func:`emit_event`: validate-then-log; the\n  payload denylist from :mod:`hugrgate.observability.trace` is enforced\n  here too \u2014 a field named ``state`` or ``value`` raises instead of\n  leaking a decision payload into the logs.\n- :class:`ObservabilityFormatter`: extends\n  :class:`hugrgate.log.JsonFormatter` with ``event``,\n  ``event_version``, ``trace_id``, ``span_id``, and ``fields``.\n- :class:`TraceLoggerAdapter`: stamps every record with the ambient\n  trace/span ids.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "json",
+        "logging",
+        "typing"
+      ],
+      "loc": 208,
+      "path": "hugrgate/observability/logschema.py",
+      "public_defs": [
+        "validate_event",
+        "emit_event",
+        "ObservabilityFormatter",
+        "TraceLoggerAdapter",
+        "format",
+        "process"
+      ]
+    },
+    "hugrgate.observability.metrics": {
+      "docstring": "Metric primitives for HugrGate observability. Slice 326.\n\nCampaign VI's :mod:`hugrgate.adaptive.telemetry` keeps an *event log* for\noffline learning; this module is the complementary *live* instrument\nsurface: :class:`Counter`, :class:`Gauge`, and :class:`Histogram`\ninstruments registered in a :class:`MetricRegistry`.\n\nDesign rules (Yrsa Execution Law 14 \u2014 bounded, typed, auditable):\n\n- metric and label names must match Prometheus naming rules; violations\n  raise :class:`~hugrgate.errors.MetricError` at registration, never\n  silently;\n- label sets are fixed per metric; a wrong label set raises;\n- label cardinality is bounded by ``max_series``: when the cap is hit,\n  *new* label combinations raise instead of growing memory without\n  bound;\n- counters never decrease; observations must be finite;\n- every instrument is thread-safe (one re-entrant lock per registry);\n- :meth:`MetricRegistry.snapshot` returns a JSON-serializable dict so\n  exporters (Prometheus text in slice 334, dashboards in slice 335)\n  never touch instrument internals.",
+      "imports": [
+        "__future__",
+        "bisect",
+        "hugrgate",
+        "math",
+        "re",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 372,
+      "path": "hugrgate/observability/metrics.py",
+      "public_defs": [
+        "validate_metric_name",
+        "Counter",
+        "Gauge",
+        "Histogram",
+        "MetricRegistry",
+        "name",
+        "kind",
+        "inc",
+        "value",
+        "set",
+        "inc",
+        "dec",
+        "value",
+        "observe",
+        "buckets",
+        "count",
+        "total",
+        "percentile",
+        "counter",
+        "gauge",
+        "histogram",
+        "get",
+        "timer",
+        "snapshot"
+      ]
+    },
+    "hugrgate.observability.otel": {
+      "docstring": "OpenTelemetry interop for HugrGate traces. Slice 327.\n\nHugrGate's own trace model lives in :mod:`hugrgate.observability.trace`\n(stdlib-only, local-first).  This module is the *bridge* to the wider\nOpenTelemetry ecosystem:\n\n- W3C ``traceparent`` encode/decode for cross-process propagation;\n- :class:`OtelBridge`, which forwards HugrGate spans to a real OTel SDK\n  when the ``otel`` extra is installed, and otherwise degrades to a\n  documented in-process fallback instead of raising at import time;\n- exporter abstractions (:class:`SpanExporter`, :class:`InMemoryExporter`)\n  so tests and operators can capture spans without any SDK.\n\nLocal-first philosophy (Execution Law 15): HugrGate never *requires*\nthe OTel SDK.  The bridge is explicit \u2014 :meth:`OtelBridge.configure`\nreports ``sdk_available`` \u2014 and the fallback keeps every span locally\ninspectable through :class:`InMemoryExporter`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "opentelemetry",
+        "re",
+        "threading",
+        "typing"
+      ],
+      "loc": 282,
+      "path": "hugrgate/observability/otel.py",
+      "public_defs": [
+        "OtelConfig",
+        "encode_traceparent",
+        "decode_traceparent",
+        "SpanExporter",
+        "InMemoryExporter",
+        "OtelBridge",
+        "export",
+        "export",
+        "spans",
+        "clear",
+        "sdk_available",
+        "config",
+        "configure",
+        "require_sdk",
+        "export",
+        "shutdown"
+      ]
+    },
+    "hugrgate.observability.privacy_metrics": {
+      "docstring": "Privacy-event metrics. Slice 342.\n\nPrivacy enforcement (:mod:`hugrgate.privacy` and friends) *blocks*\nthings; this module *counts* the blocks \u2014 violations by taxonomy code\nand privacy class, denied data flows, redaction events \u2014 without ever\nrecording what was blocked.  The metric labels are metadata-only by\nconstruction:\n\n- label *names* are drawn from a fixed allowlist; anything else\n  raises;\n- label *values* are length-capped and may never use a forbidden\n  (payload) key name;\n- the violating payload itself is never an argument to any function\n  here \u2014 callers pass the already-raised exception.\n\nIncludes the slice's adversarial tests: attempts to smuggle payload\nthrough label names or values are rejected, not recorded.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 119,
+      "path": "hugrgate/observability/privacy_metrics.py",
+      "public_defs": [
+        "PrivacyEventMetrics",
+        "registry",
+        "record_violation",
+        "record_denied_flow",
+        "record_redaction",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.prometheus": {
+      "docstring": "Prometheus text exposition for the metric registry. Slice 334.\n\nRenders :class:`hugrgate.observability.metrics.MetricRegistry` in the\nPrometheus text format (version 0.0.4), so any Prometheus server can\nscrape HugrGate without a client library:\n\n- counters render as ``<name>_total`` (unless already suffixed);\n- gauges render as-is;\n- histograms render cumulative ``<name>_bucket{le=\"...\"}`` series plus\n  an implicit ``+Inf`` bucket, ``<name>_sum``, and ``<name>_count``;\n- label values are escaped per spec (``\\\\``, ``\\n``, ``\\\"``).\n\nThe renderer reads only :meth:`MetricRegistry.snapshot`, never\ninstrument internals, so the exposition contract is decoupled from the\nregistry implementation.",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 100,
+      "path": "hugrgate/observability/prometheus.py",
+      "public_defs": [
+        "escape_label_value",
+        "generate_latest"
+      ]
+    },
+    "hugrgate.observability.replay": {
+      "docstring": "Trace replay viewer data. Slice 347.\n\nThe replay viewer needs one thing: *every span of a trace, in order,\nwith nesting*.  :class:`TraceReplay` builds that from a\n:class:`TraceStore <hugrgate.observability.trace.TraceStore>`:\n\n- :meth:`timeline` \u2014 spans ordered by start time, each with its depth\n  (nesting level derived from ``parent_span_id``), start offset in ms\n  from the trace start, duration, status, and attributes;\n- :meth:`to_dict` \u2014 the JSON document a viewer renders (waterfall,\n  span detail pane, error highlighting);\n- :meth:`render_text` \u2014 a plain-text waterfall for terminals and logs.\n\nOrphan spans (parent id not in the trace) are kept at depth 0 and\nflagged, never dropped \u2014 the viewer must show what the store has,\nincluding ragged edges from sampling or eviction.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 114,
+      "path": "hugrgate/observability/replay.py",
+      "public_defs": [
+        "TraceReplay",
+        "timeline",
+        "to_dict",
+        "render_text"
+      ]
+    },
+    "hugrgate.observability.slo": {
+      "docstring": "SLO definitions. Slice 344.\n\nA Service-Level Objective is a contract with the future: *\"this\nfraction of events must be good, measured this way, over this\nwindow.\"*  :class:`SLODefinition` makes the contract explicit,\nvalidated, and serializable \u2014 the evaluator (slice 345) consumes it,\nthe dashboard (slice 335) displays its status, and the release gate\n(slice 350) can block on it.\n\nDefinitions are immutable value objects.  Bad definitions raise\n:class:`~hugrgate.errors.SLOError` at construction \u2014 an SLO that\ncannot be stated precisely cannot be evaluated honestly.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 98,
+      "path": "hugrgate/observability/slo.py",
+      "public_defs": [
+        "SLODefinition",
+        "error_budget",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.observability.slo_eval": {
+      "docstring": "SLO evaluator. Slice 345.\n\nEvaluates an :class:`SLODefinition\n<hugrgate.observability.slo.SLODefinition>` over a window of samples:\n\n- ``evaluate_availability(slo, outcomes)`` \u2014 *outcomes* is a list of\n  ``(timestamp, ok)`` pairs; only samples inside the window count;\n- ``evaluate_latency(slo, latencies_ms)`` \u2014 *latencies_ms* is a list of\n  ``(timestamp, latency_ms)`` pairs; \"good\" means within the SLO's\n  ``latency_budget_ms``.\n\nBoth return an :class:`SLOStatus` with the observed good-fraction, the\nburn rate (``observed_bad_rate / error_budget``), the remaining error\nbudget as a fraction, and a status:\n\n- ``\"ok\"`` \u2014 burn rate \u2264 1 (budget remaining > 0);\n- ``\"warning\"`` \u2014 1 < burn rate \u2264 2 (budget spent faster than allowed);\n- ``\"breaching\"`` \u2014 burn rate > 2 (budget exhausting fast).\n\nAn empty sample set raises :class:`~hugrgate.errors.SLOError`: an SLO\njudged on zero evidence is a configuration bug, not a passing grade.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 136,
+      "path": "hugrgate/observability/slo_eval.py",
+      "public_defs": [
+        "SLOStatus",
+        "SLOEvaluator",
+        "to_dict",
+        "evaluate_availability",
+        "evaluate_latency"
+      ]
+    },
+    "hugrgate.observability.spans_backend": {
+      "docstring": "Backend trace spans. Slice 330.\n\nEvery backend invocation becomes a child span of the decision span:\n``hugrgate.backend`` with the backend name, the attempt number (retries\nget one span per attempt, linked to their siblings), and the outcome \u2014\nlatency, success, or the machine-readable error code.\n\n``backend_span`` records exceptions as span errors and re-raises, so the\nretry loop in :mod:`hugrgate.chaos.retry` (or any caller) keeps its own\nsemantics while the trace shows exactly which attempt failed and why.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 89,
+      "path": "hugrgate/observability/spans_backend.py",
+      "public_defs": [
+        "annotate_backend_outcome",
+        "backend_span"
+      ]
+    },
+    "hugrgate.observability.spans_calibration": {
+      "docstring": "Calibration trace spans. Slice 332.\n\nRenders a calibration step as a span: which method ran, on how many\nsamples, what coverage it claimed, and \u2014 where a labeled holdout is\navailable \u2014 what coverage it *achieved*.  The empirical-coverage check\nis the statistical heart of this slice: :func:`empirical_coverage`\ncomputes the fraction of prediction sets containing the true label on\ncontrolled data, and :func:`coverage_within_tolerance` judges it\nagainst the nominal level with an exact binomial confidence interval,\nso the test never \"validates\" by eyeballing.\n\nSpan attributes carry the method name, nominal level, sample count,\nand achieved coverage \u2014 never the raw labels or scores.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/observability/spans_calibration.py",
+      "public_defs": [
+        "empirical_coverage",
+        "coverage_within_tolerance",
+        "annotate_calibration",
+        "calibration_span"
+      ]
+    },
+    "hugrgate.observability.spans_decision": {
+      "docstring": "Decision trace spans. Slice 329.\n\nRenders one HugrGate decision as a trace span: the spec that was asked,\nthe policy that judged it, and the verdict that resulted \u2014 metadata\nonly, never the decision payload (``result.value`` and the full\ndistribution stay out of spans by construction).\n\nThe span name is ``hugrgate.decision``; the verdict is recorded both as\nan attribute (``decision.verdict``) and as a span event\n(``decision.accepted`` / ``decision.review`` / ``decision.abstained``)\nso the replay viewer (slice 347) can filter on it.\n\nUse as a context manager::\n\n    with decision_span(tracer, spec, policy) as span:\n        result = gate.decide(spec)\n    annotate_decision(span, spec, result, policy)",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 109,
+      "path": "hugrgate/observability/spans_decision.py",
+      "public_defs": [
+        "probability_band",
+        "verdict_of",
+        "annotate_decision",
+        "decision_span"
+      ]
+    },
+    "hugrgate.observability.spans_routing": {
+      "docstring": "Routing trace spans. Slice 331.\n\nRenders the adaptive router's choice as a span: which candidates were\nconsidered, which arm was pulled, with what propensity, under which\npolicy version \u2014 the exact fields :mod:`hugrgate.adaptive.telemetry`\nlogs as a :class:`RouteEvent`, so the trace and the learning dataset\ntell the same story.\n\nThe builder accepts a real ``RouteEvent`` (preferred \u2014 schema-checked)\nor a plain mapping with the same keys, so non-adaptive routers can\nemit identical spans.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 93,
+      "path": "hugrgate/observability/spans_routing.py",
+      "public_defs": [
+        "annotate_routing",
+        "routing_span"
+      ]
+    },
+    "hugrgate.observability.trace": {
+      "docstring": "Distributed trace model for HugrGate. Slice 328.\n\nThe stdlib-only, local-first trace core that\n:mod:`hugrgate.observability.otel` bridges to OpenTelemetry:\n\n- :class:`Span` \u2014 one timed operation with validated attributes,\n  events, and a privacy-enforcing attribute gate (metadata only, never\n  payload \u2014 the same law as :mod:`hugrgate.log`'s ``PRIVACY_RULE``);\n- :class:`Tracer` \u2014 creates spans, propagates parent context, applies\n  head-based sampling;\n- :class:`TraceStore` \u2014 bounded in-memory store of finished spans with\n  trace reassembly for the replay viewer (slice 347).\n\nSampling is deterministic per trace: the sampler hashes the trace id,\nso a trace is either fully kept or fully dropped \u2014 never a ragged\nhalf-trace.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "re",
+        "secrets",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 447,
+      "path": "hugrgate/observability/trace.py",
+      "public_defs": [
+        "new_trace_id",
+        "new_span_id",
+        "SpanContext",
+        "Span",
+        "ProbabilisticSampler",
+        "TraceStore",
+        "Tracer",
+        "name",
+        "trace_id",
+        "span_id",
+        "parent_span_id",
+        "sampled",
+        "attributes",
+        "events",
+        "status",
+        "start_time",
+        "end_time",
+        "duration_s",
+        "finished",
+        "context",
+        "set_attribute",
+        "add_event",
+        "add_link",
+        "set_error",
+        "finish",
+        "mark_dropped",
+        "dropped",
+        "to_dict",
+        "rate",
+        "should_sample",
+        "add",
+        "get_trace",
+        "find_spans",
+        "clear",
+        "store",
+        "start_span",
+        "trace",
+        "traced",
+        "decorator",
+        "wrapper"
       ]
     },
     "hugrgate.perfgate": {
@@ -6230,7 +7325,7 @@
         "pickle",
         "typing"
       ],
-      "loc": 261,
+      "loc": 268,
       "path": "hugrgate/privacy_provenance.py",
       "public_defs": [
         "fingerprint_state",
@@ -6426,7 +7521,7 @@
         "time",
         "typing"
       ],
-      "loc": 239,
+      "loc": 278,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -6438,8 +7533,10 @@
         "evicted_count",
         "purge",
         "by_hash",
+        "scan",
         "recent",
         "count",
+        "estimate_bytes",
         "verify_chain"
       ]
     },
@@ -8115,7 +9212,43 @@
     "test_localrt_173_conformance.py",
     "test_localrt_174_bench_matrix.py",
     "test_logging.py",
+    "test_memory_access.py",
+    "test_memory_adversarial.py",
+    "test_memory_assisted_calibration.py",
+    "test_memory_assisted_routing.py",
+    "test_memory_backend_history.py",
+    "test_memory_benchmarks.py",
+    "test_memory_compaction.py",
+    "test_memory_conditioned.py",
+    "test_memory_contract_history.py",
+    "test_memory_counterfactuals.py",
+    "test_memory_decay.py",
+    "test_memory_domain_profiles.py",
+    "test_memory_frequency.py",
+    "test_memory_groundtruth.py",
+    "test_memory_history.py",
+    "test_memory_io.py",
+    "test_memory_outcomes.py",
+    "test_memory_policies.py",
+    "test_memory_query.py",
+    "test_memory_recency.py",
+    "test_memory_replay.py",
+    "test_memory_retention.py",
+    "test_memory_retrieval.py",
+    "test_memory_similarity.py",
     "test_ml_calibration.py",
+    "test_observability_alerts_slo.py",
+    "test_observability_dashboard.py",
+    "test_observability_domain_metrics.py",
+    "test_observability_explain_replay.py",
+    "test_observability_histograms.py",
+    "test_observability_load.py",
+    "test_observability_logschema.py",
+    "test_observability_metrics.py",
+    "test_observability_otel.py",
+    "test_observability_prometheus.py",
+    "test_observability_spans.py",
+    "test_observability_trace.py",
     "test_package_boundaries.py",
     "test_perf_276_profiling.py",
     "test_perf_277_flame.py",
@@ -8204,5 +9337,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 70808
+  "total_loc": 79153
 }
