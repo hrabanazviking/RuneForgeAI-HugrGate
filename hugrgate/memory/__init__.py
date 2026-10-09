@@ -25,6 +25,15 @@ from hugrgate.memory.decay import (
     effective_count,
     half_life_for_horizon,
 )
+from hugrgate.memory.frequency import (
+    FrequencyEntry,
+    FrequencyTable,
+    by_backend,
+    by_backend_value,
+    by_model,
+    by_outcome_kind,
+    count_by,
+)
 from hugrgate.memory.groundtruth import GroundTruth, outcome_agrees
 from hugrgate.memory.history import DecisionHistory, Episode
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
@@ -54,6 +63,8 @@ __all__ = [
     "OUTCOME_KINDS",
     "DecisionHistory",
     "Episode",
+    "FrequencyEntry",
+    "FrequencyTable",
     "GroundTruth",
     "MemoryAction",
     "MemoryDecision",
@@ -64,7 +75,12 @@ __all__ = [
     "RecencyFeatures",
     "RetrievalResult",
     "SimilarityHit",
+    "by_backend",
+    "by_backend_value",
+    "by_model",
+    "by_outcome_kind",
     "cosine",
+    "count_by",
     "decay_weight",
     "decayed_mean",
     "drop_backend",

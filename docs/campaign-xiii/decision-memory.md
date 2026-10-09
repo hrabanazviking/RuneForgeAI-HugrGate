@@ -132,3 +132,12 @@ it into an opaque agent.
   Cosine threshold gate, newest-first scan capped at `max_candidates`
   for large histories.
 - Tests: `tests/test_memory_recency.py` (9 tests).
+
+### Slice 310 — Frequency features
+- `hugrgate/memory/frequency.py`: `count_by(history, key_fn)` groups
+  episodes (key fns: `by_backend`, `by_model`, `by_backend_value`,
+  `by_outcome_kind`, or custom) into `FrequencyEntry` records — raw
+  count, decay-weighted count, first/last seen, per-outcome breakdown;
+  `FrequencyTable.top(n)` ranks by decayed count; optional
+  `MemoryQuery` pre-filter and scan `limit`.
+- Tests: `tests/test_memory_frequency.py` (10 tests).
