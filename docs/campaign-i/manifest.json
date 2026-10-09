@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T17:28:48.675125+00:00",
-  "module_count": 363,
+  "generated_utc": "2026-10-09T18:32:49.235223+00:00",
+  "module_count": 387,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -806,7 +806,7 @@
         "time",
         "typing"
       ],
-      "loc": 304,
+      "loc": 317,
       "path": "hugrgate/backends/logreg.py",
       "public_defs": [
         "SklearnClassifierBackend",
@@ -960,7 +960,7 @@
         "time",
         "typing"
       ],
-      "loc": 300,
+      "loc": 325,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -2465,7 +2465,7 @@
         "time",
         "typing"
       ],
-      "loc": 680,
+      "loc": 692,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -4691,7 +4691,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 610,
+      "loc": 746,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4752,6 +4752,18 @@
         "DatasetError",
         "EvalError",
         "EvalGateError",
+        "SupplyChainViolation",
+        "SignatureVerificationFailed",
+        "PluginTrustError",
+        "SandboxViolation",
+        "InputTooLarge",
+        "ResourceBudgetExceeded",
+        "DeserializationBlocked",
+        "PathTraversalBlocked",
+        "PromptInjectionBlocked",
+        "ReplayDetected",
+        "AuthzDenied",
+        "RateLimitExceeded",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -6997,7 +7009,7 @@
         "secrets",
         "typing"
       ],
-      "loc": 247,
+      "loc": 272,
       "path": "hugrgate/privacy_crypto.py",
       "public_defs": [
         "hkdf",
@@ -7325,7 +7337,7 @@
         "pickle",
         "typing"
       ],
-      "loc": 268,
+      "loc": 272,
       "path": "hugrgate/privacy_provenance.py",
       "public_defs": [
         "fingerprint_state",
@@ -7431,11 +7443,12 @@
         "__future__",
         "collections",
         "copy",
+        "hugrgate",
         "pickle",
         "secrets",
         "typing"
       ],
-      "loc": 122,
+      "loc": 137,
       "path": "hugrgate/privacy_tokens.py",
       "public_defs": [
         "TokenVault",
@@ -8766,6 +8779,614 @@
         "stats"
       ]
     },
+    "hugrgate.security.__init__": {
+      "docstring": "Security Forge \u2014 Gjallarbr\u00fa Campaign XVII (slices 401-425).\n\nAdversarial robustness for a runtime that faces hostile inputs,\nmodels, plugins, and networks. Built *on top of* the existing\ndefenses \u2014 privacy fortress (redaction, tokenization, sealed crypto),\nsecret detection, hash-chained audit logs, cluster mutual auth \u2014\nhardening what exists instead of duplicating it:\n\n- :mod:`hugrgate.security.threat_model` \u2014 STRIDE threat model v2\n  with coverage analysis (slice 401).\n- :mod:`hugrgate.security.attack_surface` \u2014 enumerated, audited\n  attack surface (slice 402).\n- :mod:`hugrgate.security.depscan` \u2014 dependency security scanning\n  (slice 403).\n- :mod:`hugrgate.security.supply_chain` \u2014 supply-chain policy +\n  SBOM (slice 404).\n- :mod:`hugrgate.security.model_signing` \u2014 signed model metadata\n  (slice 405).\n- :mod:`hugrgate.security.checksums` \u2014 model checksum enforcement\n  (slice 406).\n- :mod:`hugrgate.security.plugins` \u2014 plugin trust model (slice 407).\n- :mod:`hugrgate.security.sandbox` \u2014 backend sandbox boundary\n  (slice 408).\n- :mod:`hugrgate.security.input_limits` \u2014 input-size limits\n  (slice 409).\n- :mod:`hugrgate.security.resource_guards` \u2014 resource-exhaustion\n  guards (slice 410).\n- :mod:`hugrgate.security.serde_guards` \u2014 deserialization hardening\n  (slice 411).\n- :mod:`hugrgate.security.path_guards` \u2014 path traversal defenses\n  (slice 412).\n- :mod:`hugrgate.security.injection_corpus` \u2014 injection test corpus\n  (slice 413).\n- :mod:`hugrgate.security.prompt_injection` \u2014 prompt-injection\n  boundary (slice 414).\n- :mod:`hugrgate.security.malicious_backend` \u2014 malicious-backend\n  adversarial fixtures (slice 415).\n- :mod:`hugrgate.security.provenance_guards` \u2014 provenance tamper\n  detection + tip sealing (slice 416).\n- :mod:`hugrgate.security.cache_poisoning` \u2014 cache-poisoning\n  defenses (slice 417).\n- :mod:`hugrgate.security.replay` \u2014 replay attack defenses\n  (slice 418).\n- :mod:`hugrgate.security.authz` \u2014 service authorization policy\n  (slice 419).\n- :mod:`hugrgate.security.rate_limit` \u2014 rate limiting (slice 420).\n- :mod:`hugrgate.security.secret_audit` \u2014 secret-handling audit\n  (slice 421).\n- :mod:`hugrgate.security.fuzzing` \u2014 deterministic fuzzing campaign\n  harness (slice 422).\n- :mod:`hugrgate.security.gauntlet` \u2014 independent-style security\n  gauntlet (slice 424).",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 287,
+      "path": "hugrgate/security/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.security.attack_surface": {
+      "docstring": "Attack-surface inventory. Slice 402.\n\nA security inventory that cannot drift: :func:`enumerate_surface`\nrebuilds the inventory from the code itself (AST over\n``hugrgate/server.py`` routes, ``hugrgate/cli.py`` subcommands, and\n``os.getenv``/``os.environ`` reads across the package), and\n:func:`find_unlisted` reports anything the curated registry does not\nknow about. New endpoints, commands, or env vars without a registry\nentry fail the gate test \u2014 the inventory is append-only by\nconstruction.\n\nEach entry carries a kind, whether authentication is required, and a\nrisk rating, so reviewers can see the exposed surface at a glance.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 277,
+      "path": "hugrgate/security/attack_surface.py",
+      "public_defs": [
+        "SurfaceEntry",
+        "AttackSurface",
+        "enumerate_surface",
+        "find_unlisted",
+        "curated_surface",
+        "to_dict",
+        "from_dict",
+        "add",
+        "by_kind",
+        "unauthenticated",
+        "high_risk",
+        "names",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.security.authz": {
+      "docstring": "Service authorization policy. Slice 419.\n\nThreat T-12: the HTTP service exposes decide/configure endpoints\nwith no authentication or authorization. This module is the\ndeny-by-default policy engine that threat's mitigation names:\n\n- :class:`AuthzPolicy` \u2014 roles map to capability sets; principals\n  (API keys) map to roles. Everything not explicitly granted is\n  denied: unknown principals, unknown capabilities, revoked keys.\n- Credential checks use constant-time comparison, so a wrong key\n  is indistinguishable (by timing) from an unknown key id.\n- Keys are revocable and the store supports rotation (register\n  the replacement, revoke the old) without touching role grants.\n\nWhat this module is *not*: deployment wiring. TLS termination,\nkey distribution, and per-route enforcement in ``hugrgate/server``\nremain operator responsibility (the threat model records this as\nthe residual for T-12). The :data:`ENDPOINT_CAPABILITIES` table\ndocuments which capability each service operation requires so the\nwiring is a lookup, not a judgment call.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hmac",
+        "hugrgate",
+        "secrets",
+        "threading",
+        "typing"
+      ],
+      "loc": 204,
+      "path": "hugrgate/security/authz.py",
+      "public_defs": [
+        "Principal",
+        "AuthzPolicy",
+        "can",
+        "define_role",
+        "role_capabilities",
+        "register_key",
+        "revoke_key",
+        "rotate_key",
+        "authenticate",
+        "authorize",
+        "check",
+        "stats"
+      ]
+    },
+    "hugrgate.security.cache_poisoning": {
+      "docstring": "Cache-poisoning defenses. Slice 417.\n\nAttack result against :class:`DecisionCache`: the key bound\nstate+spec+policy, but *not* the tenant or the model generation \u2014\nso two tenants sharing a cache, or two model versions behind one\nbackend name, could read each other's entries (threat T-05). The\nfix (in ``hugrgate/cache.py`` and the sealed cache): optional\n``namespace`` / ``model_version`` key bindings, defaulting to the\nhistorical behavior.\n\nThis module provides:\n\n- :class:`BoundCache` \u2014 a cache view with namespace and model\n  version pinned: callers cannot forget to pass them.\n- :func:`run_poison_suite` \u2014 the adversarial battery: cross-tenant\n  reads, stale-model reads, type confusion, policy separation,\n  and in-memory tamper eviction, each measured as\n  contained-or-not.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 151,
+      "path": "hugrgate/security/cache_poisoning.py",
+      "public_defs": [
+        "BoundCache",
+        "PoisonReport",
+        "run_poison_suite",
+        "namespace",
+        "model_version",
+        "get",
+        "put",
+        "invalidate_backend"
+      ]
+    },
+    "hugrgate.security.checksums": {
+      "docstring": "Model checksum enforcement. Slice 406.\n\nSigned metadata (slice 405) attests *claims* about a model; checksums\nattest the *bytes*. A manifest pins every file in a model directory\nto a SHA-256 digest; :func:`verify_manifest` re-hashes on load and\n:meth:`ModelChecksumGate.load` refuses to hand a loader bytes that do\nnot match. Tampered, truncated, or substituted weight files fail\nclosed with :class:`SignatureVerificationFailed`.\n\nHashing is streaming (64 KiB chunks) so multi-gigabyte weight files\nnever sit fully in memory.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "typing"
+      ],
+      "loc": 209,
+      "path": "hugrgate/security/checksums.py",
+      "public_defs": [
+        "hash_file",
+        "ChecksumManifest",
+        "VerificationReport",
+        "build_manifest",
+        "verify_manifest",
+        "enforce_manifest",
+        "verified_open",
+        "ModelChecksumGate",
+        "to_dict",
+        "from_dict",
+        "to_json",
+        "from_json",
+        "passed",
+        "to_dict",
+        "load",
+        "write_manifest"
+      ]
+    },
+    "hugrgate.security.depscan": {
+      "docstring": "Dependency security scan. Slice 403.\n\nScans requirement specifiers (and optionally installed versions)\nfor three classes of findings:\n\n- **advisories** \u2014 a curated, locally-maintained DB of verified CVEs\n  (every entry was cross-checked against NVD/GitHub advisories; the\n  DB is explicitly a *subset*, not a replacement for ``pip-audit`` /\n  OSV \u2014 see :data:`ADVISORY_DB_NOTE`);\n- **pinning** \u2014 unpinned or open-ended requirements that let a\n  future malicious release slide in;\n- **url_dependencies** \u2014 git/URL installs that bypass index trust.\n\nVersion comparison is a small PEP-440-subset matcher (``== >= <= >\n< !=`` with comma-AND); good enough for advisory range checks\nwithout pulling in ``packaging``.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "importlib",
+        "pathlib",
+        "re",
+        "tomllib",
+        "typing"
+      ],
+      "loc": 291,
+      "path": "hugrgate/security/depscan.py",
+      "public_defs": [
+        "Advisory",
+        "Finding",
+        "matches_spec",
+        "parse_requirement",
+        "installed_versions",
+        "scan_requirements",
+        "scan_project",
+        "render_report",
+        "to_dict"
+      ]
+    },
+    "hugrgate.security.fuzzing": {
+      "docstring": "Fuzzing campaign harness. Slice 422.\n\nThreat T-16: malformed JSON/compact encodings crash serde or\nvalidation instead of raising taxonomy errors. This module is the\nreusable harness; the campaign itself lives in the test suite,\nwhich fuzzes the real parsers (``DecisionSpec.from_dict``,\n``policy_from_dict``/``result_from_dict``, the compact codecs,\n``validate_state``, and the security detectors).\n\nDesign (stdlib only, seeded for reproducibility \u2014 the same\nconvention as the slice-247 privacy fuzz):\n\n- :class:`FuzzTarget` wraps a callable and classifies each case:\n  ``ok``, ``taxonomy_error`` (an expected :class:`HugrGateError`\n  or other *declared* exception), ``crash`` (anything else), or\n  ``hang`` (per-case timeout exceeded).\n- :func:`run_campaign` drives a generator for ``n_cases`` with a\n  fixed seed, runs each case in a worker thread with a timeout,\n  and returns a :class:`FuzzReport` with the crash corpus\n  (deduplicated by exception type + message) and reproduction\n  seeds.\n- Generators: :func:`hostile_values` (nested hostile scalars),\n  :func:`hostile_json_texts` (malformed JSON), :func:`hostile_states`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "random",
+        "threading",
+        "traceback",
+        "typing"
+      ],
+      "loc": 220,
+      "path": "hugrgate/security/fuzzing.py",
+      "public_defs": [
+        "Crash",
+        "FuzzReport",
+        "FuzzTarget",
+        "run_campaign",
+        "hostile_values",
+        "hostile_states",
+        "hostile_json_texts",
+        "signature",
+        "unique_crashes",
+        "summary",
+        "worker"
+      ]
+    },
+    "hugrgate.security.gauntlet": {
+      "docstring": "The security gauntlet. Slice 424.\n\nThe capstone battery: runs every Security Forge adversarial suite\nin one pass and reports per-battery containment. A battery that\nraises fails *that battery* \u2014 the gauntlet itself never crashes.\n\nBatteries:\n\n- threat_model \u2014 the STRIDE model validates and every threat\n  names its tests;\n- attack_surface \u2014 no unlisted routes/commands/env vars (drift);\n- injection_corpus \u2014 all 30 payloads neutralized/detected;\n- malicious_backends \u2014 the five hostile backends stay contained;\n- provenance_tamper \u2014 chain + tip seals detect every attack;\n- cache_poison \u2014 cross-tenant/stale-model reads contained;\n- replay \u2014 sealed envelopes reject replays;\n- authz \u2014 unknown keys and escalation denied;\n- rate_limit \u2014 bursts rejected with retry-after;\n- secret_audit \u2014 zero high/medium findings over the package;\n- fuzz_smoke \u2014 100-case campaigns on the codec + validator;\n- depscan \u2014 no advisory findings over the project.\n\nUse :func:`run_security_gauntlet` (named to avoid clashing with\nthe slice-415 backend :func:`run_gauntlet`).",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 309,
+      "path": "hugrgate/security/gauntlet.py",
+      "public_defs": [
+        "BatteryResult",
+        "SecurityGauntletReport",
+        "run_security_gauntlet",
+        "passed",
+        "failed",
+        "to_dict",
+        "summary",
+        "dict_cases"
+      ]
+    },
+    "hugrgate.security.injection_corpus": {
+      "docstring": "Injection test corpus. Slice 413.\n\nA curated, categorized corpus of hostile payloads (SQLi, command,\nXSS, log forging, path, LDAP, prompt override) plus the\nsanitizers that must neutralize them and a harness\n(:func:`run_corpus`) proving every payload is neutralized in its\ncontext.\n\nDesign notes:\n\n- Sanitization is context-specific: log forging is defeated by\n  control-character stripping, filenames by charset whitelisting,\n  shell args by :func:`shlex.quote`, HTML by escaping. There is no\n  universal sanitizer, and the corpus encodes that.\n- SQL injection is *detected*, not cleaned: the only safe handling\n  is parameterization, so :func:`detect_sqli` flags hostile input\n  for rejection instead of pretending to clean it.\n- The prompt-override category feeds slice 414's boundary tests.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "html",
+        "hugrgate",
+        "re",
+        "shlex",
+        "unicodedata"
+      ],
+      "loc": 268,
+      "path": "hugrgate/security/injection_corpus.py",
+      "public_defs": [
+        "Payload",
+        "sanitize_log",
+        "sanitize_filename",
+        "shell_quote",
+        "escape_html",
+        "escape_ldap",
+        "detect_sqli",
+        "neutralize",
+        "CorpusResult",
+        "run_corpus"
+      ]
+    },
+    "hugrgate.security.input_limits": {
+      "docstring": "Input-size limits. Slice 409.\n\n:func:`hugrgate.validation.validate_state` already caps bytes and\ndepth generously; this module is the *security* layer on top of it\n(threat T-04): a deliberate, named, tunable :class:`InputLimits`\npolicy that also covers key counts, key lengths, batch\namplification, and prompt text \u2014 the dimensions validation does\nnot bound.\n\nOrdering at ingress: limits first (cheap rejection of hostile\npayloads), then validation, then privacy. :func:`check_state` runs\n:func:`validate_state` itself so the security path reuses the\ncontract checks instead of duplicating them; limit breaches raise\n:class:`InputTooLarge` (taxonomy error), contract breaches raise\nthe usual :class:`SpecError`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "typing"
+      ],
+      "loc": 155,
+      "path": "hugrgate/security/input_limits.py",
+      "public_defs": [
+        "InputLimits",
+        "check_state",
+        "check_batch",
+        "check_prompt",
+        "describe"
+      ]
+    },
+    "hugrgate.security.malicious_backend": {
+      "docstring": "Malicious-backend adversarial fixtures + containment gauntlet.\n# secscan: hostile-fixture \u2014 this module is deliberately hostile code.\n\nSlice 415. Five hostile backends, each defeated by a real,\nalready-implemented layer (threat T-11):\n\n- :class:`LyingBackend` \u2014 out-of-spec values, impossible\n  confidence \u2192 :func:`validate_result` rejects (SpecError).\n- :class:`ExfiltratingBackend` \u2014 socket/subprocess during\n  evaluate \u2192 :class:`SandboxedBackend` (slice 408) raises\n  SandboxViolation before the operation runs.\n- :class:`HangingBackend` \u2014 sleeps forever \u2192 :class:`TimeoutBackend`\n  raises TimeoutError past the deadline.\n- :class:`GiantOutputBackend` \u2014 megabyte metadata blob \u2192\n  output-size check raises InputTooLarge.\n- :class:`ExplodingBackend` \u2014 raises arbitrary exceptions \u2192\n  core translates to BackendError (never a raw traceback leak).\n\n:func:`run_gauntlet` executes each attack against a live\n:class:`HugrGate` and reports per-attack containment; the\ncontrol backend must still decide normally.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "json",
+        "os",
+        "socket",
+        "time",
+        "typing"
+      ],
+      "loc": 249,
+      "path": "hugrgate/security/malicious_backend.py",
+      "public_defs": [
+        "check_result_size",
+        "LyingBackend",
+        "ExfiltratingBackend",
+        "HangingBackend",
+        "GiantOutputBackend",
+        "ExplodingBackend",
+        "HonestBackend",
+        "GauntletReport",
+        "run_gauntlet",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "evaluate",
+        "passed",
+        "to_dict",
+        "contain",
+        "lying",
+        "exfil",
+        "hanging",
+        "giant",
+        "exploding"
+      ]
+    },
+    "hugrgate.security.model_signing": {
+      "docstring": "Signed model metadata. Slice 405.\n\nModel metadata (identity, version, capability claims, checksums) is a\ntrust decision: the gate routes, caches, and explains based on it.\nAn unsigned metadata file can be edited to misroute decisions\n(threat T-02). This module makes metadata tamper-evident:\n\n- :class:`ModelSigner` \u2014 HMAC-SHA256 sign/verify over canonical\n  JSON (stdlib only; keys validated by\n  :func:`hugrgate.privacy_crypto.require_key`).\n- :class:`SignedMetadata` \u2014 the envelope: metadata dict, key id,\n  algorithm tag, hex signature; JSON-serializable for sidecar\n  ``.sig`` files.\n- :class:`TrustedModelStore` \u2014 verify-before-trust registry:\n  ``register()`` refuses envelopes that do not verify, so only\n  attested metadata is ever served.\n\nKey rotation is first-class: verification uses a ``key_id ->\nkey`` map, unknown key ids fail closed, and ``rotate()`` re-signs\nthe store's envelopes under a new key.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "json",
+        "pathlib",
+        "time",
+        "typing"
+      ],
+      "loc": 225,
+      "path": "hugrgate/security/model_signing.py",
+      "public_defs": [
+        "canonical_json",
+        "SignedMetadata",
+        "ModelSigner",
+        "TrustedModelStore",
+        "to_dict",
+        "from_dict",
+        "to_json",
+        "from_json",
+        "key_id",
+        "sign",
+        "verify",
+        "write_signed",
+        "read_signed",
+        "register",
+        "get",
+        "rotate"
+      ]
+    },
+    "hugrgate.security.path_guards": {
+      "docstring": "Path traversal defenses. Slice 412.\n\nAudit: file paths in HugrGate come from the operator (CLI args,\nconfig) \u2014 no manifest-driven path joins were found in the runtime\npack loaders \u2014 but threat T-10 still wants a single choke point\nwherever a user-influenced relative path meets the filesystem.\nThat choke point is :func:`safe_join`:\n\n- null bytes are rejected outright;\n- the joined path is fully resolved (``..`` segments *and*\n  symlinks) and must stay inside the resolved root;\n- anything else raises :class:`PathTraversalBlocked`.\n\nThe single invariant is *containment*: absolute paths are allowed\niff they resolve inside the root, because containment \u2014 not the\nspelling \u2014 is the security property.\n\nIntegrated into :func:`hugrgate.security.checksums.verified_open`\n(slice 406), the model-directory read boundary.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "os",
+        "pathlib"
+      ],
+      "loc": 77,
+      "path": "hugrgate/security/path_guards.py",
+      "public_defs": [
+        "is_within",
+        "safe_join",
+        "safe_read_text"
+      ]
+    },
+    "hugrgate.security.plugins": {
+      "docstring": "Plugin trust model. Slice 407.\n\n``BackendRegistry.register`` accepts arbitrary ``Backend`` objects \u2014\ntoday there is no distinction between a shipped backend and a\nthird-party module with the same interface (threat T-15). This module\nadds that distinction without changing the registry:\n\n- trust levels: ``builtin`` (shipped with HugrGate), ``signed``\n  (manifest signature verifies against the operator keyring),\n  ``sandboxed`` (may load but only under a sandbox policy, slice\n  408); anything else is denied by default;\n- :class:`PluginManifest` \u2014 name, version, dotted entry point,\n  declared capabilities, and a signature envelope\n  (:class:`SignedMetadata`, slice 405) for the ``signed`` level;\n- :class:`PluginRegistry` \u2014 ``register_manifest`` verifies before\n  trusting; ``load`` imports the entry point only from allowlisted\n  module prefixes; ``check_capability`` enforces least privilege.\n\nDangerous capabilities (``network``, ``subprocess``,\n``filesystem_write``) are never granted to ``sandboxed`` plugins\nand must be explicitly declared even by ``signed`` ones.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "re",
+        "typing"
+      ],
+      "loc": 219,
+      "path": "hugrgate/security/plugins.py",
+      "public_defs": [
+        "PluginManifest",
+        "sign_manifest",
+        "PluginRegistry",
+        "payload",
+        "register_manifest",
+        "register_builtin",
+        "load",
+        "check_capability",
+        "granted"
+      ]
+    },
+    "hugrgate.security.prompt_injection": {
+      "docstring": "Prompt-injection boundary. Slice 414.\n\nLLM backends cannot distinguish instructions from data on their\nown \u2014 so the boundary must be structural (threat T-03):\n\n- :class:`UntrustedData` \u2014 a type-level marker: tool output and\n  state text travel wrapped, never as bare strings, where a\n  boundary is enforced.\n- :func:`build_prompt` \u2014 renders system instructions with\n  untrusted chunks inside ``<data source=\"...\">`` delimiters;\n  delimiter spellings inside the data are escaped so a chunk\n  cannot break out of its region.\n- :func:`detect_override` \u2014 pattern-based override-attempt\n  detector returning :class:`OverrideFinding`\\ s with confidence\n  levels. A heuristic tripwire, documented as such: it catches\n  known phrasings, not novel attacks.\n- :class:`BoundaryEnforcer` \u2014 ``check()`` flags, ``enforce()``\n  raises :class:`PromptInjectionBlocked` on high-confidence hits.\n\nCloses the loop on the slice-413 corpus: ``run_corpus(\"prompt\")``\nnow runs these payloads through the real detector.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 166,
+      "path": "hugrgate/security/prompt_injection.py",
+      "public_defs": [
+        "UntrustedData",
+        "OverrideFinding",
+        "detect_override",
+        "build_prompt",
+        "BoundaryEnforcer",
+        "check",
+        "enforce",
+        "describe"
+      ]
+    },
+    "hugrgate.security.provenance_guards": {
+      "docstring": "Provenance tamper detection + tip sealing. Slice 416.\n\nAttack result: the hash chain (slice 015) detects *edits* and\n*reorders* \u2014 recomputing every link catches those \u2014 but\n*truncation at the tip* is invisible to ``verify_chain()``: remove\nthe last record and the remaining links are still consistent\n(threat T-06). This module proves the gap with white-box attacks\nand closes it:\n\n- :func:`seal_tip` \u2014 HMAC-signed checkpoint (slice 405 envelopes)\n  over ``(tip_hash, length, sealed_at)``: a point-in-time\n  attestation of the store.\n- :func:`verify_tip` \u2014 re-verifies the signature, then requires\n  the store's tip hash and length to match the checkpoint.\n  Truncation, rollback, and forged extension all fail.\n- :func:`run_tamper_suite` \u2014 the adversarial battery: edit,\n  reorder, truncate, each measured against chain verification\n  and tip verification.\n\nThe checkpoint lives outside the store (operator keyring): an\nattacker with memory access can rewrite the chain, but cannot\nforge the seal.",
+      "imports": [
+        "__future__",
+        "copy",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 173,
+      "path": "hugrgate/security/provenance_guards.py",
+      "public_defs": [
+        "seal_tip",
+        "verify_tip",
+        "TamperReport",
+        "run_tamper_suite",
+        "attempt"
+      ]
+    },
+    "hugrgate.security.ratelimit": {
+      "docstring": "Per-key rate limiting. Slice 420.\n\nThreat T-13: an unauthenticated client floods ``/decide`` and\nstarves legitimate users. The runtime already had a thread-safe\n:class:`~hugrgate.backpressure.TokenBucket`, but no per-caller\nmanagement \u2014 one global bucket cannot tell a flood from a crowd,\nand a naive per-key dict is itself a memory-exhaustion vector\n(the slice-418 attack class).\n\n:class:`RateLimiter` keeps one token bucket per caller key (API\nkey id, IP, or ``\"anonymous\"``):\n\n- per-tier rates: ``\"anonymous\"`` callers get the harshest\n  budget, authenticated tiers get more; overrides per call;\n- the key table is bounded: idle buckets are evicted past\n  ``max_keys`` (LRU), so a key-spoofing flood cannot grow memory\n  without bound;\n- exceeding the limit raises :class:`RateLimitExceeded` (carrying\n  ``retry_after_ms``) \u2014 recoverable, unlike the other security\n  errors, because \"try again later\" is the correct response.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 150,
+      "path": "hugrgate/security/ratelimit.py",
+      "public_defs": [
+        "RateLimiter",
+        "set_tier",
+        "throttle",
+        "stats"
+      ]
+    },
+    "hugrgate.security.replay": {
+      "docstring": "Replay attack defenses. Slice 418.\n\nAttack analysis of the existing cluster mechanism\n(``ClusterNode._last_seq``, slice 208): the per-sender sequence\nwindow stops naive replays, but the sender map grew without bound\n(a sender-id flood was a memory-exhaustion vector \u2014 now an LRU\nwith a 4096 cap in ``hugrgate/cluster/node.py``), and there is no\ntimestamp/freshness binding: a delayed-but-fresh-seq message is\naccepted.\n\nThis module is the generalized defense for new integrations:\n\n- :class:`ReplayGuard` \u2014 nonce + timestamp window: duplicate\n  nonces rejected, timestamps outside ``[now - max_age, now +\n  max_skew]`` rejected, seen-nonces store bounded (LRU) and\n  expired entries purged, thread-safe.\n- :func:`seal_request` / :func:`open_request` \u2014 HMAC-signed\n  envelopes carrying ``(payload, nonce, timestamp, key_id)``;\n  opening verifies the tag (constant-time), the key id, and\n  freshness through the guard, in that order.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hashlib",
+        "hmac",
+        "hugrgate",
+        "json",
+        "secrets",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 198,
+      "path": "hugrgate/security/replay.py",
+      "public_defs": [
+        "ReplayGuard",
+        "seal_request",
+        "open_request",
+        "check",
+        "stats",
+        "to_dict"
+      ]
+    },
+    "hugrgate.security.resource_guards": {
+      "docstring": "Resource-exhaustion guards. Slice 410.\n\nInput-size limits (slice 409) bound the *shape* of one request;\nthis module bounds what a request may *consume* while running\n(threat T-04, second half):\n\n- :class:`ResourceBudget` + :func:`guarded` \u2014 real OS enforcement\n  via ``resource.setrlimit``: ``RLIMIT_CPU`` (SIGXCPU converted to\n  :class:`ResourceBudgetExceeded`) and ``RLIMIT_AS`` (allocation\n  failures beyond the address-space cap surface as\n  :class:`ResourceBudgetExceeded`). Previous limits and signal\n  handlers are restored on exit.\n- :class:`CostLedger` \u2014 cooperative cost accounting for\n  algorithmic-complexity hazards (batch fan-out, regex backtracking\n  budgets, recursion): :meth:`CostLedger.charge` raises when the\n  charged units exceed the budget.\n\nPOSIX-only: where the ``resource`` module is unavailable the OS\nguard degrades to a documented no-op (``enforced=False``) while\nthe ledger keeps working \u2014 see law 13 in the roadmap.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hugrgate",
+        "resource",
+        "signal",
+        "threading",
+        "typing"
+      ],
+      "loc": 160,
+      "path": "hugrgate/security/resource_guards.py",
+      "public_defs": [
+        "posix_available",
+        "ResourceBudget",
+        "guarded",
+        "CostLedger",
+        "describe",
+        "spent",
+        "remaining",
+        "charge",
+        "describe"
+      ]
+    },
+    "hugrgate.security.sandbox": {
+      "docstring": "Backend sandbox boundary. Slice 408.\n\nA malicious or buggy backend runs arbitrary Python inside\n``evaluate()`` (threat T-11). This module draws a real boundary\naround that call using :func:`sys.addaudithook`: while a sandbox is\nactive on the current thread, audited operations outside the policy\n\u2014 subprocess execution, network access, filesystem writes \u2014 are\ndenied by raising :class:`SandboxViolation` *before* the operation\nruns.\n\n- :class:`SandboxPolicy` \u2014 what the sandbox permits (deny by\n  default; ``allow_subprocess`` / ``allow_network`` /\n  ``allow_filesystem_write`` opt back in).\n- :func:`run_sandboxed` \u2014 context manager / decorator enforcing a\n  policy on the current thread; nestable, innermost wins.\n- :class:`SandboxedBackend` \u2014 a :class:`Backend` wrapper that runs\n  ``evaluate()`` (and ``warmup()``) inside the policy, converting\n  violations into taxonomy errors instead of side effects.\n\nThe audit hook is installed once per process and consults\nthread-local state, so unsandboxed threads pay only a pointer\ncheck. This is a *syscall-class* boundary, not a bulletproof\njail: it stops accidental and opportunistic abuse (the threat\nmodel's scope), not a determined interpreter-level escape.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hugrgate",
+        "sys",
+        "threading",
+        "typing"
+      ],
+      "loc": 211,
+      "path": "hugrgate/security/sandbox.py",
+      "public_defs": [
+        "SandboxPolicy",
+        "run_sandboxed",
+        "sandboxed",
+        "SandboxedBackend",
+        "describe",
+        "decorator",
+        "wrapped",
+        "policy",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "warmup",
+        "health",
+        "close",
+        "wrapper"
+      ]
+    },
+    "hugrgate.security.secret_audit": {
+      "docstring": "Secret-handling audit. Slice 421.\n\nSlice 234 catches secrets in *outbound data*. This module audits\nthe *codebase itself*: hardcoded credentials, secrets in log\ncalls, secrets in URLs, disabled TLS verification, secrets in\nexception messages, weak randomness for secret material, and\ndefault secrets in environment lookups.\n\nThe auditor is AST-based (:func:`audit_file`, :func:`audit_tree`)\nand returns :class:`SecretAuditFinding` records with rule,\nseverity, and location. It is deliberately conservative \u2014 every\nrule names a concrete mishandling pattern \u2014 and findings inside\n``tests/`` are downgraded to informational (fixtures legitimately\nuse fake secrets).\n\nThe companion test runs the auditor over the real ``hugrgate/``\ntree and asserts zero high-severity findings: the audit is a\nstanding gate, not a one-off report.",
+      "imports": [
+        "__future__",
+        "ast",
+        "dataclasses",
+        "pathlib",
+        "re",
+        "typing"
+      ],
+      "loc": 258,
+      "path": "hugrgate/security/secret_audit.py",
+      "public_defs": [
+        "SecretAuditFinding",
+        "audit_file",
+        "audit_tree",
+        "run_secret_audit",
+        "visit_Assign",
+        "visit_AnnAssign",
+        "visit_Call",
+        "visit_Raise"
+      ]
+    },
+    "hugrgate.security.serde_guards": {
+      "docstring": "Deserialization hardening. Slice 411.\n\nAudit result: ``hugrgate/backends/logreg.py`` called raw\n``pickle.loads`` on model files whose integrity manifest is an\nunsigned sidecar \u2014 an attacker who can write the model file can\nrewrite the manifest too, making this a real code-execution vector\n(threat T-01). The sealed paths (``privacy_crypto``,\n``privacy_provenance``) unpickle only after HMAC verification, but\nget defense-in-depth anyway.\n\nThis module provides:\n\n- :class:`SafeUnpickler` \u2014 a :class:`pickle.Unpickler` whose\n  ``find_class`` enforces an allowlist: safe builtins by name,\n  plus explicitly registered classes or module prefixes\n  (e.g. ``sklearn.``/``numpy`` for trained models). Anything else\n  \u2014 ``os.system``, ``subprocess.Popen``, ``builtins.eval`` \u2014\n  raises :class:`DeserializationBlocked`.\n- :func:`restricted_loads` \u2014 one-shot hardened unpickle.\n- :func:`scan_for_pickle` \u2014 detects pickle framing in opaque bytes\n  so callers can refuse before parsing.\n- :class:`DeserializationPolicy` \u2014 ``allow_pickle`` kill-switch\n  plus the allowlist, for call sites that take it from config.\n\nThe allowlist is deliberately explicit rather than clever: new\nmodel types register their classes; unknown classes fail closed.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "io",
+        "pickle",
+        "typing"
+      ],
+      "loc": 156,
+      "path": "hugrgate/security/serde_guards.py",
+      "public_defs": [
+        "register_safe_class",
+        "SafeUnpickler",
+        "restricted_loads",
+        "scan_for_pickle",
+        "DeserializationPolicy",
+        "find_class",
+        "loads",
+        "describe"
+      ]
+    },
+    "hugrgate.security.supply_chain": {
+      "docstring": "Supply-chain policy. Slice 404.\n\nComplements the dependency scanner (slice 403: *known* bad) with\n*policy* (what is *allowed* at all):\n\n- :class:`SupplyChainPolicy` \u2014 approved package indexes, hash\n  requirements, license allowlist, package blocklist.\n- :meth:`SupplyChainPolicy.evaluate` \u2014 per-dependency verdict with\n  reasons; :meth:`SupplyChainPolicy.enforce` raises\n  :class:`SupplyChainViolation` on denial.\n- :func:`generate_sbom` \u2014 CycloneDX-style software bill of\n  materials for a set of dependency records.\n- :func:`sbom_from_installed` \u2014 a real SBOM of the current\n  environment via :mod:`importlib.metadata`.\n\nThe policy is deny-by-default on the dimensions it constrains:\nunknown index, missing hashes (when required), disallowed license,\nor blocklisted package each deny independently with a named reason.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "importlib",
+        "typing"
+      ],
+      "loc": 176,
+      "path": "hugrgate/security/supply_chain.py",
+      "public_defs": [
+        "DependencyRecord",
+        "SupplyVerdict",
+        "SupplyChainPolicy",
+        "generate_sbom",
+        "sbom_from_installed",
+        "evaluate",
+        "enforce",
+        "audit"
+      ]
+    },
+    "hugrgate.security.threat_model": {
+      "docstring": "STRIDE threat model v2. Slice 401.\n\nHugrGate already had scattered defenses (hash-chained provenance,\nsecret detection, sealed caches, cluster mutual auth) but no single\nstatement of *what is being defended against*. This module is that\nstatement, as executable data rather than a prose document that can\ndrift from the code:\n\n- :class:`ThreatModel` \u2014 assets, trust boundaries, and threats with\n  STRIDE categories, likelihood/impact scores, mitigations that name\n  real capabilities, and residual-risk dispositions.\n- :func:`default_threat_model` \u2014 the v2 model of this codebase.\n- Coverage analysis (:meth:`ThreatModel.coverage_report`) \u2014 every\n  threat must name at least one mitigation, one covering test\n  module, or carry an explicit accepted-risk rationale; ``validate()``\n  enforces that invariant, so the model cannot silently rot.\n\nRisk is likelihood x impact on a 1-5 scale each (1-25). Residual\ndispositions: ``\"mitigated\"`` (defense in place and tested),\n``\"partial\"`` (defense reduces but does not eliminate),\n``\"accepted\"`` (conscious risk acceptance with rationale \u2014 never\nthe default).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "loc": 436,
+      "path": "hugrgate/security/threat_model.py",
+      "public_defs": [
+        "Asset",
+        "TrustBoundary",
+        "Threat",
+        "ThreatModel",
+        "default_threat_model",
+        "risk",
+        "to_dict",
+        "from_dict",
+        "unmitigated",
+        "accepted_risks",
+        "by_stride",
+        "top_risks",
+        "coverage_report",
+        "validate",
+        "to_dict",
+        "from_dict"
+      ]
+    },
     "hugrgate.serde": {
       "docstring": "JSON serde helpers shared by the server, daemon, CLI and SDK.\n\nSlice 021: these lived in :mod:`hugrgate.client`, which forced\n:mod:`hugrgate.server` to import the client while the client lazily\nimported the server \u2014 a module cycle. This neutral module breaks it:\nboth sides import from here, and neither imports the other.\n\nSlice 281 adds a compact positional encoding alongside the canonical\ndict form.  The dict form stays the stable wire contract; the compact\nform is the fast path for high-frequency internal transport (cache\npayloads, batch results, cluster messages): no key hashing on encode,\npositional indexing on decode, and JSON-serializable so it composes\nwith :class:`hugrgate.zerocopy.SharedPayload`.",
       "imports": [
@@ -8774,7 +9395,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 205,
+      "loc": 242,
       "path": "hugrgate/serde.py",
       "public_defs": [
         "policy_to_dict",
@@ -8833,7 +9454,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 127,
+      "loc": 138,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -9329,6 +9950,30 @@
     "test_routing_072.py",
     "test_routing_073.py",
     "test_routing_074.py",
+    "test_sec_401_threat_model.py",
+    "test_sec_402_attack_surface.py",
+    "test_sec_403_depscan.py",
+    "test_sec_404_supply_chain.py",
+    "test_sec_405_model_signing.py",
+    "test_sec_406_checksums.py",
+    "test_sec_407_plugins.py",
+    "test_sec_408_sandbox.py",
+    "test_sec_409_input_limits.py",
+    "test_sec_410_resource_guards.py",
+    "test_sec_411_serde_guards.py",
+    "test_sec_412_path_guards.py",
+    "test_sec_413_injection_corpus.py",
+    "test_sec_414_prompt_injection.py",
+    "test_sec_415_malicious_backend.py",
+    "test_sec_416_provenance_tamper.py",
+    "test_sec_417_cache_poisoning.py",
+    "test_sec_418_replay.py",
+    "test_sec_419_authz.py",
+    "test_sec_420_rate_limit.py",
+    "test_sec_421_secret_audit.py",
+    "test_sec_422_fuzzing.py",
+    "test_sec_423_secscan.py",
+    "test_sec_424_gauntlet.py",
     "test_serialization_contracts.py",
     "test_service.py",
     "test_state_validation.py",
@@ -9337,5 +9982,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 79153
+  "total_loc": 84656
 }

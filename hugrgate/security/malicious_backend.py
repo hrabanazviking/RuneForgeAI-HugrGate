@@ -189,8 +189,10 @@ def run_gauntlet() -> GauntletReport:
     """Run every attack; each must be contained, control must pass."""
     # Imported lazily: this module loads during ``hugrgate`` package
     # init (via the privacy_crypto -> security chain), when the
-    # top-level package is still partially initialized.
-    from hugrgate import DecisionPolicy, HugrGate
+    # top-level package is still partially initialized. Imported
+    # from defining modules, not the package root (boundary rule).
+    from hugrgate.core import HugrGate
+    from hugrgate.policy import DecisionPolicy
 
     report = GauntletReport()
     state = {"x": 1}
