@@ -1,4 +1,5 @@
 """Malicious-backend adversarial fixtures + containment gauntlet.
+# secscan: hostile-fixture — this module is deliberately hostile code.
 
 Slice 415. Five hostile backends, each defeated by a real,
 already-implemented layer (threat T-11):
