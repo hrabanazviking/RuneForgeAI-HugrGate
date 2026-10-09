@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:56:26.442816+00:00",
-  "module_count": 63,
+  "generated_utc": "2026-10-09T12:00:46.538555+00:00",
+  "module_count": 64,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -524,13 +524,12 @@
       ]
     },
     "hugrgate.contracts.__init__": {
-      "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.",
+      "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.\n\nAll contract submodules are imported eagerly (``import`` form, so the\nimport graph stays acyclic) so every contract ``kind`` is registered the\nmoment this package is imported \u2014 ``contract_from_dict`` never fails on\nan unimported kind.",
       "imports": [
         "__future__",
-        "hugrgate",
-        "importlib"
+        "hugrgate"
       ],
-      "loc": 64,
+      "loc": 76,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -951,6 +950,37 @@
         "validate_value",
         "check_value",
         "describe"
+      ]
+    },
+    "hugrgate.contracts.templates": {
+      "docstring": "Contract templates \u2014 reusable parameterized contracts.\n\nGjallarbr\u00fa slice 046.\n\nEvery deployment writes its fraud contract by hand, copying outcomes and\ncost shapes and hoping the amounts are right. :class:`ContractTemplate`\ncaptures the shape once, with ``${param}`` placeholders, and\n:meth:`instantiate` fills them with validated parameters:\n\n- :class:`TemplateParameter`: ``type`` (``string`` | ``number`` |\n  ``integer`` | ``boolean`` | ``array`` | ``object`` | ``any``),\n  ``required``, ``default``, and optional ``allowed`` values;\n- substitution is recursive over the body dict: a string that is exactly\n  ``${name}`` injects the raw value (numbers, lists, dicts survive);\n  ``${name}`` inside a larger string interpolates textually;\n- strictness both ways: undeclared placeholders are rejected at template\n  construction; unknown parameters are rejected at instantiation;\n- :class:`TemplateLibrary`: a named registry of templates.\n\nThe instantiated dict goes through :func:`contract_from_dict`, so the\nresult is a fully validated v2 contract, never a half-substituted dict.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 330,
+      "path": "hugrgate/contracts/templates.py",
+      "public_defs": [
+        "find_placeholders",
+        "TemplateParameter",
+        "ContractTemplate",
+        "TemplateLibrary",
+        "walk",
+        "check",
+        "to_dict",
+        "from_dict",
+        "parameter_names",
+        "instantiate",
+        "to_dict",
+        "from_dict",
+        "register",
+        "get",
+        "template_ids",
+        "instantiate",
+        "repl"
       ]
     },
     "hugrgate.contracts.uncertainty": {
@@ -1469,6 +1499,7 @@
     "test_contracts_043.py",
     "test_contracts_044.py",
     "test_contracts_045.py",
+    "test_contracts_046.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1479,5 +1510,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 12323
+  "total_loc": 12665
 }

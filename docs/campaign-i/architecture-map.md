@@ -41,6 +41,7 @@ flowchart TD
         contracts_explanations[contracts.explanations]
         contracts_inheritance[contracts.inheritance]
         contracts_composition[contracts.composition]
+        contracts_templates[contracts.templates]
     end
     subgraph runtime[runtime]
         core[core]
@@ -160,7 +161,27 @@ flowchart TD
     cli -.-> server
     client --> hugrgate
     client -.-> server
+    contracts --> contracts_composite
+    contracts --> contracts_composition
+    contracts --> contracts_conditional
+    contracts --> contracts_context
+    contracts --> contracts_cost
+    contracts --> contracts_crossfield
+    contracts --> contracts_deadlines
+    contracts --> contracts_distributions
+    contracts --> contracts_explanations
+    contracts --> contracts_features
+    contracts --> contracts_hierarchy
+    contracts --> contracts_inheritance
+    contracts --> contracts_multilabel
+    contracts --> contracts_negotiation
+    contracts --> contracts_nested
+    contracts --> contracts_ordinal
+    contracts --> contracts_risk
     contracts --> contracts_schema
+    contracts --> contracts_templates
+    contracts --> contracts_uncertainty
+    contracts --> contracts_utility
     contracts_composite --> contracts_schema
     contracts_composite --> errors
     contracts_composite --> spec
@@ -225,6 +246,8 @@ flowchart TD
     contracts_risk --> contracts_schema
     contracts_risk --> errors
     contracts_schema --> errors
+    contracts_templates --> contracts_schema
+    contracts_templates --> errors
     contracts_uncertainty --> contracts_schema
     contracts_uncertainty --> errors
     contracts_utility --> contracts_cost
@@ -295,7 +318,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -376,7 +399,27 @@ flowchart TD
 | `cli` | `server` | yes |
 | `client` | `hugrgate` | no |
 | `client` | `server` | yes |
+| `contracts` | `contracts.composite` | no |
+| `contracts` | `contracts.composition` | no |
+| `contracts` | `contracts.conditional` | no |
+| `contracts` | `contracts.context` | no |
+| `contracts` | `contracts.cost` | no |
+| `contracts` | `contracts.crossfield` | no |
+| `contracts` | `contracts.deadlines` | no |
+| `contracts` | `contracts.distributions` | no |
+| `contracts` | `contracts.explanations` | no |
+| `contracts` | `contracts.features` | no |
+| `contracts` | `contracts.hierarchy` | no |
+| `contracts` | `contracts.inheritance` | no |
+| `contracts` | `contracts.multilabel` | no |
+| `contracts` | `contracts.negotiation` | no |
+| `contracts` | `contracts.nested` | no |
+| `contracts` | `contracts.ordinal` | no |
+| `contracts` | `contracts.risk` | no |
 | `contracts` | `contracts.schema` | no |
+| `contracts` | `contracts.templates` | no |
+| `contracts` | `contracts.uncertainty` | no |
+| `contracts` | `contracts.utility` | no |
 | `contracts.composite` | `contracts.schema` | no |
 | `contracts.composite` | `errors` | no |
 | `contracts.composite` | `spec` | no |
@@ -441,6 +484,8 @@ flowchart TD
 | `contracts.risk` | `contracts.schema` | no |
 | `contracts.risk` | `errors` | no |
 | `contracts.schema` | `errors` | no |
+| `contracts.templates` | `contracts.schema` | no |
+| `contracts.templates` | `errors` | no |
 | `contracts.uncertainty` | `contracts.schema` | no |
 | `contracts.uncertainty` | `errors` | no |
 | `contracts.utility` | `contracts.cost` | no |

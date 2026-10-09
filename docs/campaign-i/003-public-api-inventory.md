@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 63 · **public names:** 278
+**Modules:** 64 · **public names:** 284
 
 ## API stability policy
 
@@ -236,6 +236,7 @@ that this document never drifts from the code.
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+| `schema` | constant | `<module 'hugrgate.contracts.schema' from '/home/hatch/worksp` |
 | `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
 | `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
 | `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
@@ -255,6 +256,7 @@ that this document never drifts from the code.
 | `explanations` | constant | `<module 'hugrgate.contracts.explanations' from '/home/hatch/` |
 | `inheritance` | constant | `<module 'hugrgate.contracts.inheritance' from '/home/hatch/w` |
 | `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
+| `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/hatch/wor` |
 
 ### `hugrgate.contracts.composite`
 
@@ -409,6 +411,15 @@ that this document never drifts from the code.
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+
+### `hugrgate.contracts.templates`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TEMPLATE_PARAM_TYPES` | constant | `('string', 'number', 'integer', 'boolean', 'array', 'object'` |
+| `TemplateParameter` | class | `(type: 'str' = 'any', required: 'bool' = True, default: 'Any' = None, allowed: 'Tuple[Any, ...]' = (), description: 'str' = '') -> None` |
+| `ContractTemplate` | class | `(template_id: 'str', body: 'Dict[str, Any]' = <factory>, parameters: 'Dict[str, TemplateParameter]' = <factory>, description: 'str' = '') -> None` |
+| `TemplateLibrary` | class | `() -> 'None'` |
 
 ### `hugrgate.contracts.uncertainty`
 
