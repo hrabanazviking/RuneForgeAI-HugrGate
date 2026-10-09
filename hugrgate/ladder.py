@@ -260,6 +260,11 @@ class LadderRouter:
                 rung_index, backend.name, RUNG_ERROR,
                 detail=str(e), latency_ms=(time.perf_counter() - t0) * 1000))
             return None
+        except SpecError:
+            # Contract violations (invalid values, incoherent results)
+            # propagate: like validate_result below, they are never
+            # swallowed into a rung audit entry (slice 012).
+            raise
         except Exception as e:  # never let one rung kill the climb
             audit.append(LadderAuditEntry(
                 rung_index, backend.name, RUNG_ERROR,

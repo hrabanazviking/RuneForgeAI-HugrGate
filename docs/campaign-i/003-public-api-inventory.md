@@ -409,5 +409,5 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `validate_state` | function | `(state: 'Mapping[str, Any]') -> 'None'` |
+| `validate_state` | function | `(state: 'Mapping[str, Any]', max_bytes: 'int' = 1000000, max_depth: 'int' = 64) -> 'None'` |
 | `validate_result` | function | `(result: 'DecisionResult', spec: 'DecisionSpec') -> 'None'` |
