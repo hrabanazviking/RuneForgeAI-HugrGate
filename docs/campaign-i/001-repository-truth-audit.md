@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T13:47:15.598164+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T13:51:06.190913+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 69 Python files under `hugrgate/`
-- **Total LOC:** 12946
+- **Modules:** 70 Python files under `hugrgate/`
+- **Total LOC:** 13088
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_cluster_auth.py, test_cluster_backpressure.py, test_cluster_capabilities.py, test_cluster_discovery.py, test_cluster_distributed_batch.py, test_cluster_identity.py, test_cluster_lan.py, test_cluster_node_cost.py, test_cluster_node_health.py, test_cluster_node_latency.py, test_cluster_partition.py, test_cluster_policy_sync.py, test_cluster_privacy_boundary.py, test_cluster_protocol.py, test_cluster_provenance_dist.py, test_cluster_recovery.py, test_cluster_routing.py, test_cluster_rpc.py, test_cluster_static_config.py, test_cluster_trace.py, test_cluster_transport.py, test_cluster_work_stealing.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_cluster_auth.py, test_cluster_backpressure.py, test_cluster_capabilities.py, test_cluster_chaos.py, test_cluster_discovery.py, test_cluster_distributed_batch.py, test_cluster_identity.py, test_cluster_lan.py, test_cluster_node_cost.py, test_cluster_node_health.py, test_cluster_node_latency.py, test_cluster_partition.py, test_cluster_policy_sync.py, test_cluster_privacy_boundary.py, test_cluster_protocol.py, test_cluster_provenance_dist.py, test_cluster_recovery.py, test_cluster_routing.py, test_cluster_rpc.py, test_cluster_static_config.py, test_cluster_trace.py, test_cluster_transport.py, test_cluster_work_stealing.py, test_config.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
 
 ## Module table
 
@@ -36,10 +36,11 @@
 | `hugrgate.circuit` | 174 | Circuit breaker — per-backend failure containment. Slice 18. | hugrgate |
 | `hugrgate.cli` | 277 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 220 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
-| `hugrgate.cluster.__init__` | 208 | Cluster package for distributed HugrGate. Campaign IX (slices 201-225). | hugrgate |
+| `hugrgate.cluster.__init__` | 212 | Cluster package for distributed HugrGate. Campaign IX (slices 201-225). | hugrgate |
 | `hugrgate.cluster.auth` | 155 | Mutual authentication for cluster RPC. Slice 208. | hugrgate |
 | `hugrgate.cluster.backpressure` | 103 | Backpressure protocol. Slice 218. | hugrgate |
 | `hugrgate.cluster.capabilities` | 168 | Node capability advertisement. Slice 203. | hugrgate |
+| `hugrgate.cluster.chaos` | 138 | Distributed chaos tests. Slice 223. | hugrgate |
 | `hugrgate.cluster.discovery` | 175 | Node discovery — finding peers. Slice 204. | hugrgate |
 | `hugrgate.cluster.distributed_batch` | 211 | Distributed batching. Slice 217. | hugrgate |
 | `hugrgate.cluster.identity` | 123 | Node identity — stable, unforgeable node ids. Slice 202. | hugrgate |

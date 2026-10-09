@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 69 · **public names:** 343
+**Modules:** 70 · **public names:** 348
 
 ## API stability policy
 
@@ -255,6 +255,7 @@ that this document never drifts from the code.
 | `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
 | `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
 | `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
+| `ChaosProxy` | class | `(transport: 'httpx.BaseTransport', injector: 'FaultInjector | None' = None) -> 'None'` |
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
 | `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True, enforce_quorum: 'bool' = False) -> 'None'` |
@@ -263,6 +264,7 @@ that this document never drifts from the code.
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
 | `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
 | `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `FaultInjector` | class | `(drop_rate: 'float' = 0.0, delay_s: 'float' = 0.0, delay_rate: 'float' = 0.0, duplicate_rate: 'float' = 0.0, corrupt_rate: 'float' = 0.0, seed: 'int | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
@@ -286,6 +288,7 @@ that this document never drifts from the code.
 | `RecoveryManager` | class | `(base_delay_s: 'float' = 1.0, max_delay_s: 'float' = 300.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
+| `Span` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str', operation: 'str', started_at: 'float' = <factory>, ended_at: 'float | None' = None, status: 'str' = 'ok', attributes: 'dict[str, Any]' = <factory>, _collector: 'Any' = None) -> None` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
@@ -332,6 +335,13 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `NodeCapabilities` | class | `(node_id: 'str', display_name: 'str' = '', backends: 'list[dict[str, Any]]' = <factory>, models: 'list[dict[str, Any]]' = <factory>, hardware: 'dict[str, Any]' = <factory>, features: 'list[str]' = <factory>, hugrgate_version: 'str' = '0.1.0', protocol_version: 'int' = 1) -> None` |
+
+### `hugrgate.cluster.chaos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ChaosProxy` | class | `(transport: 'httpx.BaseTransport', injector: 'FaultInjector | None' = None) -> 'None'` |
+| `FaultInjector` | class | `(drop_rate: 'float' = 0.0, delay_s: 'float' = 0.0, delay_rate: 'float' = 0.0, duplicate_rate: 'float' = 0.0, corrupt_rate: 'float' = 0.0, seed: 'int | None' = None) -> 'None'` |
 
 ### `hugrgate.cluster.discovery`
 

@@ -19,6 +19,7 @@ from hugrgate.cluster.backpressure import (
     AdmissionController,
 )
 from hugrgate.cluster.capabilities import NodeCapabilities
+from hugrgate.cluster.chaos import ChaosProxy, FaultInjector
 from hugrgate.cluster.discovery import (
     DEFAULT_STALE_AFTER_S,
     Discovery,
@@ -152,6 +153,7 @@ __all__ = [
     "Authenticator",
     "BatchJob",
     "BatchOutcome",
+    "ChaosProxy",
     "ClusterKey",
     "ClusterMessage",
     "ClusterNode",
@@ -160,6 +162,7 @@ __all__ = [
     "DiscoveryRegistry",
     "DistributedBatcher",
     "DistributedRouter",
+    "FaultInjector",
     "InboundHook",
     "LANDiscoveryAdapter",
     "LatencyTracker",
