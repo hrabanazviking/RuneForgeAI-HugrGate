@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:05:08.460440+00:00",
-  "module_count": 45,
+  "generated_utc": "2026-10-09T11:10:14.120136+00:00",
+  "module_count": 46,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -527,9 +527,10 @@
       "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.",
       "imports": [
         "__future__",
-        "hugrgate"
+        "hugrgate",
+        "importlib"
       ],
-      "loc": 30,
+      "loc": 43,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -558,6 +559,27 @@
         "offer",
         "supports_kind",
         "to_dict"
+      ]
+    },
+    "hugrgate.contracts.nested": {
+      "docstring": "Nested categorical contracts \u2014 decision trees. Gjallarbr\u00fa slice 028.\n\nA flat categorical contract picks one of N options. A nested categorical\ncontract picks an option, and that option may refine into another nested\ncategorical contract: ``(\"animal\", \"mammal\", \"dog\")``. Values are paths \u2014\ntuples of strings or dotted strings (``\"animal.mammal.dog\"``) \u2014 validated\nby walking the tree. A valid decision is always a root-to-leaf path.\n\nInvariants: options are unique non-empty dot-free strings; child keys are\na subset of options; every child is itself a nested categorical contract;\nnesting depth is bounded (:data:`MAX_NESTING_DEPTH`).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 195,
+      "path": "hugrgate/contracts/nested.py",
+      "public_defs": [
+        "parse_path",
+        "NestedCategoricalContract",
+        "depth",
+        "leaf_paths",
+        "is_leaf",
+        "subcontract_at",
+        "validate_value",
+        "describe"
       ]
     },
     "hugrgate.contracts.schema": {
@@ -1028,6 +1050,7 @@
     "test_arch_map.py",
     "test_contracts_026.py",
     "test_contracts_027.py",
+    "test_contracts_028.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1038,5 +1061,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 7657
+  "total_loc": 7865
 }

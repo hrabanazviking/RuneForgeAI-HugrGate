@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 45 · **public names:** 198
+**Modules:** 46 · **public names:** 202
 
 ## API stability policy
 
@@ -237,6 +237,7 @@ that this document never drifts from the code.
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
 | `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
 | `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
+| `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
 
 ### `hugrgate.contracts.negotiation`
 
@@ -249,6 +250,14 @@ that this document never drifts from the code.
 | `parse_version` | function | `(version: 'str') -> 'Tuple[int, ...]'` |
 | `negotiate_version` | function | `(*offers: 'VersionOffer') -> 'NegotiationResult'` |
 | `negotiate_session` | function | `(client: 'ContractEndpoint', server: 'ContractEndpoint') -> 'SessionAgreement'` |
+
+### `hugrgate.contracts.nested`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MAX_NESTING_DEPTH` | constant | `8` |
+| `NestedCategoricalContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, options: 'List[str]' = <factory>, children: "Dict[str, 'NestedCategoricalContract']" = <factory>) -> None` |
+| `parse_path` | function | `(value: 'Any') -> 'Tuple[str, ...]'` |
 
 ### `hugrgate.contracts.schema`
 

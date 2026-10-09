@@ -23,6 +23,7 @@ flowchart TD
         contracts[contracts]
         contracts_schema[contracts.schema]
         contracts_negotiation[contracts.negotiation]
+        contracts_nested[contracts.nested]
     end
     subgraph runtime[runtime]
         core[core]
@@ -145,6 +146,8 @@ flowchart TD
     contracts --> contracts_schema
     contracts_negotiation --> contracts_schema
     contracts_negotiation --> errors
+    contracts_nested --> contracts_schema
+    contracts_nested --> errors
     contracts_schema --> errors
     core --> backend
     core --> errors
@@ -211,7 +214,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -295,6 +298,8 @@ flowchart TD
 | `contracts` | `contracts.schema` | no |
 | `contracts.negotiation` | `contracts.schema` | no |
 | `contracts.negotiation` | `errors` | no |
+| `contracts.nested` | `contracts.schema` | no |
+| `contracts.nested` | `errors` | no |
 | `contracts.schema` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
