@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 249)
+- Privacy benchmark suite (`benchmarks/privacy_bench_249.py` +
+  `benchmarks/privacy_bench_249.json`): real per-operation
+  latencies for the 10 privacy pipeline stages (payload compile
+  ~2.5ms mean, everything else sub-ms).
+
 ### Added (slice 248)
 - Exfiltration simulation (`hugrgate.privacy_exfil`):
   `ExfilSimulator` red-teams a guard configuration with 7
