@@ -72,6 +72,7 @@ flowchart TD
     subgraph edge[edge]
         edge[edge]
         edge_platform[edge.platform]
+        edge_memory[edge.memory]
     end
 
     hugrgate --> backend
@@ -177,6 +178,7 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    edge_memory --> errors
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -247,7 +249,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
-| edge | `edge`, `edge.platform` |
+| edge | `edge`, `edge.platform`, `edge.memory` |
 
 ## Internal dependency edges
 
@@ -356,6 +358,7 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `edge.memory` | `errors` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |

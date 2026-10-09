@@ -57,6 +57,7 @@ LAYERS: dict[str, list[str]] = {
     "api": ["hugrgate"],
     "edge": [
         "hugrgate.edge", "hugrgate.edge.platform",
+        "hugrgate.edge.memory",
     ],
 }
 

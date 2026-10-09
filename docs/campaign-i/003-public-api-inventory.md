@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 46 · **public names:** 193
+**Modules:** 47 · **public names:** 197
 
 ## API stability policy
 
@@ -262,6 +262,15 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+
+### `hugrgate.edge.memory`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MemoryInfo` | class | `(total_bytes: 'int', available_bytes: 'int', cgroup_limited: 'bool', live: 'bool' = True) -> None` |
+| `MemoryManager` | class | `(meminfo_text: 'str | None' = None, cgroup_limit_bytes: 'int | None' = None)` |
+| `MemoryMode` | class | `(*values)` |
 
 ### `hugrgate.edge.platform`
 
