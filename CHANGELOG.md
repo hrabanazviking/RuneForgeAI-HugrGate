@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 239)
+- Retention policies (`hugrgate.privacy_retention`): per-class
+  maximum ages, `purge_expired` with `on_purge` hook,
+  `ProvenanceStore.purge` (chain-safe), `DecisionCache.put`
+  `retention=` TTL capping.
+
 ### Added (slice 238)
 - Privacy-preserving provenance (`hugrgate.privacy_provenance`):
   per-class record builder, opt-in value fingerprints,

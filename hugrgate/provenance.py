@@ -178,6 +178,27 @@ class ProvenanceStore:
         with self._lock:
             return self._evicted
 
+    def purge(self, predicate) -> int:
+        """Remove records matching ``predicate``; return the count removed.
+
+        Slice 239: retention purges. Surviving records are re-chained
+        from ``_floor_hash`` so :meth:`verify_chain` still passes —
+        a purge re-anchors history (documented; the removed records
+        are gone, not hidden). Thread-safe.
+        """
+        with self._lock:
+            kept = [r for r in self._records if not predicate(r)]
+            removed = len(self._records) - len(kept)
+            if removed:
+                prev = self._floor_hash
+                for r in kept:
+                    r.prev_hash = prev
+                    r.record_hash = hashlib.sha256(
+                        (prev + self._canonical(r)).encode()).hexdigest()
+                    prev = r.record_hash
+                self._records = kept
+            return removed
+
     def by_hash(self, request_hash: str) -> DecisionRecord | None:
         with self._lock:
             records = list(self._records)
