@@ -34,6 +34,17 @@ from hugrgate import (
 )
 from hugrgate import __version__ as HUGRGATE_VERSION
 
+__all__ = [
+    "accuracy",
+    "brier_score",
+    "reliability_bins",
+    "expected_calibration_error",
+    "dataset_fingerprint",
+    "BenchmarkConfig",
+    "run_benchmark",
+    "Benchmark",
+]
+
 
 # ---------------------------------------------------------------------------
 # Metric primitives

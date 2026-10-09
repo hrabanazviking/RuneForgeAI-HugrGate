@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+__all__ = [
+    "HugrGateError",
+    "SpecError",
+    "PolicyError",
+    "BackendError",
+    "BackendUnavailable",
+    "CalibrationError",
+    "TimeoutError",
+    "PrivacyViolation",
+    "Abstention",
+]
+
 
 class HugrGateError(Exception):
     """Base for all HugrGate errors."""

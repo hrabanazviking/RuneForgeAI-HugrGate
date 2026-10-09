@@ -9,6 +9,11 @@ from hugrgate.errors import SpecError
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "validate_state",
+    "validate_result",
+]
+
 
 def validate_state(state: Mapping[str, Any]) -> None:
     """State must be a JSON-serializable dict."""

@@ -18,6 +18,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from hugrgate.errors import HugrGateError
 
+__all__ = [
+    "sha256_bytes",
+    "ModelManifest",
+    "ModelStore",
+]
+
 
 def _utcnow_iso() -> str:
     return datetime.now(timezone.utc).isoformat()

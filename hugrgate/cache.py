@@ -30,6 +30,11 @@ from hugrgate.privacy import PrivacyGuard
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "cache_key",
+    "DecisionCache",
+]
+
 
 def _policy_fingerprint(policy: DecisionPolicy) -> Dict[str, Any]:
     """The policy fields that can change a decision outcome."""

@@ -20,6 +20,12 @@ from hugrgate.errors import BackendUnavailable, PrivacyViolation
 from hugrgate.policy import DecisionPolicy
 from hugrgate.provenance import DecisionRecord
 
+__all__ = [
+    "REMOTE_MODES",
+    "NON_CACHEABLE_PRIVACY_CLASSES",
+    "PrivacyGuard",
+]
+
 REMOTE_MODES = ("allow", "forbidden")
 #: Privacy classes whose data must never touch the decision cache or
 #: leave the process in provenance records.

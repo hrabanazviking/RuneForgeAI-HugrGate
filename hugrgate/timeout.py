@@ -25,6 +25,13 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "run_with_deadline",
+    "deadline_ms_for",
+    "evaluate_with_timeout",
+    "TimeoutBackend",
+]
+
 
 def run_with_deadline(fn: Callable[[], Any], deadline_s: float,
                       name: str = "task") -> Any:

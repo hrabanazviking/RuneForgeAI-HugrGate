@@ -24,6 +24,11 @@ from collections import deque
 from dataclasses import dataclass, field
 from typing import Deque, Dict, List, Optional
 
+__all__ = [
+    "BackendStats",
+    "HealthMonitor",
+]
+
 
 def _percentile(sorted_values: List[float], pct: float) -> float:
     """Nearest-rank percentile over an already-sorted list."""

@@ -13,6 +13,10 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
+__all__ = [
+    "HugrGate",
+]
+
 
 class HugrGate:
     """The decision runtime.

@@ -21,6 +21,12 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "abstain",
+    "mark_for_review",
+    "apply_abstention_policy",
+]
+
 
 def abstain(spec: DecisionSpec, reason: str = "below_threshold",
             backend: str = "unknown",

@@ -11,6 +11,11 @@ from typing import Any, Dict, List, Mapping, Optional
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "DecisionRecord",
+    "ProvenanceStore",
+]
+
 
 def _hash_request(state: Mapping[str, Any], spec: DecisionSpec) -> str:
     payload = json.dumps({"state": dict(state), "spec": spec.to_dict()},

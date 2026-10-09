@@ -7,6 +7,11 @@ from typing import Any, Dict, List, Optional
 
 from hugrgate.errors import SpecError
 
+__all__ = [
+    "SPEC_TYPES",
+    "DecisionSpec",
+]
+
 SPEC_TYPES = ("categorical", "binary", "ordinal", "numeric", "multilabel")
 
 

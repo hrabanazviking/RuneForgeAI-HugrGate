@@ -24,6 +24,13 @@ from hugrgate import (
     HugrGate,
 )
 
+__all__ = [
+    "policy_to_dict",
+    "policy_from_dict",
+    "result_from_dict",
+    "HugrGateClient",
+]
+
 
 def policy_to_dict(policy: DecisionPolicy) -> Dict[str, Any]:
     """Serialize a :class:`DecisionPolicy` to plain JSON-compatible dict."""

@@ -22,6 +22,21 @@ from typing import Any, Dict, List, Mapping, Optional
 
 from hugrgate import DecisionPolicy, DecisionSpec
 
+__all__ = [
+    "load_spec",
+    "load_state",
+    "load_policy",
+    "cmd_decide",
+    "cmd_backends",
+    "cmd_models",
+    "cmd_health",
+    "cmd_serve",
+    "cmd_bench",
+    "cmd_report",
+    "build_parser",
+    "main",
+]
+
 
 def _load_doc(path: str) -> Any:
     """Load a JSON or YAML document (YAML is a superset of JSON)."""

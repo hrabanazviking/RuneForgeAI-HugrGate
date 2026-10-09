@@ -26,6 +26,14 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "NumericBand",
+    "ThresholdConfig",
+    "ordinal_cumulative_probability",
+    "classify_numeric_band",
+    "apply_thresholds",
+]
+
 
 @dataclass
 class NumericBand:

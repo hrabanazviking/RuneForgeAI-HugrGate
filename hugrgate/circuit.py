@@ -24,6 +24,14 @@ import threading
 import time
 from typing import Callable, Dict, Optional
 
+__all__ = [
+    "CLOSED",
+    "OPEN",
+    "HALF_OPEN",
+    "CircuitBreaker",
+    "CircuitRegistry",
+]
+
 CLOSED = "closed"
 OPEN = "open"
 HALF_OPEN = "half-open"

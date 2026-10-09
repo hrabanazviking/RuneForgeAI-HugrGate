@@ -8,6 +8,11 @@ from typing import Any, Dict, List, Mapping, Optional
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "Backend",
+    "BackendRegistry",
+]
+
 
 class Backend(ABC):
     """A replaceable intelligence implementation.

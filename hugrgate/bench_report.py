@@ -11,6 +11,12 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping
 
+__all__ = [
+    "ascii_reliability_diagram",
+    "render_markdown",
+    "write_report",
+]
+
 
 def _fmt(value: Any, digits: int = 3) -> str:
     if value is None:

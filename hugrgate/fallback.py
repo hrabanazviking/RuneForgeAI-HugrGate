@@ -37,6 +37,10 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.policy import DecisionPolicy
 
+__all__ = [
+    "FallbackChain",
+]
+
 
 class FallbackChain(Backend):
     """Try backends in order; fail over on backend errors."""

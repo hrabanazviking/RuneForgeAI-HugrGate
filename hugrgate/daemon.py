@@ -34,6 +34,19 @@ from hugrgate import Abstention, DecisionPolicy, DecisionResult, HugrGate
 from hugrgate.client import policy_from_dict
 from hugrgate.server import build_gate, create_app
 
+__all__ = [
+    "DEFAULT_HOST",
+    "DEFAULT_PORT",
+    "DaemonConfig",
+    "QueueFull",
+    "BatchingQueue",
+    "load_client_policies",
+    "create_daemon_app",
+    "Daemon",
+    "serve_forever",
+    "main",
+]
+
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8377
 

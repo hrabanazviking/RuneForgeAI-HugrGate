@@ -18,6 +18,12 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
 from hugrgate.spec import DecisionSpec
 
+__all__ = [
+    "ACCURACY_WEIGHT",
+    "CALIBRATION_WEIGHT",
+    "select_backend",
+]
+
 #: Weighting of historical quality: accuracy vs. calibration.
 ACCURACY_WEIGHT = 0.7
 CALIBRATION_WEIGHT = 0.3

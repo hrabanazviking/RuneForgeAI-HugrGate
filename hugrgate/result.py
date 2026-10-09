@@ -7,6 +7,10 @@ from typing import Any, Dict, Optional
 
 from hugrgate.errors import SpecError
 
+__all__ = [
+    "DecisionResult",
+]
+
 
 @dataclass
 class DecisionResult:

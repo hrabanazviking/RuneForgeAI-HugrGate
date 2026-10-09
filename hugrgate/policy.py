@@ -8,6 +8,10 @@ from typing import List, Optional
 from hugrgate.errors import PolicyError
 from hugrgate.result import DecisionResult
 
+__all__ = [
+    "DecisionPolicy",
+]
+
 
 @dataclass
 class DecisionPolicy:

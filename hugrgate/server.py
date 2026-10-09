@@ -44,6 +44,17 @@ from hugrgate import __version__ as HUGRGATE_VERSION
 from hugrgate.client import policy_from_dict
 from hugrgate.errors import HugrGateError
 
+__all__ = [
+    "UniformBackend",
+    "KeywordBackend",
+    "ModelInfo",
+    "register_model",
+    "list_models",
+    "build_gate",
+    "create_app",
+    "run",
+]
+
 _WORD_RE = re.compile(r"[a-z0-9]+")
 
 
