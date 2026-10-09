@@ -23,10 +23,19 @@ from hugrgate.routing.rungs import (
     RungBuilder,
     RungFilter,
 )
+from hugrgate.routing.synthesis import (
+    QOS_DEPTH_CAPS,
+    QOS_WEIGHTS,
+    LadderSynthesizer,
+    score_capability,
+)
 
 __all__ = [
     "DynamicRungPlanner",
     "LadderRouterV2",
+    "LadderSynthesizer",
+    "QOS_DEPTH_CAPS",
+    "QOS_WEIGHTS",
     "RungBuilder",
     "RungExecutor",
     "RungFilter",
@@ -38,4 +47,5 @@ __all__ = [
     "RoutingOptions",
     "RoutingPlan",
     "SerialPlanExecutor",
+    "score_capability",
 ]
