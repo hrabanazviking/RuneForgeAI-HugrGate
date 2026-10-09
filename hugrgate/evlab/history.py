@@ -212,6 +212,7 @@ def detect_regression(
     higher_better: bool = True,
     baseline: str = "best",
     window: int = 5,
+    current: RunRecord | None = None,
 ) -> RegressionFinding | None:
     """Flag a regression of ``metric`` in the latest run.
 
@@ -220,6 +221,10 @@ def detect_regression(
     :class:`RegressionFinding` when the drop strictly exceeds
     ``min_drop``; None otherwise (including when there is no prior
     history).
+
+    ``current`` optionally supplies the run under evaluation when it
+    has not been appended to the store yet (the release gate's case):
+    it is treated as the latest entry without mutating the store.
     """
     if baseline not in ("best", "median"):
         raise EvalError(
@@ -234,6 +239,15 @@ def detect_regression(
         if isinstance(r.backends.get(backend, {}).get(metric),
                       (int, float))
     ]
+    if current is not None:
+        if not isinstance(current, RunRecord):
+            raise EvalError(
+                f"detect_regression current must be a RunRecord, got "
+                f"{type(current).__name__}")
+        if not isinstance(current.backends.get(backend, {}).get(metric),
+                          (int, float)):
+            return None  # unscored current: nothing to compare
+        scored = [*scored, current]
     if len(scored) < 2:
         return None
     current = scored[-1]

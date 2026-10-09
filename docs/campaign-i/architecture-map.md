@@ -1170,6 +1170,7 @@ flowchart TD
     evlab --> evlab_history
     evlab --> evlab_latency
     evlab --> evlab_privacy
+    evlab --> evlab_release
     evlab --> evlab_report
     evlab --> evlab_repro
     evlab --> evlab_robustness
@@ -1251,6 +1252,11 @@ flowchart TD
     evlab_privacy --> privacy_pii
     evlab_privacy --> result
     evlab_privacy --> spec
+    evlab_release --> errors
+    evlab_release --> evlab_api
+    evlab_release --> evlab_gates
+    evlab_release --> evlab_history
+    evlab_release --> evlab_repro
     evlab_report --> hugrgate
     evlab_report --> errors
     evlab_report --> evlab_api
@@ -2448,6 +2454,7 @@ flowchart TD
 | `evlab` | `evlab.history` | no |
 | `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.privacy` | no |
+| `evlab` | `evlab.release` | no |
 | `evlab` | `evlab.report` | no |
 | `evlab` | `evlab.repro` | no |
 | `evlab` | `evlab.robustness` | no |
@@ -2529,6 +2536,11 @@ flowchart TD
 | `evlab.privacy` | `privacy_pii` | no |
 | `evlab.privacy` | `result` | no |
 | `evlab.privacy` | `spec` | no |
+| `evlab.release` | `errors` | no |
+| `evlab.release` | `evlab.api` | no |
+| `evlab.release` | `evlab.gates` | no |
+| `evlab.release` | `evlab.history` | no |
+| `evlab.release` | `evlab.repro` | no |
 | `evlab.report` | `hugrgate` | no |
 | `evlab.report` | `errors` | no |
 | `evlab.report` | `evlab.api` | no |

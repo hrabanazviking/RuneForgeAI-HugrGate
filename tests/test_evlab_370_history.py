@@ -189,6 +189,27 @@ def test_window_validation(tmp_path):
                           min_drop=-1.0)
 
 
+def test_current_param_without_appending(tmp_path):
+    store = _store(tmp_path, [0.90, 0.92])
+    current = _record("pending", 0.70,
+                      at="2026-10-09T12:00:09")
+    finding = detect_regression(store, "ds", "stub", "accuracy",
+                                current=current)
+    assert finding is not None
+    assert finding.current_run_id == "pending"
+    assert finding.baseline == pytest.approx(0.92)
+    # The store itself is untouched.
+    assert [r.run_id for r in store.records()] == ["run-0", "run-1"]
+    # Unscored current: nothing to compare.
+    blank = _record("blank", 0.70, at="2026-10-09T12:00:09")
+    blank.backends = {"stub": {}}
+    assert detect_regression(store, "ds", "stub", "accuracy",
+                             current=blank) is None
+    with pytest.raises(EvalError):
+        detect_regression(store, "ds", "stub", "accuracy",
+                          current={"run_id": "x"})
+
+
 def test_finding_roundtrip(tmp_path):
     store = _store(tmp_path, [0.90, 0.70])
     finding = detect_regression(store, "ds", "stub", "accuracy")

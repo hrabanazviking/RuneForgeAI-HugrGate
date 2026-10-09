@@ -115,6 +115,13 @@ from hugrgate.evlab.privacy import (
     randomized_response_q,
     scan_dataset_pii,
 )
+from hugrgate.evlab.release import (
+    HOLD,
+    RELEASE,
+    ReleaseVerdict,
+    assert_release,
+    release_gate,
+)
 from hugrgate.evlab.report import (
     LabReport,
     lab_report_from_run,
@@ -164,6 +171,8 @@ __all__ = [
     "ACQUISITIONS",
     "COLUMN_TYPES",
     "DEFAULT_METRICS",
+    "HOLD",
+    "RELEASE",
     "BackendComparison",
     "BootstrapCI",
     "BundleReport",
@@ -199,6 +208,7 @@ __all__ = [
     "PrivacyUtilityCurve",
     "PrivacyUtilityPoint",
     "RegressionFinding",
+    "ReleaseVerdict",
     "ReproCheck",
     "ReproManifest",
     "RobustnessReport",
@@ -213,6 +223,7 @@ __all__ = [
     "TemperatureCalibrator",
     "TransformStep",
     "assert_gates",
+    "assert_release",
     "aurc",
     "bootstrap_backend_ci",
     "bootstrap_mean_ci",
@@ -248,6 +259,7 @@ __all__ = [
     "privacy_utility_curve",
     "randomized_response_q",
     "read_bundle",
+    "release_gate",
     "render_lab_markdown",
     "risk_at_coverage",
     "risk_coverage_curve",

@@ -55,10 +55,23 @@ A dataset may declare `"sensitivity": "restricted"` (or
 policy's `privacy_class` is `"sensitive"` or `"strict"`. The record
 always carries the effective privacy class.
 
+## Release workflow
+
+The capstone (`evlab.release`): `release_gate(record, gates, ...)`
+renders one go/no-go `ReleaseVerdict` over a finished run — CI gates
+(`evlab.gates`), regression checks against the history store
+(`evlab.history`), the reproducibility manifest (`evlab.repro`),
+and git-SHA provenance. Any failure holds the release with every
+reason named; `assert_release()` turns a hold into `EvalGateError`
+for CI. A gateless suite is refused: a release with zero quality
+gates is a rubber stamp.
+
 ## Errors
 
 - `EvalError` — bad experiment configuration or empty run. Not
   recoverable: fix the experiment, re-run.
+- `EvalGateError` — a quality gate (or the release gate) failed.
+  Not recoverable: change the code, the data, or the gate, re-run.
 - `DatasetError` — malformed/unusable dataset. Not recoverable.
 
 ## Slice map

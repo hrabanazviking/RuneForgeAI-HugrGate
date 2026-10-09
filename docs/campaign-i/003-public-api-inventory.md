@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 312 · **public names:** 1941
+**Modules:** 313 · **public names:** 1949
 
 ## API stability policy
 
@@ -2258,6 +2258,8 @@ that this document never drifts from the code.
 | `ACQUISITIONS` | constant | `('download', 'generated', 'derived', 'synthetic', 'manual')` |
 | `COLUMN_TYPES` | constant | `('string', 'number', 'boolean', 'categorical', 'list', 'mapp` |
 | `DEFAULT_METRICS` | constant | `('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latenc` |
+| `HOLD` | constant | `'hold'` |
+| `RELEASE` | constant | `'release'` |
 | `BackendComparison` | class | `(backend_a: 'str', backend_b: 'str', metric: 'str', higher_better: 'bool', n_items: 'int', n_joint: 'int', estimate_a: 'float', estimate_b: 'float', mean_diff: 'float', diff_ci_low: 'float | None', diff_ci_high: 'float | None', p_value: 'float', alpha: 'float', wins_a: 'int', wins_b: 'int', ties: 'int', verdict: 'str') -> None` |
 | `BootstrapCI` | class | `(metric: 'str', estimate: 'float', ci_low: 'float', ci_high: 'float', ci_level: 'float', n_boot: 'int', n_items: 'int', seed: 'int') -> None` |
 | `BundleReport` | class | `(path: 'str', name: 'str', files: 'int', ok: 'bool', problems: 'list[str]') -> None` |
@@ -2293,6 +2295,7 @@ that this document never drifts from the code.
 | `PrivacyUtilityCurve` | class | `(backend: 'str', baseline_accuracy: 'float | None', points: 'list[PrivacyUtilityPoint]', disclaimer: 'str' = 'Simulation of the privacy/utility tradeoff shape via randomized response. Not a differential-privacy guarantee: no privacy budget is tracked and no mechanism is certified.') -> None` |
 | `PrivacyUtilityPoint` | class | `(epsilon: 'float', flip_q: 'float', accuracy: 'float | None', n: 'int') -> None` |
 | `RegressionFinding` | class | `(dataset: 'str', backend: 'str', metric: 'str', current: 'float', baseline: 'float', drop: 'float', current_run_id: 'str', baseline_run_id: 'str', current_sha: 'str | None', baseline_sha: 'str | None', current_at: 'str', baseline_at: 'str') -> None` |
+| `ReleaseVerdict` | class | `(decision: 'str', reasons: 'list[str]', run_id: 'str', dataset: 'str', decided_at: 'str', gate_results: 'list[dict[str, Any]]', regressions: 'list[dict[str, Any]]', repro_check: 'dict[str, Any] | None') -> None` |
 | `ReproCheck` | class | `(ok: 'bool', mismatches: 'list[str]') -> None` |
 | `ReproManifest` | class | `(dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', backends: 'list[str]', policy: 'dict[str, Any]', seed: 'int', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', git_sha: 'str | None', command: 'str | None', created_at: 'str', extra: 'dict[str, Any]') -> None` |
 | `RobustnessReport` | class | `(backends: 'dict[str, dict[str, Any]]', perturbations: 'list[str]', n_items: 'int', seed: 'int') -> None` |
@@ -2307,6 +2310,7 @@ that this document never drifts from the code.
 | `TemperatureCalibrator` | class | `() -> 'None'` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
 | `assert_gates` | function | `(suite: 'GateSuite', results: 'Mapping[str, Mapping[str, Any]] | RunRecord') -> 'list[GateResult]'` |
+| `assert_release` | function | `(verdict: 'ReleaseVerdict') -> 'ReleaseVerdict'` |
 | `aurc` | function | `(curve: 'Sequence[SelectivePoint]') -> 'float'` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
@@ -2322,7 +2326,7 @@ that this document never drifts from the code.
 | `cost_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, cost_model: 'CostModel | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'CostReport'` |
 | `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
-| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5) -> 'RegressionFinding | None'` |
+| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5, current: 'RunRecord | None' = None) -> 'RegressionFinding | None'` |
 | `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
@@ -2342,6 +2346,7 @@ that this document never drifts from the code.
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `read_bundle` | function | `(path: 'str | Path') -> 'dict[str, Any]'` |
+| `release_gate` | function | `(record: 'RunRecord', gates: 'GateSuite', history: 'HistoryStore | None' = None, regression_metrics: 'Sequence[tuple[str, float, bool]]' = (), repro_manifest: 'ReproManifest | None' = None, require_repro: 'bool' = True, require_git_sha: 'bool' = True) -> 'ReleaseVerdict'` |
 | `render_lab_markdown` | function | `(report: 'LabReport') -> 'str'` |
 | `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
 | `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
@@ -2468,7 +2473,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `HistoryStore` | class | `(path: 'str | Path') -> 'None'` |
 | `RegressionFinding` | class | `(dataset: 'str', backend: 'str', metric: 'str', current: 'float', baseline: 'float', drop: 'float', current_run_id: 'str', baseline_run_id: 'str', current_sha: 'str | None', baseline_sha: 'str | None', current_at: 'str', baseline_at: 'str') -> None` |
-| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5) -> 'RegressionFinding | None'` |
+| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5, current: 'RunRecord | None' = None) -> 'RegressionFinding | None'` |
 | `series_summary` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str') -> 'dict[str, Any]'` |
 
 ### `hugrgate.evlab.latency`
@@ -2488,6 +2493,14 @@ that this document never drifts from the code.
 | `privacy_utility_curve` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', epsilons: 'Sequence[float]', seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'PrivacyUtilityCurve'` |
 | `randomized_response_q` | function | `(epsilon: 'float') -> 'float'` |
 | `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
+
+### `hugrgate.evlab.release`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReleaseVerdict` | class | `(decision: 'str', reasons: 'list[str]', run_id: 'str', dataset: 'str', decided_at: 'str', gate_results: 'list[dict[str, Any]]', regressions: 'list[dict[str, Any]]', repro_check: 'dict[str, Any] | None') -> None` |
+| `assert_release` | function | `(verdict: 'ReleaseVerdict') -> 'ReleaseVerdict'` |
+| `release_gate` | function | `(record: 'RunRecord', gates: 'GateSuite', history: 'HistoryStore | None' = None, regression_metrics: 'Sequence[tuple[str, float, bool]]' = (), repro_manifest: 'ReproManifest | None' = None, require_repro: 'bool' = True, require_git_sha: 'bool' = True) -> 'ReleaseVerdict'` |
 
 ### `hugrgate.evlab.report`
 
