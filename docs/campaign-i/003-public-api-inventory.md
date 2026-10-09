@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 292 · **public names:** 1769
+**Modules:** 293 · **public names:** 1777
 
 ## API stability policy
 
@@ -2266,8 +2266,12 @@ that this document never drifts from the code.
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+| `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
+| `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
+| `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
+| `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 
 ### `hugrgate.evlab.api`
 
@@ -2291,6 +2295,15 @@ that this document never drifts from the code.
 | `DatasetRegistry` | class | `() -> 'None'` |
 | `DatasetVersion` | class | `(major: 'int', minor: 'int', patch: 'int', prerelease: 'str' = '', build: 'str' = '') -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+
+### `hugrgate.evlab.splits`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
+| `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
+| `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
+| `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 
 ### `hugrgate.fallback`
 

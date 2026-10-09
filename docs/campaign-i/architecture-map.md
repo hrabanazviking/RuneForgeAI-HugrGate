@@ -1158,6 +1158,7 @@ flowchart TD
     ensemble_voting --> result
     evlab --> evlab_api
     evlab --> evlab_dataset
+    evlab --> evlab_splits
     evlab_api --> hugrgate
     evlab_api --> bench
     evlab_api --> core
@@ -1166,6 +1167,8 @@ flowchart TD
     evlab_api --> policy
     evlab_api --> spec
     evlab_dataset --> errors
+    evlab_splits --> errors
+    evlab_splits --> evlab_dataset
     fallback --> backend
     fallback --> circuit
     fallback --> errors
@@ -2319,6 +2322,7 @@ flowchart TD
 | `ensemble.voting` | `result` | no |
 | `evlab` | `evlab.api` | no |
 | `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.splits` | no |
 | `evlab.api` | `hugrgate` | no |
 | `evlab.api` | `bench` | no |
 | `evlab.api` | `core` | no |
@@ -2327,6 +2331,8 @@ flowchart TD
 | `evlab.api` | `policy` | no |
 | `evlab.api` | `spec` | no |
 | `evlab.dataset` | `errors` | no |
+| `evlab.splits` | `errors` | no |
+| `evlab.splits` | `evlab.dataset` | no |
 | `fallback` | `backend` | no |
 | `fallback` | `circuit` | no |
 | `fallback` | `errors` | no |

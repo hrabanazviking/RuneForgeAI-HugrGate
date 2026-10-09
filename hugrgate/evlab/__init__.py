@@ -53,6 +53,12 @@ from hugrgate.evlab.dataset import (
     TransformStep,
     fingerprint_items,
 )
+from hugrgate.evlab.splits import (
+    SplitPlan,
+    kfold_indices,
+    make_splits,
+    manifest_splits,
+)
 
 __all__ = [
     "ACQUISITIONS",
@@ -67,6 +73,10 @@ __all__ = [
     "Experiment",
     "MetricSet",
     "RunRecord",
+    "SplitPlan",
     "TransformStep",
     "fingerprint_items",
+    "kfold_indices",
+    "make_splits",
+    "manifest_splits",
 ]
