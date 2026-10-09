@@ -27,7 +27,7 @@ hash-chained provenance (slice 015), cluster mutual auth (slice
 | 413 | `hugrgate/security/injection_corpus.py` — injection test corpus | done |
 | 414 | `hugrgate/security/prompt_injection.py` — prompt-injection boundary | done |
 | 415 | `hugrgate/security/malicious_backend.py` — malicious-backend fixtures | done |
-| 416 | `hugrgate/security/provenance_guards.py` — provenance tamper detection | pending |
+| 416 | `hugrgate/security/provenance_guards.py` — provenance tamper detection | done |
 | 417 | `hugrgate/security/cache_poisoning.py` — cache-poisoning defenses | pending |
 | 418 | `hugrgate/security/replay.py` — replay attack defenses | pending |
 | 419 | `hugrgate/security/authz.py` — service authorization policy | pending |

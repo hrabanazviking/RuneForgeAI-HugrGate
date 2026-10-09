@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 379 · **public names:** 2349
+**Modules:** 380 · **public names:** 2356
 
 ## API stability policy
 
@@ -4011,6 +4011,7 @@ that this document never drifts from the code.
 | `run_corpus` | function | `(category: 'str | None' = None) -> 'list[CorpusResult]'` |
 | `run_gauntlet` | function | `() -> 'GauntletReport'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
 | `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
 | `sanitize_filename` | function | `(text: 'str') -> 'str'` |
@@ -4019,10 +4020,12 @@ that this document never drifts from the code.
 | `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+| `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
 | `shell_quote` | function | `(arg: 'str') -> 'str'` |
 | `sign_manifest` | function | `(manifest: 'PluginManifest', signer: 'ModelSigner') -> 'PluginManifest'` |
 | `verified_open` | function | `(root: 'str | Path', relpath: 'str', manifest: 'ChecksumManifest')` |
 | `verify_manifest` | function | `(root: 'str | Path', manifest: 'ChecksumManifest', strict: 'bool' = False) -> 'VerificationReport'` |
+| `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
 
 ### `hugrgate.security.attack_surface`
 
@@ -4132,6 +4135,15 @@ that this document never drifts from the code.
 | `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
 | `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
 | `detect_override` | function | `(text: 'str') -> 'list[OverrideFinding]'` |
+
+### `hugrgate.security.provenance_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TamperReport` | class | `(attack: 'str', detected_by_chain: 'bool', detected_by_tip: 'bool', detail: 'str' = '') -> None` |
+| `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
+| `seal_tip` | function | `(store: 'ProvenanceStore', signer: 'ModelSigner') -> 'SignedMetadata'` |
+| `verify_tip` | function | `(store: 'ProvenanceStore', checkpoint: 'SignedMetadata', keys: 'dict[str, bytes]') -> 'dict[str, Any]'` |
 
 ### `hugrgate.security.resource_guards`
 

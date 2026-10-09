@@ -1828,6 +1828,7 @@ flowchart TD
     security --> security_path_guards
     security --> security_plugins
     security --> security_prompt_injection
+    security --> security_provenance_guards
     security --> security_resource_guards
     security --> security_sandbox
     security --> security_serde_guards
@@ -1852,6 +1853,9 @@ flowchart TD
     security_plugins --> errors
     security_plugins --> security_model_signing
     security_prompt_injection --> errors
+    security_provenance_guards --> errors
+    security_provenance_guards --> provenance
+    security_provenance_guards --> security_model_signing
     security_resource_guards --> errors
     security_sandbox --> backend
     security_sandbox --> errors
@@ -3314,6 +3318,7 @@ flowchart TD
 | `security` | `security.path_guards` | no |
 | `security` | `security.plugins` | no |
 | `security` | `security.prompt_injection` | no |
+| `security` | `security.provenance_guards` | no |
 | `security` | `security.resource_guards` | no |
 | `security` | `security.sandbox` | no |
 | `security` | `security.serde_guards` | no |
@@ -3338,6 +3343,9 @@ flowchart TD
 | `security.plugins` | `errors` | no |
 | `security.plugins` | `security.model_signing` | no |
 | `security.prompt_injection` | `errors` | no |
+| `security.provenance_guards` | `errors` | no |
+| `security.provenance_guards` | `provenance` | no |
+| `security.provenance_guards` | `security.model_signing` | no |
 | `security.resource_guards` | `errors` | no |
 | `security.sandbox` | `backend` | no |
 | `security.sandbox` | `errors` | no |

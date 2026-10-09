@@ -118,6 +118,11 @@ from hugrgate.security.prompt_injection import (
     build_prompt,
     detect_override,
 )
+from hugrgate.security.provenance_guards import (
+    run_tamper_suite,
+    seal_tip,
+    verify_tip,
+)
 from hugrgate.security.resource_guards import (
     CostLedger,
     ResourceBudget,
@@ -204,6 +209,7 @@ __all__ = [
     "run_corpus",
     "run_gauntlet",
     "run_sandboxed",
+    "run_tamper_suite",
     "safe_join",
     "safe_read_text",
     "sanitize_filename",
@@ -212,8 +218,10 @@ __all__ = [
     "scan_for_pickle",
     "scan_project",
     "scan_requirements",
+    "seal_tip",
     "shell_quote",
     "sign_manifest",
     "verified_open",
     "verify_manifest",
+    "verify_tip",
 ]
