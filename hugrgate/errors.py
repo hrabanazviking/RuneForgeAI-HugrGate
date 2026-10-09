@@ -640,36 +640,42 @@ class AgentNotFound(AgentError):
     register the agent first.
     """
     code = "agent_not_found"
+    recoverable = False
 class AgentLoopDetected(AgentError):
     """An agent call chain cycled back on itself. Slice 393.
     Recoverable: the loop-breaker severs the cycle and the ticket
     can be rerouted or escalated.
     """
     code = "agent_loop_detected"
+    recoverable = False
 class AgentRunaway(AgentError):
     """A ticket breached runaway limits (escalations/steps/tokens) or
     the kill switch tripped. Slice 394.  Not recoverable: a runaway
     ticket is terminated, never resumed — start a new ticket.
     """
     code = "agent_runaway"
+    recoverable = False
 class AgentBudgetExhausted(AgentError):
     """An agent exhausted its decision/token/latency budget.
     Slice 395.  Recoverable: budgets reset on a new window or a
     supervisor can top them up.
     """
     code = "agent_budget_exhausted"
+    recoverable = False
 class AgentEscalationFailed(AgentError):
     """An escalation could not be delivered (no higher level, depth
     cap reached, cooldown storm). Slice 384.  Recoverable: the ticket
     stays with its current owner and can retry after cooldown.
     """
     code = "agent_escalation_failed"
+    recoverable = False
 class HumanReviewTimeout(AgentError):
     """A human-review item breached its SLA without a decision.
     Slice 385.  Recoverable: the item stays queued and the timeout
     policy (escalate / auto-deny / auto-approve) decides.
     """
     code = "human_review_timeout"
+    recoverable = False
 class SupplyChainViolation(HugrGateError):
     """A dependency or artifact violates the supply-chain policy.
     Slice 404.  Raised by
@@ -699,6 +705,7 @@ class PluginTrustError(HugrGateError):
     recoverable: the plugin declaration itself must change.
     """
     code = "plugin_trust_error"
+    recoverable = False
 class SandboxViolation(HugrGateError):
     """A sandboxed backend attempted a forbidden operation.
     Slice 408.  Raised by :mod:`hugrgate.security.sandbox` when an
@@ -707,6 +714,7 @@ class SandboxViolation(HugrGateError):
     recoverable: the backend's behavior violates its policy.
     """
     code = "sandbox_violation"
+    recoverable = False
 class InputTooLarge(HugrGateError):
     """An input exceeded the configured size limits.
     Slice 409.  Raised by :mod:`hugrgate.security.input_limits`
@@ -715,6 +723,7 @@ class InputTooLarge(HugrGateError):
     or raise the limit deliberately.
     """
     code = "input_too_large"
+    recoverable = False
 class ResourceBudgetExceeded(HugrGateError):
     """A resource budget was exhausted inside a guarded region.
     Slice 410.  Raised by :mod:`hugrgate.security.resource_guards`
@@ -723,6 +732,7 @@ class ResourceBudgetExceeded(HugrGateError):
     the same budget again — shrink the work or raise the budget.
     """
     code = "resource_budget_exceeded"
+    recoverable = False
 class DeserializationBlocked(HugrGateError):
     """Untrusted bytes were refused deserialization.
     Slice 411.  Raised by :mod:`hugrgate.security.serde_guards`
@@ -732,6 +742,7 @@ class DeserializationBlocked(HugrGateError):
     hostile or the policy forbids them.
     """
     code = "deserialization_blocked"
+    recoverable = False
 class PathTraversalBlocked(HugrGateError):
     """A path escaped its jail directory.
     Slice 412.  Raised by :mod:`hugrgate.security.path_guards` when
@@ -740,6 +751,7 @@ class PathTraversalBlocked(HugrGateError):
     bytes).  Not recoverable: the path itself is hostile.
     """
     code = "path_traversal_blocked"
+    recoverable = False
 class PromptInjectionBlocked(HugrGateError):
     """A prompt-injection attempt was stopped at the boundary.
     Slice 414.  Raised by :mod:`hugrgate.security.prompt_injection`
@@ -747,6 +759,7 @@ class PromptInjectionBlocked(HugrGateError):
     override attempt.  Not recoverable: the content is hostile.
     """
     code = "prompt_injection_blocked"
+    recoverable = False
 class ReplayDetected(HugrGateError):
     """A replayed or stale message was rejected.
     Slice 418.  Raised by :mod:`hugrgate.security.replay` when a
@@ -755,6 +768,7 @@ class ReplayDetected(HugrGateError):
     Not recoverable: the message itself is hostile or stale.
     """
     code = "replay_detected"
+    recoverable = False
 class AuthzDenied(HugrGateError):
     """An authorization check denied the request.
     Slice 419.  Raised by :mod:`hugrgate.security.authz` when a
@@ -764,6 +778,7 @@ class AuthzDenied(HugrGateError):
     the caller must obtain the right credential or capability.
     """
     code = "authz_denied"
+    recoverable = False
 class RateLimitExceeded(HugrGateError):
     """A per-key rate limit was exceeded.
     Slice 420.  Raised by :mod:`hugrgate.security.ratelimit` when a
