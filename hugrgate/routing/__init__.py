@@ -28,6 +28,11 @@ from hugrgate.routing.confidence import (
     ConfidenceAwarePlanner,
     adjusted_gate,
 )
+from hugrgate.routing.cost import (
+    CostAwarePlanner,
+    CostLedger,
+    budget_for,
+)
 from hugrgate.routing.latency import (
     LatencyAwarePlanner,
     LatencyTracker,
@@ -50,8 +55,11 @@ __all__ = [
     "CapabilityScore",
     "CapabilityScorer",
     "ConfidenceAwarePlanner",
+    "CostAwarePlanner",
+    "CostLedger",
     "DynamicRungPlanner",
     "adjusted_gate",
+    "budget_for",
     "LadderRouterV2",
     "LadderSynthesizer",
     "LatencyAwarePlanner",
