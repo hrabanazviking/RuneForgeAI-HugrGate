@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 from typing import Any, Mapping, Optional
 
@@ -118,3 +119,17 @@ class HugrGate:
     def decide_batch(self, states: list, spec: DecisionSpec,
                      policy: Optional[DecisionPolicy] = None) -> list:
         return [self.decide(s, spec, policy) for s in states]
+
+    async def adecide(self, state: Mapping[str, Any],
+                      spec: DecisionSpec,
+                      policy: Optional[DecisionPolicy] = None,
+                      context: Optional[Mapping[str, Any]] = None,
+                      backend_name: Optional[str] = None) -> DecisionResult:
+        """Async variant of :meth:`decide` (slice 018).
+
+        Backend inference is synchronous and may block; this runs it in
+        a worker thread via :func:`asyncio.to_thread` so the event loop
+        stays responsive. Same contract, same errors as ``decide``.
+        """
+        return await asyncio.to_thread(
+            self.decide, state, spec, policy, context, backend_name)
