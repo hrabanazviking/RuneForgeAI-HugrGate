@@ -85,6 +85,12 @@ from hugrgate.evlab.energy import (
     energy_aware_evaluate,
 )
 from hugrgate.evlab.fairness import FairnessReport, fairness_evaluate
+from hugrgate.evlab.history import (
+    HistoryStore,
+    RegressionFinding,
+    detect_regression,
+    series_summary,
+)
 from hugrgate.evlab.latency import LatencyReport, latency_aware_evaluate
 from hugrgate.evlab.privacy import (
     PIIReport,
@@ -148,6 +154,7 @@ __all__ = [
     "FairnessReport",
     "FoldResult",
     "HistogramBinningCalibrator",
+    "HistoryStore",
     "IdentityCalibrator",
     "LabCalibrator",
     "LabelNoise",
@@ -158,6 +165,7 @@ __all__ = [
     "Perturbation",
     "PrivacyUtilityCurve",
     "PrivacyUtilityPoint",
+    "RegressionFinding",
     "RobustnessReport",
     "RunRecord",
     "SelectivePoint",
@@ -181,6 +189,7 @@ __all__ = [
     "cost_aware_evaluate",
     "coverage_at_risk",
     "cross_validate",
+    "detect_regression",
     "energy_aware_evaluate",
     "expected_calibration_error",
     "fairness_evaluate",
@@ -201,6 +210,7 @@ __all__ = [
     "robustness_evaluate",
     "scan_dataset_pii",
     "selective_evaluate",
+    "series_summary",
     "shift_evaluate",
     "stratified_evaluate",
 ]

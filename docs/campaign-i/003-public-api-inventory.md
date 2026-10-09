@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 307 · **public names:** 1893
+**Modules:** 308 · **public names:** 1901
 
 ## API stability policy
 
@@ -2275,6 +2275,7 @@ that this document never drifts from the code.
 | `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
 | `HistogramBinningCalibrator` | class | `(n_bins: 'int' = 10) -> 'None'` |
+| `HistoryStore` | class | `(path: 'str | Path') -> 'None'` |
 | `IdentityCalibrator` | class | `()` |
 | `LabCalibrator` | class | `()` |
 | `LabelNoise` | class | `(p: 'float') -> 'None'` |
@@ -2285,6 +2286,7 @@ that this document never drifts from the code.
 | `Perturbation` | class | `()` |
 | `PrivacyUtilityCurve` | class | `(backend: 'str', baseline_accuracy: 'float | None', points: 'list[PrivacyUtilityPoint]', disclaimer: 'str' = 'Simulation of the privacy/utility tradeoff shape via randomized response. Not a differential-privacy guarantee: no privacy budget is tracked and no mechanism is certified.') -> None` |
 | `PrivacyUtilityPoint` | class | `(epsilon: 'float', flip_q: 'float', accuracy: 'float | None', n: 'int') -> None` |
+| `RegressionFinding` | class | `(dataset: 'str', backend: 'str', metric: 'str', current: 'float', baseline: 'float', drop: 'float', current_run_id: 'str', baseline_run_id: 'str', current_sha: 'str | None', baseline_sha: 'str | None', current_at: 'str', baseline_at: 'str') -> None` |
 | `RobustnessReport` | class | `(backends: 'dict[str, dict[str, Any]]', perturbations: 'list[str]', n_items: 'int', seed: 'int') -> None` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
 | `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
@@ -2308,6 +2310,7 @@ that this document never drifts from the code.
 | `cost_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, cost_model: 'CostModel | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'CostReport'` |
 | `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
+| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5) -> 'RegressionFinding | None'` |
 | `energy_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, energy_model: 'EnergyModel | None' = None, power_source: 'PowerSource | None' = None, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'EnergyReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
@@ -2328,6 +2331,7 @@ that this document never drifts from the code.
 | `robustness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, perturbations: 'Sequence[Perturbation] | None' = None, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'RobustnessReport'` |
 | `scan_dataset_pii` | function | `(dataset: 'Mapping[str, Any]', kinds: 'Sequence[str] | None' = None, max_items: 'int | None' = None) -> 'PIIReport'` |
 | `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
+| `series_summary` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str') -> 'dict[str, Any]'` |
 | `shift_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, shift_key: 'str' = 'period', source: 'Any' = 'source', target: 'Any' = 'target', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'ShiftReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 
@@ -2416,6 +2420,15 @@ that this document never drifts from the code.
 |---|---|---|
 | `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
 | `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
+
+### `hugrgate.evlab.history`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HistoryStore` | class | `(path: 'str | Path') -> 'None'` |
+| `RegressionFinding` | class | `(dataset: 'str', backend: 'str', metric: 'str', current: 'float', baseline: 'float', drop: 'float', current_run_id: 'str', baseline_run_id: 'str', current_sha: 'str | None', baseline_sha: 'str | None', current_at: 'str', baseline_at: 'str') -> None` |
+| `detect_regression` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str', min_drop: 'float' = 0.02, higher_better: 'bool' = True, baseline: 'str' = 'best', window: 'int' = 5) -> 'RegressionFinding | None'` |
+| `series_summary` | function | `(store: 'HistoryStore', dataset: 'str', backend: 'str', metric: 'str') -> 'dict[str, Any]'` |
 
 ### `hugrgate.evlab.latency`
 
