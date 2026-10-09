@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from hugrgate.errors import SignatureVerificationFailed
+from hugrgate.security.path_guards import safe_join
 
 __all__ = [
     "ChecksumManifest",
@@ -164,14 +165,15 @@ def verified_open(root: str | Path, relpath: str,
 
     Returns a binary file object; raises SignatureVerificationFailed
     when the file is absent from the manifest or does not match.
-    (Slice 412 hardens the path resolution against traversal.)
+    The path is jailed to ``root`` via :func:`safe_join` (slice 412),
+    so manifest keys cannot be traversal payloads either.
     """
     root = Path(root)
     expected = manifest.files.get(relpath)
     if expected is None:
         raise SignatureVerificationFailed(
             f"{relpath!r} is not pinned in the checksum manifest")
-    path = root / relpath
+    path = safe_join(root, relpath)
     if not path.is_file() or hash_file(path) != expected:
         raise SignatureVerificationFailed(
             f"checksum mismatch for {relpath!r}")

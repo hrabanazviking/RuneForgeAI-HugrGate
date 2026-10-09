@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 375 · **public names:** 2308
+**Modules:** 376 · **public names:** 2314
 
 ## API stability policy
 
@@ -3997,9 +3997,12 @@ that this document never drifts from the code.
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
 | `generate_sbom` | function | `(records: 'list[DependencyRecord]', policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `guarded` | function | `(budget: 'ResourceBudget') -> 'Iterator[ResourceBudget]'` |
+| `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
 | `register_safe_class` | function | `(cls: 'type') -> 'type'` |
 | `restricted_loads` | function | `(data: 'bytes', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'Any'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
+| `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
 | `sbom_from_installed` | function | `(policy: 'SupplyChainPolicy | None' = None) -> 'dict[str, Any]'` |
 | `scan_for_pickle` | function | `(data: 'bytes') -> 'bool'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
@@ -4061,6 +4064,14 @@ that this document never drifts from the code.
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
 | `canonical_json` | function | `(payload: 'Mapping[str, Any]') -> 'bytes'` |
+
+### `hugrgate.security.path_guards`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `is_within` | function | `(root: 'str | Path', candidate: 'str | Path') -> 'bool'` |
+| `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
+| `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
 
 ### `hugrgate.security.plugins`
 

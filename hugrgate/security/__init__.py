@@ -89,6 +89,11 @@ from hugrgate.security.model_signing import (
     SignedMetadata,
     TrustedModelStore,
 )
+from hugrgate.security.path_guards import (
+    is_within,
+    safe_join,
+    safe_read_text,
+)
 from hugrgate.security.plugins import (
     PluginManifest,
     PluginRegistry,
@@ -166,9 +171,12 @@ __all__ = [
     "find_unlisted",
     "generate_sbom",
     "guarded",
+    "is_within",
     "register_safe_class",
     "restricted_loads",
     "run_sandboxed",
+    "safe_join",
+    "safe_read_text",
     "sbom_from_installed",
     "scan_for_pickle",
     "scan_project",

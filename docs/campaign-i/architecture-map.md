@@ -1823,6 +1823,7 @@ flowchart TD
     security --> security_depscan
     security --> security_input_limits
     security --> security_model_signing
+    security --> security_path_guards
     security --> security_plugins
     security --> security_resource_guards
     security --> security_sandbox
@@ -1830,10 +1831,12 @@ flowchart TD
     security --> security_supply_chain
     security --> security_threat_model
     security_checksums --> errors
+    security_checksums --> security_path_guards
     security_input_limits --> errors
     security_input_limits --> validation
     security_model_signing --> errors
     security_model_signing -.-> privacy_crypto
+    security_path_guards --> errors
     security_plugins --> errors
     security_plugins --> security_model_signing
     security_resource_guards --> errors
@@ -3293,6 +3296,7 @@ flowchart TD
 | `security` | `security.depscan` | no |
 | `security` | `security.input_limits` | no |
 | `security` | `security.model_signing` | no |
+| `security` | `security.path_guards` | no |
 | `security` | `security.plugins` | no |
 | `security` | `security.resource_guards` | no |
 | `security` | `security.sandbox` | no |
@@ -3300,10 +3304,12 @@ flowchart TD
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
 | `security.checksums` | `errors` | no |
+| `security.checksums` | `security.path_guards` | no |
 | `security.input_limits` | `errors` | no |
 | `security.input_limits` | `validation` | no |
 | `security.model_signing` | `errors` | no |
 | `security.model_signing` | `privacy_crypto` | yes |
+| `security.path_guards` | `errors` | no |
 | `security.plugins` | `errors` | no |
 | `security.plugins` | `security.model_signing` | no |
 | `security.resource_guards` | `errors` | no |

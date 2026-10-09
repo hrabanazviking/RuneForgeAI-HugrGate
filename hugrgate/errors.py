@@ -689,3 +689,14 @@ class DeserializationBlocked(HugrGateError):
     """
     code = "deserialization_blocked"
     recoverable = False
+
+
+class PathTraversalBlocked(HugrGateError):
+    """A path escaped its jail directory.
+    Slice 412.  Raised by :mod:`hugrgate.security.path_guards` when
+    a user-influenced path resolves outside the root it was jailed
+    to (``..`` segments, absolute paths, symlink escapes, null
+    bytes).  Not recoverable: the path itself is hostile.
+    """
+    code = "path_traversal_blocked"
+    recoverable = False
