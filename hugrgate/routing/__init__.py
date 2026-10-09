@@ -50,6 +50,12 @@ from hugrgate.routing.memory import (
     MemoryAwarePlanner,
     MemoryModel,
 )
+from hugrgate.routing.privacy import (
+    BackendClearance,
+    DataClassifier,
+    PrivacyAwarePlanner,
+    PrivacyTier,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
@@ -84,6 +90,10 @@ __all__ = [
     "LatencyTracker",
     "MemoryAwarePlanner",
     "MemoryModel",
+    "PrivacyAwarePlanner",
+    "PrivacyTier",
+    "BackendClearance",
+    "DataClassifier",
     "DEFAULT_LOCAL_MEMORY_MB",
     "DEFAULT_REMOTE_MEMORY_MB",
     "QOS_DEPTH_CAPS",
