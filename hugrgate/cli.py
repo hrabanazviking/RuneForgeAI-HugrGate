@@ -30,7 +30,9 @@ __all__ = [
     "cmd_completion",
     "cmd_decide",
     "cmd_doctor",
+    "cmd_gen",
     "cmd_health",
+    "cmd_init",
     "cmd_inspect",
     "cmd_models",
     "cmd_openapi",
@@ -226,14 +228,44 @@ def cmd_health(args: argparse.Namespace) -> int:
 
 def cmd_serve(args: argparse.Namespace) -> int:
     from hugrgate.daemon import main as daemon_main
-    daemon_argv = ["--host", args.host, "--port", str(args.port),
-                   "--batch-window-ms", str(args.batch_window_ms),
-                   "--max-batch", str(args.max_batch),
-                   "--max-queue", str(args.max_queue)]
-    if args.unix_socket:
-        daemon_argv += ["--unix-socket", args.unix_socket]
-    if args.client_policies:
-        daemon_argv += ["--client-policies", args.client_policies]
+    host, port = args.host, args.port
+    batch_window_ms = args.batch_window_ms
+    max_batch, max_queue = args.max_batch, args.max_queue
+    unix_socket, client_policies = args.unix_socket, args.client_policies
+    if args.config:
+        # Slice 437: a config file supplies values for flags left at
+        # their defaults; explicit flags always win.
+        from hugrgate.configgen import load_daemon_config
+        from hugrgate.daemon import DaemonConfig
+        from hugrgate.errors import ConfigError
+        try:
+            cfg = load_daemon_config(args.config)
+        except ConfigError as e:
+            print(f"hugrgate: {e}", file=sys.stderr)
+            return 2
+        defaults = DaemonConfig()
+        if host == defaults.host:
+            host = cfg.host
+        if port == defaults.port:
+            port = cfg.port
+        if batch_window_ms == defaults.batch_window_ms:
+            batch_window_ms = cfg.batch_window_ms
+        if max_batch == defaults.max_batch:
+            max_batch = cfg.max_batch
+        if max_queue == defaults.max_queue:
+            max_queue = cfg.max_queue
+        if unix_socket is None:
+            unix_socket = cfg.unix_socket
+        if client_policies is None:
+            client_policies = cfg.client_policies_path
+    daemon_argv = ["--host", host, "--port", str(port),
+                   "--batch-window-ms", str(batch_window_ms),
+                   "--max-batch", str(max_batch),
+                   "--max-queue", str(max_queue)]
+    if unix_socket:
+        daemon_argv += ["--unix-socket", unix_socket]
+    if client_policies:
+        daemon_argv += ["--client-policies", client_policies]
     return daemon_main(daemon_argv)
 
 
@@ -424,6 +456,61 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return run_inspect(args.url)
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    """Write a starter HugrGate working directory (slice 437)."""
+    from hugrgate.configgen import init_project
+    from hugrgate.errors import ConfigError
+    try:
+        written = init_project(args.dir, force=args.force)
+    except ConfigError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    for p in written:
+        print(f"wrote {p}")
+    print("next: edit spec.yaml/state, then "
+          "`hugrgate decide --spec spec.yaml --state state.example.yaml`")
+    return 0
+
+
+def cmd_gen(args: argparse.Namespace) -> int:
+    """Generate one config file (slice 437)."""
+    from hugrgate.configgen import (
+        generate_daemon_config,
+        generate_policy,
+        generate_spec,
+        write_new,
+    )
+    from hugrgate.errors import ConfigError
+    try:
+        if args.kind == "daemon":
+            content = generate_daemon_config()
+            default = "hugrgate.yaml"
+        elif args.kind == "spec":
+            fields: dict[str, Any] = {}
+            if args.options:
+                fields["options"] = args.options.split(",")
+            if args.statement:
+                fields["statement"] = args.statement
+            if args.levels:
+                fields["levels"] = args.levels.split(",")
+            content = generate_spec(args.type, **fields)
+            default = "spec.yaml"
+        else:  # policy
+            overrides: dict[str, Any] = {}
+            if args.min_probability is not None:
+                overrides["minimum_probability"] = args.min_probability
+            if args.max_latency_ms is not None:
+                overrides["maximum_latency_ms"] = args.max_latency_ms
+            content = generate_policy(**overrides)
+            default = "policy.yaml"
+        path = write_new(args.out or default, content, force=args.force)
+    except ConfigError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+        return 2
+    print(f"wrote {path}")
+    return 0
+
+
 def _command_names(parser: argparse.ArgumentParser) -> list[str]:
     """Sorted subcommand names (for completion and did-you-mean)."""
     for action in parser._actions:
@@ -486,6 +573,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-batch", type=int, default=32)
     p.add_argument("--max-queue", type=int, default=1024)
     p.add_argument("--client-policies", default=None)
+    p.add_argument("--config", default=None,
+                   help="daemon config file (hugrgate.yaml); explicit "
+                        "flags override it")
     p.set_defaults(func=cmd_serve)
 
     p = sub.add_parser("bench", help="run a benchmark")
@@ -523,6 +613,37 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--url", default=None,
                    help="service URL (default: http://127.0.0.1:8377)")
     p.set_defaults(func=cmd_inspect)
+
+    p = sub.add_parser("init",
+                       help="write a starter HugrGate working directory")
+    p.add_argument("--dir", default=".",
+                   help="target directory (default: .)")
+    p.add_argument("--force", action="store_true",
+                   help="overwrite existing files")
+    p.set_defaults(func=cmd_init)
+
+    p = sub.add_parser("gen", help="generate one config file")
+    p.add_argument("kind", choices=["daemon", "spec", "policy"])
+    p.add_argument("--out", default=None,
+                   help="output file (default: hugrgate.yaml / "
+                        "spec.yaml / policy.yaml)")
+    p.add_argument("--force", action="store_true",
+                   help="overwrite an existing file")
+    p.add_argument("--type", default="categorical",
+                   choices=["categorical", "binary", "ordinal",
+                            "numeric"],
+                   help="spec type (gen spec)")
+    p.add_argument("--options", default=None,
+                   help="comma-separated options (gen spec categorical)")
+    p.add_argument("--statement", default=None,
+                   help="statement (gen spec binary)")
+    p.add_argument("--levels", default=None,
+                   help="comma-separated levels (gen spec ordinal)")
+    p.add_argument("--min-probability", type=float, default=None,
+                   help="minimum probability (gen policy)")
+    p.add_argument("--max-latency-ms", type=float, default=None,
+                   help="maximum latency ms (gen policy)")
+    p.set_defaults(func=cmd_gen)
 
     return parser
 
