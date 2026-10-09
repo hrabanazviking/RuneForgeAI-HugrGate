@@ -44,6 +44,12 @@ def test_slack_token(scanner):
     assert any(f.pattern == "slack_token" for f in findings)
 
 
+def test_openai_key(scanner):
+    # Regression: slice 247 fuzzing found sk- keys were missed.
+    findings = scanner.scan_text("key=sk-" + "a" * 32)
+    assert any(f.pattern == "openai_key" for f in findings)
+
+
 def test_pem_private_key(scanner):
     findings = scanner.scan_text("-----BEGIN RSA PRIVATE KEY-----\nMII...")
     assert any(f.pattern == "pem_private_key" for f in findings)

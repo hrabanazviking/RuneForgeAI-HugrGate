@@ -50,6 +50,7 @@ SECRET_PATTERNS: list[tuple[str, str, str]] = [
      r"[A-Za-z0-9/+=]{40}['\"]?", "high"),
     ("github_token", r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36,}", "high"),
     ("github_pat", r"github_pat_[A-Za-z0-9_]{22,}", "high"),
+    ("openai_key", r"sk-[A-Za-z0-9\-_]{20,}", "high"),
     ("slack_token", r"xox[abpras]-[A-Za-z0-9-]{10,}", "high"),
     ("pem_private_key",
      r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----", "high"),

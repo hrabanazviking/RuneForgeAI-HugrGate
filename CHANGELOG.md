@@ -13,6 +13,12 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 247)
+- Privacy fuzz tests (`tests/test_privacy_fuzz.py`): 15
+  stdlib-seeded property tests. Found and fixed a real gap:
+  the secret scanner missed OpenAI-style `sk-` keys — added
+  the `openai_key` pattern plus regression test.
+
 ### Added (slice 246)
 - Privacy explanation reports (`hugrgate.privacy_explain`):
   `PrivacyExplainer` turns denials, dry-run reports, and
