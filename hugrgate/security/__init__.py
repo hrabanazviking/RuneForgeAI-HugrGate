@@ -149,6 +149,13 @@ from hugrgate.security.sandbox import (
     SandboxPolicy,
     run_sandboxed,
 )
+from hugrgate.security.secret_audit import (
+    SECRET_NAME_RE,
+    SecretAuditFinding,
+    audit_file,
+    audit_tree,
+    run_secret_audit,
+)
 from hugrgate.security.serde_guards import (
     DeserializationPolicy,
     SafeUnpickler,
@@ -177,6 +184,7 @@ __all__ = [
     "ENDPOINT_CAPABILITIES",
     "PAYLOADS",
     "ROLES",
+    "SECRET_NAME_RE",
     "STRIDE",
     "Advisory",
     "Asset",
@@ -201,6 +209,7 @@ __all__ = [
     "SafeUnpickler",
     "SandboxPolicy",
     "SandboxedBackend",
+    "SecretAuditFinding",
     "SignedMetadata",
     "SupplyChainPolicy",
     "SupplyVerdict",
@@ -210,6 +219,8 @@ __all__ = [
     "TrustBoundary",
     "TrustedModelStore",
     "UntrustedData",
+    "audit_file",
+    "audit_tree",
     "build_manifest",
     "build_prompt",
     "check_batch",
@@ -234,6 +245,7 @@ __all__ = [
     "run_gauntlet",
     "run_poison_suite",
     "run_sandboxed",
+    "run_secret_audit",
     "run_tamper_suite",
     "safe_join",
     "safe_read_text",

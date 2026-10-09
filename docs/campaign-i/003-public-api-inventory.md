@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 384 · **public names:** 2377
+**Modules:** 385 · **public names:** 2387
 
 ## API stability policy
 
@@ -3963,6 +3963,7 @@ that this document never drifts from the code.
 | `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
 | `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'me` |
+| `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
@@ -3987,6 +3988,7 @@ that this document never drifts from the code.
 | `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
 | `SandboxPolicy` | class | `(allow_subprocess: 'bool' = False, allow_network: 'bool' = False, allow_filesystem_write: 'bool' = False) -> None` |
 | `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
+| `SecretAuditFinding` | class | `(path: 'str', line: 'int', rule: 'str', severity: 'str', message: 'str', snippet: 'str' = '') -> None` |
 | `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
 | `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
@@ -3996,6 +3998,8 @@ that this document never drifts from the code.
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
 | `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
 | `UntrustedData` | class | `(text: 'str', source: 'str' = 'unknown') -> None` |
+| `audit_file` | function | `(path: 'str | Path') -> 'list[SecretAuditFinding]'` |
+| `audit_tree` | function | `(root: 'str | Path', exclude: 'tuple[str, ...]' = ('.venv', 'venv', '__pycache__', '.git', 'node_modules')) -> 'list[SecretAuditFinding]'` |
 | `build_manifest` | function | `(root: 'str | Path', manifest_name: 'str' = 'checksums.json') -> 'ChecksumManifest'` |
 | `build_prompt` | function | `(system: 'str', *chunks: 'UntrustedData', footer: 'str' = '') -> 'str'` |
 | `check_batch` | function | `(states: 'Sequence[Mapping[str, Any]]', limits: 'InputLimits | None' = None) -> 'int'` |
@@ -4020,6 +4024,7 @@ that this document never drifts from the code.
 | `run_gauntlet` | function | `() -> 'GauntletReport'` |
 | `run_poison_suite` | function | `() -> 'list[PoisonReport]'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
+| `run_secret_audit` | function | `(root: 'str | Path' = '.') -> 'dict[str, Any]'` |
 | `run_tamper_suite` | function | `(records: 'list[DecisionRecord]', key: 'bytes', key_id: 'str' = 'tip') -> 'list[TamperReport]'` |
 | `safe_join` | function | `(root: 'str | Path', user_path: 'str | Path') -> 'Path'` |
 | `safe_read_text` | function | `(root: 'str | Path', user_path: 'str | Path', max_bytes: 'int' = 1000000) -> 'str'` |
@@ -4203,6 +4208,16 @@ that this document never drifts from the code.
 | `SandboxedBackend` | class | `(backend: 'Backend', policy: 'SandboxPolicy | None' = None) -> 'None'` |
 | `run_sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Iterator[SandboxPolicy]'` |
 | `sandboxed` | function | `(policy: 'SandboxPolicy') -> 'Callable'` |
+
+### `hugrgate.security.secret_audit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SECRET_NAME_RE` | constant | `re.compile('(?i)(password|passwd|pwd|secret|api[_-]?key|apik` |
+| `SecretAuditFinding` | class | `(path: 'str', line: 'int', rule: 'str', severity: 'str', message: 'str', snippet: 'str' = '') -> None` |
+| `audit_file` | function | `(path: 'str | Path') -> 'list[SecretAuditFinding]'` |
+| `audit_tree` | function | `(root: 'str | Path', exclude: 'tuple[str, ...]' = ('.venv', 'venv', '__pycache__', '.git', 'node_modules')) -> 'list[SecretAuditFinding]'` |
+| `run_secret_audit` | function | `(root: 'str | Path' = '.') -> 'dict[str, Any]'` |
 
 ### `hugrgate.security.serde_guards`
 
