@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 44 · **public names:** 184
+**Modules:** 46 · **public names:** 189
 
 ## API stability policy
 
@@ -257,6 +257,21 @@ that this document never drifts from the code.
 | `DriftReport` | class | `(psi: 'float', alert: 'bool', severity: 'str', n_reference: 'int', n_live: 'int', n_bins: 'int', reference_hist: 'list[float]' = <factory>, live_hist: 'list[float]' = <factory>, observed_at: 'float' = <factory>) -> None` |
 | `population_stability_index` | function | `(reference: 'list[float]', live: 'list[float]') -> 'float'` |
 | `recalibration_advisory` | function | `(report: 'DriftReport') -> 'dict[str, Any]'` |
+
+### `hugrgate.edge`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+
+### `hugrgate.edge.platform`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Arm64AuditReport` | class | `(platform: 'PlatformInfo', findings: 'list[Arm64Finding]' = <factory>) -> None` |
+| `Arm64Finding` | class | `(id: 'str', severity: 'str', area: 'str', message: 'str', remediation: 'str', source: 'str') -> None` |
+| `PlatformInfo` | class | `(arch: 'str', system: 'str', release: 'str', python_version: 'tuple[int, int, int]', python_implementation: 'str', cpu_count: 'int | None', cpu_features: 'tuple[str, ...]', page_size: 'int | None', byteorder: 'str', is_64bit: 'bool', live: 'bool' = True) -> None` |
+| `PlatformProbe` | class | `(cpuinfo_text: 'str | None' = None)` |
+| `audit_arm64` | function | `(platform_info: 'PlatformInfo | None' = None, probe: 'PlatformProbe | None' = None) -> 'Arm64AuditReport'` |
 
 ### `hugrgate.errors`
 

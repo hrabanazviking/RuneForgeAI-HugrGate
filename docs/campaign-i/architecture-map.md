@@ -69,6 +69,10 @@ flowchart TD
     subgraph api[api]
         hugrgate[hugrgate]
     end
+    subgraph edge[edge]
+        edge[edge]
+        edge_platform[edge.platform]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -243,6 +247,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
 | api | `hugrgate` |
+| edge | `edge`, `edge.platform` |
 
 ## Internal dependency edges
 

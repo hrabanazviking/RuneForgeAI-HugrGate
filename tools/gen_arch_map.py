@@ -55,6 +55,9 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.cli",
     ],
     "api": ["hugrgate"],
+    "edge": [
+        "hugrgate.edge", "hugrgate.edge.platform",
+    ],
 }
 
 LAYER_OF = {m: layer for layer, mods in LAYERS.items() for m in mods}
