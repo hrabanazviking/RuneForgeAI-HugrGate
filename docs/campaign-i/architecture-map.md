@@ -69,6 +69,7 @@ flowchart TD
     subgraph cluster[cluster]
         cluster[cluster]
         cluster_protocol[cluster.protocol]
+        cluster_identity[cluster.identity]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -160,7 +161,10 @@ flowchart TD
     client --> serde
     client -.-> server
     client --> spec
+    cluster --> cluster_identity
     cluster --> cluster_protocol
+    cluster_identity --> cluster_protocol
+    cluster_identity --> errors
     cluster_protocol --> errors
     core --> backend
     core --> errors
@@ -248,7 +252,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -341,7 +345,10 @@ flowchart TD
 | `client` | `serde` | no |
 | `client` | `server` | yes |
 | `client` | `spec` | no |
+| `cluster` | `cluster.identity` | no |
 | `cluster` | `cluster.protocol` | no |
+| `cluster.identity` | `cluster.protocol` | no |
+| `cluster.identity` | `errors` | no |
 | `cluster.protocol` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |

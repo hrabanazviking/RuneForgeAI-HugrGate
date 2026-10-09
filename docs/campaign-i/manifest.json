@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T12:53:58.935667+00:00",
-  "module_count": 46,
+  "generated_utc": "2026-10-09T12:54:46.752542+00:00",
+  "module_count": 47,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,9 +544,32 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 30,
+      "loc": 33,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
+    },
+    "hugrgate.cluster.identity": {
+      "docstring": "Node identity \u2014 stable, unforgeable node ids. Slice 202.\n\nA node's identity is a 256-bit secret generated once and persisted with\nowner-only permissions. The public node id is ``sha256(secret)``: stable\nacross restarts (same key file \u2192 same id), unforgeable without the key\nfile, and never transmitted in full \u2014 peers see only the id, never the\nsecret. Slice 208 (mutual authentication) builds on this by proving\npossession of the secret via challenge-response.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "os",
+        "secrets",
+        "typing"
+      ],
+      "loc": 123,
+      "path": "hugrgate/cluster/identity.py",
+      "public_defs": [
+        "NodeIdentity",
+        "generate",
+        "node_id",
+        "to_advertisement",
+        "save",
+        "load"
+      ]
     },
     "hugrgate.cluster.protocol": {
       "docstring": "Gjallarbr\u00fa node wire protocol. Slice 201.\n\nEvery inter-node exchange in a HugrGate cluster is a\n:class:`ClusterMessage`: a small versioned JSON envelope carried over\nHTTP ``POST /cluster/rpc`` (slice 207) or UDP multicast for discovery\n(slice 206). The envelope is deliberately boring \u2014 JSON, UTF-8, length\nchecked \u2014 so any future transport can carry it unchanged.\n\nWire format (all keys required unless noted)::\n\n    {\n      \"protocol_version\": 1,\n      \"msg_type\": \"decide_request\",\n      \"sender\": \"<64-hex node id>\",\n      \"seq\": 41,                 # per-sender monotonic sequence\n      \"trace_id\": \"<32-hex>\",    # slice 222 correlation\n      \"timestamp\": 1728470000.5, # sender clock, informational only\n      \"payload\": {...}           # message-type-specific body\n    }\n\nReceivers MUST reject (with :class:`SpecError`) any envelope whose\n``protocol_version`` is newer than :data:`PROTOCOL_VERSION` \u2014 a node\nmust never silently misread a future protocol \u2014 and any envelope\nover :data:`MAX_MESSAGE_BYTES`.",
@@ -1082,6 +1105,7 @@
     "test_arch_map.py",
     "test_async_readiness.py",
     "test_backend_registry.py",
+    "test_cluster_identity.py",
     "test_cluster_protocol.py",
     "test_config.py",
     "test_coverage_attack.py",
@@ -1110,5 +1134,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 8230
+  "total_loc": 8356
 }

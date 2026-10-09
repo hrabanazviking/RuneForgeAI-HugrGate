@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 46 · **public names:** 200
+**Modules:** 47 · **public names:** 204
 
 ## API stability policy
 
@@ -234,10 +234,19 @@ that this document never drifts from the code.
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
 | `PROTOCOL_VERSION` | constant | `1` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
+| `KEY_BYTES` | constant | `32` |
 | `MessageType` | class | `(*values)` |
+| `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
 | `encode_message` | function | `(message: 'ClusterMessage') -> 'bytes'` |
 | `new_trace_id` | function | `() -> 'str'` |
+
+### `hugrgate.cluster.identity`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `KEY_BYTES` | constant | `32` |
+| `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 
 ### `hugrgate.cluster.protocol`
 
