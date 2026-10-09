@@ -54,6 +54,10 @@ from hugrgate.cluster.node_latency import (
     LatencyTracker,
     PeerLatency,
 )
+from hugrgate.cluster.partition import (
+    DEFAULT_PARTITION_STALE_AFTER_S,
+    PartitionDetector,
+)
 from hugrgate.cluster.policy_sync import (
     PolicyPropagator,
     PolicyVersion,
@@ -113,6 +117,7 @@ __all__ = [
     "DEFAULT_LAN_PORT",
     "DEFAULT_LATENCY_TARGET_MS",
     "DEFAULT_MAX_BATCH_SIZE",
+    "DEFAULT_PARTITION_STALE_AFTER_S",
     "DEFAULT_QUARANTINE_THRESHOLD",
     "DEFAULT_STALE_AFTER_S",
     "KEY_BYTES",
@@ -142,6 +147,7 @@ __all__ = [
     "NodeHealthMonitor",
     "NodeIdentity",
     "OutboundHook",
+    "PartitionDetector",
     "PeerHealth",
     "PeerLatency",
     "PeerRecord",

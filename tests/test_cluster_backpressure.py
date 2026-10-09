@@ -121,7 +121,7 @@ def test_shed_load_recovers():
     assert node.dispatch(
         _message(MessageType.DECIDE_REQUEST,
                  _decide_payload())).msg_type is MessageType.ERROR
-    time.sleep(0.01)
+    time.sleep(0.05)
     reply = node.dispatch(_message(MessageType.DECIDE_REQUEST,
                                    _decide_payload()))
     assert reply.msg_type is not MessageType.ERROR

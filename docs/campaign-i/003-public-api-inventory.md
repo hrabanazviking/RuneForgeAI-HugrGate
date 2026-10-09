@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 65 · **public names:** 315
+**Modules:** 66 · **public names:** 320
 
 ## API stability policy
 
@@ -238,6 +238,7 @@ that this document never drifts from the code.
 | `DEFAULT_LAN_PORT` | constant | `18377` |
 | `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
 | `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
+| `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
 | `DEFAULT_QUARANTINE_THRESHOLD` | constant | `0.5` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
 | `KEY_BYTES` | constant | `32` |
@@ -245,17 +246,18 @@ that this document never drifts from the code.
 | `MAX_STEAL_BATCH` | constant | `64` |
 | `PROTOCOL_VERSION` | constant | `1` |
 | `SENSITIVE_PREFIX` | constant | `'private_'` |
+| `AdmissionController` | class | `(capacity: 'int' = 128, refill_per_second: 'float' = 64.0) -> 'None'` |
 | `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
 | `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
 | `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
-| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True, enforce_quorum: 'bool' = False) -> 'None'` |
 | `CostModel` | class | `() -> 'None'` |
 | `Discovery` | class | `()` |
 | `DiscoveryRegistry` | class | `(local_node_id: 'str' = '', stale_after_s: 'float' = 60.0) -> 'None'` |
-| `DistributedBatcher` | class | `(node: 'ClusterNode', max_batch_size: 'int' = 32) -> 'None'` |
-| `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
+| `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `LANDiscoveryAdapter` | class | `(identity: 'NodeIdentity', http_port: 'int', capabilities: 'NodeCapabilities | None' = None, config: 'MulticastConfig | None' = None, tls: 'bool' = False, socket_factory: 'SocketFactory | None' = None) -> 'None'` |
 | `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
@@ -266,6 +268,7 @@ that this document never drifts from the code.
 | `NodeHealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.5, max_consecutive_failures: 'int' = 5) -> 'None'` |
 | `NodeIdentity` | class | `(key: 'bytes', display_name: 'str' = '') -> None` |
 | `OutboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
+| `PartitionDetector` | class | `(stale_after_s: 'float' = 30.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 | `PeerHealth` | class | `(outcomes: 'deque[bool]' = <factory>, consecutive_failures: 'int' = 0, total_successes: 'int' = 0, total_failures: 'int' = 0) -> None` |
 | `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
@@ -335,7 +338,7 @@ that this document never drifts from the code.
 | `DEFAULT_MAX_BATCH_SIZE` | constant | `32` |
 | `BatchJob` | class | `(spec: 'DecisionSpec', state: 'dict[str, Any]', policy: 'DecisionPolicy | None' = None, backend_name: 'str | None' = None, context: 'dict[str, Any] | None' = None) -> None` |
 | `BatchOutcome` | class | `(ok: 'bool', result: 'DecisionResult | None' = None, error: 'str | None' = None, abstained: 'bool' = False, trace_id: 'str' = <factory>) -> None` |
-| `DistributedBatcher` | class | `(node: 'ClusterNode', max_batch_size: 'int' = 32) -> 'None'` |
+| `DistributedBatcher` | class | `(node: '_BatcherNode', max_batch_size: 'int' = 32) -> 'None'` |
 
 ### `hugrgate.cluster.identity`
 
@@ -357,7 +360,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True) -> 'None'` |
+| `ClusterNode` | class | `(identity: 'NodeIdentity', gate: 'HugrGate', discovery: 'DiscoveryRegistry | None' = None, rpc_timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, serve_remote: 'bool' = True, enforce_quorum: 'bool' = False) -> 'None'` |
 | `InboundHook` | constant | `collections.abc.Callable[[hugrgate.cluster.protocol.ClusterM` |
 | `NodeAuthenticator` | class | `(*args, **kwargs)` |
 
@@ -382,6 +385,13 @@ that this document never drifts from the code.
 | `DEFAULT_LATENCY_TARGET_MS` | constant | `250.0` |
 | `LatencyTracker` | class | `(target_ms: 'float' = 250.0, alpha: 'float' = 0.3, window: 'int' = 200) -> 'None'` |
 | `PeerLatency` | class | `(samples: 'deque[float]' = <factory>, ewma_ms: 'float' = 0.0, count: 'int' = 0) -> None` |
+
+### `hugrgate.cluster.partition`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_PARTITION_STALE_AFTER_S` | constant | `30.0` |
+| `PartitionDetector` | class | `(stale_after_s: 'float' = 30.0, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 
 ### `hugrgate.cluster.policy_sync`
 
@@ -421,7 +431,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DistributedRouter` | class | `(node: 'ClusterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
+| `DistributedRouter` | class | `(node: '_RouterNode', weights: 'dict[str, float] | None' = None) -> 'None'` |
 | `PeerScores` | class | `(health: 'float' = 1.0, latency: 'float' = 1.0, cost: 'float' = 1.0) -> None` |
 | `RouteCandidate` | class | `(kind: 'str', peer: 'PeerRecord | None', scores: 'PeerScores' = <factory>, total: 'float' = 1.0, reasons: 'list[str]' = <factory>) -> None` |
 

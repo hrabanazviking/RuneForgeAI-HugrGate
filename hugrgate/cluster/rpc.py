@@ -345,6 +345,22 @@ class RPCClient:
             StealJob.from_dict(raw)
         return jobs
 
+    def heartbeat(self, peer: PeerRecord,
+                  trace_id: str | None = None) -> dict[str, Any]:
+        """Ping a peer's liveness (partition detection, slice 219).
+
+        Returns the peer's heartbeat payload. Control-plane: never
+        shed, never privacy-gated.
+        """
+        message = self._prepare(MessageType.HEARTBEAT,
+                                {"node_id": self.node_id}, trace_id)
+        reply = self.send(peer, message)
+        if reply.msg_type is not MessageType.HEARTBEAT:
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… sent unexpected "
+                f"{reply.msg_type.value}")
+        return reply.payload
+
 
 class RemoteBackend(Backend):
     """A peer node exposed as an ordinary backend.

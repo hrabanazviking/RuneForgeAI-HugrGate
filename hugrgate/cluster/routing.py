@@ -31,10 +31,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any, Protocol
 
 from hugrgate.cluster.discovery import PeerRecord
+from hugrgate.cluster.node_cost import CostModel
 from hugrgate.cluster.privacy_boundary import PrivacyBoundary
+from hugrgate.core import HugrGate
 from hugrgate.errors import (
     BackendError,
     BackendUnavailable,
@@ -45,14 +47,35 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
-if TYPE_CHECKING:
-    from hugrgate.cluster.node import ClusterNode
-
 __all__ = [
     "DistributedRouter",
     "PeerScores",
     "RouteCandidate",
 ]
+
+
+class _RouterNode(Protocol):
+    """The slice of :class:`ClusterNode` the router needs.
+
+    A Protocol (not a ``TYPE_CHECKING`` import of node.py) because the
+    import graph must stay acyclic even counting ``TYPE_CHECKING``
+    edges — and node.py eagerly imports this module.
+    """
+
+    @property
+    def gate(self) -> HugrGate: ...
+    @property
+    def costs(self) -> CostModel: ...
+    @property
+    def enforce_quorum(self) -> bool: ...
+    def peers(self) -> list[PeerRecord]: ...
+    def in_quorum(self) -> bool: ...
+    def decide_remote(self, peer: PeerRecord, spec: DecisionSpec,
+                      state: Mapping[str, Any],
+                      policy: DecisionPolicy | None = None,
+                      backend_name: str | None = None,
+                      context: Mapping[str, Any] | None = None,
+                      trace_id: str | None = None) -> DecisionResult: ...
 
 
 @dataclass
@@ -93,7 +116,7 @@ class RouteCandidate:
 class DistributedRouter:
     """Filter → score → walk cluster routing candidates."""
 
-    def __init__(self, node: ClusterNode,
+    def __init__(self, node: _RouterNode,
                  weights: dict[str, float] | None = None) -> None:
         self._node = node
         self._weights = dict(weights or {"health": 0.5, "latency": 0.3,
@@ -152,6 +175,12 @@ class DistributedRouter:
                 kind="local", peer=None,
                 scores=PeerScores(1.0, 1.0, 1.0), total=1.0,
                 reasons=["local gate supports the spec"]))
+        # Partition fail-closed (slice 219): without a visible majority
+        # the node routes local-only.
+        if self._node.enforce_quorum and not self._node.in_quorum():
+            for candidate in candidates:
+                candidate.reasons.append("no quorum: remote routes shed")
+            return candidates
         for peer in self._node.peers():
             allowed, _reason = self._peer_allowed(peer, spec, policy)
             if not allowed:

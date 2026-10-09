@@ -15,18 +15,17 @@ from __future__ import annotations
 
 import threading
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any, Protocol
 
-from hugrgate import DecisionPolicy
+from hugrgate.cluster.discovery import PeerRecord
 from hugrgate.cluster.privacy_boundary import PrivacyBoundary
 from hugrgate.cluster.protocol import new_trace_id
+from hugrgate.cluster.rpc import RPCClient
 from hugrgate.errors import BackendError, PrivacyViolation, SpecError
+from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.serde import result_from_dict
 from hugrgate.spec import DecisionSpec
-
-if TYPE_CHECKING:
-    from hugrgate.cluster.node import ClusterNode
 
 __all__ = [
     "DEFAULT_MAX_BATCH_SIZE",
@@ -34,6 +33,19 @@ __all__ = [
     "BatchOutcome",
     "DistributedBatcher",
 ]
+
+
+class _BatcherNode(Protocol):
+    """The slice of :class:`ClusterNode` the batcher needs.
+
+    A Protocol (not a ``TYPE_CHECKING`` import of node.py) because the
+    import graph must stay acyclic even counting ``TYPE_CHECKING``
+    edges — and node.py eagerly imports this module.
+    """
+
+    @property
+    def rpc(self) -> RPCClient: ...
+    def peers(self) -> list[PeerRecord]: ...
 
 #: Jobs per envelope per peer per flush.
 DEFAULT_MAX_BATCH_SIZE = 32
@@ -64,7 +76,7 @@ class BatchOutcome:
 class DistributedBatcher:
     """Group pending decisions by destination node; flush as batches."""
 
-    def __init__(self, node: ClusterNode,
+    def __init__(self, node: _BatcherNode,
                  max_batch_size: int = DEFAULT_MAX_BATCH_SIZE) -> None:
         if not isinstance(max_batch_size, int) or max_batch_size < 1:
             raise SpecError("max_batch_size must be a positive int")

@@ -27,6 +27,7 @@ from hugrgate.cluster.identity import NodeIdentity
 from hugrgate.cluster.node_cost import CostModel
 from hugrgate.cluster.node_health import NodeHealthMonitor
 from hugrgate.cluster.node_latency import LatencyTracker
+from hugrgate.cluster.partition import PartitionDetector
 from hugrgate.cluster.policy_sync import PolicyPropagator
 from hugrgate.cluster.protocol import (
     ClusterMessage,
@@ -93,7 +94,8 @@ class ClusterNode:
                  discovery: DiscoveryRegistry | None = None,
                  rpc_timeout: float = 10.0,
                  outbound_hook: OutboundHook | None = None,
-                 serve_remote: bool = True) -> None:
+                 serve_remote: bool = True,
+                 enforce_quorum: bool = False) -> None:
         self.identity = identity
         self.gate = gate
         self.discovery = discovery or DiscoveryRegistry(
@@ -119,6 +121,7 @@ class ClusterNode:
             MessageType.DECIDE_REQUEST: self.handle_decide,
             MessageType.BATCH_REQUEST: self.handle_batch,
             MessageType.STEAL_REQUEST: self.handle_steal_request,
+            MessageType.HEARTBEAT: self.handle_heartbeat,
             MessageType.POLICY_PUSH: self.handle_policy_push,
             MessageType.POLICY_PULL: self.handle_policy_pull,
         }
@@ -139,6 +142,11 @@ class ClusterNode:
         self.batcher = DistributedBatcher(self)
         #: Backpressure (slice 218).
         self.admission = AdmissionController()
+        #: Partition detection (slice 219). ``enforce_quorum`` opts into
+        #: fail-closed split-brain protection: without a visible
+        #: majority the node serves and routes local-only.
+        self.partition = PartitionDetector()
+        self.enforce_quorum = enforce_quorum
 
     # -- local facts --------------------------------------------------------
 
@@ -181,6 +189,9 @@ class ClusterNode:
         and backend failures count against the peer, successes heal it.
         Round-trip time feeds the latency tracker (slice 214).
         """
+        if self.enforce_quorum and not self.in_quorum():
+            raise BackendUnavailable(
+                "no quorum: refusing remote decision while partitioned")
         import time
 
         start = time.perf_counter()
@@ -210,6 +221,29 @@ class ClusterNode:
                 latency=self.latency.score(node_id),
                 cost=self.costs.score(node_id),
             ))
+
+    # -- partition handling (slice 219) -------------------------------------
+
+    def in_quorum(self) -> bool:
+        """True when this node can see a strict majority of the cluster."""
+        return self.partition.has_quorum(
+            [peer.node_id for peer in self.peers()])
+
+    def handle_heartbeat(self, message: ClusterMessage) -> ClusterMessage:
+        """Record liveness; answer with our own heartbeat."""
+        self.partition.note_heartbeat(message.sender)
+        return self._respond(
+            message, MessageType.HEARTBEAT,
+            {"alive": True, "node_id": self.node_id,
+             "peers": len(self.peers())})
+
+    def ping(self, peer: PeerRecord,
+             trace_id: str | None = None) -> dict[str, Any]:
+        """Heartbeat a peer; record its liveness on success."""
+        reply = self.rpc.heartbeat(peer,
+                                   trace_id=trace_id or new_trace_id())
+        self.partition.note_heartbeat(peer.node_id)
+        return reply
 
     # -- inbound ------------------------------------------------------------
 
@@ -287,6 +321,14 @@ class ClusterNode:
                 QueueFull("node is shedding load",
                           retry_after_ms=round(
                               self.admission.retry_after_ms(), 1)),
+                self.node_id, self.next_seq(), message.trace_id)
+        # Partition fail-closed (slice 219): without a visible
+        # majority, the work plane goes local-only.
+        if (self.enforce_quorum
+                and message.msg_type.value in WORK_MESSAGE_TYPES
+                and not self.in_quorum()):
+            return error_envelope(
+                BackendUnavailable("no quorum: node is partitioned"),
                 self.node_id, self.next_seq(), message.trace_id)
         try:
             return handler(message)
