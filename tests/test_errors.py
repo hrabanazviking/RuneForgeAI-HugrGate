@@ -53,6 +53,7 @@ from hugrgate.errors import (
     MemoryError,
     MemoryQuotaExceeded,
     MetricError,
+    MigrationError,
     MultiprocError,
     NPUError,
     NumaError,
@@ -144,6 +145,8 @@ ALL_ERRORS = [
     SandboxViolation,
     SignatureVerificationFailed,
     SupplyChainViolation,
+    # Campaign XX gauntlet errors (slice 485 taxonomy promotion).
+    MigrationError,
 ]
 
 EXPECTED_CODES = {
