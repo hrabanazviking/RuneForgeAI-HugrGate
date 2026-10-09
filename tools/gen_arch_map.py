@@ -66,7 +66,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.runtimes.residency", "hugrgate.runtimes.structured",
         "hugrgate.runtimes.tensorrt",
         "hugrgate.runtimes.transformers_rt", "hugrgate.runtimes.vllm",
-        "hugrgate.runtimes.warmup",
+        "hugrgate.runtimes.warmup", "hugrgate.runtimes.session_pool",
     ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",
@@ -217,6 +217,14 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.cluster.release_gate",
     ],
     "api": ["hugrgate"],
+    "performance": [  # Gjallarbrú campaign XII, slices 276-299
+        "hugrgate.profiling", "hugrgate.flame", "hugrgate.hotpaths",
+        "hugrgate.allocprof", "hugrgate.zerocopy", "hugrgate.asyncx",
+        "hugrgate.async_backend", "hugrgate.scheduler",
+        "hugrgate.backpressure", "hugrgate.pool", "hugrgate.lockaudit",
+        "hugrgate.multiproc", "hugrgate.supervision", "hugrgate.numa",
+        "hugrgate.gpusched", "hugrgate.perfgate", "hugrgate.millionbench",
+    ],
     "edge": [
         "hugrgate.edge", "hugrgate.edge.platform",
         "hugrgate.edge.memory",

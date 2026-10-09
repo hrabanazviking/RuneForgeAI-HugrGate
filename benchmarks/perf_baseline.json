@@ -1,0 +1,18 @@
+{
+  "slice": 298,
+  "recorded_at": "2026-10-09T15:58:41+0000",
+  "gates": {
+    "cache.key_us": {
+      "value": 13.419999959296547,
+      "direction": "lower-better",
+      "samples": 7,
+      "unit": "us"
+    },
+    "cache.get_hit_us": {
+      "value": 20.080000467714854,
+      "direction": "lower-better",
+      "samples": 7,
+      "unit": "us"
+    }
+  }
+}

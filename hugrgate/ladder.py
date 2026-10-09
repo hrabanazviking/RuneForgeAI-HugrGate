@@ -13,6 +13,12 @@ Slice 32 adds two pruning rules applied *before* a rung runs:
 - **Privacy gate**: remote rungs require ``policy.remote_inference=True``
   (and pass the operator-level :class:`PrivacyGuard`).
 
+Slice 284 adds :meth:`LadderRouter.decide_concurrent`: the same ordered
+semantics, but rungs evaluate in parallel and the lowest-index rung that
+clears its gate wins the race.  Pre-run pruning stays sequential (cheap
+and deterministic); evaluation overlaps.  Backends used concurrently
+must be thread-safe.
+
 Every rung outcome — attempted, skipped, failed, accepted — is recorded in
 an auditable trail, both in the result's metadata and, optionally, in a
 :class:`ProvenanceStore`.
@@ -22,6 +28,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Mapping
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any
 
@@ -255,6 +262,151 @@ class LadderRouter:
             "ladder exhausted: no rung cleared its confidence gate",
             reason="ladder_exhausted",
             ladder_trace=[e.to_dict() for e in audit])
+
+    def decide_concurrent(self, state: Mapping[str, Any],
+                          spec: DecisionSpec,
+                          policy: DecisionPolicy | None = None,
+                          context: Mapping[str, Any] | None = None,
+                          max_workers: int = 4) -> DecisionResult:
+        """Climb the ladder with rungs evaluating concurrently.
+
+        Same ordered semantics as :meth:`decide`: pre-run pruning
+        (support/privacy/latency) is identical, and the winner is the
+        *lowest-index* rung whose result clears its gate — even when a
+        higher rung finishes first.  Rungs still in flight when a winner
+        is found are cancelled and audited as ``RUNG_CANCELLED``.
+
+        Raises
+        ------
+        Abstention
+            With ``reason="ladder_exhausted"`` when no rung produced an
+            acceptable result.
+        SpecError
+            When ``max_workers`` is not a positive int.
+
+        .. note:: Backends shared across rungs must be thread-safe;
+           concurrent evaluation calls ``backend.evaluate`` from worker
+           threads.
+        """
+        if not isinstance(max_workers, int) or max_workers < 1:
+            raise SpecError(
+                f"max_workers must be a positive int, got {max_workers!r}")
+        policy = policy or DecisionPolicy()
+        validate_state(state)
+        rungs = self.ladder_for(spec)
+        if not rungs:
+            raise SpecError(f"no ladder configured for spec type {spec.type!r}")
+
+        # Phase 1 — sequential pruning (cheap, deterministic audit order).
+        audit: list[LadderAuditEntry] = []
+        planned: list[tuple[int, LadderRung, Backend]] = []
+        started = time.perf_counter()
+        for i, rung in enumerate(rungs):
+            backend = self.registry.get(rung.backend_name)
+            if backend is None:
+                audit.append(LadderAuditEntry(
+                    i, rung.backend_name, RUNG_SKIPPED_UNKNOWN,
+                    detail="backend not in registry"))
+                continue
+            skip = self.skip_reason(backend, rung, spec, policy, started)
+            if skip is not None:
+                audit.append(LadderAuditEntry(
+                    i, backend.name, skip[0], detail=skip[1]))
+                continue
+            planned.append((i, rung, backend))
+
+        if not planned:
+            self.last_audit = audit
+            raise Abstention(
+                "ladder exhausted: no rung survived pruning",
+                reason="ladder_exhausted",
+                ladder_trace=[e.to_dict() for e in audit])
+
+        # Phase 2 — ordered race.  Each worker fills its own audit list
+        # (no shared mutation from threads); the main thread merges in
+        # ladder order and applies the gates.
+        def _run(planned_rung: tuple[int, LadderRung, Backend]
+                 ) -> tuple[int, DecisionResult | None,
+                            list[LadderAuditEntry]]:
+            i, _rung, backend = planned_rung
+            worker_audit: list[LadderAuditEntry] = []
+            result = self._attempt(backend, state, spec, context,
+                                   worker_audit, i)
+            return i, result, worker_audit
+
+        with ThreadPoolExecutor(max_workers=max_workers,
+                                thread_name_prefix="ladder-rung") as pool:
+            future_of = {pool.submit(_run, p): p[0] for p in planned}
+            futures = [f for f, _i in sorted(future_of.items(),
+                                             key=lambda kv: kv[1])]
+            try:
+                return self._race_in_order(
+                    futures, planned, audit, state, spec, policy)
+            finally:
+                for f in futures:
+                    f.cancel()  # best-effort: stragglers stop being waited on
+
+    def _race_in_order(self, futures: list,
+                       planned: list[tuple[int, LadderRung, Backend]],
+                       audit: list[LadderAuditEntry],
+                       state: Mapping[str, Any], spec: DecisionSpec,
+                       policy: DecisionPolicy) -> DecisionResult:
+        """Consume rung futures in ladder order; first gate-clearer wins."""
+        by_index = {i: (rung, backend) for i, rung, backend in planned}
+        pending = list(zip(futures, [i for i, _r, _b in planned],
+                           strict=True))
+        for future, i in pending:
+            rung, backend = by_index[i]
+            _idx, result, worker_audit = future.result()
+            audit.extend(worker_audit)
+            if result is None:
+                continue  # failure already audited; climb on
+            gate = max(rung.min_confidence, policy.minimum_probability)
+            if result.probability >= gate:
+                audit[-1].outcome = RUNG_ACCEPTED
+                audit[-1].detail = (
+                    f"probability {result.probability:.3f} cleared gate "
+                    f"{gate:.3f} (concurrent race)")
+                self._mark_cancelled(futures, pending, i, audit, by_index)
+                self._log_attempt(state, spec, result, policy, gate)
+                result.metadata["ladder_trace"] = [e.to_dict()
+                                                   for e in audit]
+                result.metadata["ladder_rung"] = i
+                result.metadata["ladder_backend"] = backend.name
+                result.metadata["ladder_concurrent"] = True
+                self.last_audit = audit
+                return result
+            audit[-1].outcome = RUNG_BELOW_CONFIDENCE
+            audit[-1].detail = (
+                f"probability {result.probability:.3f} below gate "
+                f"{gate:.3f}; climbing")
+            self._log_attempt(state, spec, result, policy, gate)
+
+        self.last_audit = audit
+        raise Abstention(
+            "ladder exhausted: no rung cleared its confidence gate",
+            reason="ladder_exhausted",
+            ladder_trace=[e.to_dict() for e in audit])
+
+    @staticmethod
+    def _mark_cancelled(futures: list, pending: list,
+                        winner_index: int, audit: list[LadderAuditEntry],
+                        by_index: dict[int, tuple[LadderRung, Backend]]
+                        ) -> None:
+        """Audit rungs that never got to race as cancelled (slice 065)."""
+        decided = set()
+        for _f, i in pending:
+            if i <= winner_index:
+                decided.add(i)
+        for future, i in pending:
+            if i in decided:
+                continue
+            rung, backend = by_index[i]
+            future.cancel()
+            audit.append(LadderAuditEntry(
+                i, backend.name, RUNG_CANCELLED,
+                detail=(f"dropped after rung {winner_index} won the race; "
+                        f"min_confidence was {rung.min_confidence}")))
 
     # -- internals -------------------------------------------------------
 

@@ -1,0 +1,98 @@
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:<genexpr> 1.361
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:<genexpr> 1.361
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:<genexpr> 1.055
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:<genexpr> 1.055
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;__init__:dumps;encoder:encode;encoder:iterencode 0.527
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;__init__:dumps;encoder:encode;encoder:iterencode 0.527
+<stdin>:workload;core:decide;validation:validate_state;__init__:dumps;encoder:encode;encoder:iterencode 0.527
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<method 'get' of 'dict' objects> 0.449
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_deepcopy_dict;~:<built-in method builtins.id> 0.221
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_deepcopy_list;~:<built-in method builtins.id> 0.221
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_keep_alive;~:<built-in method builtins.id> 0.221
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;~:<built-in method builtins.id> 0.221
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<built-in method builtins.id> 0.221
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:fields;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:fields;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;spec:to_dict;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:from_decision;spec:to_dict;~:<built-in method builtins.getattr> 0.159
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_deepcopy_atomic 0.121
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;copy:<genexpr> 0.089
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:fields;dataclasses:<genexpr> 0.085
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:fields;dataclasses:<genexpr> 0.085
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;result:__post_init__;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_deepcopy_dict;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_finite;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_keys;validation:_check_keys;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_keys;~:<method 'items' of 'dict' objects> 0.061
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<method '__reduce_ex__' of 'object' objects>;copyreg:_slotnames;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:_is_dataclass_instance;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_is_dataclass_instance;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_is_dataclass_instance;~:<built-in method builtins.hasattr> 0.058
+<stdin>:workload;core:decide;provenance:append;~:<built-in method _hashlib.openssl_sha256> 0.053
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;~:<built-in method _hashlib.openssl_sha256> 0.053
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_deepcopy_list;~:<method 'append' of 'list' objects> 0.049
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_keep_alive;~:<method 'append' of 'list' objects> 0.049
+<stdin>:workload;core:decide;provenance:append;~:<method 'append' of 'list' objects> 0.049
+<stdin>:workload;core:decide;provenance:append;~:<method 'hexdigest' of '_hashlib.HASH' objects> 0.042
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;~:<method 'hexdigest' of '_hashlib.HASH' objects> 0.042
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;result:__post_init__;~:<method 'values' of 'dict' objects> 0.031
+<stdin>:workload;core:decide;core:_select_backend;backend:supporting;~:<method 'values' of 'dict' objects> 0.031
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;dataclasses:fields;~:<method 'values' of 'dict' objects> 0.031
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:fields;~:<method 'values' of 'dict' objects> 0.031
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_depth;~:<method 'values' of 'dict' objects> 0.031
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;__init__:dumps;encoder:__init__ 0.030
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;__init__:dumps;encoder:__init__ 0.030
+<stdin>:workload;core:decide;validation:validate_state;__init__:dumps;encoder:__init__ 0.030
+<stdin>:workload;core:decide;provenance:append;~:<method 'encode' of 'str' objects> 0.030
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;~:<method 'encode' of 'str' objects> 0.030
+<stdin>:workload;core:decide;validation:validate_state;~:<method 'encode' of 'str' objects> 0.030
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_depth;~:<method 'pop' of 'list' objects> 0.023
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_finite;~:<method 'pop' of 'list' objects> 0.023
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;__init__:dumps;encoder:encode;~:<method 'join' of 'str' objects> 0.023
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;__init__:dumps;encoder:encode;~:<method 'join' of 'str' objects> 0.023
+<stdin>:workload;core:decide;validation:validate_state;__init__:dumps;encoder:encode;~:<method 'join' of 'str' objects> 0.023
+<stdin>:workload;core:decide;validation:validate_result;spec:value_space 0.021
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;~:<method 'update' of 'dict' objects> 0.020
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_depth;~:<method 'extend' of 'list' objects>;validation:<genexpr> 0.019
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_finite;~:<method 'extend' of 'list' objects>;validation:<genexpr> 0.019
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_depth;~:<method 'extend' of 'list' objects>;validation:<genexpr> 0.016
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_finite;~:<method 'extend' of 'list' objects>;validation:<genexpr> 0.016
+<stdin>:workload;core:decide;policy:evaluate 0.016
+<stdin>:workload;core:decide;core:_select_backend;backend:supporting;~:<method '__exit__' of '_thread.RLock' objects> 0.015
+<stdin>:workload;core:decide;provenance:append;~:<method '__exit__' of '_thread.RLock' objects> 0.015
+~:<method 'disable' of '_lsprof.Profiler' objects> 0.015
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;result:__post_init__;~:<built-in method builtins.abs> 0.014
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;result:__post_init__;~:<built-in method builtins.sum> 0.013
+<stdin>:workload;core:decide;~:<built-in method time.perf_counter> 0.012
+<stdin>:workload;core:decide;provenance:from_decision;~:<method 'keys' of 'dict' objects> 0.008
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;~:<built-in method time.time> 0.008
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;~:<method 'pop' of 'dict' objects> 0.007
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;copyreg:__newobj__;~:<built-in method __new__ of type object at 0xa44b40> 0.007
+<stdin>:workload;core:decide;core:_select_backend;policy:backend_allowed 0.007
+<stdin>:workload;core:decide;core:_select_backend;backend:supporting;<stdin>:supports 0.007
+<stdin>:workload;core:decide;validation:validate_state;~:<built-in method builtins.len> 0.006
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<built-in method builtins.issubclass> 0.005
+<stdin>:workload;core:decide;<stdin>:evaluate;<string>:__init__;result:__post_init__;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;core:_ensure_spec;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;copy:_reconstruct;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;__init__:dumps;encoder:encode;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;dataclasses:_asdict_inner;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;provenance:_canonical;dataclasses:asdict;dataclasses:_asdict_inner;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:from_decision;provenance:_hash_request;__init__:dumps;encoder:encode;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;__init__:dumps;encoder:encode;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_depth;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_finite;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_keys;validation:_check_keys;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;validation:_check_keys;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;validation:validate_state;~:<built-in method builtins.isinstance>;<frozen abc>:__instancecheck__;~:<built-in method _abc._abc_instancecheck>;<frozen abc>:__subclasscheck__;~:<built-in method _abc._abc_subclasscheck>;<frozen _collections_abc>:__subclasshook__ 0.003
+<stdin>:workload;core:decide;provenance:append;copy:deepcopy;~:<method '__reduce_ex__' of 'object' objects>;copyreg:_slotnames;~:<method 'get' of 'mappingproxy' objects> 0.000

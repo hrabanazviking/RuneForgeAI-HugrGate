@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 271 · **public names:** 1659
+**Modules:** 252 · **public names:** 1510
 
 ## API stability policy
 
@@ -308,6 +308,31 @@ that this document never drifts from the code.
 | `PolicyVersion` | class | `(version_id: 'str', parent_id: 'str | None', created_at: 'float', note: 'str', state_digest: 'str') -> None` |
 | `digest_state` | function | `(state: 'Mapping[str, Any]') -> 'str'` |
 
+### `hugrgate.allocprof`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AllocationProfiler` | class | `(nframes: 'int' = 8, top_n: 'int' = 200, attach_to_metadata: 'bool' = True) -> 'None'` |
+| `AllocationReport` | class | `(label: 'str', before_bytes: 'int', after_bytes: 'int', sites: 'list[AllocationSite]' = <factory>) -> None` |
+| `AllocationSite` | class | `(location: 'str', size_bytes: 'int', count: 'int') -> None` |
+
+### `hugrgate.async_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AsyncGate` | class | `(gate: 'HugrGate | None' = None, max_concurrency: 'int' = 8) -> 'None'` |
+| `AsyncRequest` | class | `(state: 'Mapping[str, Any]', spec: 'SpecLike', policy: 'DecisionPolicy | None' = None, context: 'Mapping[str, Any] | None' = None, backend_name: 'str | None' = None, timeout_s: 'float | None' = None) -> None` |
+| `evaluate_async` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Mapping[str, Any] | None' = None) -> 'Any'` |
+
+### `hugrgate.asyncx`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AsyncBackend` | class | `(*args, **kwargs)` |
+| `AsyncBackendBase` | class | `()` |
+| `evaluate_async` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', context: 'Mapping[str, Any] | None' = None) -> 'Any'` |
+| `is_async_backend` | function | `(backend: 'Any') -> 'bool'` |
+
 ### `hugrgate.backend`
 
 | Name | Kind | Signature / value |
@@ -367,6 +392,14 @@ that this document never drifts from the code.
 | `OPERATORS` | constant | `('eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'in', 'contains', 'ex` |
 | `Rule` | class | `(condition: 'dict[str, Any] | None', then: 'Any', confidence: 'float' = 1.0, priority: 'int' = 0, name: 'str | None' = None) -> None` |
 | `RuleBackend` | class | `(rules: 'list[Rule] | None' = None, name: 'str' = 'rules', model_name: 'str' = 'ruleset')` |
+
+### `hugrgate.backpressure`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `BackpressureEngine` | class | `(max_inflight: 'int' = 128, rate_per_second: 'float | None' = None, burst_capacity: 'int | None' = None) -> 'None'` |
+| `Lease` | class | `(engine: 'BackpressureEngine') -> 'None'` |
+| `TokenBucket` | class | `(capacity: 'int', refill_per_second: 'float') -> 'None'` |
 
 ### `hugrgate.bench`
 
@@ -681,224 +714,6 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `SlidingWindowCalibrator` | class | `(factory: 'Callable[[], Calibrator]', window_size: 'int' = 500, refit_every: 'int' = 50, min_samples: 'int' = 20)` |
-
-### `hugrgate.chaos`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CHAOS_LAB` | constant | `'chaos-lab'` |
-| `CORRUPTION_KINDS` | constant | `('flip_magic', 'bad_version', 'truncate', 'kv_bomb', 'zero_o` |
-| `CRASH` | constant | `'crash'` |
-| `CRITICAL` | constant | `'critical'` |
-| `DOWN` | constant | `'down'` |
-| `ERROR_RATE` | constant | `'error_rate'` |
-| `HANG` | constant | `'hang'` |
-| `LATENCY` | constant | `'latency'` |
-| `MALFORMED` | constant | `'malformed'` |
-| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
-| `OK` | constant | `'ok'` |
-| `UP` | constant | `'up'` |
-| `WARN` | constant | `'warn'` |
-| `BlastRadius` | class | `(allowed_targets: 'frozenset[str]' = frozenset(), dry_run: 'bool' = False) -> None` |
-| `BulkheadExecutor` | class | `(default_cap: 'int' = 8, caps: 'dict[str, int] | None' = None) -> 'None'` |
-| `CPUStarvationSimulator` | class | `(share: 'float' = 1.0)` |
-| `CacheCorruptor` | class | `(cache: 'DecisionCache')` |
-| `ChaosExperiment` | class | `(name: 'str', hypothesis: 'str', faults: 'tuple[Fault, ...]' = (), probes: 'tuple[SteadyStateProbe, ...]' = (), blast_radius: 'BlastRadius' = <factory>, seed: 'int | None' = None) -> None` |
-| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
-| `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
-| `DegradationPlan` | class | `(name: 'str', description: 'str', triggers: 'tuple[str, ...]', steps: 'tuple[DegradationStep, ...]' = <factory>) -> None` |
-| `DegradationPlanRegistry` | class | `() -> 'None'` |
-| `DegradationReport` | class | `(plan_name: 'str', failure_code: 'str', steps: 'list[_StepOutcome]', started_at: 'float', finished_at: 'float') -> None` |
-| `DegradationStep` | class | `(name: 'str', description: 'str', run: 'StepAction') -> None` |
-| `DependencyMatrix` | class | `()` |
-| `DependencyScenario` | class | `(name: 'str', description: 'str', break_it: 'Callable[[], Callable[[], None]]', check: 'Callable[[], None]') -> None` |
-| `ExperimentReport` | class | `(experiment: 'str', hypothesis: 'str', target: 'str', seed: 'int | None', dry_run: 'bool', steady_before: 'dict[str, ProbeOutcome]' = <factory>, steady_after: 'dict[str, ProbeOutcome]' = <factory>, faults: 'list[FaultResult]' = <factory>, started_at: 'float' = 0.0, finished_at: 'float' = 0.0) -> None` |
-| `ExperimentRunner` | class | `(clock: 'Callable[[], float]' = <built-in function monotonic>)` |
-| `Fault` | class | `(name: 'str', description: 'str', inject: 'Callable[[dict[str, Any]], None]', verify: 'Callable[[dict[str, Any]], None]', rollback: 'Callable[[dict[str, Any]], None] | None' = None) -> None` |
-| `FaultResult` | class | `(name: 'str', injected: 'bool', verified: 'bool', rolled_back: 'bool', detail: 'str' = '') -> None` |
-| `FaultSpec` | class | `(mode: 'str', rate: 'float' = 1.0, seed: 'int | None' = None, params: 'dict[str, Any]' = <factory>) -> None` |
-| `FaultyBackend` | class | `(backend: 'Backend')` |
-| `MemoryPressureSimulator` | class | `(total_bytes: 'int' = 8589934592)` |
-| `MemoryReading` | class | `(total_bytes: 'int', available_bytes: 'int') -> None` |
-| `ModelCorruptor` | class | `(seed: 'int | None' = None)` |
-| `NetworkGuard` | class | `(backend: 'Backend', network: 'NetworkSimulator', host: 'str | None' = None)` |
-| `NetworkSimulator` | class | `()` |
-| `ProbeOutcome` | class | `(ok: 'bool', detail: 'str' = '') -> None` |
-| `RecoveryProbe` | class | `(name: 'str', description: 'str', check: 'ProbeCheck') -> None` |
-| `RecoveryReport` | class | `(verifier_name: 'str', probes: 'list[_ProbeOutcome]', started_at: 'float', finished_at: 'float') -> None` |
-| `RecoveryVerifier` | class | `(name: 'str', probes: 'list[RecoveryProbe] | tuple[RecoveryProbe, ...]', sleep: 'Callable[[float], None]' = <built-in function sleep>) -> 'None'` |
-| `ResourceGuard` | class | `(reader: 'Callable[[], MemoryReading]', warn_ratio: 'float' = 0.75, critical_ratio: 'float' = 0.9)` |
-| `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
-| `ScheduledFault` | class | `(name: 'str', at_s: 'float', until_s: 'float', apply: 'Callable[[], None]', revert: 'Callable[[], None]') -> None` |
-| `Scorecard` | class | `(title: 'str' = 'Reliability scorecard', threshold: 'float' = 1.0) -> 'None'` |
-| `ScorecardEntry` | class | `(name: 'str', category: 'str', passed: 'bool', note: 'str' = '', weight: 'float' = 1.0, waived: 'bool' = False, waiver_reason: 'str' = '') -> None` |
-| `ScorecardReport` | class | `(title: 'str', entries: 'list[ScorecardEntry]', threshold: 'float', built_at: 'float' = <factory>) -> None` |
-| `ServiceUnderTest` | class | `(backends: 'Sequence[Backend]', breakable: 'Collection[str]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None)` |
-| `SkewedClock` | class | `(base: 'Callable[[], float]' = <built-in function monotonic>)` |
-| `SoakConfig` | class | `(duration_s: 'float' = 2.0, target_ops_per_s: 'float' = 50.0, max_ops: 'int | None' = None, invariant_every_n_ops: 'int' = 25, expected_errors: 'tuple[str, ...]' = ()) -> None` |
-| `SoakReport` | class | `(ops_completed: 'int', errors: 'dict[str, int]', unexpected_errors: 'dict[str, int]', violations: 'list[str]', faults_applied: 'list[str]', duration_s: 'float') -> None` |
-| `SoakRunner` | class | `(workload: 'Callable[[int], None]', invariants: 'list[Callable[[], None]] | None' = None, faults: 'list[ScheduledFault] | None' = None) -> 'None'` |
-| `SteadyStateProbe` | class | `(name: 'str', check: 'Callable[[], ProbeOutcome]') -> None` |
-| `audit_deadline_clocks` | function | `() -> 'dict[str, str]'` |
-| `backend_health_probe` | function | `(backend: 'Any') -> 'RecoveryProbe'` |
-| `builtin_degradation_plans` | function | `() -> 'DegradationPlanRegistry'` |
-| `builtin_dependency_matrix` | function | `() -> 'DependencyMatrix'` |
-| `circuit_closed_probe` | function | `(get_state: 'Callable[[], str]', backend_name: 'str') -> 'RecoveryProbe'` |
-| `decision_smoke_probe` | function | `(gate: 'Any', state: 'Mapping[str, Any]', spec: 'Any', backend_name: 'str | None' = None) -> 'RecoveryProbe'` |
-| `default_retry_policy` | function | `(exc: 'BaseException') -> 'bool'` |
-| `dependency_failure_matrix` | function | `() -> 'dict[str, Any]'` |
-| `disk_full` | function | `(errno_code: 'int' = 28) -> 'Iterator[None]'` |
-| `partial_service_failure_experiment` | function | `(service: 'ServiceUnderTest', failing_names: 'Collection[str]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', *, name: 'str' = 'partial-service-failure', seed: 'int | None' = 266, simultaneous: 'bool' = False) -> 'ChaosExperiment'` |
-| `read_only` | function | `(errno_code: 'int' = 30) -> 'Iterator[None]'` |
-| `retry_with_budget` | function | `(fn: 'Callable[[], T]', budget: 'RetryBudget', *, is_retryable: 'Callable[[BaseException], bool] | None' = None, on_retry: 'Callable[[int, BaseException], None] | None' = None) -> 'T'` |
-| `run_experiment_on_lab` | function | `(experiment: 'ChaosExperiment') -> 'dict[str, Any]'` |
-
-### `hugrgate.chaos.backend_faults`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CRASH` | constant | `'crash'` |
-| `ERROR_RATE` | constant | `'error_rate'` |
-| `HANG` | constant | `'hang'` |
-| `LATENCY` | constant | `'latency'` |
-| `MALFORMED` | constant | `'malformed'` |
-| `FaultSpec` | class | `(mode: 'str', rate: 'float' = 1.0, seed: 'int | None' = None, params: 'dict[str, Any]' = <factory>) -> None` |
-| `FaultyBackend` | class | `(backend: 'Backend')` |
-
-### `hugrgate.chaos.bulkhead`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BulkheadExecutor` | class | `(default_cap: 'int' = 8, caps: 'dict[str, int] | None' = None) -> 'None'` |
-
-### `hugrgate.chaos.cache_faults`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CacheCorruptor` | class | `(cache: 'DecisionCache')` |
-
-### `hugrgate.chaos.clock`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `SkewedClock` | class | `(base: 'Callable[[], float]' = <built-in function monotonic>)` |
-| `audit_deadline_clocks` | function | `() -> 'dict[str, str]'` |
-
-### `hugrgate.chaos.crash`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
-| `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
-| `worker_main` | function | `(directory: 'str', count: 'int') -> 'int'` |
-
-### `hugrgate.chaos.degradation`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DegradationPlan` | class | `(name: 'str', description: 'str', triggers: 'tuple[str, ...]', steps: 'tuple[DegradationStep, ...]' = <factory>) -> None` |
-| `DegradationPlanRegistry` | class | `() -> 'None'` |
-| `DegradationReport` | class | `(plan_name: 'str', failure_code: 'str', steps: 'list[_StepOutcome]', started_at: 'float', finished_at: 'float') -> None` |
-| `DegradationStep` | class | `(name: 'str', description: 'str', run: 'StepAction') -> None` |
-| `builtin_degradation_plans` | function | `() -> 'DegradationPlanRegistry'` |
-
-### `hugrgate.chaos.experiments`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CHAOS_LAB` | constant | `'chaos-lab'` |
-| `DependencyMatrix` | class | `()` |
-| `DependencyScenario` | class | `(name: 'str', description: 'str', break_it: 'Callable[[], Callable[[], None]]', check: 'Callable[[], None]') -> None` |
-| `ServiceUnderTest` | class | `(backends: 'Sequence[Backend]', breakable: 'Collection[str]', policy: 'DecisionPolicy | None' = None, safe_default: 'Any' = None)` |
-| `builtin_dependency_matrix` | function | `() -> 'DependencyMatrix'` |
-| `dependency_failure_matrix` | function | `() -> 'dict[str, Any]'` |
-| `partial_service_failure_experiment` | function | `(service: 'ServiceUnderTest', failing_names: 'Collection[str]', state: 'Mapping[str, Any]', spec: 'DecisionSpec', *, name: 'str' = 'partial-service-failure', seed: 'int | None' = 266, simultaneous: 'bool' = False) -> 'ChaosExperiment'` |
-| `run_experiment_on_lab` | function | `(experiment: 'ChaosExperiment') -> 'dict[str, Any]'` |
-
-### `hugrgate.chaos.filesystem`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `disk_full` | function | `(errno_code: 'int' = 28) -> 'Iterator[None]'` |
-| `read_only` | function | `(errno_code: 'int' = 30) -> 'Iterator[None]'` |
-
-### `hugrgate.chaos.framework`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `BlastRadius` | class | `(allowed_targets: 'frozenset[str]' = frozenset(), dry_run: 'bool' = False) -> None` |
-| `ChaosExperiment` | class | `(name: 'str', hypothesis: 'str', faults: 'tuple[Fault, ...]' = (), probes: 'tuple[SteadyStateProbe, ...]' = (), blast_radius: 'BlastRadius' = <factory>, seed: 'int | None' = None) -> None` |
-| `ExperimentReport` | class | `(experiment: 'str', hypothesis: 'str', target: 'str', seed: 'int | None', dry_run: 'bool', steady_before: 'dict[str, ProbeOutcome]' = <factory>, steady_after: 'dict[str, ProbeOutcome]' = <factory>, faults: 'list[FaultResult]' = <factory>, started_at: 'float' = 0.0, finished_at: 'float' = 0.0) -> None` |
-| `ExperimentRunner` | class | `(clock: 'Callable[[], float]' = <built-in function monotonic>)` |
-| `Fault` | class | `(name: 'str', description: 'str', inject: 'Callable[[dict[str, Any]], None]', verify: 'Callable[[dict[str, Any]], None]', rollback: 'Callable[[dict[str, Any]], None] | None' = None) -> None` |
-| `FaultResult` | class | `(name: 'str', injected: 'bool', verified: 'bool', rolled_back: 'bool', detail: 'str' = '') -> None` |
-| `ProbeOutcome` | class | `(ok: 'bool', detail: 'str' = '') -> None` |
-| `SteadyStateProbe` | class | `(name: 'str', check: 'Callable[[], ProbeOutcome]') -> None` |
-
-### `hugrgate.chaos.model_faults`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CORRUPTION_KINDS` | constant | `('flip_magic', 'bad_version', 'truncate', 'kv_bomb', 'zero_o` |
-| `MUST_REJECT_KINDS` | constant | `{'bad_version', 'flip_magic', 'kv_bomb', 'truncate', 'zero_o` |
-| `ModelCorruptor` | class | `(seed: 'int | None' = None)` |
-
-### `hugrgate.chaos.network`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DOWN` | constant | `'down'` |
-| `UP` | constant | `'up'` |
-| `NetworkGuard` | class | `(backend: 'Backend', network: 'NetworkSimulator', host: 'str | None' = None)` |
-| `NetworkSimulator` | class | `()` |
-
-### `hugrgate.chaos.recovery`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `RecoveryProbe` | class | `(name: 'str', description: 'str', check: 'ProbeCheck') -> None` |
-| `RecoveryReport` | class | `(verifier_name: 'str', probes: 'list[_ProbeOutcome]', started_at: 'float', finished_at: 'float') -> None` |
-| `RecoveryVerifier` | class | `(name: 'str', probes: 'list[RecoveryProbe] | tuple[RecoveryProbe, ...]', sleep: 'Callable[[float], None]' = <built-in function sleep>) -> 'None'` |
-| `backend_health_probe` | function | `(backend: 'Any') -> 'RecoveryProbe'` |
-| `circuit_closed_probe` | function | `(get_state: 'Callable[[], str]', backend_name: 'str') -> 'RecoveryProbe'` |
-| `decision_smoke_probe` | function | `(gate: 'Any', state: 'Mapping[str, Any]', spec: 'Any', backend_name: 'str | None' = None) -> 'RecoveryProbe'` |
-
-### `hugrgate.chaos.resources`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CRITICAL` | constant | `'critical'` |
-| `OK` | constant | `'ok'` |
-| `WARN` | constant | `'warn'` |
-| `CPUStarvationSimulator` | class | `(share: 'float' = 1.0)` |
-| `MemoryPressureSimulator` | class | `(total_bytes: 'int' = 8589934592)` |
-| `MemoryReading` | class | `(total_bytes: 'int', available_bytes: 'int') -> None` |
-| `ResourceGuard` | class | `(reader: 'Callable[[], MemoryReading]', warn_ratio: 'float' = 0.75, critical_ratio: 'float' = 0.9)` |
-
-### `hugrgate.chaos.retry`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `RetryBudget` | class | `(max_retries: 'int', window_s: 'float' = 60.0, clock: 'Callable[[], float]' = <built-in function monotonic>) -> 'None'` |
-| `default_retry_policy` | function | `(exc: 'BaseException') -> 'bool'` |
-| `retry_with_budget` | function | `(fn: 'Callable[[], T]', budget: 'RetryBudget', *, is_retryable: 'Callable[[BaseException], bool] | None' = None, on_retry: 'Callable[[int, BaseException], None] | None' = None) -> 'T'` |
-
-### `hugrgate.chaos.scorecard`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `Scorecard` | class | `(title: 'str' = 'Reliability scorecard', threshold: 'float' = 1.0) -> 'None'` |
-| `ScorecardEntry` | class | `(name: 'str', category: 'str', passed: 'bool', note: 'str' = '', weight: 'float' = 1.0, waived: 'bool' = False, waiver_reason: 'str' = '') -> None` |
-| `ScorecardReport` | class | `(title: 'str', entries: 'list[ScorecardEntry]', threshold: 'float', built_at: 'float' = <factory>) -> None` |
-
-### `hugrgate.chaos.soak`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ScheduledFault` | class | `(name: 'str', at_s: 'float', until_s: 'float', apply: 'Callable[[], None]', revert: 'Callable[[], None]') -> None` |
-| `SoakConfig` | class | `(duration_s: 'float' = 2.0, target_ops_per_s: 'float' = 50.0, max_ops: 'int | None' = None, invariant_every_n_ops: 'int' = 25, expected_errors: 'tuple[str, ...]' = ()) -> None` |
-| `SoakReport` | class | `(ops_completed: 'int', errors: 'dict[str, int]', unexpected_errors: 'dict[str, int]', violations: 'list[str]', faults_applied: 'list[str]', duration_s: 'float') -> None` |
-| `SoakRunner` | class | `(workload: 'Callable[[int], None]', invariants: 'list[Callable[[], None]] | None' = None, faults: 'list[ScheduledFault] | None' = None) -> 'None'` |
 
 ### `hugrgate.circuit`
 
@@ -1595,7 +1410,7 @@ that this document never drifts from the code.
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
 | `EdgeWatchdog` | class | `(timeout_s: 'float', *, clock: 'Callable[[], float] | None' = None, policy: 'MissPolicy' = <MissPolicy.LOG: 'log'>, on_miss: 'Callable[[int], None] | None' = None, on_restart: 'Callable[[], None] | None' = None, max_misses: 'int | None' = None, check_interval_s: 'float' = 1.0)` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]', pre_check: 'Callable[[], None] | None' = None, post_check: 'Callable[[], None] | None' = None) -> None` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
 | `GateCheck` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
 | `GateReport` | class | `(checks: 'list[GateCheck]' = <factory>, blockers: 'list[str]' = <factory>) -> None` |
 | `HailoAdapter` | class | `(sdk: 'Any | None' = None, pci_vendor_ids: 'list[str] | None' = None)` |
@@ -1722,7 +1537,7 @@ that this document never drifts from the code.
 | `BUILTIN_SCENARIOS` | constant | `[FaultScenario(name='power-loss-mid-write', description='tor` |
 | `ChaosResult` | class | `(name: 'str', passed: 'bool', detail: 'str' = '') -> None` |
 | `ChaosRunner` | class | `()` |
-| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]', pre_check: 'Callable[[], None] | None' = None, post_check: 'Callable[[], None] | None' = None) -> None` |
+| `FaultScenario` | class | `(name: 'str', description: 'str', run: 'Callable[[], None]') -> None` |
 | `build_builtin_runner` | function | `() -> 'ChaosRunner'` |
 
 ### `hugrgate.edge.gate`
@@ -2170,39 +1985,42 @@ that this document never drifts from the code.
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details: 'Any')` |
 | `BackendError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BackendUnavailable` | class | `(message: 'str' = '', **details: 'Any')` |
+| `BackpressureError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `BulkheadRejected` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ContractError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `DataFlowDenied` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeAffinityError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `GpuschedError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `HugrGateError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `JurisdictionViolation` | class | `(message: 'str' = '', **details: 'Any')` |
-| `KeyProviderError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `LocalOnlyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `MultiprocError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `NPUError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `NumaError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `OfflineBootstrapError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PerfGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PolicyError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PoolError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ProfilingError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QuantError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `QueueFull` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
-| `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
-| `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
-| `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SchedulerError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SerdeError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SpecError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `StorageError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `SupervisionError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TelemetryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `TimeoutError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `WatchdogError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `ZeroCopyError` | class | `(message: 'str' = '', **details: 'Any')` |
 
 ### `hugrgate.fallback`
 
@@ -2221,12 +2039,38 @@ that this document never drifts from the code.
 | `Pipeline` | class | `(extractors: 'Sequence[FeatureExtractor]')` |
 | `TextLengthEncoder` | class | `(field: 'str', include_words: 'bool' = True, normalize: 'float | None' = None)` |
 
+### `hugrgate.flame`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FlameGraph` | class | `(width: 'int' = 1200, frame_height: 'int' = 22, font_size: 'int' = 12) -> 'None'` |
+| `FoldedStacks` | class | `(frames: 'list[StackFrame]' = <factory>, total_weight_ms: 'float' = 0.0, label: 'str' = '') -> None` |
+| `StackFrame` | class | `(stack: 'str', weight_ms: 'float', depth: 'int') -> None` |
+| `baseline_metadata` | function | `(label: 'str') -> 'dict[str, Any]'` |
+| `write_baseline` | function | `(stacks: 'FoldedStacks', svg: 'str', directory: 'str | Path', label: 'str') -> 'dict[str, Path]'` |
+
+### `hugrgate.gpusched`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GpuInfo` | class | `(index: 'int', name: 'str', memory_total_mb: 'int', memory_used_mb: 'int', memory_free_mb: 'int', utilization_pct: 'int') -> None` |
+| `GpuScheduler` | class | `(gpus: 'list[GpuInfo] | None' = None, *, policy: 'str' = 'least-memory-used', max_workers_per_gpu: 'int | None' = None) -> 'None'` |
+| `discover_gpus` | function | `(smi_binary: 'str' = 'nvidia-smi') -> 'list[GpuInfo]'` |
+| `parse_smi_csv` | function | `(text: 'str') -> 'list[GpuInfo]'` |
+
 ### `hugrgate.health`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `BackendStats` | class | `(latencies: 'deque[float]' = <factory>, errors: 'int' = 0, samples: 'int' = 0, consecutive_failures: 'int' = 0) -> None` |
 | `HealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.3, max_consecutive_failures: 'int' = 5, latency_target_ms: 'float' = 1000.0, min_samples: 'int' = 3)` |
+
+### `hugrgate.hotpaths`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HotFunction` | class | `(function: 'str', cumtime_ms: 'float', tottime_ms: 'float', calls: 'int', runs_seen: 'int', share: 'float' = 0.0) -> None` |
+| `HotPathInventory` | class | `(runs: 'int', total_ms: 'float', functions: 'list[HotFunction]' = <factory>, label: 'str' = '') -> None` |
 
 ### `hugrgate.ladder`
 
@@ -2246,6 +2090,14 @@ that this document never drifts from the code.
 | `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'list[LadderRung] | None' = None, *, ladders: 'dict[str, list[LadderRung]] | None' = None, provenance: 'ProvenanceStore | None' = None, privacy_guard: 'PrivacyGuard | None' = None)` |
 | `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'float | None' = None) -> None` |
 
+### `hugrgate.lockaudit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Finding` | class | `(path: 'str', lineno: 'int', function: 'str', lock_expr: 'str', kind: 'str', detail: 'str') -> None` |
+| `InstrumentedLock` | class | `(name: 'str', kind: 'str' = 'rlock') -> 'None'` |
+| `audit_locks` | function | `(package_root: 'str | Path' = 'hugrgate') -> 'list[Finding]'` |
+
 ### `hugrgate.log`
 
 | Name | Kind | Signature / value |
@@ -2255,6 +2107,14 @@ that this document never drifts from the code.
 | `configure_logging` | function | `(level: 'str' = 'WARNING', stream: 'TextIO | None' = None, json_format: 'bool' = False) -> 'logging.Logger'` |
 | `get_logger` | function | `(name: 'str') -> 'logging.Logger'` |
 
+### `hugrgate.millionbench`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `InstantBackend` | class | `()` |
+| `MillionResult` | class | `(n: 'int', seed: 'int', state_pool_size: 'int', elapsed_s: 'float', decisions_per_s: 'float', latency_p50_us: 'float', latency_p95_us: 'float', latency_p99_us: 'float', latency_max_us: 'float', errors: 'int', rss_before_mb: 'float | None', rss_after_mb: 'float | None') -> None` |
+| `run_million` | function | `(n: 'int' = 1000000, *, seed: 'int' = 299, state_pool_size: 'int' = 1000, progress_every: 'int' = 100000, sample_every: 'int' = 100) -> 'MillionResult'` |
+
 ### `hugrgate.models`
 
 | Name | Kind | Signature / value |
@@ -2262,6 +2122,12 @@ that this document never drifts from the code.
 | `ModelManifest` | class | `(name: 'str', version: 'str', backend: 'str', spec_type: 'str', features: 'list[str]', classes: 'list[str]', trained_at: 'str' = <factory>, metrics: 'dict[str, float]' = <factory>, payload_hash: 'str' = '', extra: 'dict[str, Any]' = <factory>) -> None` |
 | `ModelStore` | class | `(root: 'str | Path')` |
 | `sha256_bytes` | function | `(payload: 'bytes') -> 'str'` |
+
+### `hugrgate.multiproc`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ProcessPool` | class | `(*, max_workers: 'int | None' = None, start_method: 'str' = 'spawn', task_timeout_s: 'float | None' = None, initializer: 'Callable | None' = None, initargs: 'tuple' = ()) -> 'None'` |
 
 ### `hugrgate.negotiate`
 
@@ -2271,208 +2137,59 @@ that this document never drifts from the code.
 | `CALIBRATION_WEIGHT` | constant | `0.3` |
 | `select_backend` | function | `(spec: 'DecisionSpec', policy: 'DecisionPolicy', registry: 'BackendRegistry', *, privacy_guard: 'PrivacyGuard | None' = None, health: 'Callable[[str], float] | None' = None, min_health: 'float' = 0.0, stats: 'Mapping[str, Mapping[str, float]] | None' = None) -> 'list[Backend]'` |
 
+### `hugrgate.numa`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `NumaTopology` | class | `(nodes: 'dict[int, list[int]]', distances: 'dict[int, dict[int, int]]' = <factory>, source: 'str' = 'sysfs') -> None` |
+| `current_node` | function | `(topology: 'NumaTopology | None' = None) -> 'int | None'` |
+| `detect_topology` | function | `() -> 'NumaTopology'` |
+| `is_numa` | function | `(topology: 'NumaTopology | None' = None) -> 'bool'` |
+| `pin_thread` | function | `(cpus: 'set[int] | list[int]', topology: 'NumaTopology | None' = None) -> 'None'` |
+| `pin_to_node` | function | `(node: 'int', topology: 'NumaTopology | None' = None) -> 'None'` |
+| `pinned_to` | class | `(node: 'int', topology: 'NumaTopology | None' = None) -> 'None'` |
+| `suggest_node` | function | `(worker_index: 'int', topology: 'NumaTopology | None' = None) -> 'int'` |
+
+### `hugrgate.perfgate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `GateDefinition` | class | `(name: 'str', metric_fn: 'Callable[[], float]', direction: 'str', max_regression_frac: 'float', samples: 'int' = 7, unit: 'str' = '') -> None` |
+| `GateResult` | class | `(name: 'str', baseline: 'float', measured: 'float', direction: 'str', max_regression_frac: 'float', regression_frac: 'float', passed: 'bool', unit: 'str' = '') -> None` |
+| `PerfGate` | class | `(baseline_path: 'str | Path' = PosixPath('benchmarks/perf_baseline.json')) -> 'None'` |
+| `default_gates` | function | `() -> 'list[tuple]'` |
+
 ### `hugrgate.policy`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionPolicy` | class | `(minimum_probability: 'float' = 0.0, maximum_latency_ms: 'float | None' = None, remote_inference: 'bool' = False, allowed_backends: 'list[str] | None' = None, preferred_backends: 'list[str] | None' = None, fallback_behavior: 'str' = 'abstain', privacy_class: 'str' = 'standard', max_cost: 'float | None' = None, review_band: 'tuple | None' = None) -> None` |
 
+### `hugrgate.pool`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PooledHandle` | class | `(pool: 'ResourcePool', resource: 'Any') -> 'None'` |
+| `ResourcePool` | class | `(factory: 'Callable[[], Any]', *, min_size: 'int' = 0, max_size: 'int' = 8, idle_timeout_s: 'float' = 60.0, max_lifetime_s: 'float' = 3600.0, acquire_timeout_s: 'float' = 10.0, health_check: 'Callable[[Any], bool] | None' = None, name: 'str' = 'pool') -> 'None'` |
+| `shared_http_client_pool` | function | `() -> 'ResourcePool'` |
+
 ### `hugrgate.privacy`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CLASS_SEMANTICS` | constant | `{'public': {'min_trust': 'untrusted', 'cacheable': True, 're` |
-| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'forbidden', 'strict'}` |
-| `PRIVACY_CLASS_ORDER` | constant | `('public', 'standard', 'sensitive', 'strict', 'forbidden')` |
+| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'strict'}` |
 | `REMOTE_MODES` | constant | `('allow', 'forbidden')` |
-| `TRUST_ORDER` | constant | `('untrusted', 'basic', 'verified', 'enclave')` |
-| `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True, trust_registry: 'BackendTrustRegistry | None' = None, jurisdiction_registry: 'JurisdictionRegistry | None' = None, jurisdictions_allowed: 'set[str] | frozenset[str] | None' = None, audit_log: 'PrivacyAuditLog | None' = None)` |
-| `at_least` | function | `(privacy_class: 'str', minimum: 'str') -> 'bool'` |
-| `class_rank` | function | `(privacy_class: 'str') -> 'int'` |
-| `default_trust_level` | function | `(backend: 'Backend') -> 'str'` |
-| `provenance_mode_for` | function | `(privacy_class: 'str') -> 'str'` |
-| `semantics_for` | function | `(privacy_class: 'str') -> 'dict[str, Any]'` |
-| `trust_rank` | function | `(level: 'str') -> 'int'` |
+| `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True)` |
 
-### `hugrgate.privacy_audit`
+### `hugrgate.profiling`
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `FileAuditSink` | class | `(path: 'str | Path')` |
-| `PrivacyAuditEvent` | class | `(event: 'str', timestamp: 'float' = <factory>, details: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', event_hash: 'str' = '') -> None` |
-| `PrivacyAuditLog` | class | `(sink: 'Callable[[dict[str, Any]], None] | None' = None)` |
-
-### `hugrgate.privacy_crypto`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `EncryptedDecisionCache` | class | `(key: 'bytes', *, ttl_seconds: 'float' = 300.0, max_size: 'int' = 1000, namespace: 'str' = 'decision-cache')` |
-| `SealedBox` | class | `()` |
-| `hkdf` | function | `(key: 'bytes', *, salt: 'bytes' = b'', info: 'bytes' = b'', length: 'int' = 32) -> 'bytes'` |
-| `require_key` | function | `(key: 'bytes') -> 'bytes'` |
-
-### `hugrgate.privacy_deletion`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CryptoShredder` | class | `(drop_key: 'Callable[[str], None]')` |
-| `DeletionReceipt` | class | `(record_hash: 'str', timestamp: 'float' = <factory>, hooks_fired: 'list[str]' = <factory>, shredded_fields: 'list[str]' = <factory>) -> None` |
-| `SecureBuffer` | class | `(initial: 'bytes | bytearray' = b'', passes: 'int' = 3)` |
-| `SecureDeleter` | class | `()` |
-| `shred_bytes` | function | `(buffer: 'bytearray', passes: 'int' = 3) -> 'None'` |
-
-### `hugrgate.privacy_dryrun`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DryRunReport` | class | `(backend: 'str', allowed: 'bool', stages: 'list[DryRunStage]' = <factory>, stripped_fields: 'list[str]' = <factory>, denied_reason: 'str | None' = None) -> None` |
-| `DryRunStage` | class | `(stage: 'str', action: 'str', reason: 'str', detail: 'dict[str, Any]' = <factory>) -> None` |
-| `PrivacyDryRun` | class | `(guard: 'PrivacyGuard')` |
-
-### `hugrgate.privacy_exfil`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `ExfilAttempt` | class | `(name: 'str', state: 'dict[str, Any]', backend_name: 'str' = 'attacker-controlled', trust: 'str' = 'basic', jurisdiction: 'str' = 'unknown', privacy_class: 'str' = 'strict', labels: 'FieldLabels | None' = None, markers: 'list[str]' = <factory>, expect: 'str' = 'blocked') -> None` |
-| `ExfilOutcome` | class | `(name: 'str', verdict: 'str', mechanism: 'str', detail: 'str', expected: 'str') -> None` |
-| `ExfilReport` | class | `(outcomes: 'list[ExfilOutcome]' = <factory>) -> None` |
-| `ExfilSimulator` | class | `(guard: 'PrivacyGuard | None' = None, jurisdictions_allowed: 'frozenset[str] | None' = None)` |
-| `default_attacks` | function | `() -> 'list[ExfilAttempt]'` |
-
-### `hugrgate.privacy_explain`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PrivacyExplainer` | class | `()` |
-| `explain_denial` | function | `(error: 'HugrGateError', **context: 'Any') -> 'str'` |
-
-### `hugrgate.privacy_flow`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DataFlowPolicy` | class | `(max_remote_level: 'Sensitivity | str | int' = <Sensitivity.CONFIDENTIAL: 2>, redact_instead_of_deny: 'bool' = False)` |
-| `FlowDecision` | class | `(allowed: 'bool', action: 'str', redactions: 'list[str]' = <factory>, reasons: 'list[str]' = <factory>, _dst: 'str' = '') -> None` |
-| `FlowRequest` | class | `(privacy_class: 'str', dst_name: 'str', dst_remote: 'bool' = False, dst_trust: 'str' = 'enclave', dst_jurisdiction: 'str' = 'local', field_levels: 'Mapping[str, Sensitivity | str | int]' = <factory>, local_only_fields: 'Iterable[str]' = (), jurisdictions_allowed: 'frozenset[str] | set[str] | None' = None) -> None` |
-
-### `hugrgate.privacy_jurisdiction`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `LOCAL_JURISDICTION` | constant | `'local'` |
-| `UNKNOWN_JURISDICTION` | constant | `'unknown'` |
-| `JurisdictionPolicy` | class | `(allowed: 'set[str] | frozenset[str] | None' = None, registry: 'JurisdictionRegistry | None' = None)` |
-| `JurisdictionRegistry` | class | `(jurisdictions: 'Mapping[str, str] | None' = None)` |
-
-### `hugrgate.privacy_keys`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `EnvKeyProvider` | class | `(prefix: 'str' = '', env: 'dict[str, str] | None' = None)` |
-| `EphemeralKeyProvider` | class | `()` |
-| `FileKeyProvider` | class | `(directory: 'str | Path')` |
-| `KeyProvider` | class | `()` |
-| `RotatingKeyProvider` | class | `(primary: 'KeyProvider', retired: 'list[KeyProvider] | None' = None)` |
-| `cache_from_provider` | function | `(provider: 'KeyProvider', key_id: 'str', **kwargs: 'Any') -> 'EncryptedDecisionCache'` |
-| `derive_key` | function | `(provider: 'KeyProvider', key_id: 'str', context: 'str', length: 'int' = 32) -> 'bytes'` |
-| `provenance_store_from_provider` | function | `(provider: 'KeyProvider', key_id: 'str', **kwargs: 'Any') -> 'SealedProvenanceStore'` |
-
-### `hugrgate.privacy_labels`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `FieldLabels` | class | `(labels: 'Mapping[str, Sensitivity | str | int] | None' = None, default: 'Sensitivity | str | int' = <Sensitivity.PUBLIC: 0>, local_only: 'Iterable[str] | None' = None)` |
-| `Sensitivity` | class | `(*values)` |
-| `filter_by_clearance` | function | `(state: 'Mapping[str, Any]', labels: 'FieldLabels', clearance: 'Sensitivity | str | int', drop_local_only: 'bool' = True) -> 'dict[str, Any]'` |
-
-### `hugrgate.privacy_localonly`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `LocalOnlyPolicy` | class | `(strict: 'bool' = False)` |
-| `LocalOnlyResult` | class | `(state: 'dict[str, Any]', stripped: 'list[str]' = <factory>, remote: 'bool' = False) -> None` |
-| `enforce_local_only` | function | `(state: 'Mapping[str, Any]', labels: 'FieldLabels', *, remote: 'bool', strict: 'bool' = False) -> 'LocalOnlyResult'` |
-
-### `hugrgate.privacy_minimize`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `MinimizationPolicy` | class | `(keep_lists: 'Mapping[str, Collection[str]] | None' = None, default_keep: 'Collection[str] | None' = None)` |
-| `MinimizationReport` | class | `(kept: 'list[str]' = <factory>, dropped: 'list[str]' = <factory>, backend: 'str' = '') -> None` |
-| `PromptMinimizer` | class | `(max_chars: 'int' = 4000)` |
-| `minimize_state` | function | `(state: 'Mapping[str, Any]', keep: 'Collection[str]', backend: 'str' = '') -> 'tuple[dict[str, Any], MinimizationReport]'` |
-
-### `hugrgate.privacy_payload`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `RemotePayload` | class | `(payload: 'dict[str, Any]', manifest: 'dict[str, Any]', backend: 'str' = '', remote: 'bool' = False) -> None` |
-| `RemotePayloadCompiler` | class | `(guard: 'PrivacyGuard', flow_policy: 'DataFlowPolicy | None' = None, labels: 'FieldLabels | None' = None, minimization: 'MinimizationPolicy | None' = None, pii_detector: 'PIIDetector | None' = None, pii_scrub: 'bool' = True, pii_action: 'str' = 'mask', redaction_pipeline: 'RedactionPipeline | None' = None, local_only_strict: 'bool' = False)` |
-
-### `hugrgate.privacy_pii`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `CompositePIIDetector` | class | `(detectors: 'list[PIIDetector]')` |
-| `PIIDetector` | class | `()` |
-| `PIIFinding` | class | `(field: 'str', kind: 'str', confidence: 'str', preview: 'str') -> None` |
-| `PIIScrubber` | class | `(detector: 'PIIDetector | None' = None, action: 'str' = 'mask')` |
-| `RegexPIIDetector` | class | `(kinds: 'list[str] | tuple[str, ...] | None' = None)` |
-
-### `hugrgate.privacy_provenance`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `PrivacyAwareProvenanceStore` | class | `(max_records: 'int | None' = None)` |
-| `SealedProvenanceStore` | class | `(key: 'bytes', *, namespace: 'str' = 'provenance', max_records: 'int | None' = None)` |
-| `fingerprint_state` | function | `(state: 'Mapping[str, Any]', digest_chars: 'int' = 16) -> 'dict[str, str]'` |
-| `privacy_preserving_record` | function | `(state: 'Mapping[str, Any]', spec: 'DecisionSpec', result: 'DecisionResult', policy: 'DecisionPolicy', policy_threshold: 'float' = 0.0, fingerprints: 'bool' = False) -> 'DecisionRecord'` |
-
-### `hugrgate.privacy_redact`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `DROP` | constant | `DROP` |
-| `DropRedactor` | class | `()` |
-| `HashRedactor` | class | `(salt: 'str' = 'hugrgate', digest_size: 'int' = 16)` |
-| `MaskRedactor` | class | `(mask: 'str' = '[REDACTED]', keep_last: 'int' = 0)` |
-| `PatternRedactor` | class | `(patterns: 'list[tuple[str, str]] | None' = None)` |
-| `RedactionPipeline` | class | `(field_redactors: 'Mapping[str, Redactor] | None' = None, level_redactors: 'Mapping[Sensitivity, Redactor] | None' = None, text_redactor: 'PatternRedactor | None' = None)` |
-| `Redactor` | class | `()` |
-| `TokenRedactor` | class | `(vault: 'Any')` |
-| `redact_metadata` | function | `(metadata: 'Mapping[str, Any]', text_redactor: 'PatternRedactor | None' = None) -> 'dict[str, Any]'` |
-
-### `hugrgate.privacy_retention`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `RETENTION_DEFAULTS` | constant | `{'public': None, 'standard': 2592000, 'sensitive': 604800, '` |
-| `RetentionPolicy` | class | `(max_age_seconds: 'Mapping[str, float | None] | None' = None)` |
-| `purge_expired` | function | `(store: 'ProvenanceStore', policy: 'RetentionPolicy | None' = None, now: 'float | None' = None, on_purge: 'Callable[[DecisionRecord], None] | None' = None) -> 'int'` |
-
-### `hugrgate.privacy_secrets`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `SecretFinding` | class | `(field: 'str', pattern: 'str', confidence: 'str', preview: 'str') -> None` |
-| `SecretScanner` | class | `(extra_patterns: 'list[tuple[str, str, str]] | None' = None, entropy_scan: 'bool' = False, min_confidence: 'str' = 'low')` |
-| `assert_no_secrets` | function | `(state: 'Mapping[str, Any]', scanner: 'SecretScanner | None' = None) -> 'None'` |
-
-### `hugrgate.privacy_tokens`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `TOKEN_PREFIX` | constant | `'hgptok_'` |
-| `TokenVault` | class | `(namespace: 'str' = 'default')` |
-
-### `hugrgate.privacy_trust`
-
-| Name | Kind | Signature / value |
-|---|---|---|
-| `TRUST_ORDER` | constant | `('untrusted', 'basic', 'verified', 'enclave')` |
-| `BackendTrustRegistry` | class | `()` |
-| `TrustAttestation` | class | `(level: 'str', attested_by: 'str' = '', attested_at: 'float' = <factory>, expires_at: 'float | None' = None, note: 'str' = '') -> None` |
-| `default_trust_level` | function | `(backend: 'Backend') -> 'str'` |
-| `trust_rank` | function | `(level: 'str') -> 'int'` |
+| `DecisionProfiler` | class | `(sort_by: 'str' = 'cumulative', max_entries: 'int' = 500, attach_to_metadata: 'bool' = True) -> 'None'` |
+| `ProfileEntry` | class | `(function: 'str', ncalls: 'int', tottime_ms: 'float', cumtime_ms: 'float', percall_ms: 'float') -> None` |
+| `ProfileReport` | class | `(wall_ms: 'float', total_calls: 'int', primitive_calls: 'int', entries: 'list[ProfileEntry]' = <factory>, label: 'str' = '') -> None` |
+| `profile_region` | function | `(name: 'str')` |
+| `region_report` | function | `(reset: 'bool' = True) -> 'dict[str, dict[str, float]]'` |
 
 ### `hugrgate.provenance`
 
@@ -2939,6 +2656,12 @@ that this document never drifts from the code.
 | `ResidencyLease` | class | `(manager: 'ResidencyManager', runtime_name: 'str', model: 'ModelRef') -> 'None'` |
 | `ResidencyManager` | class | `() -> 'None'` |
 
+### `hugrgate.runtimes.session_pool`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ModelSessionPool` | class | `(*, max_sessions_per_model: 'int' = 2, max_models: 'int' = 8, idle_timeout_s: 'float' = 300.0, acquire_timeout_s: 'float' = 30.0) -> 'None'` |
+
 ### `hugrgate.runtimes.structured`
 
 | Name | Kind | Signature / value |
@@ -2976,13 +2699,28 @@ that this document never drifts from the code.
 | `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
 | `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
+### `hugrgate.scheduler`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `AdaptiveBatchController` | class | `(min_batch_size: 'int' = 1, max_batch_size: 'int' = 32, target_latency_s: 'float' = 0.05, additive_increase: 'int' = 1, decrease_factor: 'float' = 0.5) -> 'None'` |
+| `BatchExecutor` | class | `(*args, **kwargs)` |
+| `BatchScheduler` | class | `(config: 'SchedulerConfig | None' = None, executor: 'BatchExecutor | None' = None, backpressure: 'BackpressureEngine | None' = None) -> 'None'` |
+| `SchedulerConfig` | class | `(max_batch_size: 'int' = 32, batch_window_s: 'float' = 0.005, max_queue_depth: 'int' = 1024, max_workers: 'int' = 8, shutdown_timeout_s: 'float' = 10.0, adaptive: 'bool' = False, min_batch_size: 'int' = 1, target_batch_latency_s: 'float' = 0.05, priority_enabled: 'bool' = False, starvation_horizon_s: 'float' = 30.0, deadline_enabled: 'bool' = False, drop_late: 'bool' = True) -> None` |
+| `ThreadPoolBatchExecutor` | class | `(max_workers: 'int' = 8) -> 'None'` |
+
 ### `hugrgate.serde`
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `COMPACT_VERSION` | constant | `1` |
+| `policy_from_compact` | function | `(data: 'Sequence[Any]') -> 'DecisionPolicy'` |
 | `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
+| `policy_to_compact` | function | `(policy: 'DecisionPolicy') -> 'list'` |
 | `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
+| `result_from_compact` | function | `(data: 'Sequence[Any]') -> 'DecisionResult'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
+| `result_to_compact` | function | `(result: 'DecisionResult') -> 'list'` |
 
 ### `hugrgate.server`
 
@@ -3003,6 +2741,14 @@ that this document never drifts from the code.
 |---|---|---|
 | `SPEC_TYPES` | constant | `('categorical', 'binary', 'ordinal', 'numeric', 'multilabel'` |
 | `DecisionSpec` | class | `(type: 'str', options: 'list[str] | None' = None, statement: 'str | None' = None, levels: 'list[str] | None' = None, minimum: 'float | None' = None, maximum: 'float | None' = None, labels: 'list[str] | None' = None, metadata: 'dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.supervision`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Supervisor` | class | `(*, check_interval_s: 'float' = 1.0, on_escalation: 'Callable[[str, str, WorkerRecord], None] | None' = None) -> 'None'` |
+| `WorkerContext` | class | `(name: 'str') -> 'None'` |
+| `WorkerRecord` | class | `(name: 'str', target: 'Callable[[WorkerContext], None]', heartbeat_timeout_s: 'float', max_restarts: 'int', restart_window_s: 'float', restarts: 'int' = 0, restart_times: 'list[float]' = <factory>, failures: 'int' = 0, escalated: 'bool' = False, last_error: 'str | None' = None, thread: 'threading.Thread | None' = None, ctx: 'WorkerContext | None' = None) -> None` |
 
 ### `hugrgate.threshold`
 
@@ -3029,3 +2775,13 @@ that this document never drifts from the code.
 |---|---|---|
 | `validate_result` | function | `(result: 'DecisionResult', spec: 'DecisionSpec') -> 'None'` |
 | `validate_state` | function | `(state: 'Mapping[str, Any]', max_bytes: 'int' = 1000000, max_depth: 'int' = 64) -> 'None'` |
+
+### `hugrgate.zerocopy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FrozenDecisionResult` | class | `(result: 'DecisionResult') -> 'None'` |
+| `SharedPayload` | class | `(data: 'bytes', content_type: 'str' = 'application/json') -> 'None'` |
+| `ZeroCopyCache` | class | `(ttl_seconds: 'float' = 300.0, max_size: 'int' = 1024, freeze_on_put: 'bool' = False) -> 'None'` |
+| `copy_cost_estimate` | function | `(result: 'DecisionResult', repeats: 'int' = 200) -> 'dict[str, float]'` |
+| `freeze` | function | `(result: 'DecisionResult') -> 'FrozenDecisionResult'` |

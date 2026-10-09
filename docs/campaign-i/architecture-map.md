@@ -70,6 +70,7 @@ flowchart TD
         runtimes_transformers_rt[runtimes.transformers_rt]
         runtimes_vllm[runtimes.vllm]
         runtimes_warmup[runtimes.warmup]
+        runtimes_session_pool[runtimes.session_pool]
     end
     subgraph runtime[runtime]
         core[core]
@@ -81,28 +82,6 @@ flowchart TD
         circuit[circuit]
         privacy[privacy]
         ladder[ladder]
-    end
-    subgraph privacy-fortress[privacy-fortress]
-        privacy_audit[privacy_audit]
-        privacy_crypto[privacy_crypto]
-        privacy_deletion[privacy_deletion]
-        privacy_dryrun[privacy_dryrun]
-        privacy_exfil[privacy_exfil]
-        privacy_explain[privacy_explain]
-        privacy_flow[privacy_flow]
-        privacy_jurisdiction[privacy_jurisdiction]
-        privacy_keys[privacy_keys]
-        privacy_labels[privacy_labels]
-        privacy_localonly[privacy_localonly]
-        privacy_minimize[privacy_minimize]
-        privacy_payload[privacy_payload]
-        privacy_pii[privacy_pii]
-        privacy_provenance[privacy_provenance]
-        privacy_redact[privacy_redact]
-        privacy_retention[privacy_retention]
-        privacy_secrets[privacy_secrets]
-        privacy_tokens[privacy_tokens]
-        privacy_trust[privacy_trust]
     end
     subgraph routing[routing]
         routing[routing]
@@ -274,6 +253,25 @@ flowchart TD
     subgraph api[api]
         hugrgate[hugrgate]
     end
+    subgraph performance[performance]
+        profiling[profiling]
+        flame[flame]
+        hotpaths[hotpaths]
+        allocprof[allocprof]
+        zerocopy[zerocopy]
+        asyncx[asyncx]
+        async_backend[async_backend]
+        scheduler[scheduler]
+        backpressure[backpressure]
+        pool[pool]
+        lockaudit[lockaudit]
+        multiproc[multiproc]
+        supervision[supervision]
+        numa[numa]
+        gpusched[gpusched]
+        perfgate[perfgate]
+        millionbench[millionbench]
+    end
     subgraph edge[edge]
         edge[edge]
         edge_platform[edge.platform]
@@ -294,25 +292,6 @@ flowchart TD
         edge_bench[edge.bench]
         edge_chaos[edge.chaos]
         edge_gate[edge.gate]
-    end
-    subgraph chaos[chaos]
-        chaos[chaos]
-        chaos_framework[chaos.framework]
-        chaos_backend_faults[chaos.backend_faults]
-        chaos_model_faults[chaos.model_faults]
-        chaos_cache_faults[chaos.cache_faults]
-        chaos_filesystem[chaos.filesystem]
-        chaos_resources[chaos.resources]
-        chaos_network[chaos.network]
-        chaos_clock[chaos.clock]
-        chaos_experiments[chaos.experiments]
-        chaos_retry[chaos.retry]
-        chaos_bulkhead[chaos.bulkhead]
-        chaos_degradation[chaos.degradation]
-        chaos_recovery[chaos.recovery]
-        chaos_crash[chaos.crash]
-        chaos_soak[chaos.soak]
-        chaos_scorecard[chaos.scorecard]
     end
 
     hugrgate --> backend
@@ -409,6 +388,18 @@ flowchart TD
     adaptive_shadow --> errors
     adaptive_telemetry --> errors
     adaptive_versioning --> errors
+    allocprof --> errors
+    allocprof --> log
+    allocprof --> policy
+    async_backend --> asyncx
+    async_backend --> core
+    async_backend --> errors
+    async_backend --> log
+    async_backend --> policy
+    async_backend --> result
+    asyncx --> backend
+    asyncx --> log
+    asyncx --> spec
     backend --> errors
     backend --> result
     backend --> spec
@@ -442,6 +433,8 @@ flowchart TD
     backends_rules --> errors
     backends_rules --> result
     backends_rules --> spec
+    backpressure --> errors
+    backpressure --> log
     bench --> hugrgate
     bench --> core
     bench --> errors
@@ -451,7 +444,6 @@ flowchart TD
     cache --> log
     cache --> policy
     cache --> privacy
-    cache --> privacy_retention
     cache --> result
     cache --> spec
     calibration --> calibration__base
@@ -536,69 +528,6 @@ flowchart TD
     calibration_viz --> errors
     calibration_window -.-> calibration__base
     calibration_window --> errors
-    chaos --> chaos_backend_faults
-    chaos --> chaos_bulkhead
-    chaos --> chaos_cache_faults
-    chaos --> chaos_clock
-    chaos --> chaos_crash
-    chaos --> chaos_degradation
-    chaos --> chaos_experiments
-    chaos --> chaos_filesystem
-    chaos --> chaos_framework
-    chaos --> chaos_model_faults
-    chaos --> chaos_network
-    chaos --> chaos_recovery
-    chaos --> chaos_resources
-    chaos --> chaos_retry
-    chaos --> chaos_scorecard
-    chaos --> chaos_soak
-    chaos_backend_faults --> backend
-    chaos_backend_faults --> errors
-    chaos_backend_faults --> result
-    chaos_backend_faults --> spec
-    chaos_bulkhead --> errors
-    chaos_cache_faults --> cache
-    chaos_cache_faults --> errors
-    chaos_cache_faults --> policy
-    chaos_cache_faults --> result
-    chaos_cache_faults --> spec
-    chaos_clock --> cache
-    chaos_clock --> chaos_framework
-    chaos_clock --> circuit
-    chaos_clock --> edge_watchdog
-    chaos_clock --> errors
-    chaos_crash --> hugrgate
-    chaos_crash --> edge_recovery
-    chaos_crash --> errors
-    chaos_degradation --> errors
-    chaos_experiments --> backend
-    chaos_experiments -.-> backends_embedding
-    chaos_experiments -.-> backends_logreg
-    chaos_experiments --> chaos_backend_faults
-    chaos_experiments --> chaos_framework
-    chaos_experiments --> errors
-    chaos_experiments --> fallback
-    chaos_experiments -.-> features
-    chaos_experiments --> policy
-    chaos_experiments --> result
-    chaos_experiments --> spec
-    chaos_experiments --> validation
-    chaos_framework --> errors
-    chaos_model_faults --> errors
-    chaos_model_faults --> runtimes_gguf
-    chaos_network --> backend
-    chaos_network --> errors
-    chaos_network --> result
-    chaos_network --> spec
-    chaos_recovery --> errors
-    chaos_resources --> backend
-    chaos_resources --> errors
-    chaos_resources --> log
-    chaos_resources --> result
-    chaos_resources --> spec
-    chaos_retry --> errors
-    chaos_scorecard --> errors
-    chaos_soak --> errors
     circuit --> log
     cli -.-> bench
     cli -.-> bench_report
@@ -606,6 +535,7 @@ flowchart TD
     cli -.-> daemon
     cli -.-> errors
     cli --> policy
+    cli -.-> pool
     cli -.-> serde
     cli -.-> server
     cli --> spec
@@ -881,15 +811,13 @@ flowchart TD
     contracts_utility --> contracts_cost
     contracts_utility --> contracts_schema
     contracts_utility --> errors
+    core -.-> asyncx
     core --> backend
-    core --> chaos_bulkhead
-    core --> chaos_retry
     core -.-> contracts_migration
     core -.-> contracts_schema
     core --> errors
     core --> log
     core --> policy
-    core --> privacy_provenance
     core --> provenance
     core --> result
     core --> spec
@@ -1102,94 +1030,56 @@ flowchart TD
     fallback --> result
     fallback --> spec
     features --> errors
+    flame --> hugrgate
+    flame --> errors
+    flame --> log
+    gpusched --> errors
+    gpusched --> log
+    hotpaths --> errors
+    hotpaths --> log
+    hotpaths --> profiling
     ladder --> backend
     ladder --> errors
     ladder --> policy
     ladder --> privacy
-    ladder --> privacy_provenance
     ladder --> provenance
     ladder --> result
     ladder --> spec
     ladder --> validation
+    lockaudit --> log
+    millionbench --> backend
+    millionbench --> core
+    millionbench --> log
+    millionbench --> policy
+    millionbench --> result
+    millionbench --> spec
     models --> errors
+    multiproc --> errors
+    multiproc --> log
     negotiate --> backend
     negotiate --> policy
     negotiate --> privacy
     negotiate --> spec
+    numa --> errors
+    numa --> log
+    perfgate -.-> cache
+    perfgate --> errors
+    perfgate --> log
+    perfgate -.-> policy
+    perfgate -.-> result
+    perfgate -.-> spec
     policy --> errors
     policy --> result
+    pool --> errors
+    pool --> log
     privacy --> backend
     privacy --> errors
     privacy --> log
     privacy --> policy
-    privacy --> privacy_audit
-    privacy --> privacy_jurisdiction
-    privacy --> privacy_labels
-    privacy --> privacy_localonly
-    privacy --> privacy_redact
-    privacy --> privacy_secrets
-    privacy --> privacy_trust
     privacy --> provenance
-    privacy_audit --> log
-    privacy_crypto --> cache
-    privacy_crypto --> errors
-    privacy_crypto --> policy
-    privacy_crypto --> privacy
-    privacy_crypto --> privacy_retention
-    privacy_crypto --> result
-    privacy_crypto --> spec
-    privacy_deletion --> provenance
-    privacy_dryrun --> backend
-    privacy_dryrun --> errors
-    privacy_dryrun --> policy
-    privacy_dryrun --> privacy
-    privacy_dryrun --> privacy_labels
-    privacy_exfil --> backend
-    privacy_exfil --> errors
-    privacy_exfil --> policy
-    privacy_exfil --> privacy
-    privacy_exfil --> privacy_labels
-    privacy_exfil --> privacy_payload
-    privacy_exfil --> privacy_trust
-    privacy_explain --> errors
-    privacy_explain --> privacy_dryrun
-    privacy_explain --> provenance
-    privacy_flow --> errors
-    privacy_flow --> privacy
-    privacy_flow --> privacy_labels
-    privacy_jurisdiction --> backend
-    privacy_jurisdiction --> errors
-    privacy_jurisdiction --> log
-    privacy_keys --> errors
-    privacy_keys --> log
-    privacy_keys -.-> privacy_crypto
-    privacy_keys -.-> privacy_provenance
-    privacy_localonly --> backend
-    privacy_localonly --> errors
-    privacy_localonly --> privacy_labels
-    privacy_payload --> backend
-    privacy_payload --> policy
-    privacy_payload --> privacy
-    privacy_payload --> privacy_flow
-    privacy_payload --> privacy_labels
-    privacy_payload --> privacy_minimize
-    privacy_payload --> privacy_pii
-    privacy_payload --> privacy_redact
-    privacy_provenance --> errors
-    privacy_provenance --> policy
-    privacy_provenance --> privacy
-    privacy_provenance --> privacy_crypto
-    privacy_provenance --> privacy_redact
-    privacy_provenance --> provenance
-    privacy_provenance --> result
-    privacy_provenance --> spec
-    privacy_redact --> privacy_labels
-    privacy_redact --> provenance
-    privacy_retention --> policy
-    privacy_retention --> provenance
-    privacy_secrets --> errors
-    privacy_trust --> backend
-    privacy_trust --> log
+    profiling --> errors
+    profiling --> log
+    profiling --> policy
     provenance -.-> errors
     provenance --> result
     provenance --> spec
@@ -1336,6 +1226,10 @@ flowchart TD
     runtimes_probe --> errors
     runtimes_probe --> runtimes
     runtimes_residency --> runtimes
+    runtimes_session_pool --> errors
+    runtimes_session_pool --> log
+    runtimes_session_pool --> pool
+    runtimes_session_pool --> runtimes
     runtimes_structured --> errors
     runtimes_structured --> runtimes
     runtimes_tensorrt --> errors
@@ -1348,6 +1242,9 @@ flowchart TD
     runtimes_warmup --> backend
     runtimes_warmup --> errors
     runtimes_warmup --> runtimes
+    scheduler --> backpressure
+    scheduler --> errors
+    scheduler --> log
     serde --> errors
     serde --> policy
     serde --> result
@@ -1361,6 +1258,8 @@ flowchart TD
     server --> serde
     server --> spec
     spec --> errors
+    supervision --> errors
+    supervision --> log
     threshold --> abstain
     threshold --> errors
     threshold --> policy
@@ -1374,6 +1273,13 @@ flowchart TD
     validation --> errors
     validation --> result
     validation --> spec
+    zerocopy -.-> cache
+    zerocopy --> errors
+    zerocopy --> log
+    zerocopy --> policy
+    zerocopy --> privacy
+    zerocopy --> result
+    zerocopy --> spec
 ```
 
 ## Layer membership
@@ -1383,9 +1289,8 @@ flowchart TD
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation`, `serde` |
 | contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
-| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup` |
+| local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup`, `runtimes.session_pool` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
-| privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -1395,8 +1300,8 @@ flowchart TD
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
+| performance | `profiling`, `flame`, `hotpaths`, `allocprof`, `zerocopy`, `asyncx`, `async_backend`, `scheduler`, `backpressure`, `pool`, `lockaudit`, `multiproc`, `supervision`, `numa`, `gpusched`, `perfgate`, `millionbench` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
-| chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 
 ## Internal dependency edges
 
@@ -1496,6 +1401,18 @@ flowchart TD
 | `adaptive.shadow` | `errors` | no |
 | `adaptive.telemetry` | `errors` | no |
 | `adaptive.versioning` | `errors` | no |
+| `allocprof` | `errors` | no |
+| `allocprof` | `log` | no |
+| `allocprof` | `policy` | no |
+| `async_backend` | `asyncx` | no |
+| `async_backend` | `core` | no |
+| `async_backend` | `errors` | no |
+| `async_backend` | `log` | no |
+| `async_backend` | `policy` | no |
+| `async_backend` | `result` | no |
+| `asyncx` | `backend` | no |
+| `asyncx` | `log` | no |
+| `asyncx` | `spec` | no |
 | `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
@@ -1529,6 +1446,8 @@ flowchart TD
 | `backends.rules` | `errors` | no |
 | `backends.rules` | `result` | no |
 | `backends.rules` | `spec` | no |
+| `backpressure` | `errors` | no |
+| `backpressure` | `log` | no |
 | `bench` | `hugrgate` | no |
 | `bench` | `core` | no |
 | `bench` | `errors` | no |
@@ -1538,7 +1457,6 @@ flowchart TD
 | `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
-| `cache` | `privacy_retention` | no |
 | `cache` | `result` | no |
 | `cache` | `spec` | no |
 | `calibration` | `calibration._base` | no |
@@ -1623,69 +1541,6 @@ flowchart TD
 | `calibration.viz` | `errors` | no |
 | `calibration.window` | `calibration._base` | yes |
 | `calibration.window` | `errors` | no |
-| `chaos` | `chaos.backend_faults` | no |
-| `chaos` | `chaos.bulkhead` | no |
-| `chaos` | `chaos.cache_faults` | no |
-| `chaos` | `chaos.clock` | no |
-| `chaos` | `chaos.crash` | no |
-| `chaos` | `chaos.degradation` | no |
-| `chaos` | `chaos.experiments` | no |
-| `chaos` | `chaos.filesystem` | no |
-| `chaos` | `chaos.framework` | no |
-| `chaos` | `chaos.model_faults` | no |
-| `chaos` | `chaos.network` | no |
-| `chaos` | `chaos.recovery` | no |
-| `chaos` | `chaos.resources` | no |
-| `chaos` | `chaos.retry` | no |
-| `chaos` | `chaos.scorecard` | no |
-| `chaos` | `chaos.soak` | no |
-| `chaos.backend_faults` | `backend` | no |
-| `chaos.backend_faults` | `errors` | no |
-| `chaos.backend_faults` | `result` | no |
-| `chaos.backend_faults` | `spec` | no |
-| `chaos.bulkhead` | `errors` | no |
-| `chaos.cache_faults` | `cache` | no |
-| `chaos.cache_faults` | `errors` | no |
-| `chaos.cache_faults` | `policy` | no |
-| `chaos.cache_faults` | `result` | no |
-| `chaos.cache_faults` | `spec` | no |
-| `chaos.clock` | `cache` | no |
-| `chaos.clock` | `chaos.framework` | no |
-| `chaos.clock` | `circuit` | no |
-| `chaos.clock` | `edge.watchdog` | no |
-| `chaos.clock` | `errors` | no |
-| `chaos.crash` | `hugrgate` | no |
-| `chaos.crash` | `edge.recovery` | no |
-| `chaos.crash` | `errors` | no |
-| `chaos.degradation` | `errors` | no |
-| `chaos.experiments` | `backend` | no |
-| `chaos.experiments` | `backends.embedding` | yes |
-| `chaos.experiments` | `backends.logreg` | yes |
-| `chaos.experiments` | `chaos.backend_faults` | no |
-| `chaos.experiments` | `chaos.framework` | no |
-| `chaos.experiments` | `errors` | no |
-| `chaos.experiments` | `fallback` | no |
-| `chaos.experiments` | `features` | yes |
-| `chaos.experiments` | `policy` | no |
-| `chaos.experiments` | `result` | no |
-| `chaos.experiments` | `spec` | no |
-| `chaos.experiments` | `validation` | no |
-| `chaos.framework` | `errors` | no |
-| `chaos.model_faults` | `errors` | no |
-| `chaos.model_faults` | `runtimes.gguf` | no |
-| `chaos.network` | `backend` | no |
-| `chaos.network` | `errors` | no |
-| `chaos.network` | `result` | no |
-| `chaos.network` | `spec` | no |
-| `chaos.recovery` | `errors` | no |
-| `chaos.resources` | `backend` | no |
-| `chaos.resources` | `errors` | no |
-| `chaos.resources` | `log` | no |
-| `chaos.resources` | `result` | no |
-| `chaos.resources` | `spec` | no |
-| `chaos.retry` | `errors` | no |
-| `chaos.scorecard` | `errors` | no |
-| `chaos.soak` | `errors` | no |
 | `circuit` | `log` | no |
 | `cli` | `bench` | yes |
 | `cli` | `bench_report` | yes |
@@ -1693,6 +1548,7 @@ flowchart TD
 | `cli` | `daemon` | yes |
 | `cli` | `errors` | yes |
 | `cli` | `policy` | no |
+| `cli` | `pool` | yes |
 | `cli` | `serde` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
@@ -1968,15 +1824,13 @@ flowchart TD
 | `contracts.utility` | `contracts.cost` | no |
 | `contracts.utility` | `contracts.schema` | no |
 | `contracts.utility` | `errors` | no |
+| `core` | `asyncx` | yes |
 | `core` | `backend` | no |
-| `core` | `chaos.bulkhead` | no |
-| `core` | `chaos.retry` | no |
 | `core` | `contracts.migration` | yes |
 | `core` | `contracts.schema` | yes |
 | `core` | `errors` | no |
 | `core` | `log` | no |
 | `core` | `policy` | no |
-| `core` | `privacy_provenance` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
 | `core` | `spec` | no |
@@ -2189,94 +2043,56 @@ flowchart TD
 | `fallback` | `result` | no |
 | `fallback` | `spec` | no |
 | `features` | `errors` | no |
+| `flame` | `hugrgate` | no |
+| `flame` | `errors` | no |
+| `flame` | `log` | no |
+| `gpusched` | `errors` | no |
+| `gpusched` | `log` | no |
+| `hotpaths` | `errors` | no |
+| `hotpaths` | `log` | no |
+| `hotpaths` | `profiling` | no |
 | `ladder` | `backend` | no |
 | `ladder` | `errors` | no |
 | `ladder` | `policy` | no |
 | `ladder` | `privacy` | no |
-| `ladder` | `privacy_provenance` | no |
 | `ladder` | `provenance` | no |
 | `ladder` | `result` | no |
 | `ladder` | `spec` | no |
 | `ladder` | `validation` | no |
+| `lockaudit` | `log` | no |
+| `millionbench` | `backend` | no |
+| `millionbench` | `core` | no |
+| `millionbench` | `log` | no |
+| `millionbench` | `policy` | no |
+| `millionbench` | `result` | no |
+| `millionbench` | `spec` | no |
 | `models` | `errors` | no |
+| `multiproc` | `errors` | no |
+| `multiproc` | `log` | no |
 | `negotiate` | `backend` | no |
 | `negotiate` | `policy` | no |
 | `negotiate` | `privacy` | no |
 | `negotiate` | `spec` | no |
+| `numa` | `errors` | no |
+| `numa` | `log` | no |
+| `perfgate` | `cache` | yes |
+| `perfgate` | `errors` | no |
+| `perfgate` | `log` | no |
+| `perfgate` | `policy` | yes |
+| `perfgate` | `result` | yes |
+| `perfgate` | `spec` | yes |
 | `policy` | `errors` | no |
 | `policy` | `result` | no |
+| `pool` | `errors` | no |
+| `pool` | `log` | no |
 | `privacy` | `backend` | no |
 | `privacy` | `errors` | no |
 | `privacy` | `log` | no |
 | `privacy` | `policy` | no |
-| `privacy` | `privacy_audit` | no |
-| `privacy` | `privacy_jurisdiction` | no |
-| `privacy` | `privacy_labels` | no |
-| `privacy` | `privacy_localonly` | no |
-| `privacy` | `privacy_redact` | no |
-| `privacy` | `privacy_secrets` | no |
-| `privacy` | `privacy_trust` | no |
 | `privacy` | `provenance` | no |
-| `privacy_audit` | `log` | no |
-| `privacy_crypto` | `cache` | no |
-| `privacy_crypto` | `errors` | no |
-| `privacy_crypto` | `policy` | no |
-| `privacy_crypto` | `privacy` | no |
-| `privacy_crypto` | `privacy_retention` | no |
-| `privacy_crypto` | `result` | no |
-| `privacy_crypto` | `spec` | no |
-| `privacy_deletion` | `provenance` | no |
-| `privacy_dryrun` | `backend` | no |
-| `privacy_dryrun` | `errors` | no |
-| `privacy_dryrun` | `policy` | no |
-| `privacy_dryrun` | `privacy` | no |
-| `privacy_dryrun` | `privacy_labels` | no |
-| `privacy_exfil` | `backend` | no |
-| `privacy_exfil` | `errors` | no |
-| `privacy_exfil` | `policy` | no |
-| `privacy_exfil` | `privacy` | no |
-| `privacy_exfil` | `privacy_labels` | no |
-| `privacy_exfil` | `privacy_payload` | no |
-| `privacy_exfil` | `privacy_trust` | no |
-| `privacy_explain` | `errors` | no |
-| `privacy_explain` | `privacy_dryrun` | no |
-| `privacy_explain` | `provenance` | no |
-| `privacy_flow` | `errors` | no |
-| `privacy_flow` | `privacy` | no |
-| `privacy_flow` | `privacy_labels` | no |
-| `privacy_jurisdiction` | `backend` | no |
-| `privacy_jurisdiction` | `errors` | no |
-| `privacy_jurisdiction` | `log` | no |
-| `privacy_keys` | `errors` | no |
-| `privacy_keys` | `log` | no |
-| `privacy_keys` | `privacy_crypto` | yes |
-| `privacy_keys` | `privacy_provenance` | yes |
-| `privacy_localonly` | `backend` | no |
-| `privacy_localonly` | `errors` | no |
-| `privacy_localonly` | `privacy_labels` | no |
-| `privacy_payload` | `backend` | no |
-| `privacy_payload` | `policy` | no |
-| `privacy_payload` | `privacy` | no |
-| `privacy_payload` | `privacy_flow` | no |
-| `privacy_payload` | `privacy_labels` | no |
-| `privacy_payload` | `privacy_minimize` | no |
-| `privacy_payload` | `privacy_pii` | no |
-| `privacy_payload` | `privacy_redact` | no |
-| `privacy_provenance` | `errors` | no |
-| `privacy_provenance` | `policy` | no |
-| `privacy_provenance` | `privacy` | no |
-| `privacy_provenance` | `privacy_crypto` | no |
-| `privacy_provenance` | `privacy_redact` | no |
-| `privacy_provenance` | `provenance` | no |
-| `privacy_provenance` | `result` | no |
-| `privacy_provenance` | `spec` | no |
-| `privacy_redact` | `privacy_labels` | no |
-| `privacy_redact` | `provenance` | no |
-| `privacy_retention` | `policy` | no |
-| `privacy_retention` | `provenance` | no |
-| `privacy_secrets` | `errors` | no |
-| `privacy_trust` | `backend` | no |
-| `privacy_trust` | `log` | no |
+| `profiling` | `errors` | no |
+| `profiling` | `log` | no |
+| `profiling` | `policy` | no |
 | `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
@@ -2423,6 +2239,10 @@ flowchart TD
 | `runtimes.probe` | `errors` | no |
 | `runtimes.probe` | `runtimes` | no |
 | `runtimes.residency` | `runtimes` | no |
+| `runtimes.session_pool` | `errors` | no |
+| `runtimes.session_pool` | `log` | no |
+| `runtimes.session_pool` | `pool` | no |
+| `runtimes.session_pool` | `runtimes` | no |
 | `runtimes.structured` | `errors` | no |
 | `runtimes.structured` | `runtimes` | no |
 | `runtimes.tensorrt` | `errors` | no |
@@ -2435,6 +2255,9 @@ flowchart TD
 | `runtimes.warmup` | `backend` | no |
 | `runtimes.warmup` | `errors` | no |
 | `runtimes.warmup` | `runtimes` | no |
+| `scheduler` | `backpressure` | no |
+| `scheduler` | `errors` | no |
+| `scheduler` | `log` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |
 | `serde` | `result` | no |
@@ -2448,6 +2271,8 @@ flowchart TD
 | `server` | `serde` | no |
 | `server` | `spec` | no |
 | `spec` | `errors` | no |
+| `supervision` | `errors` | no |
+| `supervision` | `log` | no |
 | `threshold` | `abstain` | no |
 | `threshold` | `errors` | no |
 | `threshold` | `policy` | no |
@@ -2461,3 +2286,10 @@ flowchart TD
 | `validation` | `errors` | no |
 | `validation` | `result` | no |
 | `validation` | `spec` | no |
+| `zerocopy` | `cache` | yes |
+| `zerocopy` | `errors` | no |
+| `zerocopy` | `log` | no |
+| `zerocopy` | `policy` | no |
+| `zerocopy` | `privacy` | no |
+| `zerocopy` | `result` | no |
+| `zerocopy` | `spec` | no |

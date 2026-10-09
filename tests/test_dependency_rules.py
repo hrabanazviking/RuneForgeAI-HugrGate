@@ -177,6 +177,10 @@ _STDLIB = {
     "hmac", "secrets", "ssl", "stat",
     "base64", "binascii",
     "errno",
+    # Campaign XII (slices 276-281): profiling/allocation/benchmark stdlib.
+    "cProfile", "pstats", "tracemalloc", "timeit",
+    # Campaign XII (slice 294): multiprocess mode.
+    "multiprocessing",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",

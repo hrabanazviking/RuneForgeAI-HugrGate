@@ -19,6 +19,7 @@ __all__ = [
     "Abstention",
     "BackendError",
     "BackendUnavailable",
+    "BackpressureError",
     "BenchmarkError",
     "BulkheadRejected",
     "CalibrationError",
@@ -31,15 +32,21 @@ __all__ = [
     "EdgeMemoryError",
     "GGUFError",
     "GateError",
+    "GpuschedError",
     "HugrGateError",
     "JurisdictionViolation",
     "KeyProviderError",
     "LocalOnlyViolation",
+    "MultiprocError",
     "NPUError",
+    "NumaError",
     "OfflineBootstrapError",
+    "PerfGateError",
     "PolicyError",
+    "PoolError",
     "PowerBudgetError",
     "PrivacyViolation",
+    "ProfilingError",
     "QuantError",
     "QueueFull",
     "RecoveryError",
@@ -47,11 +54,15 @@ __all__ = [
     "RetryBudgetExhausted",
     "SealError",
     "SecretDetected",
+    "SchedulerError",
+    "SerdeError",
     "SpecError",
     "StorageError",
+    "SupervisionError",
     "TelemetryError",
     "TimeoutError",
     "WatchdogError",
+    "ZeroCopyError",
 ]
 
 
@@ -359,4 +370,120 @@ class TelemetryError(HugrGateError):
 class WatchdogError(HugrGateError):
     """A watchdog invariant was violated."""
     code = "edge_watchdog_error"
+    recoverable = False
+
+
+class ProfilingError(HugrGateError):
+    """A profiler run was misconfigured or failed to execute. Slice 276."""
+    code = "profiling_error"
+    # A failed profile never invalidates the decision itself; retrying
+    # without (or with fixed) profiler settings can plausibly succeed.
+    recoverable = True
+
+
+class ZeroCopyError(HugrGateError):
+    """A zero-copy invariant was violated (mutation of frozen data).
+
+    Slice 280.  Raised at the mutation site, never silently downstream;
+    retrying with an unfrozen path can succeed.
+    """
+    code = "zerocopy_error"
+    recoverable = True
+
+
+class SerdeError(HugrGateError):
+    """A serialization payload was malformed or version-incompatible.
+
+    Slice 281.  A bad payload is a caller bug, not a transient fault:
+    retrying the same bytes will fail the same way.
+    """
+    code = "serde_error"
+    recoverable = False
+
+
+class SchedulerError(HugrGateError):
+    """A scheduling invariant was violated (bad config, full queue, down).
+
+    Slice 285.  Queue-full and shutdown races are transient — shedding
+    load or retrying later can succeed.
+    """
+    code = "scheduler_error"
+    recoverable = True
+
+
+class BackpressureError(HugrGateError):
+    """Admission refused: the system is saturated, shed load and retry.
+
+    Slice 289.  Carries ``reason`` ("inflight_cap" | "rate_limit") and,
+    when the rate limiter can compute one, ``retry_after_s``.
+    """
+    code = "backpressure_error"
+    recoverable = True
+
+
+class PoolError(HugrGateError):
+    """A resource pool was misconfigured, exhausted, or unhealthy.
+
+    Slice 290.  Exhaustion is transient — retrying after load sheds can
+    succeed; a poisoned factory is a caller/ops problem.
+    """
+    code = "pool_error"
+    recoverable = True
+
+
+class MultiprocError(HugrGateError):
+    """A multiprocess task could not be executed.
+
+    Slice 294.  Unpicklable tasks are caller errors; worker crashes and
+    timeouts are transient — the pool replaces the worker and the caller
+    may retry.  Recoverable, because one bad task must never take down
+    the gate.
+    """
+    code = "multiproc_error"
+    recoverable = True
+
+
+class SupervisionError(HugrGateError):
+    """A supervised worker could not be kept alive.
+
+    Slice 295.  Raised for supervisor misuse (unknown worker, double
+    start); worker *failures* are handled by restart/escalation, not
+    exceptions.  Recoverable — the supervisor itself keeps running.
+    """
+    code = "supervision_error"
+    recoverable = True
+
+
+class NumaError(HugrGateError):
+    """A NUMA topology query or thread-pinning request failed.
+
+    Slice 296.  NUMA operations are best-effort performance hints, not
+    correctness requirements — failure is always recoverable (run
+    unpinned).  Real multi-node hardware validation is still needed
+    (see the module docstring of :mod:`hugrgate.numa`).
+    """
+    code = "numa_error"
+    recoverable = True
+
+
+class GpuschedError(HugrGateError):
+    """GPU discovery or device assignment failed.
+
+    Slice 297.  GPU scheduling is a best-effort placement hint; the
+    gate always runs correctly on CPU.  Real GPU-hardware validation
+    is still needed (see the module docstring of
+    :mod:`hugrgate.gpusched`).
+    """
+    code = "gpusched_error"
+    recoverable = True
+
+
+class PerfGateError(HugrGateError):
+    """A performance regression gate failed.
+
+    Slice 298.  Deliberately *not* recoverable: a breached gate is a
+    hard quality signal, not a transient fault.  Do not catch-and-
+    retry; fix the regression or consciously re-baseline.
+    """
+    code = "perfgate_error"
     recoverable = False

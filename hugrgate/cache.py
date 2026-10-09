@@ -16,8 +16,9 @@ and three safety rails:
   entries (counted in ``stats()["corruptions"]``) instead of serving
   garbage — see :mod:`hugrgate.chaos.cache_faults`.
 
-Results are deep-copied on the way in and out so callers cannot mutate the
-cached copy.
+Results are isolation-copied on the way in and out (slice 292: a
+targeted copy of the known mutable fields, ``deepcopy`` for subclass
+instances) so callers cannot mutate the cached copy.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ import threading
 import time
 from collections import OrderedDict
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 from hugrgate.log import get_logger
@@ -64,14 +65,54 @@ def _policy_fingerprint(policy: DecisionPolicy) -> dict[str, Any]:
     }
 
 
+def _canonicalize(obj: Any) -> Any:
+    """Recursively sort mapping keys so equal states hash equal.
+
+    Only the *state* subtree needs this: :meth:`DecisionSpec.to_dict`
+    and :func:`_policy_fingerprint` already build their mappings in a
+    fixed insertion order.  Sorting here in Python (slice 292) is
+    cheaper than ``json.dumps(..., sort_keys=True)``, which re-sorts
+    every nested mapping — including the already-canonical spec and
+    policy subtrees — inside the encoder.  Mixed-type keys raise
+    ``TypeError`` here exactly as ``sort_keys=True`` raised it before.
+    """
+    if isinstance(obj, dict):
+        return {k: _canonicalize(obj[k]) for k in sorted(obj)}
+    if isinstance(obj, (list, tuple)):
+        # JSON serializes tuples as arrays; normalize so tuples and
+        # lists of equal items hash equal (as they did before).
+        return [_canonicalize(v) for v in obj]
+    return obj
+
+
+def _isolated_copy(result: DecisionResult) -> DecisionResult:
+    """Copy a result so cache and caller cannot mutate each other.
+
+    Slice 292: ``copy.deepcopy`` of a :class:`DecisionResult` costs
+    ~19us because it walks the whole object graph generically.  The
+    exact-type fast path copies only the known mutable fields —
+    ``distribution`` is ``dict[str, float]`` (immutable values, so a
+    flat ``dict()`` suffices) and ``metadata`` is deep-copied for
+    arbitrary nesting — at ~9us.  Subclass instances keep the old
+    ``deepcopy`` behavior: their extra fields are unknown to us.
+    """
+    if type(result) is DecisionResult:
+        return replace(
+            result,
+            distribution=dict(result.distribution),
+            metadata=copy.deepcopy(result.metadata),
+        )
+    return copy.deepcopy(result)
+
+
 def cache_key(state: Mapping[str, Any], spec: DecisionSpec,
               policy: DecisionPolicy) -> str:
     """Stable hash identifying one cacheable decision request."""
     payload = json.dumps(
-        {"state": dict(state),
+        {"state": _canonicalize(dict(state)),
          "spec": spec.to_dict(),
          "policy": _policy_fingerprint(policy)},
-        sort_keys=True, default=str)
+        default=str)
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -122,43 +163,48 @@ class DecisionCache:
 
     def get(self, state: Mapping[str, Any], spec: DecisionSpec,
             policy: DecisionPolicy) -> DecisionResult | None:
-        """Return the cached result, or None on miss/expiry/privacy."""
-        with self._lock:
-            return self._get_locked(state, spec, policy)
+        """Return the cached result, or None on miss/expiry/privacy.
 
-    def _get_locked(self, state: Mapping[str, Any], spec: DecisionSpec,
-                    policy: DecisionPolicy) -> DecisionResult | None:
+        Slice 293: the key computation and the result copy are pure
+        functions of the arguments — they run *outside* the lock so
+        the critical section holds only the dict probe and the LRU
+        touch (~1us instead of ~35us).
+        """
         if not PrivacyGuard.cache_allowed(policy):
             return None
         key = cache_key(state, spec, policy)
-        entry = self._entries.get(key)
-        if entry is None:
-            self.misses += 1
-            logger.debug("cache miss (no entry)")
-            return None
-        if entry.expires_at <= time.monotonic():
-            del self._entries[key]
-            self.misses += 1
-            logger.debug("cache miss (expired)")
-            return None
-        # Subclass verification runs before the integrity seal: a cache
-        # with stronger guarantees (e.g. the encrypted cache's AEAD)
-        # must fail closed with its own error rather than have the
-        # entry silently evicted as corrupt.
-        self._verify_entry(entry, state, spec, policy)
-        if _result_checksum(entry.result) != entry.checksum:
-            # The stored result was corrupted beneath the cache API.
-            # Fail safe: evict the damaged entry and report a miss so
-            # the caller recomputes instead of serving garbage.
-            del self._entries[key]
-            self.corruptions += 1
-            self.misses += 1
-            logger.warning("cache corruption detected; entry evicted")
-            return None
-        self._entries.move_to_end(key)  # LRU touch
-        self.hits += 1
-        logger.debug("cache hit")
-        return copy.deepcopy(entry.result)
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is None:
+                self.misses += 1
+                logger.debug("cache miss (no entry)")
+                return None
+            if entry.expires_at <= time.monotonic():
+                del self._entries[key]
+                self.misses += 1
+                logger.debug("cache miss (expired)")
+                return None
+            # Subclass verification runs before the integrity seal: a cache
+            # with stronger guarantees (e.g. the encrypted cache's AEAD)
+            # must fail closed with its own error rather than have the
+            # entry silently evicted as corrupt.
+            self._verify_entry(entry, state, spec, policy)
+            if _result_checksum(entry.result) != entry.checksum:
+                # The stored result was corrupted beneath the cache API.
+                # Fail safe: evict the damaged entry and report a miss so
+                # the caller recomputes instead of serving garbage.
+                del self._entries[key]
+                self.corruptions += 1
+                self.misses += 1
+                logger.warning("cache corruption detected; entry evicted")
+                return None
+            self._entries.move_to_end(key)  # LRU touch
+            self.hits += 1
+            logger.debug("cache hit")
+            result = entry.result
+        # Copy outside the lock: the entry reference keeps the result
+        # alive even if another thread invalidates the key meanwhile.
+        return _isolated_copy(result)
 
     def _verify_entry(self, entry: _Entry, state: Mapping[str, Any],
                       spec: DecisionSpec, policy: DecisionPolicy) -> None:
@@ -176,20 +222,25 @@ class DecisionCache:
 
         When ``retention`` is given, the entry TTL is capped by the
         privacy class's maximum age (slice 239).
+
+        Slice 293: key computation and the isolation copy are hoisted
+        out of the lock (see :meth:`get`).
         """
+        if not PrivacyGuard.cache_allowed(policy):
+            return False
+        key = cache_key(state, spec, policy)
+        stored = _isolated_copy(result)
+        backend = result.backend
+        ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \
+            if retention is not None else self.ttl_seconds
+        checksum = _result_checksum(stored)
         with self._lock:
-            if not PrivacyGuard.cache_allowed(policy):
-                return False
-            key = cache_key(state, spec, policy)
             now = time.monotonic()
-            ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \
-                if retention is not None else self.ttl_seconds
-            stored = copy.deepcopy(result)
             self._entries[key] = _Entry(
                 result=stored,
                 expires_at=now + ttl,
-                backend=result.backend,
-                checksum=_result_checksum(stored))
+                backend=backend,
+                checksum=checksum)
             self._entries.move_to_end(key)
             while len(self._entries) > self.max_size:
                 self._entries.popitem(last=False)  # evict least-recently-used
