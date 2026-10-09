@@ -13,6 +13,11 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 236)
+- Prompt / data minimization (`hugrgate.privacy_minimize`):
+  `minimize_state`, per-backend `MinimizationPolicy`, and
+  budget-enforcing `PromptMinimizer`.
+
 ### Added (slice 235)
 - PII detector interface (`hugrgate.privacy_pii`): `PIIDetector`
   interface, `RegexPIIDetector` with Luhn/SSN/IPv4 validators,
