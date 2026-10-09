@@ -334,6 +334,32 @@ flowchart TD
         chaos_soak[chaos.soak]
         chaos_scorecard[chaos.scorecard]
     end
+    subgraph observability[observability]
+        observability[observability]
+        observability_metrics[observability.metrics]
+        observability_otel[observability.otel]
+        observability_trace[observability.trace]
+        observability_spans_decision[observability.spans_decision]
+        observability_spans_backend[observability.spans_backend]
+        observability_spans_routing[observability.spans_routing]
+        observability_spans_calibration[observability.spans_calibration]
+        observability_logschema[observability.logschema]
+        observability_prometheus[observability.prometheus]
+        observability_dashboard[observability.dashboard]
+        observability_histograms[observability.histograms]
+        observability_confidence[observability.confidence]
+        observability_abstention[observability.abstention]
+        observability_escalation[observability.escalation]
+        observability_cost[observability.cost]
+        observability_energy[observability.energy]
+        observability_privacy_metrics[observability.privacy_metrics]
+        observability_alerts[observability.alerts]
+        observability_slo[observability.slo]
+        observability_slo_eval[observability.slo_eval]
+        observability_explain[observability.explain]
+        observability_replay[observability.replay]
+        observability_load[observability.load]
+    end
 
     hugrgate --> backend
     hugrgate --> core
@@ -1171,6 +1197,68 @@ flowchart TD
     negotiate --> spec
     numa --> errors
     numa --> log
+    observability_abstention --> errors
+    observability_abstention --> observability_metrics
+    observability_abstention --> result
+    observability_alerts --> drift
+    observability_alerts --> errors
+    observability_confidence --> errors
+    observability_confidence --> observability_metrics
+    observability_cost --> errors
+    observability_cost --> observability_metrics
+    observability_dashboard --> errors
+    observability_dashboard --> health
+    observability_dashboard --> observability_metrics
+    observability_energy --> errors
+    observability_energy --> observability_metrics
+    observability_escalation --> errors
+    observability_escalation --> observability_metrics
+    observability_explain --> errors
+    observability_explain --> observability_spans_decision
+    observability_explain --> observability_trace
+    observability_explain --> provenance
+    observability_explain --> result
+    observability_explain --> spec
+    observability_histograms --> errors
+    observability_histograms --> observability_metrics
+    observability_load --> errors
+    observability_load --> observability_dashboard
+    observability_load --> observability_metrics
+    observability_load --> observability_spans_backend
+    observability_load --> observability_spans_decision
+    observability_load --> observability_trace
+    observability_load --> policy
+    observability_load --> result
+    observability_load --> spec
+    observability_logschema --> errors
+    observability_logschema --> log
+    observability_logschema --> observability_trace
+    observability_metrics --> errors
+    observability_otel --> errors
+    observability_otel --> observability_trace
+    observability_privacy_metrics --> errors
+    observability_privacy_metrics --> observability_metrics
+    observability_privacy_metrics --> observability_trace
+    observability_prometheus --> errors
+    observability_prometheus --> observability_metrics
+    observability_replay --> errors
+    observability_replay --> observability_trace
+    observability_slo --> errors
+    observability_slo_eval --> errors
+    observability_slo_eval --> observability_slo
+    observability_spans_backend --> errors
+    observability_spans_backend --> observability_trace
+    observability_spans_calibration --> errors
+    observability_spans_calibration --> observability_trace
+    observability_spans_decision --> errors
+    observability_spans_decision --> observability_trace
+    observability_spans_decision --> policy
+    observability_spans_decision --> result
+    observability_spans_decision --> spec
+    observability_spans_routing --> adaptive_telemetry
+    observability_spans_routing --> errors
+    observability_spans_routing --> observability_trace
+    observability_trace --> errors
     perfgate -.-> cache
     perfgate --> errors
     perfgate --> log
@@ -1480,6 +1568,7 @@ flowchart TD
 | performance | `profiling`, `flame`, `hotpaths`, `allocprof`, `zerocopy`, `asyncx`, `async_backend`, `scheduler`, `backpressure`, `pool`, `lockaudit`, `multiproc`, `supervision`, `numa`, `gpusched`, `perfgate`, `millionbench` |
 | edge | `edge`, `edge.platform`, `edge.memory`, `edge.affinity`, `edge.thermal`, `edge.routing`, `edge.power`, `edge.quant`, `edge.npu`, `edge.residency`, `edge.cachetune`, `edge.storage`, `edge.bootstrap`, `edge.recovery`, `edge.watchdog`, `edge.telemetry`, `edge.bench`, `edge.chaos`, `edge.gate` |
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
+| observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
 
 ## Internal dependency edges
 
@@ -2321,6 +2410,68 @@ flowchart TD
 | `negotiate` | `spec` | no |
 | `numa` | `errors` | no |
 | `numa` | `log` | no |
+| `observability.abstention` | `errors` | no |
+| `observability.abstention` | `observability.metrics` | no |
+| `observability.abstention` | `result` | no |
+| `observability.alerts` | `drift` | no |
+| `observability.alerts` | `errors` | no |
+| `observability.confidence` | `errors` | no |
+| `observability.confidence` | `observability.metrics` | no |
+| `observability.cost` | `errors` | no |
+| `observability.cost` | `observability.metrics` | no |
+| `observability.dashboard` | `errors` | no |
+| `observability.dashboard` | `health` | no |
+| `observability.dashboard` | `observability.metrics` | no |
+| `observability.energy` | `errors` | no |
+| `observability.energy` | `observability.metrics` | no |
+| `observability.escalation` | `errors` | no |
+| `observability.escalation` | `observability.metrics` | no |
+| `observability.explain` | `errors` | no |
+| `observability.explain` | `observability.spans_decision` | no |
+| `observability.explain` | `observability.trace` | no |
+| `observability.explain` | `provenance` | no |
+| `observability.explain` | `result` | no |
+| `observability.explain` | `spec` | no |
+| `observability.histograms` | `errors` | no |
+| `observability.histograms` | `observability.metrics` | no |
+| `observability.load` | `errors` | no |
+| `observability.load` | `observability.dashboard` | no |
+| `observability.load` | `observability.metrics` | no |
+| `observability.load` | `observability.spans_backend` | no |
+| `observability.load` | `observability.spans_decision` | no |
+| `observability.load` | `observability.trace` | no |
+| `observability.load` | `policy` | no |
+| `observability.load` | `result` | no |
+| `observability.load` | `spec` | no |
+| `observability.logschema` | `errors` | no |
+| `observability.logschema` | `log` | no |
+| `observability.logschema` | `observability.trace` | no |
+| `observability.metrics` | `errors` | no |
+| `observability.otel` | `errors` | no |
+| `observability.otel` | `observability.trace` | no |
+| `observability.privacy_metrics` | `errors` | no |
+| `observability.privacy_metrics` | `observability.metrics` | no |
+| `observability.privacy_metrics` | `observability.trace` | no |
+| `observability.prometheus` | `errors` | no |
+| `observability.prometheus` | `observability.metrics` | no |
+| `observability.replay` | `errors` | no |
+| `observability.replay` | `observability.trace` | no |
+| `observability.slo` | `errors` | no |
+| `observability.slo_eval` | `errors` | no |
+| `observability.slo_eval` | `observability.slo` | no |
+| `observability.spans_backend` | `errors` | no |
+| `observability.spans_backend` | `observability.trace` | no |
+| `observability.spans_calibration` | `errors` | no |
+| `observability.spans_calibration` | `observability.trace` | no |
+| `observability.spans_decision` | `errors` | no |
+| `observability.spans_decision` | `observability.trace` | no |
+| `observability.spans_decision` | `policy` | no |
+| `observability.spans_decision` | `result` | no |
+| `observability.spans_decision` | `spec` | no |
+| `observability.spans_routing` | `adaptive.telemetry` | no |
+| `observability.spans_routing` | `errors` | no |
+| `observability.spans_routing` | `observability.trace` | no |
+| `observability.trace` | `errors` | no |
 | `perfgate` | `cache` | yes |
 | `perfgate` | `errors` | no |
 | `perfgate` | `log` | no |

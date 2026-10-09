@@ -35,6 +35,7 @@ __all__ = [
     "OtelConfig",
     "SpanExporter",
     "_load_sdk",
+    "_otel_trace",
     "decode_traceparent",
     "encode_traceparent",
 ]
@@ -155,6 +156,20 @@ def _load_sdk() -> Any | None:
     return sdk_trace
 
 
+def _otel_trace() -> Any:
+    """Import the OTel *API* trace module lazily.
+
+    Separate seam from :func:`_load_sdk` (which gates on the SDK):
+    tests patch this to inject a fake API module, because stuffing a
+    fake into ``sys.modules`` is unreliable once the real
+    ``opentelemetry.trace`` has been imported anywhere in the process
+    (``import a.b as c`` resolves through the parent package's
+    attribute, not ``sys.modules``).
+    """
+    import opentelemetry.trace as otel_trace
+    return otel_trace
+
+
 class OtelBridge:
     """Forward HugrGate spans to OpenTelemetry when the SDK is present.
 
@@ -228,11 +243,7 @@ class OtelBridge:
         self._fallback.export(spans)
 
     def _export_via_sdk(self, spans: list[Span]) -> None:
-        try:
-            import opentelemetry.trace as otel_trace
-        except ImportError as exc:  # pragma: no cover - configure() checked
-            raise ObservabilityError(
-                "OTel SDK vanished after configure()") from exc
+        otel_trace = _otel_trace()
         for span in spans:
             ctx = otel_trace.SpanContext(
                 trace_id=int(span.trace_id, 16),

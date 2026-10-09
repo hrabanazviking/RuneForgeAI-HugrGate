@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T16:18:54.392461+00:00",
-  "module_count": 289,
+  "generated_utc": "2026-10-09T17:05:07.813273+00:00",
+  "module_count": 313,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -960,7 +960,7 @@
         "time",
         "typing"
       ],
-      "loc": 292,
+      "loc": 300,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -4691,7 +4691,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 489,
+      "loc": 555,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -4741,6 +4741,11 @@
         "NumaError",
         "GpuschedError",
         "PerfGateError",
+        "ObservabilityError",
+        "MetricError",
+        "TraceError",
+        "SLOError",
+        "AlertError",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -5099,6 +5104,540 @@
         "node_of_cpu",
         "distance",
         "to_dict"
+      ]
+    },
+    "hugrgate.observability.__init__": {
+      "docstring": "HugrGate observability (Campaign XIV) \u2014 make every important decision\npath measurable, inspectable, and explainable.\n\nCampaign VI's :mod:`hugrgate.adaptive.telemetry` keeps a routing-decision\ndataset for learning; this package is the *operations* layer around it:\nmetrics (:mod:`metrics`), distributed traces (:mod:`trace`), OpenTelemetry\ninterop (:mod:`otel`), structured logging (:mod:`logschema`), Prometheus\nexport (:mod:`prometheus`), dashboards (:mod:`dashboard`), SLOs\n(:mod:`slo`, :mod:`slo_eval`), alerts (:mod:`alerts`), and explanation\nreports (:mod:`explain`, :mod:`replay`).\n\nThe package is stdlib-only (the OTel SDK itself is an optional extra)\nand sits above ``spec`` / ``result`` / ``backend`` / ``policy``,\nprovenance, privacy, and drift detection \u2014 it never reaches into the\nservice layer.  Submodules are imported individually\n(``from hugrgate.observability import metrics``); this ``__init__``\nstays empty so importing the package never pulls the whole layer in.",
+      "imports": [
+        "__future__"
+      ],
+      "loc": 22,
+      "path": "hugrgate/observability/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.observability.abstention": {
+      "docstring": "Abstention metrics. Slice 338.\n\nAbstentions are first-class observability signals: *why* the gate\nrefused to decide matters as much as the decisions it made.\n:class:`AbstentionMetrics` counts abstentions by machine-readable\nreason (the ``abstain_reason`` metadata set by\n:func:`hugrgate.abstain.abstain`), reviews by policy verdict, and keeps\na bounded sliding window for recent abstention *rates*.\n\nAn abstention is never a backend failure \u2014 these counters live\nalongside, not inside, the error metrics.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 99,
+      "path": "hugrgate/observability/abstention.py",
+      "public_defs": [
+        "AbstentionMetrics",
+        "registry",
+        "record",
+        "abstentions_by_reason",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.alerts": {
+      "docstring": "Drift alerts. Slice 343.\n\nDrift *detection* lives in :mod:`hugrgate.drift` (PSI over prediction\ndistributions) and :mod:`hugrgate.adaptive.drift_detect` (route drift);\nthis module is the *alerting* layer on top:\n\n- :func:`alert_for_drift_report` turns a :class:`DriftReport` into an\n  :class:`Alert` (``\"watch\"`` \u2192 warning, ``\"action\"`` \u2192 critical,\n  ``\"none\"`` \u2192 no alert);\n- :class:`AlertManager` evaluates rules with dedup keys and cooldowns:\n  the same condition re-firing inside its cooldown is *suppressed and\n  counted*, never re-emitted \u2014 alert storms are a failure mode, not a\n  feature.\n\nAlerts carry metadata only: names, severities, PSI values, sample\ncounts.  Never distributions, never payloads.",
+      "imports": [
+        "__future__",
+        "collections",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 224,
+      "path": "hugrgate/observability/alerts.py",
+      "public_defs": [
+        "Alert",
+        "alert_for_drift_report",
+        "AlertRule",
+        "AlertManager",
+        "to_dict",
+        "key",
+        "add_rule",
+        "remove_rule",
+        "evaluate",
+        "suppressed_counts",
+        "history",
+        "fire",
+        "evaluate_drift"
+      ]
+    },
+    "hugrgate.observability.confidence": {
+      "docstring": "Confidence histograms for decision observability. Slice 337.\n\n:class:`ConfidenceHistogram` tracks the distribution of decision\nprobabilities: where the gate's confidence *lives*.  A healthy gate\nshows mass near 0 and 1 (decisive); mass piling up mid-range signals\nchronic uncertainty worth investigating.\n\nStatistical validation (slice 332's discipline, applied here): the\ntest feeds the histogram samples from a known ``Beta(2, 2)``\ndistribution (seeded) and checks every bucket against the theoretical\nCDF computed by numeric integration \u2014 the histogram must reproduce\nthe distribution it was fed, within an explicit tolerance.\n\nMetric/coverage assumptions:\n\n- observations are treated as i.i.d. draws; the validation only proves\n  the instrument is faithful, not that the gate is calibrated;\n- buckets are fixed 0.1-wide bands; probabilities outside [0, 1] are\n  rejected, never clipped.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 110,
+      "path": "hugrgate/observability/confidence.py",
+      "public_defs": [
+        "ConfidenceHistogram",
+        "histogram",
+        "observe",
+        "bucket_counts",
+        "total",
+        "mass_in",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.cost": {
+      "docstring": "Cost metrics. Slice 340.\n\nEvery routed decision can carry a cost (see\n:attr:`RouteEvent.cost <hugrgate.adaptive.telemetry.RouteEvent>`).\n:class:`CostMetrics` aggregates spend: totals, per-backend, per-route\ntotals, and a bounded ledger of recent charges for audit.\n\nCosts are non-negative floats in a single configured currency unit\n(``currency`` is a label, not a converter \u2014 HugrGate never invents FX\nrates).  Negative costs raise :class:`~hugrgate.errors.MetricError`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 117,
+      "path": "hugrgate/observability/cost.py",
+      "public_defs": [
+        "CostMetrics",
+        "currency",
+        "registry",
+        "record",
+        "total",
+        "recent_charges",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.dashboard": {
+      "docstring": "Health dashboard data. Slice 335.\n\nThe dashboard is the *aggregation* layer: it funnels one\n:func:`observe` call per decision into the :class:`HealthMonitor`\n(per-backend health, quarantine) and the :class:`MetricRegistry`\n(counters, latency histograms), and :meth:`snapshot` rolls those up \u2014\nplus firing alerts (slice 343) and SLO statuses (slice 345), passed in\nat snapshot time so this module never depends on the alert/SLO\nmodules \u2014 into one JSON-serializable document:\n\n``status`` is ``\"healthy\"`` / ``\"degraded\"`` / ``\"critical\"``:\n\n- ``critical`` \u2014 any backend quarantined, or any firing alert with\n  severity ``\"critical\"``;\n- ``degraded`` \u2014 any firing ``\"warning\"`` alert, or any backend score\n  below 0.5;\n- ``healthy`` \u2014 otherwise.\n\nThe dashboard never invents numbers: every field derives from recorded\nobservations.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 158,
+      "path": "hugrgate/observability/dashboard.py",
+      "public_defs": [
+        "HealthDashboard",
+        "registry",
+        "health",
+        "observe",
+        "snapshot"
+      ]
+    },
+    "hugrgate.observability.energy": {
+      "docstring": "Energy metrics interface. Slice 341.\n\nHugrGate tracks energy the way it tracks cost: as a first-class\nper-decision quantity in watt-hours.  The *interface* is the point of\nthis slice \u2014 real joules need real power telemetry, so:\n\n- :class:`EnergyEstimator` is the protocol: estimate Wh from a\n  backend name and a latency.  Operators plug in RAPL/nvidia-smi\n  readers here.\n- :class:`DefaultEnergyEstimator` is a documented, auditable fallback:\n  per-backend average-power coefficients (watts) times duration.  The\n  coefficients are *clearly marked estimates* \u2014 see\n  ``benchmarks/observability_energy_341.json`` \u2014 and the estimator\n  reports which coefficients it used so nothing is mistaken for a\n  measurement.\n- :class:`EnergyMetrics` aggregates estimated Wh by backend and keeps\n  a bounded ledger, mirroring :class:`CostMetrics\n  <hugrgate.observability.cost.CostMetrics>`.\n\nWhat is *not* claimed: these numbers are not meter readings.  The\nartifact records the model's provenance and a determinism check\n(same inputs \u2192 same outputs) instead of pretending to be hardware\ntruth.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 174,
+      "path": "hugrgate/observability/energy.py",
+      "public_defs": [
+        "EnergyEstimator",
+        "DefaultEnergyEstimator",
+        "EnergyMetrics",
+        "estimate_wh",
+        "describe",
+        "estimate_wh",
+        "describe",
+        "estimator",
+        "registry",
+        "record",
+        "total_wh",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.escalation": {
+      "docstring": "Escalation metrics. Slice 339.\n\nWorker supervision (:mod:`hugrgate.supervision`) restarts dead workers\nand *escalates* when a restart budget is exhausted.  This module makes\nboth visible: restarts by worker, escalations by worker and reason,\nand a bounded history of escalation events for the dashboard and the\nexplanation report.\n\nWire-up is a one-liner \u2014 the metrics object *is* the callback::\n\n    metrics = EscalationMetrics()\n    supervisor = Supervisor(on_escalation=metrics.as_callback(), ...)",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 113,
+      "path": "hugrgate/observability/escalation.py",
+      "public_defs": [
+        "EscalationMetrics",
+        "registry",
+        "record_restart",
+        "record_escalation",
+        "as_callback",
+        "restarts",
+        "recent_escalations",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.explain": {
+      "docstring": "Decision explanation report. Slice 346.\n\nProvenance (:class:`DecisionRecord\n<hugrgate.provenance.DecisionRecord>`) tells you *what* was decided;\ntraces tell you *how long each step took*; neither tells you *why* in\none place.  :class:`DecisionExplainer` joins them into an\n:class:`ExplanationReport`: a verdict summary, the policy reasoning\n(threshold vs. probability, review bands, abstention reasons), the\nfallback chain, the span timeline, and explicit caveats.\n\nPrivacy: the report renders the decision *value* only when\n``include_value=True`` is passed explicitly \u2014 the default redacts it,\nbecause explanation reports get pasted into tickets and dashboards.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 193,
+      "path": "hugrgate/observability/explain.py",
+      "public_defs": [
+        "ExplanationReport",
+        "DecisionExplainer",
+        "to_dict",
+        "render_markdown",
+        "explain",
+        "explain_result"
+      ]
+    },
+    "hugrgate.observability.histograms": {
+      "docstring": "Latency histograms for decision observability. Slice 336.\n\n:class:`LatencyTracker` is the opinionated instrument for decision\nlatency: one histogram per backend with the campaign's standard\nbuckets, millisecond-facing helpers, and an SLA predicate.  It sits on\nthe shared :class:`MetricRegistry` so Prometheus (slice 334) and the\ndashboard (slice 335) see the same numbers.\n\nThe slice's measurement artifact is produced by\n``benchmarks/observability_overhead_336.py`` \u2192 \n``benchmarks/observability_overhead_336.json``: the real overhead of\nthe instrumented observe path, compared against the explicit baseline\n(\u2264 50 \u00b5s p99 per observation on the reference host).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 89,
+      "path": "hugrgate/observability/histograms.py",
+      "public_defs": [
+        "LatencyTracker",
+        "histogram",
+        "observe_ms",
+        "percentile_ms",
+        "summary",
+        "within_sla"
+      ]
+    },
+    "hugrgate.observability.load": {
+      "docstring": "Observability load tests. Slice 348.\n\nAnswers the only load question that matters for an observability\nlayer: *how much does watching cost?*  :class:`ObservabilityLoadHarness`\nruns N iterations of the fully instrumented decision path (tracer +\ndecision/backend spans + dashboard observation + metric recording)\nagainst a bare baseline, and reports per-iteration overhead with p50 /\np99 / max.\n\nThe harness is honest about what it measures: CPython wall-clock on\none host, not production tail latency.  :meth:`assert_within_budget`\nturns the measurement into a gate \u2014 the suite (and CI) fails loudly if\ninstrumentation ever costs more than the declared budget.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "statistics",
+        "time",
+        "typing"
+      ],
+      "loc": 171,
+      "path": "hugrgate/observability/load.py",
+      "public_defs": [
+        "LoadResult",
+        "ObservabilityLoadHarness",
+        "to_dict",
+        "run",
+        "assert_within_budget",
+        "instrumented",
+        "baseline"
+      ]
+    },
+    "hugrgate.observability.logschema": {
+      "docstring": "Structured log schema for observability events. Slice 333.\n\n:mod:`hugrgate.log` gives us JSON log *formatting* (slice 009); this\nmodule gives us log *semantics*: a versioned schema for every\nobservability event the gate emits, so operators and log pipelines can\nrely on field names instead of grepping free text.\n\n- :data:`EVENT_SCHEMAS`: event name -> version + required/optional\n  fields.  Schemas are append-only: new optional fields may be added,\n  required fields are never removed or renamed (enforced by\n  ``tests/test_observability_logschema.py``).\n- :func:`validate_event` / :func:`emit_event`: validate-then-log; the\n  payload denylist from :mod:`hugrgate.observability.trace` is enforced\n  here too \u2014 a field named ``state`` or ``value`` raises instead of\n  leaking a decision payload into the logs.\n- :class:`ObservabilityFormatter`: extends\n  :class:`hugrgate.log.JsonFormatter` with ``event``,\n  ``event_version``, ``trace_id``, ``span_id``, and ``fields``.\n- :class:`TraceLoggerAdapter`: stamps every record with the ambient\n  trace/span ids.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "json",
+        "logging",
+        "typing"
+      ],
+      "loc": 208,
+      "path": "hugrgate/observability/logschema.py",
+      "public_defs": [
+        "validate_event",
+        "emit_event",
+        "ObservabilityFormatter",
+        "TraceLoggerAdapter",
+        "format",
+        "process"
+      ]
+    },
+    "hugrgate.observability.metrics": {
+      "docstring": "Metric primitives for HugrGate observability. Slice 326.\n\nCampaign VI's :mod:`hugrgate.adaptive.telemetry` keeps an *event log* for\noffline learning; this module is the complementary *live* instrument\nsurface: :class:`Counter`, :class:`Gauge`, and :class:`Histogram`\ninstruments registered in a :class:`MetricRegistry`.\n\nDesign rules (Yrsa Execution Law 14 \u2014 bounded, typed, auditable):\n\n- metric and label names must match Prometheus naming rules; violations\n  raise :class:`~hugrgate.errors.MetricError` at registration, never\n  silently;\n- label sets are fixed per metric; a wrong label set raises;\n- label cardinality is bounded by ``max_series``: when the cap is hit,\n  *new* label combinations raise instead of growing memory without\n  bound;\n- counters never decrease; observations must be finite;\n- every instrument is thread-safe (one re-entrant lock per registry);\n- :meth:`MetricRegistry.snapshot` returns a JSON-serializable dict so\n  exporters (Prometheus text in slice 334, dashboards in slice 335)\n  never touch instrument internals.",
+      "imports": [
+        "__future__",
+        "bisect",
+        "hugrgate",
+        "math",
+        "re",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 372,
+      "path": "hugrgate/observability/metrics.py",
+      "public_defs": [
+        "validate_metric_name",
+        "Counter",
+        "Gauge",
+        "Histogram",
+        "MetricRegistry",
+        "name",
+        "kind",
+        "inc",
+        "value",
+        "set",
+        "inc",
+        "dec",
+        "value",
+        "observe",
+        "buckets",
+        "count",
+        "total",
+        "percentile",
+        "counter",
+        "gauge",
+        "histogram",
+        "get",
+        "timer",
+        "snapshot"
+      ]
+    },
+    "hugrgate.observability.otel": {
+      "docstring": "OpenTelemetry interop for HugrGate traces. Slice 327.\n\nHugrGate's own trace model lives in :mod:`hugrgate.observability.trace`\n(stdlib-only, local-first).  This module is the *bridge* to the wider\nOpenTelemetry ecosystem:\n\n- W3C ``traceparent`` encode/decode for cross-process propagation;\n- :class:`OtelBridge`, which forwards HugrGate spans to a real OTel SDK\n  when the ``otel`` extra is installed, and otherwise degrades to a\n  documented in-process fallback instead of raising at import time;\n- exporter abstractions (:class:`SpanExporter`, :class:`InMemoryExporter`)\n  so tests and operators can capture spans without any SDK.\n\nLocal-first philosophy (Execution Law 15): HugrGate never *requires*\nthe OTel SDK.  The bridge is explicit \u2014 :meth:`OtelBridge.configure`\nreports ``sdk_available`` \u2014 and the fallback keeps every span locally\ninspectable through :class:`InMemoryExporter`.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "opentelemetry",
+        "re",
+        "threading",
+        "typing"
+      ],
+      "loc": 282,
+      "path": "hugrgate/observability/otel.py",
+      "public_defs": [
+        "OtelConfig",
+        "encode_traceparent",
+        "decode_traceparent",
+        "SpanExporter",
+        "InMemoryExporter",
+        "OtelBridge",
+        "export",
+        "export",
+        "spans",
+        "clear",
+        "sdk_available",
+        "config",
+        "configure",
+        "require_sdk",
+        "export",
+        "shutdown"
+      ]
+    },
+    "hugrgate.observability.privacy_metrics": {
+      "docstring": "Privacy-event metrics. Slice 342.\n\nPrivacy enforcement (:mod:`hugrgate.privacy` and friends) *blocks*\nthings; this module *counts* the blocks \u2014 violations by taxonomy code\nand privacy class, denied data flows, redaction events \u2014 without ever\nrecording what was blocked.  The metric labels are metadata-only by\nconstruction:\n\n- label *names* are drawn from a fixed allowlist; anything else\n  raises;\n- label *values* are length-capped and may never use a forbidden\n  (payload) key name;\n- the violating payload itself is never an argument to any function\n  here \u2014 callers pass the already-raised exception.\n\nIncludes the slice's adversarial tests: attempts to smuggle payload\nthrough label names or values are rejected, not recorded.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 119,
+      "path": "hugrgate/observability/privacy_metrics.py",
+      "public_defs": [
+        "PrivacyEventMetrics",
+        "registry",
+        "record_violation",
+        "record_denied_flow",
+        "record_redaction",
+        "summary"
+      ]
+    },
+    "hugrgate.observability.prometheus": {
+      "docstring": "Prometheus text exposition for the metric registry. Slice 334.\n\nRenders :class:`hugrgate.observability.metrics.MetricRegistry` in the\nPrometheus text format (version 0.0.4), so any Prometheus server can\nscrape HugrGate without a client library:\n\n- counters render as ``<name>_total`` (unless already suffixed);\n- gauges render as-is;\n- histograms render cumulative ``<name>_bucket{le=\"...\"}`` series plus\n  an implicit ``+Inf`` bucket, ``<name>_sum``, and ``<name>_count``;\n- label values are escaped per spec (``\\\\``, ``\\n``, ``\\\"``).\n\nThe renderer reads only :meth:`MetricRegistry.snapshot`, never\ninstrument internals, so the exposition contract is decoupled from the\nregistry implementation.",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 100,
+      "path": "hugrgate/observability/prometheus.py",
+      "public_defs": [
+        "escape_label_value",
+        "generate_latest"
+      ]
+    },
+    "hugrgate.observability.replay": {
+      "docstring": "Trace replay viewer data. Slice 347.\n\nThe replay viewer needs one thing: *every span of a trace, in order,\nwith nesting*.  :class:`TraceReplay` builds that from a\n:class:`TraceStore <hugrgate.observability.trace.TraceStore>`:\n\n- :meth:`timeline` \u2014 spans ordered by start time, each with its depth\n  (nesting level derived from ``parent_span_id``), start offset in ms\n  from the trace start, duration, status, and attributes;\n- :meth:`to_dict` \u2014 the JSON document a viewer renders (waterfall,\n  span detail pane, error highlighting);\n- :meth:`render_text` \u2014 a plain-text waterfall for terminals and logs.\n\nOrphan spans (parent id not in the trace) are kept at depth 0 and\nflagged, never dropped \u2014 the viewer must show what the store has,\nincluding ragged edges from sampling or eviction.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 114,
+      "path": "hugrgate/observability/replay.py",
+      "public_defs": [
+        "TraceReplay",
+        "timeline",
+        "to_dict",
+        "render_text"
+      ]
+    },
+    "hugrgate.observability.slo": {
+      "docstring": "SLO definitions. Slice 344.\n\nA Service-Level Objective is a contract with the future: *\"this\nfraction of events must be good, measured this way, over this\nwindow.\"*  :class:`SLODefinition` makes the contract explicit,\nvalidated, and serializable \u2014 the evaluator (slice 345) consumes it,\nthe dashboard (slice 335) displays its status, and the release gate\n(slice 350) can block on it.\n\nDefinitions are immutable value objects.  Bad definitions raise\n:class:`~hugrgate.errors.SLOError` at construction \u2014 an SLO that\ncannot be stated precisely cannot be evaluated honestly.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 98,
+      "path": "hugrgate/observability/slo.py",
+      "public_defs": [
+        "SLODefinition",
+        "error_budget",
+        "to_dict",
+        "from_dict"
+      ]
+    },
+    "hugrgate.observability.slo_eval": {
+      "docstring": "SLO evaluator. Slice 345.\n\nEvaluates an :class:`SLODefinition\n<hugrgate.observability.slo.SLODefinition>` over a window of samples:\n\n- ``evaluate_availability(slo, outcomes)`` \u2014 *outcomes* is a list of\n  ``(timestamp, ok)`` pairs; only samples inside the window count;\n- ``evaluate_latency(slo, latencies_ms)`` \u2014 *latencies_ms* is a list of\n  ``(timestamp, latency_ms)`` pairs; \"good\" means within the SLO's\n  ``latency_budget_ms``.\n\nBoth return an :class:`SLOStatus` with the observed good-fraction, the\nburn rate (``observed_bad_rate / error_budget``), the remaining error\nbudget as a fraction, and a status:\n\n- ``\"ok\"`` \u2014 burn rate \u2264 1 (budget remaining > 0);\n- ``\"warning\"`` \u2014 1 < burn rate \u2264 2 (budget spent faster than allowed);\n- ``\"breaching\"`` \u2014 burn rate > 2 (budget exhausting fast).\n\nAn empty sample set raises :class:`~hugrgate.errors.SLOError`: an SLO\njudged on zero evidence is a configuration bug, not a passing grade.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 136,
+      "path": "hugrgate/observability/slo_eval.py",
+      "public_defs": [
+        "SLOStatus",
+        "SLOEvaluator",
+        "to_dict",
+        "evaluate_availability",
+        "evaluate_latency"
+      ]
+    },
+    "hugrgate.observability.spans_backend": {
+      "docstring": "Backend trace spans. Slice 330.\n\nEvery backend invocation becomes a child span of the decision span:\n``hugrgate.backend`` with the backend name, the attempt number (retries\nget one span per attempt, linked to their siblings), and the outcome \u2014\nlatency, success, or the machine-readable error code.\n\n``backend_span`` records exceptions as span errors and re-raises, so the\nretry loop in :mod:`hugrgate.chaos.retry` (or any caller) keeps its own\nsemantics while the trace shows exactly which attempt failed and why.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 89,
+      "path": "hugrgate/observability/spans_backend.py",
+      "public_defs": [
+        "annotate_backend_outcome",
+        "backend_span"
+      ]
+    },
+    "hugrgate.observability.spans_calibration": {
+      "docstring": "Calibration trace spans. Slice 332.\n\nRenders a calibration step as a span: which method ran, on how many\nsamples, what coverage it claimed, and \u2014 where a labeled holdout is\navailable \u2014 what coverage it *achieved*.  The empirical-coverage check\nis the statistical heart of this slice: :func:`empirical_coverage`\ncomputes the fraction of prediction sets containing the true label on\ncontrolled data, and :func:`coverage_within_tolerance` judges it\nagainst the nominal level with an exact binomial confidence interval,\nso the test never \"validates\" by eyeballing.\n\nSpan attributes carry the method name, nominal level, sample count,\nand achieved coverage \u2014 never the raw labels or scores.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "math",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/observability/spans_calibration.py",
+      "public_defs": [
+        "empirical_coverage",
+        "coverage_within_tolerance",
+        "annotate_calibration",
+        "calibration_span"
+      ]
+    },
+    "hugrgate.observability.spans_decision": {
+      "docstring": "Decision trace spans. Slice 329.\n\nRenders one HugrGate decision as a trace span: the spec that was asked,\nthe policy that judged it, and the verdict that resulted \u2014 metadata\nonly, never the decision payload (``result.value`` and the full\ndistribution stay out of spans by construction).\n\nThe span name is ``hugrgate.decision``; the verdict is recorded both as\nan attribute (``decision.verdict``) and as a span event\n(``decision.accepted`` / ``decision.review`` / ``decision.abstained``)\nso the replay viewer (slice 347) can filter on it.\n\nUse as a context manager::\n\n    with decision_span(tracer, spec, policy) as span:\n        result = gate.decide(spec)\n    annotate_decision(span, spec, result, policy)",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 109,
+      "path": "hugrgate/observability/spans_decision.py",
+      "public_defs": [
+        "probability_band",
+        "verdict_of",
+        "annotate_decision",
+        "decision_span"
+      ]
+    },
+    "hugrgate.observability.spans_routing": {
+      "docstring": "Routing trace spans. Slice 331.\n\nRenders the adaptive router's choice as a span: which candidates were\nconsidered, which arm was pulled, with what propensity, under which\npolicy version \u2014 the exact fields :mod:`hugrgate.adaptive.telemetry`\nlogs as a :class:`RouteEvent`, so the trace and the learning dataset\ntell the same story.\n\nThe builder accepts a real ``RouteEvent`` (preferred \u2014 schema-checked)\nor a plain mapping with the same keys, so non-adaptive routers can\nemit identical spans.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 93,
+      "path": "hugrgate/observability/spans_routing.py",
+      "public_defs": [
+        "annotate_routing",
+        "routing_span"
+      ]
+    },
+    "hugrgate.observability.trace": {
+      "docstring": "Distributed trace model for HugrGate. Slice 328.\n\nThe stdlib-only, local-first trace core that\n:mod:`hugrgate.observability.otel` bridges to OpenTelemetry:\n\n- :class:`Span` \u2014 one timed operation with validated attributes,\n  events, and a privacy-enforcing attribute gate (metadata only, never\n  payload \u2014 the same law as :mod:`hugrgate.log`'s ``PRIVACY_RULE``);\n- :class:`Tracer` \u2014 creates spans, propagates parent context, applies\n  head-based sampling;\n- :class:`TraceStore` \u2014 bounded in-memory store of finished spans with\n  trace reassembly for the replay viewer (slice 347).\n\nSampling is deterministic per trace: the sampler hashes the trace id,\nso a trace is either fully kept or fully dropped \u2014 never a ragged\nhalf-trace.",
+      "imports": [
+        "__future__",
+        "collections",
+        "contextlib",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "re",
+        "secrets",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 447,
+      "path": "hugrgate/observability/trace.py",
+      "public_defs": [
+        "new_trace_id",
+        "new_span_id",
+        "SpanContext",
+        "Span",
+        "ProbabilisticSampler",
+        "TraceStore",
+        "Tracer",
+        "name",
+        "trace_id",
+        "span_id",
+        "parent_span_id",
+        "sampled",
+        "attributes",
+        "events",
+        "status",
+        "start_time",
+        "end_time",
+        "duration_s",
+        "finished",
+        "context",
+        "set_attribute",
+        "add_event",
+        "add_link",
+        "set_error",
+        "finish",
+        "mark_dropped",
+        "dropped",
+        "to_dict",
+        "rate",
+        "should_sample",
+        "add",
+        "get_trace",
+        "find_spans",
+        "clear",
+        "store",
+        "start_span",
+        "trace",
+        "traced",
+        "decorator",
+        "wrapper"
       ]
     },
     "hugrgate.perfgate": {
@@ -5769,7 +6308,7 @@
         "time",
         "typing"
       ],
-      "loc": 239,
+      "loc": 248,
       "path": "hugrgate/provenance.py",
       "public_defs": [
         "DecisionRecord",
@@ -7434,6 +7973,18 @@
     "test_localrt_174_bench_matrix.py",
     "test_logging.py",
     "test_ml_calibration.py",
+    "test_observability_alerts_slo.py",
+    "test_observability_dashboard.py",
+    "test_observability_domain_metrics.py",
+    "test_observability_explain_replay.py",
+    "test_observability_histograms.py",
+    "test_observability_load.py",
+    "test_observability_logschema.py",
+    "test_observability_metrics.py",
+    "test_observability_otel.py",
+    "test_observability_prometheus.py",
+    "test_observability_spans.py",
+    "test_observability_trace.py",
     "test_package_boundaries.py",
     "test_perf_276_profiling.py",
     "test_perf_277_flame.py",
@@ -7522,5 +8073,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 63711
+  "total_loc": 67631
 }

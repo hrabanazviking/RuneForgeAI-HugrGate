@@ -7,7 +7,6 @@ it.  SDK-present behavior is exercised through a fake SDK injected via
 
 from __future__ import annotations
 
-import sys
 import types
 
 import pytest
@@ -121,7 +120,14 @@ def test_bridge_disabled_config_never_touches_sdk(monkeypatch):
 
 
 def _install_fake_sdk(monkeypatch):
-    """Inject fake ``opentelemetry.trace`` + SDK into sys.modules."""
+    """Inject fake OTel API + SDK modules through the seams in otel.py.
+
+    Patching ``otel._otel_trace`` (not ``sys.modules``): once the real
+    ``opentelemetry.trace`` has been imported anywhere in the process
+    (e.g. by FastAPI's optional instrumentation), ``import a.b as c``
+    resolves through the parent package attribute and a
+    ``sys.modules`` fake is silently ignored.
+    """
     recorded: list[dict] = []
 
     fake_trace = types.ModuleType("opentelemetry.trace")
@@ -136,8 +142,9 @@ def _install_fake_sdk(monkeypatch):
         ERROR = "error"
 
     class Status:
-        def __init__(self, code, description=None):
-            self.code = code
+        # Mirrors the real API: Status(status_code, description).
+        def __init__(self, status_code, description=None):
+            self.status_code = status_code
             self.description = description
 
     class SpanContext:
@@ -201,8 +208,8 @@ def _install_fake_sdk(monkeypatch):
     fake_sdk = types.ModuleType("opentelemetry.sdk.trace")
     fake_sdk.TracerProvider = FakeProvider
 
-    monkeypatch.setitem(sys.modules, "opentelemetry.trace", fake_trace)
     monkeypatch.setattr(otel, "_load_sdk", lambda: fake_sdk)
+    monkeypatch.setattr(otel, "_otel_trace", lambda: fake_trace)
     return recorded
 
 
@@ -235,5 +242,5 @@ def test_bridge_converts_error_status(monkeypatch):
     span.set_error("kaput")
     span.finish()
     bridge.export([span])
-    assert recorded[0]["status"].code == "error"
+    assert recorded[0]["status"].status_code == "error"
     bridge.shutdown()

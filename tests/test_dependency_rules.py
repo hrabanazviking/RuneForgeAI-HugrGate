@@ -175,6 +175,7 @@ _STDLIB = {
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
     "concurrent",
     "struct",
+    "bisect",  # Campaign XIV (slice 326): histogram bucket search.
     "resource", "types", "builtins",
     "glob", "zlib",
     "hmac", "secrets", "ssl", "stat",
