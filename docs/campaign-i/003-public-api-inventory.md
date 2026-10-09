@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 58 · **public names:** 257
+**Modules:** 59 · **public names:** 262
 
 ## API stability policy
 
@@ -250,6 +250,7 @@ that this document never drifts from the code.
 | `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/hatch/works` |
 | `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/hatch/workspac` |
 | `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/hatch/wor` |
+| `context` | constant | `<module 'hugrgate.contracts.context' from '/home/hatch/works` |
 
 ### `hugrgate.contracts.composite`
 
@@ -265,6 +266,15 @@ that this document never drifts from the code.
 | `CONDITION_OPS` | constant | `('eq', 'ne', 'in', 'not_in', 'gt', 'ge', 'lt', 'le')` |
 | `FieldCondition` | class | `(on_field: 'str', op: 'str', expected: 'Any' = None) -> None` |
 | `ConditionalCompositeContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'Dict[str, FieldContract]' = <factory>, conditions: 'Dict[str, FieldCondition]' = <factory>) -> None` |
+
+### `hugrgate.contracts.context`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONTEXT_FIELD_TYPES` | constant | `('string', 'number', 'integer', 'boolean', 'array', 'object'` |
+| `ContextField` | class | `(name: 'str', type: 'str' = 'any', required: 'bool' = False) -> None` |
+| `ContextSchema` | class | `(fields: 'List[ContextField]', allow_extra: 'bool' = True) -> 'None'` |
+| `ContextContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>, fields: 'List[Dict[str, Any]]' = <factory>, allow_extra: 'bool' = True) -> None` |
 
 ### `hugrgate.contracts.cost`
 

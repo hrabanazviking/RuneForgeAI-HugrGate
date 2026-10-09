@@ -36,6 +36,7 @@ flowchart TD
         contracts_utility[contracts.utility]
         contracts_risk[contracts.risk]
         contracts_deadlines[contracts.deadlines]
+        contracts_context[contracts.context]
     end
     subgraph runtime[runtime]
         core[core]
@@ -162,6 +163,8 @@ flowchart TD
     contracts_conditional --> contracts_composite
     contracts_conditional --> contracts_schema
     contracts_conditional --> errors
+    contracts_context --> contracts_schema
+    contracts_context --> errors
     contracts_cost --> contracts_schema
     contracts_cost --> errors
     contracts_crossfield --> contracts_composite
@@ -257,7 +260,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
-| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines` |
+| contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -345,6 +348,8 @@ flowchart TD
 | `contracts.conditional` | `contracts.composite` | no |
 | `contracts.conditional` | `contracts.schema` | no |
 | `contracts.conditional` | `errors` | no |
+| `contracts.context` | `contracts.schema` | no |
+| `contracts.context` | `errors` | no |
 | `contracts.cost` | `contracts.schema` | no |
 | `contracts.cost` | `errors` | no |
 | `contracts.crossfield` | `contracts.composite` | no |

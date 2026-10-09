@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T11:34:10.795761+00:00",
-  "module_count": 58,
+  "generated_utc": "2026-10-09T11:38:34.667076+00:00",
+  "module_count": 59,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -530,7 +530,7 @@
         "hugrgate",
         "importlib"
       ],
-      "loc": 58,
+      "loc": 59,
       "path": "hugrgate/contracts/__init__.py",
       "public_defs": []
     },
@@ -573,6 +573,36 @@
         "validate_value",
         "describe",
         "visit"
+      ]
+    },
+    "hugrgate.contracts.context": {
+      "docstring": "Context schemas \u2014 typed contracts for decision context.\n\nGjallarbr\u00fa slice 041.\n\n``HugrGate.decide(state, spec, policy, context)`` accepts an opaque\n``context`` mapping that nothing validates: a backend expecting\n``context[\"locale\"]`` to be a string gets whatever the caller passed.\nThis module adds:\n\n- :class:`ContextField`: one named field \u2014 ``type`` (``string``,\n  ``number``, ``integer``, ``boolean``, ``array``, ``object``, ``any``)\n  plus ``required``;\n- :class:`ContextSchema`: an ordered field set with ``allow_extra``\n  control; :meth:`violations` aggregates every problem, :meth:`validate`\n  raises one error;\n- :class:`ContextContract` (kind ``\"context-schema\"``): the schema as a\n  v2 contract, so context requirements travel, negotiate, and compose\n  like any other contract.\n\n(``hugrgate/validation.py`` is deliberately untouched: the contracts\nlayer may not import the contract-engine layer per the slice-004\nlayering rules. Runtime wiring of context schemas into ``decide()``\nlands in slice 050.)",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 274,
+      "path": "hugrgate/contracts/context.py",
+      "public_defs": [
+        "ContextField",
+        "ContextSchema",
+        "ContextContract",
+        "check",
+        "to_dict",
+        "from_dict",
+        "fields",
+        "allow_extra",
+        "required_fields",
+        "violations",
+        "validate",
+        "to_dict",
+        "from_dict",
+        "schema",
+        "validate_value",
+        "violations",
+        "describe"
       ]
     },
     "hugrgate.contracts.cost": {
@@ -1357,6 +1387,7 @@
     "test_contracts_038.py",
     "test_contracts_039.py",
     "test_contracts_040.py",
+    "test_contracts_041.py",
     "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
@@ -1367,5 +1398,5 @@
     "test_service.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10986
+  "total_loc": 11261
 }
