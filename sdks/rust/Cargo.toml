@@ -1,0 +1,16 @@
+[package]
+name = "hugrgate"
+version = "0.1.0"
+edition = "2021"
+description = "Rust SDK for the HugrGate decision service (protocol v1)"
+license = "Apache-2.0"
+repository = "https://github.com/hrabanazviking/RuneForgeAI-HugrGate"
+keywords = ["hugrgate", "decisions", "sdk"]
+
+[dependencies]
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+# tests use only the std test harness; no extra dev-deps.
