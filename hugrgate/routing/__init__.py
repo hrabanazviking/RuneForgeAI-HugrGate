@@ -39,6 +39,12 @@ from hugrgate.routing.dag import (
     RoutingDAG,
     evaluate_condition,
 )
+from hugrgate.routing.explain import (
+    OUTCOME_PHRASES,
+    explain_decision,
+    explain_plan,
+    explain_route,
+)
 from hugrgate.routing.cost import (
     CostAwarePlanner,
     CostLedger,
@@ -120,6 +126,10 @@ __all__ = [
     "EnergyAwarePlanner",
     "EnergyLedger",
     "EnergyModel",
+    "OUTCOME_PHRASES",
+    "explain_decision",
+    "explain_plan",
+    "explain_route",
     "EarlyExitExecutor",
     "FallbackGraph",
     "FallbackGraphExecutor",
