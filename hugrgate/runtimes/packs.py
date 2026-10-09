@@ -1,4 +1,4 @@
-"""Local NLI model pack. Slice 166.
+"""Local NLI + embedding model packs. Slices 166-167.
 
 A *pack* is a curated, known-good model choice for one fabric job.
 This slice covers NLI packs: zero-shot entailment models served by
@@ -27,6 +27,7 @@ from hugrgate.runtimes import LocalRuntime, ModelRef
 from hugrgate.runtimes.transformers_rt import TransformersRuntime
 
 __all__ = [
+    "EMBEDDING_PACKS",
     "NLI_PACKS",
     "ModelPack",
     "default_pack",
@@ -37,8 +38,9 @@ __all__ = [
     "runtime_for_pack",
 ]
 
-#: Pack kinds (more kinds arrive in slices 167-168).
+#: Pack kinds (classifier packs arrive in slice 168).
 KIND_NLI = "nli"
+KIND_EMBEDDING = "embedding"
 
 
 @dataclass(frozen=True)
@@ -60,7 +62,7 @@ class ModelPack:
     extra: dict[str, Any] = field(default_factory=dict, compare=False)
 
     def __post_init__(self) -> None:
-        if self.kind != KIND_NLI:
+        if self.kind not in (KIND_NLI, KIND_EMBEDDING):
             raise SpecError(f"unknown pack kind {self.kind!r}")
 
     def to_model_ref(self) -> ModelRef:
@@ -93,13 +95,48 @@ NLI_PACKS: tuple[ModelPack, ...] = (
                     "entailment checks."),
 )
 
+EMBEDDING_PACKS: tuple[ModelPack, ...] = (
+    ModelPack(
+        kind=KIND_EMBEDDING, name="all-minilm-l6-v2",
+        hf_id="sentence-transformers/all-MiniLM-L6-v2",
+        task="feature-extraction", dims=384,
+        languages=("en",), license="apache-2.0", size_mb=90.0,
+        description="MiniLM-L6-v2; the default sentence embedding — "
+                    "tiny, fast, good enough for most retrieval.",
+        default=True),
+    ModelPack(
+        kind=KIND_EMBEDDING, name="bge-small-en-v1.5",
+        hf_id="BAAI/bge-small-en-v1.5",
+        task="feature-extraction", dims=384,
+        languages=("en",), license="mit", size_mb=130.0,
+        description="BGE-small; stronger retrieval quality than "
+                    "MiniLM at similar size."),
+    ModelPack(
+        kind=KIND_EMBEDDING, name="e5-small-v2",
+        hf_id="intfloat/e5-small-v2",
+        task="feature-extraction", dims=384,
+        languages=("en",), license="mit", size_mb=130.0,
+        description="E5-small-v2; prefix queries with 'query: ' and "
+                    "passages with 'passage: ' for best results.",
+        extra={"query_prefix": "query: ",
+               "passage_prefix": "passage: "}),
+    ModelPack(
+        kind=KIND_EMBEDDING, name="nomic-embed-text-v1.5",
+        hf_id="nomic-ai/nomic-embed-text-v1.5",
+        task="feature-extraction", dims=768,
+        languages=("en",), license="apache-2.0", size_mb=550.0,
+        description="Nomic 8192-context embeddings; long-document "
+                    "retrieval."),
+)
+
 _PACKS: dict[str, tuple[ModelPack, ...]] = {
     KIND_NLI: NLI_PACKS,
+    KIND_EMBEDDING: EMBEDDING_PACKS,
 }
 
 
 def packs_for(kind: str) -> tuple[ModelPack, ...]:
-    """All packs of one kind (``"nli"`` for now; more in 167-168)."""
+    """All packs of one kind (``"nli"``/``"embedding"``)."""
     if kind not in _PACKS:
         raise SpecError(
             f"unknown pack kind {kind!r}; choose from "
