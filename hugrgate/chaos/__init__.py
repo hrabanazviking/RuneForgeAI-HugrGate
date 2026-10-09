@@ -27,6 +27,12 @@ from hugrgate.chaos.backend_faults import (
 )
 from hugrgate.chaos.cache_faults import CacheCorruptor
 from hugrgate.chaos.clock import SkewedClock, audit_deadline_clocks
+from hugrgate.chaos.experiments import (
+    CHAOS_LAB,
+    ServiceUnderTest,
+    partial_service_failure_experiment,
+    run_experiment_on_lab,
+)
 from hugrgate.chaos.filesystem import disk_full, read_only
 from hugrgate.chaos.framework import (
     BlastRadius,
@@ -60,6 +66,7 @@ from hugrgate.chaos.resources import (
 )
 
 __all__ = [
+    "CHAOS_LAB",
     "CORRUPTION_KINDS",
     "CRASH",
     "CRITICAL",
@@ -89,9 +96,12 @@ __all__ = [
     "NetworkSimulator",
     "ProbeOutcome",
     "ResourceGuard",
+    "ServiceUnderTest",
     "SkewedClock",
     "SteadyStateProbe",
     "audit_deadline_clocks",
     "disk_full",
+    "partial_service_failure_experiment",
     "read_only",
+    "run_experiment_on_lab",
 ]

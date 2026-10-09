@@ -1,0 +1,282 @@
+"""Ready-made chaos experiments. Slices 266-267.
+
+The framework (:mod:`hugrgate.chaos.framework`) is the experiment
+*discipline*; this module is the *library* of standard experiments
+built from the fault injectors:
+
+- :func:`partial_service_failure_experiment` (266) — crash a subset
+  of a service's backends and verify the survivors keep serving;
+- :func:`dependency_failure_matrix` (267) — run a matrix of
+  dependency-outage scenarios and report which the system survives.
+
+:class:`ServiceUnderTest` is the harness: a :class:`FallbackChain`
+over named backends, some wrapped in :class:`FaultyBackend` so the
+experiment can break and heal them.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Collection, Mapping, Sequence
+from typing import Any
+
+from hugrgate.backend import Backend
+from hugrgate.chaos.backend_faults import CRASH, FaultSpec, FaultyBackend
+from hugrgate.chaos.framework import (
+    BlastRadius,
+    ChaosExperiment,
+    ExperimentRunner,
+    Fault,
+    ProbeOutcome,
+    SteadyStateProbe,
+)
+from hugrgate.errors import Abstention, SpecError
+from hugrgate.fallback import FallbackChain
+from hugrgate.policy import DecisionPolicy
+from hugrgate.result import DecisionResult
+from hugrgate.spec import DecisionSpec
+from hugrgate.validation import validate_result
+
+__all__ = [
+    "CHAOS_LAB",
+    "ServiceUnderTest",
+    "partial_service_failure_experiment",
+    "run_experiment_on_lab",
+]
+
+#: The only blast-radius target the built-in experiments may touch.
+CHAOS_LAB = "chaos-lab"
+
+
+class ServiceUnderTest:
+    """A fallback chain whose named backends can be crashed and healed."""
+
+    def __init__(self, backends: Sequence[Backend],
+                 breakable: Collection[str],
+                 policy: DecisionPolicy | None = None,
+                 safe_default: Any = None):
+        if not backends:
+            raise SpecError("ServiceUnderTest needs at least one backend")
+        names = [b.name for b in backends]
+        if len(set(names)) != len(names):
+            raise SpecError(f"backend names must be unique, got {names}")
+        unknown = set(breakable) - set(names)
+        if unknown:
+            raise SpecError(
+                f"breakable names not in backends: {sorted(unknown)}")
+        self.policy = policy or DecisionPolicy()
+        self._faulty: dict[str, FaultyBackend] = {}
+        wrapped: list[Backend] = []
+        for backend in backends:
+            if backend.name in breakable:
+                faulty = FaultyBackend(backend)
+                self._faulty[backend.name] = faulty
+                wrapped.append(faulty)
+            else:
+                wrapped.append(backend)
+        self.chain = FallbackChain(wrapped, policy=self.policy,
+                                    safe_default=safe_default)
+        self._names = names
+
+    @property
+    def names(self) -> list[str]:
+        return list(self._names)
+
+    @property
+    def breakable(self) -> list[str]:
+        return sorted(self._faulty)
+
+    def inject_crash(self, name: str) -> None:
+        try:
+            faulty = self._faulty[name]
+        except KeyError:
+            raise SpecError(
+                f"backend {name!r} is not breakable") from None
+        faulty.arm(FaultSpec(mode=CRASH, rate=1.0, seed=0))
+
+    def recover(self, name: str) -> None:
+        try:
+            faulty = self._faulty[name]
+        except KeyError:
+            raise SpecError(
+                f"backend {name!r} is not breakable") from None
+        faulty.disarm_all()
+
+    def decide(self, state: Mapping[str, Any],
+               spec: DecisionSpec) -> DecisionResult:
+        """Decide through the chain, mirroring the core decision path
+        (:meth:`hugrgate.core.HugrGate.decide`): result validation and
+        the policy gate apply, so a below-threshold result abstains
+        instead of being served."""
+        result = self.chain.evaluate(state, spec)
+        validate_result(result, spec)
+        if self.policy.evaluate(result) == "abstain":
+            raise Abstention(
+                f"probability {result.probability:.3f} below threshold "
+                f"{self.policy.minimum_probability:.3f}",
+                reason="below_threshold", backend="service-under-test")
+        result.accepted = True
+        return result
+
+    def crashed_names(self) -> list[str]:
+        """Backends currently crashed (fault armed)."""
+        return sorted(n for n, f in self._faulty.items()
+                      if f.armed_modes())
+
+    def is_healthy(self) -> bool:
+        """No backend is currently crashed."""
+        return not self.crashed_names()
+
+
+def _serves_probe(service: ServiceUnderTest, state: Mapping[str, Any],
+                  spec: DecisionSpec) -> SteadyStateProbe:
+    def check() -> ProbeOutcome:
+        try:
+            result = service.decide(dict(state), spec)
+        except Exception as e:  # noqa: BLE001 - probe failure is data
+            return ProbeOutcome(False, f"{type(e).__name__}: {e}")
+        if not result.accepted:
+            return ProbeOutcome(False, "result not accepted")
+        return ProbeOutcome(True, f"served by "
+                                 f"{result.metadata.get('decided_by')}")
+    return SteadyStateProbe("service-serves", check)
+
+
+def _policy_intact_probe(policy: DecisionPolicy) -> SteadyStateProbe:
+    fingerprint = (policy.minimum_probability, policy.remote_inference,
+                   policy.fallback_behavior)
+
+    def check() -> ProbeOutcome:
+        current = (policy.minimum_probability, policy.remote_inference,
+                   policy.fallback_behavior)
+        if current != fingerprint:
+            return ProbeOutcome(False,
+                                f"policy mutated: {fingerprint} -> {current}")
+        return ProbeOutcome(True, "policy unchanged")
+    return SteadyStateProbe("policy-intact", check)
+
+
+def partial_service_failure_experiment(
+        service: ServiceUnderTest,
+        failing_names: Collection[str],
+        state: Mapping[str, Any],
+        spec: DecisionSpec,
+        *,
+        name: str = "partial-service-failure",
+        seed: int | None = 266,
+        simultaneous: bool = False) -> ChaosExperiment:
+    """Build the partial-service-failure experiment.
+
+    Hypothesis (``simultaneous=False``): "when ``failing_names`` crash
+    one at a time, the service keeps serving via the survivors and
+    policy is not weakened." Each failing backend becomes one fault:
+    inject crashes it, verify asserts it is crashed *and* the service
+    still serves an accepted result, rollback heals it.
+
+    Hypothesis (``simultaneous=True``): "when ``failing_names`` all
+    crash at once, the service fails *cleanly* — it abstains instead
+    of serving garbage or hanging." One fault crashes everything;
+    verify asserts ``decide`` raises instead of serving.
+
+    Steady-state probes assert the service served *before* the first
+    fault and serves *after* the last rollback, and that policy is
+    intact throughout. A falsified hypothesis is reported as a
+    failure, never passed quietly.
+    """
+    failing = list(failing_names)
+    if not failing:
+        raise SpecError("failing_names must be non-empty")
+    unknown = set(failing) - set(service.breakable)
+    if unknown:
+        raise SpecError(
+            f"cannot fail unbreakable backends: {sorted(unknown)}")
+
+    if simultaneous:
+        faults = (_simultaneous_fault(service, failing, state, spec),)
+        hypothesis = (f"the service fails cleanly when {sorted(failing)} "
+                      f"all fail at once")
+    else:
+        faults = tuple(_single_fault(service, victim, state, spec)
+                       for victim in failing)
+        hypothesis = (f"the service keeps serving when "
+                      f"{sorted(failing)} fail")
+
+    return ChaosExperiment(
+        name=name,
+        hypothesis=hypothesis,
+        faults=faults,
+        probes=(_serves_probe(service, state, spec),
+                _policy_intact_probe(service.policy)),
+        blast_radius=BlastRadius(allowed_targets=frozenset({CHAOS_LAB})),
+        seed=seed,
+    )
+
+
+def _single_fault(service: ServiceUnderTest, victim: str,
+                  state: Mapping[str, Any],
+                  spec: DecisionSpec) -> Fault:
+    def inject(ctx: dict[str, Any]) -> None:
+        service.inject_crash(victim)
+
+    def verify(ctx: dict[str, Any]) -> None:
+        # The victim must be crashed *right now* — otherwise the
+        # verification is vacuous.
+        if victim not in service.crashed_names():
+            raise AssertionError(
+                f"fault {victim!r} is not armed during verification")
+        result = service.decide(dict(state), spec)
+        if not result.accepted:
+            raise AssertionError("service did not serve an "
+                                 "accepted result")
+
+    def rollback(ctx: dict[str, Any]) -> None:
+        service.recover(victim)
+
+    return Fault(
+        name=f"crash-{victim}",
+        description=f"crash backend {victim!r}; survivors must serve",
+        inject=inject,
+        verify=verify,
+        rollback=rollback,
+    )
+
+
+def _simultaneous_fault(service: ServiceUnderTest, victims: list[str],
+                        state: Mapping[str, Any],
+                        spec: DecisionSpec) -> Fault:
+    def inject(ctx: dict[str, Any]) -> None:
+        for victim in victims:
+            service.inject_crash(victim)
+
+    def verify(ctx: dict[str, Any]) -> None:
+        crashed = service.crashed_names()
+        missing = [v for v in victims if v not in crashed]
+        if missing:
+            raise AssertionError(
+                f"victims not crashed during verification: {missing}")
+        try:
+            result = service.decide(dict(state), spec)
+        except (Abstention, SpecError):
+            return  # clean failure: the hypothesis holds
+        raise AssertionError(
+            f"service served {result.value!r} with every backend "
+            f"crashed — expected a clean abstention")
+
+    def rollback(ctx: dict[str, Any]) -> None:
+        for victim in victims:
+            service.recover(victim)
+
+    return Fault(
+        name="crash-all",
+        description=(f"crash {sorted(victims)} at once; the service "
+                     f"must fail cleanly"),
+        inject=inject,
+        verify=verify,
+        rollback=rollback,
+    )
+
+
+def run_experiment_on_lab(experiment: ChaosExperiment) -> dict[str, Any]:
+    """Run an experiment against the chaos-lab target; return the
+    JSON-serializable report."""
+    report = ExperimentRunner().run(experiment, CHAOS_LAB)
+    return report.to_dict()
