@@ -30,11 +30,13 @@ from hugrgate.errors import (
     Abstention,
     BackendError,
     BackendUnavailable,
+    PrivacyViolation,
     SpecError,
 )
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
-from hugrgate.provenance import DecisionRecord, ProvenanceStore
+from hugrgate.privacy_provenance import privacy_preserving_record
+from hugrgate.provenance import ProvenanceStore
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
@@ -225,7 +227,8 @@ class LadderRouter:
                     i, backend.name, skip[0], detail=skip[1]))
                 continue
 
-            result = self._attempt(backend, state, spec, context, audit, i)
+            result = self._attempt(backend, state, spec, context, policy,
+                                   audit, i)
             if result is None:
                 continue  # failure already audited; climb on
 
@@ -274,12 +277,30 @@ class LadderRouter:
 
     def _attempt(self, backend: Backend, state: Mapping[str, Any],
                  spec: DecisionSpec, context: Mapping[str, Any] | None,
+                 policy: DecisionPolicy,
                  audit: list[LadderAuditEntry], rung_index: int
                  ) -> DecisionResult | None:
         """Run one rung. Returns the result, or None (audited) on failure."""
         t0 = time.perf_counter()
+        outbound = state
+        manifest: dict[str, Any] | None = None
+        if backend.is_remote and self.privacy_guard.payload_compiler is not None:
+            # Slice 237: the outbound chokepoint — compile the remote
+            # payload before any state flows to the backend. Denials
+            # are audited as privacy skips, not rung errors.
+            try:
+                compiled = self.privacy_guard.compile_outbound(
+                    state, backend, policy)
+                outbound = compiled.payload
+                manifest = compiled.manifest
+            except PrivacyViolation as e:
+                audit.append(LadderAuditEntry(
+                    rung_index, backend.name, RUNG_SKIPPED_PRIVACY,
+                    detail=f"outbound compile denied: {e}",
+                    latency_ms=(time.perf_counter() - t0) * 1000))
+                return None
         try:
-            result = backend.evaluate(state, spec, context)
+            result = backend.evaluate(outbound, spec, context)
         except Abstention as e:
             audit.append(LadderAuditEntry(
                 rung_index, backend.name, RUNG_ABSTAINED,
@@ -323,6 +344,10 @@ class LadderRouter:
 
         result.latency_ms = (time.perf_counter() - t0) * 1000
         result.backend = backend.name
+        if manifest is not None:
+            # Slice 237: the compiled payload's audit manifest rides
+            # with the result for provenance/explanation.
+            result.metadata["privacy_manifest"] = manifest
         validate_result(result, spec)  # never let invalid values climb
         audit.append(LadderAuditEntry(
             rung_index, backend.name, RUNG_BELOW_CONFIDENCE,  # provisional
@@ -335,9 +360,9 @@ class LadderRouter:
         """Append an attempted rung to the provenance store, if any."""
         if self.provenance is None:
             return
-        redact = policy.privacy_class == "strict"
-        record = DecisionRecord.from_decision(
-            state, spec, result, policy_threshold=gate, redact_input=redact)
-        if redact or self.privacy_guard.redact_provenance:
+        # Slice 238: per-class privacy-preserving records.
+        record = privacy_preserving_record(
+            state, spec, result, policy, policy_threshold=gate)
+        if self.privacy_guard.redact_provenance:
             record = self.privacy_guard.redact_record(record)
         self.provenance.append(record)

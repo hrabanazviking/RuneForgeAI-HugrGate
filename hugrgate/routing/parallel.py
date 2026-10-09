@@ -86,7 +86,7 @@ class ParallelPlanExecutor(RungExecutor):
             i, node, backend = item
             local_audit: list[LadderAuditEntry] = []
             result = router._attempt(backend, state, ctx.spec, None,
-                                     local_audit, i)
+                                     policy, local_audit, i)
             with lock:
                 if result is None:
                     outcome = (local_audit[-1].outcome

@@ -24,12 +24,16 @@ __all__ = [
     "ChaosError",
     "ClusterAuthError",
     "ContractError",
+    "DataFlowDenied",
     "EdgeAffinityError",
     "EdgeCacheError",
     "EdgeMemoryError",
     "GGUFError",
     "GateError",
     "HugrGateError",
+    "JurisdictionViolation",
+    "KeyProviderError",
+    "LocalOnlyViolation",
     "NPUError",
     "OfflineBootstrapError",
     "PolicyError",
@@ -39,6 +43,8 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "SealError",
+    "SecretDetected",
     "SpecError",
     "StorageError",
     "TelemetryError",
@@ -123,6 +129,88 @@ class TimeoutError(BackendError):
 
 class PrivacyViolation(HugrGateError):
     code = "privacy_violation"
+    recoverable = False
+
+
+class DataFlowDenied(PrivacyViolation):
+    """Raised when a planned data flow violates the data-flow policy.
+
+    Subclass of :class:`PrivacyViolation`: a denied flow is a privacy
+    violation, so existing ``except PrivacyViolation`` handlers keep
+    working. Not recoverable by blind retry — the caller must change
+    the flow (different backend, redaction, lower classification) or
+    the policy.
+    """
+
+    code = "data_flow_denied"
+    recoverable = False
+
+
+class JurisdictionViolation(PrivacyViolation):
+    """Raised when data would cross into a disallowed jurisdiction.
+
+    Subclass of :class:`PrivacyViolation`. Not recoverable by blind
+    retry: the destination's jurisdiction is a fact about the world,
+    not a transient failure — route to an allowed jurisdiction or
+    change the policy.
+    """
+
+    code = "jurisdiction_violation"
+    recoverable = False
+
+
+class LocalOnlyViolation(PrivacyViolation):
+    """Raised when a local-only field would leave the process.
+
+    Subclass of :class:`PrivacyViolation`. Raised in strict mode by
+    the local-only enforcer (slice 231) instead of silently stripping
+    the field, so callers get a hard guarantee. Not recoverable by
+    blind retry: remove the field or mark it non-local-only.
+    """
+
+    code = "local_only_violation"
+    recoverable = False
+
+
+class SecretDetected(PrivacyViolation):
+    """Raised when a secret-shaped value is found in outbound data.
+
+    Subclass of :class:`PrivacyViolation`. Not recoverable by blind
+    retry: the payload contains a secret and must be cleaned (rotate
+    the secret, redact it, or mark the field local-only).
+    """
+
+    code = "secret_detected"
+    recoverable = False
+
+
+class SealError(HugrGateError):
+    """Raised when authenticated decryption fails (slice 241).
+
+    Wrong key, truncated blob, or failed authentication tag — the
+    blob must not be trusted. Not recoverable by blind retry with
+    the same blob and key; the caller must supply the right key or
+    treat the data as lost/tampered.
+    """
+
+    code = "seal_error"
+    recoverable = False
+
+    def __init__(self, message: str = "", reason: str = "auth",
+                 **details: Any):
+        super().__init__(message, reason=reason, **details)
+        self.reason = reason
+
+
+class KeyProviderError(HugrGateError):
+    """Raised when a key provider cannot supply a key (slice 243).
+
+    Missing environment variable, unreadable key file, unknown key
+    id, or malformed key material. Not recoverable by blind retry:
+    the operator must fix the key configuration.
+    """
+
+    code = "key_provider_error"
     recoverable = False
 
 

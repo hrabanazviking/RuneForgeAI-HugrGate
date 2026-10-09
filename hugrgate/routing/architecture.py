@@ -260,7 +260,8 @@ class SerialPlanExecutor:
                 audit.append(LadderAuditEntry(
                     i, backend.name, skip[0], detail=skip[1]))
                 continue
-            result = router._attempt(backend, state, ctx.spec, None, audit, i)
+            result = router._attempt(backend, state, ctx.spec, None,
+                                     policy, audit, i)
             if result is None:
                 # Feed the circuit breaker: hard failures count, polite
                 # abstentions do not.

@@ -21,12 +21,16 @@ from hugrgate.errors import (
     ChaosError,
     ClusterAuthError,
     ContractError,
+    DataFlowDenied,
     EdgeAffinityError,
     EdgeCacheError,
     EdgeMemoryError,
     GateError,
     GGUFError,
     HugrGateError,
+    JurisdictionViolation,
+    KeyProviderError,
+    LocalOnlyViolation,
     NPUError,
     OfflineBootstrapError,
     PolicyError,
@@ -36,6 +40,8 @@ from hugrgate.errors import (
     QueueFull,
     RecoveryError,
     ResidencyError,
+    SealError,
+    SecretDetected,
     SpecError,
     StorageError,
     TelemetryError,
@@ -56,6 +62,12 @@ ALL_ERRORS = [
     QuantError, RecoveryError, ResidencyError, StorageError, TelemetryError,
     WatchdogError,
     ClusterAuthError,
+    DataFlowDenied,
+    JurisdictionViolation,
+    LocalOnlyViolation,
+    SecretDetected,
+    SealError,
+    KeyProviderError,
 ]
 
 EXPECTED_CODES = {
@@ -87,6 +99,12 @@ EXPECTED_CODES = {
     TelemetryError: "edge_telemetry_error",
     WatchdogError: "edge_watchdog_error",
     ClusterAuthError: "cluster_auth_error",
+    DataFlowDenied: "data_flow_denied",
+    JurisdictionViolation: "jurisdiction_violation",
+    LocalOnlyViolation: "local_only_violation",
+    SecretDetected: "secret_detected",
+    SealError: "seal_error",
+    KeyProviderError: "key_provider_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -122,6 +140,12 @@ EXPECTED_RECOVERABLE = {
     TelemetryError: False,
     WatchdogError: False,
     ClusterAuthError: False,
+    DataFlowDenied: False,
+    JurisdictionViolation: False,
+    LocalOnlyViolation: False,
+    SecretDetected: False,
+    SealError: False,
+    KeyProviderError: False,
 }
 
 

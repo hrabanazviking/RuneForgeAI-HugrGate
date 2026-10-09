@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T14:34:32.013249+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T15:45:49.568674+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 234 Python files under `hugrgate/`
-- **Total LOC:** 49966
+- **Modules:** 254 Python files under `hugrgate/`
+- **Total LOC:** 54479
 - **pyproject version:** 0.1.0
-- **Test files:** test_adaptive_bandit.py, test_adaptive_benchmark.py, test_adaptive_coldstart.py, test_adaptive_competence.py, test_adaptive_contract_competence.py, test_adaptive_cost_quality.py, test_adaptive_counterfactual.py, test_adaptive_delayed.py, test_adaptive_domain_competence.py, test_adaptive_drift.py, test_adaptive_energy_quality.py, test_adaptive_explanations.py, test_adaptive_exploration.py, test_adaptive_feedback.py, test_adaptive_latency_quality.py, test_adaptive_multiobjective.py, test_adaptive_offline.py, test_adaptive_privacy_objective.py, test_adaptive_rollback.py, test_adaptive_router_features.py, test_adaptive_safe_exploration.py, test_adaptive_shadow.py, test_adaptive_telemetry.py, test_adaptive_versioning.py, test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_calib_adversarial.py, test_calib_aleatoric.py, test_calib_autoselect.py, test_calib_bayes.py, test_calib_bench.py, test_calib_conformal.py, test_calib_conformal_reg.py, test_calib_coverage.py, test_calib_decomposition.py, test_calib_drift.py, test_calib_ensemble.py, test_calib_epistemic.py, test_calib_group.py, test_calib_imbalance.py, test_calib_online.py, test_calib_perclass.py, test_calib_pipeline.py, test_calib_registry.py, test_calib_risk_coverage.py, test_calib_selective.py, test_calib_sets.py, test_calib_shift.py, test_calib_viz.py, test_calib_window.py, test_cluster_auth.py, test_cluster_backpressure.py, test_cluster_bench.py, test_cluster_capabilities.py, test_cluster_chaos.py, test_cluster_discovery.py, test_cluster_distributed_batch.py, test_cluster_identity.py, test_cluster_lan.py, test_cluster_node_cost.py, test_cluster_node_health.py, test_cluster_node_latency.py, test_cluster_partition.py, test_cluster_policy_sync.py, test_cluster_privacy_boundary.py, test_cluster_protocol.py, test_cluster_provenance_dist.py, test_cluster_recovery.py, test_cluster_release_gate.py, test_cluster_routing.py, test_cluster_rpc.py, test_cluster_static_config.py, test_cluster_trace.py, test_cluster_transport.py, test_cluster_work_stealing.py, test_config.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_contracts_048.py, test_contracts_049.py, test_contracts_050.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_edge_affinity.py, test_edge_bench.py, test_edge_bootstrap.py, test_edge_cachetune.py, test_edge_chaos.py, test_edge_gate.py, test_edge_memory.py, test_edge_npu.py, test_edge_platform.py, test_edge_power.py, test_edge_quant.py, test_edge_recovery.py, test_edge_residency.py, test_edge_storage.py, test_edge_telemetry.py, test_edge_thermal.py, test_edge_watchdog.py, test_ensemble_101_api.py, test_ensemble_102_hard_voting.py, test_ensemble_103_soft_voting.py, test_ensemble_104_weighted_voting.py, test_ensemble_105_confidence_voting.py, test_ensemble_106_bma.py, test_ensemble_107_stacking.py, test_ensemble_108_blending.py, test_ensemble_109_moe.py, test_ensemble_110_diversity.py, test_ensemble_111_disagreement.py, test_ensemble_112_escalation.py, test_ensemble_113_consensus.py, test_ensemble_114_minority.py, test_ensemble_115_correlation.py, test_ensemble_116_reliability.py, test_ensemble_117_membership.py, test_ensemble_118_calibration.py, test_ensemble_119_provenance.py, test_ensemble_120_explanations.py, test_ensemble_121_caching.py, test_ensemble_122_batch.py, test_ensemble_123_adversarial.py, test_ensemble_124_benchmarks.py, test_ensemble_125_release.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_localrt_151_interface.py, test_localrt_152_llamacpp.py, test_localrt_153_ollama.py, test_localrt_154_onnx.py, test_localrt_155_transformers.py, test_localrt_156_vllm.py, test_localrt_157_mlx.py, test_localrt_158_openvino.py, test_localrt_159_tensorrt.py, test_localrt_160_gguf.py, test_localrt_161_metadata.py, test_localrt_162_probe.py, test_localrt_163_structured.py, test_localrt_164_grammar.py, test_localrt_165_jsonschema.py, test_localrt_166_nli_packs.py, test_localrt_167_embedding_packs.py, test_localrt_168_classifier_packs.py, test_localrt_169_warmup.py, test_localrt_170_residency.py, test_localrt_171_eviction.py, test_localrt_172_health_probes.py, test_localrt_173_conformance.py, test_localrt_174_bench_matrix.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_routing_051.py, test_routing_052.py, test_routing_053.py, test_routing_054.py, test_routing_055.py, test_routing_056.py, test_routing_057.py, test_routing_058.py, test_routing_059.py, test_routing_060.py, test_routing_061.py, test_routing_062.py, test_routing_063.py, test_routing_064.py, test_routing_065.py, test_routing_066.py, test_routing_067.py, test_routing_068.py, test_routing_069.py, test_routing_070.py, test_routing_071.py, test_routing_072.py, test_routing_073.py, test_routing_074.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
+- **Test files:** test_adaptive_bandit.py, test_adaptive_benchmark.py, test_adaptive_coldstart.py, test_adaptive_competence.py, test_adaptive_contract_competence.py, test_adaptive_cost_quality.py, test_adaptive_counterfactual.py, test_adaptive_delayed.py, test_adaptive_domain_competence.py, test_adaptive_drift.py, test_adaptive_energy_quality.py, test_adaptive_explanations.py, test_adaptive_exploration.py, test_adaptive_feedback.py, test_adaptive_latency_quality.py, test_adaptive_multiobjective.py, test_adaptive_offline.py, test_adaptive_privacy_objective.py, test_adaptive_rollback.py, test_adaptive_router_features.py, test_adaptive_safe_exploration.py, test_adaptive_shadow.py, test_adaptive_telemetry.py, test_adaptive_versioning.py, test_api_inventory.py, test_arch_map.py, test_async_readiness.py, test_backend_registry.py, test_calib_adversarial.py, test_calib_aleatoric.py, test_calib_autoselect.py, test_calib_bayes.py, test_calib_bench.py, test_calib_conformal.py, test_calib_conformal_reg.py, test_calib_coverage.py, test_calib_decomposition.py, test_calib_drift.py, test_calib_ensemble.py, test_calib_epistemic.py, test_calib_group.py, test_calib_imbalance.py, test_calib_online.py, test_calib_perclass.py, test_calib_pipeline.py, test_calib_registry.py, test_calib_risk_coverage.py, test_calib_selective.py, test_calib_sets.py, test_calib_shift.py, test_calib_viz.py, test_calib_window.py, test_cluster_auth.py, test_cluster_backpressure.py, test_cluster_bench.py, test_cluster_capabilities.py, test_cluster_chaos.py, test_cluster_discovery.py, test_cluster_distributed_batch.py, test_cluster_identity.py, test_cluster_lan.py, test_cluster_node_cost.py, test_cluster_node_health.py, test_cluster_node_latency.py, test_cluster_partition.py, test_cluster_policy_sync.py, test_cluster_privacy_boundary.py, test_cluster_protocol.py, test_cluster_provenance_dist.py, test_cluster_recovery.py, test_cluster_release_gate.py, test_cluster_routing.py, test_cluster_rpc.py, test_cluster_static_config.py, test_cluster_trace.py, test_cluster_transport.py, test_cluster_work_stealing.py, test_config.py, test_contracts_026.py, test_contracts_027.py, test_contracts_028.py, test_contracts_029.py, test_contracts_030.py, test_contracts_031.py, test_contracts_032.py, test_contracts_033.py, test_contracts_034.py, test_contracts_035.py, test_contracts_036.py, test_contracts_037.py, test_contracts_038.py, test_contracts_039.py, test_contracts_040.py, test_contracts_041.py, test_contracts_042.py, test_contracts_043.py, test_contracts_044.py, test_contracts_045.py, test_contracts_046.py, test_contracts_047.py, test_contracts_048.py, test_contracts_049.py, test_contracts_050.py, test_coverage_attack.py, test_dead_code.py, test_dependency_rules.py, test_determinism_contract.py, test_deterministic.py, test_edge_affinity.py, test_edge_bench.py, test_edge_bootstrap.py, test_edge_cachetune.py, test_edge_chaos.py, test_edge_gate.py, test_edge_memory.py, test_edge_npu.py, test_edge_platform.py, test_edge_power.py, test_edge_quant.py, test_edge_recovery.py, test_edge_residency.py, test_edge_storage.py, test_edge_telemetry.py, test_edge_thermal.py, test_edge_watchdog.py, test_ensemble_101_api.py, test_ensemble_102_hard_voting.py, test_ensemble_103_soft_voting.py, test_ensemble_104_weighted_voting.py, test_ensemble_105_confidence_voting.py, test_ensemble_106_bma.py, test_ensemble_107_stacking.py, test_ensemble_108_blending.py, test_ensemble_109_moe.py, test_ensemble_110_diversity.py, test_ensemble_111_disagreement.py, test_ensemble_112_escalation.py, test_ensemble_113_consensus.py, test_ensemble_114_minority.py, test_ensemble_115_correlation.py, test_ensemble_116_reliability.py, test_ensemble_117_membership.py, test_ensemble_118_calibration.py, test_ensemble_119_provenance.py, test_ensemble_120_explanations.py, test_ensemble_121_caching.py, test_ensemble_122_batch.py, test_ensemble_123_adversarial.py, test_ensemble_124_benchmarks.py, test_ensemble_125_release.py, test_errors.py, test_foundation.py, test_import_cycles.py, test_ladder.py, test_localrt_151_interface.py, test_localrt_152_llamacpp.py, test_localrt_153_ollama.py, test_localrt_154_onnx.py, test_localrt_155_transformers.py, test_localrt_156_vllm.py, test_localrt_157_mlx.py, test_localrt_158_openvino.py, test_localrt_159_tensorrt.py, test_localrt_160_gguf.py, test_localrt_161_metadata.py, test_localrt_162_probe.py, test_localrt_163_structured.py, test_localrt_164_grammar.py, test_localrt_165_jsonschema.py, test_localrt_166_nli_packs.py, test_localrt_167_embedding_packs.py, test_localrt_168_classifier_packs.py, test_localrt_169_warmup.py, test_localrt_170_residency.py, test_localrt_171_eviction.py, test_localrt_172_health_probes.py, test_localrt_173_conformance.py, test_localrt_174_bench_matrix.py, test_logging.py, test_ml_calibration.py, test_package_boundaries.py, test_policy_invariants.py, test_privacy_audit.py, test_privacy_bench_249.py, test_privacy_classification.py, test_privacy_crypto.py, test_privacy_deletion.py, test_privacy_dryrun.py, test_privacy_exfil.py, test_privacy_explain.py, test_privacy_flow.py, test_privacy_fortress_gate.py, test_privacy_fuzz.py, test_privacy_jurisdiction.py, test_privacy_keys.py, test_privacy_labels.py, test_privacy_localonly.py, test_privacy_minimize.py, test_privacy_payload.py, test_privacy_pii.py, test_privacy_provenance.py, test_privacy_redact.py, test_privacy_retention.py, test_privacy_sealed.py, test_privacy_secrets.py, test_privacy_tokens.py, test_privacy_trust.py, test_provenance_integrity.py, test_release_gate.py, test_repo_truth.py, test_resource_lifecycle.py, test_result_invariants.py, test_routing_051.py, test_routing_052.py, test_routing_053.py, test_routing_054.py, test_routing_055.py, test_routing_056.py, test_routing_057.py, test_routing_058.py, test_routing_059.py, test_routing_060.py, test_routing_061.py, test_routing_062.py, test_routing_063.py, test_routing_064.py, test_routing_065.py, test_routing_066.py, test_routing_067.py, test_routing_068.py, test_routing_069.py, test_routing_070.py, test_routing_071.py, test_routing_072.py, test_routing_073.py, test_routing_074.py, test_serialization_contracts.py, test_service.py, test_state_validation.py, test_static_analysis.py, test_taxonomy.py, test_thread_safety.py, test_typecheck.py
 
 ## Module table
 
@@ -15,31 +15,31 @@
 |---|---|---|---|
 | `hugrgate.__init__` | 45 | HugrGate — local-first, model-agnostic probabilistic decision runtime. | hugrgate |
 | `hugrgate.abstain` | 111 | Abstention — typed "I don't know" results and review banding. Slice 15. | hugrgate |
-| `hugrgate.adaptive.__init__` | 201 | Adaptive routing (Campaign VI) — learn which inference path fits each wo | hugrgate |
-| `hugrgate.adaptive.bandit` | 277 | Contextual bandit adapter. Slice 130. | hugrgate |
+| `hugrgate.adaptive.__init__` | 211 | Adaptive routing (Campaign VI) — learn which inference path fits each wo | hugrgate |
+| `hugrgate.adaptive.bandit` | 278 | Contextual bandit adapter. Slice 130. | hugrgate |
 | `hugrgate.adaptive.benchmark` | 192 | Adaptive routing benchmark. Slice 149. | hugrgate |
 | `hugrgate.adaptive.coldstart` | 154 | Cold-start routing. Slice 140. | hugrgate |
 | `hugrgate.adaptive.competence` | 215 | Backend competence profiles. Slice 137. | hugrgate |
 | `hugrgate.adaptive.contract_competence` | 172 | Per-contract competence. Slice 139. | hugrgate |
 | `hugrgate.adaptive.cost_quality` | 139 | Cost-quality objective. Slice 132. | hugrgate |
 | `hugrgate.adaptive.counterfactual` | 178 | Counterfactual route evaluation. Slice 144. | hugrgate |
-| `hugrgate.adaptive.delayed` | 172 | Delayed-label ingestion. Slice 128. | hugrgate |
+| `hugrgate.adaptive.delayed` | 171 | Delayed-label ingestion. Slice 128. | hugrgate |
 | `hugrgate.adaptive.domain_competence` | 169 | Per-domain competence. Slice 138. | hugrgate |
 | `hugrgate.adaptive.drift_detect` | 184 | Adaptive-route drift detection. Slice 148. | hugrgate |
 | `hugrgate.adaptive.energy_quality` | 127 | Energy-quality objective. Slice 134. | hugrgate |
 | `hugrgate.adaptive.explanations` | 189 | Adaptive-route explanations. Slice 147. | hugrgate |
-| `hugrgate.adaptive.exploration` | 170 | Exploration controls. Slice 141. | hugrgate |
+| `hugrgate.adaptive.exploration` | 171 | Exploration controls. Slice 141. | hugrgate |
 | `hugrgate.adaptive.feedback` | 165 | Outcome feedback API. Slice 127. | hugrgate |
 | `hugrgate.adaptive.latency_quality` | 153 | Latency-quality objective. Slice 133. | hugrgate |
 | `hugrgate.adaptive.multiobjective` | 137 | Multi-objective routing. Slice 136. | hugrgate |
 | `hugrgate.adaptive.offline` | 149 | Offline policy learning. Slice 131. | hugrgate |
-| `hugrgate.adaptive.privacy_objective` | 115 | Privacy-constrained objective. Slice 135. | hugrgate |
-| `hugrgate.adaptive.rollback` | 145 | Router rollback. Slice 145. | hugrgate |
-| `hugrgate.adaptive.router_features` | 191 | Router feature extraction. Slice 129. | hugrgate |
+| `hugrgate.adaptive.privacy_objective` | 114 | Privacy-constrained objective. Slice 135. | hugrgate |
+| `hugrgate.adaptive.rollback` | 146 | Router rollback. Slice 145. | hugrgate |
+| `hugrgate.adaptive.router_features` | 192 | Router feature extraction. Slice 129. | hugrgate |
 | `hugrgate.adaptive.safe_exploration` | 127 | Safe exploration. Slice 142. | hugrgate |
 | `hugrgate.adaptive.shadow` | 136 | Router shadow mode. Slice 143. | hugrgate |
-| `hugrgate.adaptive.telemetry` | 359 | Routing telemetry dataset. Slice 126. | hugrgate |
-| `hugrgate.adaptive.versioning` | 174 | Adaptive policy versioning. Slice 146. | hugrgate |
+| `hugrgate.adaptive.telemetry` | 360 | Routing telemetry dataset. Slice 126. | hugrgate |
+| `hugrgate.adaptive.versioning` | 175 | Adaptive policy versioning. Slice 146. | hugrgate |
 | `hugrgate.backend` | 151 | Backend interface + registry. Slice 6. | hugrgate |
 | `hugrgate.backends.boosting` | 69 | Gradient boosting backend. Slice 24. | hugrgate |
 | `hugrgate.backends.embedding` | 260 | Embedding backend — prototype classifier. Slice 33. | hugrgate |
@@ -50,38 +50,38 @@
 | `hugrgate.backends.rules` | 381 | Rule backend — predicates, decision tables, confidence distributions. | hugrgate |
 | `hugrgate.bench` | 345 | Benchmark harness — datasets → backends → metrics. Slice 45. | hugrgate |
 | `hugrgate.bench_report` | 146 | Benchmark report — markdown rendering of benchmark JSON. Slice 47. | — |
-| `hugrgate.cache` | 181 | Decision cache — request-hash keyed result memoization. Slice 38. | hugrgate |
-| `hugrgate.calibration.__init__` | 90 | Probability calibration package. Slices 26-29. | hugrgate |
+| `hugrgate.cache` | 189 | Decision cache — request-hash keyed result memoization. Slice 38. | hugrgate |
+| `hugrgate.calibration.__init__` | 106 | Probability calibration package. Slices 26-29. | hugrgate |
 | `hugrgate.calibration._base` | 121 | Calibration base classes (private). | hugrgate |
-| `hugrgate.calibration.adversarial` | 169 | Calibration adversarial tests. Slice 098. | hugrgate |
-| `hugrgate.calibration.aleatoric` | 132 | Aleatoric uncertainty adapters. Slice 096. | hugrgate |
-| `hugrgate.calibration.autoselect` | 154 | Calibration auto-selection. Slice 092. | hugrgate |
-| `hugrgate.calibration.bayes` | 180 | Bayesian calibration research adapter. Slice 081. | hugrgate |
-| `hugrgate.calibration.bench` | 156 | Calibration benchmark suite. Slice 099. | hugrgate |
+| `hugrgate.calibration.adversarial` | 170 | Calibration adversarial tests. Slice 098. | hugrgate |
+| `hugrgate.calibration.aleatoric` | 133 | Aleatoric uncertainty adapters. Slice 096. | hugrgate |
+| `hugrgate.calibration.autoselect` | 155 | Calibration auto-selection. Slice 092. | hugrgate |
+| `hugrgate.calibration.bayes` | 181 | Bayesian calibration research adapter. Slice 081. | hugrgate |
+| `hugrgate.calibration.bench` | 157 | Calibration benchmark suite. Slice 099. | hugrgate |
 | `hugrgate.calibration.conformal` | 156 | Split-conformal classification. Slice 082. | hugrgate |
 | `hugrgate.calibration.conformal_regression` | 143 | Split-conformal regression. Slice 083. | hugrgate |
-| `hugrgate.calibration.coverage` | 167 | Coverage guarantees tooling. Slice 085. | hugrgate |
-| `hugrgate.calibration.decomposition` | 112 | Uncertainty decomposition. Slice 094. | hugrgate |
-| `hugrgate.calibration.drift` | 181 | Calibration under drift. Slice 088. | hugrgate |
-| `hugrgate.calibration.ensemble` | 133 | Calibration ensemble. Slice 093. | hugrgate |
-| `hugrgate.calibration.epistemic` | 137 | Epistemic uncertainty adapters. Slice 095. | hugrgate |
-| `hugrgate.calibration.group` | 156 | Group calibration. Slice 078. | hugrgate |
-| `hugrgate.calibration.imbalance` | 177 | Calibration under class imbalance. Slice 089. | hugrgate |
+| `hugrgate.calibration.coverage` | 168 | Coverage guarantees tooling. Slice 085. | hugrgate |
+| `hugrgate.calibration.decomposition` | 113 | Uncertainty decomposition. Slice 094. | hugrgate |
+| `hugrgate.calibration.drift` | 182 | Calibration under drift. Slice 088. | hugrgate |
+| `hugrgate.calibration.ensemble` | 134 | Calibration ensemble. Slice 093. | hugrgate |
+| `hugrgate.calibration.epistemic` | 138 | Epistemic uncertainty adapters. Slice 095. | hugrgate |
+| `hugrgate.calibration.group` | 157 | Group calibration. Slice 078. | hugrgate |
+| `hugrgate.calibration.imbalance` | 178 | Calibration under class imbalance. Slice 089. | hugrgate |
 | `hugrgate.calibration.isotonic` | 112 | Isotonic regression via the Pool Adjacent Violators (PAV) algorithm. | hugrgate |
 | `hugrgate.calibration.metrics` | 149 | Calibration metrics. Slice 28. | hugrgate |
-| `hugrgate.calibration.online` | 178 | Online (incremental) calibration. Slice 079. | hugrgate |
-| `hugrgate.calibration.perclass` | 232 | Per-class calibration. Slice 077. | hugrgate |
-| `hugrgate.calibration.pipeline` | 244 | Calibration pipeline (architecture v2). Slice 076. | hugrgate |
+| `hugrgate.calibration.online` | 179 | Online (incremental) calibration. Slice 079. | hugrgate |
+| `hugrgate.calibration.perclass` | 233 | Per-class calibration. Slice 077. | hugrgate |
+| `hugrgate.calibration.pipeline` | 245 | Calibration pipeline (architecture v2). Slice 076. | hugrgate |
 | `hugrgate.calibration.platt` | 131 | Platt scaling. Slice 26. | hugrgate |
 | `hugrgate.calibration.profiles` | 277 | Calibration profiles. Slice 29. | hugrgate |
 | `hugrgate.calibration.registry` | 172 | Calibration registry (rich catalog). Slice 091. | hugrgate |
 | `hugrgate.calibration.risk_coverage` | 147 | Risk-coverage curves. Slice 087. | hugrgate |
 | `hugrgate.calibration.selective` | 125 | Selective prediction curves. Slice 086. | hugrgate |
-| `hugrgate.calibration.sets` | 187 | Prediction sets. Slice 084. | hugrgate |
+| `hugrgate.calibration.sets` | 188 | Prediction sets. Slice 084. | hugrgate |
 | `hugrgate.calibration.shift` | 165 | Calibration under distribution shift. Slice 090. | hugrgate |
 | `hugrgate.calibration.temperature` | 137 | Temperature scaling. Slice 27. | hugrgate |
-| `hugrgate.calibration.viz` | 170 | Calibration visualization data. Slice 097. | hugrgate |
-| `hugrgate.calibration.window` | 158 | Sliding-window calibration. Slice 080. | hugrgate |
+| `hugrgate.calibration.viz` | 171 | Calibration visualization data. Slice 097. | hugrgate |
+| `hugrgate.calibration.window` | 160 | Sliding-window calibration. Slice 080. | hugrgate |
 | `hugrgate.circuit` | 174 | Circuit breaker — per-backend failure containment. Slice 18. | hugrgate |
 | `hugrgate.cli` | 277 | HugrGate command-line interface. Slice 44. | hugrgate |
 | `hugrgate.client` | 220 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
@@ -183,20 +183,40 @@
 | `hugrgate.ensemble.reliability` | 137 | Backend reliability weighting — trust, but verify. Slice 116. | hugrgate |
 | `hugrgate.ensemble.stacking` | 259 | Stacking engine — a meta-learner over member predictions. Slice 107. | hugrgate |
 | `hugrgate.ensemble.voting` | 257 | Voting combiners — many ballots, one decision. Slices 101-105. | hugrgate |
-| `hugrgate.errors` | 245 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
+| `hugrgate.errors` | 337 | Error taxonomy for HugrGate. Slice 10; hardened in slice 007. | — |
 | `hugrgate.fallback` | 171 | Fallback engine — ordered failover across backends. Slice 14. | hugrgate |
 | `hugrgate.features` | 291 | Feature preprocessing contract. Slice 21. | hugrgate |
 | `hugrgate.health` | 140 | Backend health scoring — latency, errors, quarantine. Slice 17. | — |
-| `hugrgate.ladder` | 343 | Intelligence ladder — ordered backend cascade. Slices 31-32. | hugrgate |
+| `hugrgate.ladder` | 368 | Intelligence ladder — ordered backend cascade. Slices 31-32. | hugrgate |
 | `hugrgate.log` | 101 | Structured logging for HugrGate (slice 009). | — |
 | `hugrgate.models` | 162 | Model manifests and a disk-backed versioned model store. Slice 25. | hugrgate |
 | `hugrgate.negotiate` | 96 | Backend capability negotiation. Slice 36. | hugrgate |
-| `hugrgate.policy` | 96 | DecisionPolicy — application-controlled thresholds. Slice 5. | hugrgate |
-| `hugrgate.privacy` | 131 | Privacy enforcement — system-level guardrails. Slice 40. | hugrgate |
-| `hugrgate.provenance` | 218 | Decision provenance — why did the program take this branch? Slice 9. | hugrgate |
+| `hugrgate.policy` | 101 | DecisionPolicy — application-controlled thresholds. Slice 5. | hugrgate |
+| `hugrgate.privacy` | 416 | Privacy enforcement — system-level guardrails. Slice 40. | hugrgate |
+| `hugrgate.privacy_audit` | 151 | Policy violation audit log. Slice 244. | hugrgate |
+| `hugrgate.privacy_crypto` | 230 | Authenticated encryption (stdlib only) + encrypted cache. Slice 241. | hugrgate |
+| `hugrgate.privacy_deletion` | 202 | Secure deletion hooks. Slice 240. | hugrgate |
+| `hugrgate.privacy_dryrun` | 172 | Privacy dry-run mode. Slice 245. | hugrgate |
+| `hugrgate.privacy_exfil` | 268 | Exfiltration simulation. Slice 248. | hugrgate |
+| `hugrgate.privacy_explain` | 207 | Privacy explanation reports. Slice 246. | hugrgate |
+| `hugrgate.privacy_flow` | 206 | Data-flow policy engine. Slice 228. | hugrgate |
+| `hugrgate.privacy_jurisdiction` | 128 | Jurisdiction metadata. Slice 230. | hugrgate |
+| `hugrgate.privacy_keys` | 254 | Key-provider abstraction. Slice 243. | hugrgate |
+| `hugrgate.privacy_labels` | 190 | Field-level sensitivity labels. Slice 227. | — |
+| `hugrgate.privacy_localonly` | 129 | Local-only field enforcement. Slice 231. | hugrgate |
+| `hugrgate.privacy_minimize` | 185 | Prompt / data minimization. Slice 236. | — |
+| `hugrgate.privacy_payload` | 270 | Remote payload compiler — the outbound chokepoint. Slice 237. | hugrgate |
+| `hugrgate.privacy_pii` | 246 | PII detector interface. Slice 235. | — |
+| `hugrgate.privacy_provenance` | 261 | Privacy-preserving provenance. Slice 238. | hugrgate |
+| `hugrgate.privacy_redact` | 320 | Redaction pipeline v2. Slice 232. | hugrgate |
+| `hugrgate.privacy_retention` | 118 | Retention policies. Slice 239. | hugrgate |
+| `hugrgate.privacy_secrets` | 199 | Secret detection hooks. Slice 234. | hugrgate |
+| `hugrgate.privacy_tokens` | 122 | Tokenization / pseudonymization vault. Slice 233. | — |
+| `hugrgate.privacy_trust` | 169 | Backend trust levels. Slice 229. | hugrgate |
+| `hugrgate.provenance` | 239 | Decision provenance — why did the program take this branch? Slice 9. | hugrgate |
 | `hugrgate.result` | 82 | DecisionResult — typed value + probability distribution. Slice 4. | hugrgate |
 | `hugrgate.routing.__init__` | 211 | Ladder II — intelligence routing subsystem (Campaign III). | hugrgate |
-| `hugrgate.routing.architecture` | 403 | Router architecture v2 — plan/execute separation. Slice 051. | hugrgate |
+| `hugrgate.routing.architecture` | 404 | Router architecture v2 — plan/execute separation. Slice 051. | hugrgate |
 | `hugrgate.routing.availability` | 140 | Availability-aware routing. Slice 062. | hugrgate |
 | `hugrgate.routing.capability` | 148 | Capability scoring. Slice 054. | hugrgate |
 | `hugrgate.routing.confidence` | 141 | Confidence-aware routing. Slice 055. | hugrgate |

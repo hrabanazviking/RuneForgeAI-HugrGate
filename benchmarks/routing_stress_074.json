@@ -7,140 +7,140 @@
     {
       "label": "v1-baseline/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 21797.8,
-      "mean_ms": 0.0459,
-      "p50_ms": 0.0394,
-      "p99_ms": 0.1521
+      "decisions_per_sec": 21366.4,
+      "mean_ms": 0.0468,
+      "p50_ms": 0.0421,
+      "p99_ms": 0.1078
     },
     {
       "label": "v2-serial/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 13404.7,
-      "mean_ms": 0.0746,
-      "p50_ms": 0.0723,
-      "p99_ms": 0.0888
+      "decisions_per_sec": 12616.8,
+      "mean_ms": 0.0793,
+      "p50_ms": 0.0776,
+      "p99_ms": 0.1003
     },
     {
       "label": "v2-plan-only/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 83173.2,
-      "mean_ms": 0.012,
-      "p50_ms": 0.0107,
-      "p99_ms": 0.0326
+      "decisions_per_sec": 86360.0,
+      "mean_ms": 0.0116,
+      "p50_ms": 0.0108,
+      "p99_ms": 0.0271
     },
     {
       "label": "v2-parallel/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 2078.1,
-      "mean_ms": 0.4812,
-      "p50_ms": 0.4568,
-      "p99_ms": 0.8495
+      "decisions_per_sec": 1188.8,
+      "mean_ms": 0.8412,
+      "p50_ms": 0.687,
+      "p99_ms": 2.3945
     },
     {
       "label": "v2-hedged/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 2004.2,
-      "mean_ms": 0.499,
-      "p50_ms": 0.3443,
-      "p99_ms": 1.2765
+      "decisions_per_sec": 1907.8,
+      "mean_ms": 0.5242,
+      "p50_ms": 0.5082,
+      "p99_ms": 0.7385
     },
     {
       "label": "v2-early-exit/4-rungs",
       "decisions": 30,
-      "decisions_per_sec": 11324.3,
-      "mean_ms": 0.0883,
-      "p50_ms": 0.073,
-      "p99_ms": 0.3096
+      "decisions_per_sec": 11336.6,
+      "mean_ms": 0.0882,
+      "p50_ms": 0.0784,
+      "p99_ms": 0.1841
     },
     {
       "label": "v1-baseline/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 7159.5,
-      "mean_ms": 0.1397,
-      "p50_ms": 0.1276,
-      "p99_ms": 0.2215
+      "decisions_per_sec": 6934.4,
+      "mean_ms": 0.1442,
+      "p50_ms": 0.1373,
+      "p99_ms": 0.1877
     },
     {
       "label": "v2-serial/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 4413.2,
-      "mean_ms": 0.2266,
-      "p50_ms": 0.2234,
-      "p99_ms": 0.2428
+      "decisions_per_sec": 4066.3,
+      "mean_ms": 0.2459,
+      "p50_ms": 0.2428,
+      "p99_ms": 0.265
     },
     {
       "label": "v2-plan-only/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 37522.6,
-      "mean_ms": 0.0267,
-      "p50_ms": 0.0266,
-      "p99_ms": 0.0277
+      "decisions_per_sec": 35566.3,
+      "mean_ms": 0.0281,
+      "p50_ms": 0.027,
+      "p99_ms": 0.0472
     },
     {
       "label": "v2-parallel/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 625.8,
-      "mean_ms": 1.5979,
-      "p50_ms": 1.4972,
-      "p99_ms": 2.5877
+      "decisions_per_sec": 294.1,
+      "mean_ms": 3.4,
+      "p50_ms": 2.7497,
+      "p99_ms": 6.1538
     },
     {
       "label": "v2-hedged/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 1127.3,
-      "mean_ms": 0.8871,
-      "p50_ms": 0.8806,
-      "p99_ms": 0.9463
+      "decisions_per_sec": 255.7,
+      "mean_ms": 3.9105,
+      "p50_ms": 2.8426,
+      "p99_ms": 15.3206
     },
     {
       "label": "v2-early-exit/16-rungs",
       "decisions": 30,
-      "decisions_per_sec": 4184.3,
-      "mean_ms": 0.239,
-      "p50_ms": 0.2355,
-      "p99_ms": 0.2582
+      "decisions_per_sec": 688.9,
+      "mean_ms": 1.4517,
+      "p50_ms": 0.3317,
+      "p99_ms": 8.3949
     }
   ],
   "comparisons": [
     {
       "rungs": 4,
       "variant": "v2-serial",
-      "vs_v1_baseline": 0.615
+      "vs_v1_baseline": 0.59
     },
     {
       "rungs": 4,
       "variant": "v2-parallel",
-      "vs_v1_baseline": 0.095
+      "vs_v1_baseline": 0.056
     },
     {
       "rungs": 4,
       "variant": "v2-hedged",
-      "vs_v1_baseline": 0.092
+      "vs_v1_baseline": 0.089
     },
     {
       "rungs": 4,
       "variant": "v2-early-exit",
-      "vs_v1_baseline": 0.52
+      "vs_v1_baseline": 0.531
     },
     {
       "rungs": 16,
       "variant": "v2-serial",
-      "vs_v1_baseline": 0.616
+      "vs_v1_baseline": 0.586
     },
     {
       "rungs": 16,
       "variant": "v2-parallel",
-      "vs_v1_baseline": 0.087
+      "vs_v1_baseline": 0.042
     },
     {
       "rungs": 16,
       "variant": "v2-hedged",
-      "vs_v1_baseline": 0.157
+      "vs_v1_baseline": 0.037
     },
     {
       "rungs": 16,
       "variant": "v2-early-exit",
-      "vs_v1_baseline": 0.584
+      "vs_v1_baseline": 0.099
     }
   ]
 }

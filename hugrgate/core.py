@@ -16,7 +16,8 @@ from hugrgate.errors import (
 )
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
-from hugrgate.provenance import DecisionRecord, ProvenanceStore
+from hugrgate.privacy_provenance import privacy_preserving_record
+from hugrgate.provenance import ProvenanceStore
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
@@ -173,12 +174,11 @@ class HugrGate:
         if contract_id is not None:
             result.metadata["contract_id"] = contract_id
 
-        # Provenance
-        redact = policy.privacy_class == "strict"
-        self.provenance.append(DecisionRecord.from_decision(
-            state, spec, result,
-            policy_threshold=policy.minimum_probability,
-            redact_input=redact))
+        # Provenance — slice 238: per-class privacy-preserving
+        # records (keys / fingerprints / redacted / none).
+        self.provenance.append(privacy_preserving_record(
+            state, spec, result, policy,
+            policy_threshold=policy.minimum_probability))
 
         return result
 

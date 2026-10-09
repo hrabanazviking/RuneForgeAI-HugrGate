@@ -89,7 +89,7 @@ class EarlyExitExecutor(RungExecutor):
                 continue
 
             result = router._attempt(backend, state, ctx.spec, None,
-                                     audit, i)
+                                     policy, audit, i)
             if result is None:
                 continue
             router.note_availability(backend.name, True)

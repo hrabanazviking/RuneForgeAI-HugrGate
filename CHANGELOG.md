@@ -1,5 +1,182 @@
 # Changelog — HugrGate
 
+## Unreleased — Gjallarbrú Campaign X: Privacy Fortress (slices 226–250)
+
+Data sovereignty and enforceable information-flow constraints become
+core architecture: an ordered five-class privacy ladder, field-level
+sensitivity labels, a data-flow policy engine, backend trust levels
+and jurisdiction metadata, local-only enforcement, a redaction
+pipeline, tokenization, secret/PII detection, prompt minimization, a
+remote payload compiler chokepoint, privacy-preserving and encrypted
+provenance, retention and secure deletion, an encrypted cache option,
+a key-provider abstraction, violation auditing, dry-run mode,
+explanation reports, fuzz and exfiltration testing, a privacy
+benchmark suite, and a release gate.
+
+### Added (slice 250)
+- Privacy Fortress release gate (`tests/test_privacy_fortress_gate.py`,
+  gate-marked): asserts all 25 slices' artifacts — module imports,
+  slice docs, taxonomy rows, CHANGELOG coverage, error taxonomy,
+  plus end-to-end holds (exfil suite, audit chain, sealed
+  round-trip, dry-run) and the stdlib-only crypto contract.
+
+### Added (slice 249)
+- Privacy benchmark suite (`benchmarks/privacy_bench_249.py` +
+  `benchmarks/privacy_bench_249.json`): real per-operation
+  latencies for the 10 privacy pipeline stages (payload compile
+  ~2.5ms mean, everything else sub-ms).
+
+### Added (slice 248)
+- Exfiltration simulation (`hugrgate.privacy_exfil`):
+  `ExfilSimulator` red-teams a guard configuration with 7
+  attacker scenarios (blocked/neutralized/allowed verdicts);
+  fixed a real bug where attempt labels never reached the
+  payload compiler.
+
+### Added (slice 247)
+- Privacy fuzz tests (`tests/test_privacy_fuzz.py`): 15
+  stdlib-seeded property tests. Found and fixed a real gap:
+  the secret scanner missed OpenAI-style `sk-` keys — added
+  the `openai_key` pattern plus regression test.
+
+### Added (slice 246)
+- Privacy explanation reports (`hugrgate.privacy_explain`):
+  `PrivacyExplainer` turns denials, dry-run reports, and
+  provenance records into plain-language what/why/what-to-do
+  reports with per-code remediation.
+
+### Added (slice 245)
+- Privacy dry-run mode (`hugrgate.privacy_dryrun`):
+  `PrivacyDryRun(guard).evaluate(...)` simulates the outbound
+  pipeline stage-by-stage and returns a `DryRunReport` with a
+  `summary()` — no execution, no mutation, no raises.
+
+### Added (slice 244)
+- Policy violation audit (`hugrgate.privacy_audit`):
+  append-only hash-chained `PrivacyAuditLog` with `FileAuditSink`;
+  `PrivacyGuard(audit_log=...)` records every denial (backend
+  blocks, jurisdiction, local-only strict, secret detection).
+
+### Added (slice 243)
+- Key-provider abstraction (`hugrgate.privacy_keys`):
+  `KeyProvider` interface, env/file/ephemeral/rotating
+  providers, HKDF `derive_key`, provider-built cache/store
+  constructors. New `KeyProviderError` error (code
+  `key_provider_error`).
+
+### Added (slice 242)
+- Encrypted provenance option: `SealedProvenanceStore`
+  (`hugrgate.privacy_provenance`) — sealed record bodies, plaintext
+  chain index, tamper-evident `verify_chain`, chain-safe purge.
+
+### Added (slice 241)
+- Encrypted cache option (`hugrgate.privacy_crypto`): stdlib
+  `SealedBox` authenticated encryption + HKDF, and
+  `EncryptedDecisionCache` with sealed entries, fail-closed
+  tamper handling, and retention TTL caps. New `SealError` error
+  (code `seal_error`).
+
+### Added (slice 240)
+- Secure deletion hooks (`hugrgate.privacy_deletion`):
+  `shred_bytes`, `SecureBuffer`, `SecureDeleter` with
+  `DeletionReceipt`, `CryptoShredder` for key-destruction deletion.
+
+### Added (slice 239)
+- Retention policies (`hugrgate.privacy_retention`): per-class
+  maximum ages, `purge_expired` with `on_purge` hook,
+  `ProvenanceStore.purge` (chain-safe), `DecisionCache.put`
+  `retention=` TTL capping.
+
+### Added (slice 238)
+- Privacy-preserving provenance (`hugrgate.privacy_provenance`):
+  per-class record builder, opt-in value fingerprints,
+  `PrivacyAwareProvenanceStore`; core/ladder use it instead of
+  ad-hoc redaction branches.
+
+### Added (slice 237)
+- Remote payload compiler (`hugrgate.privacy_payload`): the
+  eight-stage outbound chokepoint (`RemotePayloadCompiler` /
+  `RemotePayload` with audit manifest); `PrivacyGuard`
+  `payload_compiler` hook + `compile_outbound`;
+  `LadderRouter._attempt` compiles remote-bound state and audits
+  denials as privacy skips.
+
+### Added (slice 236)
+- Prompt / data minimization (`hugrgate.privacy_minimize`):
+  `minimize_state`, per-backend `MinimizationPolicy`, and
+  budget-enforcing `PromptMinimizer`.
+
+### Added (slice 235)
+- PII detector interface (`hugrgate.privacy_pii`): `PIIDetector`
+  interface, `RegexPIIDetector` with Luhn/SSN/IPv4 validators,
+  `CompositePIIDetector`, `PIIScrubber` mask/drop actions.
+
+### Added (slice 234)
+- Secret detection hooks (`hugrgate.privacy_secrets`):
+  `SecretScanner` with curated patterns + opt-in entropy heuristic,
+  `scan_text`/`scan_state`, `assert_no_secrets`;
+  `PrivacyGuard.check_no_secrets`. New `SecretDetected` error (code
+  `secret_detected`).
+
+### Added (slice 233)
+- Tokenization / pseudonymization (`hugrgate.privacy_tokens`):
+  `TokenVault` with opaque CSPRNG tokens, namespace isolation,
+  revoke/clear, and export/import for encrypted persistence.
+
+### Added (slice 232)
+- Redaction pipeline v2 (`hugrgate.privacy_redact`): composable
+  `Redactor` strategies (mask/pattern/hash/drop/token),
+  `RedactionPipeline` with per-field and per-sensitivity strategies,
+  deep metadata scrubbing; `PrivacyGuard.redact_record` hardened to
+  the deep scrub.
+
+### Added (slice 231)
+- Local-only field enforcement (`hugrgate.privacy_localonly`):
+  `LocalOnlyPolicy` strip/strict modes, nested-aware stripping with
+  pruning, deep-copy safety; `PrivacyGuard.enforce_local_only`.
+  New `LocalOnlyViolation` error (code `local_only_violation`).
+
+### Added (slice 230)
+- Jurisdiction metadata (`hugrgate.privacy_jurisdiction`):
+  `JurisdictionRegistry` (fail-closed `"unknown"` default for
+  undeclared remotes) + `JurisdictionPolicy`; `PrivacyGuard`
+  enforces `jurisdictions_allowed` at selection/attempt time.
+  New `JurisdictionViolation` error (code `jurisdiction_violation`).
+
+### Added (slice 229)
+- Backend trust levels (`hugrgate.privacy_trust`):
+  `TrustAttestation` + `BackendTrustRegistry` with expiry/revocation
+  and safe fallback; `PrivacyGuard(trust_registry=...)` evaluates
+  class trust floors against attested trust. Trust primitives moved
+  here from `hugrgate.privacy` (re-exported, no cycle).
+
+### Added (slice 228)
+- Data-flow policy engine (`hugrgate.privacy_flow`): `FlowRequest` /
+  `DataFlowPolicy` / `FlowDecision` with ordered deterministic rules
+  (class eligibility, trust floor, jurisdiction, field levels,
+  local-only stripping) and `DataFlowDenied` error
+  (`hugrgate.errors`, code `data_flow_denied`, not recoverable).
+
+### Added (slice 227)
+- Field-level sensitivity labels (`hugrgate.privacy_labels`):
+  `Sensitivity` ladder, `FieldLabels` with dotted-path nested support
+  and `local_only` marking, `filter_by_clearance` for
+  clearance-based field filtering.
+
+### Added (slice 226)
+- Privacy classification v2: `public < standard < sensitive < strict <
+  forbidden` ladder (`hugrgate.policy.DecisionPolicy.PRIVACY_CLASSES`,
+  `hugrgate.privacy.PRIVACY_CLASS_ORDER` / `CLASS_SEMANTICS` /
+  `TRUST_ORDER` and helpers). `PrivacyGuard` now enforces class
+  semantics at selection and attempt time.
+
+### Changed (behavior, slice 226)
+- `strict`-class data now requires a `verified`-trust remote backend;
+  unattested remotes are denied even when the policy allows remote
+  inference. `forbidden`-class data can never reach a remote backend.
+  Provenance redaction in core/ladder follows the class ladder's
+  provenance mode.
+
 ## Unreleased — Gjallarbrú Campaign VII: Local Model Fabric
 
 New `hugrgate/runtimes/` layer (slices 151–175): a v2 local-runtime

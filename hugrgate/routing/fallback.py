@@ -167,7 +167,7 @@ class FallbackGraphExecutor(RungExecutor):
                 return None
             visited.add(backend.name)
             result = router._attempt(backend, state, ctx.spec, None,
-                                     audit, i)
+                                     policy, audit, i)
             if result is None:
                 kinds = _error_kinds(audit[-1])
                 if via:

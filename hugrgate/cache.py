@@ -30,6 +30,7 @@ from typing import Any
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
+from hugrgate.privacy_retention import RetentionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
@@ -120,16 +121,23 @@ class DecisionCache:
         return copy.deepcopy(entry.result)
 
     def put(self, state: Mapping[str, Any], spec: DecisionSpec,
-            policy: DecisionPolicy, result: DecisionResult) -> bool:
-        """Store ``result``. Returns False when privacy forbids caching."""
+            policy: DecisionPolicy, result: DecisionResult,
+            retention: RetentionPolicy | None = None) -> bool:
+        """Store ``result``. Returns False when privacy forbids caching.
+
+        When ``retention`` is given, the entry TTL is capped by the
+        privacy class's maximum age (slice 239).
+        """
         with self._lock:
             if not PrivacyGuard.cache_allowed(policy):
                 return False
             key = cache_key(state, spec, policy)
             now = time.monotonic()
+            ttl = retention.cache_ttl_for(policy, self.ttl_seconds) \
+                if retention is not None else self.ttl_seconds
             self._entries[key] = _Entry(
                 result=copy.deepcopy(result),
-                expires_at=now + self.ttl_seconds,
+                expires_at=now + ttl,
                 backend=result.backend)
             self._entries.move_to_end(key)
             while len(self._entries) > self.max_size:

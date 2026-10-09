@@ -98,7 +98,7 @@ class HedgedPlanExecutor(RungExecutor):
                                  flight.backend)
             local: list[LadderAuditEntry] = []
             result = router._attempt(backend, state, ctx.spec, None,
-                                     local, i)
+                                     policy, local, i)
             with lock:
                 if closed.is_set():
                     return  # winner already returned; drop late stragglers

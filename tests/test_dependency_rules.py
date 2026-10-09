@@ -175,9 +175,11 @@ _STDLIB = {
     "resource", "types", "builtins",
     "glob", "zlib",
     "hmac", "secrets", "ssl", "stat",
+    "base64", "binascii",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
-_LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes"}
+_LOCAL_MODULES = {"event_triage", "build", "ensemble_fakes",
+                  "privacy_bench_249"}
 
 
 def _third_party_imports() -> dict[str, set[str]]:

@@ -82,6 +82,28 @@ flowchart TD
         privacy[privacy]
         ladder[ladder]
     end
+    subgraph privacy-fortress[privacy-fortress]
+        privacy_audit[privacy_audit]
+        privacy_crypto[privacy_crypto]
+        privacy_deletion[privacy_deletion]
+        privacy_dryrun[privacy_dryrun]
+        privacy_exfil[privacy_exfil]
+        privacy_explain[privacy_explain]
+        privacy_flow[privacy_flow]
+        privacy_jurisdiction[privacy_jurisdiction]
+        privacy_keys[privacy_keys]
+        privacy_labels[privacy_labels]
+        privacy_localonly[privacy_localonly]
+        privacy_minimize[privacy_minimize]
+        privacy_payload[privacy_payload]
+        privacy_pii[privacy_pii]
+        privacy_provenance[privacy_provenance]
+        privacy_redact[privacy_redact]
+        privacy_retention[privacy_retention]
+        privacy_secrets[privacy_secrets]
+        privacy_tokens[privacy_tokens]
+        privacy_trust[privacy_trust]
+    end
     subgraph routing[routing]
         routing[routing]
         routing_architecture[routing.architecture]
@@ -410,6 +432,7 @@ flowchart TD
     cache --> log
     cache --> policy
     cache --> privacy
+    cache --> privacy_retention
     cache --> result
     cache --> spec
     calibration --> calibration__base
@@ -782,6 +805,7 @@ flowchart TD
     core --> errors
     core --> log
     core --> policy
+    core --> privacy_provenance
     core --> provenance
     core --> result
     core --> spec
@@ -998,6 +1022,7 @@ flowchart TD
     ladder --> errors
     ladder --> policy
     ladder --> privacy
+    ladder --> privacy_provenance
     ladder --> provenance
     ladder --> result
     ladder --> spec
@@ -1013,7 +1038,74 @@ flowchart TD
     privacy --> errors
     privacy --> log
     privacy --> policy
+    privacy --> privacy_audit
+    privacy --> privacy_jurisdiction
+    privacy --> privacy_labels
+    privacy --> privacy_localonly
+    privacy --> privacy_redact
+    privacy --> privacy_secrets
+    privacy --> privacy_trust
     privacy --> provenance
+    privacy_audit --> log
+    privacy_crypto --> cache
+    privacy_crypto --> errors
+    privacy_crypto --> policy
+    privacy_crypto --> privacy
+    privacy_crypto --> privacy_retention
+    privacy_crypto --> result
+    privacy_crypto --> spec
+    privacy_deletion --> provenance
+    privacy_dryrun --> backend
+    privacy_dryrun --> errors
+    privacy_dryrun --> policy
+    privacy_dryrun --> privacy
+    privacy_dryrun --> privacy_labels
+    privacy_exfil --> backend
+    privacy_exfil --> errors
+    privacy_exfil --> policy
+    privacy_exfil --> privacy
+    privacy_exfil --> privacy_labels
+    privacy_exfil --> privacy_payload
+    privacy_exfil --> privacy_trust
+    privacy_explain --> errors
+    privacy_explain --> privacy_dryrun
+    privacy_explain --> provenance
+    privacy_flow --> errors
+    privacy_flow --> privacy
+    privacy_flow --> privacy_labels
+    privacy_jurisdiction --> backend
+    privacy_jurisdiction --> errors
+    privacy_jurisdiction --> log
+    privacy_keys --> errors
+    privacy_keys --> log
+    privacy_keys -.-> privacy_crypto
+    privacy_keys -.-> privacy_provenance
+    privacy_localonly --> backend
+    privacy_localonly --> errors
+    privacy_localonly --> privacy_labels
+    privacy_payload --> backend
+    privacy_payload --> policy
+    privacy_payload --> privacy
+    privacy_payload --> privacy_flow
+    privacy_payload --> privacy_labels
+    privacy_payload --> privacy_minimize
+    privacy_payload --> privacy_pii
+    privacy_payload --> privacy_redact
+    privacy_provenance --> errors
+    privacy_provenance --> policy
+    privacy_provenance --> privacy
+    privacy_provenance --> privacy_crypto
+    privacy_provenance --> privacy_redact
+    privacy_provenance --> provenance
+    privacy_provenance --> result
+    privacy_provenance --> spec
+    privacy_redact --> privacy_labels
+    privacy_redact --> provenance
+    privacy_retention --> policy
+    privacy_retention --> provenance
+    privacy_secrets --> errors
+    privacy_trust --> backend
+    privacy_trust --> log
     provenance -.-> errors
     provenance --> result
     provenance --> spec
@@ -1209,6 +1301,7 @@ flowchart TD
 | contract-engine | `contracts`, `contracts.schema`, `contracts.negotiation`, `contracts.nested`, `contracts.hierarchy`, `contracts.composite`, `contracts.conditional`, `contracts.crossfield`, `contracts.ordinal`, `contracts.uncertainty`, `contracts.distributions`, `contracts.multilabel`, `contracts.cost`, `contracts.utility`, `contracts.risk`, `contracts.deadlines`, `contracts.context`, `contracts.features`, `contracts.explanations`, `contracts.inheritance`, `contracts.composition`, `contracts.templates`, `contracts.migration`, `contracts.lint`, `contracts.fuzz` |
 | local-runtimes | `runtimes`, `runtimes.bench_matrix`, `runtimes.conformance`, `runtimes.eviction`, `runtimes.gguf`, `runtimes.grammar`, `runtimes.health_probes`, `runtimes.jsonschema`, `runtimes.llama_cpp`, `runtimes.metadata`, `runtimes.mlx`, `runtimes.ollama`, `runtimes.onnx`, `runtimes.openvino`, `runtimes.packs`, `runtimes.probe`, `runtimes.residency`, `runtimes.structured`, `runtimes.tensorrt`, `runtimes.transformers_rt`, `runtimes.vllm`, `runtimes.warmup` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
+| privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -1360,6 +1453,7 @@ flowchart TD
 | `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
+| `cache` | `privacy_retention` | no |
 | `cache` | `result` | no |
 | `cache` | `spec` | no |
 | `calibration` | `calibration._base` | no |
@@ -1732,6 +1826,7 @@ flowchart TD
 | `core` | `errors` | no |
 | `core` | `log` | no |
 | `core` | `policy` | no |
+| `core` | `privacy_provenance` | no |
 | `core` | `provenance` | no |
 | `core` | `result` | no |
 | `core` | `spec` | no |
@@ -1948,6 +2043,7 @@ flowchart TD
 | `ladder` | `errors` | no |
 | `ladder` | `policy` | no |
 | `ladder` | `privacy` | no |
+| `ladder` | `privacy_provenance` | no |
 | `ladder` | `provenance` | no |
 | `ladder` | `result` | no |
 | `ladder` | `spec` | no |
@@ -1963,7 +2059,74 @@ flowchart TD
 | `privacy` | `errors` | no |
 | `privacy` | `log` | no |
 | `privacy` | `policy` | no |
+| `privacy` | `privacy_audit` | no |
+| `privacy` | `privacy_jurisdiction` | no |
+| `privacy` | `privacy_labels` | no |
+| `privacy` | `privacy_localonly` | no |
+| `privacy` | `privacy_redact` | no |
+| `privacy` | `privacy_secrets` | no |
+| `privacy` | `privacy_trust` | no |
 | `privacy` | `provenance` | no |
+| `privacy_audit` | `log` | no |
+| `privacy_crypto` | `cache` | no |
+| `privacy_crypto` | `errors` | no |
+| `privacy_crypto` | `policy` | no |
+| `privacy_crypto` | `privacy` | no |
+| `privacy_crypto` | `privacy_retention` | no |
+| `privacy_crypto` | `result` | no |
+| `privacy_crypto` | `spec` | no |
+| `privacy_deletion` | `provenance` | no |
+| `privacy_dryrun` | `backend` | no |
+| `privacy_dryrun` | `errors` | no |
+| `privacy_dryrun` | `policy` | no |
+| `privacy_dryrun` | `privacy` | no |
+| `privacy_dryrun` | `privacy_labels` | no |
+| `privacy_exfil` | `backend` | no |
+| `privacy_exfil` | `errors` | no |
+| `privacy_exfil` | `policy` | no |
+| `privacy_exfil` | `privacy` | no |
+| `privacy_exfil` | `privacy_labels` | no |
+| `privacy_exfil` | `privacy_payload` | no |
+| `privacy_exfil` | `privacy_trust` | no |
+| `privacy_explain` | `errors` | no |
+| `privacy_explain` | `privacy_dryrun` | no |
+| `privacy_explain` | `provenance` | no |
+| `privacy_flow` | `errors` | no |
+| `privacy_flow` | `privacy` | no |
+| `privacy_flow` | `privacy_labels` | no |
+| `privacy_jurisdiction` | `backend` | no |
+| `privacy_jurisdiction` | `errors` | no |
+| `privacy_jurisdiction` | `log` | no |
+| `privacy_keys` | `errors` | no |
+| `privacy_keys` | `log` | no |
+| `privacy_keys` | `privacy_crypto` | yes |
+| `privacy_keys` | `privacy_provenance` | yes |
+| `privacy_localonly` | `backend` | no |
+| `privacy_localonly` | `errors` | no |
+| `privacy_localonly` | `privacy_labels` | no |
+| `privacy_payload` | `backend` | no |
+| `privacy_payload` | `policy` | no |
+| `privacy_payload` | `privacy` | no |
+| `privacy_payload` | `privacy_flow` | no |
+| `privacy_payload` | `privacy_labels` | no |
+| `privacy_payload` | `privacy_minimize` | no |
+| `privacy_payload` | `privacy_pii` | no |
+| `privacy_payload` | `privacy_redact` | no |
+| `privacy_provenance` | `errors` | no |
+| `privacy_provenance` | `policy` | no |
+| `privacy_provenance` | `privacy` | no |
+| `privacy_provenance` | `privacy_crypto` | no |
+| `privacy_provenance` | `privacy_redact` | no |
+| `privacy_provenance` | `provenance` | no |
+| `privacy_provenance` | `result` | no |
+| `privacy_provenance` | `spec` | no |
+| `privacy_redact` | `privacy_labels` | no |
+| `privacy_redact` | `provenance` | no |
+| `privacy_retention` | `policy` | no |
+| `privacy_retention` | `provenance` | no |
+| `privacy_secrets` | `errors` | no |
+| `privacy_trust` | `backend` | no |
+| `privacy_trust` | `log` | no |
 | `provenance` | `errors` | yes |
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
