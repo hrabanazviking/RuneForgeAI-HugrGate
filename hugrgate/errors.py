@@ -40,6 +40,7 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "SerdeError",
     "SpecError",
     "StorageError",
     "TelemetryError",
@@ -267,3 +268,13 @@ class ZeroCopyError(HugrGateError):
     """
     code = "zerocopy_error"
     recoverable = True
+
+
+class SerdeError(HugrGateError):
+    """A serialization payload was malformed or version-incompatible.
+
+    Slice 281.  A bad payload is a caller bug, not a transient fault:
+    retrying the same bytes will fail the same way.
+    """
+    code = "serde_error"
+    recoverable = False
