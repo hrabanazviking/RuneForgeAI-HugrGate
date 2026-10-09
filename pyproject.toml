@@ -38,6 +38,10 @@ lint = ["ruff>=0.8", "coverage>=7.0"]
 # imports are lazy (try/except ImportError inside detect()); the extra
 # only declares what *would* provide them on real edge hardware.
 npu = ["hailort>=4.0", "tensorrt>=8.6", "openvino>=2023.0"]
+# Campaign XIV (slice 327): OpenTelemetry SDK for the observability
+# bridge. The bridge degrades gracefully without it; imports are lazy.
+otel = ["opentelemetry-api>=1.20", "opentelemetry-sdk>=1.20",
+        "opentelemetry-exporter-otlp>=1.20"]
 
 [project.scripts]
 hugrgate = "hugrgate.cli:main"
