@@ -50,8 +50,7 @@ __all__ = [
 #: Fault mode: the backend process died mid-request.
 CRASH = "crash"
 #: Fault mode: evaluate never returns (slice 253).
-HANG = "hang"
-#: Fault mode: artificial latency before delegating (slice 254).
+HANG = "hang"#: Fault mode: artificial latency before delegating (slice 254).
 LATENCY = "latency"
 #: Fault mode: probabilistic BackendError (slice 255).
 ERROR_RATE = "error_rate"
@@ -94,7 +93,7 @@ class FaultyBackend(Backend):
     """
 
     #: Fault modes with working injectors in this build.
-    _WIRED_MODES: tuple[str, ...] = (CRASH,)
+    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG)
 
     def __init__(self, backend: Backend):
         if not isinstance(backend, Backend):
@@ -135,6 +134,7 @@ class FaultyBackend(Backend):
             raise SpecError(
                 f"fault mode {spec.mode!r} is not wired in this build; "
                 f"wired modes: {list(self._WIRED_MODES)}")
+        self._check_params(spec)
         with self._lock:
             self._armed[spec.mode] = spec
             self._rngs[spec.mode] = random.Random(spec.seed)
@@ -181,10 +181,12 @@ class FaultyBackend(Backend):
         if mode == CRASH:
             raise BackendUnavailable(
                 f"chaos: injected crash of backend {self.name!r}")
-        # Further modes (hang, latency, error_rate, malformed) are
-        # wired by slices 253-256, which extend _WIRED_MODES and add
-        # their branch here. _roll_fault can only return a wired mode
-        # because arm() rejects the rest.
+        if mode == HANG:
+            return self._inject_hang(state, spec, context)
+        # Further modes (latency, error_rate, malformed) are wired by
+        # slices 254-256, which extend _WIRED_MODES and add their branch
+        # here. _roll_fault can only return a wired mode because arm()
+        # rejects the rest.
         return self._backend.evaluate(state, spec, context)
 
     def _roll_fault(self) -> str | None:
@@ -206,3 +208,31 @@ class FaultyBackend(Backend):
     def _spec_for(self, mode: str) -> FaultSpec:
         with self._lock:
             return self._armed[mode]
+
+    @staticmethod
+    def _check_params(spec: FaultSpec) -> None:
+        """Validate a fault spec's params at arm time."""
+        if spec.mode == HANG:
+            hang_s = spec.params.get("hang_s")
+            if hang_s is not None and (
+                    not isinstance(hang_s, (int, float)) or hang_s < 0):
+                raise SpecError(
+                    f"hang fault param 'hang_s' must be None or >= 0, "
+                    f"got {hang_s!r}")
+
+    def _inject_hang(self, state: Mapping[str, Any], spec: DecisionSpec,
+                     context: Mapping[str, Any] | None) -> DecisionResult:
+        """Block the calling thread: endlessly, or for ``hang_s``
+        seconds before delegating (a transient hang that recovers).
+
+        An endless hang is only survivable behind a deadline enforcer
+        such as :class:`~hugrgate.timeout.TimeoutBackend`, which runs
+        ``evaluate`` on a daemon worker thread — the hung call can
+        never block process exit.
+        """
+        hang_s = self._spec_for(HANG).params.get("hang_s")
+        if hang_s is None:
+            threading.Event().wait()  # never set: hangs forever
+            raise AssertionError("unreachable")  # pragma: no cover
+        threading.Event().wait(float(hang_s))
+        return self._backend.evaluate(state, spec, context)

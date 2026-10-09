@@ -6,7 +6,7 @@ import threading
 
 import pytest
 
-from hugrgate.chaos import CRASH, HANG, FaultSpec, FaultyBackend
+from hugrgate.chaos import CRASH, LATENCY, FaultSpec, FaultyBackend
 from hugrgate.errors import BackendUnavailable, SpecError
 from hugrgate.fallback import FallbackChain
 from hugrgate.spec import DecisionSpec
@@ -76,7 +76,7 @@ def test_fault_spec_validation():
 def test_unwired_mode_arm_is_rejected_honestly():
     backend = FaultyBackend(StubBackend())
     with pytest.raises(SpecError, match="not wired in this build"):
-        backend.arm(FaultSpec(mode=HANG, rate=1.0))
+        backend.arm(FaultSpec(mode=LATENCY, rate=1.0))
     assert backend.armed_modes() == []
 
 
