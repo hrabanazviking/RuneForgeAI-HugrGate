@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 50 · **public names:** 215
+**Modules:** 51 · **public names:** 220
 
 ## API stability policy
 
@@ -298,12 +298,22 @@ that this document never drifts from the code.
 | `detect_pi_board` | function | `(cpuinfo_text: 'str | None' = None, model_text: 'str | None' = None) -> 'PiBoard | None'` |
 | `pi_baseline` | function | `(board: 'PiBoard | str') -> 'EdgeBaseline'` |
 
+### `hugrgate.edge.power`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MockPowerSource` | class | `(script: 'list[float | None]')` |
+| `PowerBudget` | class | `(budget_mw: 'float', reserve_mw: 'float' = 0.0, source: 'PowerSource | None' = None)` |
+| `PowerBudgetError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `PowerSource` | class | `()` |
+| `SysfsPowerSensor` | class | `(path_glob: 'str' = '/sys/class/hwmon/hwmon*/power1_input')` |
+
 ### `hugrgate.edge.routing`
 
 | Name | Kind | Signature / value |
 |---|---|---|
 | `THERMAL_CLASSES` | constant | `('cool', 'warm', 'hot')` |
-| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None)` |
+| `EdgeRouter` | class | `(governor: 'ThermalGovernor | None' = None, power: 'PowerBudget | None' = None)` |
 | `edge_cost_of` | function | `(backend: 'Backend') -> 'dict[str, Any]'` |
 
 ### `hugrgate.edge.thermal`

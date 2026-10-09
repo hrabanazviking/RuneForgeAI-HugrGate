@@ -24,6 +24,7 @@ import dataclasses
 from typing import Any
 
 from hugrgate.backend import Backend
+from hugrgate.edge.power import PowerBudget
 from hugrgate.edge.thermal import ThermalGovernor, ThermalLevel
 from hugrgate.policy import DecisionPolicy
 
@@ -55,8 +56,10 @@ def edge_cost_of(backend: Backend) -> dict[str, Any]:
 class EdgeRouter:
     """Filters/orders backend candidates by live edge conditions."""
 
-    def __init__(self, governor: ThermalGovernor | None = None):
+    def __init__(self, governor: ThermalGovernor | None = None,
+                 power: PowerBudget | None = None):
         self._governor = governor
+        self._power = power
 
     # -- thermal -----------------------------------------------------------
 
@@ -72,22 +75,41 @@ class EdgeRouter:
             declared = "warm"
         return declared in _LEVEL_ALLOWS[level.value]
 
+    # -- power ---------------------------------------------------------------
+
+    def _power_allows(self, backend: Backend) -> bool:
+        """True when the backend's declared power fits the budget.
+
+        Backends that declare no power are allowed — the router cannot
+        prove infeasibility from ignorance, so it says so in telemetry
+        instead of blocking.
+        """
+        if self._power is None:
+            return True
+        declared = edge_cost_of(backend).get("power_mw")
+        if not isinstance(declared, (int, float)):
+            return True
+        return self._power.feasible(float(declared))
+
     # -- routing ------------------------------------------------------------
 
     def route(self, candidates: list[Backend]) -> list[Backend]:
-        """Return candidates ordered by edge fitness, thermally filtered.
+        """Return candidates ordered by edge fitness, filtered.
 
-        Ordering: coolest thermal class first, then lowest declared
-        power, then lowest estimated latency. Backends the current
-        thermal level forbids are dropped. An empty input stays empty
-        (never invent a candidate); if *every* candidate is thermally
-        forbidden, the full list is returned unfiltered so the caller —
-        not the router — decides whether to abstain.
+        Thermal filtering drops forbidden thermal classes; power
+        filtering drops backends whose declared draw exceeds the
+        remaining budget. Ordering: coolest thermal class first, then
+        lowest declared power, then lowest estimated latency. An empty
+        input stays empty (never invent a candidate); if *every*
+        candidate is filtered out, the full list is returned unfiltered
+        so the caller — not the router — decides whether to abstain.
         """
         if not candidates:
             return []
         level = self.thermal_level()
-        allowed = [b for b in candidates if self._thermal_allows(b, level)]
+        allowed = [b for b in candidates
+                   if self._thermal_allows(b, level)
+                   and self._power_allows(b)]
         pool = allowed or candidates
 
         def rank(b: Backend) -> tuple[int, float, float]:
