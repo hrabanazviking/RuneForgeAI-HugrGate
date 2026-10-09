@@ -259,6 +259,7 @@ class SerialPlanExecutor:
             if result is None:
                 continue
             router.note_cost(backend, result)
+            router.note_energy(backend, result)
             gate = max(node.min_confidence, policy.minimum_probability)
             if result.probability >= gate:
                 audit[-1].outcome = RUNG_ACCEPTED
@@ -301,12 +302,14 @@ class LadderRouterV2(LadderRouter):
 
     def __init__(self, *args, planner: Optional[RungPlanner] = None,
                  executor: Optional[RungExecutor] = None,
-                 latency_tracker=None, cost_ledger=None, **kwargs):
+                 latency_tracker=None, cost_ledger=None,
+                 energy_ledger=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.planner: RungPlanner = planner or _DefaultPlanner(self)
         self.executor: RungExecutor = executor or SerialPlanExecutor()
         self.latency_tracker = latency_tracker
         self.cost_ledger = cost_ledger
+        self.energy_ledger = energy_ledger
         self.last_plan: Optional[RoutingPlan] = None
 
     def note_cost(self, backend, result) -> None:
@@ -320,6 +323,14 @@ class LadderRouterV2(LadderRouter):
         except (TypeError, ValueError):
             actual = backend.estimated_cost()
         self.cost_ledger.spend(backend.name, max(0.0, actual))
+
+    def note_energy(self, backend, result) -> None:
+        """Record a rung's measured energy: measured latency × modeled power."""
+        if self.energy_ledger is None:
+            return
+        latency = getattr(result, "latency_ms", None) or 0.0
+        self.energy_ledger.spend(
+            self.energy_ledger.model.estimate_j(backend, latency))
 
     def note_latencies(self, audit) -> None:
         """Feed measured rung latencies into the tracker, if one is set."""

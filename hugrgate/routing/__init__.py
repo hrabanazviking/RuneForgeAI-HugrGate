@@ -33,6 +33,13 @@ from hugrgate.routing.cost import (
     CostLedger,
     budget_for,
 )
+from hugrgate.routing.energy import (
+    DEFAULT_LOCAL_WATTS,
+    DEFAULT_REMOTE_WATTS,
+    EnergyAwarePlanner,
+    EnergyLedger,
+    EnergyModel,
+)
 from hugrgate.routing.latency import (
     LatencyAwarePlanner,
     LatencyTracker,
@@ -57,7 +64,12 @@ __all__ = [
     "ConfidenceAwarePlanner",
     "CostAwarePlanner",
     "CostLedger",
+    "DEFAULT_LOCAL_WATTS",
+    "DEFAULT_REMOTE_WATTS",
     "DynamicRungPlanner",
+    "EnergyAwarePlanner",
+    "EnergyLedger",
+    "EnergyModel",
     "adjusted_gate",
     "budget_for",
     "LadderRouterV2",
