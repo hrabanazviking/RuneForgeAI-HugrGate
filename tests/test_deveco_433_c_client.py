@@ -16,6 +16,7 @@ import subprocess
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from typing import ClassVar
 
 import pytest
 
@@ -37,8 +38,8 @@ def _ok_body():
 
 
 class StubHandler(BaseHTTPRequestHandler):
-    script: list = []
-    requests: list = []
+    script: ClassVar[list] = []
+    requests: ClassVar[list] = []
 
     def _handle(self):
         length = int(self.headers.get("Content-Length", 0))
