@@ -27,6 +27,7 @@ import httpx
 
 from hugrgate.backend import Backend
 from hugrgate.cluster.discovery import PeerRecord
+from hugrgate.cluster.privacy_boundary import PrivacyBoundary
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     ClusterMessage,
@@ -46,7 +47,11 @@ from hugrgate.errors import (
 )
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
-from hugrgate.serde import policy_to_dict, result_from_dict
+from hugrgate.serde import (
+    policy_from_dict,
+    policy_to_dict,
+    result_from_dict,
+)
 from hugrgate.spec import SPEC_TYPES, DecisionSpec
 
 __all__ = [
@@ -188,10 +193,11 @@ class RPCClient:
 
     def _check_remote_allowed(self, policy: DecisionPolicy,
                               peer: PeerRecord) -> None:
-        if not policy.remote_inference:
+        try:
+            PrivacyBoundary().check_outbound_allowed(policy)
+        except PrivacyViolation as e:
             raise PrivacyViolation(
-                f"remote inference to peer {peer.node_id[:12]}… blocked: "
-                f"policy.remote_inference is false")
+                f"peer {peer.node_id[:12]}…: {e.message}") from e
 
     def decide(self, peer: PeerRecord, spec: DecisionSpec,
                state: Mapping[str, Any],
@@ -207,9 +213,12 @@ class RPCClient:
         """
         effective = policy or DecisionPolicy()
         self._check_remote_allowed(effective, peer)
+        clean_state, redacted = PrivacyBoundary().prepare_outbound(
+            effective, state)
         payload: dict[str, Any] = {
             "spec": spec.to_dict(),
-            "state": dict(state),
+            "state": clean_state,
+            "redacted_fields": redacted,
             "policy": policy_to_dict(effective),
             "backend_name": backend_name,
             "context": dict(context) if context else None,
@@ -249,24 +258,35 @@ class RPCClient:
         effective = policy or DecisionPolicy()
         self._check_remote_allowed(effective, peer)
         items = []
+        boundary = PrivacyBoundary()
         for req in requests:
             spec = req["spec"]
+            req_policy = req.get("policy", effective)
+            if isinstance(req_policy, DecisionPolicy):
+                self._check_remote_allowed(req_policy, peer)
+                policy_dict: Any = policy_to_dict(req_policy)
+            elif isinstance(req_policy, dict):
+                # Raw dicts are validated + checked, never trusted blind.
+                self._check_remote_allowed(
+                    policy_from_dict(req_policy), peer)
+                policy_dict = req_policy
+            elif req_policy is not None:
+                raise SpecError(
+                    "batch item 'policy' must be a DecisionPolicy, "
+                    "a dict, or omitted")
+            else:
+                policy_dict = policy_to_dict(effective)
+            clean_state, redacted = boundary.redact_state(req["state"])
             item: dict[str, Any] = {
                 "spec": spec.to_dict() if isinstance(spec, DecisionSpec)
                 else spec,
-                "state": dict(req["state"]),
+                "state": clean_state,
+                "redacted_fields": redacted,
+                "policy": policy_dict,
                 "backend_name": req.get("backend_name"),
                 "context": (dict(req["context"])
                             if req.get("context") else None),
             }
-            req_policy = req.get("policy", effective)
-            if isinstance(req_policy, DecisionPolicy):
-                self._check_remote_allowed(req_policy, peer)
-                item["policy"] = policy_to_dict(req_policy)
-            elif req_policy is not None:
-                item["policy"] = req_policy
-            else:
-                item["policy"] = policy_to_dict(effective)
             items.append(item)
         message = self._prepare(MessageType.BATCH_REQUEST,
                                 {"requests": items}, trace_id)

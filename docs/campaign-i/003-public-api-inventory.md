@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 57 · **public names:** 272
+**Modules:** 58 · **public names:** 276
 
 ## API stability policy
 
@@ -238,6 +238,7 @@ that this document never drifts from the code.
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
 | `PROTOCOL_VERSION` | constant | `1` |
+| `SENSITIVE_PREFIX` | constant | `'private_'` |
 | `Authenticator` | class | `(key: 'ClusterKey') -> 'None'` |
 | `ClusterKey` | class | `(key: 'bytes') -> None` |
 | `ClusterMessage` | class | `(msg_type: 'MessageType', sender: 'str', seq: 'int', trace_id: 'str' = <factory>, protocol_version: 'int' = 1, payload: 'dict[str, Any]' = <factory>, timestamp: 'float' = <factory>) -> None` |
@@ -255,6 +256,7 @@ that this document never drifts from the code.
 | `PeerRecord` | class | `(node_id: 'str', host: 'str', port: 'int', last_seen: 'float' = <factory>, capabilities: 'NodeCapabilities | None' = None, source: 'str' = 'unknown', tls: 'bool' = False) -> None` |
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
 | `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
+| `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
 | `RPCClient` | class | `(node_id: 'str', timeout: 'float' = 10.0, outbound_hook: 'OutboundHook | None' = None, mac_provider: 'Callable[[bytes], str] | None' = None, http_client: 'httpx.Client | None' = None) -> 'None'` |
 | `RemoteBackend` | class | `(peer: 'PeerRecord', rpc: 'RPCClient', policy: 'DecisionPolicy | None' = None, name: 'str | None' = None) -> 'None'` |
 | `StaticDiscovery` | class | `(config: 'StaticPeerConfig') -> 'None'` |
@@ -330,6 +332,13 @@ that this document never drifts from the code.
 | `PolicyPropagator` | class | `(node_id: 'str' = '', policy: 'DecisionPolicy | None' = None) -> 'None'` |
 | `PolicyVersion` | class | `(version: 'int', timestamp: 'float' = <factory>, node_id: 'str' = '') -> None` |
 | `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
+
+### `hugrgate.cluster.privacy_boundary`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SENSITIVE_PREFIX` | constant | `'private_'` |
+| `PrivacyBoundary` | class | `(sensitive_prefix: 'str' = 'private_') -> 'None'` |
 
 ### `hugrgate.cluster.protocol`
 

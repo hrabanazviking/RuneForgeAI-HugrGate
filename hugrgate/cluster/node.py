@@ -313,11 +313,18 @@ class ClusterNode:
                                   message.trace_id)
         # Defense in depth: the client already checked, but a hostile
         # or buggy peer must not get remote inference for free.
+        # privacy_class="strict" is local-only (slice 211).
         if not policy.remote_inference:
             return error_envelope(
                 PrivacyViolation(
                     "remote inference blocked: policy.remote_inference "
                     "is false"),
+                self.node_id, self.next_seq(), message.trace_id)
+        if policy.privacy_class == "strict":
+            return error_envelope(
+                PrivacyViolation(
+                    "privacy_class='strict' is local-only: refusing "
+                    "remote decision"),
                 self.node_id, self.next_seq(), message.trace_id)
         try:
             result = self.gate.decide(
@@ -330,6 +337,9 @@ class ClusterNode:
                 {"abstained": True, "reason": e.reason,
                  "message": e.message})
         result.metadata["served_by"] = self.node_id
+        redacted = payload.get("redacted_fields")
+        if redacted:
+            result.metadata["redacted_fields"] = list(redacted)
         return self._respond(message, MessageType.DECIDE_RESPONSE,
                              {"result": result.to_dict()})
 
@@ -370,6 +380,9 @@ class ClusterNode:
         if not policy.remote_inference:
             return {"error": PrivacyViolation(
                 "remote inference blocked").to_dict()}
+        if policy.privacy_class == "strict":
+            return {"error": PrivacyViolation(
+                "privacy_class='strict' is local-only").to_dict()}
         try:
             result = self.gate.decide(
                 state, spec, policy,
@@ -381,4 +394,7 @@ class ClusterNode:
         except HugrGateError as e:
             return {"error": e.to_dict()}
         result.metadata["served_by"] = self.node_id
+        redacted = req.get("redacted_fields")
+        if redacted:
+            result.metadata["redacted_fields"] = list(redacted)
         return {"result": result.to_dict()}

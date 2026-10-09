@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:21:37.802792+00:00",
-  "module_count": 57,
+  "generated_utc": "2026-10-09T13:23:12.801122+00:00",
+  "module_count": 58,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 115,
+      "loc": 121,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -688,7 +688,7 @@
         "threading",
         "typing"
       ],
-      "loc": 384,
+      "loc": 400,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -734,6 +734,24 @@
         "update",
         "receive",
         "snapshot"
+      ]
+    },
+    "hugrgate.cluster.privacy_boundary": {
+      "docstring": "Privacy boundary enforcement. Slice 211.\n\nA cluster boundary is a trust boundary: state crossing it must be\n*explicitly* allowed and *minimally* disclosed. :class:`PrivacyBoundary`\nis the single choke point both ends consult:\n\n- **Allowed?** Remote inference requires\n  ``policy.remote_inference=True``. Additionally,\n  ``privacy_class=\"strict\"`` means *local-only*: under strict, state\n  never leaves the node, even when ``remote_inference`` is true.\n  (Strict-if-any wins in policy propagation, slice 210, so one strict\n  member makes the cluster's remote posture strict.)\n- **Minimal?** Fields tagged sensitive \u2014 the ``private_`` prefix by\n  convention, plus an explicit set per call \u2014 are dropped before the\n  envelope is built. The drop is *reported* (``redacted_fields`` in\n  the request payload and result metadata), never silent: the peer's\n  provenance records what it did *not* see.\n\nFail-closed throughout: anything ambiguous raises\n:class:`PrivacyViolation`.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 96,
+      "path": "hugrgate/cluster/privacy_boundary.py",
+      "public_defs": [
+        "PrivacyBoundary",
+        "is_sensitive",
+        "check_outbound_allowed",
+        "redact_state",
+        "prepare_outbound"
       ]
     },
     "hugrgate.cluster.protocol": {
@@ -788,7 +806,7 @@
         "threading",
         "typing"
       ],
-      "loc": 347,
+      "loc": 367,
       "path": "hugrgate/cluster/rpc.py",
       "public_defs": [
         "error_envelope",
@@ -1374,6 +1392,7 @@
     "test_cluster_identity.py",
     "test_cluster_lan.py",
     "test_cluster_policy_sync.py",
+    "test_cluster_privacy_boundary.py",
     "test_cluster_protocol.py",
     "test_cluster_rpc.py",
     "test_cluster_static_config.py",
@@ -1405,5 +1424,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 10680
+  "total_loc": 10818
 }

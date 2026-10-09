@@ -37,6 +37,10 @@ from hugrgate.cluster.policy_sync import (
     PolicyVersion,
     merge_policies,
 )
+from hugrgate.cluster.privacy_boundary import (
+    SENSITIVE_PREFIX,
+    PrivacyBoundary,
+)
 from hugrgate.cluster.protocol import (
     CLUSTER_RPC_PATH,
     MAX_MESSAGE_BYTES,
@@ -77,6 +81,7 @@ __all__ = [
     "KEY_BYTES",
     "MAX_MESSAGE_BYTES",
     "PROTOCOL_VERSION",
+    "SENSITIVE_PREFIX",
     "Authenticator",
     "ClusterKey",
     "ClusterMessage",
@@ -94,6 +99,7 @@ __all__ = [
     "PeerRecord",
     "PolicyPropagator",
     "PolicyVersion",
+    "PrivacyBoundary",
     "RPCClient",
     "RemoteBackend",
     "StaticDiscovery",
