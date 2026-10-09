@@ -86,3 +86,14 @@ it into an opaque agent.
   `SimilarityHit` (score + shared features explaining the match),
   recency tie-break, `exclude_ids`.
 - Tests: `tests/test_memory_similarity.py` (10 tests).
+
+### Slice 306 — Decision retrieval
+- `hugrgate/memory/retrieval.py`: `retrieve()` scores precedents as
+  `alpha*similarity + beta*recency + gamma*outcome_bonus` (weights
+  validated, `min_score` filter, `exclude_ids`, injectable `now`);
+  `RetrievalResult` carries the full score breakdown plus
+  `explain()`; `recall()` builds features from raw attributes.
+  Outcome bonus: known-positive 1.0, known-negative 0.0, unknown 0.5.
+- Exported similarity + retrieval surfaces from `hugrgate.memory`
+  (missed in the slice 305 commit).
+- Tests: `tests/test_memory_retrieval.py` (9 tests).

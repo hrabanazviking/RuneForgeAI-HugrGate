@@ -27,6 +27,14 @@ from hugrgate.memory.groundtruth import (
 from hugrgate.memory.history import DecisionHistory, Episode
 from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
+from hugrgate.memory.retrieval import RetrievalResult, recall, retrieve
+from hugrgate.memory.similarity import (
+    SimilarityHit,
+    cosine,
+    featurize_episode,
+    featurize_query,
+    most_similar,
+)
 
 __all__ = [
     "OUTCOME_KINDS",
@@ -35,7 +43,15 @@ __all__ = [
     "GroundTruth",
     "MemoryQuery",
     "Outcome",
+    "RetrievalResult",
+    "SimilarityHit",
     "consistency_report",
+    "cosine",
+    "featurize_episode",
+    "featurize_query",
     "find_in_provenance",
+    "most_similar",
     "outcome_agrees",
+    "recall",
+    "retrieve",
 ]
