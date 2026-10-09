@@ -276,6 +276,13 @@ class LadderRouter:
                 latency_ms=(time.perf_counter() - t0) * 1000))
             return None
 
+        if result is None:  # slice 073: hostile backend returned None
+            audit.append(LadderAuditEntry(
+                rung_index, backend.name, RUNG_ERROR,
+                detail="backend returned None instead of a DecisionResult",
+                latency_ms=(time.perf_counter() - t0) * 1000))
+            return None
+
         result.latency_ms = (time.perf_counter() - t0) * 1000
         result.backend = backend.name
         validate_result(result, spec)  # never let invalid values climb

@@ -49,6 +49,10 @@ from hugrgate.routing.explain import (
     explain_plan,
     explain_route,
 )
+from hugrgate.routing.fuzz import (
+    FuzzBackend,
+    run_fuzz,
+)
 from hugrgate.routing.replay import (
     RecordingExecutor,
     ReplayExecutor,
@@ -147,6 +151,7 @@ __all__ = [
     "explain_route",
     "EarlyExitExecutor",
     "FallbackGraph",
+    "FuzzBackend",
     "FallbackGraphExecutor",
     "HardwareAwarePlanner",
     "HedgedPlanExecutor",
@@ -192,6 +197,7 @@ __all__ = [
     "RoutingOptions",
     "RoutePolicy",
     "RoutingPlan",
+    "run_fuzz",
     "parse_route_policy",
     "SerialPlanExecutor",
     "SimulatedRung",
