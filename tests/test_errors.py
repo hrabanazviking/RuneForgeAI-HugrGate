@@ -62,6 +62,7 @@ from hugrgate.errors import (
     SealError,
     SecretDetected,
     SerdeError,
+    SignatureVerificationFailed,
     SLOError,
     SpecError,
     StorageError,
@@ -109,6 +110,7 @@ ALL_ERRORS = [
     # Campaign XIV observability errors (slice 326 taxonomy promotion).
     ObservabilityError, MetricError, TraceError, SLOError, AlertError,
     # Campaign XVII security-forge errors (slice 404+).
+    SignatureVerificationFailed,
     SupplyChainViolation,
 ]
 
@@ -172,6 +174,7 @@ EXPECTED_CODES = {
     DatasetError: "dataset_error",
     EvalError: "eval_error",
     EvalGateError: "eval_gate_error",
+    SignatureVerificationFailed: "signature_verification_failed",
     SupplyChainViolation: "supply_chain_violation",
 }
 
@@ -241,6 +244,7 @@ EXPECTED_RECOVERABLE = {
     DatasetError: False,
     EvalError: False,
     EvalGateError: False,
+    SignatureVerificationFailed: False,
     SupplyChainViolation: False,
 }
 

@@ -620,3 +620,15 @@ class SupplyChainViolation(HugrGateError):
     """
     code = "supply_chain_violation"
     recoverable = False
+
+
+class SignatureVerificationFailed(HugrGateError):
+    """A cryptographic signature check failed.
+    Slice 405.  Raised by :mod:`hugrgate.security.model_signing` (and
+    the checksum enforcer, slice 406) when a signed envelope's tag
+    does not verify, the key id is unknown, or the envelope is
+    malformed.  Not recoverable: the bytes or the key are wrong —
+    retrying the same check cannot succeed.
+    """
+    code = "signature_verification_failed"
+    recoverable = False

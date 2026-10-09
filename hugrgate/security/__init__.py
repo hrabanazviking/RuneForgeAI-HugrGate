@@ -70,6 +70,11 @@ from hugrgate.security.depscan import (
 from hugrgate.security.depscan import (
     Finding as DependencyFinding,
 )
+from hugrgate.security.model_signing import (
+    ModelSigner,
+    SignedMetadata,
+    TrustedModelStore,
+)
 from hugrgate.security.supply_chain import (
     DependencyRecord,
     SupplyChainPolicy,
@@ -94,12 +99,15 @@ __all__ = [
     "AttackSurface",
     "DependencyFinding",
     "DependencyRecord",
+    "ModelSigner",
+    "SignedMetadata",
     "SupplyChainPolicy",
     "SupplyVerdict",
     "SurfaceEntry",
     "Threat",
     "ThreatModel",
     "TrustBoundary",
+    "TrustedModelStore",
     "curated_surface",
     "default_threat_model",
     "enumerate_surface",

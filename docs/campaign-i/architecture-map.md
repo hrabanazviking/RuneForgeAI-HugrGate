@@ -1817,8 +1817,11 @@ flowchart TD
     scheduler --> log
     security --> security_attack_surface
     security --> security_depscan
+    security --> security_model_signing
     security --> security_supply_chain
     security --> security_threat_model
+    security_model_signing --> errors
+    security_model_signing --> privacy_crypto
     security_supply_chain --> errors
     serde --> errors
     serde --> policy
@@ -3264,8 +3267,11 @@ flowchart TD
 | `scheduler` | `log` | no |
 | `security` | `security.attack_surface` | no |
 | `security` | `security.depscan` | no |
+| `security` | `security.model_signing` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
+| `security.model_signing` | `errors` | no |
+| `security.model_signing` | `privacy_crypto` | no |
 | `security.supply_chain` | `errors` | no |
 | `serde` | `errors` | no |
 | `serde` | `policy` | no |

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 368 · **public names:** 2246
+**Modules:** 369 · **public names:** 2254
 
 ## API stability policy
 
@@ -3966,12 +3966,15 @@ that this document never drifts from the code.
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
 | `DependencyFinding` | class | `(kind: 'str', package: 'str', severity: 'str', detail: 'str', cve: 'str' = '', fixed_in: 'str' = '') -> None` |
 | `DependencyRecord` | class | `(name: 'str', version: 'str', index_url: 'str' = 'https://pypi.org/simple', license: 'str' = 'UNKNOWN', hashes: 'tuple[str, ...]' = (), origin: 'str' = 'direct') -> None` |
+| `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
+| `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
 | `SupplyChainPolicy` | class | `(allowed_indexes: 'tuple[str, ...]' = ('https://pypi.org/simple',), require_hashes: 'bool' = False, allowed_licenses: 'frozenset[str] | None' = None, blocked_packages: 'frozenset[str]' = frozenset()) -> None` |
 | `SupplyVerdict` | class | `(allowed: 'bool', reasons: 'tuple[str, ...]' = ()) -> None` |
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `Threat` | class | `(id: 'str', title: 'str', stride: 'str', asset: 'str', description: 'str', likelihood: 'int', impact: 'int', mitigations: 'list[str]' = <factory>, tests: 'list[str]' = <factory>, residual: 'str' = 'partial', rationale: 'str' = '') -> None` |
 | `ThreatModel` | class | `(version: 'str', assets: 'list[Asset]' = <factory>, boundaries: 'list[TrustBoundary]' = <factory>, threats: 'list[Threat]' = <factory>) -> None` |
 | `TrustBoundary` | class | `(name: 'str', description: 'str', enforced_by: 'str') -> None` |
+| `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
 | `curated_surface` | function | `() -> 'AttackSurface'` |
 | `default_threat_model` | function | `() -> 'ThreatModel'` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
@@ -4003,6 +4006,16 @@ that this document never drifts from the code.
 | `render_report` | function | `(findings: 'list[Finding]') -> 'str'` |
 | `scan_project` | function | `(root: 'str | Path' = '.') -> 'list[Finding]'` |
 | `scan_requirements` | function | `(requirements: 'list[str]', installed: 'dict[str, str] | None' = None) -> 'list[Finding]'` |
+
+### `hugrgate.security.model_signing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ALGORITHM` | constant | `'HMAC-SHA256/hugrgate-metadata-v1'` |
+| `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
+| `SignedMetadata` | class | `(metadata: 'dict[str, Any]', key_id: 'str', signature: 'str', algorithm: 'str' = 'HMAC-SHA256/hugrgate-metadata-v1', signed_at: 'float' = <factory>) -> None` |
+| `TrustedModelStore` | class | `(keys: 'Mapping[str, bytes]') -> 'None'` |
+| `canonical_json` | function | `(payload: 'Mapping[str, Any]') -> 'bytes'` |
 
 ### `hugrgate.security.supply_chain`
 
