@@ -30,6 +30,32 @@ flowchart TD
         privacy[privacy]
         ladder[ladder]
     end
+    subgraph routing[routing]
+        routing[routing]
+        routing_architecture[routing.architecture]
+        routing_rungs[routing.rungs]
+        routing_synthesis[routing.synthesis]
+        routing_capability[routing.capability]
+        routing_confidence[routing.confidence]
+        routing_latency[routing.latency]
+        routing_cost[routing.cost]
+        routing_energy[routing.energy]
+        routing_memory[routing.memory]
+        routing_privacy[routing.privacy]
+        routing_hardware[routing.hardware]
+        routing_availability[routing.availability]
+        routing_qos[routing.qos]
+        routing_parallel[routing.parallel]
+        routing_hedged[routing.hedged]
+        routing_early_exit[routing.early_exit]
+        routing_fallback[routing.fallback]
+        routing_dag[routing.dag]
+        routing_explain[routing.explain]
+        routing_replay[routing.replay]
+        routing_simulate[routing.simulate]
+        routing_dsl[routing.dsl]
+        routing_fuzz[routing.fuzz]
+    end
     subgraph state[state]
         provenance[provenance]
         health[health]
@@ -178,6 +204,102 @@ flowchart TD
     provenance --> result
     provenance --> spec
     result --> errors
+    routing --> routing_architecture
+    routing --> routing_availability
+    routing --> routing_capability
+    routing --> routing_confidence
+    routing --> routing_cost
+    routing --> routing_dag
+    routing --> routing_dsl
+    routing --> routing_early_exit
+    routing --> routing_energy
+    routing --> routing_explain
+    routing --> routing_fallback
+    routing --> routing_fuzz
+    routing --> routing_hardware
+    routing --> routing_hedged
+    routing --> routing_latency
+    routing --> routing_memory
+    routing --> routing_parallel
+    routing --> routing_privacy
+    routing --> routing_qos
+    routing --> routing_replay
+    routing --> routing_rungs
+    routing --> routing_simulate
+    routing --> routing_synthesis
+    routing_architecture -.-> errors
+    routing_architecture -.-> ladder
+    routing_architecture --> policy
+    routing_architecture --> result
+    routing_architecture --> spec
+    routing_availability --> backend
+    routing_availability --> routing_architecture
+    routing_capability --> backend
+    routing_capability --> routing_architecture
+    routing_confidence --> backend
+    routing_confidence --> routing_architecture
+    routing_cost --> routing_architecture
+    routing_dag -.-> hugrgate
+    routing_dag --> errors
+    routing_dag --> ladder
+    routing_dag --> routing_architecture
+    routing_dsl --> errors
+    routing_dsl --> policy
+    routing_dsl --> routing_architecture
+    routing_early_exit --> errors
+    routing_early_exit --> ladder
+    routing_early_exit --> routing_architecture
+    routing_early_exit --> routing_qos
+    routing_energy --> backend
+    routing_energy --> routing_architecture
+    routing_explain --> ladder
+    routing_explain --> routing_architecture
+    routing_fallback --> errors
+    routing_fallback --> ladder
+    routing_fallback --> routing_architecture
+    routing_fuzz -.-> hugrgate
+    routing_fuzz --> errors
+    routing_fuzz --> ladder
+    routing_fuzz --> result
+    routing_fuzz --> routing_architecture
+    routing_fuzz --> routing_early_exit
+    routing_fuzz --> routing_fallback
+    routing_fuzz --> routing_rungs
+    routing_fuzz --> routing_synthesis
+    routing_fuzz --> validation
+    routing_hardware --> backend
+    routing_hardware --> routing_architecture
+    routing_hedged --> backend
+    routing_hedged --> errors
+    routing_hedged --> ladder
+    routing_hedged --> routing_architecture
+    routing_hedged --> routing_qos
+    routing_latency --> backend
+    routing_latency --> routing_architecture
+    routing_memory --> backend
+    routing_memory --> routing_architecture
+    routing_parallel --> errors
+    routing_parallel --> ladder
+    routing_parallel --> routing_architecture
+    routing_parallel --> routing_qos
+    routing_privacy --> backend
+    routing_privacy --> routing_architecture
+    routing_replay --> errors
+    routing_replay --> ladder
+    routing_replay --> result
+    routing_replay --> routing_architecture
+    routing_rungs --> backend
+    routing_rungs --> routing_architecture
+    routing_rungs -.-> routing_capability
+    routing_simulate --> routing_architecture
+    routing_simulate --> routing_capability
+    routing_simulate --> routing_energy
+    routing_simulate --> routing_memory
+    routing_synthesis --> backend
+    routing_synthesis --> routing_architecture
+    routing_synthesis --> routing_capability
+    routing_synthesis --> routing_qos
+    routing_synthesis --> routing_rungs
     server --> hugrgate
     server --> client
     server --> errors
@@ -203,6 +325,7 @@ flowchart TD
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
+| routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
@@ -323,6 +446,102 @@ flowchart TD
 | `provenance` | `result` | no |
 | `provenance` | `spec` | no |
 | `result` | `errors` | no |
+| `routing` | `routing.architecture` | no |
+| `routing` | `routing.availability` | no |
+| `routing` | `routing.capability` | no |
+| `routing` | `routing.confidence` | no |
+| `routing` | `routing.cost` | no |
+| `routing` | `routing.dag` | no |
+| `routing` | `routing.dsl` | no |
+| `routing` | `routing.early_exit` | no |
+| `routing` | `routing.energy` | no |
+| `routing` | `routing.explain` | no |
+| `routing` | `routing.fallback` | no |
+| `routing` | `routing.fuzz` | no |
+| `routing` | `routing.hardware` | no |
+| `routing` | `routing.hedged` | no |
+| `routing` | `routing.latency` | no |
+| `routing` | `routing.memory` | no |
+| `routing` | `routing.parallel` | no |
+| `routing` | `routing.privacy` | no |
+| `routing` | `routing.qos` | no |
+| `routing` | `routing.replay` | no |
+| `routing` | `routing.rungs` | no |
+| `routing` | `routing.simulate` | no |
+| `routing` | `routing.synthesis` | no |
+| `routing.architecture` | `errors` | yes |
+| `routing.architecture` | `ladder` | yes |
+| `routing.architecture` | `policy` | no |
+| `routing.architecture` | `result` | no |
+| `routing.architecture` | `spec` | no |
+| `routing.availability` | `backend` | no |
+| `routing.availability` | `routing.architecture` | no |
+| `routing.capability` | `backend` | no |
+| `routing.capability` | `routing.architecture` | no |
+| `routing.confidence` | `backend` | no |
+| `routing.confidence` | `routing.architecture` | no |
+| `routing.cost` | `routing.architecture` | no |
+| `routing.dag` | `hugrgate` | yes |
+| `routing.dag` | `errors` | no |
+| `routing.dag` | `ladder` | no |
+| `routing.dag` | `routing.architecture` | no |
+| `routing.dsl` | `errors` | no |
+| `routing.dsl` | `policy` | no |
+| `routing.dsl` | `routing.architecture` | no |
+| `routing.early_exit` | `errors` | no |
+| `routing.early_exit` | `ladder` | no |
+| `routing.early_exit` | `routing.architecture` | no |
+| `routing.early_exit` | `routing.qos` | no |
+| `routing.energy` | `backend` | no |
+| `routing.energy` | `routing.architecture` | no |
+| `routing.explain` | `ladder` | no |
+| `routing.explain` | `routing.architecture` | no |
+| `routing.fallback` | `errors` | no |
+| `routing.fallback` | `ladder` | no |
+| `routing.fallback` | `routing.architecture` | no |
+| `routing.fuzz` | `hugrgate` | yes |
+| `routing.fuzz` | `errors` | no |
+| `routing.fuzz` | `ladder` | no |
+| `routing.fuzz` | `result` | no |
+| `routing.fuzz` | `routing.architecture` | no |
+| `routing.fuzz` | `routing.early_exit` | no |
+| `routing.fuzz` | `routing.fallback` | no |
+| `routing.fuzz` | `routing.rungs` | no |
+| `routing.fuzz` | `routing.synthesis` | no |
+| `routing.fuzz` | `validation` | no |
+| `routing.hardware` | `backend` | no |
+| `routing.hardware` | `routing.architecture` | no |
+| `routing.hedged` | `backend` | no |
+| `routing.hedged` | `errors` | no |
+| `routing.hedged` | `ladder` | no |
+| `routing.hedged` | `routing.architecture` | no |
+| `routing.hedged` | `routing.qos` | no |
+| `routing.latency` | `backend` | no |
+| `routing.latency` | `routing.architecture` | no |
+| `routing.memory` | `backend` | no |
+| `routing.memory` | `routing.architecture` | no |
+| `routing.parallel` | `errors` | no |
+| `routing.parallel` | `ladder` | no |
+| `routing.parallel` | `routing.architecture` | no |
+| `routing.parallel` | `routing.qos` | no |
+| `routing.privacy` | `backend` | no |
+| `routing.privacy` | `routing.architecture` | no |
+| `routing.replay` | `errors` | no |
+| `routing.replay` | `ladder` | no |
+| `routing.replay` | `result` | no |
+| `routing.replay` | `routing.architecture` | no |
+| `routing.rungs` | `backend` | no |
+| `routing.rungs` | `routing.architecture` | no |
+| `routing.rungs` | `routing.capability` | yes |
+| `routing.simulate` | `routing.architecture` | no |
+| `routing.simulate` | `routing.capability` | no |
+| `routing.simulate` | `routing.energy` | no |
+| `routing.simulate` | `routing.memory` | no |
+| `routing.synthesis` | `backend` | no |
+| `routing.synthesis` | `routing.architecture` | no |
+| `routing.synthesis` | `routing.capability` | no |
+| `routing.synthesis` | `routing.qos` | no |
+| `routing.synthesis` | `routing.rungs` | no |
 | `server` | `hugrgate` | no |
 | `server` | `client` | no |
 | `server` | `errors` | no |

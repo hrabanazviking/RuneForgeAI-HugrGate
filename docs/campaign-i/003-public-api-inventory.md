@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 42 · **public names:** 175
+**Modules:** 66 · **public names:** 326
 
 ## API stability policy
 
@@ -308,6 +308,7 @@ that this document never drifts from the code.
 | `RUNG_UNAVAILABLE` | constant | `'backend_unavailable'` |
 | `RUNG_ERROR` | constant | `'backend_error'` |
 | `RUNG_ABSTAINED` | constant | `'backend_abstained'` |
+| `RUNG_CANCELLED` | constant | `'cancelled'` |
 | `LadderRung` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None) -> None` |
 | `LadderAuditEntry` | class | `(rung_index: 'int', backend_name: 'str', outcome: 'str', detail: 'str' = '', probability: 'Optional[float]' = None, latency_ms: 'float' = 0.0) -> None` |
 | `LadderRouter` | class | `(registry: 'BackendRegistry', rungs: 'Optional[List[LadderRung]]' = None, *, ladders: 'Optional[Dict[str, List[LadderRung]]]' = None, provenance: 'Optional[ProvenanceStore]' = None, privacy_guard: 'Optional[PrivacyGuard]' = None)` |
@@ -339,7 +340,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `REMOTE_MODES` | constant | `('allow', 'forbidden')` |
-| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `frozenset({'strict'})` |
+| `NON_CACHEABLE_PRIVACY_CLASSES` | constant | `{'strict'}` |
 | `PrivacyGuard` | class | `(remote_inference: 'str' = 'allow', redact_provenance: 'bool' = True)` |
 
 ### `hugrgate.provenance`
@@ -354,6 +355,276 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `DecisionResult` | class | `(value: 'Optional[Any]', probability: 'float', distribution: 'Dict[str, float]' = <factory>, uncertainty: 'float' = 0.0, accepted: 'bool' = True, backend: 'str' = 'unknown', model: 'str' = 'unknown', latency_ms: 'float' = 0.0, calibration_profile: 'str' = 'none', fallback_used: 'bool' = False, metadata: 'Dict[str, Any]' = <factory>) -> None` |
+
+### `hugrgate.routing`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CAPABILITY_WEIGHTS` | constant | `{'quality': 0.35, 'calibration': 0.2, 'features': 0.2, 'capa` |
+| `AvailabilityAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[AvailabilityTracker]' = None, check_health: 'bool' = True)` |
+| `AvailabilityTracker` | class | `(failure_threshold: 'int' = 3, cooldown_s: 'float' = 60.0)` |
+| `CalibrationTracker` | class | `(n_bins: 'int' = 10)` |
+| `CircuitState` | class | `(consecutive_failures: 'int' = 0, open_since: 'Optional[float]' = None, half_open_trial: 'bool' = False) -> None` |
+| `CapabilityScore` | class | `(value: 'float', reasons: 'List[str]' = <factory>, factors: 'Dict[str, float]' = <factory>) -> None` |
+| `CapabilityScorer` | class | `(weights: 'Dict[str, float] | None' = None)` |
+| `ConfidenceAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[CalibrationTracker]' = None, min_samples: 'int' = 50)` |
+| `CostAwarePlanner` | class | `(inner: 'RungPlanner', registry, ledger: 'Optional[CostLedger]' = None)` |
+| `CostLedger` | class | `(budget: 'Optional[float]')` |
+| `DEFAULT_LOCAL_WATTS` | constant | `65.0` |
+| `DEFAULT_REMOTE_WATTS` | constant | `5.0` |
+| `DynamicRungPlanner` | class | `(registry, builder: 'Optional[RungBuilder]' = None)` |
+| `EnergyAwarePlanner` | class | `(inner: 'RungPlanner', registry, budget_j: 'Optional[float]' = None, model: 'Optional[EnergyModel]' = None)` |
+| `EnergyLedger` | class | `(budget_j: 'Optional[float]', model: 'Optional[EnergyModel]' = None)` |
+| `EnergyModel` | class | `(local_watts: 'float' = 65.0, remote_watts: 'float' = 5.0)` |
+| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'below_confidenc` |
+| `explain_decision` | function | `(decision: 'RoutingDecision') -> 'str'` |
+| `explain_plan` | function | `(plan: 'RoutingPlan') -> 'str'` |
+| `explain_route` | function | `(audit: 'List[Dict]', plan: 'Optional[RoutingPlan]' = None, winner: 'Optional[int]' = None) -> 'str'` |
+| `EarlyExitExecutor` | class | `(*args, **kwargs)` |
+| `FallbackGraph` | class | `()` |
+| `FuzzBackend` | class | `(name: 'str', rng: 'random.Random', remote: 'bool')` |
+| `FallbackGraphExecutor` | class | `(graph: 'Optional[FallbackGraph]' = None, validate_graph: 'bool' = True)` |
+| `HardwareAwarePlanner` | class | `(inner: 'RungPlanner', registry, host: 'Optional[HostProfile]' = None)` |
+| `HedgedPlanExecutor` | class | `(*args, **kwargs)` |
+| `HostProfile` | class | `(cpu_count: 'int' = 1, memory_mb: 'float' = 1024.0, has_gpu: 'bool' = False, platform: 'str' = 'linux', accelerators: 'List[str]' = <factory>) -> None` |
+| `adjusted_gate` | function | `(base_gate: 'float', ece: 'float') -> 'float'` |
+| `budget_for` | function | `(ctx: 'RouterContext') -> 'Optional[float]'` |
+| `hardware_compatible` | function | `(backend: 'Backend', host: 'HostProfile') -> 'Optional[str]'` |
+| `LadderRouterV2` | class | `(*args, planner: 'Optional[RungPlanner]' = None, executor: 'Optional[RungExecutor]' = None, latency_tracker=None, cost_ledger=None, energy_ledger=None, availability_tracker=None, **kwargs)` |
+| `LadderSynthesizer` | class | `(registry, builder: 'Optional[RungBuilder]' = None)` |
+| `LatencyAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[LatencyTracker]' = None)` |
+| `LatencyTracker` | class | `(alpha: 'float' = 0.3, min_samples: 'int' = 3)` |
+| `MemoryAwarePlanner` | class | `(inner: 'RungPlanner', registry, budget_mb: 'Optional[float]' = None, model: 'Optional[MemoryModel]' = None)` |
+| `MemoryModel` | class | `(local_mb: 'float' = 512.0, remote_mb: 'float' = 0.0)` |
+| `ParallelPlanExecutor` | class | `(*args, **kwargs)` |
+| `PrivacyAwarePlanner` | class | `(inner: 'RungPlanner', registry, classifier: 'Optional[DataClassifier]' = None)` |
+| `PrivacyTier` | class | `(*values)` |
+| `BackendClearance` | class | `()` |
+| `DAGExecutor` | class | `(dag: 'Optional[RoutingDAG]' = None, validate: 'bool' = True)` |
+| `DAGNode` | class | `(name: 'str', backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None, condition: 'Condition' = None)` |
+| `DataClassifier` | class | `(extra_rules: 'Optional[Dict[str, PrivacyTier]]' = None)` |
+| `RoutingDAG` | class | `()` |
+| `evaluate_condition` | function | `(condition: 'Condition', ctx: 'RouterContext') -> 'bool'` |
+| `QOS_PROFILES` | constant | `{<QoSClass.BEST_EFFORT: 'best_effort'>: QoSProfile(name=<QoS` |
+| `QoSClass` | class | `(*values)` |
+| `QoSProfile` | class | `(name: 'QoSClass', depth_cap: 'int', weights: 'Tuple[float, float, float]', parallel_width: 'int', hedge_allowed: 'bool', hedge_delay_ms: 'float', fast_path_probability: 'float', early_exit_delta: 'float') -> None` |
+| `qos_profile` | function | `(name: 'str') -> 'QoSProfile'` |
+| `DEFAULT_LOCAL_MEMORY_MB` | constant | `512.0` |
+| `DEFAULT_REMOTE_MEMORY_MB` | constant | `0.0` |
+| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'standard': 4, 'priority': 6, 'critical':` |
+| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'standard': (0.4, 0.3, 0.3)` |
+| `RungBuilder` | class | `(extra_filters: 'Sequence[RungFilter]' = (), order: 'str' = 'cost', max_rungs: 'Optional[int]' = None)` |
+| `RungExecutor` | class | `(*args, **kwargs)` |
+| `RungFilter` | constant | `typing.Callable[[hugrgate.backend.Backend, hugrgate.routing.` |
+| `RecordingExecutor` | class | `(inner: 'RungExecutor')` |
+| `ReplayExecutor` | class | `(recording: 'RouteRecording')` |
+| `RouteRecording` | class | `(plan: 'Dict[str, Any]', plan_fingerprint: 'str', spec_type: 'str', spec_options: 'List[str]', minimum_probability: 'float', rung_outcomes: 'List[Dict[str, Any]]' = <factory>, winner_index: 'Optional[int]' = None, winner_result: 'Optional[Dict[str, Any]]' = None, recorded_at: 'float' = <factory>) -> None` |
+| `RungMode` | class | `(*values)` |
+| `replay` | function | `(recording: 'RouteRecording') -> 'RoutingDecision'` |
+| `RungNode` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None, mode: 'RungMode' = <RungMode.SERIAL: 'serial'>, why: 'str' = '', params: 'Dict[str, Any]' = <factory>) -> None` |
+| `RungPlanner` | class | `(*args, **kwargs)` |
+| `RouterContext` | class | `(spec: 'DecisionSpec', policy: 'DecisionPolicy', options: 'RoutingOptions' = <factory>, state_keys: 'Tuple[str, ...]' = (), state_size_hint: 'int' = 0) -> None` |
+| `RoutingDecision` | class | `(result: 'DecisionResult', plan: 'RoutingPlan', audit: 'List[Dict[str, Any]]', accepted_rung: 'int') -> None` |
+| `RoutingOptions` | class | `(qos: 'str' = 'standard', strategy: 'str' = 'serial', max_cost: 'Optional[float]' = None, max_energy_j: 'Optional[float]' = None, max_memory_mb: 'Optional[float]' = None, privacy_tier: 'str' = 'internal', hedge_delay_ms: 'float' = 50.0, parallel_width: 'int' = 3, fast_path_probability: 'float' = 0.97, early_exit_delta: 'Optional[float]' = None, record: 'bool' = False, seed: 'Optional[int]' = None) -> None` |
+| `RoutePolicy` | class | `(options: 'RoutingOptions' = <factory>, policy_values: 'Dict[str, Any]' = <factory>, prefer: 'List[str]' = <factory>, allow: 'Optional[List[str]]' = None, forbid: 'List[str]' = <factory>, skip_remote_when_strict: 'bool' = False, _assigned_options: 'Dict[str, object]' = <factory>) -> None` |
+| `RoutingPlan` | class | `(nodes: 'List[RungNode]', strategy: 'RungMode' = <RungMode.SERIAL: 'serial'>, created_by: 'str' = 'unknown', rationale: 'List[str]' = <factory>) -> None` |
+| `run_fuzz` | function | `(seed: 'int', iterations: 'int' = 100) -> 'Dict[str, Any]'` |
+| `parse_route_policy` | function | `(text: 'str') -> 'RoutePolicy'` |
+| `SerialPlanExecutor` | class | `()` |
+| `SimulatedRung` | class | `(backend_name: 'str', rung_index: 'int', would_skip: 'bool', skip_reason: 'str' = '', est_latency_ms: 'float' = 0.0, est_cost: 'float' = 0.0, est_energy_j: 'float' = 0.0, est_memory_mb: 'float' = 0.0, capability: 'float' = 0.0) -> None` |
+| `SimulationReport` | class | `(plan_fingerprint: 'str', rungs: 'List[SimulatedRung]' = <factory>, what_if_win: 'List[Dict[str, Any]]' = <factory>, note: 'str' = 'simulation predicts skips and resource use from estimates; it cannot predict which rung will clear its gate.') -> None` |
+| `simulate` | function | `(router: 'LadderRouterV2', plan: 'RoutingPlan', state: 'Mapping[str, Any]', ctx: 'RouterContext', energy_model: 'Optional[EnergyModel]' = None, memory_model: 'Optional[MemoryModel]' = None) -> 'SimulationReport'` |
+| `score_capability` | function | `(backend: 'Backend', ctx: 'RouterContext') -> 'float'` |
+
+### `hugrgate.routing.architecture`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RungMode` | class | `(*values)` |
+| `RoutingOptions` | class | `(qos: 'str' = 'standard', strategy: 'str' = 'serial', max_cost: 'Optional[float]' = None, max_energy_j: 'Optional[float]' = None, max_memory_mb: 'Optional[float]' = None, privacy_tier: 'str' = 'internal', hedge_delay_ms: 'float' = 50.0, parallel_width: 'int' = 3, fast_path_probability: 'float' = 0.97, early_exit_delta: 'Optional[float]' = None, record: 'bool' = False, seed: 'Optional[int]' = None) -> None` |
+| `RouterContext` | class | `(spec: 'DecisionSpec', policy: 'DecisionPolicy', options: 'RoutingOptions' = <factory>, state_keys: 'Tuple[str, ...]' = (), state_size_hint: 'int' = 0) -> None` |
+| `RungNode` | class | `(backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None, mode: 'RungMode' = <RungMode.SERIAL: 'serial'>, why: 'str' = '', params: 'Dict[str, Any]' = <factory>) -> None` |
+| `RoutingPlan` | class | `(nodes: 'List[RungNode]', strategy: 'RungMode' = <RungMode.SERIAL: 'serial'>, created_by: 'str' = 'unknown', rationale: 'List[str]' = <factory>) -> None` |
+| `RoutingDecision` | class | `(result: 'DecisionResult', plan: 'RoutingPlan', audit: 'List[Dict[str, Any]]', accepted_rung: 'int') -> None` |
+| `RungPlanner` | class | `(*args, **kwargs)` |
+| `RungExecutor` | class | `(*args, **kwargs)` |
+| `SerialPlanExecutor` | class | `()` |
+| `LadderRouterV2` | class | `(*args, planner: 'Optional[RungPlanner]' = None, executor: 'Optional[RungExecutor]' = None, latency_tracker=None, cost_ledger=None, energy_ledger=None, availability_tracker=None, **kwargs)` |
+
+### `hugrgate.routing.availability`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CircuitState` | class | `(consecutive_failures: 'int' = 0, open_since: 'Optional[float]' = None, half_open_trial: 'bool' = False) -> None` |
+| `AvailabilityTracker` | class | `(failure_threshold: 'int' = 3, cooldown_s: 'float' = 60.0)` |
+| `AvailabilityAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[AvailabilityTracker]' = None, check_health: 'bool' = True)` |
+
+### `hugrgate.routing.capability`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CapabilityScore` | class | `(value: 'float', reasons: 'List[str]' = <factory>, factors: 'Dict[str, float]' = <factory>) -> None` |
+| `CapabilityScorer` | class | `(weights: 'Dict[str, float] | None' = None)` |
+
+### `hugrgate.routing.confidence`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CalibrationTracker` | class | `(n_bins: 'int' = 10)` |
+| `ConfidenceAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[CalibrationTracker]' = None, min_samples: 'int' = 50)` |
+| `adjusted_gate` | function | `(base_gate: 'float', ece: 'float') -> 'float'` |
+
+### `hugrgate.routing.cost`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CostLedger` | class | `(budget: 'Optional[float]')` |
+| `CostAwarePlanner` | class | `(inner: 'RungPlanner', registry, ledger: 'Optional[CostLedger]' = None)` |
+| `budget_for` | function | `(ctx: 'RouterContext') -> 'Optional[float]'` |
+
+### `hugrgate.routing.dag`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DAGNode` | class | `(name: 'str', backend_name: 'str', min_confidence: 'float' = 0.0, latency_budget_ms: 'Optional[float]' = None, condition: 'Condition' = None)` |
+| `RoutingDAG` | class | `()` |
+| `DAGExecutor` | class | `(dag: 'Optional[RoutingDAG]' = None, validate: 'bool' = True)` |
+| `evaluate_condition` | function | `(condition: 'Condition', ctx: 'RouterContext') -> 'bool'` |
+
+### `hugrgate.routing.dsl`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RoutePolicy` | class | `(options: 'RoutingOptions' = <factory>, policy_values: 'Dict[str, Any]' = <factory>, prefer: 'List[str]' = <factory>, allow: 'Optional[List[str]]' = None, forbid: 'List[str]' = <factory>, skip_remote_when_strict: 'bool' = False, _assigned_options: 'Dict[str, object]' = <factory>) -> None` |
+| `parse` | function | `(text: 'str') -> 'RoutePolicy'` |
+
+### `hugrgate.routing.early_exit`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EarlyExitExecutor` | class | `(*args, **kwargs)` |
+
+### `hugrgate.routing.energy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `EnergyModel` | class | `(local_watts: 'float' = 65.0, remote_watts: 'float' = 5.0)` |
+| `EnergyLedger` | class | `(budget_j: 'Optional[float]', model: 'Optional[EnergyModel]' = None)` |
+| `EnergyAwarePlanner` | class | `(inner: 'RungPlanner', registry, budget_j: 'Optional[float]' = None, model: 'Optional[EnergyModel]' = None)` |
+| `DEFAULT_LOCAL_WATTS` | constant | `65.0` |
+| `DEFAULT_REMOTE_WATTS` | constant | `5.0` |
+
+### `hugrgate.routing.explain`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `explain_plan` | function | `(plan: 'RoutingPlan') -> 'str'` |
+| `explain_route` | function | `(audit: 'List[Dict]', plan: 'Optional[RoutingPlan]' = None, winner: 'Optional[int]' = None) -> 'str'` |
+| `explain_decision` | function | `(decision: 'RoutingDecision') -> 'str'` |
+| `OUTCOME_PHRASES` | constant | `{'accepted': 'accepted — cleared its gate', 'below_confidenc` |
+
+### `hugrgate.routing.fallback`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FallbackGraph` | class | `()` |
+| `FallbackGraphExecutor` | class | `(graph: 'Optional[FallbackGraph]' = None, validate_graph: 'bool' = True)` |
+
+### `hugrgate.routing.fuzz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `FuzzBackend` | class | `(name: 'str', rng: 'random.Random', remote: 'bool')` |
+| `run_fuzz` | function | `(seed: 'int', iterations: 'int' = 100) -> 'Dict[str, Any]'` |
+| `KNOWN_OUTCOMES` | constant | `{'accepted', 'backend_abstained', 'backend_error', 'backend_` |
+
+### `hugrgate.routing.hardware`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HostProfile` | class | `(cpu_count: 'int' = 1, memory_mb: 'float' = 1024.0, has_gpu: 'bool' = False, platform: 'str' = 'linux', accelerators: 'List[str]' = <factory>) -> None` |
+| `hardware_compatible` | function | `(backend: 'Backend', host: 'HostProfile') -> 'Optional[str]'` |
+| `HardwareAwarePlanner` | class | `(inner: 'RungPlanner', registry, host: 'Optional[HostProfile]' = None)` |
+
+### `hugrgate.routing.hedged`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `HedgedPlanExecutor` | class | `(*args, **kwargs)` |
+
+### `hugrgate.routing.latency`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `LatencyTracker` | class | `(alpha: 'float' = 0.3, min_samples: 'int' = 3)` |
+| `LatencyAwarePlanner` | class | `(inner: 'RungPlanner', registry, tracker: 'Optional[LatencyTracker]' = None)` |
+
+### `hugrgate.routing.memory`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `MemoryModel` | class | `(local_mb: 'float' = 512.0, remote_mb: 'float' = 0.0)` |
+| `MemoryAwarePlanner` | class | `(inner: 'RungPlanner', registry, budget_mb: 'Optional[float]' = None, model: 'Optional[MemoryModel]' = None)` |
+| `DEFAULT_LOCAL_MEMORY_MB` | constant | `512.0` |
+| `DEFAULT_REMOTE_MEMORY_MB` | constant | `0.0` |
+
+### `hugrgate.routing.parallel`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ParallelPlanExecutor` | class | `(*args, **kwargs)` |
+
+### `hugrgate.routing.privacy`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `PrivacyTier` | class | `(*values)` |
+| `DataClassifier` | class | `(extra_rules: 'Optional[Dict[str, PrivacyTier]]' = None)` |
+| `BackendClearance` | class | `()` |
+| `PrivacyAwarePlanner` | class | `(inner: 'RungPlanner', registry, classifier: 'Optional[DataClassifier]' = None)` |
+
+### `hugrgate.routing.qos`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `QoSClass` | class | `(*values)` |
+| `QoSProfile` | class | `(name: 'QoSClass', depth_cap: 'int', weights: 'Tuple[float, float, float]', parallel_width: 'int', hedge_allowed: 'bool', hedge_delay_ms: 'float', fast_path_probability: 'float', early_exit_delta: 'float') -> None` |
+| `QOS_PROFILES` | constant | `{<QoSClass.BEST_EFFORT: 'best_effort'>: QoSProfile(name=<QoS` |
+| `qos_profile` | function | `(name: 'str') -> 'QoSProfile'` |
+
+### `hugrgate.routing.replay`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RouteRecording` | class | `(plan: 'Dict[str, Any]', plan_fingerprint: 'str', spec_type: 'str', spec_options: 'List[str]', minimum_probability: 'float', rung_outcomes: 'List[Dict[str, Any]]' = <factory>, winner_index: 'Optional[int]' = None, winner_result: 'Optional[Dict[str, Any]]' = None, recorded_at: 'float' = <factory>) -> None` |
+| `RecordingExecutor` | class | `(inner: 'RungExecutor')` |
+| `ReplayExecutor` | class | `(recording: 'RouteRecording')` |
+| `replay` | function | `(recording: 'RouteRecording') -> 'RoutingDecision'` |
+
+### `hugrgate.routing.rungs`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `RungFilter` | constant | `typing.Callable[[hugrgate.backend.Backend, hugrgate.routing.` |
+| `RungBuilder` | class | `(extra_filters: 'Sequence[RungFilter]' = (), order: 'str' = 'cost', max_rungs: 'Optional[int]' = None)` |
+| `DynamicRungPlanner` | class | `(registry, builder: 'Optional[RungBuilder]' = None)` |
+
+### `hugrgate.routing.simulate`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SimulatedRung` | class | `(backend_name: 'str', rung_index: 'int', would_skip: 'bool', skip_reason: 'str' = '', est_latency_ms: 'float' = 0.0, est_cost: 'float' = 0.0, est_energy_j: 'float' = 0.0, est_memory_mb: 'float' = 0.0, capability: 'float' = 0.0) -> None` |
+| `SimulationReport` | class | `(plan_fingerprint: 'str', rungs: 'List[SimulatedRung]' = <factory>, what_if_win: 'List[Dict[str, Any]]' = <factory>, note: 'str' = 'simulation predicts skips and resource use from estimates; it cannot predict which rung will clear its gate.') -> None` |
+| `simulate` | function | `(router: 'LadderRouterV2', plan: 'RoutingPlan', state: 'Mapping[str, Any]', ctx: 'RouterContext', energy_model: 'Optional[EnergyModel]' = None, memory_model: 'Optional[MemoryModel]' = None) -> 'SimulationReport'` |
+
+### `hugrgate.routing.synthesis`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `QOS_DEPTH_CAPS` | constant | `{'best_effort': 2, 'standard': 4, 'priority': 6, 'critical':` |
+| `QOS_WEIGHTS` | constant | `{'best_effort': (0.2, 0.4, 0.4), 'standard': (0.4, 0.3, 0.3)` |
+| `score_capability` | function | `(backend: 'Backend', ctx: 'RouterContext') -> 'float'` |
+| `LadderSynthesizer` | class | `(registry, builder: 'Optional[RungBuilder]' = None)` |
 
 ### `hugrgate.server`
 

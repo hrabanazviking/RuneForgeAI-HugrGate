@@ -24,7 +24,6 @@ additively and clamped to [0,1]; widening never *lowers* a gate.
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 from hugrgate.backend import Backend

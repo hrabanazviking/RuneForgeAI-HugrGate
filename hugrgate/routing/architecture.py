@@ -227,7 +227,7 @@ class SerialPlanExecutor:
         import time
 
         from hugrgate.errors import Abstention
-        from hugrgate.ladder import (RUNG_ABSTAINED, RUNG_ACCEPTED,
+        from hugrgate.ladder import (RUNG_ACCEPTED,
                                      RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
                                      RUNG_SKIPPED_LATENCY,
                                      RUNG_SKIPPED_PRIVACY,

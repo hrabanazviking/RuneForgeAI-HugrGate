@@ -25,22 +25,31 @@ from __future__ import annotations
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
-from typing import Dict, List
+from typing import Dict, List, NamedTuple
+from concurrent.futures import Future
+from hugrgate.backend import Backend
 
 from hugrgate.errors import Abstention
 from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
                              RUNG_CANCELLED, RUNG_ERROR,
-                             RUNG_SKIPPED_LATENCY, RUNG_SKIPPED_PRIVACY,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
-                             RUNG_UNAVAILABLE, LadderAuditEntry)
+                             RUNG_SKIPPED_UNKNOWN, RUNG_UNAVAILABLE,
+                             LadderAuditEntry)
 from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
-                                            RungExecutor, RoutingDecision,
-                                            RoutingPlan)
+                                            RungExecutor, RungNode,
+                                            RoutingDecision, RoutingPlan)
 from hugrgate.routing.qos import qos_profile
 
 __all__ = [
     "HedgedPlanExecutor",
 ]
+
+
+class _Flight(NamedTuple):
+    """One rung in flight: rung index, node, resolved backend."""
+
+    rung_index: int
+    node: "RungNode"
+    backend: "Backend"
 
 
 class HedgedPlanExecutor(RungExecutor):
@@ -69,14 +78,15 @@ class HedgedPlanExecutor(RungExecutor):
                 audit.append(LadderAuditEntry(
                     i, backend.name, skip[0], detail=skip[1]))
                 continue
-            runnable.append((i, node, backend))
+            runnable.append(_Flight(i, node, backend))
 
         lock = threading.Lock()
         closed = threading.Event()
         results: Dict[int, object] = {}
 
-        def run_one(item, hedged: bool):
-            i, node, backend = item
+        def run_one(flight: _Flight, hedged: bool):
+            i, node, backend = (flight.rung_index, flight.node,
+                                 flight.backend)
             local: List[LadderAuditEntry] = []
             result = router._attempt(backend, state, ctx.spec, None,
                                      local, i)
@@ -121,8 +131,8 @@ class HedgedPlanExecutor(RungExecutor):
             plan.rationale.append(
                 f"hedging disabled for QoS {ctx.options.qos}; serial climb")
 
-        pending = list(runnable)
-        in_flight: Dict[object, tuple] = {}
+        pending: List[_Flight] = list(runnable)
+        in_flight: Dict[Future, _Flight] = {}
         winner = None
         # Without hedging the wait is unbounded: strict serial semantics.
         timeout = delay_s if hedging else None
@@ -130,9 +140,9 @@ class HedgedPlanExecutor(RungExecutor):
         pool = ThreadPoolExecutor(max_workers=max(len(runnable), 1))
         try:
             def launch(hedged: bool):
-                item = pending.pop(0)
-                fut = pool.submit(run_one, item, hedged)
-                in_flight[fut] = item
+                flight = pending.pop(0)
+                fut = pool.submit(run_one, flight, hedged)
+                in_flight[fut] = flight
 
             if pending:
                 launch(hedged=False)
@@ -140,9 +150,9 @@ class HedgedPlanExecutor(RungExecutor):
                 done, _ = wait(list(in_flight), timeout=timeout,
                                return_when=FIRST_COMPLETED)
                 for fut in done:
-                    item = in_flight.pop(fut)
+                    flight = in_flight.pop(fut)
                     fut.result()  # re-raise unexpected errors
-                    i = item[0]
+                    i = flight.rung_index
                     outcome = results.get(i)
                     if isinstance(outcome, tuple) and outcome[4]:
                         winner = (i, *outcome[:4])
@@ -163,12 +173,11 @@ class HedgedPlanExecutor(RungExecutor):
                 # Prompt return: cancel stragglers, record them, and do not
                 # wait for them. The closed flag drops their late writes.
                 closed.set()
-                for fut, item in list(in_flight.items()):
-                    i, _node, backend = item
+                for fut, flight in list(in_flight.items()):
                     if not fut.done():
                         fut.cancel()
                         audit.append(LadderAuditEntry(
-                            i, backend.name, RUNG_CANCELLED,
+                            flight.rung_index, flight.backend.name, RUNG_CANCELLED,
                             detail="hedge straggler cancelled after winner"))
                 pool.shutdown(wait=False, cancel_futures=True)
             else:

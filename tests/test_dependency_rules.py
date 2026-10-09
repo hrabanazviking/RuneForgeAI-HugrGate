@@ -132,6 +132,7 @@ _STDLIB = {
     "tempfile", "threading", "time", "tomllib", "traceback", "typing",
     "unittest", "uuid", "warnings", "functools", "operator", "textwrap",
     "csv", "gzip", "zipfile", "email", "html", "http", "urllib",
+    "concurrent",
 }
 # First-party modules imported via sys.path tricks in tests/benchmarks.
 _LOCAL_MODULES = {"event_triage", "build"}

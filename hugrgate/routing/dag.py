@@ -34,13 +34,11 @@ will refuse it rather than guess.
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Callable, Dict, List, Mapping, Optional, Set
+from typing import Any, Dict, List, Mapping, Optional, Set
 
 from hugrgate.errors import Abstention, SpecError
 from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             RUNG_SKIPPED_LATENCY, RUNG_SKIPPED_PRIVACY,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
-                             LadderAuditEntry)
+                             RUNG_SKIPPED_UNKNOWN, LadderAuditEntry)
 from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
                                             RungExecutor, RungNode,
                                             RoutingDecision, RoutingPlan)

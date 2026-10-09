@@ -22,8 +22,7 @@ from hugrgate.ladder import (RUNG_ABSTAINED, RUNG_ACCEPTED,
                              RUNG_ERROR, RUNG_SKIPPED_LATENCY,
                              RUNG_SKIPPED_PRIVACY, RUNG_SKIPPED_UNKNOWN,
                              RUNG_SKIPPED_UNSUPPORTED, RUNG_UNAVAILABLE)
-from hugrgate.routing.architecture import (RoutingDecision, RoutingPlan,
-                                            RungNode)
+from hugrgate.routing.architecture import (RoutingDecision, RoutingPlan)
 
 __all__ = [
     "explain_plan",

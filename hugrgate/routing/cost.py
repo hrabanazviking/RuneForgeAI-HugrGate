@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from hugrgate.backend import Backend
 from hugrgate.routing.architecture import (RouterContext, RungNode,
                                             RungPlanner, RoutingPlan)
 
@@ -54,9 +53,10 @@ class CostLedger:
 
     def can_afford(self, estimate: float) -> bool:
         """True when the estimate fits the uncommitted budget (or unbounded)."""
-        if self.budget is None:
+        remaining = self.remaining
+        if remaining is None:
             return True
-        return estimate <= self.remaining
+        return estimate <= remaining
 
     def reserve(self, backend_name: str, estimate: float) -> bool:
         """Reserve budget for a planned rung; False when unaffordable."""

@@ -17,9 +17,9 @@ executors, then run real climbs checking hard invariants:
    completion order nondeterministic by nature).
 
 :func:`run_fuzz` returns a report dict; the pytest module asserts zero
-violations across fixed seeds. This is a *harness*, not a one-off: new
-executors and planners plug in via the ``EXECUTORS``/``PLANNERS``
-registries at the bottom.
+violations across fixed seeds. This is a *harness*, not a one-off:
+extend ``_BEHAVIORS``, ``_planner``, and ``_executor`` to cover new
+components.
 """
 
 from __future__ import annotations
@@ -30,9 +30,10 @@ from typing import Any, Dict, List, Optional
 
 from hugrgate import Backend, BackendRegistry, DecisionPolicy, DecisionSpec
 from hugrgate.errors import BackendError, BackendUnavailable, HugrGateError
-from hugrgate.ladder import LadderRouter, LadderRung
+from hugrgate.ladder import LadderRung
 from hugrgate.result import DecisionResult
-from hugrgate.routing.architecture import (LadderRouterV2, RoutingOptions,
+from hugrgate.routing.architecture import (LadderRouterV2, RungPlanner,
+                                            RoutingOptions,
                                             SerialPlanExecutor)
 from hugrgate.routing.early_exit import EarlyExitExecutor
 from hugrgate.routing.fallback import FallbackGraph, FallbackGraphExecutor
@@ -68,7 +69,7 @@ class FuzzBackend(Backend):
         self.calls = 0
 
     def capabilities(self):
-        caps = {"spec_types": ["categorical"]}
+        caps: Dict[str, Any] = {"spec_types": ["categorical"]}
         if self._rng.random() < 0.3:
             caps["accuracy"] = round(self._rng.uniform(0.5, 1.0), 2)
         return caps
@@ -134,7 +135,8 @@ def _random_options(rng: random.Random) -> RoutingOptions:
     )
 
 
-def _planner(rng: random.Random, registry) -> object:
+def _planner(rng: random.Random,
+              registry) -> Optional[RungPlanner]:
     return rng.choice([
         None,
         DynamicRungPlanner(registry),
@@ -232,11 +234,13 @@ def _check_invariants(tag: str, seed: int, it: int,
 
     # Invariant 3: audit integrity.
     trace = md.get("ladder_trace", [])
-    for e in trace:
-        if e["outcome"] not in KNOWN_OUTCOMES:
-            violations.append(f"{tag}: unknown outcome {e['outcome']!r}")
-        if not isinstance(e["rung_index"], int) or e["rung_index"] < 0:
-            violations.append(f"{tag}: bad rung_index {e!r}")
+    for entry in trace:
+        if entry["outcome"] not in KNOWN_OUTCOMES:
+            violations.append(
+                f"{tag}: unknown outcome {entry['outcome']!r}")
+        if not isinstance(entry["rung_index"], int) \
+                or entry["rung_index"] < 0:
+            violations.append(f"{tag}: bad rung_index {entry!r}")
     last = router.last_audit
     if len(last) != len(trace):
         violations.append(

@@ -97,9 +97,10 @@ class EnergyLedger:
         return max(0.0, self.budget_j - self.reserved - self.spent)
 
     def can_afford(self, joules: float) -> bool:
-        if self.budget_j is None:
+        remaining = self.remaining
+        if remaining is None:
             return True
-        return joules <= self.remaining
+        return joules <= remaining
 
     def reserve(self, backend_name: str, joules: float) -> bool:
         if not self.can_afford(joules):

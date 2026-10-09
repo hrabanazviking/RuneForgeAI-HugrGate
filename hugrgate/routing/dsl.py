@@ -46,7 +46,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from hugrgate.errors import PolicyError, SpecError
 from hugrgate.policy import DecisionPolicy
@@ -90,7 +90,7 @@ class RoutePolicy:
     """Compiled DSL: options, policy overrides, backend lists, rules."""
 
     options: RoutingOptions = field(default_factory=RoutingOptions)
-    policy_values: Dict[str, object] = field(default_factory=dict)
+    policy_values: Dict[str, Any] = field(default_factory=dict)
     prefer: List[str] = field(default_factory=list)
     allow: Optional[List[str]] = None
     forbid: List[str] = field(default_factory=list)
@@ -179,7 +179,7 @@ def parse(text: str) -> RoutePolicy:
     return parser.parse()
 
 
-def _lex(text: str) -> List[Tuple[str, str, int]]:
+def _lex(text: str) -> List[Tuple[Optional[str], str, int]]:
     tokens = []
     for m in _TOKEN.finditer(text):
         kind = m.lastgroup
@@ -192,7 +192,8 @@ def _lex(text: str) -> List[Tuple[str, str, int]]:
 
 
 class _Parser:
-    def __init__(self, tokens: List[Tuple[str, str, int]]):
+    def __init__(
+        self, tokens: List[Tuple[Optional[str], str, int]]):
         self.tokens = tokens
         self.pos = 0
         self.route = RoutePolicy()

@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T10:50:38.026827+00:00",
-  "module_count": 42,
+  "generated_utc": "2026-10-09T11:25:38.005202+00:00",
+  "module_count": 66,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -78,12 +78,11 @@
         "abc",
         "hashlib",
         "hugrgate",
-        "math",
         "numpy",
         "re",
         "typing"
       ],
-      "loc": 261,
+      "loc": 260,
       "path": "hugrgate/backends/embedding.py",
       "public_defs": [
         "Embedder",
@@ -190,7 +189,7 @@
         "transformers",
         "typing"
       ],
-      "loc": 149,
+      "loc": 153,
       "path": "hugrgate/backends/nli.py",
       "public_defs": [
         "NLIBackend",
@@ -212,7 +211,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 379,
+      "loc": 380,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -245,7 +244,7 @@
         "time",
         "typing"
       ],
-      "loc": 332,
+      "loc": 346,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -486,7 +485,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 273,
+      "loc": 275,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -511,7 +510,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 239,
+      "loc": 261,
       "path": "hugrgate/client.py",
       "public_defs": [
         "policy_to_dict",
@@ -558,7 +557,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 391,
+      "loc": 394,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -632,7 +631,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 163,
+      "loc": 165,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -712,7 +711,7 @@
         "time",
         "typing"
       ],
-      "loc": 289,
+      "loc": 305,
       "path": "hugrgate/ladder.py",
       "public_defs": [
         "LadderRung",
@@ -720,6 +719,7 @@
         "LadderRouter",
         "to_dict",
         "ladder_for",
+        "skip_reason",
         "decide"
       ]
     },
@@ -844,6 +844,495 @@
         "to_dict"
       ]
     },
+    "hugrgate.routing.__init__": {
+      "docstring": "Ladder II \u2014 intelligence routing subsystem (Campaign III).\n\nA plan/execute-separated routing architecture built on top of the v1\n:class:`~hugrgate.ladder.LadderRouter`. Each Campaign III slice adds one\nmodule to this package; the package docstring of each module names its\nslice.",
+      "imports": [
+        "hugrgate"
+      ],
+      "loc": 207,
+      "path": "hugrgate/routing/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.routing.architecture": {
+      "docstring": "Router architecture v2 \u2014 plan/execute separation. Slice 051.\n\nThe v1 :class:`~hugrgate.ladder.LadderRouter` interleaves *deciding which\nrungs to try* with *actually trying them*. Architecture v2 splits the two\nconcerns:\n\n- a **planner** turns a :class:`RouterContext` into a :class:`RoutingPlan`\n  (an ordered list of :class:`RungNode`), and\n- an **executor** walks the plan, producing a decision and an audit trail.\n\nThis makes routing inspectable (the plan exists before any backend runs),\nreplayable (slice 070), simulable (slice 071), and explainable (slice 069).\n:class:`LadderRouterV2` subclasses the v1 router so every existing\n``LadderRouter`` construction site keeps working; the new surface is\nadditive only.\n\nSlice 051 also refactors :class:`~hugrgate.ladder.LadderRouter` itself\n(Anti-Checkbox Rule): the four pre-run pruning checks are extracted into\n:meth:`~hugrgate.ladder.LadderRouter.precheck`, which the v2 planner\nreuses instead of duplicating the logic.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "enum",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "time",
+        "typing"
+      ],
+      "loc": 399,
+      "path": "hugrgate/routing/architecture.py",
+      "public_defs": [
+        "RungMode",
+        "RoutingOptions",
+        "RouterContext",
+        "RungNode",
+        "RoutingPlan",
+        "RoutingDecision",
+        "RungPlanner",
+        "RungExecutor",
+        "SerialPlanExecutor",
+        "LadderRouterV2",
+        "from_request",
+        "to_ladder_rung",
+        "to_dict",
+        "fingerprint",
+        "to_dict",
+        "plan",
+        "execute",
+        "execute",
+        "note_availability",
+        "note_cost",
+        "note_energy",
+        "note_latencies",
+        "build_plan",
+        "decide",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.availability": {
+      "docstring": "Availability-aware routing. Slice 062.\n\nA rung pointing at a dead backend wastes the climb's latency budget and,\nworse, burns the user's time. :class:`AvailabilityTracker` is a\nper-backend circuit breaker:\n\n- **closed** (normal): failures are counted; ``failure_threshold``\n  consecutive failures *open* the circuit;\n- **open**: the backend is skipped without being touched, until\n  ``cooldown_s`` elapse;\n- **half-open**: one trial request is allowed through; success *closes*\n  the circuit, failure re-opens it.\n\n:class:`AvailabilityAwarePlanner` additionally consults\n``backend.health()`` at plan time \u2014 a backend reporting anything but\n``{\"status\": \"ok\"}`` is pruned before it can fail. The router feeds\nattempt outcomes back through ``LadderRouterV2.note_availability``:\n``BackendUnavailable``/``BackendError`` (and unexpected exceptions)\ncount as failures; a returned result \u2014 even one below the confidence\ngate \u2014 counts as success, because the backend *worked*. Abstentions are\nneutral: a backend that politely declines is not a broken backend.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 137,
+      "path": "hugrgate/routing/availability.py",
+      "public_defs": [
+        "CircuitState",
+        "AvailabilityTracker",
+        "AvailabilityAwarePlanner",
+        "record_success",
+        "record_failure",
+        "state",
+        "available",
+        "note_trial",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.capability": {
+      "docstring": "Capability scoring. Slice 054.\n\nPromotes the slice-053 heuristic into a reasoned, auditable scorer.\n:class:`CapabilityScorer` grades a backend for a specific request as a\n:class:`CapabilityScore`: a value in [0,1] plus the per-factor breakdown\nand human-readable reasons that produced it. Factors:\n\n- **support gate** \u2014 ``backend.supports(spec)`` is required; anything\n  else scores exactly 0 with the reason recorded.\n- **spec-type claim** \u2014 explicit listing of the spec type in\n  ``capabilities()[\"spec_types\"]``.\n- **quality claims** \u2014 declared ``accuracy`` / ``reliability`` /\n  ``quality`` numbers in [0,1].\n- **calibration** \u2014 ``calibration_info()[\"calibrated\"]`` earns a bonus;\n  a declared expected calibration error (``ece``) discounts the score.\n- **feature coverage** \u2014 fraction of ``spec.metadata[\"requires_features\"]``\n  present in ``capabilities()[\"features\"]``.\n- **capacity fit** \u2014 declared ``max_options`` / ``max_labels`` limits\n  checked against the spec's value-space size; a backend that cannot\n  represent the space scores 0.\n\nThe final value is a weighted blend, clamped to [0,1] and rounded to 4\ndecimals so scores are stable and comparable.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 148,
+      "path": "hugrgate/routing/capability.py",
+      "public_defs": [
+        "CapabilityScore",
+        "CapabilityScorer",
+        "score"
+      ]
+    },
+    "hugrgate.routing.confidence": {
+      "docstring": "Confidence-aware routing. Slice 055.\n\nA rung's confidence gate is only as honest as the backend behind it: an\noverconfident backend clears gates it has not earned. This module makes\nrouting *confidence-aware* in two ways:\n\n1. **Plan-time gate adjustment** \u2014 :class:`ConfidenceAwarePlanner` wraps\n   any planner and widens each rung's ``min_confidence`` by the backend's\n   expected calibration error (from ``calibration_info()[\"ece\"]`` or a\n   :class:`CalibrationTracker`). An overconfident backend must clear a\n   higher bar; a well-calibrated one keeps its gate.\n2. **Runtime calibration tracking** \u2014 :class:`CalibrationTracker`\n   records ``(reported probability, actual correctness)`` pairs per\n   backend and computes the expected calibration error (ECE) over\n   probability bins, the standard statistical measure of miscalibration.\n\nMetric/coverage assumptions (validated statistically in the tests):\nECE is computed over 10 equal-width bins as \u03a3 |acc \u2212 conf| \u00b7 n/N.\nA perfectly calibrated backend has ECE \u2248 0; a backend reporting 0.9\nwhile correct 70% of the time has ECE \u2248 0.2. Gates are widened\nadditively and clamped to [0,1]; widening never *lowers* a gate.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 138,
+      "path": "hugrgate/routing/confidence.py",
+      "public_defs": [
+        "adjusted_gate",
+        "CalibrationTracker",
+        "ConfidenceAwarePlanner",
+        "record",
+        "samples",
+        "ece",
+        "gate_for",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.cost": {
+      "docstring": "Cost-aware routing. Slice 057.\n\nMoney is a routing constraint like latency: :class:`CostLedger` holds a\nper-request spend budget \u2014 ``options.max_cost`` when set, else the\npolicy's ``max_cost`` \u2014 and tracks reservations (plan time) and actuals\n(run time). :class:`CostAwarePlanner` prunes rungs the budget cannot\ncover before execution, spending the budget cumulatively down the plan so\na ladder of individually-cheap rungs cannot silently exceed it.\n\nActuals come from ``result.metadata[\"cost\"]`` when a backend reports its\ntrue spend, else fall back to ``backend.estimated_cost()``. The router\nfeeds them back via ``LadderRouterV2.note_cost`` after each climb, the\nsame pattern slice 056 established for latency.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 126,
+      "path": "hugrgate/routing/cost.py",
+      "public_defs": [
+        "budget_for",
+        "CostLedger",
+        "CostAwarePlanner",
+        "remaining",
+        "can_afford",
+        "reserve",
+        "spend",
+        "to_dict",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.dag": {
+      "docstring": "Conditional routing DAGs. Slice 068.\n\nA ladder is a line; some routing decisions are *graphs*. \n:class:`RoutingDAG` lets rungs branch on the request itself: each\n:class:`DAGNode` carries a condition evaluated against the live request\nat execution time, and edges say \"if this node didn't win, these nodes\nbecome eligible\". :class:`DAGExecutor` walks the DAG in topological\norder:\n\n- a node runs only when its condition holds (else it is skipped, and its\n  successors still become eligible \u2014 a false condition is not a failure);\n- the first node to clear its gate wins and the DAG stops;\n- below-gate results, abstentions, errors, and skips all release the\n  node's successors (each successor runs once all its predecessors have\n  settled);\n- cycles are rejected by :meth:`RoutingDAG.validate` (Kahn's algorithm);\n  the executor validates by default.\n\nConditions are declarative dicts so DAGs stay serializable (slices 070\nand 072 build on this):\n\n- ``{\"always\": True}``\n- ``{\"key_present\": \"ssn\"}`` / ``{\"key_absent\": \"ssn\"}``\n- ``{\"spec_type\": \"categorical\"}``\n- ``{\"qos\": \"priority\"}`` / ``{\"qos_in\": [\"priority\", \"critical\"]}``\n- ``{\"min_state_keys\": 2}``\n- ``{\"all\": [...]}``, ``{\"any\": [...]}``, ``{\"not\": {...}}``\n\nA raw callable ``(ctx) -> bool`` may be used instead; it is marked\nnon-serializable (``node.serializable`` is False) and replay/simulation\nwill refuse it rather than guess.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 289,
+      "path": "hugrgate/routing/dag.py",
+      "public_defs": [
+        "evaluate_condition",
+        "DAGNode",
+        "RoutingDAG",
+        "DAGExecutor",
+        "serializable",
+        "to_dict",
+        "add_node",
+        "add_edge",
+        "roots",
+        "validate",
+        "to_dict",
+        "execute",
+        "release"
+      ]
+    },
+    "hugrgate.routing.dsl": {
+      "docstring": "Route policy DSL. Slice 072.\n\nA tiny declarative language for routing posture, so operators can write\n\n    route {\n      qos = priority;\n      strategy = hedged;\n      max_cost = 0.05;\n      max_latency_ms = 500;\n      min_probability = 0.8;\n      prefer \"local-llm\", \"rules\";\n      forbid \"experimental\";\n      skip remote when privacy = strict;\n    }\n\ninstead of wiring ``RoutingOptions`` and ``DecisionPolicy`` by hand.\n:func:`parse` compiles the text into a :class:`RoutePolicy`\n(``RoutingOptions`` + policy overrides + backend lists + conditional\nrules); :meth:`RoutePolicy.apply` merges it onto an existing\n``(DecisionPolicy, RoutingOptions)`` pair, explicit DSL values winning\nover the base.\n\nGrammar (statements end with ``;``):\n\n- ``qos = <best_effort|standard|priority|critical>``\n- ``strategy = <serial|parallel|hedged|dag>``\n- ``privacy_tier = <public|internal|confidential|restricted>``\n- ``privacy = <standard|strict>``\n- ``max_cost|max_energy_j|max_memory_mb|max_latency_ms|``\n  ``min_probability|hedge_delay_ms|parallel_width|``\n  ``fast_path|early_exit_delta = <number>``\n- ``prefer \"a\", \"b\", ...`` \u2014 policy preferred_backends\n- ``allow \"a\", \"b\", ...`` \u2014 policy allowed_backends (allowlist)\n- ``forbid \"a\", \"b\", ...`` \u2014 removed from any allowlist; also blocks\n  via an internal denylist applied at ``apply`` time\n- ``skip remote when privacy = strict`` \u2014 sets\n  ``remote_inference=False`` when the effective privacy class is strict\n\nErrors carry line numbers; unknown keys, duplicate assignments, and\ninvalid values raise ``PolicyError``/``SpecError``. Values are\nvalidated by constructing the real ``RoutingOptions``/``DecisionPolicy``\nobjects, so the DSL can never express an invalid configuration.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "re",
+        "typing"
+      ],
+      "loc": 318,
+      "path": "hugrgate/routing/dsl.py",
+      "public_defs": [
+        "RoutePolicy",
+        "parse",
+        "apply",
+        "dumps",
+        "peek",
+        "next",
+        "expect",
+        "parse",
+        "statement",
+        "assignment",
+        "backend_list",
+        "skip_rule"
+      ]
+    },
+    "hugrgate.routing.early_exit": {
+      "docstring": "Early-exit routing. Slice 066.\n\nA ladder that always climbs to the top wastes work two ways: it keeps\ngoing after an overwhelmingly confident answer, and it keeps going when\neach new rung barely moves the needle. :class:`EarlyExitExecutor`\n(wrapping the serial walk's building blocks, not its loop) adds two\nexit rules:\n\n1. **Fast path** \u2014 a result with ``probability >= fast_path_bar`` is\n   accepted immediately, even if the rung's own ``min_confidence`` gate\n   is stricter. Overwhelming confidence short-circuits stricter gates.\n   The bar is ``min(options.fast_path_probability,\n   qos_profile(options.qos).fast_path_probability)``.\n2. **Diminishing returns** \u2014 after at least 3 attempts, if the best\n   probability has not improved by ``early_exit_delta`` over the last 2\n   attempts, the climb stops: the best result so far is returned when it\n   clears ``policy.minimum_probability``, otherwise the router abstains\n   early with ``reason=\"early_exit_no_improvement\"`` instead of burning\n   more rungs. The delta defaults to the QoS profile's value; setting\n   ``options.early_exit_delta = 0`` disables the rule (no positive\n   improvement threshold can be met... i.e. the rule only fires on\n   *strictly less than delta* improvement, and ``0`` means \"never\").\n\nBoth exits are recorded in the audit detail and in\n``result.metadata[\"early_exit\"]``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 175,
+      "path": "hugrgate/routing/early_exit.py",
+      "public_defs": [
+        "EarlyExitExecutor",
+        "execute"
+      ]
+    },
+    "hugrgate.routing.energy": {
+      "docstring": "Energy-aware routing. Slice 058.\n\nInference costs energy, and energy is a budget like latency or money.\n:class:`EnergyModel` estimates joules per rung as\n\n    energy_j = latency_s \u00d7 power_watts\n\nwhere ``power_watts`` comes from ``backend.hardware_requirements()`` when\ndeclared, else from documented class defaults. :class:`EnergyLedger`\ntracks a per-request joule budget (``options.max_energy_j``); \n:class:`EnergyAwarePlanner` prunes rungs the budget cannot cover; the\nrouter feeds measured latencies back through ``note_energy``.\n\nPower-draw assumptions (stated, not hidden):\n- local backend without a declared draw: 65 W (typical desktop CPU);\n- remote backend without a declared draw: 5 W client-side (NIC + idle\n  CPU share). Server-side energy is out of scope and documented as such \u2014\n  the model compares *client-attributable* energy, which is what routing\n  on this machine can actually control.\n- a backend may override everything with ``estimated_energy_j()``.\n\nThe reproducible measurement artifact lives in\n``benchmarks/routing_energy_058.py`` \u2192 ``benchmarks/routing_energy_058.json``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 168,
+      "path": "hugrgate/routing/energy.py",
+      "public_defs": [
+        "EnergyModel",
+        "EnergyLedger",
+        "EnergyAwarePlanner",
+        "power_watts",
+        "estimate_j",
+        "remaining",
+        "can_afford",
+        "reserve",
+        "spend",
+        "to_dict",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.explain": {
+      "docstring": "Route explanation. Slice 069.\n\nAudit trails are for machines; this module is for humans.\n:func:`explain_plan` narrates a plan *before* execution (\"what will be\ntried, in what order, and why\"); :func:`explain_route` narrates an\nexecuted climb *after* (\"what was tried, what happened at each rung,\nand why this backend won\"); :func:`explain_decision` ties a\n:class:`RoutingDecision` together into one readable account.\n\nEvery rung outcome the ladder can produce \u2014 including the slice-065\n``cancelled`` outcome \u2014 has a plain-language phrasing. Explanations\nnever include raw state values: they name backends, gates, budgets,\nand reasons, never the data that flowed through.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 120,
+      "path": "hugrgate/routing/explain.py",
+      "public_defs": [
+        "explain_plan",
+        "explain_route",
+        "explain_decision"
+      ]
+    },
+    "hugrgate.routing.fallback": {
+      "docstring": "Fallback graph routing. Slice 067.\n\nThe linear ladder assumes \"on failure, try the next rung\". Reality is\nricher: when backend A fails with a rate-limit error you want the\npatient retry backend; when it fails with an auth error you want the\nlocal fallback *now*. :class:`FallbackGraph` is a directed graph of\n``(backend, error-kind) -> [fallback backends]`` edges consulted at run\ntime by :class:`FallbackGraphExecutor`:\n\n- on a rung failure, edges matching the failure's error kind are\n  followed *instead of* the linear plan order;\n- a fallback rung inherits the failed node's gate and latency budget;\n- error kinds are exception class names (``\"BackendError\"``,\n  ``\"BackendUnavailable\"``, ...) or the ``\"*\"`` wildcard;\n- cycles are rejected statically by :meth:`FallbackGraph.validate` and\n  guarded dynamically by a per-request visited set \u2014 a fallback target\n  already attempted is never retried.\n\nError-kind extraction reuses the audit entries :meth:`_attempt` writes:\n``RUNG_UNAVAILABLE`` \u2192 ``BackendUnavailable``; ``RUNG_ERROR`` \u2192 the\nexception class parsed from the detail (``\"unexpected X: ...\"``) or\n``BackendError`` for plain backend errors; ``RUNG_ABSTAINED`` \u2192\n``Abstention`` (edges rarely match it, so abstentions still climb\nlinearly by default).",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 230,
+      "path": "hugrgate/routing/fallback.py",
+      "public_defs": [
+        "FallbackGraph",
+        "FallbackGraphExecutor",
+        "add_edge",
+        "fallbacks",
+        "validate",
+        "to_dict",
+        "execute",
+        "dfs",
+        "attempt"
+      ]
+    },
+    "hugrgate.routing.fuzz": {
+      "docstring": "Routing fuzz tests. Slice 073.\n\nA stdlib-only differential/robustness harness: seeded PRNGs generate\nrandom registries (including *hostile* backends \u2014 raisers, liars,\nabstainers, slowpokes), random specs, policies, options, planners, and\nexecutors, then run real climbs checking hard invariants:\n\n1. **No unexpected exception escapes** \u2014 only ``HugrGateError``\n   (incl. ``Abstention``) may leave ``decide()``. A backend raising\n   ``RuntimeError`` must become ``RUNG_ERROR``, never a crash.\n2. **Result validity** \u2014 a returned result passes ``validate_result``\n   and carries ``ladder_trace`` + ``routing_plan`` metadata.\n3. **Audit integrity** \u2014 every entry has a known outcome string and a\n   valid rung index; ``last_audit`` matches the returned trace.\n4. **Determinism** \u2014 the same seed twice gives the same winner and\n   probability (serial executors; thread scheduling makes parallel\n   completion order nondeterministic by nature).\n\n:func:`run_fuzz` returns a report dict; the pytest module asserts zero\nviolations across fixed seeds. This is a *harness*, not a one-off:\nextend ``_BEHAVIORS``, ``_planner``, and ``_executor`` to cover new\ncomponents.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "random",
+        "time",
+        "typing"
+      ],
+      "loc": 254,
+      "path": "hugrgate/routing/fuzz.py",
+      "public_defs": [
+        "FuzzBackend",
+        "run_fuzz",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "estimated_latency",
+        "estimated_cost"
+      ]
+    },
+    "hugrgate.routing.hardware": {
+      "docstring": "Hardware-aware routing. Slice 061.\n\nA rung is only viable if the backend can actually run *here*.\n:class:`HostProfile` describes this machine (CPUs, RAM, GPU presence,\nplatform); :func:`hardware_compatible` checks a backend's\n``hardware_requirements()`` against it; :class:`HardwareAwarePlanner`\nprunes incompatible rungs at plan time.\n\nRecognized requirement keys (all optional; unknown keys are ignored so\nnew backends never break old routers):\n- ``requires_gpu`` (bool) \u2014 needs ``host.has_gpu``;\n- ``min_memory_mb`` (number) \u2014 needs ``host.memory_mb >=`` it;\n- ``min_cpu_count`` (int) \u2014 needs ``host.cpu_count >=`` it;\n- ``platforms`` (list of ``sys.platform`` strings) \u2014 host must be listed.\n\n``HostProfile.detect()`` builds a profile from the real machine using\nthe standard library only: ``os.cpu_count()``, ``/proc/meminfo`` (or a\nconservative fallback), ``sys.platform``, and ``nvidia-smi`` presence\nfor GPU detection. GPU detection is best-effort and documented as such.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "os",
+        "shutil",
+        "sys",
+        "typing"
+      ],
+      "loc": 132,
+      "path": "hugrgate/routing/hardware.py",
+      "public_defs": [
+        "HostProfile",
+        "hardware_compatible",
+        "HardwareAwarePlanner",
+        "detect",
+        "to_dict",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.hedged": {
+      "docstring": "Hedged inference. Slice 065.\n\nWhen the primary rung is slow, waiting it out wastes the latency budget;\nwhen it is merely *thought* slow, abandoning it wastes work. Hedging\nsplits the difference: launch the primary, and if it has not finished\nwithin the hedge delay, launch the next rung as a *hedge* alongside it.\nThe first result to clear its gate wins; the loser is cancelled\nbest-effort.\n\n- Delay: ``options.hedge_delay_ms``, but only when the QoS profile\n  allows hedging (``qos_profile(...).hedge_allowed``) \u2014 otherwise the\n  executor degrades to strict serial, documented in the plan rationale.\n- A rung that *completes* below its gate hands off immediately: the next\n  rung launches at once instead of waiting out the delay.\n- Every attempt flows through the same ``skip_reason`` / ``_attempt`` /\n  provenance / feedback path as the other executors; hedged launches\n  are marked in the audit detail.\n\nThis is the classic \"hedged requests\" pattern (Dean & Barroso) applied\nto rung selection rather than replicas.",
+      "imports": [
+        "__future__",
+        "concurrent",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 193,
+      "path": "hugrgate/routing/hedged.py",
+      "public_defs": [
+        "HedgedPlanExecutor",
+        "execute",
+        "run_one",
+        "launch"
+      ]
+    },
+    "hugrgate.routing.latency": {
+      "docstring": "Latency-aware routing. Slice 056.\n\nDeclared ``backend.estimated_latency()`` values are guesses \u2014 often the\n100ms conservative default. This module learns the truth: a\n:class:`LatencyTracker` keeps an exponential moving average of *measured*\nrung latencies per backend, and routing uses the measured EMA once enough\nsamples exist, falling back to the declared estimate before that.\n\n- :class:`LatencyTracker.record` / :meth:`estimate` \u2014 EMA (\u03b1=0.3) with a\n  minimum-sample gate.\n- :class:`LatencyAwarePlanner` \u2014 wraps any planner; at plan time it\n  prunes rungs whose *measured* estimate already exceeds the policy's\n  latency budget, and stamps each surviving node with the estimate it\n  used (``params[\"latency_estimate_ms\"]``), so the plan shows its work.\n- :meth:`LadderRouterV2.note_latencies` \u2014 called by executors after each\n  climb to feed measured rung latencies back into the tracker.\n\nThe reproducible measurement artifact lives in\n``benchmarks/routing_latency_056.py`` \u2192 ``benchmarks/routing_latency_056.json``.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 119,
+      "path": "hugrgate/routing/latency.py",
+      "public_defs": [
+        "LatencyTracker",
+        "LatencyAwarePlanner",
+        "record",
+        "samples",
+        "measured",
+        "estimate",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.memory": {
+      "docstring": "Memory-aware routing. Slice 059.\n\nUnlike cost or energy, memory is a *peak* constraint, not a cumulative\none: each rung must fit within available memory on its own. \n:class:`MemoryModel` estimates a backend's footprint in megabytes from\n``hardware_requirements()[\"memory_mb\"]`` when declared, else an optional\n``estimated_memory_mb()`` method, else documented class defaults.\n:class:`MemoryAwarePlanner` prunes rungs whose footprint exceeds\n``options.max_memory_mb`` and stamps survivors with\n``params[\"memory_estimate_mb\"]``.\n\nMemory assumptions (stated, not hidden):\n- local backend with no declared figure: 512 MB (a modest in-process\n  model runtime);\n- remote backend with no declared figure: 0 MB client-side \u2014 the memory\n  lives on the server, which this machine's routing cannot observe.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 103,
+      "path": "hugrgate/routing/memory.py",
+      "public_defs": [
+        "MemoryModel",
+        "MemoryAwarePlanner",
+        "estimate_mb",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.parallel": {
+      "docstring": "Parallel speculative rungs. Slice 064.\n\nInstead of climbing serially, :class:`ParallelPlanExecutor` fans the\nplan's rungs out across a thread pool and takes the *first result that\nclears its gate*. Every rung still passes the same pre-run\n``skip_reason`` checks, the same ``_attempt`` path (validation, audit,\nprovenance), and the same feedback hooks as the serial executor \u2014 only\nthe *scheduling* changes.\n\nFan-out width is ``min(options.parallel_width,\nqos_profile(options.qos).parallel_width)``: the QoS posture caps how\nspeculative a request may be (best_effort never fans out). Rungs beyond\nthe width run in a second wave only if the first wave produced no\nwinner.\n\nThread-safety contract: ``backend.evaluate`` must be safe to call from\npool threads (true for stateless backends; stateful ones should guard\nthemselves). Audit/provenance/feedback writes are serialized under one\nlock inside the executor.\n\nCancellation is best-effort: once a winner is found, pending futures\nare cancelled; already-running backends run to completion but their\nresults are recorded, not returned.",
+      "imports": [
+        "__future__",
+        "concurrent",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 149,
+      "path": "hugrgate/routing/parallel.py",
+      "public_defs": [
+        "ParallelPlanExecutor",
+        "execute",
+        "run_one"
+      ]
+    },
+    "hugrgate.routing.privacy": {
+      "docstring": "Privacy-aware routing v2. Slice 060.\n\nThe v1 ladder gates only on *where* a backend runs (remote vs local).\nv2 gates on *what the data is*: every request's state keys are classified\ninto a :class:`PrivacyTier`, every backend is graded to a clearance from\nits privacy properties, and rungs where the data outranks the clearance\nare pruned at plan time \u2014 before any bytes move.\n\n- :class:`DataClassifier` \u2014 key-name heuristics \u2192 tier (PUBLIC <\n  INTERNAL < CONFIDENTIAL < RESTRICTED); explicit override via\n  ``spec.metadata[\"data_tier\"]``; ``policy.privacy_class == \"strict\"``\n  floors every request at CONFIDENTIAL.\n- :class:`BackendClearance` \u2014 local + no retention \u2192 RESTRICTED; remote\n  \u2192 at most INTERNAL; ``data_retained`` \u2192 at most INTERNAL; remote *and*\n  retaining \u2192 PUBLIC only.\n- :class:`PrivacyAwarePlanner` \u2014 prunes rungs whose clearance < data\n  tier, recording the verdict per node.\n\nThis is defense in depth *over* the existing guards: the executor's\n``skip_reason`` (policy + ``PrivacyGuard``) still re-checks at run time.\nAdversarial behavior \u2014 exfiltration-shaped routing \u2014 is pruned, audited,\nand tested below.",
+      "imports": [
+        "__future__",
+        "enum",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 158,
+      "path": "hugrgate/routing/privacy.py",
+      "public_defs": [
+        "PrivacyTier",
+        "DataClassifier",
+        "BackendClearance",
+        "PrivacyAwarePlanner",
+        "classify_key",
+        "classify",
+        "clearance",
+        "verdict",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.qos": {
+      "docstring": "Quality-of-service classes. Slice 063.\n\nQoS is the request's *posture*: how much of the ladder may be spent on\nit. :class:`QoSClass` names the four postures; :func:`qos_profile`\nreturns the :class:`QoSProfile` that planners and executors consult:\n\n- **depth_cap** \u2014 max rungs a synthesized ladder may hold;\n- **weights** \u2014 (capability, latency, cost) blend for rung ordering;\n- **parallel_width** \u2014 max speculative fan-out (slice 064);\n- **hedge_allowed** / **hedge_delay_ms** \u2014 hedged inference (slice 065);\n- **fast_path_probability** \u2014 early-exit bar (slice 066);\n- **early_exit_delta** \u2014 stop when marginal gain falls below this.\n\nThis module unifies the ``QOS_DEPTH_CAPS``/``QOS_WEIGHTS`` tables slice\n053 introduced \u2014 they now live here as the single source of truth, and\n``synthesis.py`` imports them.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "enum",
+        "typing"
+      ],
+      "loc": 97,
+      "path": "hugrgate/routing/qos.py",
+      "public_defs": [
+        "QoSClass",
+        "QoSProfile",
+        "qos_profile",
+        "parse"
+      ]
+    },
+    "hugrgate.routing.replay": {
+      "docstring": "Route replay. Slice 070.\n\nA recorded climb can be replayed *without touching any backend*: \n:class:`RecordingExecutor` wraps any executor and captures the plan,\nper-rung outcomes (probabilities, latencies, skip reasons), and the\nwinning result into a :class:`RouteRecording` (JSON-serializable).\n:func:`replay` / :class:`ReplayExecutor` then walk the recorded plan\nusing the recorded probabilities instead of calling backends, applying\nthe recorded policy's gates \u2014 reproducing the recorded winner\ndeterministically.\n\nRecorded skip outcomes are authoritative: replay never consults the\nregistry, so even an empty registry replays faithfully. The plan\nfingerprint is verified before replay; tampering raises ``SpecError``.\n\nLimitations (documented, not hidden): replay reproduces the *routing\noutcome* (winner, probability, audit), not wall-clock latencies \u2014\nlatencies are recorded facts, not re-measured. Only successful\ndecisions are recordable; abstentions carry no winner to reproduce.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 200,
+      "path": "hugrgate/routing/replay.py",
+      "public_defs": [
+        "RouteRecording",
+        "RecordingExecutor",
+        "ReplayExecutor",
+        "replay",
+        "to_json",
+        "from_json",
+        "execute",
+        "execute"
+      ]
+    },
+    "hugrgate.routing.rungs": {
+      "docstring": "Dynamic rung construction. Slice 052.\n\nWhere the v1 ladder (and the 051 default planner) climb a *statically\nconfigured* rung list, :class:`RungBuilder` constructs the rung list at\nrequest time from the live registry: it enumerates backends, applies the\npolicy's allow/block lists, drops backends that cannot serve the spec or\nthat the privacy posture forbids, and orders survivors by expected price\nof admission (cost, then latency), with preferred backends floated first.\n\n:class:`DynamicRungPlanner` adapts the builder to the\n:class:`~hugrgate.routing.architecture.RungPlanner` protocol so a\n:class:`~hugrgate.routing.architecture.LadderRouterV2` can build a fresh\nladder per request instead of reusing a configured one.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 138,
+      "path": "hugrgate/routing/rungs.py",
+      "public_defs": [
+        "RungBuilder",
+        "DynamicRungPlanner",
+        "candidates",
+        "build",
+        "plan"
+      ]
+    },
+    "hugrgate.routing.simulate": {
+      "docstring": "Route simulation. Slice 071.\n\n:func:`simulate` dry-runs a routing plan against backend *estimates* \u2014\nno backend is ever called. It answers, before spending anything:\n\n- which rungs would be skipped and why (reusing the router's real\n  :meth:`skip_reason`, so predictions match execution);\n- per-rung estimated latency, cost, energy, memory, and capability;\n- totals for the full climb;\n- a what-if table: \"if rung k wins, the climb costs X ms / Y money /\n  Z joules\".\n\nWhat simulation honestly cannot do: predict *which* rung will clear its\ngate \u2014 that depends on the live result probabilities. The report says\nso explicitly instead of inventing a winner. Capability scores (slice\n054) are reported as the best available proxy for rung quality, labeled\nas such.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "time",
+        "typing"
+      ],
+      "loc": 152,
+      "path": "hugrgate/routing/simulate.py",
+      "public_defs": [
+        "SimulatedRung",
+        "SimulationReport",
+        "simulate",
+        "to_dict",
+        "totals",
+        "to_dict"
+      ]
+    },
+    "hugrgate.routing.synthesis": {
+      "docstring": "Per-request ladder synthesis. Slice 053.\n\nSlice 052 builds rungs dynamically from the registry; synthesis goes one\nstep further and *composes* the plan for this exact request: it weighs\neach candidate against the request's QoS posture, splits the policy's\nlatency budget fairly across the plan, caps ladder depth by QoS class,\nand records why each rung earned its position. The same registry under a\n`best_effort` request and under a `critical` request yields different\nladders \u2014 that is the point.\n\nCapability grading comes from slice 054's :class:`CapabilityScorer`.",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "typing"
+      ],
+      "loc": 109,
+      "path": "hugrgate/routing/synthesis.py",
+      "public_defs": [
+        "score_capability",
+        "LadderSynthesizer",
+        "plan"
+      ]
+    },
     "hugrgate.server": {
       "docstring": "HugrGate local HTTP API \u2014 FastAPI service. Slice 41.\n\nExposes the in-process :class:`HugrGate` runtime over HTTP:\n\n- ``POST /decide`` \u2014 spec + state + policy JSON \u2192 result JSON\n- ``GET  /health`` \u2014 liveness probe\n- ``GET  /backends`` \u2014 registered backend capabilities\n- ``GET  /models`` \u2014 known model catalogue entries\n\nLocalhost-only by default: :func:`run` binds ``127.0.0.1`` unless the\noperator explicitly passes a different host.\n\nThis module also ships two small deterministic built-in backends\n(``uniform`` and ``keyword``) so the service, CLI, daemon and benchmark\nharness are usable end to end with zero ML dependencies. They are honest\nbaselines \u2014 not intelligent \u2014 and richer backends register through the\nsame :class:`BackendRegistry` contract.",
       "imports": [
@@ -858,7 +1347,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 365,
+      "loc": 368,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -890,7 +1379,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 109,
+      "loc": 114,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -950,7 +1439,7 @@
         "json",
         "typing"
       ],
-      "loc": 58,
+      "loc": 60,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -963,13 +1452,39 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
     "test_foundation.py",
     "test_ladder.py",
     "test_ml_calibration.py",
     "test_repo_truth.py",
-    "test_service.py"
+    "test_routing_051.py",
+    "test_routing_052.py",
+    "test_routing_053.py",
+    "test_routing_054.py",
+    "test_routing_055.py",
+    "test_routing_056.py",
+    "test_routing_057.py",
+    "test_routing_058.py",
+    "test_routing_059.py",
+    "test_routing_060.py",
+    "test_routing_061.py",
+    "test_routing_062.py",
+    "test_routing_063.py",
+    "test_routing_064.py",
+    "test_routing_065.py",
+    "test_routing_066.py",
+    "test_routing_067.py",
+    "test_routing_068.py",
+    "test_routing_069.py",
+    "test_routing_070.py",
+    "test_routing_071.py",
+    "test_routing_072.py",
+    "test_routing_073.py",
+    "test_routing_074.py",
+    "test_service.py",
+    "test_typecheck.py"
   ],
-  "total_loc": 7104
+  "total_loc": 11436
 }

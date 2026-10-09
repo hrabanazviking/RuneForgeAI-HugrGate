@@ -32,9 +32,7 @@ from typing import Any, Dict, List, Mapping, Optional
 
 from hugrgate.errors import Abstention
 from hugrgate.ladder import (RUNG_ACCEPTED, RUNG_BELOW_CONFIDENCE,
-                             RUNG_SKIPPED_LATENCY, RUNG_SKIPPED_PRIVACY,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
-                             LadderAuditEntry)
+                             RUNG_SKIPPED_UNKNOWN, LadderAuditEntry)
 from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
                                             RungExecutor, RoutingDecision,
                                             RoutingPlan)

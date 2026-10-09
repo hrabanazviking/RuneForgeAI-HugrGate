@@ -44,7 +44,13 @@ def describe(module, name: str) -> tuple[str, str]:
     elif inspect.ismethoddescriptor(obj):
         kind = "method-descriptor"
     else:
-        return "constant", repr(obj)[:60]
+        # Sort set/frozenset constants so regeneration is byte-deterministic
+        # across processes (set iteration order varies with hash seed).
+        if isinstance(obj, (set, frozenset)):
+            shown = "{" + ", ".join(repr(x) for x in sorted(obj, key=repr)) + "}"
+        else:
+            shown = repr(obj)
+        return "constant", shown[:60]
     try:
         sig = str(inspect.signature(obj))
     except (TypeError, ValueError):

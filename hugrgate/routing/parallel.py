@@ -28,14 +28,13 @@ from __future__ import annotations
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Optional
+from typing import List
 
 from hugrgate.errors import Abstention
 from hugrgate.ladder import (RUNG_ACCEPTED,
                              RUNG_BELOW_CONFIDENCE, RUNG_ERROR,
-                             RUNG_SKIPPED_LATENCY, RUNG_SKIPPED_PRIVACY,
-                             RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
-                             RUNG_UNAVAILABLE, LadderAuditEntry)
+                             RUNG_SKIPPED_UNKNOWN, RUNG_UNAVAILABLE,
+                             LadderAuditEntry)
 from hugrgate.routing.architecture import (LadderRouterV2, RouterContext,
                                             RungExecutor, RoutingDecision,
                                             RoutingPlan)
@@ -44,10 +43,6 @@ from hugrgate.routing.qos import qos_profile
 __all__ = [
     "ParallelPlanExecutor",
 ]
-
-_SKIP_OUTCOMES = {RUNG_SKIPPED_UNKNOWN, RUNG_SKIPPED_UNSUPPORTED,
-                  RUNG_SKIPPED_PRIVACY, RUNG_SKIPPED_LATENCY}
-
 
 class ParallelPlanExecutor(RungExecutor):
     """Execute a plan's rungs concurrently; first gate-clear wins."""
