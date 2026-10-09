@@ -1,0 +1,56 @@
+{
+  "config": {
+    "alpha": 1.0,
+    "arms": [
+      "arm_a",
+      "arm_b",
+      "arm_c"
+    ],
+    "ridge": 1.0,
+    "scenario": "default_scenario"
+  },
+  "generated_at": 1791546563.2860773,
+  "mean_reward": {
+    "adaptive": 0.8819859891683539,
+    "round_robin": 0.5764216270566995,
+    "static_first": 0.5991193304883593,
+    "uniform": 0.5840290447153029
+  },
+  "policies": [
+    "uniform",
+    "round_robin",
+    "static_first",
+    "adaptive"
+  ],
+  "pulls": {
+    "adaptive": {
+      "arm_a": 983,
+      "arm_b": 1001,
+      "arm_c": 16
+    },
+    "round_robin": {
+      "arm_a": 667,
+      "arm_b": 667,
+      "arm_c": 666
+    },
+    "static_first": {
+      "arm_a": 2000,
+      "arm_b": 0,
+      "arm_c": 0
+    },
+    "uniform": {
+      "arm_a": 690,
+      "arm_b": 641,
+      "arm_c": 669
+    }
+  },
+  "rounds": 2000,
+  "seed": 7,
+  "total_reward": {
+    "adaptive": 1763.971978336708,
+    "round_robin": 1152.843254113399,
+    "static_first": 1198.2386609767186,
+    "uniform": 1168.0580894306058
+  },
+  "winner": "adaptive"
+}
