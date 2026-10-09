@@ -55,3 +55,14 @@ it into an opaque agent.
 - Fixed a real bug found by tests: `getattr(x, name, x.timestamp)`
   evaluates the default eagerly — replaced with explicit `hasattr`.
 - Tests: `tests/test_memory_query.py` (15 tests).
+
+### Slice 303 — Outcome attachment
+- `hugrgate/memory/outcomes.py`: frozen `Outcome` (kind in
+  success/failure/partial, optional score in [0,1], `observed_at`,
+  note, latency) with `to_dict`/`from_dict`, `is_positive()`.
+- `DecisionHistory.attach_outcome(episode_id, outcome, overwrite=False)`:
+  one outcome per episode; double-attach raises `MemoryError` unless
+  `overwrite=True`; unknown ids raise `MemoryError`.
+- Outcomes are queryable (`has_outcome`, `outcome_kinds` filters from
+  slice 302) and feed slices 305-322.
+- Tests: `tests/test_memory_outcomes.py` (13 tests).

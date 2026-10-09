@@ -35,13 +35,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from hugrgate.errors import MemoryError
+from hugrgate.memory.outcomes import Outcome
 from hugrgate.memory.query import MemoryQuery
 from hugrgate.privacy import PRIVACY_CLASS_ORDER
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 
 if TYPE_CHECKING:  # pragma: no cover - typing only, no runtime cycle
     from hugrgate.memory.groundtruth import GroundTruth
-    from hugrgate.memory.outcomes import Outcome
 
 __all__ = [
     "DecisionHistory",
@@ -227,6 +227,32 @@ class DecisionHistory:
         with self._lock:
             snapshot = copy.deepcopy(self._episodes)
         return query.apply(snapshot)
+
+    def attach_outcome(self, episode_id: str, outcome: Outcome, *,
+                       overwrite: bool = False) -> Episode:
+        """Record what actually happened for one episode (slice 303).
+
+        Raises :class:`MemoryError` for an unknown id, or when an
+        outcome is already attached and ``overwrite`` is False.
+        Returns a copy of the updated episode.
+        """
+        if not isinstance(outcome, Outcome):
+            raise TypeError(
+                f"attach_outcome needs an Outcome, got "
+                f"{type(outcome).__name__}")
+        with self._lock:
+            episode = self._by_id.get(episode_id)
+            if episode is None:
+                raise MemoryError(
+                    f"unknown episode_id: {episode_id!r}",
+                    episode_id=episode_id)
+            if episode.outcome is not None and not overwrite:
+                raise MemoryError(
+                    f"episode {episode_id!r} already has an outcome; "
+                    f"pass overwrite=True to replace it",
+                    episode_id=episode_id)
+            episode.outcome = outcome
+            return copy.deepcopy(episode)
 
     # -- introspection -------------------------------------------------
 

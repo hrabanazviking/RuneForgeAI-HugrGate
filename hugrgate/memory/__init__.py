@@ -20,11 +20,14 @@ behavior is typed, thread-safe, and bounded (see
 from __future__ import annotations
 
 from hugrgate.memory.history import DecisionHistory, Episode
+from hugrgate.memory.outcomes import OUTCOME_KINDS, Outcome
 from hugrgate.memory.query import MemoryQuery, find_in_provenance
 
 __all__ = [
+    "OUTCOME_KINDS",
     "DecisionHistory",
     "Episode",
     "MemoryQuery",
+    "Outcome",
     "find_in_provenance",
 ]
