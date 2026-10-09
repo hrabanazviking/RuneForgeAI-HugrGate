@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 299 · **public names:** 1825
+**Modules:** 300 · **public names:** 1841
 
 ## API stability policy
 
@@ -2275,11 +2275,14 @@ that this document never drifts from the code.
 | `MetricSet` | class | `(include: 'tuple[str, ...]' = ('accuracy', 'brier_score', 'ece', 'latency_p50_ms', 'latency_p99_ms', 'latency_mean_ms', 'throughput_per_s', 'abstention_rate', 'n_decided', 'n_abstained', 'n_errors'), derived: 'dict[str, DerivedMetric]' = <factory>) -> None` |
 | `PackageCalibrator` | class | `(calibrator: 'Any') -> 'None'` |
 | `RunRecord` | class | `(run_id: 'str', experiment_name: 'str', seed: 'int', started_at: 'str', finished_at: 'str', elapsed_s: 'float', hugrgate_version: 'str', python_version: 'str', platform: 'dict[str, str]', dataset_name: 'str', dataset_version: 'str', dataset_fingerprint: 'str', policy: 'dict[str, Any]', privacy_class: 'str', tags: 'dict[str, str]', backends: 'dict[str, dict[str, Any]]', n_items: 'int', git_sha: 'str | None' = None) -> None` |
+| `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
+| `SelectiveReport` | class | `(backends: 'dict[str, dict[str, Any]]', n_items: 'int', policy_threshold: 'float | None' = None) -> None` |
 | `SignificanceResult` | class | `(test: 'str', statistic: 'float', p_value: 'float', alpha: 'float', n: 'int', details: 'dict[str, Any]') -> None` |
 | `SplitPlan` | class | `(n_total: 'int', splits: 'list[tuple[str, float]]', seed: 'int', method: 'str', stratify_key: 'str | None' = None, created_at: 'str' = '', input_fingerprint: 'str' = '') -> None` |
 | `StratifiedReport` | class | `(stratify_key: 'str', strata: 'list[str]', stratum_sizes: 'dict[str, int]', per_stratum: 'dict[str, dict[str, dict[str, Any]]]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]', n_items: 'int' = 0) -> None` |
 | `TemperatureCalibrator` | class | `() -> 'None'` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+| `aurc` | function | `(curve: 'Sequence[SelectivePoint]') -> 'float'` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
@@ -2287,6 +2290,7 @@ that this document never drifts from the code.
 | `compare_backends` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend_a: 'str', backend_b: 'str', metric: 'str' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, n_boot: 'int' = 2000, n_perm: 'int' = 10000, alpha: 'float' = 0.05, max_items: 'int | None' = None) -> 'BackendComparison'` |
 | `compare_calibrators` | function | `(calib_confidences: 'Sequence[float]', calib_correct: 'Sequence[int]', eval_confidences: 'Sequence[float]', eval_correct: 'Sequence[int]', calibrators: 'Sequence[LabCalibrator]', n_bins: 'int' = 10) -> 'CalibrationComparison'` |
 | `compare_paired_correctness` | function | `(pairs_a: 'Sequence[tuple[Any, DecisionResult | None]]', pairs_b: 'Sequence[tuple[Any, DecisionResult | None]]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alpha: 'float' = 0.05, label_a: 'str' = 'a', label_b: 'str' = 'b') -> 'dict[str, Any]'` |
+| `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
 | `cross_validate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', k: 'int' = 5, seed: 'int' = 0, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None) -> 'CVReport'` |
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
@@ -2294,7 +2298,11 @@ that this document never drifts from the code.
 | `make_splits` | function | `(items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.7), ('validation', 0.15), ('test', 0.15)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None) -> 'tuple[dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 | `manifest_splits` | function | `(manifest: 'DatasetManifest', items: 'Sequence[Mapping[str, Any]]', splits: 'Sequence[tuple[str, float]]' = (('train', 0.8), ('test', 0.2)), seed: 'int' = 0, method: 'str' = 'shuffled', stratify_key: 'str | None' = None) -> 'tuple[dict[str, DatasetManifest], dict[str, list[Mapping[str, Any]]], SplitPlan]'` |
 | `mcnemar_test` | function | `(b01: 'int', b10: 'int', *, alpha: 'float' = 0.05) -> 'SignificanceResult'` |
+| `oracle_aurc` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
 | `paired_permutation_test` | function | `(scores_a: 'Sequence[float]', scores_b: 'Sequence[float]', *, n_perm: 'int' = 10000, seed: 'int' = 0, alternative: 'str' = 'two-sided', alpha: 'float' = 0.05) -> 'SignificanceResult'` |
+| `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
+| `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
+| `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
 | `stratified_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', *, stratify_key: 'str | None' = None, key_fn: 'Callable[[Mapping[str, Any]], Any] | None' = None, backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None) -> 'StratifiedReport'` |
 
 ### `hugrgate.evlab.api`
@@ -2357,6 +2365,19 @@ that this document never drifts from the code.
 | `DatasetRegistry` | class | `() -> 'None'` |
 | `DatasetVersion` | class | `(major: 'int', minor: 'int', patch: 'int', prerelease: 'str' = '', build: 'str' = '') -> None` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+
+### `hugrgate.evlab.selective`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SelectivePoint` | class | `(threshold: 'float', coverage: 'float', risk: 'float', accuracy: 'float', n: 'int') -> None` |
+| `SelectiveReport` | class | `(backends: 'dict[str, dict[str, Any]]', n_items: 'int', policy_threshold: 'float | None' = None) -> None` |
+| `aurc` | function | `(curve: 'Sequence[SelectivePoint]') -> 'float'` |
+| `coverage_at_risk` | function | `(curve: 'Sequence[SelectivePoint]', target_risk: 'float') -> 'float'` |
+| `oracle_aurc` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'float'` |
+| `risk_at_coverage` | function | `(curve: 'Sequence[SelectivePoint]', target_coverage: 'float') -> 'float'` |
+| `risk_coverage_curve` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_points: 'int' = 50) -> 'list[SelectivePoint]'` |
+| `selective_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, policy: 'DecisionPolicy | None' = None, n_points: 'int' = 50, max_items: 'int | None' = None) -> 'SelectiveReport'` |
 
 ### `hugrgate.evlab.significance`
 

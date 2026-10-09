@@ -1162,6 +1162,7 @@ flowchart TD
     evlab --> evlab_compare
     evlab --> evlab_crossval
     evlab --> evlab_dataset
+    evlab --> evlab_selective
     evlab --> evlab_significance
     evlab --> evlab_splits
     evlab --> evlab_stratified
@@ -1197,6 +1198,10 @@ flowchart TD
     evlab_crossval --> evlab_splits
     evlab_crossval --> policy
     evlab_dataset --> errors
+    evlab_selective --> core
+    evlab_selective --> errors
+    evlab_selective --> policy
+    evlab_selective --> spec
     evlab_significance --> errors
     evlab_significance --> result
     evlab_splits --> errors
@@ -2363,6 +2368,7 @@ flowchart TD
 | `evlab` | `evlab.compare` | no |
 | `evlab` | `evlab.crossval` | no |
 | `evlab` | `evlab.dataset` | no |
+| `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
 | `evlab` | `evlab.stratified` | no |
@@ -2398,6 +2404,10 @@ flowchart TD
 | `evlab.crossval` | `evlab.splits` | no |
 | `evlab.crossval` | `policy` | no |
 | `evlab.dataset` | `errors` | no |
+| `evlab.selective` | `core` | no |
+| `evlab.selective` | `errors` | no |
+| `evlab.selective` | `policy` | no |
+| `evlab.selective` | `spec` | no |
 | `evlab.significance` | `errors` | no |
 | `evlab.significance` | `result` | no |
 | `evlab.splits` | `errors` | no |
