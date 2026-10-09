@@ -6,3 +6,8 @@ venv/
 
 .coverage*
 .mypy_cache/
+
+# SDK build artifacts (Campaign XVIII)
+sdks/typescript/node_modules/
+sdks/typescript/dist/
+sdks/rust/target/
