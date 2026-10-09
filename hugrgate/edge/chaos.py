@@ -1,4 +1,5 @@
-"""Edge failure testing — deterministic fault injection. Slice 199.
+"""Edge failure testing — deterministic fault injection. Slice 199;
+hardened in slice 251 (steady-state pre/post hooks, ``run_one``).
 
 :class:`ChaosRunner` executes named :class:`FaultScenario`s against
 real Campaign VIII components. Each scenario *injects* a fault
@@ -34,12 +35,24 @@ __all__ = [
 
 @dataclass(frozen=True)
 class FaultScenario:
-    """One inject-then-verify failure story."""
+    """One inject-then-verify failure story.
+
+    ``pre_check``/``post_check`` are optional steady-state hooks
+    (slice 251 hardening): ``pre_check`` runs before the fault and
+    ``post_check`` runs after. A raising check fails the scenario —
+    a post-check failure means the fault leaked damage beyond the
+    injected failure, which is reported as a failure even when the
+    scenario callable itself passed.
+    """
 
     name: str
     description: str
     run: Callable[[], None]
     """Inject the fault and verify recovery. Raises on failure."""
+    pre_check: Callable[[], None] | None = None
+    """Steady-state precondition. Raises when the world is unhealthy."""
+    post_check: Callable[[], None] | None = None
+    """Steady-state postcondition. Raises when the fault leaked damage."""
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -90,16 +103,48 @@ class ChaosRunner:
         with self._lock:
             scenarios = [self._scenarios[n] for n in sorted(self._scenarios)]
         for scenario in scenarios:
-            try:
-                scenario.run()
-            except Exception as e:  # noqa: BLE001 - recorded per scenario
-                results.append(ChaosResult(
-                    scenario.name, False, f"{type(e).__name__}: {e}"))
-            else:
-                results.append(ChaosResult(scenario.name, True))
+            results.append(self._run_one(scenario))
         with self._lock:
             self._results = results
         return list(results)
+
+    def run_one(self, name: str) -> ChaosResult:
+        """Execute a single registered scenario by name."""
+        with self._lock:
+            try:
+                scenario = self._scenarios[name]
+            except KeyError:
+                raise ChaosError(
+                    f"unknown chaos scenario {name!r}") from None
+        return self._run_one(scenario)
+
+    @staticmethod
+    def _run_one(scenario: FaultScenario) -> ChaosResult:
+        # Steady-state precondition: the world must be healthy *before*
+        # the fault is injected, or the verification is meaningless.
+        if scenario.pre_check is not None:
+            try:
+                scenario.pre_check()
+            except Exception as e:  # noqa: BLE001 - recorded per scenario
+                return ChaosResult(
+                    scenario.name, False,
+                    f"steady-state pre-check failed: "
+                    f"{type(e).__name__}: {e}")
+        try:
+            scenario.run()
+        except Exception as e:  # noqa: BLE001 - recorded per scenario
+            return ChaosResult(
+                scenario.name, False, f"{type(e).__name__}: {e}")
+        # Steady-state postcondition: the fault must not leak damage.
+        if scenario.post_check is not None:
+            try:
+                scenario.post_check()
+            except Exception as e:  # noqa: BLE001 - recorded per scenario
+                return ChaosResult(
+                    scenario.name, False,
+                    f"steady-state post-check failed (fault leaked "
+                    f"damage): {type(e).__name__}: {e}")
+        return ChaosResult(scenario.name, True)
 
     def report(self) -> dict[str, Any]:
         """JSON-serializable report of the last run."""
