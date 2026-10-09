@@ -27,6 +27,7 @@ from hugrgate.errors import HugrGateError
 
 __all__ = [
     "PRECISIONS",
+    "HailoAdapter",
     "MockNPUAdapter",
     "NPUAdapter",
     "NPUCapability",
@@ -220,3 +221,107 @@ class NPURegistry:
     def __len__(self) -> int:
         with self._lock:
             return len(self._adapters)
+
+
+# --- vendor adapters (slices 186-188) -------------------------------------------
+
+#: Hailo PCI vendor ID (Hailo-8 / Hailo-8L on PCIe / M.2 HATs).
+_HAILO_PCI_VENDOR_ID = "0x1e60"
+
+
+class HailoAdapter(NPUAdapter):
+    """Hailo-8/8L adapter boundary (slice 186).
+
+    Detection is two-stage: the HailoRT SDK must import *and* a Hailo
+    PCI device must be enumerable. Either missing → ``None`` (absent,
+    not broken). ``sdk`` / ``pci_vendor_ids`` are injectable so tests
+    exercise every branch without hardware or the SDK installed.
+    """
+
+    name = "hailo"
+    vendor = "hailo"
+
+    def __init__(self, sdk: Any | None = None,
+                 pci_vendor_ids: list[str] | None = None):
+        # sdk=None -> lazy real import on detect(); a passed object is
+        # used verbatim (tests inject a fake module).
+        self._sdk = sdk
+        self._pci_vendor_ids = pci_vendor_ids
+        self._lock = threading.RLock()
+        self._models: dict[str, str] = {}
+
+    def _load_sdk(self) -> Any | None:
+        if self._sdk is not None:
+            return self._sdk
+        try:
+            import hailo_platform
+            return hailo_platform
+        except ImportError:
+            return None
+
+    def _pci_ids(self) -> list[str]:
+        if self._pci_vendor_ids is not None:
+            return self._pci_vendor_ids
+        ids: list[str] = []
+        try:
+            import glob as _glob
+            for path in _glob.glob("/sys/bus/pci/devices/*/vendor"):
+                try:
+                    with open(path, encoding="utf-8") as fh:
+                        ids.append(fh.read().strip().lower())
+                except OSError:
+                    continue
+        except OSError:
+            pass
+        return ids
+
+    def detect(self) -> NPUCapability | None:
+        sdk = self._load_sdk()
+        if sdk is None:
+            return None
+        pci_ids = [v.lower() for v in self._pci_ids()]
+        if _HAILO_PCI_VENDOR_ID not in pci_ids:
+            return None
+        driver = getattr(sdk, "__version__", None)
+        # Hailo-8L (13 TOPS, on Pi 5 AI HAT) vs Hailo-8 (26 TOPS):
+        # the SDK device query distinguishes them; without a queryable
+        # device we report the conservative 8L figure.
+        tops = 13.0
+        device = "Hailo-8L"
+        scan = getattr(sdk, "scan_devices", None)
+        if callable(scan):
+            try:
+                for dev in scan() or []:
+                    name = str(getattr(dev, "device_name", "")).lower()
+                    if name == "hailo-8":
+                        device, tops = "Hailo-8", 26.0
+                        break
+                    # "hailo-8l" keeps the conservative default
+            except Exception:  # noqa: BLE001 - detection must not raise
+                pass
+        return NPUCapability(
+            vendor="hailo", device=device, tops_int8=tops,
+            precisions=("int8",), power_mw=2500.0,
+            driver=str(driver) if driver else None,
+            notes="NEEDS_HARDWARE_VALIDATION: TOPS/power are vendor "
+                  "figures; verify on the HAT")
+
+    def load_model(self, model_path: str, **kwargs: Any) -> str:
+        self.require_available()
+        if not model_path.endswith(".hef"):
+            raise NPUError(
+                f"Hailo models must be .hef (Hailo Executable Format), "
+                f"got {model_path!r}")
+        handle = f"hailo://{model_path}"
+        with self._lock:
+            self._models[handle] = model_path
+        return handle
+
+    def infer(self, handle: str, inputs: Any) -> Any:
+        self.require_available()
+        with self._lock:
+            if handle not in self._models:
+                raise NPUError(f"unknown Hailo model handle {handle!r}")
+        raise NPUError(
+            "Hailo infer() needs the HailoRT runtime on-device; "
+            "NEEDS_HARDWARE_VALIDATION")

@@ -120,3 +120,88 @@ def test_registry_rejects_duplicates_and_non_adapters():
         reg.register("not-an-adapter")  # type: ignore[arg-type]
     with pytest.raises(NPUError, match="unknown NPU adapter"):
         reg.get("missing")
+
+
+# --- slice 186: Hailo adapter ----------------------------------------------------
+
+from hugrgate.edge.npu import HailoAdapter
+
+
+class _FakeHailoSdk:
+    __version__ = "4.19.0"
+
+    @staticmethod
+    def scan_devices():
+        return []
+
+
+class _FakeHailo8Sdk(_FakeHailoSdk):
+    @staticmethod
+    def scan_devices():
+        class Dev:
+            device_name = "Hailo-8"
+        return [Dev()]
+
+
+def test_hailo_detect_with_sdk_and_pci():
+    adapter = HailoAdapter(sdk=_FakeHailoSdk(),
+                           pci_vendor_ids=["0x1e60"])
+    cap = adapter.detect()
+    assert cap is not None
+    assert cap.vendor == "hailo"
+    assert cap.device == "Hailo-8L"  # conservative: no 8-class device seen
+    assert cap.tops_int8 == 13.0
+    assert cap.supports("int8") and not cap.supports("fp16")
+    assert adapter.is_available()
+
+
+def test_hailo_detect_distinguishes_hailo8():
+    adapter = HailoAdapter(sdk=_FakeHailo8Sdk(),
+                           pci_vendor_ids=["0x1E60"])  # case-insensitive
+    cap = adapter.detect()
+    assert cap is not None
+    assert (cap.device, cap.tops_int8) == ("Hailo-8", 26.0)
+
+
+def test_hailo_absent_without_sdk():
+    assert HailoAdapter(sdk=None,
+                        pci_vendor_ids=["0x1e60"]).detect() is None
+
+
+def test_hailo_absent_without_pci_device():
+    adapter = HailoAdapter(sdk=_FakeHailoSdk(), pci_vendor_ids=["0x8086"])
+    assert adapter.detect() is None
+    assert not adapter.is_available()
+
+
+def test_hailo_load_model_requires_hef():
+    adapter = HailoAdapter(sdk=_FakeHailoSdk(),
+                           pci_vendor_ids=["0x1e60"])
+    handle = adapter.load_model("models/tiny.hef")
+    assert handle == "hailo://models/tiny.hef"
+    with pytest.raises(NPUError, match=r"\.hef"):
+        adapter.load_model("models/tiny.onnx")
+
+
+def test_hailo_load_without_device_raises():
+    adapter = HailoAdapter(sdk=None, pci_vendor_ids=[])
+    with pytest.raises(NPUError, match="NEEDS_HARDWARE_VALIDATION"):
+        adapter.load_model("models/tiny.hef")
+
+
+def test_hailo_infer_marks_hardware_validation():
+    adapter = HailoAdapter(sdk=_FakeHailoSdk(),
+                           pci_vendor_ids=["0x1e60"])
+    handle = adapter.load_model("models/tiny.hef")
+    with pytest.raises(NPUError, match="NEEDS_HARDWARE_VALIDATION"):
+        adapter.infer(handle, {})
+    with pytest.raises(NPUError, match="unknown Hailo model handle"):
+        adapter.infer("hailo://nope.hef", {})
+
+
+def test_hailo_registry_integration():
+    reg = NPURegistry()
+    reg.register(HailoAdapter(sdk=_FakeHailoSdk(),
+                              pci_vendor_ids=["0x1e60"]))
+    found = reg.detect_all()
+    assert found["hailo"].device == "Hailo-8L"
