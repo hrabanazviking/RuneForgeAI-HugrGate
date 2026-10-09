@@ -34,8 +34,8 @@ from hugrgate.calibration.online import OnlineCalibrator       # noqa: E402
 from hugrgate.calibration.window import SlidingWindowCalibrator  # noqa: E402
 from hugrgate.calibration.bayes import BetaBinomialCalibrator   # noqa: E402
 from . import (  # noqa: E402
-    conformal, conformal_regression, coverage, group, metrics, perclass,
-    pipeline, profiles, risk_coverage, selective, sets,
+    conformal, conformal_regression, coverage, drift, group, metrics,
+    perclass, pipeline, profiles, risk_coverage, selective, sets,
 )
 
 CalibratorRegistry.register("platt", PlattCalibrator)
@@ -59,6 +59,7 @@ __all__ = [
     "conformal",
     "conformal_regression",
     "coverage",
+    "drift",
     "group",
     "risk_coverage",
     "selective",
