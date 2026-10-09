@@ -35,6 +35,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from hugrgate.errors import MemoryError
+from hugrgate.memory.query import MemoryQuery
 from hugrgate.privacy import PRIVACY_CLASS_ORDER
 from hugrgate.provenance import DecisionRecord, ProvenanceStore
 
@@ -217,6 +218,15 @@ class DecisionHistory:
             self._episodes.clear()
             self._by_id.clear()
             return removed
+
+    def find(self, query: MemoryQuery) -> list[Episode]:
+        """Run a :class:`MemoryQuery`; return deep copies, never aliases."""
+        if not isinstance(query, MemoryQuery):
+            raise TypeError(
+                f"find needs a MemoryQuery, got {type(query).__name__}")
+        with self._lock:
+            snapshot = copy.deepcopy(self._episodes)
+        return query.apply(snapshot)
 
     # -- introspection -------------------------------------------------
 

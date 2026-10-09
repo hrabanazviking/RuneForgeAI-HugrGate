@@ -207,6 +207,19 @@ class ProvenanceStore:
                 return copy.deepcopy(r)
         return None
 
+    def scan(self, predicate) -> list[DecisionRecord]:
+        """Return deep copies of every record matching ``predicate``.
+
+        Slice 302: the primitive that makes the provenance store
+        queryable. ``predicate`` receives a stored record (never a
+        live reference — it is already a deep copy) and returns
+        truthy to keep it. Thread-safe; the snapshot is taken under
+        the lock so concurrent appends cannot skew the result.
+        """
+        with self._lock:
+            snapshot = copy.deepcopy(self._records)
+        return [r for r in snapshot if predicate(r)]
+
     def recent(self, n: int = 10) -> list[DecisionRecord]:
         if n < 0:
             raise ValueError(f"recent(n) needs n >= 0, got {n}")

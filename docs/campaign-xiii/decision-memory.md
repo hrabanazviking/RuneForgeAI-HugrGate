@@ -40,3 +40,18 @@ it into an opaque agent.
 - Tests: `tests/test_memory_history.py` (20 tests: round-trip,
   deep-copy isolation, failure paths, boundaries, eviction, import,
   thread-safety smoke).
+
+### Slice 302 — Queryable provenance store
+- `ProvenanceStore.scan(predicate)` hardened into `hugrgate/provenance.py`:
+  thread-safe snapshot, deep copies, the new query primitive.
+- `hugrgate/memory/query.py`: `MemoryQuery` — typed composable filters
+  (backend, model, accepted, fallback, time range, privacy class, tags
+  any/all, outcome kind, has_outcome, has_ground_truth, probability
+  range, request hashes), sorting (`recorded_at`/`probability`/
+  `latency_ms`), limit/offset pagination, `matches()`/`explain()`.
+- `DecisionHistory.find(query)`; `find_in_provenance(store, query)`
+  runs the same language on a raw provenance store (memory-only
+  filters raise `MemoryError` instead of being silently ignored).
+- Fixed a real bug found by tests: `getattr(x, name, x.timestamp)`
+  evaluates the default eagerly — replaced with explicit `hasattr`.
+- Tests: `tests/test_memory_query.py` (15 tests).
