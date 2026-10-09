@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 310 · **public names:** 1921
+**Modules:** 311 · **public names:** 1933
 
 ## API stability policy
 
@@ -2216,6 +2216,7 @@ that this document never drifts from the code.
 | `EdgeCacheError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EdgeMemoryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `EvalError` | class | `(message: 'str' = '', **details: 'Any')` |
+| `EvalGateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GGUFError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GateError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `GpuschedError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2275,6 +2276,9 @@ that this document never drifts from the code.
 | `Experiment` | class | `(name: 'str', dataset: 'Mapping[str, Any]', backends: 'list[str] | None' = None, policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, metrics: 'MetricSet | None' = None, tags: 'dict[str, str]' = <factory>, max_items: 'int | None' = None) -> None` |
 | `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
 | `FoldResult` | class | `(fold: 'int', n_train: 'int', n_test: 'int', backends: 'dict[str, dict[str, Any]]') -> None` |
+| `Gate` | class | `(name: 'str', metric: 'str', op: 'str', threshold: 'float', backends: 'tuple[str, ...]' = ('*',)) -> None` |
+| `GateResult` | class | `(gate: 'str', backend: 'str', metric: 'str', op: 'str', threshold: 'float', actual: 'float | None', passed: 'bool', detail: 'str') -> None` |
+| `GateSuite` | class | `(name: 'str', gates: 'list[Gate]') -> None` |
 | `HistogramBinningCalibrator` | class | `(n_bins: 'int' = 10) -> 'None'` |
 | `HistoryStore` | class | `(path: 'str | Path') -> 'None'` |
 | `IdentityCalibrator` | class | `()` |
@@ -2301,11 +2305,13 @@ that this document never drifts from the code.
 | `StratifiedReport` | class | `(stratify_key: 'str', strata: 'list[str]', stratum_sizes: 'dict[str, int]', per_stratum: 'dict[str, dict[str, dict[str, Any]]]', aggregate: 'dict[str, dict[str, dict[str, float | None]]]', n_items: 'int' = 0) -> None` |
 | `TemperatureCalibrator` | class | `() -> 'None'` |
 | `TransformStep` | class | `(name: 'str', tool: 'str' = '', tool_version: 'str' = '', params: 'dict[str, Any]' = <factory>, input_fingerprint: 'str' = '', output_fingerprint: 'str' = '') -> None` |
+| `assert_gates` | function | `(suite: 'GateSuite', results: 'Mapping[str, Mapping[str, Any]] | RunRecord') -> 'list[GateResult]'` |
 | `aurc` | function | `(curve: 'Sequence[SelectivePoint]') -> 'float'` |
 | `bootstrap_backend_ci` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backend: 'str', metric: 'str | MetricFn' = 'accuracy', *, policy: 'DecisionPolicy | None' = None, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, max_items: 'int | None' = None) -> 'BootstrapCI'` |
 | `bootstrap_mean_ci` | function | `(values: 'Sequence[float]', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0, metric_name: 'str' = 'mean') -> 'BootstrapCI'` |
 | `bootstrap_metric_ci` | function | `(pairs: 'Pairs', spec: 'DecisionSpec', metric: 'str | MetricFn' = 'accuracy', *, n_boot: 'int' = 2000, ci: 'float' = 0.95, seed: 'int' = 0) -> 'BootstrapCI'` |
 | `build_repro_manifest` | function | `(dataset: 'Mapping[str, Any]', backends: 'Sequence[str]', policy: 'DecisionPolicy | None' = None, seed: 'int' = 0, command: 'str | None' = None, extra: 'Mapping[str, Any] | None' = None) -> 'ReproManifest'` |
+| `check_gates` | function | `(suite: 'GateSuite', results: 'Mapping[str, Mapping[str, Any]] | RunRecord') -> 'list[GateResult]'` |
 | `check_reproducibility` | function | `(manifest: 'ReproManifest') -> 'ReproCheck'` |
 | `co2e_grams` | function | `(energy_mj: 'float', grid_intensity_g_per_kwh: 'float' = 400.0) -> 'float'` |
 | `compare_backend_calibration` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str]', calibrator_factories: 'Sequence[Callable[[], LabCalibrator]]', *, calib_frac: 'float' = 0.5, seed: 'int' = 0, policy: 'DecisionPolicy | None' = None, n_bins: 'int' = 10, max_items: 'int | None' = None) -> 'dict[str, CalibrationComparison]'` |
@@ -2320,6 +2326,7 @@ that this document never drifts from the code.
 | `expected_calibration_error` | function | `(correct: 'Sequence[int]', confidences: 'Sequence[float]', n_bins: 'int' = 10) -> 'float'` |
 | `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
 | `fingerprint_items` | function | `(items: 'list[Mapping[str, Any]]') -> 'str'` |
+| `gates_from_config` | function | `(configs: 'Sequence[Mapping[str, Any]]', name: 'str' = 'suite') -> 'GateSuite'` |
 | `kfold_indices` | function | `(n: 'int', k: 'int', seed: 'int' = 0, shuffle: 'bool' = True) -> 'list[tuple[list[int], list[int]]]'` |
 | `label_psi` | function | `(source_labels: 'Sequence[Any]', target_labels: 'Sequence[Any]', bins: 'int' = 10) -> 'float'` |
 | `latency_aware_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, slo_ms: 'float' = 100.0, policy: 'DecisionPolicy | None' = None, max_items: 'int | None' = None) -> 'LatencyReport'` |
@@ -2440,6 +2447,16 @@ that this document never drifts from the code.
 |---|---|---|
 | `FairnessReport` | class | `(stratified: 'StratifiedReport', group_key: 'str', groups: 'list[str]', group_sizes: 'dict[str, int]', selection_rates: 'dict[str, dict[str, dict[str, float]]]') -> None` |
 | `fairness_evaluate` | function | `(dataset: 'Mapping[str, Any]', gate: 'HugrGate', backends: 'Sequence[str] | None' = None, group_key: 'str' = 'group', policy: 'DecisionPolicy | None' = None, metrics: 'MetricSet | None' = None, max_items: 'int | None' = None, min_group_size: 'int' = 10) -> 'FairnessReport'` |
+
+### `hugrgate.evlab.gates`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `Gate` | class | `(name: 'str', metric: 'str', op: 'str', threshold: 'float', backends: 'tuple[str, ...]' = ('*',)) -> None` |
+| `GateResult` | class | `(gate: 'str', backend: 'str', metric: 'str', op: 'str', threshold: 'float', actual: 'float | None', passed: 'bool', detail: 'str') -> None` |
+| `GateSuite` | class | `(name: 'str', gates: 'list[Gate]') -> None` |
+| `assert_gates` | function | `(suite: 'GateSuite', results: 'Mapping[str, Mapping[str, Any]] | RunRecord') -> 'list[GateResult]'` |
+| `check_gates` | function | `(suite: 'GateSuite', results: 'Mapping[str, Mapping[str, Any]] | RunRecord') -> 'list[GateResult]'` |
 
 ### `hugrgate.evlab.history`
 

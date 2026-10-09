@@ -92,6 +92,14 @@ from hugrgate.evlab.energy import (
     energy_aware_evaluate,
 )
 from hugrgate.evlab.fairness import FairnessReport, fairness_evaluate
+from hugrgate.evlab.gates import (
+    Gate,
+    GateResult,
+    GateSuite,
+    assert_gates,
+    check_gates,
+    gates_from_config,
+)
 from hugrgate.evlab.history import (
     HistoryStore,
     RegressionFinding,
@@ -168,6 +176,9 @@ __all__ = [
     "Experiment",
     "FairnessReport",
     "FoldResult",
+    "Gate",
+    "GateResult",
+    "GateSuite",
     "HistogramBinningCalibrator",
     "HistoryStore",
     "IdentityCalibrator",
@@ -194,11 +205,13 @@ __all__ = [
     "StratifiedReport",
     "TemperatureCalibrator",
     "TransformStep",
+    "assert_gates",
     "aurc",
     "bootstrap_backend_ci",
     "bootstrap_mean_ci",
     "bootstrap_metric_ci",
     "build_repro_manifest",
+    "check_gates",
     "check_reproducibility",
     "co2e_grams",
     "compare_backend_calibration",
@@ -213,6 +226,7 @@ __all__ = [
     "expected_calibration_error",
     "fairness_evaluate",
     "fingerprint_items",
+    "gates_from_config",
     "kfold_indices",
     "label_psi",
     "latency_aware_evaluate",

@@ -32,6 +32,7 @@ __all__ = [
     "EdgeCacheError",
     "EdgeMemoryError",
     "EvalError",
+    "EvalGateError",
     "GGUFError",
     "GateError",
     "GpuschedError",
@@ -510,4 +511,16 @@ class EvalError(HugrGateError):
     the experiment definition and re-run.
     """
     code = "eval_error"
+    recoverable = False
+
+
+class EvalGateError(HugrGateError):
+    """An evaluation quality gate failed (CI red).
+
+    Slice 373.  Raised by :func:`hugrgate.evlab.gates.assert_gates`
+    when one or more declared gates do not pass.  Not recoverable:
+    the numbers missed their thresholds — change the code, the data,
+    or the gate, then re-run.
+    """
+    code = "eval_gate_error"
     recoverable = False

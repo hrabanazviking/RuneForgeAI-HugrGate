@@ -29,6 +29,7 @@ from hugrgate.errors import (
     EdgeCacheError,
     EdgeMemoryError,
     EvalError,
+    EvalGateError,
     GateError,
     GGUFError,
     GpuschedError,
@@ -86,6 +87,7 @@ ALL_ERRORS = [
     DataFlowDenied,
     DatasetError,
     EvalError,
+    EvalGateError,
     JurisdictionViolation,
     LocalOnlyViolation,
     SecretDetected,
@@ -143,6 +145,7 @@ EXPECTED_CODES = {
     KeyProviderError: "key_provider_error",
     DatasetError: "dataset_error",
     EvalError: "eval_error",
+    EvalGateError: "eval_gate_error",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -199,6 +202,7 @@ EXPECTED_RECOVERABLE = {
     KeyProviderError: False,
     DatasetError: False,
     EvalError: False,
+    EvalGateError: False,
 }
 
 
