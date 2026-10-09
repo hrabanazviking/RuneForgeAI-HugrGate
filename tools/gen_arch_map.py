@@ -328,7 +328,7 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.security.provenance_guards",
         "hugrgate.security.cache_poisoning",
         "hugrgate.security.replay", "hugrgate.security.authz",
-        "hugrgate.security.rate_limit", "hugrgate.security.secret_audit",
+        "hugrgate.security.ratelimit", "hugrgate.security.secret_audit",
         "hugrgate.security.fuzzing", "hugrgate.security.gauntlet",
     ],
 }

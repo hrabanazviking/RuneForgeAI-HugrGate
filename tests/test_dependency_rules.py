@@ -188,6 +188,7 @@ _STDLIB = {
     "base64", "binascii",
     "errno",
     "decimal",  # Campaign XVII (slice 411): stdlib, used in serde tests.
+    "shlex", "unicodedata",  # Campaign XVII (slice 413): stdlib.
     # Campaign XII (slices 276-281): profiling/allocation/benchmark stdlib.
     "cProfile", "pstats", "tracemalloc", "timeit",
     # Campaign XII (slice 294): multiprocess mode.

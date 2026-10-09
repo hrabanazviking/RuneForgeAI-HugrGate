@@ -435,7 +435,7 @@ flowchart TD
         security_cache_poisoning[security.cache_poisoning]
         security_replay[security.replay]
         security_authz[security.authz]
-        security_rate_limit[security.rate_limit]
+        security_ratelimit[security.ratelimit]
         security_secret_audit[security.secret_audit]
         security_fuzzing[security.fuzzing]
         security_gauntlet[security.gauntlet]
@@ -1648,6 +1648,8 @@ flowchart TD
     privacy_retention --> policy
     privacy_retention --> provenance
     privacy_secrets --> errors
+    privacy_tokens --> errors
+    privacy_tokens --> security_serde_guards
     privacy_trust --> backend
     privacy_trust --> log
     profiling --> errors
@@ -1823,6 +1825,8 @@ flowchart TD
     security --> security_cache_poisoning
     security --> security_checksums
     security --> security_depscan
+    security --> security_fuzzing
+    security --> security_gauntlet
     security --> security_injection_corpus
     security --> security_input_limits
     security --> security_malicious_backend
@@ -1831,9 +1835,11 @@ flowchart TD
     security --> security_plugins
     security --> security_prompt_injection
     security --> security_provenance_guards
+    security --> security_ratelimit
     security --> security_replay
     security --> security_resource_guards
     security --> security_sandbox
+    security --> security_secret_audit
     security --> security_serde_guards
     security --> security_supply_chain
     security --> security_threat_model
@@ -1844,12 +1850,31 @@ flowchart TD
     security_cache_poisoning --> spec
     security_checksums --> errors
     security_checksums --> security_path_guards
+    security_fuzzing --> errors
+    security_gauntlet -.-> errors
+    security_gauntlet -.-> provenance
+    security_gauntlet -.-> security_attack_surface
+    security_gauntlet -.-> security_authz
+    security_gauntlet -.-> security_cache_poisoning
+    security_gauntlet -.-> security_depscan
+    security_gauntlet -.-> security_fuzzing
+    security_gauntlet -.-> security_injection_corpus
+    security_gauntlet -.-> security_malicious_backend
+    security_gauntlet -.-> security_model_signing
+    security_gauntlet -.-> security_provenance_guards
+    security_gauntlet -.-> security_ratelimit
+    security_gauntlet -.-> security_replay
+    security_gauntlet -.-> security_secret_audit
+    security_gauntlet -.-> security_threat_model
+    security_gauntlet -.-> spec
+    security_gauntlet -.-> validation
     security_injection_corpus -.-> security_prompt_injection
     security_input_limits --> errors
     security_input_limits --> validation
-    security_malicious_backend -.-> hugrgate
     security_malicious_backend --> backend
+    security_malicious_backend -.-> core
     security_malicious_backend --> errors
+    security_malicious_backend -.-> policy
     security_malicious_backend --> result
     security_malicious_backend --> security_sandbox
     security_malicious_backend --> spec
@@ -1864,6 +1889,8 @@ flowchart TD
     security_provenance_guards --> errors
     security_provenance_guards --> provenance
     security_provenance_guards --> security_model_signing
+    security_ratelimit --> backpressure
+    security_ratelimit --> errors
     security_replay --> errors
     security_replay -.-> privacy_crypto
     security_resource_guards --> errors
@@ -1935,7 +1962,7 @@ flowchart TD
 | chaos | `chaos`, `chaos.framework`, `chaos.backend_faults`, `chaos.model_faults`, `chaos.cache_faults`, `chaos.filesystem`, `chaos.resources`, `chaos.network`, `chaos.clock`, `chaos.experiments`, `chaos.retry`, `chaos.bulkhead`, `chaos.degradation`, `chaos.recovery`, `chaos.crash`, `chaos.soak`, `chaos.scorecard` |
 | observability | `observability`, `observability.metrics`, `observability.otel`, `observability.trace`, `observability.spans_decision`, `observability.spans_backend`, `observability.spans_routing`, `observability.spans_calibration`, `observability.logschema`, `observability.prometheus`, `observability.dashboard`, `observability.histograms`, `observability.confidence`, `observability.abstention`, `observability.escalation`, `observability.cost`, `observability.energy`, `observability.privacy_metrics`, `observability.alerts`, `observability.slo`, `observability.slo_eval`, `observability.explain`, `observability.replay`, `observability.load` |
 | evaluation-lab | `evlab`, `evlab.api`, `evlab.dataset`, `evlab.splits`, `evlab.stratified`, `evlab.crossval`, `evlab.bootstrap`, `evlab.significance`, `evlab.compare`, `evlab.calibration`, `evlab.selective`, `evlab.costaware`, `evlab.latency`, `evlab.energy`, `evlab.privacy`, `evlab.robustness`, `evlab.shift`, `evlab.fairness`, `evlab.history`, `evlab.artifacts`, `evlab.repro`, `evlab.gates`, `evlab.report`, `evlab.release` |
-| security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.rate_limit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
+| security-forge | `security`, `security.threat_model`, `security.attack_surface`, `security.depscan`, `security.supply_chain`, `security.model_signing`, `security.checksums`, `security.plugins`, `security.sandbox`, `security.input_limits`, `security.resource_guards`, `security.serde_guards`, `security.path_guards`, `security.injection_corpus`, `security.prompt_injection`, `security.malicious_backend`, `security.provenance_guards`, `security.cache_poisoning`, `security.replay`, `security.authz`, `security.ratelimit`, `security.secret_audit`, `security.fuzzing`, `security.gauntlet` |
 
 ## Internal dependency edges
 
@@ -3148,6 +3175,8 @@ flowchart TD
 | `privacy_retention` | `policy` | no |
 | `privacy_retention` | `provenance` | no |
 | `privacy_secrets` | `errors` | no |
+| `privacy_tokens` | `errors` | no |
+| `privacy_tokens` | `security.serde_guards` | no |
 | `privacy_trust` | `backend` | no |
 | `privacy_trust` | `log` | no |
 | `profiling` | `errors` | no |
@@ -3323,6 +3352,8 @@ flowchart TD
 | `security` | `security.cache_poisoning` | no |
 | `security` | `security.checksums` | no |
 | `security` | `security.depscan` | no |
+| `security` | `security.fuzzing` | no |
+| `security` | `security.gauntlet` | no |
 | `security` | `security.injection_corpus` | no |
 | `security` | `security.input_limits` | no |
 | `security` | `security.malicious_backend` | no |
@@ -3331,9 +3362,11 @@ flowchart TD
 | `security` | `security.plugins` | no |
 | `security` | `security.prompt_injection` | no |
 | `security` | `security.provenance_guards` | no |
+| `security` | `security.ratelimit` | no |
 | `security` | `security.replay` | no |
 | `security` | `security.resource_guards` | no |
 | `security` | `security.sandbox` | no |
+| `security` | `security.secret_audit` | no |
 | `security` | `security.serde_guards` | no |
 | `security` | `security.supply_chain` | no |
 | `security` | `security.threat_model` | no |
@@ -3344,12 +3377,31 @@ flowchart TD
 | `security.cache_poisoning` | `spec` | no |
 | `security.checksums` | `errors` | no |
 | `security.checksums` | `security.path_guards` | no |
+| `security.fuzzing` | `errors` | no |
+| `security.gauntlet` | `errors` | yes |
+| `security.gauntlet` | `provenance` | yes |
+| `security.gauntlet` | `security.attack_surface` | yes |
+| `security.gauntlet` | `security.authz` | yes |
+| `security.gauntlet` | `security.cache_poisoning` | yes |
+| `security.gauntlet` | `security.depscan` | yes |
+| `security.gauntlet` | `security.fuzzing` | yes |
+| `security.gauntlet` | `security.injection_corpus` | yes |
+| `security.gauntlet` | `security.malicious_backend` | yes |
+| `security.gauntlet` | `security.model_signing` | yes |
+| `security.gauntlet` | `security.provenance_guards` | yes |
+| `security.gauntlet` | `security.ratelimit` | yes |
+| `security.gauntlet` | `security.replay` | yes |
+| `security.gauntlet` | `security.secret_audit` | yes |
+| `security.gauntlet` | `security.threat_model` | yes |
+| `security.gauntlet` | `spec` | yes |
+| `security.gauntlet` | `validation` | yes |
 | `security.injection_corpus` | `security.prompt_injection` | yes |
 | `security.input_limits` | `errors` | no |
 | `security.input_limits` | `validation` | no |
-| `security.malicious_backend` | `hugrgate` | yes |
 | `security.malicious_backend` | `backend` | no |
+| `security.malicious_backend` | `core` | yes |
 | `security.malicious_backend` | `errors` | no |
+| `security.malicious_backend` | `policy` | yes |
 | `security.malicious_backend` | `result` | no |
 | `security.malicious_backend` | `security.sandbox` | no |
 | `security.malicious_backend` | `spec` | no |
@@ -3364,6 +3416,8 @@ flowchart TD
 | `security.provenance_guards` | `errors` | no |
 | `security.provenance_guards` | `provenance` | no |
 | `security.provenance_guards` | `security.model_signing` | no |
+| `security.ratelimit` | `backpressure` | no |
+| `security.ratelimit` | `errors` | no |
 | `security.replay` | `errors` | no |
 | `security.replay` | `privacy_crypto` | yes |
 | `security.resource_guards` | `errors` | no |
