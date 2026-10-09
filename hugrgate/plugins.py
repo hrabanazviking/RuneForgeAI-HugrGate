@@ -66,13 +66,9 @@ class PluginInfo:
 
 
 def _iter_entry_points() -> list[EntryPoint]:
-    eps = entry_points()
-    if hasattr(eps, "select"):  # importlib.metadata >= 3.6 API
-        return list(eps.select(group=ENTRY_POINT_GROUP))
-    get = getattr(eps, "get", None)
-    if callable(get):  # very old dict-returning API
-        return list(get(ENTRY_POINT_GROUP, ()))
-    return [ep for ep in eps if ep.group == ENTRY_POINT_GROUP]  # type: ignore[union-attr]
+    # importlib.metadata entry_points().select() exists on all
+    # supported Pythons (>= 3.10).
+    return list(entry_points().select(group=ENTRY_POINT_GROUP))
 
 
 def discover_plugins(

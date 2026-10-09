@@ -484,6 +484,43 @@ def cmd_plugins(args: argparse.Namespace) -> int:
     return 1 if failed else 0
 
 
+def cmd_check_backend(args: argparse.Namespace) -> int:
+    """Run the backend conformance battery (slice 440)."""
+    from hugrgate.conformance import (
+        assert_conformance,
+        run_backend_conformance,
+    )
+    from hugrgate.errors import ConformanceError
+    from hugrgate.server import build_gate
+    gate = build_gate()
+    backend = gate.registry.get(args.name)
+    if backend is None:
+        # Fall back to the plugin loader: maybe it is installed
+        # but not registered.
+        from hugrgate.errors import PluginError
+        from hugrgate.plugins import load_plugin
+        try:
+            backend = load_plugin(args.name)
+        except PluginError as e:
+            print(f"hugrgate: {e}", file=sys.stderr)
+            return 2
+    report = run_backend_conformance(backend)
+    _emit(args, report.to_dict(),
+          ([{"check": c.name,
+             "passed": "ok" if c.passed else "FAIL",
+             "detail": c.detail} for c in report.checks],
+           ["check", "passed", "detail"]))
+    if report.passed:
+        print(f"backend {args.name!r} is conformant "
+              f"({len(report.checks)} checks)")
+        return 0
+    try:
+        assert_conformance(report)
+    except ConformanceError as e:
+        print(f"hugrgate: {e}", file=sys.stderr)
+    return 1
+
+
 def cmd_inspect(args: argparse.Namespace) -> int:
     """Drop into the interactive inspector REPL (slice 436)."""
     from hugrgate.inspect import run_inspect
@@ -645,6 +682,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("plugins",
                        help="list discovered backend plugins")
     p.set_defaults(func=cmd_plugins)
+
+    p = sub.add_parser("check-backend",
+                       help="run the backend conformance battery")
+    p.add_argument("name", help="backend name (registry or plugin)")
+    p.set_defaults(func=cmd_check_backend)
 
     p = sub.add_parser("new", help="scaffold a new HugrGate project")
     p.add_argument("name", help="project name (lowercase, valid package)")

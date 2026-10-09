@@ -71,7 +71,10 @@ SERVICE = {"hugrgate.server", "hugrgate.daemon", "hugrgate.cli", "hugrgate.clien
            "hugrgate.inspect",
            # Campaign XVIII (slice 439): the plugin SDK loads
            # backends into the service-layer registry.
-           "hugrgate.plugins"}
+           "hugrgate.plugins",
+           # Campaign XVIII (slice 440): the conformance kit
+           # exercises backends through the service layer.
+           "hugrgate.conformance"}
 # Slice 152: the local-model-fabric runtime layer sits *below* backends —
 # backends may build on runtime adapters, never the reverse.
 BACKEND_ALLOWED = CONTRACTS | {"hugrgate.features", "hugrgate.models",
