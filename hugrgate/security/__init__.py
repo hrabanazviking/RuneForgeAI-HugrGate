@@ -61,6 +61,12 @@ from hugrgate.security.attack_surface import (
     enumerate_surface,
     find_unlisted,
 )
+from hugrgate.security.authz import (
+    ENDPOINT_CAPABILITIES,
+    ROLES,
+    AuthzPolicy,
+    Principal,
+)
 from hugrgate.security.cache_poisoning import (
     BoundCache,
     run_poison_suite,
@@ -167,11 +173,14 @@ from hugrgate.security.threat_model import (
 
 __all__ = [
     "ADVISORIES",
+    "ENDPOINT_CAPABILITIES",
     "PAYLOADS",
+    "ROLES",
     "STRIDE",
     "Advisory",
     "Asset",
     "AttackSurface",
+    "AuthzPolicy",
     "BoundCache",
     "BoundaryEnforcer",
     "ChecksumManifest",
@@ -184,6 +193,7 @@ __all__ = [
     "ModelSigner",
     "PluginManifest",
     "PluginRegistry",
+    "Principal",
     "ReplayGuard",
     "ResourceBudget",
     "SafeUnpickler",

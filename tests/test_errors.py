@@ -15,6 +15,7 @@ import hugrgate
 from hugrgate.errors import (
     Abstention,
     AlertError,
+    AuthzDenied,
     BackendError,
     BackendUnavailable,
     BackpressureError,
@@ -122,6 +123,7 @@ ALL_ERRORS = [
     DeserializationBlocked,
     InputTooLarge,
     PathTraversalBlocked,
+    AuthzDenied,
     PromptInjectionBlocked,
     ReplayDetected,
     ResourceBudgetExceeded,

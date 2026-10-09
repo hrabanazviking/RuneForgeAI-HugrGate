@@ -721,3 +721,15 @@ class ReplayDetected(HugrGateError):
     """
     code = "replay_detected"
     recoverable = False
+
+
+class AuthzDenied(HugrGateError):
+    """An authorization check denied the request.
+    Slice 419.  Raised by :mod:`hugrgate.security.authz` when a
+    principal is unknown, presents a bad/revoked credential, or
+    lacks the capability for the operation. Deny-by-default:
+    anything not explicitly granted is denied. Not recoverable —
+    the caller must obtain the right credential or capability.
+    """
+    code = "authz_denied"
+    recoverable = False

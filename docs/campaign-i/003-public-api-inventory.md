@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 382 · **public names:** 2367
+**Modules:** 383 · **public names:** 2375
 
 ## API stability policy
 
@@ -3960,11 +3960,14 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `ADVISORIES` | constant | `(Advisory(package='pyyaml', cve='CVE-2020-1747', summary='Ar` |
+| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
 | `PAYLOADS` | constant | `(Payload(text="' OR '1'='1", category='sqli', handling='dete` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
 | `STRIDE` | constant | `('spoofing', 'tampering', 'repudiation', 'information_disclo` |
 | `Advisory` | class | `(package: 'str', cve: 'str', summary: 'str', affected: 'str', fixed_in: 'str', severity: 'str') -> None` |
 | `Asset` | class | `(name: 'str', description: 'str', trust_boundary: 'str') -> None` |
 | `AttackSurface` | class | `(entries: 'list[SurfaceEntry]' = <factory>) -> None` |
+| `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
 | `BoundCache` | class | `(cache: 'DecisionCache', *, namespace: 'str', model_version: 'str' = '') -> 'None'` |
 | `BoundaryEnforcer` | class | `(block_on: 'str' = 'high') -> None` |
 | `ChecksumManifest` | class | `(files: 'dict[str, str]' = <factory>, algorithm: 'str' = 'sha256') -> None` |
@@ -3977,6 +3980,7 @@ that this document never drifts from the code.
 | `ModelSigner` | class | `(key: 'bytes', key_id: 'str') -> 'None'` |
 | `PluginManifest` | class | `(name: 'str', version: 'str', entry_point: 'str', trust: 'str' = 'denied', capabilities: 'frozenset[str]' = frozenset(), signature: 'SignedMetadata | None' = None) -> None` |
 | `PluginRegistry` | class | `(keys: 'dict[str, bytes] | None' = None, allowed_prefixes: 'tuple[str, ...]' = ('hugrgate.',)) -> 'None'` |
+| `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 | `ReplayGuard` | class | `(max_age_seconds: 'float' = 300.0, max_skew_seconds: 'float' = 60.0, max_entries: 'int' = 100000) -> 'None'` |
 | `ResourceBudget` | class | `(max_cpu_seconds: 'float | None' = None, max_rss_bytes: 'int | None' = None) -> None` |
 | `SafeUnpickler` | class | `(file: 'Any', allowed_modules: 'tuple[str, ...]' = (), extra_classes: 'frozenset[tuple[str, str]]' = frozenset()) -> 'None'` |
@@ -4040,6 +4044,15 @@ that this document never drifts from the code.
 | `SurfaceEntry` | class | `(name: 'str', kind: 'str', description: 'str', auth_required: 'bool', risk: 'str') -> None` |
 | `enumerate_surface` | function | `() -> 'dict[str, list[str]]'` |
 | `find_unlisted` | function | `(surface: 'AttackSurface') -> 'dict[str, list[str]]'` |
+
+### `hugrgate.security.authz`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ENDPOINT_CAPABILITIES` | constant | `{'POST /decide': 'decide', 'POST /decide/batch': 'decide', '` |
+| `ROLES` | constant | `{'caller': frozenset({'decide'}), 'operator': frozenset({'co` |
+| `AuthzPolicy` | class | `(roles: 'Mapping[str, frozenset[str]] | None' = None) -> 'None'` |
+| `Principal` | class | `(key_id: 'str', roles: 'tuple[str, ...]', capabilities: 'frozenset[str]') -> None` |
 
 ### `hugrgate.security.cache_poisoning`
 
