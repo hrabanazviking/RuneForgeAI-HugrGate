@@ -28,6 +28,9 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.spec", "hugrgate.result", "hugrgate.backend",
         "hugrgate.policy", "hugrgate.validation",
     ],
+    "contract-engine": [
+        "hugrgate.contracts", "hugrgate.contracts.schema",
+    ],
     "runtime": [
         "hugrgate.core", "hugrgate.abstain", "hugrgate.threshold",
         "hugrgate.negotiate", "hugrgate.fallback", "hugrgate.timeout",

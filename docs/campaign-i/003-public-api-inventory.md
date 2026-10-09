@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 42 · **public names:** 175
+**Modules:** 44 · **public names:** 190
 
 ## API stability policy
 
@@ -225,6 +225,30 @@ that this document never drifts from the code.
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
 | `HugrGateClient` | class | `(url: 'Optional[str]' = None, socket_path: 'Optional[str]' = None, gate: 'Optional[HugrGate]' = None, extra_backends: 'Optional[List[Backend]]' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True) -> 'None'` |
 
+### `hugrgate.contracts`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCHEMA_VERSION` | constant | `'2.0'` |
+| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0',)` |
+| `CONTRACT_KINDS` | constant | `{'contract': <class 'hugrgate.contracts.schema.DecisionContr` |
+| `DecisionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
+| `is_supported_version` | function | `(version: 'object') -> 'bool'` |
+| `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+
+### `hugrgate.contracts.schema`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SCHEMA_VERSION` | constant | `'2.0'` |
+| `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0',)` |
+| `CONTRACT_KINDS` | constant | `{'contract': <class 'hugrgate.contracts.schema.DecisionContr` |
+| `DecisionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'Dict[str, Any]' = <factory>) -> None` |
+| `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
+| `is_supported_version` | function | `(version: 'object') -> 'bool'` |
+| `register_kind` | function | `(cls: "Type['DecisionContract']") -> "Type['DecisionContract']"` |
+
 ### `hugrgate.core`
 
 | Name | Kind | Signature / value |
@@ -269,6 +293,7 @@ that this document never drifts from the code.
 | `CalibrationError` | class | `(message: 'str' = '', **details)` |
 | `TimeoutError` | class | `(message: 'str' = '', **details)` |
 | `PrivacyViolation` | class | `(message: 'str' = '', **details)` |
+| `ContractError` | class | `(message: 'str' = '', **details)` |
 | `Abstention` | class | `(message: 'str' = 'insufficient confidence', reason: 'str' = 'below_threshold', **details)` |
 
 ### `hugrgate.fallback`

@@ -19,6 +19,10 @@ flowchart TD
         policy[policy]
         validation[validation]
     end
+    subgraph contract-engine[contract-engine]
+        contracts[contracts]
+        contracts_schema[contracts.schema]
+    end
     subgraph runtime[runtime]
         core[core]
         abstain[abstain]
@@ -137,6 +141,8 @@ flowchart TD
     cli -.-> server
     client --> hugrgate
     client -.-> server
+    contracts --> contracts_schema
+    contracts_schema --> errors
     core --> backend
     core --> errors
     core --> policy
@@ -202,6 +208,7 @@ flowchart TD
 |---|---|
 | foundation | `errors` |
 | contracts | `spec`, `result`, `backend`, `policy`, `validation` |
+| contract-engine | `contracts`, `contracts.schema` |
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
@@ -282,6 +289,8 @@ flowchart TD
 | `cli` | `server` | yes |
 | `client` | `hugrgate` | no |
 | `client` | `server` | yes |
+| `contracts` | `contracts.schema` | no |
+| `contracts.schema` | `errors` | no |
 | `core` | `backend` | no |
 | `core` | `errors` | no |
 | `core` | `policy` | no |

@@ -11,6 +11,7 @@ __all__ = [
     "CalibrationError",
     "TimeoutError",
     "PrivacyViolation",
+    "ContractError",
     "Abstention",
 ]
 
@@ -58,6 +59,16 @@ class TimeoutError(BackendError):
 
 class PrivacyViolation(HugrGateError):
     code = "privacy_violation"
+    recoverable = False
+
+
+class ContractError(SpecError):
+    """A decision contract is malformed, unsupported, or violated.
+
+    Subclass of :class:`SpecError`: a bad contract is a bad spec, so
+    existing ``except SpecError`` handlers keep working.
+    """
+    code = "contract_error"
     recoverable = False
 
 

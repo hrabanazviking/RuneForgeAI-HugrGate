@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T10:50:38.026827+00:00",
-  "module_count": 42,
+  "generated_utc": "2026-10-09T11:01:52.442989+00:00",
+  "module_count": 44,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -78,12 +78,11 @@
         "abc",
         "hashlib",
         "hugrgate",
-        "math",
         "numpy",
         "re",
         "typing"
       ],
-      "loc": 261,
+      "loc": 260,
       "path": "hugrgate/backends/embedding.py",
       "public_defs": [
         "Embedder",
@@ -190,7 +189,7 @@
         "transformers",
         "typing"
       ],
-      "loc": 149,
+      "loc": 153,
       "path": "hugrgate/backends/nli.py",
       "public_defs": [
         "NLIBackend",
@@ -212,7 +211,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 379,
+      "loc": 380,
       "path": "hugrgate/backends/rules.py",
       "public_defs": [
         "Rule",
@@ -245,7 +244,7 @@
         "time",
         "typing"
       ],
-      "loc": 332,
+      "loc": 346,
       "path": "hugrgate/bench.py",
       "public_defs": [
         "accuracy",
@@ -486,7 +485,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 273,
+      "loc": 275,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "load_spec",
@@ -511,7 +510,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 239,
+      "loc": 261,
       "path": "hugrgate/client.py",
       "public_defs": [
         "policy_to_dict",
@@ -522,6 +521,42 @@
         "health",
         "backends",
         "close"
+      ]
+    },
+    "hugrgate.contracts.__init__": {
+      "docstring": "Decision contracts \u2014 versioned, self-describing decision specifications.\n\nCampaign II (Gjallarbr\u00fa slices 026-050) builds the Contract Engine here,\nalongside the v1 :class:`hugrgate.spec.DecisionSpec` which is left\nuntouched for backward compatibility.",
+      "imports": [
+        "__future__",
+        "hugrgate"
+      ],
+      "loc": 28,
+      "path": "hugrgate/contracts/__init__.py",
+      "public_defs": []
+    },
+    "hugrgate.contracts.schema": {
+      "docstring": "Decision contract schema v2. Gjallarbr\u00fa slice 026.\n\nThe v1 decision contract is :class:`hugrgate.spec.DecisionSpec`: an\nunversioned dataclass with five fixed types, no identity, and no\ncanonical form. Schema v2 introduces :class:`DecisionContract`:\n\n- every contract carries a ``schema_version`` (``\"2.0\"``) and a unique\n  ``contract_id``;\n- the ``kind`` string is drawn from an explicit registry\n  (:data:`CONTRACT_KINDS`), so new decision shapes are discoverable and\n  deserializable without touching this module;\n- serialization is canonical JSON with a sha256 content hash\n  (:meth:`DecisionContract.canonical_hash`), giving contracts a stable\n  identity for caching, provenance, and negotiation;\n- :meth:`DecisionContract.validate_value` is the validation hook every\n  later Campaign II slice extends.\n\n``DecisionSpec`` is untouched: v2 contracts live alongside it and\nmigration between the two is slice 047's job.",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hashlib",
+        "hugrgate",
+        "json",
+        "typing"
+      ],
+      "loc": 243,
+      "path": "hugrgate/contracts/schema.py",
+      "public_defs": [
+        "is_supported_version",
+        "register_kind",
+        "DecisionContract",
+        "contract_from_dict",
+        "schema_version",
+        "to_dict",
+        "from_dict",
+        "canonical_hash",
+        "validate_value",
+        "check_value",
+        "describe"
       ]
     },
     "hugrgate.core": {
@@ -558,7 +593,7 @@
         "typing",
         "uvicorn"
       ],
-      "loc": 391,
+      "loc": 394,
       "path": "hugrgate/daemon.py",
       "public_defs": [
         "DaemonConfig",
@@ -611,7 +646,7 @@
       "imports": [
         "__future__"
       ],
-      "loc": 72,
+      "loc": 83,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -622,6 +657,7 @@
         "CalibrationError",
         "TimeoutError",
         "PrivacyViolation",
+        "ContractError",
         "Abstention"
       ]
     },
@@ -632,7 +668,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 163,
+      "loc": 165,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
@@ -858,7 +894,7 @@
         "uvicorn",
         "warnings"
       ],
-      "loc": 365,
+      "loc": 368,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -890,7 +926,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 109,
+      "loc": 114,
       "path": "hugrgate/spec.py",
       "public_defs": [
         "DecisionSpec",
@@ -950,7 +986,7 @@
         "json",
         "typing"
       ],
-      "loc": 58,
+      "loc": 60,
       "path": "hugrgate/validation.py",
       "public_defs": [
         "validate_state",
@@ -963,13 +999,16 @@
   "test_files": [
     "test_api_inventory.py",
     "test_arch_map.py",
+    "test_contracts_026.py",
+    "test_dead_code.py",
     "test_dependency_rules.py",
     "test_deterministic.py",
     "test_foundation.py",
     "test_ladder.py",
     "test_ml_calibration.py",
     "test_repo_truth.py",
-    "test_service.py"
+    "test_service.py",
+    "test_typecheck.py"
   ],
-  "total_loc": 7104
+  "total_loc": 7443
 }

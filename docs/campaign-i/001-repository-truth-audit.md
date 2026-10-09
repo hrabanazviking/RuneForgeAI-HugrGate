@@ -1,13 +1,13 @@
 # Slice 001 — Repository truth audit
 
-**Generated:** 2026-10-09T10:50:38.026827+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
+**Generated:** 2026-10-09T11:01:52.442989+00:00 (deterministic re-runnable via `tools/audit_repo.py`)
 
 ## Inventory
 
-- **Modules:** 42 Python files under `hugrgate/`
-- **Total LOC:** 7104
+- **Modules:** 44 Python files under `hugrgate/`
+- **Total LOC:** 7443
 - **pyproject version:** 0.1.0
-- **Test files:** test_api_inventory.py, test_arch_map.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py
+- **Test files:** test_api_inventory.py, test_arch_map.py, test_contracts_026.py, test_dead_code.py, test_dependency_rules.py, test_deterministic.py, test_foundation.py, test_ladder.py, test_ml_calibration.py, test_repo_truth.py, test_service.py, test_typecheck.py
 
 ## Module table
 
@@ -17,13 +17,13 @@
 | `hugrgate.abstain` | 111 | Abstention — typed "I don't know" results and review banding. Slice 15. | hugrgate |
 | `hugrgate.backend` | 84 | Backend interface + registry. Slice 6. | hugrgate |
 | `hugrgate.backends.boosting` | 69 | Gradient boosting backend. Slice 24. | hugrgate |
-| `hugrgate.backends.embedding` | 261 | Embedding backend — prototype classifier. Slice 33. | hugrgate |
+| `hugrgate.backends.embedding` | 260 | Embedding backend — prototype classifier. Slice 33. | hugrgate |
 | `hugrgate.backends.forest` | 74 | Random forest backend. Slice 23. | hugrgate |
 | `hugrgate.backends.llm` | 247 | Local LLM backend — constrained decoding. Slice 35. | hugrgate |
 | `hugrgate.backends.logreg` | 303 | Logistic regression backend. Slice 22. | hugrgate |
-| `hugrgate.backends.nli` | 149 | NLI backend — statement entailment as a binary decision. Slice 34. | hugrgate |
-| `hugrgate.backends.rules` | 379 | Rule backend — predicates, decision tables, confidence distributions. | hugrgate |
-| `hugrgate.bench` | 332 | Benchmark harness — datasets → backends → metrics. Slice 45. | hugrgate |
+| `hugrgate.backends.nli` | 153 | NLI backend — statement entailment as a binary decision. Slice 34. | hugrgate |
+| `hugrgate.backends.rules` | 380 | Rule backend — predicates, decision tables, confidence distributions. | hugrgate |
+| `hugrgate.bench` | 346 | Benchmark harness — datasets → backends → metrics. Slice 45. | hugrgate |
 | `hugrgate.bench_report` | 145 | Benchmark report — markdown rendering of benchmark JSON. Slice 47. | — |
 | `hugrgate.cache` | 161 | Decision cache — request-hash keyed result memoization. Slice 38. | hugrgate |
 | `hugrgate.calibration.__init__` | 47 | Probability calibration package. Slices 26-29. | hugrgate |
@@ -34,13 +34,15 @@
 | `hugrgate.calibration.profiles` | 263 | Calibration profiles. Slice 29. | hugrgate |
 | `hugrgate.calibration.temperature` | 136 | Temperature scaling. Slice 27. | hugrgate |
 | `hugrgate.circuit` | 164 | Circuit breaker — per-backend failure containment. Slice 18. | — |
-| `hugrgate.cli` | 273 | HugrGate command-line interface. Slice 44. | hugrgate |
-| `hugrgate.client` | 239 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
+| `hugrgate.cli` | 275 | HugrGate command-line interface. Slice 44. | hugrgate |
+| `hugrgate.client` | 261 | HugrGate Python SDK — client for the HTTP service. Slice 43. | hugrgate |
+| `hugrgate.contracts.__init__` | 28 | Decision contracts — versioned, self-describing decision specifications. | hugrgate |
+| `hugrgate.contracts.schema` | 243 | Decision contract schema v2. Gjallarbrú slice 026. | hugrgate |
 | `hugrgate.core` | 111 | HugrGate core runtime — decide(). Slice 8. | hugrgate |
-| `hugrgate.daemon` | 391 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
+| `hugrgate.daemon` | 394 | HugrGate service daemon — long-running process mode. Slice 42. | hugrgate |
 | `hugrgate.drift` | 250 | Calibration drift detection — PSI over prediction distributions. Slice 4 | — |
-| `hugrgate.errors` | 72 | Error taxonomy for HugrGate. Slice 10. | — |
-| `hugrgate.fallback` | 163 | Fallback engine — ordered failover across backends. Slice 14. | hugrgate |
+| `hugrgate.errors` | 83 | Error taxonomy for HugrGate. Slice 10. | — |
+| `hugrgate.fallback` | 165 | Fallback engine — ordered failover across backends. Slice 14. | hugrgate |
 | `hugrgate.features` | 290 | Feature preprocessing contract. Slice 21. | hugrgate |
 | `hugrgate.health` | 141 | Backend health scoring — latency, errors, quarantine. Slice 17. | — |
 | `hugrgate.ladder` | 289 | Intelligence ladder — ordered backend cascade. Slices 31-32. | hugrgate |
@@ -50,11 +52,11 @@
 | `hugrgate.privacy` | 123 | Privacy enforcement — system-level guardrails. Slice 40. | hugrgate |
 | `hugrgate.provenance` | 84 | Decision provenance — why did the program take this branch? Slice 9. | hugrgate |
 | `hugrgate.result` | 64 | DecisionResult — typed value + probability distribution. Slice 4. | hugrgate |
-| `hugrgate.server` | 365 | HugrGate local HTTP API — FastAPI service. Slice 41. | hugrgate |
-| `hugrgate.spec` | 109 | DecisionSpec — the decision contract. Slices 2-3. | hugrgate |
+| `hugrgate.server` | 368 | HugrGate local HTTP API — FastAPI service. Slice 41. | hugrgate |
+| `hugrgate.spec` | 114 | DecisionSpec — the decision contract. Slices 2-3. | hugrgate |
 | `hugrgate.threshold` | 167 | Thresholding — per-option, ordinal-cumulative, and numeric-band gates. | hugrgate |
 | `hugrgate.timeout` | 138 | Timeouts — per-decision deadline enforcement via threads. Slice 19. | hugrgate |
-| `hugrgate.validation` | 58 | Validation layer — the application never receives an invalid value. Slic | hugrgate |
+| `hugrgate.validation` | 60 | Validation layer — the application never receives an invalid value. Slic | hugrgate |
 
 ## Findings (forwarded to later slices)
 
