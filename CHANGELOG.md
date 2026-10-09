@@ -13,6 +13,13 @@ a key-provider abstraction, violation auditing, dry-run mode,
 explanation reports, fuzz and exfiltration testing, a privacy
 benchmark suite, and a release gate.
 
+### Added (slice 234)
+- Secret detection hooks (`hugrgate.privacy_secrets`):
+  `SecretScanner` with curated patterns + opt-in entropy heuristic,
+  `scan_text`/`scan_state`, `assert_no_secrets`;
+  `PrivacyGuard.check_no_secrets`. New `SecretDetected` error (code
+  `secret_detected`).
+
 ### Added (slice 233)
 - Tokenization / pseudonymization (`hugrgate.privacy_tokens`):
   `TokenVault` with opaque CSPRNG tokens, namespace isolation,

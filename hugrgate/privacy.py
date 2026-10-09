@@ -34,6 +34,7 @@ from hugrgate.privacy_jurisdiction import (
 from hugrgate.privacy_labels import FieldLabels
 from hugrgate.privacy_localonly import LocalOnlyPolicy, LocalOnlyResult
 from hugrgate.privacy_redact import redact_metadata
+from hugrgate.privacy_secrets import SecretScanner
 from hugrgate.privacy_trust import (
     TRUST_ORDER,
     BackendTrustRegistry,
@@ -306,6 +307,17 @@ class PrivacyGuard:
         """
         return LocalOnlyPolicy(strict=strict).enforce_for_backend(
             state, labels, backend)
+
+    # -- secret detection hook (slice 234) --------------------------------
+
+    def check_no_secrets(self, state: Mapping[str, Any],
+                         scanner: SecretScanner | None = None) -> None:
+        """Raise :class:`~hugrgate.errors.SecretDetected` on secret hits.
+
+        Hook point for outbound paths; the remote payload compiler
+        (slice 237) calls this before any state leaves the process.
+        """
+        (scanner or SecretScanner()).assert_no_secrets(state)
 
     # -- cache policy ----------------------------------------------------
 

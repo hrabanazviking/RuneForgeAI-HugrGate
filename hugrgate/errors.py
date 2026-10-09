@@ -42,6 +42,7 @@ __all__ = [
     "QueueFull",
     "RecoveryError",
     "ResidencyError",
+    "SecretDetected",
     "SpecError",
     "StorageError",
     "TelemetryError",
@@ -166,6 +167,18 @@ class LocalOnlyViolation(PrivacyViolation):
     """
 
     code = "local_only_violation"
+    recoverable = False
+
+
+class SecretDetected(PrivacyViolation):
+    """Raised when a secret-shaped value is found in outbound data.
+
+    Subclass of :class:`PrivacyViolation`. Not recoverable by blind
+    retry: the payload contains a secret and must be cleaned (rotate
+    the secret, redact it, or mark the field local-only).
+    """
+
+    code = "secret_detected"
     recoverable = False
 
 

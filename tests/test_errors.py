@@ -39,6 +39,7 @@ from hugrgate.errors import (
     QueueFull,
     RecoveryError,
     ResidencyError,
+    SecretDetected,
     SpecError,
     StorageError,
     TelemetryError,
@@ -62,6 +63,7 @@ ALL_ERRORS = [
     DataFlowDenied,
     JurisdictionViolation,
     LocalOnlyViolation,
+    SecretDetected,
 ]
 
 EXPECTED_CODES = {
@@ -96,6 +98,7 @@ EXPECTED_CODES = {
     DataFlowDenied: "data_flow_denied",
     JurisdictionViolation: "jurisdiction_violation",
     LocalOnlyViolation: "local_only_violation",
+    SecretDetected: "secret_detected",
 }
 
 EXPECTED_RECOVERABLE = {
@@ -134,6 +137,7 @@ EXPECTED_RECOVERABLE = {
     DataFlowDenied: False,
     JurisdictionViolation: False,
     LocalOnlyViolation: False,
+    SecretDetected: False,
 }
 
 
