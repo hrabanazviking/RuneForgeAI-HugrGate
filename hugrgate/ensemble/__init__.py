@@ -75,6 +75,7 @@ from hugrgate.ensemble.diversity import (
     winner_margin,
 )
 from hugrgate.ensemble.moe import ExpertRouter, moe_combine
+from hugrgate.ensemble.reliability import ReliabilityTracker
 from hugrgate.ensemble.stacking import (
     SoftmaxRegression,
     StackingEngine,
@@ -121,6 +122,7 @@ __all__ = [
     "log_loss",
     "ExpertRouter",
     "moe_combine",
+    "ReliabilityTracker",
     "vote_entropy",
     "disagreement_rate",
     "winner_margin",
