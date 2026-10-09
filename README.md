@@ -1,5 +1,4 @@
-
-![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png)
+![file_00000000f11881f5b3df333d9dc5fa47.png](file_00000000f11881f5b3df333d9dc5fa47.png)
 
 ---
 
@@ -12,6 +11,10 @@
 **Implementation:** Initial 50-slice implementation complete  
 **License:** Apache-2.0  
 **Project philosophy:** Local first. Open interfaces. Replaceable intelligence. Deterministic when possible.
+
+---
+
+![https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png](https://raw.githubusercontent.com/hrabanazviking/RuneForgeAI-HugrGate/refs/heads/main/RuneForgeAI-HugrGate_picture1.png)
 
 ---
 
