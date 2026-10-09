@@ -1166,6 +1166,7 @@ flowchart TD
     evlab --> evlab_energy
     evlab --> evlab_latency
     evlab --> evlab_privacy
+    evlab --> evlab_robustness
     evlab --> evlab_selective
     evlab --> evlab_significance
     evlab --> evlab_splits
@@ -1228,6 +1229,12 @@ flowchart TD
     evlab_privacy --> privacy_pii
     evlab_privacy --> result
     evlab_privacy --> spec
+    evlab_robustness --> hugrgate
+    evlab_robustness --> core
+    evlab_robustness --> errors
+    evlab_robustness --> policy
+    evlab_robustness --> result
+    evlab_robustness --> spec
     evlab_selective --> core
     evlab_selective --> errors
     evlab_selective --> policy
@@ -2402,6 +2409,7 @@ flowchart TD
 | `evlab` | `evlab.energy` | no |
 | `evlab` | `evlab.latency` | no |
 | `evlab` | `evlab.privacy` | no |
+| `evlab` | `evlab.robustness` | no |
 | `evlab` | `evlab.selective` | no |
 | `evlab` | `evlab.significance` | no |
 | `evlab` | `evlab.splits` | no |
@@ -2464,6 +2472,12 @@ flowchart TD
 | `evlab.privacy` | `privacy_pii` | no |
 | `evlab.privacy` | `result` | no |
 | `evlab.privacy` | `spec` | no |
+| `evlab.robustness` | `hugrgate` | no |
+| `evlab.robustness` | `core` | no |
+| `evlab.robustness` | `errors` | no |
+| `evlab.robustness` | `policy` | no |
+| `evlab.robustness` | `result` | no |
+| `evlab.robustness` | `spec` | no |
 | `evlab.selective` | `core` | no |
 | `evlab.selective` | `errors` | no |
 | `evlab.selective` | `policy` | no |
