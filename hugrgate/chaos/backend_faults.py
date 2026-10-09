@@ -96,7 +96,8 @@ class FaultyBackend(Backend):
     """
 
     #: Fault modes with working injectors in this build.
-    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG, LATENCY, ERROR_RATE)
+    _WIRED_MODES: tuple[str, ...] = (CRASH, HANG, LATENCY, ERROR_RATE,
+                                     MALFORMED)
 
     def __init__(self, backend: Backend):
         if not isinstance(backend, Backend):
@@ -190,9 +191,8 @@ class FaultyBackend(Backend):
             return self._inject_latency(state, spec, context)
         if mode == ERROR_RATE:
             self._inject_error_rate()
-        # The last mode (malformed) is wired by slice 256, which extends
-        # _WIRED_MODES and adds its branch here. _roll_fault can only
-        # return a wired mode because arm() rejects the rest.
+        if mode == MALFORMED:
+            return self._inject_malformed(state, spec, context)
         return self._backend.evaluate(state, spec, context)
 
     def _roll_fault(self) -> str | None:
@@ -237,6 +237,12 @@ class FaultyBackend(Backend):
                 raise SpecError(
                     f"error_rate fault param 'message' must be a non-empty "
                     f"string, got {message!r}")
+        if spec.mode == MALFORMED:
+            kind = spec.params.get("kind", "bad_value")
+            if kind not in ("bad_value", "bad_distribution"):
+                raise SpecError(
+                    f"malformed fault param 'kind' must be 'bad_value' or "
+                    f"'bad_distribution', got {kind!r}")
 
     def _inject_hang(self, state: Mapping[str, Any], spec: DecisionSpec,
                      context: Mapping[str, Any] | None) -> DecisionResult:
@@ -277,3 +283,29 @@ class FaultyBackend(Backend):
         message = self._spec_for(ERROR_RATE).params.get(
             "message", "chaos: injected backend error")
         raise BackendError(f"{message} (backend {self.name!r})")
+
+    def _inject_malformed(self, state: Mapping[str, Any],
+                          spec: DecisionSpec,
+                          context: Mapping[str, Any] | None
+                          ) -> DecisionResult:
+        """Return a result the spec's value space rejects.
+
+        ``kind="bad_value"``: the value itself is outside the space.
+        ``kind="bad_distribution"``: the value is legal but the
+        distribution smuggles an outside key. Both pass the
+        :class:`DecisionResult` constructor's own invariants — the
+        corruption is only visible to
+        :func:`~hugrgate.validation.validate_result`, which is the
+        layer under test.
+        """
+        kind = self._spec_for(MALFORMED).params.get("kind", "bad_value")
+        if kind == "bad_distribution":
+            options = list(spec.value_space())
+            value = options[0] if options else "a"
+            return DecisionResult(
+                value=value, probability=0.9,
+                distribution={value: 0.9, "__chaos_outside__": 0.1},
+                backend=self.name)
+        return DecisionResult(
+            value="__chaos_malformed__", probability=0.9,
+            backend=self.name)

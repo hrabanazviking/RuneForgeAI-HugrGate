@@ -73,7 +73,10 @@ def test_fault_spec_validation():
         FaultSpec(mode="meteor-strike")
 
 
-def test_unwired_mode_arm_is_rejected_honestly():
+def test_unwired_mode_arm_is_rejected_honestly(monkeypatch):
+    # Simulate a build where only CRASH is wired: arming anything else
+    # must fail loudly rather than silently never firing.
+    monkeypatch.setattr(FaultyBackend, "_WIRED_MODES", (CRASH,))
     backend = FaultyBackend(StubBackend())
     with pytest.raises(SpecError, match="not wired in this build"):
         backend.arm(FaultSpec(mode=MALFORMED, rate=1.0))
