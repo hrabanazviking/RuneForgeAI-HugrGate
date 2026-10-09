@@ -15,8 +15,9 @@ guarantee.  This module adds the *abstraction* on top:
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, FrozenSet, List, Mapping, Optional, Sequence, Set
+from typing import Any
 
 try:
     import numpy as np
@@ -35,11 +36,11 @@ from hugrgate.errors import CalibrationError
 
 __all__ = [
     "PredictionSet",
-    "threshold_set",
-    "topk_set",
     "cumulative_set",
     "set_metrics",
     "size_stratified_coverage",
+    "threshold_set",
+    "topk_set",
 ]
 
 
@@ -47,10 +48,10 @@ __all__ = [
 class PredictionSet:
     """An immutable prediction set with audit metadata."""
 
-    labels: FrozenSet[str]
+    labels: frozenset[str]
     method: str
-    params: Dict[str, Any] = field(default_factory=dict)
-    provenance: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
+    provenance: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.labels:
@@ -64,7 +65,7 @@ class PredictionSet:
     def covers(self, label: str) -> bool:
         return label in self.labels
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "labels": sorted(self.labels),
             "method": self.method,
@@ -73,7 +74,7 @@ class PredictionSet:
         }
 
 
-def _check_proba(proba: Mapping[str, float]) -> Dict[str, float]:
+def _check_proba(proba: Mapping[str, float]) -> dict[str, float]:
     _require_numpy()
     d = {str(k): float(v) for k, v in proba.items()}
     if not d:
@@ -115,7 +116,7 @@ def cumulative_set(proba: Mapping[str, float],
     if not 0.0 < mass <= 1.0:
         raise CalibrationError("mass must be in (0, 1]")
     ranked = sorted(d, key=lambda c: d[c], reverse=True)
-    chosen: Set[str] = set()
+    chosen: set[str] = set()
     total = 0.0
     for c in ranked:
         chosen.add(c)
@@ -128,7 +129,7 @@ def cumulative_set(proba: Mapping[str, float],
 
 def from_conformal(proba: Mapping[str, float],
                    conformal: Any,
-                   group: Optional[str] = None) -> PredictionSet:
+                   group: str | None = None) -> PredictionSet:
     """Wrap a fitted ``ConformalClassifier.predict_set`` result."""
     raw = conformal.predict_set(dict(proba), group=group)
     return PredictionSet(
@@ -140,7 +141,7 @@ def from_conformal(proba: Mapping[str, float],
 
 
 def set_metrics(sets: Sequence[PredictionSet],
-                labels: Sequence[str]) -> Dict[str, float]:
+                labels: Sequence[str]) -> dict[str, float]:
     """Coverage, mean/median/max size over a batch of prediction sets."""
     _require_numpy()
     sets = list(sets)
@@ -150,7 +151,7 @@ def set_metrics(sets: Sequence[PredictionSet],
     if not sets:
         raise CalibrationError("empty set batch")
     sizes = np.asarray([s.size for s in sets], dtype=float)
-    hits = sum(1 for s, y in zip(sets, labels) if s.covers(y))
+    hits = sum(1 for s, y in zip(sets, labels, strict=True) if s.covers(y))
     return {
         "coverage": hits / len(sets),
         "mean_size": float(sizes.mean()),
@@ -163,7 +164,7 @@ def set_metrics(sets: Sequence[PredictionSet],
 
 def size_stratified_coverage(sets: Sequence[PredictionSet],
                              labels: Sequence[str]
-                             ) -> List[Dict[str, float]]:
+                             ) -> list[dict[str, float]]:
     """Coverage broken down by prediction-set size.
 
     A healthy system covers ~equally at every size; if singletons cover
@@ -173,8 +174,8 @@ def size_stratified_coverage(sets: Sequence[PredictionSet],
     labels = list(labels)
     if len(sets) != len(labels):
         raise CalibrationError("sets/labels length mismatch")
-    by_size: Dict[int, List[int]] = {}
-    for s, y in zip(sets, labels):
+    by_size: dict[int, list[int]] = {}
+    for s, y in zip(sets, labels, strict=True):
         by_size.setdefault(s.size, []).append(1 if s.covers(y) else 0)
     rows = []
     for size in sorted(by_size):

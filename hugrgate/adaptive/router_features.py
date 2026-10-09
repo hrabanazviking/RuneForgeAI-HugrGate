@@ -29,7 +29,8 @@ model downstream.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 from hugrgate.errors import BackendError
 from hugrgate.features import FeatureExtractor
@@ -55,9 +56,9 @@ class RouteContext:
     """
 
     def __init__(self, state: Mapping[str, Any], spec: DecisionSpec,
-                 policy: Optional[DecisionPolicy],
+                 policy: DecisionPolicy | None,
                  candidates: Sequence[str],
-                 candidate_stats: Optional[Mapping[str, Mapping[str, float]]]
+                 candidate_stats: Mapping[str, Mapping[str, float]] | None
                  = None) -> None:
         self.state = dict(state)
         self.spec = spec
@@ -81,8 +82,8 @@ class RouterFeatureExtractor(FeatureExtractor):
         super().__init__()
         self._fitted = True  # stateless: no fit data needed
 
-    def feature_names(self) -> List[str]:
-        names: List[str] = []
+    def feature_names(self) -> list[str]:
+        names: list[str] = []
         names.extend(f"spec_type__{t}" for t in SPEC_TYPES)
         names.extend([
             "state__n_keys",
@@ -106,7 +107,7 @@ class RouterFeatureExtractor(FeatureExtractor):
         ])
         return names
 
-    def extract(self, state: Mapping[str, Any]) -> Dict[str, float]:
+    def extract(self, state: Mapping[str, Any]) -> dict[str, float]:
         """Extract from a mapping; see :meth:`extract_context`.
 
         ``state`` may be a :class:`RouteContext` (preferred) or a plain
@@ -123,8 +124,8 @@ class RouterFeatureExtractor(FeatureExtractor):
             "RouterFeatureExtractor needs a RouteContext; got "
             f"{type(state).__name__}")
 
-    def extract_context(self, ctx: RouteContext) -> Dict[str, float]:
-        feats: Dict[str, float] = {}
+    def extract_context(self, ctx: RouteContext) -> dict[str, float]:
+        feats: dict[str, float] = {}
         for t in SPEC_TYPES:
             feats[f"spec_type__{t}"] = 1.0 if ctx.spec.type == t else 0.0
 

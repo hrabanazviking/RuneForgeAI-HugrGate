@@ -14,8 +14,9 @@ explicitly if you want them compared.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -45,13 +46,13 @@ __all__ = [
     "auto_select",
 ]
 
-_METRICS: Dict[str, Callable[[Sequence[int], Sequence[float]], float]] = {
+_METRICS: dict[str, Callable[[Sequence[int], Sequence[float]], float]] = {
     "brier": brier_score,
     "log_loss": log_loss,
     "ece": expected_calibration_error,
 }
 
-DEFAULT_CANDIDATES: List[str] = [
+DEFAULT_CANDIDATES: list[str] = [
     s.name for s in find()
     if s.family in ("parametric", "nonparametric", "bayesian")
 ]
@@ -64,13 +65,13 @@ class SelectionResult:
     metric: str
     n_folds: int
     seed: int
-    ranking: List[Dict[str, Any]]  # {name, mean, std, folds}, best first
+    ranking: list[dict[str, Any]]  # {name, mean, std, folds}, best first
     best: str
-    best_params: Dict[str, Any]
+    best_params: dict[str, Any]
     n_samples: int
     notes: str = ""
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "metric": self.metric,
             "n_folds": self.n_folds,
@@ -83,14 +84,14 @@ class SelectionResult:
         }
 
 
-def _folds(n: int, n_folds: int, seed: int) -> List[np.ndarray]:
+def _folds(n: int, n_folds: int, seed: int) -> list[np.ndarray]:
     rng = np.random.default_rng(seed)
     idx = rng.permutation(n)
     return [idx[i::n_folds] for i in range(n_folds)]
 
 
 def auto_select(scores: Sequence[float], labels: Sequence[int],
-                candidates: Optional[Sequence[str]] = None,
+                candidates: Sequence[str] | None = None,
                 metric: str = "brier",
                 n_folds: int = 5, seed: int = 0,
                 refit_best: bool = True) -> SelectionResult:
@@ -101,7 +102,7 @@ def auto_select(scores: Sequence[float], labels: Sequence[int],
             f"unknown metric {metric!r}; choose from {sorted(_METRICS)}")
     if n_folds < 2:
         raise CalibrationError("n_folds must be ≥ 2")
-    names: List[str] = (list(candidates) if candidates is not None
+    names: list[str] = (list(candidates) if candidates is not None
                         else list(DEFAULT_CANDIDATES))
     if not names:
         raise CalibrationError("no candidate calibrators")
@@ -113,7 +114,7 @@ def auto_select(scores: Sequence[float], labels: Sequence[int],
     if n_folds > s.size:
         raise CalibrationError("n_folds exceeds sample count")
 
-    ranking: List[Dict[str, Any]] = []
+    ranking: list[dict[str, Any]] = []
     for name in names:
         cls = CalibratorRegistry.get(name)  # raises on unknown names
         fold_scores = []
@@ -141,7 +142,7 @@ def auto_select(scores: Sequence[float], labels: Sequence[int],
         })
     ranking.sort(key=lambda r: (r["mean"], r["name"]))
     best = ranking[0]["name"]
-    best_params: Dict[str, Any] = {}
+    best_params: dict[str, Any] = {}
     if refit_best:
         winner = CalibratorRegistry.get(best)()
         winner.fit(s.tolist(), y.tolist())

@@ -20,22 +20,22 @@ the backend's overall reputation until they earn their own.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
-
-from hugrgate.errors import SpecError
-from hugrgate.spec import DecisionSpec
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 from hugrgate.adaptive.competence import (
     BackendCompetenceProfiles,
     CompetenceProfile,
 )
 from hugrgate.adaptive.telemetry import RouteEvent
+from hugrgate.errors import SpecError
+from hugrgate.spec import DecisionSpec
 
 __all__ = [
     "UNKNOWN_DOMAIN",
-    "domain_of_spec",
-    "domain_of_event",
     "PerDomainCompetence",
+    "domain_of_event",
+    "domain_of_spec",
 ]
 
 UNKNOWN_DOMAIN = "unknown"
@@ -70,10 +70,10 @@ class PerDomainCompetence:
     def __init__(self, *, success_threshold: float = 0.7) -> None:
         self._global = BackendCompetenceProfiles(
             success_threshold=success_threshold)
-        self._domains: Dict[Tuple[str, str], CompetenceProfile] = {}
+        self._domains: dict[tuple[str, str], CompetenceProfile] = {}
         self.success_threshold = self._global.success_threshold
 
-    def _key(self, backend: str, domain: str) -> Tuple[str, str]:
+    def _key(self, backend: str, domain: str) -> tuple[str, str]:
         if not backend or not domain:
             raise SpecError("backend and domain must be non-empty strings")
         return (backend, domain)
@@ -119,30 +119,30 @@ class PerDomainCompetence:
             used += 1
         return used
 
-    def get(self, backend: str, domain: str) -> Optional[CompetenceProfile]:
+    def get(self, backend: str, domain: str) -> CompetenceProfile | None:
         profile = self._domains.get((backend, domain))
         return CompetenceProfile.from_dict(profile.to_dict()) \
             if profile else None
 
     def get_with_fallback(self, backend: str,
-                          domain: str) -> Optional[CompetenceProfile]:
+                          domain: str) -> CompetenceProfile | None:
         """Exact domain profile → global backend profile → None."""
         exact = self.get(backend, domain)
         if exact is not None:
             return exact
         return self._global.get(backend)
 
-    def domains(self) -> List[str]:
+    def domains(self) -> list[str]:
         return sorted({domain for _, domain in self._domains})
 
-    def ranked_in_domain(self, domain: str) -> List[CompetenceProfile]:
+    def ranked_in_domain(self, domain: str) -> list[CompetenceProfile]:
         profiles = [CompetenceProfile.from_dict(p.to_dict())
                     for (backend, d), p in self._domains.items()
                     if d == domain]
         profiles.sort(key=lambda p: (-p.wilson_lower, p.backend))
         return profiles
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": "adaptive-domain-competence/v1",
             "success_threshold": self.success_threshold,
@@ -154,7 +154,7 @@ class PerDomainCompetence:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "PerDomainCompetence":
+    def from_dict(cls, data: Mapping[str, Any]) -> PerDomainCompetence:
         if data.get("schema") != "adaptive-domain-competence/v1":
             raise SpecError(
                 "unsupported domain-competence schema "

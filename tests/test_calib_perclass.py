@@ -25,7 +25,7 @@ def _multiclass(n: int = 600, seed: int = 11):
     raw = raw / raw.sum(axis=1, keepdims=True)
     labels = [("abc"[i]) for i in
               (rng.random(n)[:, None] < p_true.cumsum(axis=1)).argmax(axis=1)]
-    probas = [dict(zip("abc", row)) for row in raw]
+    probas = [dict(zip("abc", row, strict=True)) for row in raw]
     return probas, labels
 
 

@@ -28,11 +28,10 @@ from __future__ import annotations
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.feedback import OutcomeFeedbackAPI, OutcomeRecord
+from hugrgate.errors import SpecError
 
 __all__ = [
     "DelayedLabel",
@@ -47,11 +46,11 @@ class DelayedLabel:
 
     request_id: str
     quality: float
-    label: Optional[str] = None
+    label: str | None = None
     source: str = "human"
     received_at: float = field(default_factory=time.time)
 
-    def age(self, now: Optional[float] = None) -> float:
+    def age(self, now: float | None = None) -> float:
         return (time.time() if now is None else now) - self.received_at
 
 
@@ -63,7 +62,7 @@ class SweepReport:
     expired: int = 0
     still_pending: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "applied": self.applied,
             "expired": self.expired,
@@ -84,14 +83,14 @@ class DelayedLabelIngestion:
         self.feedback = feedback
         self.ttl_s = ttl_s
         self.max_pending = max_pending
-        self._pending: "OrderedDict[str, DelayedLabel]" = OrderedDict()
+        self._pending: OrderedDict[str, DelayedLabel] = OrderedDict()
         self.dropped_expired = 0
 
     def __len__(self) -> int:
         return len(self._pending)
 
     def ingest(self, label: DelayedLabel,
-               now: Optional[float] = None) -> str:
+               now: float | None = None) -> str:
         """Accept a label; returns ``"applied"``, ``"pending"`` or
         ``"expired"``."""
         now = time.time() if now is None else now
@@ -125,7 +124,7 @@ class DelayedLabelIngestion:
         self._pending[label.request_id] = label
         return "pending"
 
-    def drain(self, now: Optional[float] = None) -> int:
+    def drain(self, now: float | None = None) -> int:
         """Apply every pending label whose telemetry has arrived."""
         now = time.time() if now is None else now
         applied = 0
@@ -147,7 +146,7 @@ class DelayedLabelIngestion:
                 del self._pending[request_id]
         return applied
 
-    def sweep(self, now: Optional[float] = None) -> SweepReport:
+    def sweep(self, now: float | None = None) -> SweepReport:
         """Expire stale pending labels; apply the rest that now match."""
         now = time.time() if now is None else now
         report = SweepReport()
@@ -168,5 +167,5 @@ class DelayedLabelIngestion:
         report.still_pending = len(self._pending)
         return report
 
-    def pending_ids(self) -> List[str]:
+    def pending_ids(self) -> list[str]:
         return list(self._pending)

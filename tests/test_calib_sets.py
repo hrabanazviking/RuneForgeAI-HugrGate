@@ -38,7 +38,7 @@ def test_strategies():
 def test_from_conformal_matches_raw():
     rng = np.random.default_rng(0)
     names = ["a", "b", "c"]
-    probas = [dict(zip(names, rng.dirichlet([2, 2, 2]))) for _ in range(300)]
+    probas = [dict(zip(names, rng.dirichlet([2, 2, 2]), strict=True)) for _ in range(300)]
     labels = [names[int(rng.integers(0, 3))] for _ in range(300)]
     cc = ConformalClassifier(alpha=0.2).fit(probas, labels)
     ps = from_conformal(probas[0], cc)
@@ -54,7 +54,7 @@ def test_set_metrics_and_stratification():
     for _ in range(800):
         z = rng.normal(0, 1, 4)
         pr = np.exp(z) / np.exp(z).sum()
-        probas.append(dict(zip(names, pr)))
+        probas.append(dict(zip(names, pr, strict=True)))
         labels.append(names[int((rng.random() < np.cumsum(pr)).argmax())])
     sets = [cumulative_set(p, 0.9) for p in probas]
     m = set_metrics(sets, labels)

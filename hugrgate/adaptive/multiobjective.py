@@ -1,38 +1,38 @@
 """Multi-objective routing. Slice 136.
 
-Slices 132–135 each optimize one trade-off; real routing cares about
+Slices 132-135 each optimize one trade-off; real routing cares about
 all of them at once. :class:`MultiObjectiveRouter` composes objectives
 two ways:
 
-- **Weighted sum** — ``score = Σ wᵢ · objectiveᵢ(candidate)``. Simple,
+- **Weighted sum** - ``score = Σ wᵢ · objectiveᵢ(candidate)``. Simple,
   differentiable-ish, and honest about its value judgments: the weights
   *are* the policy.
-- **Lexicographic** — objectives ordered by priority; the first
+- **Lexicographic** - objectives ordered by priority; the first
   objective that distinguishes the candidates decides. For "never trade
   X for Y" requirements that weights can't express.
 
 Plus :func:`pareto_frontier`, which finds the non-dominated set over
-(quality, −cost, −latency, −energy): the candidates no other candidate
+(quality, -cost, -latency, -energy): the candidates no other candidate
 beats on every axis. The frontier is the honest answer to "what are my
 real options?" before any scalarization picks a winner.
 """
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence, Tuple
-
-from hugrgate.errors import SpecError
+from collections.abc import Sequence
+from typing import Any
 
 from hugrgate.adaptive.cost_quality import (
     RouteObjective,
     RoutingCandidate,
 )
+from hugrgate.errors import SpecError
 
 __all__ = [
     "MODES",
     "MultiObjectiveRouter",
-    "pareto_frontier",
     "dominates",
+    "pareto_frontier",
 ]
 
 MODES = ("weighted_sum", "lexicographic")
@@ -58,7 +58,7 @@ def dominates(a: RoutingCandidate, b: RoutingCandidate) -> bool:
 
 
 def pareto_frontier(candidates: Sequence[RoutingCandidate]
-                    ) -> List[RoutingCandidate]:
+                    ) -> list[RoutingCandidate]:
     """The non-dominated subset of ``candidates`` (input order kept)."""
     cands = list(candidates)
     frontier = []
@@ -74,7 +74,7 @@ class MultiObjectiveRouter:
     """Compose several :class:`RouteObjective` into one routing decision."""
 
     def __init__(self,
-                 objectives: Sequence[Tuple[RouteObjective, float]],
+                 objectives: Sequence[tuple[RouteObjective, float]],
                  mode: str = "weighted_sum") -> None:
         if mode not in MODES:
             raise SpecError(
@@ -111,7 +111,7 @@ class MultiObjectiveRouter:
         return tuple(-obj.score(candidate) for obj, _ in self.objectives)
 
     def rank(self, candidates: Sequence[RoutingCandidate]
-             ) -> List[RoutingCandidate]:
+             ) -> list[RoutingCandidate]:
         cands = list(candidates)
         if not cands:
             raise SpecError("cannot rank an empty candidate list")
@@ -128,7 +128,7 @@ class MultiObjectiveRouter:
              ) -> RoutingCandidate:
         return self.rank(candidates)[0]
 
-    def explain_weights(self) -> List[Dict[str, Any]]:
+    def explain_weights(self) -> list[dict[str, Any]]:
         """The value judgments, made auditable."""
         return [
             {"objective": obj.name, "weight": w,

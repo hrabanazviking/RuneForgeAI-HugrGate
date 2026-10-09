@@ -2,7 +2,7 @@
 
 Also home to Campaign VI's shared routing contracts: :class:`RoutingCandidate`
 (the per-arm estimate every objective scores) and :class:`RouteObjective`
-(the scoring interface slices 133–136 implement).
+(the scoring interface slices 133-136 implement).
 
 A router that maximizes quality alone will happily spend a fortune; one
 that minimizes cost alone will route everything to the cheapest broken
@@ -13,7 +13,7 @@ backend. :class:`CostQualityObjective` scalarizes the trade-off:
 ``cost_scale`` keeps the two terms commensurable (dollars and quality
 live on different planets); the weights let the application declare how
 much quality a unit of money is worth. Both weights must be
-non-negative, and at least one must be positive — an objective that
+non-negative, and at least one must be positive - an objective that
 scores everything zero routes at random, which is a bug, not a policy.
 """
 
@@ -21,14 +21,14 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 from hugrgate.errors import SpecError
 
 __all__ = [
-    "RoutingCandidate",
-    "RouteObjective",
     "CostQualityObjective",
+    "RouteObjective",
+    "RoutingCandidate",
 ]
 
 
@@ -37,7 +37,7 @@ class RoutingCandidate:
     """One arm's estimated cost/quality/latency/energy profile.
 
     This is the shared estimate contract for all Campaign VI objectives.
-    ``privacy_ok`` is advisory only — the privacy-constrained objective
+    ``privacy_ok`` is advisory only - the privacy-constrained objective
     (slice 135) re-derives permission from ``is_remote`` /
     ``data_retained`` and the policy rather than trusting the flag.
     """
@@ -61,7 +61,7 @@ class RoutingCandidate:
                 raise SpecError(
                     f"{attr} must be >= 0, got {getattr(self, attr)!r}")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "quality": self.quality,
@@ -83,7 +83,7 @@ class RouteObjective(ABC):
     def score(self, candidate: RoutingCandidate) -> float:
         """Scalar score for this candidate (higher = better)."""
 
-    def rank(self, candidates: "list[RoutingCandidate]") -> "list[RoutingCandidate]":
+    def rank(self, candidates: list[RoutingCandidate]) -> list[RoutingCandidate]:
         """Candidates sorted best-first (stable; ties keep input order)."""
         scored = [(self.score(c), i, c)
                   for i, c in enumerate(candidates)]
@@ -130,7 +130,7 @@ class CostQualityObjective(RouteObjective):
         return (self.cost_weight / self.quality_weight) * \
             (extra_cost / self.cost_scale)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "quality_weight": self.quality_weight,

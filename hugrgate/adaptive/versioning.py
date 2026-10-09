@@ -26,14 +26,15 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.errors import SpecError
 
 __all__ = [
-    "PolicyVersion",
     "AdaptivePolicyVersioning",
+    "PolicyVersion",
     "digest_state",
 ]
 
@@ -55,12 +56,12 @@ class PolicyVersion:
     """One immutable adaptive-policy release."""
 
     version_id: str
-    parent_id: Optional[str]
+    parent_id: str | None
     created_at: float
     note: str
     state_digest: str
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "version_id": self.version_id,
             "parent_id": self.parent_id,
@@ -74,11 +75,11 @@ class AdaptivePolicyVersioning:
     """Named, lineaged, integrity-checked policy releases."""
 
     def __init__(self) -> None:
-        self._versions: Dict[str, PolicyVersion] = {}
-        self._states: Dict[str, Dict[str, Any]] = {}
-        self._active_id: Optional[str] = None
+        self._versions: dict[str, PolicyVersion] = {}
+        self._states: dict[str, dict[str, Any]] = {}
+        self._active_id: str | None = None
         self._counter = 0
-        self._history: List[Dict[str, Any]] = []
+        self._history: list[dict[str, Any]] = []
 
     def __len__(self) -> int:
         return len(self._versions)
@@ -87,7 +88,7 @@ class AdaptivePolicyVersioning:
         return version_id in self._versions
 
     def create_version(self, state: Mapping[str, Any], *,
-                       parent_id: Optional[str] = None,
+                       parent_id: str | None = None,
                        note: str = "") -> PolicyVersion:
         """Mint a new immutable version from a policy state dict."""
         if parent_id is not None and parent_id not in self._versions:
@@ -123,15 +124,15 @@ class AdaptivePolicyVersioning:
         return version
 
     @property
-    def active(self) -> Optional[PolicyVersion]:
+    def active(self) -> PolicyVersion | None:
         if self._active_id is None:
             return None
         return self._versions[self._active_id]
 
-    def get(self, version_id: str) -> Optional[PolicyVersion]:
+    def get(self, version_id: str) -> PolicyVersion | None:
         return self._versions.get(version_id)
 
-    def state_for(self, version_id: str) -> Dict[str, Any]:
+    def state_for(self, version_id: str) -> dict[str, Any]:
         """The archived state bytes for a version (deep copy)."""
         state = self._states.get(version_id)
         if state is None:
@@ -145,12 +146,12 @@ class AdaptivePolicyVersioning:
             raise SpecError(f"unknown policy version {version_id!r}")
         return digest_state(state) == version.state_digest
 
-    def lineage(self, version_id: str) -> List[PolicyVersion]:
+    def lineage(self, version_id: str) -> list[PolicyVersion]:
         """Parent chain from ``version_id`` back to the root."""
         if version_id not in self._versions:
             raise SpecError(f"unknown policy version {version_id!r}")
         chain = []
-        current: Optional[str] = version_id
+        current: str | None = version_id
         seen = set()
         while current is not None:
             if current in seen:  # pragma: no cover - defensive
@@ -162,10 +163,10 @@ class AdaptivePolicyVersioning:
             current = version.parent_id
         return chain
 
-    def history(self) -> List[Dict[str, Any]]:
+    def history(self) -> list[dict[str, Any]]:
         return [dict(entry) for entry in self._history]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": "adaptive-policy-versions/v1",
             "active_id": self._active_id,

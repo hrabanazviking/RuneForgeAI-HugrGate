@@ -18,21 +18,21 @@ from __future__ import annotations
 
 import statistics
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.cost_quality import (
     RouteObjective,
     RoutingCandidate,
 )
+from hugrgate.errors import SpecError
 
 __all__ = [
     "LatencyMeasurement",
     "LatencyQualityObjective",
-    "measure_latency",
     "compare_to_baseline",
+    "measure_latency",
 ]
 
 
@@ -48,7 +48,7 @@ class LatencyMeasurement:
     max_ms: float
     label: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "n_runs": self.n_runs,
             "mean_ms": self.mean_ms,
@@ -92,7 +92,7 @@ def measure_latency(fn: Callable[[], Any], n_runs: int = 50,
 
 def compare_to_baseline(measurement: LatencyMeasurement,
                         baseline_mean_ms: float,
-                        baseline_label: str = "baseline") -> Dict[str, Any]:
+                        baseline_label: str = "baseline") -> dict[str, Any]:
     """Compare a measurement against an explicit baseline number.
 
     Returns deltas and ratios computed from the two inputs — both must
@@ -144,7 +144,7 @@ class LatencyQualityObjective(RouteObjective):
                 - self.latency_weight
                 * (candidate.latency_ms / self.latency_scale))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "quality_weight": self.quality_weight,

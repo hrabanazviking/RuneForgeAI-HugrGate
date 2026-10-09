@@ -6,7 +6,6 @@ import pytest
 
 from hugrgate.adaptive.cost_quality import (
     CostQualityObjective,
-    RouteObjective,
     RoutingCandidate,
 )
 from hugrgate.errors import SpecError

@@ -2,18 +2,19 @@
 
 No single calibrator wins everywhere: Platt is stable but rigid, isotonic
 is flexible but data-hungry, temperature is minimal.  :class:`CalibratorEnsemble`
-fits several member calibrators on the same data and averages their maps —
+fits several member calibrators on the same data and averages their maps -
 mean (default), median, or custom weights.
 
 By Jensen's inequality the Brier score of a convex combination is at most
 the average of the members' Brier scores, so the ensemble never pays more
-than the *average* member — and in practice it lands near the best one
+than the *average* member - and in practice it lands near the best one
 without requiring the choice up front (see also slice 092's auto-selection).
 """
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Sequence, Tuple
+from collections.abc import Callable, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -45,14 +46,14 @@ class CalibratorEnsemble(Calibrator):
     name = "ensemble"
 
     def __init__(self,
-                 members: Sequence[Tuple[Callable[[], Calibrator], float]]
+                 members: Sequence[tuple[Callable[[], Calibrator], float]]
                  | None = None,
                  mode: str = "mean"):
         super().__init__()
         if mode not in ("mean", "median"):
             raise CalibrationError("mode must be 'mean' or 'median'")
         self.mode = mode
-        self._spec: List[Tuple[Callable[[], Calibrator], float]] = []
+        self._spec: list[tuple[Callable[[], Calibrator], float]] = []
         if members is None:
             # Default: the three classic point calibrators, uniform weights.
             members = [(PlattCalibrator, 1.0), (IsotonicCalibrator, 1.0),
@@ -67,15 +68,15 @@ class CalibratorEnsemble(Calibrator):
             self._spec.append((factory, float(weight)))
         if self._spec and sum(w for _, w in self._spec) <= 0:
             raise CalibrationError("weights must sum to something positive")
-        self._members: List[Calibrator] = []
-        self._weights: List[float] = []
+        self._members: list[Calibrator] = []
+        self._weights: list[float] = []
 
     @property
-    def member_names(self) -> List[str]:
+    def member_names(self) -> list[str]:
         return [m.name for m in self._members]
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "CalibratorEnsemble":
+            labels: Sequence[int]) -> CalibratorEnsemble:
         s, y = self._as_arrays(scores, labels)
         self._members = []
         for factory, _ in self._spec:
@@ -100,12 +101,12 @@ class CalibratorEnsemble(Calibrator):
         return min(1.0, max(0.0, out))
 
     def member_spread(self, score: float) -> float:
-        """Max − min member output: disagreement at one score."""
+        """Max - min member output: disagreement at one score."""
         self._check_fitted()
         vals = [m.calibrate(float(score)) for m in self._members]
         return float(max(vals) - min(vals))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {
             "mode": self.mode,
@@ -115,14 +116,14 @@ class CalibratorEnsemble(Calibrator):
         }
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "CalibratorEnsemble":
+    def from_params(cls, params: dict[str, Any]) -> CalibratorEnsemble:
         members = params["members"]
         weights = params.get("weights", [1.0] * len(members))
         if len(members) != len(weights):
             raise CalibrationError("members/weights length mismatch")
         obj = cls(mode=params.get("mode", "mean"))
         obj._members = []
-        for entry, w in zip(members, weights):
+        for entry, _w in zip(members, weights, strict=True):
             cal = CalibratorRegistry.build(entry["name"], entry["params"])
             obj._members.append(cal)
         total = sum(float(w) for w in weights)

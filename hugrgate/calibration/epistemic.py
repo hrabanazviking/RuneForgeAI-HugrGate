@@ -17,8 +17,9 @@ wire them into the existing abstention machinery:
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -44,9 +45,9 @@ from hugrgate.result import DecisionResult
 
 __all__ = [
     "EpistemicReport",
-    "ensemble_epistemic",
-    "distance_epistemic",
     "combine_epistemic",
+    "distance_epistemic",
+    "ensemble_epistemic",
     "review_on_epistemic",
 ]
 
@@ -59,9 +60,9 @@ class EpistemicReport:
     value: float  # in [0, 1]-ish scale; documented per adapter
     threshold: float
     triggered: bool
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -116,7 +117,7 @@ def combine_epistemic(values: Sequence[float]) -> float:
 def review_on_epistemic(result: DecisionResult, epistemic_value: float,
                         threshold: float,
                         reason: str = "high-epistemic-uncertainty"
-                        ) -> tuple["DecisionResult", EpistemicReport]:
+                        ) -> tuple[DecisionResult, EpistemicReport]:
     """Mark ``result`` for review when epistemic uncertainty is too high.
 
     Returns ``(result, report)`` — the result is the review-flagged copy

@@ -1,26 +1,27 @@
 """Coverage guarantees tooling. Slice 085.
 
-Conformal prediction promises *marginal* coverage ≥ 1−α, but on any finite
+Conformal prediction promises *marginal* coverage ≥ 1-alpha, but on any finite
 test set the empirical hit rate is just an estimate.  This module turns that
 estimate into a checkable claim:
 
-- :func:`clopper_pearson` — exact two-sided binomial confidence interval
+- :func:`clopper_pearson` - exact two-sided binomial confidence interval
   (built on the slice-081 ``beta_quantile``, no scipy);
-- :func:`hoeffding_lower_bound` — one-sided Hoeffding lower bound, the
+- :func:`hoeffding_lower_bound` - one-sided Hoeffding lower bound, the
   distribution-free quick check;
-- :class:`CoverageCertificate` — bundles n, hits, empirical coverage, the
+- :class:`CoverageCertificate` - bundles n, hits, empirical coverage, the
   interval, and a ``holds`` verdict against a target coverage;
-- :func:`validate_coverage` — certify a batch of
+- :func:`validate_coverage` - certify a batch of
   :class:`~hugrgate.calibration.sets.PredictionSet` outcomes;
-- :func:`required_n` — how many test points you need before a
+- :func:`required_n` - how many test points you need before a
   Clopper-Pearson interval of a given width is even possible.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, Sequence, Tuple
+from typing import Any
 
 try:
     import numpy as np
@@ -39,16 +40,16 @@ from hugrgate.calibration.bayes import beta_quantile
 from hugrgate.errors import CalibrationError
 
 __all__ = [
+    "CoverageCertificate",
     "clopper_pearson",
     "hoeffding_lower_bound",
-    "CoverageCertificate",
-    "validate_coverage",
     "required_n",
+    "validate_coverage",
 ]
 
 
 def clopper_pearson(k: int, n: int, level: float = 0.95
-                    ) -> Tuple[float, float]:
+                    ) -> tuple[float, float]:
     """Exact two-sided binomial confidence interval for the hit rate."""
     if n <= 0:
         raise CalibrationError("n must be positive")
@@ -63,7 +64,7 @@ def clopper_pearson(k: int, n: int, level: float = 0.95
 
 
 def hoeffding_lower_bound(k: int, n: int, delta: float = 0.05) -> float:
-    """One-sided lower bound: P(true rate ≥ bound) ≥ 1 − δ."""
+    """One-sided lower bound: P(true rate ≥ bound) ≥ 1 - δ."""
     if n <= 0:
         raise CalibrationError("n must be positive")
     if not 0 <= k <= n:
@@ -82,7 +83,7 @@ class CoverageCertificate:
     level: float = 0.95
     method: str = "clopper-pearson"
     notes: str = ""
-    extra: Dict[str, Any] = field(default_factory=dict)
+    extra: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.n <= 0:
@@ -94,7 +95,7 @@ class CoverageCertificate:
     def empirical(self) -> float:
         return self.hits / self.n
 
-    def interval(self) -> Tuple[float, float]:
+    def interval(self) -> tuple[float, float]:
         if self.method == "clopper-pearson":
             return clopper_pearson(self.hits, self.n, self.level)
         if self.method == "hoeffding":
@@ -107,7 +108,7 @@ class CoverageCertificate:
         lo, _ = self.interval()
         return lo >= target
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         lo, hi = self.interval()
         return {
             "n": self.n,
@@ -133,7 +134,7 @@ def validate_coverage(sets: Sequence[Any], labels: Sequence[str],
         raise CalibrationError("empty set batch")
     if not 0.0 < target < 1.0:
         raise CalibrationError("target must be in (0, 1)")
-    hits = sum(1 for s, y in zip(sets, labels) if s.covers(y))
+    hits = sum(1 for s, y in zip(sets, labels, strict=True) if s.covers(y))
     cert = CoverageCertificate(n=len(sets), hits=hits, level=level,
                                method=method,
                                notes=f"target coverage {target}",
@@ -155,7 +156,7 @@ def required_n(width: float, level: float = 0.95,
         raise CalibrationError("level must be in (0, 1)")
     from statistics import NormalDist
     z = NormalDist().inv_cdf(1.0 - (1.0 - level) / 2.0)
-    # Normal approx width ≈ 2·z·√(p(1−p)/n) ≥ CP width near p=0.5 worst case.
+    # Normal approx width ≈ 2·z·√(p(1-p)/n) ≥ CP width near p=0.5 worst case.
     lo, hi = 1, 10 ** 9
     while lo < hi:
         mid = (lo + hi) // 2

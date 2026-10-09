@@ -2,7 +2,7 @@
 
 The learning heart of adaptive routing: :class:`ContextualBanditAdapter`
 maps router context features (slice 129) to a choice of backend arm using
-**LinUCB** — one ridge-regression model per arm, with an upper-confidence
+**LinUCB** - one ridge-regression model per arm, with an upper-confidence
 bound that explores arms whose reward is uncertain.
 
 Design decisions:
@@ -22,16 +22,17 @@ Design decisions:
   :class:`~hugrgate.errors.BackendError` on a singular system rather
   than returning garbage.
 
-The adapter does not know about backends, policies, or telemetry — it
+The adapter does not know about backends, policies, or telemetry - it
 learns ``features -> reward`` per named arm. Wiring (propensities,
-objectives, safety) is layered on top by slices 131–142.
+objectives, safety) is layered on top by slices 131-142.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any
 
 from hugrgate.errors import BackendError, SpecError
 
@@ -48,9 +49,9 @@ class BanditDecision:
     arm: str
     expected_reward: float
     ucb: float
-    per_arm: Dict[str, float]  # arm -> UCB score at decision time
+    per_arm: dict[str, float]  # arm -> UCB score at decision time
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "arm": self.arm,
             "expected_reward": self.expected_reward,
@@ -59,7 +60,7 @@ class BanditDecision:
         }
 
 
-def _solve(a: List[List[float]], b: List[float]) -> List[float]:
+def _solve(a: list[list[float]], b: list[float]) -> list[float]:
     """Solve ``a x = b`` by Gaussian elimination with partial pivoting."""
     n = len(a)
     if n == 0:
@@ -67,7 +68,7 @@ def _solve(a: List[List[float]], b: List[float]) -> List[float]:
     if any(len(row) != n for row in a) or len(b) != n:
         raise BackendError("linear system has inconsistent dimensions")
     # Augmented matrix.
-    m = [list(a[i]) + [b[i]] for i in range(n)]
+    m = [[*a[i], b[i]] for i in range(n)]
     for col in range(n):
         pivot = max(range(col, n), key=lambda r: abs(m[r][col]))
         if abs(m[pivot][col]) < 1e-12:
@@ -91,7 +92,7 @@ def _solve(a: List[List[float]], b: List[float]) -> List[float]:
 
 
 def _dot(u: Sequence[float], v: Sequence[float]) -> float:
-    return sum(a * b for a, b in zip(u, v))
+    return sum(a * b for a, b in zip(u, v, strict=True))
 
 
 class _ArmState:
@@ -132,11 +133,11 @@ class ContextualBanditAdapter:
         self.dim = len(names)
         self.alpha = alpha
         self.ridge = ridge
-        self._arms: Dict[str, _ArmState] = {}
+        self._arms: dict[str, _ArmState] = {}
 
     # -- core API -------------------------------------------------------
 
-    def _vector(self, features: Mapping[str, float]) -> List[float]:
+    def _vector(self, features: Mapping[str, float]) -> list[float]:
         try:
             vec = [float(features[name]) for name in self.feature_names]
         except KeyError as exc:
@@ -154,10 +155,10 @@ class ContextualBanditAdapter:
             self._arms[name] = arm
         return arm
 
-    def _theta(self, arm: _ArmState) -> List[float]:
+    def _theta(self, arm: _ArmState) -> list[float]:
         return _solve([row[:] for row in arm.A], list(arm.b))
 
-    def _score(self, name: str, vec: List[float]) -> _ScoredArm:
+    def _score(self, name: str, vec: list[float]) -> _ScoredArm:
         arm = self._arm(name)
         theta = self._theta(arm)
         expected = _dot(theta, vec)
@@ -223,7 +224,7 @@ class ContextualBanditAdapter:
 
     # -- introspection --------------------------------------------------
 
-    def arm_stats(self, arm: str) -> Dict[str, Any]:
+    def arm_stats(self, arm: str) -> dict[str, Any]:
         state = self._arms.get(arm)
         if state is None:
             return {"arm": arm, "n": 0, "mean_reward": 0.0}
@@ -233,7 +234,7 @@ class ContextualBanditAdapter:
             "mean_reward": (state.reward_sum / state.n) if state.n else 0.0,
         }
 
-    def arms(self) -> List[str]:
+    def arms(self) -> list[str]:
         return sorted(self._arms)
 
     def expected_reward(self, arm: str,
@@ -242,7 +243,7 @@ class ContextualBanditAdapter:
 
     # -- persistence ----------------------------------------------------
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": "adaptive-bandit/v1",
             "feature_names": list(self.feature_names),
@@ -260,7 +261,7 @@ class ContextualBanditAdapter:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "ContextualBanditAdapter":
+    def from_dict(cls, data: Mapping[str, Any]) -> ContextualBanditAdapter:
         if data.get("schema") != "adaptive-bandit/v1":
             raise SpecError(
                 f"unsupported bandit schema {data.get('schema')!r}")

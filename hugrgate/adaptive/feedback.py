@@ -28,20 +28,20 @@ online bandit updates (slice 130).
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from typing import Any
 
+from hugrgate.adaptive.telemetry import RouteEvent, TelemetryStore
 from hugrgate.errors import SpecError
 from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 
-from hugrgate.adaptive.telemetry import RouteEvent, TelemetryStore
-
 __all__ = [
     "OUTCOME_LABELS",
-    "OutcomeRecord",
     "OutcomeFeedbackAPI",
+    "OutcomeRecord",
 ]
 
 #: The only outcome labels with defined semantics.
@@ -54,7 +54,7 @@ class OutcomeRecord:
 
     request_id: str
     quality: float
-    label: Optional[str] = None
+    label: str | None = None
     source: str = "human"
     received_at: float = 0.0
 
@@ -69,7 +69,7 @@ class OutcomeRecord:
         if not isinstance(self.source, str) or not self.source:
             raise SpecError("outcome source must be a non-empty string")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "quality": self.quality,
             "label": self.label,
@@ -85,9 +85,9 @@ class OutcomeFeedbackAPI:
         self.store = store
 
     def record_outcome(self, request_id: str, *, quality: float,
-                       label: Optional[str] = None,
+                       label: str | None = None,
                        source: str = "human",
-                       received_at: Optional[float] = None,
+                       received_at: float | None = None,
                        allow_overwrite: bool = False) -> OutcomeRecord:
         """Attach an outcome to a logged route decision."""
         if request_id not in self.store:
@@ -126,8 +126,8 @@ class OutcomeFeedbackAPI:
                          chosen: str,
                          policy_version: str,
                          result: DecisionResult,
-                         policy: Optional[DecisionPolicy] = None,
-                         request_id: Optional[str] = None,
+                         policy: DecisionPolicy | None = None,
+                         request_id: str | None = None,
                          ) -> str:
         """Log a route decision plus its immediate quality in one call.
 

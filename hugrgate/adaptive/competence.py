@@ -2,7 +2,7 @@
 
 The bandit learns online; competence profiles remember *offline*. A
 :class:`CompetenceProfile` is the long-run report card for one backend:
-attempts, quality-weighted successes, mean latency, mean cost — plus a
+attempts, quality-weighted successes, mean latency, mean cost - plus a
 **Wilson score lower bound** on the success rate, so ranking prefers
 "10/10" over "1/1" and a battle-tested 85% over a lucky 100% on three
 samples.
@@ -12,9 +12,9 @@ samples.
 - :meth:`observe` folds one labeled outcome in (online path);
 - :meth:`update_from_telemetry` rebuilds from a telemetry store's
   labeled events (batch path, slice 126);
-- :meth:`ranked` orders backends by Wilson lower bound — the
+- :meth:`ranked` orders backends by Wilson lower bound - the
   exploitation-safe ordering;
-- profiles serialize for versioning/rollback (slices 145–146).
+- profiles serialize for versioning/rollback (slices 145-146).
 
 "Success" is quality ≥ ``success_threshold``; quality itself is averaged
 separately so near-misses still inform the mean.
@@ -23,16 +23,16 @@ separately so near-misses still inform the mean.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Mapping, Optional
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.telemetry import RouteEvent
+from hugrgate.errors import SpecError
 
 __all__ = [
-    "CompetenceProfile",
     "BackendCompetenceProfiles",
+    "CompetenceProfile",
     "wilson_lower_bound",
 ]
 
@@ -98,7 +98,7 @@ class CompetenceProfile:
         """Conservative competence estimate: prefer proven over lucky."""
         return wilson_lower_bound(self.successes, self.attempts)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "backend": self.backend,
             "attempts": self.attempts,
@@ -114,7 +114,7 @@ class CompetenceProfile:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "CompetenceProfile":
+    def from_dict(cls, data: Mapping[str, Any]) -> CompetenceProfile:
         return cls(
             backend=str(data["backend"]),
             attempts=int(data.get("attempts", 0)),
@@ -133,7 +133,7 @@ class BackendCompetenceProfiles:
             raise SpecError(
                 f"success_threshold must be in (0,1], got {success_threshold}")
         self.success_threshold = success_threshold
-        self._profiles: Dict[str, CompetenceProfile] = {}
+        self._profiles: dict[str, CompetenceProfile] = {}
 
     def __len__(self) -> int:
         return len(self._profiles)
@@ -181,21 +181,21 @@ class BackendCompetenceProfiles:
             used += 1
         return used
 
-    def get(self, backend: str) -> Optional[CompetenceProfile]:
+    def get(self, backend: str) -> CompetenceProfile | None:
         profile = self._profiles.get(backend)
         if profile is None:
             return None
         # Defensive copy: profiles are registry-owned.
         return CompetenceProfile.from_dict(profile.to_dict())
 
-    def ranked(self) -> List[CompetenceProfile]:
+    def ranked(self) -> list[CompetenceProfile]:
         """Backends best-first by Wilson lower bound (ties by name)."""
         profiles = [CompetenceProfile.from_dict(p.to_dict())
                     for p in self._profiles.values()]
         profiles.sort(key=lambda p: (-p.wilson_lower, p.backend))
         return profiles
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": "adaptive-competence/v1",
             "success_threshold": self.success_threshold,
@@ -204,7 +204,7 @@ class BackendCompetenceProfiles:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "BackendCompetenceProfiles":
+    def from_dict(cls, data: Mapping[str, Any]) -> BackendCompetenceProfiles:
         if data.get("schema") != "adaptive-competence/v1":
             raise SpecError(
                 f"unsupported competence schema {data.get('schema')!r}")

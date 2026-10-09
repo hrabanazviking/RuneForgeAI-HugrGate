@@ -25,8 +25,9 @@ and replays honest.
 from __future__ import annotations
 
 import random
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional
+from typing import Any
 
 from hugrgate.errors import SpecError
 
@@ -64,7 +65,7 @@ class ExplorationConfig:
                 "max_exploration_share must be in [0,1], got "
                 f"{self.max_exploration_share}")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "epsilon": self.epsilon,
             "epsilon_min": self.epsilon_min,
@@ -75,7 +76,7 @@ class ExplorationConfig:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "ExplorationConfig":
+    def from_dict(cls, data: Mapping[str, Any]) -> ExplorationConfig:
         return cls(
             epsilon=float(data.get("epsilon", 0.1)),
             epsilon_min=float(data.get("epsilon_min", 0.01)),
@@ -90,8 +91,8 @@ class ExplorationConfig:
 class ExplorationControls:
     """Stateful epsilon-greedy throttle with budget and kill switch."""
 
-    def __init__(self, config: Optional[ExplorationConfig] = None,
-                 seed: Optional[int] = None) -> None:
+    def __init__(self, config: ExplorationConfig | None = None,
+                 seed: int | None = None) -> None:
         self.config = config or ExplorationConfig()
         self._rng = random.Random(seed)
         self._epsilon = self.config.epsilon
@@ -134,7 +135,7 @@ class ExplorationControls:
                 >= self.config.max_exploration_share)
 
     def should_explore(self, arm_pulls: Mapping[str, int],
-                       total_decisions: Optional[int] = None) -> bool:
+                       total_decisions: int | None = None) -> bool:
         """Decide whether this decision should explore.
 
         ``arm_pulls`` maps arm name -> times pulled. Exploration happens
@@ -159,7 +160,7 @@ class ExplorationControls:
     def record_exploitation(self) -> None:
         self.step()
 
-    def snapshot(self) -> Dict[str, Any]:
+    def snapshot(self) -> dict[str, Any]:
         return {
             "config": self.config.to_dict(),
             "enabled": self._enabled,

@@ -18,7 +18,8 @@ provides :class:`PerClassCalibrator`, which:
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -60,7 +61,7 @@ class _ConstantCalibrator(Calibrator):
         self.prior = float(prior)
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "_ConstantCalibrator":
+            labels: Sequence[int]) -> _ConstantCalibrator:
         self._as_arrays(scores, labels)  # validate only
         self._fitted = True
         return self
@@ -69,12 +70,12 @@ class _ConstantCalibrator(Calibrator):
         self._check_fitted()
         return self.prior
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {"prior": self.prior}
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "_ConstantCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> _ConstantCalibrator:
         obj = cls(float(params["prior"]))
         obj._fitted = True
         return obj
@@ -92,9 +93,9 @@ class PerClassCalibrator:
             raise CalibrationError("factory must return a Calibrator")
         self.factory = factory
         self.calibrator_name = probe.name
-        self._units: Dict[str, Calibrator] = {}
-        self._classes: List[str] = []
-        self._per_class_metrics: Dict[str, Dict[str, float]] = {}
+        self._units: dict[str, Calibrator] = {}
+        self._classes: list[str] = []
+        self._per_class_metrics: dict[str, dict[str, float]] = {}
         self._fitted = False
 
     @property
@@ -102,16 +103,16 @@ class PerClassCalibrator:
         return self._fitted
 
     @property
-    def classes(self) -> List[str]:
+    def classes(self) -> list[str]:
         return list(self._classes)
 
     @property
-    def per_class_metrics(self) -> Dict[str, Dict[str, float]]:
+    def per_class_metrics(self) -> dict[str, dict[str, float]]:
         return {k: dict(v) for k, v in self._per_class_metrics.items()}
 
     def fit(self, probas: Sequence[Mapping[str, float]],
             labels: Sequence[str],
-            classes: Optional[Sequence[str]] = None) -> "PerClassCalibrator":
+            classes: Sequence[str] | None = None) -> PerClassCalibrator:
         """Fit one calibrator per class (one-vs-rest).
 
         ``classes`` optionally declares the full label set; classes absent
@@ -173,7 +174,7 @@ class PerClassCalibrator:
         if not self._fitted:
             raise CalibrationError("PerClassCalibrator used before fit")
 
-    def calibrate_dist(self, proba: Mapping[str, float]) -> Dict[str, float]:
+    def calibrate_dist(self, proba: Mapping[str, float]) -> dict[str, float]:
         """Calibrate one distribution; renormalize over declared classes."""
         self._check_fitted()
         out = {c: self._units[c].calibrate(float(proba.get(c, 0.0)))
@@ -185,10 +186,10 @@ class PerClassCalibrator:
         return {k: v / total for k, v in out.items()}
 
     def calibrate_batch(
-            self, probas: Sequence[Mapping[str, float]]) -> List[Dict[str, float]]:
+            self, probas: Sequence[Mapping[str, float]]) -> list[dict[str, float]]:
         return [self.calibrate_dist(d) for d in probas]
 
-    def to_profile_params(self) -> Dict[str, Dict[str, Any]]:
+    def to_profile_params(self) -> dict[str, dict[str, Any]]:
         """Export per-class params for ``CalibrationProfile``."""
         self._check_fitted()
         return {c: {"__fallback__": isinstance(u, _ConstantCalibrator),
@@ -197,8 +198,8 @@ class PerClassCalibrator:
 
     @classmethod
     def from_profile_params(cls, factory: Callable[[], Calibrator],
-                            params: Dict[str, Dict[str, Any]]
-                            ) -> "PerClassCalibrator":
+                            params: dict[str, dict[str, Any]]
+                            ) -> PerClassCalibrator:
         obj = cls(factory)
         for cls_name, p in params.items():
             p = dict(p)
@@ -215,7 +216,7 @@ def build_profile(name: str, per_class: PerClassCalibrator,
                   model_version: str = "",
                   version: str = "1.0.0") -> CalibrationProfile:
     """Build a :class:`CalibrationProfile` from a fitted PerClassCalibrator."""
-    metrics: Dict[str, float] = {}
+    metrics: dict[str, float] = {}
     for cls_name, m in per_class.per_class_metrics.items():
         metrics[f"brier_before[{cls_name}]"] = m["brier_before"]
         metrics[f"brier_after[{cls_name}]"] = m["brier_after"]

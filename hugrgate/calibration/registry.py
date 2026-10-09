@@ -19,7 +19,7 @@ syncs from it at import time and overlays the metadata table below.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Optional, Type
+from typing import Any
 
 from hugrgate.calibration._base import Calibrator, CalibratorRegistry
 from hugrgate.errors import CalibrationError
@@ -27,10 +27,10 @@ from hugrgate.errors import CalibrationError
 __all__ = [
     "CalibratorSpec",
     "catalog",
-    "spec",
-    "find",
     "describe",
+    "find",
     "register_spec",
+    "spec",
 ]
 
 
@@ -39,25 +39,25 @@ class CalibratorSpec:
     """Metadata describing one registered calibrator."""
 
     name: str
-    cls: Type[Calibrator]
+    cls: type[Calibrator]
     family: str  # parametric | nonparametric | bayesian | streaming | fallback
     monotone: bool
     needs_both_classes: bool
     streaming: bool
     description: str = ""
     deprecated: bool = False
-    replaced_by: Optional[str] = None
-    extra: Dict[str, Any] = field(default_factory=dict)
+    replaced_by: str | None = None
+    extra: dict[str, Any] = field(default_factory=dict)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         d = asdict(self)
         d["cls"] = f"{self.cls.__module__}.{self.cls.__qualname__}"
         return d
 
 
-_CATALOG: Dict[str, CalibratorSpec] = {}
+_CATALOG: dict[str, CalibratorSpec] = {}
 
-_METADATA: Dict[str, Dict[str, Any]] = {
+_METADATA: dict[str, dict[str, Any]] = {
     "platt": {
         "family": "parametric", "monotone": True,
         "needs_both_classes": True, "streaming": False,
@@ -128,7 +128,7 @@ def _sync() -> None:
         ))
 
 
-def catalog() -> Dict[str, CalibratorSpec]:
+def catalog() -> dict[str, CalibratorSpec]:
     """The full name → spec catalog (synced from the legacy registry)."""
     _sync()
     return dict(_CATALOG)
@@ -141,14 +141,14 @@ def spec(name: str) -> CalibratorSpec:
         return _CATALOG[name]
     except KeyError:
         raise CalibrationError(
-            f"unknown calibrator {name!r}; known: {sorted(_CATALOG)}")
+            f"unknown calibrator {name!r}; known: {sorted(_CATALOG)}") from None
 
 
-def find(family: Optional[str] = None,
-         monotone: Optional[bool] = None,
-         streaming: Optional[bool] = None,
-         needs_both_classes: Optional[bool] = None,
-         include_deprecated: bool = False) -> List[CalibratorSpec]:
+def find(family: str | None = None,
+         monotone: bool | None = None,
+         streaming: bool | None = None,
+         needs_both_classes: bool | None = None,
+         include_deprecated: bool = False) -> list[CalibratorSpec]:
     """Filter the catalog by metadata attributes."""
     out = []
     for s in catalog().values():
@@ -167,6 +167,6 @@ def find(family: Optional[str] = None,
     return sorted(out, key=lambda s: s.name)
 
 
-def describe() -> List[Dict[str, Any]]:
+def describe() -> list[dict[str, Any]]:
     """JSON-serializable summary of the whole catalog."""
     return [s.as_dict() for s in find(include_deprecated=True)]

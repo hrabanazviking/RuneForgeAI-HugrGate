@@ -40,7 +40,7 @@ def test_weighted_sum_combines_objectives():
     ])
     ranked = router.rank(CANDS)
     # balanced: (0.85-0.10) + (0.85-0.20) = 1.40 — best blend of the two.
-    assert [c.name for c in ranked][0] == "balanced"
+    assert next(c.name for c in ranked) == "balanced"
     # Weighted sum is linear in the weights: doubling one weight doubles
     # its influence.
     s1 = router.score(CANDS[0])
@@ -69,7 +69,7 @@ def test_lexicographic_falls_through_on_ties():
 
 def test_pareto_frontier_keeps_nondominated():
     dominated = cand("dominated", 0.50, 9.0, 1500.0)
-    frontier = pareto_frontier(CANDS + [dominated])
+    frontier = pareto_frontier([*CANDS, dominated])
     names = [c.name for c in frontier]
     assert "dominated" not in names
     assert set(names) == {"fast_cheap", "best_quality", "balanced"}

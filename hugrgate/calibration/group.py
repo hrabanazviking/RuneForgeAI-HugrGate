@@ -4,16 +4,17 @@ A single global calibrator can hide per-group miscalibration: group A is
 overconfident while group B is underconfident and the average looks fine.
 :class:`GroupCalibrator` fits one binary calibrator per group value (plus a
 global fallback for unseen groups), and reports per-group Brier/ECE together
-with the *calibration disparity* ``max_g ECE_g − min_g ECE_g``.
+with the *calibration disparity* ``max_g ECE_g - min_g ECE_g``.
 
 Group labels are opaque strings supplied by the caller (e.g. a segment,
-cohort, or backend name).  HugrGate never invents them — see the privacy
+cohort, or backend name).  HugrGate never invents them - see the privacy
 module before using real demographic attributes.
 """
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -52,9 +53,9 @@ class GroupCalibrator:
         self.factory = factory
         self.calibrator_name = probe.name
         self.min_group_samples = int(min_group_samples)
-        self._units: Dict[str, Calibrator] = {}
-        self._global: Optional[Calibrator] = None
-        self._group_metrics: Dict[str, Dict[str, Any]] = {}
+        self._units: dict[str, Calibrator] = {}
+        self._global: Calibrator | None = None
+        self._group_metrics: dict[str, dict[str, Any]] = {}
         self._fitted = False
 
     @property
@@ -62,22 +63,22 @@ class GroupCalibrator:
         return self._fitted
 
     @property
-    def groups(self) -> List[str]:
+    def groups(self) -> list[str]:
         return sorted(self._units)
 
     @property
-    def group_metrics(self) -> Dict[str, Dict[str, Any]]:
+    def group_metrics(self) -> dict[str, dict[str, Any]]:
         return {k: dict(v) for k, v in self._group_metrics.items()}
 
     def disparity(self, metric: str = "ece_after") -> float:
-        """max − min of a per-group metric (the calibration fairness gap)."""
+        """max - min of a per-group metric (the calibration fairness gap)."""
         if not self._fitted:
             raise CalibrationError("GroupCalibrator used before fit")
         vals = [m[metric] for m in self._group_metrics.values()]
         return float(max(vals) - min(vals)) if vals else 0.0
 
     def fit(self, scores: Sequence[float], labels: Sequence[int],
-            groups: Sequence[str]) -> "GroupCalibrator":
+            groups: Sequence[str]) -> GroupCalibrator:
         _require_numpy()
         scores = list(scores)
         labels = list(labels)
@@ -93,8 +94,8 @@ class GroupCalibrator:
         glob.fit(scores, labels)
         self._global = glob
 
-        by_group: Dict[str, Dict[str, list]] = {}
-        for s, y, g in zip(scores, labels, groups):
+        by_group: dict[str, dict[str, list]] = {}
+        for s, y, g in zip(scores, labels, groups, strict=True):
             by_group.setdefault(g, {"scores": [], "labels": []})
             by_group[g]["scores"].append(s)
             by_group[g]["labels"].append(y)
@@ -137,15 +138,15 @@ class GroupCalibrator:
         return self._unit_for(group).calibrate(float(score))
 
     def calibrate_batch(self, scores: Sequence[float],
-                        groups: Sequence[str]) -> List[float]:
+                        groups: Sequence[str]) -> list[float]:
         scores = list(scores)
         groups = list(groups)
         if len(scores) != len(groups):
             raise CalibrationError("scores/groups length mismatch")
         return [self.calibrate(float(s), g)
-                for s, g in zip(scores, groups)]
+                for s, g in zip(scores, groups, strict=True)]
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         if not self._fitted or self._global is None:
             raise CalibrationError("GroupCalibrator used before fit")
         return {

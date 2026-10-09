@@ -492,8 +492,7 @@ flowchart TD
     calibration_temperature --> errors
     calibration_viz --> calibration_metrics
     calibration_viz --> errors
-    calibration_window -.-> calibration
-    calibration_window --> calibration__base
+    calibration_window -.-> calibration__base
     calibration_window --> errors
     circuit --> log
     cli -.-> bench
@@ -1443,8 +1442,7 @@ flowchart TD
 | `calibration.temperature` | `errors` | no |
 | `calibration.viz` | `calibration.metrics` | no |
 | `calibration.viz` | `errors` | no |
-| `calibration.window` | `calibration` | yes |
-| `calibration.window` | `calibration._base` | no |
+| `calibration.window` | `calibration._base` | yes |
 | `calibration.window` | `errors` | no |
 | `circuit` | `log` | no |
 | `cli` | `bench` | yes |

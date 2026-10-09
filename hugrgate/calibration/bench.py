@@ -3,23 +3,24 @@
 Compares the calibration methods head-to-head on controlled synthetic
 datasets with known miscalibration shapes.  Every dataset is generated from
 a seeded PRNG, so the artifact is byte-identical on every run for a fixed
-seed — no invented numbers, ever.
+seed - no invented numbers, ever.
 
 Datasets (``n`` samples each):
-- ``overconfident`` — true ``p = σ(z)``, reported ``σ(2z)``;
-- ``underconfident`` — true ``p = σ(z)``, reported ``σ(0.5z)``;
-- ``label-noise`` — well-shaped scores, 15% flipped labels;
-- ``well-calibrated`` — reported == true (control: calibration should be
+- ``overconfident`` - true ``p = sigma(z)``, reported ``sigma(2z)``;
+- ``underconfident`` - true ``p = sigma(z)``, reported ``sigma(0.5z)``;
+- ``label-noise`` - well-shaped scores, 15% flipped labels;
+- ``well-calibrated`` - reported == true (control: calibration should be
   ~neutral here).
 
-Entries: ``raw`` (identity baseline — the explicit baseline the slice
+Entries: ``raw`` (identity baseline - the explicit baseline the slice
 requires) plus every batch calibrator in the catalog.  Metrics: Brier,
 log-loss, ECE, before → after.
 """
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -43,8 +44,8 @@ from hugrgate.calibration.metrics import (
 from hugrgate.errors import CalibrationError
 
 __all__ = [
-    "DATASETS",
     "BENCH_CALIBRATORS",
+    "DATASETS",
     "generate_dataset",
     "run_benchmark",
 ]
@@ -62,7 +63,7 @@ class _RawBaseline(Calibrator):
     name = "raw"
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "_RawBaseline":
+            labels: Sequence[int]) -> _RawBaseline:
         self._as_arrays(scores, labels)
         self._fitted = True
         return self
@@ -71,18 +72,18 @@ class _RawBaseline(Calibrator):
         self._check_fitted()
         return float(min(1.0, max(0.0, score)))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         return {}
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "_RawBaseline":
+    def from_params(cls, params: dict[str, Any]) -> _RawBaseline:
         obj = cls()
         obj._fitted = True
         return obj
 
 
 def generate_dataset(kind: str, n: int, seed: int
-                     ) -> tuple[List[float], List[int]]:
+                     ) -> tuple[list[float], list[int]]:
     """Seeded synthetic (scores, labels) with a known miscalibration shape."""
     _require_numpy()
     if kind not in DATASETS:
@@ -114,10 +115,10 @@ def _get(name: str) -> Callable[[], Calibrator]:
 def run_benchmark(seed: int = 20261009, n: int = 2000,
                   datasets: Sequence[str] = DATASETS,
                   calibrators: Sequence[str] = BENCH_CALIBRATORS,
-                  ) -> Dict[str, Any]:
+                  ) -> dict[str, Any]:
     """Run the full benchmark; returns the artifact dict."""
     _require_numpy()
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     for di, kind in enumerate(datasets):
         scores, labels = generate_dataset(kind, n, seed + di)
         raw_metrics = {
@@ -151,6 +152,6 @@ def run_benchmark(seed: int = 20261009, n: int = 2000,
         "datasets": list(datasets),
         "calibrators": list(calibrators),
         "metric_note": ("before/after are in-sample on the benchmark fit "
-                        "set; delta_* = before − after (positive is good)"),
+                        "set; delta_* = before - after (positive is good)"),
         "results": results,
     }

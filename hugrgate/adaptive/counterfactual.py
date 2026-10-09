@@ -24,25 +24,25 @@ rewards: an event without a usable reward is excluded, not imputed.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.bandit import ContextualBanditAdapter
 from hugrgate.adaptive.offline import OfflinePolicyLearning
 from hugrgate.adaptive.telemetry import RouteEvent
+from hugrgate.errors import SpecError
 
 __all__ = [
     "ESTIMATORS",
-    "PolicyValueEstimate",
     "CounterfactualEvaluator",
+    "PolicyValueEstimate",
 ]
 
 ESTIMATORS = ("ips", "snips", "dr")
 
 #: target_policy(features, candidates) -> chosen arm name.
-TargetPolicy = Callable[[Dict[str, float], List[str]], str]
+TargetPolicy = Callable[[dict[str, float], list[str]], str]
 
 
 @dataclass(frozen=True)
@@ -56,7 +56,7 @@ class PolicyValueEstimate:
     n_skipped: int
     effective_sample_size: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "estimator": self.estimator,
             "value": self.value,
@@ -83,7 +83,7 @@ class CounterfactualEvaluator:
         self.max_weight = max_weight
 
     def _usable(self, events: Iterable[RouteEvent]
-                ) -> List[RouteEvent]:
+                ) -> list[RouteEvent]:
         usable = []
         for event in events:
             if event.shadow or not event.labeled:
@@ -97,7 +97,7 @@ class CounterfactualEvaluator:
             usable.append(event)
         return usable
 
-    def _reward_model(self, events: List[RouteEvent]
+    def _reward_model(self, events: list[RouteEvent]
                       ) -> ContextualBanditAdapter:
         learner = OfflinePolicyLearning(
             self.feature_names, min_propensity=self.min_propensity,
@@ -107,7 +107,7 @@ class CounterfactualEvaluator:
     def estimate(self, events: Iterable[RouteEvent],
                  target_policy: TargetPolicy,
                  estimator: str = "snips",
-                 reward_model: Optional[ContextualBanditAdapter] = None
+                 reward_model: ContextualBanditAdapter | None = None
                  ) -> PolicyValueEstimate:
         """Estimate the target policy's mean reward on logged traffic."""
         if estimator not in ESTIMATORS:
@@ -125,9 +125,9 @@ class CounterfactualEvaluator:
         if estimator == "dr":
             model = reward_model or self._reward_model(usable)
 
-        weighted_rewards: List[float] = []
-        weights: List[float] = []
-        dm_terms: List[float] = []
+        weighted_rewards: list[float] = []
+        weights: list[float] = []
+        dm_terms: list[float] = []
         for event in usable:
             target_arm = target_policy(dict(event.features),
                                        list(event.candidates))

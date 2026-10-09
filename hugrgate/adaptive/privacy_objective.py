@@ -27,15 +27,14 @@ can serve this" error.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
-
-from hugrgate.errors import BackendUnavailable, SpecError
-from hugrgate.policy import DecisionPolicy
+from typing import Any
 
 from hugrgate.adaptive.cost_quality import (
     RouteObjective,
     RoutingCandidate,
 )
+from hugrgate.errors import BackendUnavailable, SpecError
+from hugrgate.policy import DecisionPolicy
 
 __all__ = [
     "PrivacyConstrainedObjective",
@@ -79,14 +78,14 @@ class PrivacyConstrainedObjective(RouteObjective):
         return True
 
     def admissible(self,
-                   candidates: List[RoutingCandidate]
-                   ) -> List[RoutingCandidate]:
+                   candidates: list[RoutingCandidate]
+                   ) -> list[RoutingCandidate]:
         """The subset of candidates the gate permits."""
         return [c for c in candidates if self.permitted(c)]
 
     def require_admissible(self,
-                           candidates: List[RoutingCandidate]
-                           ) -> List[RoutingCandidate]:
+                           candidates: list[RoutingCandidate]
+                           ) -> list[RoutingCandidate]:
         admissible = self.admissible(candidates)
         if not admissible:
             raise BackendUnavailable(
@@ -102,12 +101,12 @@ class PrivacyConstrainedObjective(RouteObjective):
             return float("-inf")
         return self.objective.score(candidate)
 
-    def best(self, candidates: List[RoutingCandidate]) -> RoutingCandidate:
+    def best(self, candidates: list[RoutingCandidate]) -> RoutingCandidate:
         """Highest-scoring admissible candidate (raises if none)."""
         admissible = self.require_admissible(candidates)
         return max(admissible, key=self.objective.score)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "objective": self.objective.name,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from hugrgate.adaptive.rollback import Checkpoint, RouterRollback
+from hugrgate.adaptive.rollback import RouterRollback
 from hugrgate.errors import SpecError
 
 

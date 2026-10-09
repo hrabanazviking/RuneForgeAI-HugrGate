@@ -6,7 +6,6 @@ import time
 
 import pytest
 
-from hugrgate.adaptive.bandit import ContextualBanditAdapter
 from hugrgate.adaptive.counterfactual import (
     ESTIMATORS,
     CounterfactualEvaluator,

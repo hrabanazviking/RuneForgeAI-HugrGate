@@ -4,20 +4,20 @@ Companion to :mod:`hugrgate.calibration.conformal`: finite-sample prediction
 *intervals* for real-valued predictions.  :class:`ConformalRegressor`
 implements split conformal prediction with
 
-- absolute-residual nonconformity ``s = |y − ŷ|`` (constant-width intervals), or
-- normalized residuals ``s = |y − ŷ| / difficulty`` when a difficulty
+- absolute-residual nonconformity ``s = |y - ŷ|`` (constant-width intervals), or
+- normalized residuals ``s = |y - ŷ| / difficulty`` when a difficulty
   estimate is supplied (locally adaptive widths: easy points get tight
   intervals, hard points get wide ones).
 
-Under exchangeability, ``[ŷ − q̂·d, ŷ + q̂·d]`` covers the true value with
-probability at least ``1 − α``.  Operates on plain floats, so it works with
+Under exchangeability, ``[ŷ - q̂·d, ŷ + q̂·d]`` covers the true value with
+probability at least ``1 - alpha``.  Operates on plain floats, so it works with
 any point-prediction source, including HugrGate numeric backends.
 """
 
 from __future__ import annotations
 
 import math
-from typing import List, Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 try:
     import numpy as np
@@ -65,8 +65,8 @@ class ConformalRegressor:
             raise CalibrationError("ConformalRegressor used before fit")
 
     def fit(self, y_pred: Sequence[float], y_true: Sequence[float],
-            difficulty: Optional[Sequence[float]] = None
-            ) -> "ConformalRegressor":
+            difficulty: Sequence[float] | None = None
+            ) -> ConformalRegressor:
         """Fit the residual quantile on a held-out calibration fold."""
         _require_numpy()
         yp = np.asarray(list(y_pred), dtype=float)
@@ -93,8 +93,8 @@ class ConformalRegressor:
         return self
 
     def predict_interval(self, y_pred: float,
-                         difficulty: Optional[float] = None
-                         ) -> Tuple[float, float]:
+                         difficulty: float | None = None
+                         ) -> tuple[float, float]:
         """``(lo, hi)`` prediction interval for one point prediction."""
         self._check_fitted()
         if not math.isfinite(float(y_pred)):
@@ -116,28 +116,28 @@ class ConformalRegressor:
 
     def predict_intervals(
             self, y_pred: Sequence[float],
-            difficulty: Optional[Sequence[float]] = None
-    ) -> List[Tuple[float, float]]:
+            difficulty: Sequence[float] | None = None
+    ) -> list[tuple[float, float]]:
         preds = list(y_pred)
         diffs = ([None] * len(preds) if difficulty is None
                  else list(difficulty))
         if len(diffs) != len(preds):
             raise CalibrationError("difficulty length mismatch")
-        return [self.predict_interval(p, d) for p, d in zip(preds, diffs)]
+        return [self.predict_interval(p, d) for p, d in zip(preds, diffs, strict=True)]
 
     def empirical_coverage(self, y_pred: Sequence[float],
                            y_true: Sequence[float],
-                           difficulty: Optional[Sequence[float]] = None
+                           difficulty: Sequence[float] | None = None
                            ) -> float:
         intervals = self.predict_intervals(y_pred, difficulty)
         yt = list(y_true)
         if len(intervals) != len(yt):
             raise CalibrationError("length mismatch")
-        hits = sum(1 for (lo, hi), y in zip(intervals, yt) if lo <= y <= hi)
+        hits = sum(1 for (lo, hi), y in zip(intervals, yt, strict=True) if lo <= y <= hi)
         return hits / len(yt) if yt else 0.0
 
     def mean_width(self, y_pred: Sequence[float],
-                   difficulty: Optional[Sequence[float]] = None) -> float:
+                   difficulty: Sequence[float] | None = None) -> float:
         intervals = self.predict_intervals(y_pred, difficulty)
         return (sum(hi - lo for lo, hi in intervals) / len(intervals)
                 if intervals else 0.0)

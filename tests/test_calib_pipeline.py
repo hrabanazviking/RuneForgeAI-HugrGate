@@ -11,9 +11,9 @@ from hugrgate.calibration import (
     TemperatureCalibrator,
 )
 from hugrgate.calibration.pipeline import (
+    MIN_FIT_SAMPLES,
     CalibrationPipeline,
     CalibrationReport,
-    MIN_FIT_SAMPLES,
     validate_fit_data,
 )
 from hugrgate.errors import CalibrationError

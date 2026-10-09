@@ -22,18 +22,18 @@ from __future__ import annotations
 # Base classes live in ._base so submodules can import them without
 # creating a parent<->child import cycle with this __init__ (slice 002).
 from hugrgate.calibration._base import Calibrator, CalibratorRegistry
+from hugrgate.calibration.bayes import BetaBinomialCalibrator
+from hugrgate.calibration.ensemble import CalibratorEnsemble
 from hugrgate.calibration.isotonic import IsotonicCalibrator
+from hugrgate.calibration.online import OnlineCalibrator
+from hugrgate.calibration.perclass import _ConstantCalibrator
 
 # Submodule imports register their calibrator classes with the registry.
 from hugrgate.calibration.platt import PlattCalibrator
 from hugrgate.calibration.temperature import (
     TemperatureCalibrator,
 )
-from hugrgate.calibration.online import OnlineCalibrator
 from hugrgate.calibration.window import SlidingWindowCalibrator
-from hugrgate.calibration.bayes import BetaBinomialCalibrator
-from hugrgate.calibration.perclass import _ConstantCalibrator
-from hugrgate.calibration.ensemble import CalibratorEnsemble
 
 from . import metrics, profiles
 
@@ -48,23 +48,39 @@ CalibratorRegistry.register("beta-binomial", BetaBinomialCalibrator)
 CalibratorRegistry.register("constant-prior", _ConstantCalibrator)
 CalibratorRegistry.register("ensemble", CalibratorEnsemble)
 
-from . import (  # noqa: E402
-    adversarial, aleatoric, autoselect, bench, conformal,
-    conformal_regression, coverage, decomposition, drift, epistemic, group,
-    imbalance, metrics, perclass, pipeline, profiles, registry,
-    risk_coverage, selective, sets, shift, viz,
+from . import (
+    adversarial,
+    aleatoric,
+    autoselect,
+    bench,
+    conformal,
+    conformal_regression,
+    coverage,
+    decomposition,
+    drift,
+    epistemic,
+    group,
+    imbalance,
+    perclass,
+    pipeline,
+    registry,
+    risk_coverage,
+    selective,
+    sets,
+    shift,
+    viz,
 )
 
 __all__ = [
+    "BetaBinomialCalibrator",
     "Calibrator",
+    "CalibratorEnsemble",
     "CalibratorRegistry",
     "IsotonicCalibrator",
-    "PlattCalibrator",
-    "TemperatureCalibrator",
     "OnlineCalibrator",
+    "PlattCalibrator",
     "SlidingWindowCalibrator",
-    "BetaBinomialCalibrator",
-    "CalibratorEnsemble",
+    "TemperatureCalibrator",
     "adversarial",
     "aleatoric",
     "autoselect",
@@ -77,14 +93,14 @@ __all__ = [
     "epistemic",
     "group",
     "imbalance",
+    "metrics",
+    "perclass",
+    "pipeline",
+    "profiles",
     "registry",
     "risk_coverage",
     "selective",
     "sets",
     "shift",
     "viz",
-    "metrics",
-    "perclass",
-    "pipeline",
-    "profiles",
 ]

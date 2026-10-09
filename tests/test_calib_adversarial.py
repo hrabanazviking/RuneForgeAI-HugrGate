@@ -39,7 +39,7 @@ def test_attack_shapes():
     assert all(v == pytest.approx(0.5) for v in under)
     assert overconfidence_attack(s, 0.0) == pytest.approx(s)
     shifted = bias_shift_attack(s, 0.1)
-    assert all(b >= a - 1e-12 for a, b in zip(s, shifted))
+    assert all(b >= a - 1e-12 for a, b in zip(s, shifted, strict=True))
     flipped = label_flip_attack(y, 0.5, seed=1)
     assert abs(sum(flipped) / len(flipped) - 0.5) < 0.1
     assert label_flip_attack(y, 0.0, seed=1) == y

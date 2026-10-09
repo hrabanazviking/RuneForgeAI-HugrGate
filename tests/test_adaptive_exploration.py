@@ -10,7 +10,6 @@ from hugrgate.adaptive.exploration import (
 )
 from hugrgate.errors import SpecError
 
-
 # --- success ---------------------------------------------------------------
 
 def test_config_defaults_are_sane():

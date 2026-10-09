@@ -15,7 +15,8 @@ with bisection inversion — no scipy dependency.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Sequence, Tuple
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -116,26 +117,26 @@ class BetaBinomialCalibrator(Calibrator):
         self.n_bins = int(n_bins)
         self.prior_a = float(prior_a)
         self.prior_b = float(prior_b)
-        self._pos: List[float] = [0.0] * self.n_bins
-        self._tot: List[float] = [0.0] * self.n_bins
+        self._pos: list[float] = [0.0] * self.n_bins
+        self._tot: list[float] = [0.0] * self.n_bins
 
     def _bin(self, score: float) -> int:
         b = int(score * self.n_bins)
         return min(self.n_bins - 1, max(0, b))
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "BetaBinomialCalibrator":
+            labels: Sequence[int]) -> BetaBinomialCalibrator:
         s, y = self._as_arrays(scores, labels)
         self._pos = [0.0] * self.n_bins
         self._tot = [0.0] * self.n_bins
-        for score, label in zip(s.tolist(), y.tolist()):
+        for score, label in zip(s.tolist(), y.tolist(), strict=True):
             b = self._bin(min(1.0, max(0.0, score)))
             self._tot[b] += 1.0
             self._pos[b] += label
         self._fitted = True
         return self
 
-    def _posterior(self, score: float) -> Tuple[float, float]:
+    def _posterior(self, score: float) -> tuple[float, float]:
         b = self._bin(min(1.0, max(0.0, float(score))))
         return (self.prior_a + self._pos[b], self.prior_b + self._tot[b] - self._pos[b])
 
@@ -148,7 +149,7 @@ class BetaBinomialCalibrator(Calibrator):
         return float(a / (a + b))
 
     def credible_interval(self, score: float,
-                          level: float = 0.9) -> Tuple[float, float]:
+                          level: float = 0.9) -> tuple[float, float]:
         """Equal-tailed ``level`` credible interval for the bin's true rate."""
         self._check_fitted()
         if not 0.0 < level < 1.0:
@@ -157,7 +158,7 @@ class BetaBinomialCalibrator(Calibrator):
         tail = (1.0 - level) / 2.0
         return (beta_quantile(tail, a, b), beta_quantile(1.0 - tail, a, b))
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {
             "n_bins": self.n_bins,
@@ -168,7 +169,7 @@ class BetaBinomialCalibrator(Calibrator):
         }
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "BetaBinomialCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> BetaBinomialCalibrator:
         obj = cls(n_bins=int(params["n_bins"]),
                   prior_a=float(params["prior_a"]),
                   prior_b=float(params["prior_b"]))

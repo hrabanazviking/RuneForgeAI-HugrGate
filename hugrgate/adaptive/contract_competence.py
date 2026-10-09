@@ -22,21 +22,21 @@ backend global → ``None``.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
-
-from hugrgate.errors import SpecError
-from hugrgate.spec import DecisionSpec
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 from hugrgate.adaptive.competence import (
     BackendCompetenceProfiles,
     CompetenceProfile,
 )
 from hugrgate.adaptive.telemetry import RouteEvent
+from hugrgate.errors import SpecError
+from hugrgate.spec import DecisionSpec
 
 __all__ = [
-    "contract_of_spec",
-    "contract_of_event",
     "PerContractCompetence",
+    "contract_of_event",
+    "contract_of_spec",
 ]
 
 
@@ -77,10 +77,10 @@ class PerContractCompetence:
     def __init__(self, *, success_threshold: float = 0.7) -> None:
         self._global = BackendCompetenceProfiles(
             success_threshold=success_threshold)
-        self._contracts: Dict[Tuple[str, str], CompetenceProfile] = {}
+        self._contracts: dict[tuple[str, str], CompetenceProfile] = {}
         self.success_threshold = self._global.success_threshold
 
-    def _key(self, backend: str, contract: str) -> Tuple[str, str]:
+    def _key(self, backend: str, contract: str) -> tuple[str, str]:
         if not backend or not contract:
             raise SpecError("backend and contract must be non-empty strings")
         return (backend, contract)
@@ -122,30 +122,30 @@ class PerContractCompetence:
             used += 1
         return used
 
-    def get(self, backend: str, contract: str) -> Optional[CompetenceProfile]:
+    def get(self, backend: str, contract: str) -> CompetenceProfile | None:
         profile = self._contracts.get((backend, contract))
         return CompetenceProfile.from_dict(profile.to_dict()) \
             if profile else None
 
     def get_with_fallback(self, backend: str,
-                          contract: str) -> Optional[CompetenceProfile]:
+                          contract: str) -> CompetenceProfile | None:
         """Exact contract profile → global backend profile → None."""
         exact = self.get(backend, contract)
         if exact is not None:
             return exact
         return self._global.get(backend)
 
-    def contracts(self) -> List[str]:
+    def contracts(self) -> list[str]:
         return sorted({contract for _, contract in self._contracts})
 
-    def ranked_in_contract(self, contract: str) -> List[CompetenceProfile]:
+    def ranked_in_contract(self, contract: str) -> list[CompetenceProfile]:
         profiles = [CompetenceProfile.from_dict(p.to_dict())
                     for (backend, c), p in self._contracts.items()
                     if c == contract]
         profiles.sort(key=lambda p: (-p.wilson_lower, p.backend))
         return profiles
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema": "adaptive-contract-competence/v1",
             "success_threshold": self.success_threshold,
@@ -157,7 +157,7 @@ class PerContractCompetence:
         }
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "PerContractCompetence":
+    def from_dict(cls, data: Mapping[str, Any]) -> PerContractCompetence:
         if data.get("schema") != "adaptive-contract-competence/v1":
             raise SpecError(
                 "unsupported contract-competence schema "

@@ -1,4 +1,4 @@
-"""Tests for slice 082 — conformal classification."""
+"""Tests for slice 082 - conformal classification."""
 
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ def _data(n: int, seed: int, n_classes: int = 4):
     p = np.exp(z) / np.exp(z).sum(axis=1, keepdims=True)
     labels_idx = (rng.random(n)[:, None] < p.cumsum(axis=1)).argmax(axis=1)
     names = [f"c{i}" for i in range(n_classes)]
-    probas = [dict(zip(names, row)) for row in p]
+    probas = [dict(zip(names, row, strict=True)) for row in p]
     labels = [names[i] for i in labels_idx]
     return probas, labels
 
 
 def test_conformal_coverage_guarantee():
-    # Well-specified probs: empirical coverage should sit at/above 1−α.
+    # Well-specified probs: empirical coverage should sit at/above 1-alpha.
     cal_probas, cal_labels = _data(1500, 1)
     test_probas, test_labels = _data(3000, 2)
     cc = ConformalClassifier(alpha=0.1).fit(cal_probas, cal_labels)

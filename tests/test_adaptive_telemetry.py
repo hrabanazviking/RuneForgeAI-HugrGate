@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 
 import pytest
 
@@ -64,7 +63,7 @@ def test_persistence_reload_merges_outcomes(tmp_path):
     assert reloaded.get("r1").quality == 0.4
     lines = open(path).read().strip().split("\n")
     assert len(lines) == 2  # route_event + outcome (append-only)
-    assert {json.loads(l)["kind"] for l in lines} == {"route_event", "outcome"}
+    assert {json.loads(line)["kind"] for line in lines} == {"route_event", "outcome"}
 
 def test_export_import_round_trip(tmp_path):
     store = TelemetryStore()

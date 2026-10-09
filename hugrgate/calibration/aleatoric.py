@@ -4,13 +4,13 @@ Aleatoric uncertainty = noise inherent in the data-generating process: no
 amount of modeling removes it.  These adapters *estimate* it from
 observables:
 
-- :func:`predictive_entropy` — entropy of one predictive distribution
+- :func:`predictive_entropy` - entropy of one predictive distribution
   (with a single model, the working aleatoric estimate);
-- :func:`bernoulli_noise` — ``p(1−p)``, the variance of a Bernoulli
+- :func:`bernoulli_noise` - ``p(1-p)``, the variance of a Bernoulli
   outcome: the irreducible noise at calibrated probability ``p``;
-- :func:`label_noise_estimate` — binned ``E[p(1−p)]`` over a labeled fit
+- :func:`label_noise_estimate` - binned ``E[p(1-p)]`` over a labeled fit
   set: the data's own noise floor as the calibrator sees it;
-- :func:`noise_floor_report` — bundles the estimate with the per-bin
+- :func:`noise_floor_report` - bundles the estimate with the per-bin
   detail into a JSON-serializable :class:`AleatoricReport`.
 
 Companion to slice 095 (epistemic adapters): together they cover both
@@ -19,8 +19,9 @@ halves of slice 094's decomposition from measurable quantities.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Mapping, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -39,10 +40,10 @@ from hugrgate.errors import CalibrationError
 
 __all__ = [
     "AleatoricReport",
-    "predictive_entropy",
     "bernoulli_noise",
     "label_noise_estimate",
     "noise_floor_report",
+    "predictive_entropy",
 ]
 
 _EPS = 1e-15
@@ -54,9 +55,9 @@ class AleatoricReport:
 
     adapter: str
     value: float
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -84,7 +85,7 @@ def bernoulli_noise(p: float) -> float:
 
 def label_noise_estimate(scores: Sequence[float], labels: Sequence[int],
                          n_bins: int = 10) -> float:
-    """Binned ``E[p(1−p)]``: the label noise floor visible in the fit data.
+    """Binned ``E[p(1-p)]``: the label noise floor visible in the fit data.
 
     Uses the empirical positive rate per score bin as ``p``.  A perfectly
     separable fit set gives ~0; pure noise gives ~0.25.
@@ -117,7 +118,7 @@ def noise_floor_report(scores: Sequence[float], labels: Sequence[int],
     y = np.asarray(list(labels), dtype=float)
     edges = np.linspace(0.0, 1.0, n_bins + 1)
     idx = np.clip(np.digitize(np.clip(s, 0.0, 1.0), edges[1:-1]), 0, n_bins - 1)
-    bins: List[Dict[str, float]] = []
+    bins: list[dict[str, float]] = []
     for b in range(n_bins):
         mask = idx == b
         n = int(mask.sum())

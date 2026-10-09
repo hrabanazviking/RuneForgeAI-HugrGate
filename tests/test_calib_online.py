@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import numpy as np
 import pytest
 
@@ -45,7 +47,7 @@ def test_online_monotone_and_bounded():
     grid = np.linspace(0.0, 1.0, 51)
     vals = cal.calibrate_batch(grid.tolist())
     assert all(0.0 <= v <= 1.0 for v in vals)
-    assert all(b >= a - 1e-12 for a, b in zip(vals, vals[1:]))
+    assert all(b >= a - 1e-12 for a, b in pairwise(vals))
     stats = cal.bin_stats()
     assert len(stats) == 8
     assert all(set(st) == {"bin", "weight", "positives", "rate"}

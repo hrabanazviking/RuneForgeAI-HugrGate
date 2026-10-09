@@ -9,17 +9,17 @@ density-ratio weights (:func:`density_ratio_weights`) and
 the target covariate distribution before fitting.
 
 **Label shift** (``P(y)`` changes, ``P(x|y)`` doesn't): estimate the target
-prior with the Saerens–Latinne–Decaestecker EM algorithm
+prior with the Saerens-Latinne-Decaestecker EM algorithm
 (:func:`em_target_prior`), then transport with the slice-089
 :func:`~hugrgate.calibration.imbalance.saerens_prior_correction`.
 
-All density estimates are binned histograms over the score axis — honest,
+All density estimates are binned histograms over the score axis - honest,
 dependency-free, and adequate for one-dimensional calibration scores.
 """
 
 from __future__ import annotations
 
-from typing import Callable, List, Sequence, Tuple
+from collections.abc import Callable, Sequence
 
 try:
     import numpy as np
@@ -39,16 +39,16 @@ from hugrgate.calibration.imbalance import saerens_prior_correction
 from hugrgate.errors import CalibrationError
 
 __all__ = [
+    "density_ratio_weights",
+    "em_target_prior",
     "psi",
     "psi_band",
-    "density_ratio_weights",
     "resample_for_shift",
-    "em_target_prior",
 ]
 
 
 def _histograms(source: np.ndarray, target: np.ndarray,
-                n_bins: int, smooth: float) -> Tuple[np.ndarray, np.ndarray,
+                n_bins: int, smooth: float) -> tuple[np.ndarray, np.ndarray,
                                                     np.ndarray]:
     lo = float(min(source.min(), target.min()))
     hi = float(max(source.max(), target.max()))
@@ -88,7 +88,7 @@ def psi_band(value: float) -> str:
 def density_ratio_weights(source: Sequence[float],
                           target: Sequence[float],
                           n_bins: int = 10,
-                          smooth: float = 0.5) -> List[float]:
+                          smooth: float = 0.5) -> list[float]:
     """Importance weight per source point: ``p_target(bin) / p_source(bin)``.
 
     Weights are normalized to mean 1.  Under pure covariate shift, fitting
@@ -111,7 +111,7 @@ def resample_for_shift(source_scores: Sequence[float],
                        source_labels: Sequence[int],
                        target_scores: Sequence[float],
                        n_bins: int = 10, seed: int = 0
-                       ) -> Tuple[List[float], List[int]]:
+                       ) -> tuple[list[float], list[int]]:
     """Resample the source fit set to mimic the target covariate mix."""
     _require_numpy()
     s = list(source_scores)

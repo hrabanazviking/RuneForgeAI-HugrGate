@@ -48,10 +48,10 @@ def test_hoeffding_bound_sane():
 def test_certificate_validates_good_and_bad_sets():
     rng = np.random.default_rng(5)
     names = ["a", "b", "c"]
-    probas = [dict(zip(names, rng.dirichlet([3, 3, 3]))) for _ in range(600)]
+    probas = [dict(zip(names, rng.dirichlet([3, 3, 3]), strict=True)) for _ in range(600)]
     labels = [names[int((rng.random() < np.cumsum(list(p.values()))).argmax())]
               for p in probas]
-    cc = ConformalClassifier(alpha=0.1).fit(probas[:300], labels[:300])
+    _cc = ConformalClassifier(alpha=0.1).fit(probas[:300], labels[:300])
     sets = [cumulative_set(p, 0.95) for p in probas[300:]]
     cert = validate_coverage(sets, labels[300:], target=0.9)
     assert isinstance(cert, CoverageCertificate)

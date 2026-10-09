@@ -4,22 +4,23 @@ Heavy imbalance breaks naive calibration two ways: the fit is dominated by
 the majority class, and the deployment prior often differs from the fit
 prior anyway.  This module provides the standard, honest toolkit:
 
-- :func:`rebalance` — resample a fit set to a target positive rate
+- :func:`rebalance` - resample a fit set to a target positive rate
   (minority oversampling / majority undersampling, seeded);
-- :func:`saerens_prior_correction` — Saerens–Latinne–Decaestecker prior
+- :func:`saerens_prior_correction` - Saerens-Latinne-Decaestecker prior
   correction: transport calibrated probabilities from the fit prior to the
   deployment prior without refitting;
-- :func:`fit_balanced` — rebalance + fit any :class:`Calibrator`, returning
+- :func:`fit_balanced` - rebalance + fit any :class:`Calibrator`, returning
   the fitted unit and an :class:`ImbalanceReport`;
-- :func:`stratified_metrics` — Brier/ECE computed separately on the
+- :func:`stratified_metrics` - Brier/ECE computed separately on the
   positive and negative strata, so minority-class miscalibration can't hide
   behind a good-looking average.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
-from typing import Any, Callable, Dict, List, Sequence, Tuple
+from typing import Any
 
 try:
     import numpy as np
@@ -43,9 +44,9 @@ from hugrgate.errors import CalibrationError
 
 __all__ = [
     "ImbalanceReport",
+    "fit_balanced",
     "rebalance",
     "saerens_prior_correction",
-    "fit_balanced",
     "stratified_metrics",
 ]
 
@@ -61,13 +62,13 @@ class ImbalanceReport:
     correction_applied: bool
     deploy_prior: float
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
 def rebalance(scores: Sequence[float], labels: Sequence[int],
               target_rate: float = 0.5,
-              seed: int = 0) -> Tuple[List[float], List[int]]:
+              seed: int = 0) -> tuple[list[float], list[int]]:
     """Resample to ``target_rate`` positives (seeded, with replacement)."""
     _require_numpy()
     if not 0.0 < target_rate < 1.0:
@@ -84,7 +85,7 @@ def rebalance(scores: Sequence[float], labels: Sequence[int],
         raise CalibrationError("rebalance needs both classes")
     rng = np.random.default_rng(seed)
     n = s.size
-    n_pos = int(round(n * target_rate))
+    n_pos = round(n * target_rate)
     n_neg = n - n_pos
     take_pos = rng.choice(pos_idx, size=n_pos, replace=True)
     take_neg = rng.choice(neg_idx, size=n_neg, replace=True)
@@ -117,7 +118,7 @@ def saerens_prior_correction(p_cal: float, fit_prior: float,
 def fit_balanced(factory: Callable[[], Calibrator],
                  scores: Sequence[float], labels: Sequence[int],
                  target_rate: float = 0.5, seed: int = 0,
-                 deploy_prior: float | None = None) -> Tuple[Calibrator,
+                 deploy_prior: float | None = None) -> tuple[Calibrator,
                                                              ImbalanceReport]:
     """Rebalance the fit set, fit the calibrator, record what was done.
 
@@ -147,7 +148,7 @@ def fit_balanced(factory: Callable[[], Calibrator],
 
 
 def stratified_metrics(y_true: Sequence[int], y_prob: Sequence[float],
-                       n_bins: int = 10) -> Dict[str, Dict[str, float]]:
+                       n_bins: int = 10) -> dict[str, dict[str, float]]:
     """Brier/ECE on the positive and negative strata separately."""
     _require_numpy()
     y = np.asarray(list(y_true), dtype=float)
@@ -156,7 +157,7 @@ def stratified_metrics(y_true: Sequence[int], y_prob: Sequence[float],
         raise CalibrationError("length mismatch")
     if y.size == 0:
         raise CalibrationError("empty inputs")
-    out: Dict[str, Dict[str, float]] = {}
+    out: dict[str, dict[str, float]] = {}
     for name, mask in (("positive", y == 1.0), ("negative", y == 0.0)):
         ys, ps = y[mask].astype(int).tolist(), p[mask].tolist()
         if not ys:

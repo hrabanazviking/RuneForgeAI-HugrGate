@@ -10,7 +10,7 @@ from hugrgate.adaptive.drift_detect import (
     AdaptiveDriftReport,
     AdaptiveRouteDriftDetector,
 )
-from hugrgate.adaptive.telemetry import RouteEvent, TelemetryStore
+from hugrgate.adaptive.telemetry import RouteEvent
 from hugrgate.errors import SpecError
 
 

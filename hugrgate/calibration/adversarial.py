@@ -18,8 +18,9 @@ collapses under mild attacks shouldn't ship.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Callable, Dict, List, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -43,11 +44,11 @@ from hugrgate.errors import CalibrationError
 
 __all__ = [
     "StressReport",
-    "overconfidence_attack",
-    "underconfidence_attack",
-    "label_flip_attack",
     "bias_shift_attack",
+    "label_flip_attack",
+    "overconfidence_attack",
     "stress_test",
+    "underconfidence_attack",
 ]
 
 
@@ -64,7 +65,7 @@ def _as_arrays(scores: Sequence[float],
 
 
 def overconfidence_attack(scores: Sequence[float],
-                          strength: float = 0.2) -> List[float]:
+                          strength: float = 0.2) -> list[float]:
     """Push scores away from 0.5 by ``strength`` (clipped to [0, 1])."""
     if not 0.0 <= strength <= 1.0:
         raise CalibrationError("strength must be in [0, 1]")
@@ -74,7 +75,7 @@ def overconfidence_attack(scores: Sequence[float],
 
 
 def underconfidence_attack(scores: Sequence[float],
-                           strength: float = 0.2) -> List[float]:
+                           strength: float = 0.2) -> list[float]:
     """Pull scores toward 0.5 by ``strength``."""
     if not 0.0 <= strength <= 1.0:
         raise CalibrationError("strength must be in [0, 1]")
@@ -84,7 +85,7 @@ def underconfidence_attack(scores: Sequence[float],
 
 
 def label_flip_attack(labels: Sequence[int], flip_rate: float = 0.1,
-                      seed: int = 0) -> List[int]:
+                      seed: int = 0) -> list[int]:
     """Flip each label independently with probability ``flip_rate``."""
     if not 0.0 <= flip_rate <= 1.0:
         raise CalibrationError("flip_rate must be in [0, 1]")
@@ -93,11 +94,11 @@ def label_flip_attack(labels: Sequence[int], flip_rate: float = 0.1,
         raise CalibrationError("labels must be 0/1")
     rng = np.random.default_rng(seed)
     flips = rng.random(len(y)) < flip_rate
-    return [1 - v if f else v for v, f in zip(y, flips)]
+    return [1 - v if f else v for v, f in zip(y, flips, strict=True)]
 
 
 def bias_shift_attack(scores: Sequence[float],
-                      shift: float = 0.1) -> List[float]:
+                      shift: float = 0.1) -> list[float]:
     """Add a systematic bias to every score (clipped to [0, 1])."""
     if not -1.0 <= shift <= 1.0:
         raise CalibrationError("shift must be in [-1, 1]")
@@ -110,10 +111,10 @@ class StressReport:
     """Per-attack degradation of one fitted calibrator."""
 
     calibrator_name: str
-    baseline: Dict[str, float]
-    attacks: List[Dict[str, Any]] = field(default_factory=list)
+    baseline: dict[str, float]
+    attacks: list[dict[str, Any]] = field(default_factory=list)
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     def worst_ece_degradation(self) -> float:
@@ -124,8 +125,8 @@ class StressReport:
 
 def stress_test(factory: Callable[[], Calibrator],
                 scores: Sequence[float], labels: Sequence[int],
-                attacks: Dict[str, Callable[[List[float], List[int]],
-                                            tuple[List[float], List[int]]]]
+                attacks: dict[str, Callable[[list[float], list[int]],
+                                            tuple[list[float], list[int]]]]
                 | None = None,
                 n_bins: int = 10) -> StressReport:
     """Fit on clean data; measure degradation under each attack."""

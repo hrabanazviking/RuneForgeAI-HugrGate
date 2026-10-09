@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import numpy as np
 import pytest
 
@@ -54,7 +56,7 @@ def test_saerens_correction_properties():
     # Monotone in p_cal, bounded in [0, 1].
     vals = [saerens_prior_correction(p / 100, 0.2, 0.6) for p in range(101)]
     assert all(0.0 <= v <= 1.0 for v in vals)
-    assert all(b >= a for a, b in zip(vals, vals[1:]))
+    assert all(b >= a for a, b in pairwise(vals))
     with pytest.raises(CalibrationError):
         saerens_prior_correction(0.5, 0.0, 0.5)
     with pytest.raises(CalibrationError):

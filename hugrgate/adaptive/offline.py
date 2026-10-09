@@ -24,13 +24,13 @@ before serving.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional, Sequence
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.bandit import ContextualBanditAdapter
 from hugrgate.adaptive.telemetry import RouteEvent
+from hugrgate.errors import SpecError
 
 __all__ = [
     "LearningDiagnostics",
@@ -49,13 +49,13 @@ class LearningDiagnostics:
     n_bad_propensity: int = 0
     n_clipped: int = 0
     effective_sample_size: float = 0.0
-    arms: List[str] = None  # type: ignore[assignment]
+    arms: list[str] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.arms is None:
             self.arms = []
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "n_events": self.n_events,
             "n_used": self.n_used,
@@ -95,7 +95,7 @@ class OfflinePolicyLearning:
     def diagnostics(self) -> LearningDiagnostics:
         return self._diagnostics
 
-    def _reward(self, event: RouteEvent) -> Optional[float]:
+    def _reward(self, event: RouteEvent) -> float | None:
         if event.outcome is not None and "quality" in event.outcome:
             return float(event.outcome["quality"])
         if event.immediate_quality:
@@ -107,7 +107,7 @@ class OfflinePolicyLearning:
         adapter = ContextualBanditAdapter(
             self.feature_names, alpha=self.alpha, ridge=self.ridge)
         diag = LearningDiagnostics()
-        weights: List[float] = []
+        weights: list[float] = []
         for event in events:
             diag.n_events += 1
             if event.shadow:

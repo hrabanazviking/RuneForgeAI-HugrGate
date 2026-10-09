@@ -4,13 +4,13 @@ Learning never stops, and neither does the world changing underneath
 it. :class:`AdaptiveRouteDriftDetector` watches two signals for
 distribution shift against a reference window:
 
-- **route drift** — the share of traffic each arm receives (a policy
+- **route drift** - the share of traffic each arm receives (a policy
   that suddenly routes 90% to one backend is telling you something);
-- **reward drift** — the distribution of observed outcome quality
+- **reward drift** - the distribution of observed outcome quality
   (the world getting harder, or easier, for everyone).
 
 Both use the Population Stability Index from :mod:`hugrgate.drift`
-(``PSI = Σ (live% − ref%) · ln(live% / ref%)``) with the same
+(``PSI = Σ (live% - ref%) · ln(live% / ref%)``) with the same
 industry-standard thresholds the calibration monitor uses
 (``PSI_WATCH = 0.10``, ``PSI_ALERT = 0.25``): one drift language across
 the whole gate.
@@ -18,16 +18,15 @@ the whole gate.
 :meth:`fit_reference` snapshots the reference window;
 :meth:`observe` compares a live window and returns an
 :class:`AdaptiveDriftReport` with per-signal PSI, severity, and an
-actionable advisory. Empty windows are refused — drift over nothing is
+actionable advisory. Empty windows are refused - drift over nothing is
 not "no drift", it's "no data".
 """
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.telemetry import RouteEvent
 from hugrgate.drift import (
@@ -37,6 +36,7 @@ from hugrgate.drift import (
     population_stability_index,
     recalibration_advisory,
 )
+from hugrgate.errors import SpecError
 
 __all__ = [
     "AdaptiveDriftReport",
@@ -44,7 +44,7 @@ __all__ = [
 ]
 
 
-def _route_shares(events: List[RouteEvent], arms: List[str]) -> List[float]:
+def _route_shares(events: list[RouteEvent], arms: list[str]) -> list[float]:
     counts = {arm: 0 for arm in arms}
     for event in events:
         if event.chosen in counts:
@@ -53,8 +53,8 @@ def _route_shares(events: List[RouteEvent], arms: List[str]) -> List[float]:
     return [counts[arm] / total for arm in arms]
 
 
-def _reward_histogram(events: List[RouteEvent],
-                      n_bins: int = 10) -> List[float]:
+def _reward_histogram(events: list[RouteEvent],
+                      n_bins: int = 10) -> list[float]:
     counts = [0] * n_bins
     usable = 0
     for event in events:
@@ -78,10 +78,10 @@ class AdaptiveDriftReport:
     severity: str  # "none" | "watch" | "action"
     n_reference: int
     n_live: int
-    arms: List[str] = field(default_factory=list)
+    arms: list[str] = field(default_factory=list)
     advisory: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "psi_route": self.psi_route,
             "psi_reward": self.psi_reward,
@@ -108,8 +108,8 @@ class AdaptiveRouteDriftDetector:
         self.watch_threshold = watch_threshold
         self.alert_threshold = alert_threshold
         self.reward_bins = reward_bins
-        self._reference: Optional[List[RouteEvent]] = None
-        self._arms: List[str] = []
+        self._reference: list[RouteEvent] | None = None
+        self._arms: list[str] = []
 
     @property
     def has_reference(self) -> bool:

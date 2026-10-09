@@ -26,9 +26,10 @@ import json
 import time
 import uuid
 from collections import OrderedDict
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional
+from typing import Any
 
 from hugrgate.errors import SpecError
 
@@ -48,7 +49,7 @@ def _require_jsonable(value: Any, name: str) -> None:
         json.dumps(value)
     except (TypeError, ValueError) as exc:
         raise SpecError(
-            f"telemetry field {name!r} is not JSON-serializable: {exc}")
+            f"telemetry field {name!r} is not JSON-serializable: {exc}") from exc
 
 
 @dataclass
@@ -66,10 +67,10 @@ class RouteEvent:
 
     request_id: str
     timestamp: float
-    spec: Dict[str, Any]
-    features: Dict[str, float]
-    candidates: List[str]
-    propensities: Dict[str, float]
+    spec: dict[str, Any]
+    features: dict[str, float]
+    candidates: list[str]
+    propensities: dict[str, float]
     chosen: str
     policy_version: str
     privacy_class: str
@@ -77,9 +78,9 @@ class RouteEvent:
     cost: float = 0.0
     energy_wh: float = 0.0
     immediate_quality: float = 0.0
-    outcome: Optional[Dict[str, Any]] = None
+    outcome: dict[str, Any] | None = None
     shadow: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.request_id, str) or not self.request_id:
@@ -134,20 +135,20 @@ class RouteEvent:
         return self.outcome is not None
 
     @property
-    def quality(self) -> Optional[float]:
+    def quality(self) -> float | None:
         """Best known quality: outcome label wins, else immediate."""
         if self.outcome is not None and "quality" in self.outcome:
             return float(self.outcome["quality"])
         return self.immediate_quality
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["schema"] = SCHEMA_VERSION
         data["kind"] = "route_event"
         return data
 
     @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> "RouteEvent":
+    def from_dict(cls, data: Mapping[str, Any]) -> RouteEvent:
         if data.get("schema") != SCHEMA_VERSION:
             raise SpecError(
                 f"unsupported telemetry schema {data.get('schema')!r}; "
@@ -169,14 +170,14 @@ class TelemetryStore:
     lines are immutable.
     """
 
-    def __init__(self, path: Optional[str] = None,
+    def __init__(self, path: str | None = None,
                  max_records: int = 100_000) -> None:
         if max_records <= 0:
             raise SpecError(
                 f"max_records must be positive, got {max_records}")
         self.path = Path(path) if path else None
         self.max_records = max_records
-        self._events: "OrderedDict[str, RouteEvent]" = OrderedDict()
+        self._events: OrderedDict[str, RouteEvent] = OrderedDict()
         if self.path is not None and self.path.exists():
             self._load()
 
@@ -230,7 +231,7 @@ class TelemetryStore:
 
     # -- reads ----------------------------------------------------------
 
-    def get(self, request_id: str) -> Optional[RouteEvent]:
+    def get(self, request_id: str) -> RouteEvent | None:
         event = self._events.get(request_id)
         return RouteEvent(**asdict(event)) if event else None
 
@@ -255,7 +256,7 @@ class TelemetryStore:
             if not event.labeled:
                 yield event
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         events = list(self._events.values())
         labeled = [e for e in events if e.labeled]
         return {
@@ -333,7 +334,7 @@ class TelemetryStore:
 
     @classmethod
     def import_file(cls, path: str,
-                    max_records: int = 100_000) -> "TelemetryStore":
+                    max_records: int = 100_000) -> TelemetryStore:
         """Load a store from an exported file (route_event lines only)."""
         store = cls(path=None, max_records=max_records)
         with open(path, encoding="utf-8") as fh:

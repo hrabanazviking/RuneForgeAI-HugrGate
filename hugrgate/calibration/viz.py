@@ -18,7 +18,8 @@ Every payload passes ``json.dumps`` — that invariant is tested.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -42,12 +43,12 @@ from hugrgate.calibration.metrics import (
 from hugrgate.errors import CalibrationError
 
 __all__ = [
-    "reliability_curve_data",
+    "calibration_dashboard",
     "confidence_histogram",
     "per_class_ece_bars",
+    "reliability_curve_data",
     "risk_coverage_points",
     "selective_curve_points",
-    "calibration_dashboard",
 ]
 
 
@@ -59,7 +60,7 @@ def _jsonable(payload: Any) -> Any:
 
 def reliability_curve_data(y_true: Sequence[int],
                            y_prob: Sequence[float],
-                           n_bins: int = 10) -> Dict[str, Any]:
+                           n_bins: int = 10) -> dict[str, Any]:
     """Reliability-diagram points + ideal diagonal + summary."""
     _require_numpy()
     bins = reliability_diagram(y_true, y_prob, n_bins)
@@ -80,7 +81,7 @@ def reliability_curve_data(y_true: Sequence[int],
 
 
 def confidence_histogram(probas: Sequence[Mapping[str, float]],
-                         n_bins: int = 10) -> Dict[str, Any]:
+                         n_bins: int = 10) -> dict[str, Any]:
     """Histogram of top-class confidences (detects over/under-confidence)."""
     _require_numpy()
     probas = list(probas)
@@ -100,7 +101,7 @@ def confidence_histogram(probas: Sequence[Mapping[str, float]],
 
 def per_class_ece_bars(y_true: Sequence[str],
                        probas: Sequence[Mapping[str, float]],
-                       n_bins: int = 10) -> Dict[str, Any]:
+                       n_bins: int = 10) -> dict[str, Any]:
     """One-vs-rest ECE per class for a bar chart."""
     _require_numpy()
     y_true = list(y_true)
@@ -120,7 +121,7 @@ def per_class_ece_bars(y_true: Sequence[str],
                       "n_samples": len(y_true)})
 
 
-def risk_coverage_points(curve: Sequence[Dict[str, float]]) -> Dict[str, Any]:
+def risk_coverage_points(curve: Sequence[dict[str, float]]) -> dict[str, Any]:
     """Normalized pass-through of a slice-087 risk-coverage curve."""
     rows = [{"coverage": float(r["coverage"]), "risk": float(r["risk"]),
              "threshold": float(r.get("threshold", 0.0))}
@@ -128,7 +129,7 @@ def risk_coverage_points(curve: Sequence[Dict[str, float]]) -> Dict[str, Any]:
     return _jsonable({"points": rows})
 
 
-def selective_curve_points(curve: Sequence[Dict[str, float]]) -> Dict[str, Any]:
+def selective_curve_points(curve: Sequence[dict[str, float]]) -> dict[str, Any]:
     """Normalized pass-through of a slice-086 selective-accuracy curve."""
     rows = [{"coverage": float(r["coverage"]),
              "accuracy": float(r["accuracy"]),
@@ -139,7 +140,7 @@ def selective_curve_points(curve: Sequence[Dict[str, float]]) -> Dict[str, Any]:
 
 def calibration_dashboard(y_true: Sequence[str],
                           probas: Sequence[Mapping[str, float]],
-                          n_bins: int = 10) -> Dict[str, Any]:
+                          n_bins: int = 10) -> dict[str, Any]:
     """Combined dashboard payload for one multiclass evaluation."""
     _require_numpy()
     y_true = list(y_true)
@@ -148,9 +149,9 @@ def calibration_dashboard(y_true: Sequence[str],
         raise CalibrationError("y_true/probas must be non-empty and aligned")
     classes = sorted({c for d in probas for c in d})
     # Binary view: top-class confidence vs. correctness.
-    y_bin: List[int] = []
-    p_bin: List[float] = []
-    for y, d in zip(y_true, probas):
+    y_bin: list[int] = []
+    p_bin: list[float] = []
+    for y, d in zip(y_true, probas, strict=True):
         top = max(d, key=lambda k: float(d[k]))
         y_bin.append(1 if top == y else 0)
         p_bin.append(float(d[top]))

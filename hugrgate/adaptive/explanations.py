@@ -2,22 +2,22 @@
 
 A router that cannot say *why* it chose an arm is a liability in
 review, incident response, and regulated settings.
-:class:`AdaptiveRouteExplainer` turns a routing decision's internals —
+:class:`AdaptiveRouteExplainer` turns a routing decision's internals -
 per-arm scores, feature contributions, competence profiles, objective
-weights — into a structured :class:`RouteExplanation` with both
+weights - into a structured :class:`RouteExplanation` with both
 machine-readable fields and a human-readable narrative.
 
 Explanation sources, in order of specificity:
 
-1. **Feature contributions** — when the caller supplies per-feature
+1. **Feature contributions** - when the caller supplies per-feature
    weights (e.g. the bandit's learned ``theta`` for the chosen arm),
-   ``contribution = weight × feature_value`` ranks what the context
+   ``contribution = weight x feature_value`` ranks what the context
    actually pushed on.
-2. **Score margins** — how far ahead the winner was, and who the
+2. **Score margins** - how far ahead the winner was, and who the
    runner-up was.
-3. **Competence context** — the winner's Wilson lower bound vs the
+3. **Competence context** - the winner's Wilson lower bound vs the
    field, when profiles are supplied.
-4. **Objective weights** — the value judgments behind the scores, when
+4. **Objective weights** - the value judgments behind the scores, when
    a multi-objective router is supplied.
 
 The explainer never invents causes: every sentence in ``text`` cites a
@@ -26,18 +26,18 @@ number present in the explanation. Unknowns are stated as unknowns.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any
 
+from hugrgate.adaptive.competence import BackendCompetenceProfiles
+from hugrgate.adaptive.cost_quality import RoutingCandidate
 from hugrgate.errors import SpecError
 
-from hugrgate.adaptive.cost_quality import RoutingCandidate
-from hugrgate.adaptive.competence import BackendCompetenceProfiles
-
 __all__ = [
+    "AdaptiveRouteExplainer",
     "FeatureContribution",
     "RouteExplanation",
-    "AdaptiveRouteExplainer",
 ]
 
 
@@ -50,7 +50,7 @@ class FeatureContribution:
     weight: float
     contribution: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "feature": self.feature,
             "value": self.value,
@@ -64,15 +64,15 @@ class RouteExplanation:
     """Why this arm won, in data and in words."""
 
     chosen: str
-    scores: Dict[str, float]
-    runner_up: Optional[str]
+    scores: dict[str, float]
+    runner_up: str | None
     margin: float
-    top_features: List[FeatureContribution] = field(default_factory=list)
-    competence_note: Optional[str] = None
-    objective_note: Optional[str] = None
+    top_features: list[FeatureContribution] = field(default_factory=list)
+    competence_note: str | None = None
+    objective_note: str | None = None
     text: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "chosen": self.chosen,
             "scores": dict(self.scores),
@@ -89,7 +89,7 @@ class AdaptiveRouteExplainer:
     """Build :class:`RouteExplanation` from decision internals."""
 
     def __init__(self, *,
-                 profiles: Optional[BackendCompetenceProfiles] = None,
+                 profiles: BackendCompetenceProfiles | None = None,
                  top_k_features: int = 3) -> None:
         if top_k_features < 1:
             raise SpecError(
@@ -99,9 +99,9 @@ class AdaptiveRouteExplainer:
 
     def explain(self, chosen: str,
                 scores: Mapping[str, float],
-                features: Optional[Mapping[str, float]] = None,
-                feature_weights: Optional[Mapping[str, float]] = None,
-                objective_note: Optional[str] = None) -> RouteExplanation:
+                features: Mapping[str, float] | None = None,
+                feature_weights: Mapping[str, float] | None = None,
+                objective_note: str | None = None) -> RouteExplanation:
         """Explain why ``chosen`` won given per-arm ``scores``."""
         score_map = dict(scores)
         if chosen not in score_map:
@@ -112,7 +112,7 @@ class AdaptiveRouteExplainer:
         runner_up = ordered[1][0] if len(ordered) > 1 else None
         margin = (ordered[0][1] - ordered[1][1]) if len(ordered) > 1 else 0.0
 
-        contributions: List[FeatureContribution] = []
+        contributions: list[FeatureContribution] = []
         if features is not None and feature_weights is not None:
             for name, value in features.items():
                 weight = feature_weights.get(name, 0.0)
@@ -159,7 +159,7 @@ class AdaptiveRouteExplainer:
         )
 
     def _competence_note(self, chosen: str,
-                         scores: Mapping[str, float]) -> Optional[str]:
+                         scores: Mapping[str, float]) -> str | None:
         if self.profiles is None:
             return None
         profile = self.profiles.get(chosen)

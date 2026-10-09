@@ -25,8 +25,9 @@ from __future__ import annotations
 import copy
 import json
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping
+from typing import Any
 
 from hugrgate.errors import SpecError
 
@@ -43,9 +44,9 @@ class Checkpoint:
     checkpoint_id: str
     created_at: float
     note: str
-    state: Dict[str, Any] = field(compare=False)
+    state: dict[str, Any] = field(compare=False)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "checkpoint_id": self.checkpoint_id,
             "created_at": self.created_at,
@@ -62,15 +63,15 @@ class RouterRollback:
             raise SpecError(
                 f"max_checkpoints must be >= 1, got {max_checkpoints}")
         self.max_checkpoints = max_checkpoints
-        self._checkpoints: List[Checkpoint] = []
-        self._audit: List[Dict[str, Any]] = []
+        self._checkpoints: list[Checkpoint] = []
+        self._audit: list[dict[str, Any]] = []
         self._counter = 0
 
     def __len__(self) -> int:
         return len(self._checkpoints)
 
     @staticmethod
-    def _validate_state(state: Mapping[str, Any]) -> Dict[str, Any]:
+    def _validate_state(state: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(state, Mapping):
             raise SpecError(
                 f"checkpoint state must be a mapping, got "
@@ -107,7 +108,7 @@ class RouterRollback:
         })
         return ckpt_id
 
-    def rollback(self, steps: int = 1) -> Dict[str, Any]:
+    def rollback(self, steps: int = 1) -> dict[str, Any]:
         """Restore the state from ``steps`` checkpoints back.
 
         The checkpoint stack is *not* truncated: after a rollback the
@@ -131,11 +132,11 @@ class RouterRollback:
         })
         return copy.deepcopy(target.state)
 
-    def history(self) -> List[Dict[str, Any]]:
+    def history(self) -> list[dict[str, Any]]:
         """Checkpoint ids in archive order (oldest first)."""
         return [c.to_dict() for c in self._checkpoints]
 
-    def audit_log(self) -> List[Dict[str, Any]]:
+    def audit_log(self) -> list[dict[str, Any]]:
         """Append-only record of checkpoints and rollbacks."""
         return [dict(entry) for entry in self._audit]
 

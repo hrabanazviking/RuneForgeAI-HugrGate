@@ -21,7 +21,8 @@ call :meth:`reset_alarm` to re-arm.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -51,10 +52,10 @@ __all__ = [
 class DriftReport:
     """Point-in-time view of the monitor (JSON-serializable)."""
 
-    def __init__(self, monitor: "CalibrationDriftMonitor"):
+    def __init__(self, monitor: CalibrationDriftMonitor):
         self._m = monitor
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         m = self._m
         return {
             "batches_seen": m.batches_seen,
@@ -86,18 +87,18 @@ class CalibrationDriftMonitor:
         self.ewma_alpha = float(ewma_alpha)
         self.min_std = float(min_std)
         self.n_bins = int(n_bins)
-        self._history: List[Dict[str, float]] = []
-        self._ewma: Dict[str, float] = {}
+        self._history: list[dict[str, float]] = []
+        self._ewma: dict[str, float] = {}
         self._alarmed = False
-        self._alarm_batch: Optional[int] = None
-        self._alarm_metric: Optional[str] = None
+        self._alarm_batch: int | None = None
+        self._alarm_metric: str | None = None
 
     @property
     def batches_seen(self) -> int:
         return len(self._history)
 
     @property
-    def history(self) -> List[Dict[str, float]]:
+    def history(self) -> list[dict[str, float]]:
         return [dict(h) for h in self._history]
 
     @property
@@ -105,14 +106,14 @@ class CalibrationDriftMonitor:
         return self._alarmed
 
     @property
-    def alarm_batch(self) -> Optional[int]:
+    def alarm_batch(self) -> int | None:
         return self._alarm_batch
 
     @property
-    def alarm_metric(self) -> Optional[str]:
+    def alarm_metric(self) -> str | None:
         return self._alarm_metric
 
-    def baseline_stats(self) -> Dict[str, float]:
+    def baseline_stats(self) -> dict[str, float]:
         _require_numpy()
         if self.batches_seen < self.baseline_batches:
             raise CalibrationError("baseline not yet established")
@@ -125,13 +126,13 @@ class CalibrationDriftMonitor:
                 max(vals.std(ddof=1), self.min_std))
         return out
 
-    def control_limits(self) -> Dict[str, float]:
+    def control_limits(self) -> dict[str, float]:
         stats = self.baseline_stats()
         return {m: stats[f"mean_{m}"] + self.k * stats[f"std_{m}"]
                 for m in ("brier", "ece")}
 
     def observe(self, scores: Sequence[float],
-                labels: Sequence[int]) -> Dict[str, float]:
+                labels: Sequence[int]) -> dict[str, float]:
         """Record one batch of calibrated outputs; update the alarm state."""
         _require_numpy()
         scores = list(scores)
@@ -144,7 +145,7 @@ class CalibrationDriftMonitor:
             "brier": brier_score(labels, scores),
             "ece": expected_calibration_error(labels, scores, self.n_bins),
         }
-        row: Dict[str, float] = {
+        row: dict[str, float] = {
             "batch": float(self.batches_seen),
             "n": float(len(scores)),
             **metrics,

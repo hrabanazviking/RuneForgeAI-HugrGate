@@ -1,4 +1,4 @@
-"""Slice 147 — adaptive-route explanations tests."""
+"""Slice 147 - adaptive-route explanations tests."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ from hugrgate.adaptive.competence import BackendCompetenceProfiles
 from hugrgate.adaptive.cost_quality import CostQualityObjective, RoutingCandidate
 from hugrgate.adaptive.explanations import (
     AdaptiveRouteExplainer,
-    FeatureContribution,
     RouteExplanation,
 )
 from hugrgate.errors import SpecError
@@ -43,7 +42,7 @@ def test_feature_contributions_ranked_by_impact():
         features={"x0": 1.0, "x1": 0.2, "bias": 1.0},
         feature_weights={"x0": 2.0, "x1": -5.0, "bias": 0.1})
     assert len(exp.top_features) == 2
-    # |−5.0×0.2|=1.0 < |2.0×1.0|=2.0 → x0 first.
+    # |-5.0x0.2|=1.0 < |2.0x1.0|=2.0 → x0 first.
     assert exp.top_features[0].feature == "x0"
     assert exp.top_features[0].contribution == pytest.approx(2.0)
     assert "x0" in exp.text

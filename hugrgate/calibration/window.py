@@ -15,7 +15,8 @@ no fit ever succeeded, :meth:`calibrate` raises).
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Callable, Deque, Dict, Optional, Sequence, Tuple
+from collections.abc import Callable, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -60,16 +61,16 @@ class SlidingWindowCalibrator(Calibrator):
         self.window_size = int(window_size)
         self.refit_every = int(refit_every)
         self.min_samples = int(min_samples)
-        self._window: Deque[Tuple[float, int]] = deque(maxlen=window_size)
-        self._inner: Optional[Calibrator] = None
+        self._window: deque[tuple[float, int]] = deque(maxlen=window_size)
+        self._inner: Calibrator | None = None
         self._since_refit = 0
         self.refit_count = 0
 
     # -- streaming -----------------------------------------------------
     def partial_fit(self, scores: Sequence[float],
-                    labels: Sequence[int]) -> "SlidingWindowCalibrator":
+                    labels: Sequence[int]) -> SlidingWindowCalibrator:
         s, y = self._as_arrays(scores, labels)
-        for score, label in zip(s.tolist(), y.tolist()):
+        for score, label in zip(s.tolist(), y.tolist(), strict=True):
             self._window.append((float(score), int(label)))
             self._since_refit += 1
         if self._since_refit >= self.refit_every:
@@ -93,7 +94,7 @@ class SlidingWindowCalibrator(Calibrator):
         return True
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "SlidingWindowCalibrator":
+            labels: Sequence[int]) -> SlidingWindowCalibrator:
         self._window.clear()
         self._inner = None
         self._since_refit = 0
@@ -121,14 +122,14 @@ class SlidingWindowCalibrator(Calibrator):
         return len(self._window)
 
     @property
-    def window_span(self) -> Optional[Tuple[float, float]]:
+    def window_span(self) -> tuple[float, float] | None:
         if not self._window:
             return None
         ss = [s for s, _ in self._window]
         return (min(ss), max(ss))
 
     # -- persistence ------------------------------------------------------
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         assert self._inner is not None
         return {
@@ -142,7 +143,7 @@ class SlidingWindowCalibrator(Calibrator):
         }
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "SlidingWindowCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> SlidingWindowCalibrator:
         # Imported late to avoid a hard dependency at module import time;
         # the factory is resolved through the registry by name.
         # (from ._base, not the package root — avoids an import cycle.)

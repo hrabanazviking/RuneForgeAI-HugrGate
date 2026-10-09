@@ -116,7 +116,6 @@ def test_non_context_mapping_rejected():
         ext.extract({"f": 1.0})
 
 def test_pipeline_contract_transform_batch():
-    import numpy as np
     ext = RouterFeatureExtractor()
     batch = ext.transform_batch([make_ctx(), make_ctx()])
     assert batch.shape == (2, 23)

@@ -13,7 +13,7 @@ pairs, so either can be derived from HugrGate decision logs.
 
 from __future__ import annotations
 
-from typing import Dict, List, Sequence
+from collections.abc import Sequence
 
 try:
     import numpy as np
@@ -31,10 +31,10 @@ def _require_numpy() -> None:
 from hugrgate.errors import CalibrationError
 
 __all__ = [
-    "selective_curve",
+    "accuracy_at_coverage",
     "area_under_selective_curve",
     "coverage_at_accuracy",
-    "accuracy_at_coverage",
+    "selective_curve",
 ]
 
 
@@ -58,7 +58,7 @@ def _check(confidences: Sequence[float],
 
 def selective_curve(confidences: Sequence[float],
                      correct: Sequence[int],
-                     n_points: int = 50) -> List[Dict[str, float]]:
+                     n_points: int = 50) -> list[dict[str, float]]:
     """Selective accuracy curve over ``n_points`` coverage levels.
 
     Each row: ``{threshold, coverage, accuracy, n}`` — the accuracy among
@@ -71,10 +71,10 @@ def selective_curve(confidences: Sequence[float],
     order = np.argsort(-c, kind="stable")
     cs, ys = c[order], y[order]
     n = c.size
-    rows: List[Dict[str, float]] = []
+    rows: list[dict[str, float]] = []
     for i in range(n_points):
         # Keep the top (i+1)/n_points fraction, at least one decision.
-        k = max(1, int(round(n * (i + 1) / n_points)))
+        k = max(1, round(n * (i + 1) / n_points))
         kept_c, kept_y = cs[:k], ys[:k]
         rows.append({
             "threshold": float(kept_c[-1]),
@@ -85,7 +85,7 @@ def selective_curve(confidences: Sequence[float],
     return rows
 
 
-def area_under_selective_curve(curve: Sequence[Dict[str, float]]) -> float:
+def area_under_selective_curve(curve: Sequence[dict[str, float]]) -> float:
     """Normalized area under the selective accuracy curve (trapezoid)."""
     rows = list(curve)
     if len(rows) < 2:
@@ -102,7 +102,7 @@ def area_under_selective_curve(curve: Sequence[Dict[str, float]]) -> float:
     return float(np.trapezoid(ys, xs))
 
 
-def accuracy_at_coverage(curve: Sequence[Dict[str, float]],
+def accuracy_at_coverage(curve: Sequence[dict[str, float]],
                          coverage: float) -> float:
     """Interpolated selective accuracy at a target coverage."""
     if not 0.0 < coverage <= 1.0:
@@ -113,7 +113,7 @@ def accuracy_at_coverage(curve: Sequence[Dict[str, float]],
     return float(np.interp(coverage, xs, ys))
 
 
-def coverage_at_accuracy(curve: Sequence[Dict[str, float]],
+def coverage_at_accuracy(curve: Sequence[dict[str, float]],
                          accuracy: float) -> float:
     """Largest coverage whose interpolated accuracy stays ≥ ``accuracy``."""
     if not 0.0 <= accuracy <= 1.0:

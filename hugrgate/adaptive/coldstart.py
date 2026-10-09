@@ -27,12 +27,12 @@ marketing number, and every shrinkage is auditable via
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
-
-from hugrgate.errors import SpecError
+from collections.abc import Sequence
+from typing import Any
 
 from hugrgate.adaptive.bandit import ContextualBanditAdapter
 from hugrgate.adaptive.competence import BackendCompetenceProfiles
+from hugrgate.errors import SpecError
 
 __all__ = [
     "ColdStartRouting",
@@ -83,7 +83,7 @@ class ColdStartRouting:
         k = self.prior_strength
         return (n * own + k * fleet) / (n + k)
 
-    def prior_report(self, arms: Sequence[str]) -> List[Dict[str, Any]]:
+    def prior_report(self, arms: Sequence[str]) -> list[dict[str, Any]]:
         """Auditable shrinkage detail per arm."""
         fleet = self._fleet_mean(arms)
         report = []
@@ -124,7 +124,7 @@ class ColdStartRouting:
         return scored[0][1]
 
     def seed_bandit(self, bandit: ContextualBanditAdapter,
-                    arms: Sequence[str]) -> Dict[str, float]:
+                    arms: Sequence[str]) -> dict[str, float]:
         """Seed a bandit's priors from shrunk competence means.
 
         Returns the per-arm prior mean used, for auditability.
@@ -132,7 +132,7 @@ class ColdStartRouting:
         arm_list = list(arms)
         if not arm_list:
             raise SpecError("seed_bandit needs at least one arm")
-        used: Dict[str, float] = {}
+        used: dict[str, float] = {}
         dim = bandit.dim
         for arm in arm_list:
             mean = self.shrunk_mean(arm, arm_list)
@@ -143,7 +143,7 @@ class ColdStartRouting:
             used[arm] = mean
         return used
 
-    def cold_arms(self, arms: Sequence[str]) -> List[str]:
+    def cold_arms(self, arms: Sequence[str]) -> list[str]:
         """Arms still below the maiden-voyage threshold."""
         out = []
         for arm in arms:

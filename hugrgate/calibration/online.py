@@ -19,7 +19,8 @@ so it works with the pipeline, registry, and auto-selection.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -67,7 +68,7 @@ def _pav_weighted(rates: np.ndarray, weights: np.ndarray) -> np.ndarray:
             if i > 0:
                 i -= 1
     out = np.empty(n)
-    for sw, swr, a, b in zip(sum_w, sum_wr, starts, ends):
+    for sw, swr, a, b in zip(sum_w, sum_wr, starts, ends, strict=True):
         out[a: b + 1] = swr / sw if sw > 0 else 0.0
     return out
 
@@ -89,8 +90,8 @@ class OnlineCalibrator(Calibrator):
         self.n_bins = int(n_bins)
         self.decay = float(decay)
         self.prior_strength = float(prior_strength)
-        self._pos: List[float] = [0.0] * self.n_bins
-        self._tot: List[float] = [0.0] * self.n_bins
+        self._pos: list[float] = [0.0] * self.n_bins
+        self._tot: list[float] = [0.0] * self.n_bins
         self._n_updates = 0
 
     def _bin(self, score: float) -> int:
@@ -98,13 +99,13 @@ class OnlineCalibrator(Calibrator):
         return min(self.n_bins - 1, max(0, b))
 
     def partial_fit(self, scores: Sequence[float],
-                    labels: Sequence[int]) -> "OnlineCalibrator":
+                    labels: Sequence[int]) -> OnlineCalibrator:
         """Incorporate one batch; old batches decay by ``self.decay``."""
         s, y = self._as_arrays(scores, labels)
         if self._n_updates:
             self._pos = [v * self.decay for v in self._pos]
             self._tot = [v * self.decay for v in self._tot]
-        for score, label in zip(s.tolist(), y.tolist()):
+        for score, label in zip(s.tolist(), y.tolist(), strict=True):
             b = self._bin(min(1.0, max(0.0, score)))
             self._tot[b] += 1.0
             self._pos[b] += label
@@ -113,7 +114,7 @@ class OnlineCalibrator(Calibrator):
         return self
 
     def fit(self, scores: Sequence[float],
-            labels: Sequence[int]) -> "OnlineCalibrator":
+            labels: Sequence[int]) -> OnlineCalibrator:
         self._pos = [0.0] * self.n_bins
         self._tot = [0.0] * self.n_bins
         self._n_updates = 0
@@ -142,7 +143,7 @@ class OnlineCalibrator(Calibrator):
         """Total decayed weight — how much history is still 'alive'."""
         return float(sum(self._tot))
 
-    def bin_stats(self) -> List[Dict[str, float]]:
+    def bin_stats(self) -> list[dict[str, float]]:
         self._check_fitted()
         rates = self._rates()
         return [
@@ -153,7 +154,7 @@ class OnlineCalibrator(Calibrator):
             for i in range(self.n_bins)
         ]
 
-    def get_params(self) -> Dict[str, Any]:
+    def get_params(self) -> dict[str, Any]:
         self._check_fitted()
         return {
             "n_bins": self.n_bins,
@@ -165,7 +166,7 @@ class OnlineCalibrator(Calibrator):
         }
 
     @classmethod
-    def from_params(cls, params: Dict[str, Any]) -> "OnlineCalibrator":
+    def from_params(cls, params: dict[str, Any]) -> OnlineCalibrator:
         obj = cls(n_bins=int(params["n_bins"]),
                   decay=float(params["decay"]),
                   prior_strength=float(params.get("prior_strength", 1.0)))

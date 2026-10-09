@@ -1,33 +1,34 @@
 """Calibration pipeline (architecture v2). Slice 076.
 
 What existed before this slice: three binary calibrators (Platt, isotonic,
-temperature), bare metrics, and versioned profiles — but no lifecycle around
+temperature), bare metrics, and versioned profiles - but no lifecycle around
 * fitting a calibrator: no fit-data diagnostics, no before/after comparison,
 no refusal to deploy a calibration that made things worse.
 
 This module adds that lifecycle without touching the existing calibrators:
 
-- :func:`validate_fit_data` — diagnostics + hard validation of a
+- :func:`validate_fit_data` - diagnostics + hard validation of a
   (scores, labels) fit set (both classes present, finite scores, sane size).
-- :class:`CalibrationPipeline` — wraps a calibrator factory, fits it,
+- :class:`CalibrationPipeline` - wraps a calibrator factory, fits it,
   records before/after Brier / log-loss / ECE / MCE, and produces a
   :class:`CalibrationReport` carrying provenance, the dataset hash, and an
   ``improved`` verdict.
-- :class:`CalibrationReport` — JSON-serializable, round-trippable; can seed
+- :class:`CalibrationReport` - JSON-serializable, round-trippable; can seed
   a :class:`~hugrgate.calibration.profiles.CalibrationProfile` via
   :meth:`CalibrationReport.as_profile_kwargs`.
 
 The pipeline *warns* (does not raise) when calibration fails to improve the
-metrics, because on near-perfect scores any map is noise — but
+metrics, because on near-perfect scores any map is noise - but
 :meth:`CalibrationPipeline.fit_strict` raises in that case for pipelines that
 want a hard gate.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -54,9 +55,9 @@ from hugrgate.errors import CalibrationError
 
 __all__ = [
     "MIN_FIT_SAMPLES",
-    "FitDiagnostics",
-    "CalibrationReport",
     "CalibrationPipeline",
+    "CalibrationReport",
+    "FitDiagnostics",
     "validate_fit_data",
 ]
 
@@ -76,7 +77,7 @@ class FitDiagnostics:
     positive_rate: float
     dataset_hash: str
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
@@ -87,7 +88,7 @@ def validate_fit_data(scores: Sequence[float],
 
     Checks: non-empty, length match, finite scores, 0/1 labels, at least
     ``min_samples`` rows, and *both* classes present (a calibrator fit on a
-    single class is degenerate — the map would be constant).
+    single class is degenerate - the map would be constant).
     """
     _require_numpy()
     s = np.asarray(list(scores), dtype=float)
@@ -126,21 +127,21 @@ class CalibrationReport:
     """Before/after record of one pipeline fit. JSON-serializable."""
 
     calibrator_name: str
-    calibrator_params: Dict[str, Any]
-    diagnostics: Dict[str, Any]
-    metrics_before: Dict[str, float]
-    metrics_after: Dict[str, float]
+    calibrator_params: dict[str, Any]
+    diagnostics: dict[str, Any]
+    metrics_before: dict[str, float]
+    metrics_after: dict[str, float]
     improved: bool
     created_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    provenance: Dict[str, Any] = field(default_factory=dict)
+    provenance: dict[str, Any] = field(default_factory=dict)
     notes: str = ""
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, d: Dict[str, Any]) -> "CalibrationReport":
+    def from_dict(cls, d: dict[str, Any]) -> CalibrationReport:
         return cls(
             calibrator_name=d["calibrator_name"],
             calibrator_params=dict(d["calibrator_params"]),
@@ -155,12 +156,12 @@ class CalibrationReport:
         )
 
     def improvement(self, metric: str) -> float:
-        """Absolute improvement (before − after) for a lower-is-better metric."""
+        """Absolute improvement (before - after) for a lower-is-better metric."""
         return float(self.metrics_before[metric] - self.metrics_after[metric])
 
 
 def _metrics_for(y: Sequence[int], p: Sequence[float],
-                 n_bins: int = 10) -> Dict[str, float]:
+                 n_bins: int = 10) -> dict[str, float]:
     return {
         "brier": brier_score(y, p),
         "log_loss": log_loss(y, p),
@@ -178,18 +179,18 @@ class CalibrationPipeline:
     """
 
     def __init__(self, factory: Callable[[], Calibrator],
-                 name: Optional[str] = None):
+                 name: str | None = None):
         probe = factory()
         if not isinstance(probe, Calibrator):
             raise CalibrationError(
                 "factory must return a Calibrator instance")
         self.factory = factory
         self.name = name or probe.name
-        self.calibrator: Optional[Calibrator] = None
-        self.report: Optional[CalibrationReport] = None
+        self.calibrator: Calibrator | None = None
+        self.report: CalibrationReport | None = None
 
     def fit(self, scores: Sequence[float], labels: Sequence[int],
-            provenance: Optional[Dict[str, Any]] = None,
+            provenance: dict[str, Any] | None = None,
             n_bins: int = 10) -> CalibrationReport:
         """Fit the calibrator and record the before/after report."""
         diag = validate_fit_data(scores, labels)
@@ -220,7 +221,7 @@ class CalibrationPipeline:
         return self.report
 
     def fit_strict(self, scores: Sequence[float], labels: Sequence[int],
-                   provenance: Optional[Dict[str, Any]] = None,
+                   provenance: dict[str, Any] | None = None,
                    n_bins: int = 10) -> CalibrationReport:
         """Like :meth:`fit` but raise if calibration did not improve things."""
         report = self.fit(scores, labels, provenance, n_bins)
@@ -230,7 +231,7 @@ class CalibrationPipeline:
                 f"before={report.metrics_before} after={report.metrics_after}")
         return report
 
-    def apply(self, scores: Sequence[float]) -> List[float]:
+    def apply(self, scores: Sequence[float]) -> list[float]:
         """Calibrate new scores with the fitted calibrator."""
         if self.calibrator is None:
             raise CalibrationError(

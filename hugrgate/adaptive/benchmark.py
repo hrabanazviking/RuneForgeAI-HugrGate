@@ -4,10 +4,10 @@ Claims about adaptive routing need a reproducible arena, not anecdotes.
 :class:`AdaptiveRoutingBenchmark` replays a synthetic-but-deterministic
 contextual scenario for ``rounds`` rounds and compares four policies:
 
-- ``uniform`` — random arm each round (the "no learning" floor);
-- ``round_robin`` — deterministic rotation (the naive-fair baseline);
-- ``static_first`` — always the first arm (the "don't bother" baseline);
-- ``adaptive`` — the LinUCB :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter`
+- ``uniform`` - random arm each round (the "no learning" floor);
+- ``round_robin`` - deterministic rotation (the naive-fair baseline);
+- ``static_first`` - always the first arm (the "don't bother" baseline);
+- ``adaptive`` - the LinUCB :class:`~hugrgate.adaptive.bandit.ContextualBanditAdapter`
   (slice 130) learning online from observed rewards.
 
 The scenario is a callable ``(rng, round_idx) -> (features, rewards)``
@@ -16,7 +16,7 @@ round; a default context-dependent scenario is provided
 (:func:`default_scenario`) where the best arm depends on the context, so
 a learning policy can genuinely beat the static baselines.
 
-:func:`run` returns a :class:`BenchmarkArtifact` — every number computed
+:func:`run` returns a :class:`BenchmarkArtifact` - every number computed
 from the replay, with the baselines' mean rewards stated explicitly so
 "adaptive beats X" is checkable, never asserted. :meth:`save` writes it
 as JSON; the checked-in artifact at
@@ -30,19 +30,19 @@ from __future__ import annotations
 import json
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Tuple
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.bandit import ContextualBanditAdapter
+from hugrgate.errors import SpecError
 
 __all__ = [
     "POLICIES",
-    "BenchmarkArtifact",
     "AdaptiveRoutingBenchmark",
-    "default_scenario",
+    "BenchmarkArtifact",
     "Scenario",
+    "default_scenario",
 ]
 
 #: Policies compared by the benchmark.
@@ -50,14 +50,14 @@ POLICIES = ("uniform", "round_robin", "static_first", "adaptive")
 
 #: ``(rng, round_idx) -> (features, {arm: true_reward})``.
 Scenario = Callable[[random.Random, int],
-                    Tuple[Dict[str, float], Dict[str, float]]]
+                    tuple[dict[str, float], dict[str, float]]]
 
 ARMS = ("arm_a", "arm_b", "arm_c")
 FEATURE_NAMES = ("x0", "x1", "bias")
 
 
 def default_scenario(rng: random.Random, round_idx: int
-                     ) -> Tuple[Dict[str, float], Dict[str, float]]:
+                     ) -> tuple[dict[str, float], dict[str, float]]:
     """Context-dependent rewards: the best arm depends on ``x0``.
 
     - ``arm_a`` is excellent when ``x0 > 0.5``, poor otherwise;
@@ -65,7 +65,7 @@ def default_scenario(rng: random.Random, round_idx: int
     - ``arm_c`` is a constant mediocre fallback.
 
     An optimal contextual policy earns 0.9 every round; uniform random
-    earns ~0.583. Gaussian noise (σ=0.05, clipped) keeps it honest.
+    earns ~0.583. Gaussian noise (sigma=0.05, clipped) keeps it honest.
     """
     del round_idx  # the scenario is stationary in time
     x0 = rng.random()
@@ -87,14 +87,14 @@ class BenchmarkArtifact:
     generated_at: float
     rounds: int
     seed: int
-    policies: Tuple[str, ...]
-    mean_reward: Dict[str, float]
-    total_reward: Dict[str, float]
-    pulls: Dict[str, Dict[str, int]]
+    policies: tuple[str, ...]
+    mean_reward: dict[str, float]
+    total_reward: dict[str, float]
+    pulls: dict[str, dict[str, int]]
     winner: str
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "generated_at": self.generated_at,
             "rounds": self.rounds,
@@ -135,7 +135,7 @@ class AdaptiveRoutingBenchmark:
         self.ridge = ridge
 
     def run(self, scenario: Scenario = default_scenario,
-            arms: Tuple[str, ...] = ARMS) -> BenchmarkArtifact:
+            arms: tuple[str, ...] = ARMS) -> BenchmarkArtifact:
         """Replay ``rounds`` rounds; return the measured artifact."""
         if not arms:
             raise SpecError("benchmark needs at least one arm")
@@ -143,7 +143,7 @@ class AdaptiveRoutingBenchmark:
         bandit = ContextualBanditAdapter(
             FEATURE_NAMES, alpha=self.alpha, ridge=self.ridge)
         totals = {p: 0.0 for p in POLICIES}
-        pulls: Dict[str, Dict[str, int]] = {
+        pulls: dict[str, dict[str, int]] = {
             p: {a: 0 for a in arms} for p in POLICIES}
         for round_idx in range(self.rounds):
             features, rewards = scenario(rng, round_idx)
@@ -187,6 +187,6 @@ class AdaptiveRoutingBenchmark:
         return path
 
     @staticmethod
-    def load(path: str) -> Dict[str, Any]:
+    def load(path: str) -> dict[str, Any]:
         with open(path, encoding="utf-8") as fh:
             return json.load(fh)

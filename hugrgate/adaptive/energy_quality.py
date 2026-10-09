@@ -20,10 +20,9 @@ power model to produce a reproducible energy artifact.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Dict
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.cost_quality import (
     RouteObjective,
@@ -33,6 +32,7 @@ from hugrgate.adaptive.latency_quality import (
     LatencyMeasurement,
     measure_latency,
 )
+from hugrgate.errors import SpecError
 
 __all__ = [
     "DEFAULT_LOCAL_WATTS",
@@ -69,7 +69,7 @@ class EnergyMeasurement:
     mean_wh: float
     p95_wh: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "latency": self.latency.to_dict(),
             "watts": self.watts,
@@ -118,7 +118,7 @@ class EnergyQualityObjective(RouteObjective):
                 - self.energy_weight
                 * (candidate.energy_wh / self.energy_scale))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "quality_weight": self.quality_weight,

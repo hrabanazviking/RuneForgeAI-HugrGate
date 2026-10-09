@@ -22,16 +22,16 @@ its counterfactual value (slice 144) beats the incumbent.
 from __future__ import annotations
 
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional, Sequence
-
-from hugrgate.errors import SpecError
+from typing import Any
 
 from hugrgate.adaptive.telemetry import RouteEvent, TelemetryStore
+from hugrgate.errors import SpecError
 
 __all__ = [
-    "ShadowDivergence",
     "RouterShadowMode",
+    "ShadowDivergence",
 ]
 
 
@@ -41,7 +41,7 @@ class ShadowDivergence:
 
     n_shadow: int
     n_diverged: int
-    per_arm_agreement: Dict[str, Dict[str, int]]  # served -> {shadow: n}
+    per_arm_agreement: dict[str, dict[str, int]]  # served -> {shadow: n}
 
     @property
     def divergence_rate(self) -> float:
@@ -49,7 +49,7 @@ class ShadowDivergence:
             return 0.0
         return self.n_diverged / self.n_shadow
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "n_shadow": self.n_shadow,
             "n_diverged": self.n_diverged,
@@ -79,9 +79,9 @@ class RouterShadowMode:
                       propensities: Mapping[str, float],
                       shadow_choice: str,
                       served_choice: str,
-                      spec: Optional[Mapping[str, Any]] = None,
+                      spec: Mapping[str, Any] | None = None,
                       privacy_class: str = "standard",
-                      request_id: Optional[str] = None) -> Optional[str]:
+                      request_id: str | None = None) -> str | None:
         """Log the shadow decision. Returns the request_id, or None when
         shadow mode is disabled (nothing is logged)."""
         if not self.enabled:
@@ -113,7 +113,7 @@ class RouterShadowMode:
         """Agreement between shadow choices and served choices."""
         n_shadow = 0
         n_diverged = 0
-        agreement: Dict[str, Dict[str, int]] = {}
+        agreement: dict[str, dict[str, int]] = {}
         for event in self.store.events():
             if not event.shadow:
                 continue
@@ -129,7 +129,7 @@ class RouterShadowMode:
         return ShadowDivergence(n_shadow=n_shadow, n_diverged=n_diverged,
                                 per_arm_agreement=agreement)
 
-    def shadow_choices_for(self, served_choice: str) -> List[str]:
+    def shadow_choices_for(self, served_choice: str) -> list[str]:
         """Shadow arms chosen when ``served_choice`` was served."""
         return [e.chosen for e in self.store.events()
                 if e.shadow and e.metadata.get("served_choice")

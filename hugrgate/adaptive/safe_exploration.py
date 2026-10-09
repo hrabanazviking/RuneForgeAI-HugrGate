@@ -25,14 +25,14 @@ it by construction rather than by sampling luck.
 from __future__ import annotations
 
 import random
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Dict, List, Mapping, Optional, Sequence
-
-from hugrgate.errors import BackendUnavailable, SpecError
-from hugrgate.policy import DecisionPolicy
+from typing import Any
 
 from hugrgate.adaptive.cost_quality import RoutingCandidate
 from hugrgate.adaptive.exploration import ExplorationControls
+from hugrgate.errors import BackendUnavailable, SpecError
+from hugrgate.policy import DecisionPolicy
 
 __all__ = [
     "SafeChoice",
@@ -46,9 +46,9 @@ class SafeChoice:
 
     arm: str
     explored: bool
-    eligible_arms: List[str]
+    eligible_arms: list[str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "arm": self.arm,
             "explored": self.explored,
@@ -60,7 +60,7 @@ class SafeExploration:
     """Exploration confined to policy-permitted arms."""
 
     def __init__(self, controls: ExplorationControls,
-                 seed: Optional[int] = None) -> None:
+                 seed: int | None = None) -> None:
         if not isinstance(controls, ExplorationControls):
             raise SpecError(
                 "SafeExploration needs ExplorationControls, got "
@@ -69,7 +69,7 @@ class SafeExploration:
         self._rng = random.Random(seed)
 
     def eligible(self, candidates: Sequence[RoutingCandidate],
-                 policy: DecisionPolicy) -> List[RoutingCandidate]:
+                 policy: DecisionPolicy) -> list[RoutingCandidate]:
         """Candidates the policy permits — the only explorable set."""
         if not isinstance(policy, DecisionPolicy):
             raise SpecError(
@@ -90,7 +90,7 @@ class SafeExploration:
         return eligible
 
     def require_eligible(self, candidates: Sequence[RoutingCandidate],
-                         policy: DecisionPolicy) -> List[RoutingCandidate]:
+                         policy: DecisionPolicy) -> list[RoutingCandidate]:
         eligible = self.eligible(candidates, policy)
         if not eligible:
             raise BackendUnavailable(

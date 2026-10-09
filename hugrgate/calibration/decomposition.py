@@ -3,9 +3,9 @@
 Total predictive uncertainty splits into two principled parts (Depeweg et
 al.; Kendall & Gal):
 
-- **aleatoric** — expected entropy of the members: noise inherent in the
+- **aleatoric** - expected entropy of the members: noise inherent in the
   data, irreducible by more modeling;
-- **epistemic** — mutual information between the prediction and the model
+- **epistemic** - mutual information between the prediction and the model
   identity: disagreement *between* members, reducible with more data or
   better models;
 
@@ -13,16 +13,17 @@ with ``total = entropy(mean distribution) = aleatoric + epistemic``.
 
 :func:`decompose` takes an ensemble's predictive distributions (one
 probability vector per member) and returns an :class:`UncertaintyBreakdown`.
-Feed it members' calibrated outputs — e.g. per-class vectors from
+Feed it members' calibrated outputs - e.g. per-class vectors from
 :class:`~hugrgate.calibration.perclass.PerClassCalibrator` variants or
-backend ensembles — and the epistemic term tells you when the system is
+backend ensembles - and the epistemic term tells you when the system is
 guessing *about its own knowledge*.
 """
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any
 
 try:
     import numpy as np
@@ -63,20 +64,20 @@ class UncertaintyBreakdown:
     n_members: int
     n_classes: int
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
 def decompose(predictions: Sequence[Sequence[float]]) -> UncertaintyBreakdown:
     """Decompose an ensemble's predictive distributions.
 
-    ``predictions``: one probability vector per member (members × classes).
+    ``predictions``: one probability vector per member (members x classes).
     """
     _require_numpy()
     mat = np.asarray([[float(v) for v in row] for row in predictions],
                      dtype=float)
     if mat.ndim != 2 or mat.shape[0] == 0 or mat.shape[1] == 0:
-        raise CalibrationError("need a non-empty members × classes matrix")
+        raise CalibrationError("need a non-empty members x classes matrix")
     if np.any(~np.isfinite(mat)):
         raise CalibrationError("predictions must be finite")
     if np.any(mat < 0.0):

@@ -1,16 +1,16 @@
 """Split-conformal classification. Slice 082.
 
 Where calibration asks "is 0.8 really 80%?", conformal prediction asks "which
-set of labels covers the truth with probability ≥ 1−α?"  :class:`ConformalClassifier`
+set of labels covers the truth with probability ≥ 1-alpha?"  :class:`ConformalClassifier`
 implements split (inductive) conformal prediction for classifiers:
 
-- nonconformity score ``s(x, y) = 1 − p̂(y | x)`` on a held-out calibration
+- nonconformity score ``s(x, y) = 1 - p̂(y | x)`` on a held-out calibration
   fold;
-- threshold ``q̂`` = the ``⌈(n+1)(1−α)⌉/n`` quantile of those scores;
-- prediction set ``{c : p̂(c | x) ≥ 1 − q̂}``.
+- threshold ``q̂`` = the ``⌈(n+1)(1-alpha)⌉/n`` quantile of those scores;
+- prediction set ``{c : p̂(c | x) ≥ 1 - q̂}``.
 
 Under exchangeability of calibration and test data, the set covers the true
-label with probability at least ``1 − α`` (finite-sample guarantee).  An
+label with probability at least ``1 - alpha`` (finite-sample guarantee).  An
 optional Mondrian (group-conditional) mode fits one threshold per group for
 group-conditional coverage.
 
@@ -22,7 +22,7 @@ abstraction on top.
 from __future__ import annotations
 
 import math
-from typing import Dict, FrozenSet, List, Mapping, Optional, Sequence
+from collections.abc import Mapping, Sequence
 
 try:
     import numpy as np
@@ -45,9 +45,9 @@ __all__ = [
 
 
 def _quantile(scores: np.ndarray, alpha: float) -> float:
-    """⌈(n+1)(1−α)⌉/n quantile (the conformal finite-sample correction)."""
+    """⌈(n+1)(1-alpha)⌉/n quantile (the conformal finite-sample correction)."""
     n = scores.size
-    k = int(math.ceil((n + 1) * (1.0 - alpha)))
+    k = math.ceil((n + 1) * (1.0 - alpha))
     k = min(n, max(1, k))
     return float(np.sort(scores)[k - 1])
 
@@ -59,8 +59,8 @@ class ConformalClassifier:
         if not 0.0 < alpha < 1.0:
             raise CalibrationError("alpha must be in (0, 1)")
         self.alpha = float(alpha)
-        self._thresholds: Dict[str, float] = {}
-        self._classes: List[str] = []
+        self._thresholds: dict[str, float] = {}
+        self._classes: list[str] = []
         self._fitted = False
 
     @property
@@ -69,7 +69,7 @@ class ConformalClassifier:
 
     def fit(self, probas: Sequence[Mapping[str, float]],
             labels: Sequence[str],
-            groups: Optional[Sequence[str]] = None) -> "ConformalClassifier":
+            groups: Sequence[str] | None = None) -> ConformalClassifier:
         """Fit thresholds on a held-out calibration fold.
 
         ``groups`` enables Mondrian (group-conditional) conformal: one
@@ -88,8 +88,8 @@ class ConformalClassifier:
         if len(group_ids) != len(probas):
             raise CalibrationError("groups length mismatch")
 
-        by_group: Dict[str, List[float]] = {}
-        for d, y, g in zip(probas, labels, group_ids):
+        by_group: dict[str, list[float]] = {}
+        for d, y, g in zip(probas, labels, group_ids, strict=True):
             if y not in d:
                 raise CalibrationError(
                     f"true label {y!r} missing from a proba dict")
@@ -101,7 +101,7 @@ class ConformalClassifier:
         self._fitted = True
         return self
 
-    def _threshold_for(self, group: Optional[str]) -> float:
+    def _threshold_for(self, group: str | None) -> float:
         if not self._fitted:
             raise CalibrationError("ConformalClassifier used before fit")
         key = "__global__" if group is None else str(group)
@@ -110,11 +110,11 @@ class ConformalClassifier:
         except KeyError:
             raise CalibrationError(
                 f"no conformal threshold for group {group!r}; "
-                f"known: {sorted(self._thresholds)}")
+                f"known: {sorted(self._thresholds)}") from None
 
     def predict_set(self, proba: Mapping[str, float],
-                    group: Optional[str] = None) -> FrozenSet[str]:
-        """Prediction set with marginal (or group-conditional) 1−α coverage."""
+                    group: str | None = None) -> frozenset[str]:
+        """Prediction set with marginal (or group-conditional) 1-alpha coverage."""
         q = self._threshold_for(group)
         cutoff = 1.0 - q
         chosen = {c for c, p in proba.items() if float(p) >= cutoff}
@@ -125,32 +125,32 @@ class ConformalClassifier:
         return frozenset(chosen)
 
     def predict_sets(self, probas: Sequence[Mapping[str, float]],
-                     groups: Optional[Sequence[str]] = None
-                     ) -> List[FrozenSet[str]]:
+                     groups: Sequence[str] | None = None
+                     ) -> list[frozenset[str]]:
         probas = list(probas)
         group_list = ([None] * len(probas) if groups is None
                       else list(groups))
         if len(group_list) != len(probas):
             raise CalibrationError("groups length mismatch")
         return [self.predict_set(d, g)
-                for d, g in zip(probas, group_list)]
+                for d, g in zip(probas, group_list, strict=True)]
 
     def empirical_coverage(self, probas: Sequence[Mapping[str, float]],
                            labels: Sequence[str],
-                           groups: Optional[Sequence[str]] = None) -> float:
+                           groups: Sequence[str] | None = None) -> float:
         """Fraction of prediction sets containing the true label."""
         sets = self.predict_sets(probas, groups)
         labels = list(labels)
         if len(sets) != len(labels):
             raise CalibrationError("probas/labels length mismatch")
-        hits = sum(1 for s, y in zip(sets, labels) if y in s)
+        hits = sum(1 for s, y in zip(sets, labels, strict=True) if y in s)
         return hits / len(sets) if sets else 0.0
 
     def mean_set_size(self, probas: Sequence[Mapping[str, float]],
-                      groups: Optional[Sequence[str]] = None) -> float:
+                      groups: Sequence[str] | None = None) -> float:
         sets = self.predict_sets(probas, groups)
         return sum(len(s) for s in sets) / len(sets) if sets else 0.0
 
     @property
-    def thresholds(self) -> Dict[str, float]:
+    def thresholds(self) -> dict[str, float]:
         return dict(self._thresholds)

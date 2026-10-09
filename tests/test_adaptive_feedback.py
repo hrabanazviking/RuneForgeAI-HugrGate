@@ -48,7 +48,7 @@ def test_outcome_labels_are_the_documented_set():
     assert store.get("r1").outcome["label"] == "failure"
 
 def test_label_optional():
-    store, api = make_store_with_event()
+    _store, api = make_store_with_event()
     rec = api.record_outcome("r1", quality=0.5)
     assert rec.label is None
 

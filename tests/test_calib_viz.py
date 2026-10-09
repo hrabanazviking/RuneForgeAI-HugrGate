@@ -26,7 +26,7 @@ def _data(n: int = 500, seed: int = 0):
     z = rng.normal(0, 1.0, (n, 3))
     p = np.exp(z) / np.exp(z).sum(axis=1, keepdims=True)
     names = ["a", "b", "c"]
-    probas = [dict(zip(names, row)) for row in p]
+    probas = [dict(zip(names, row, strict=True)) for row in p]
     labels = [names[int((rng.random() < row.cumsum()).argmax())]
               for row in p]
     return labels, probas
@@ -48,7 +48,7 @@ def test_reliability_curve_data():
 
 
 def test_confidence_histogram():
-    labels, probas = _data()
+    _labels, probas = _data()
     h = confidence_histogram(probas, n_bins=5)
     assert len(h["bins"]) == 5
     assert sum(b["count"] for b in h["bins"]) == 500
