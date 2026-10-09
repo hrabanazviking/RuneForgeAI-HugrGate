@@ -44,6 +44,7 @@ from hugrgate.ensemble.blending import (
     log_loss,
     project_simplex,
 )
+from hugrgate.ensemble.caching import CachedEnsemble, EnsembleCache
 from hugrgate.ensemble.calibration import (
     EnsembleCalibrator,
     expected_calibration_error,
@@ -140,6 +141,8 @@ __all__ = [
     "log_loss",
     "EnsembleCalibrator",
     "expected_calibration_error",
+    "CachedEnsemble",
+    "EnsembleCache",
     "ExpertRouter",
     "moe_combine",
     "ReliabilityTracker",
