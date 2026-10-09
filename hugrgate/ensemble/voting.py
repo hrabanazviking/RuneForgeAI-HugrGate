@@ -12,8 +12,9 @@
 - **weighted** (104): hard voting where each ballot counts with its
   member weight; the winner is the argmax of weighted scores and its
   probability is the weighted vote share.
-
-Slice 105 adds confidence-weighted voting here.
+- **confidence** (105): like weighted, but each ballot's weight is
+  the member's own reported probability (times its base weight) — a
+  confident minority can overrule an unsure majority.
 
 All combiners share the contract from :mod:`hugrgate.ensemble.base`:
 never raise on ordinary disagreement, always return a valid
@@ -40,6 +41,7 @@ __all__ = [
     "soft_voting",
     "hard_voting",
     "weighted_voting",
+    "confidence_weighted_voting",
 ]
 
 
@@ -164,6 +166,62 @@ def weighted_voting(votes: List[MemberVote],
         winner_share=share,
         extra={"weighted_tally": dict(scores)},
         model="ensemble:weighted",
+    )
+
+
+def confidence_weighted_voting(votes: List[MemberVote],
+                               ctx: StrategyContext) -> DecisionResult:
+    """Ballots weighted by each member's own reported confidence.
+
+    Effective weight ``eᵢ = base_weightᵢ × pᵢ`` where ``pᵢ`` is the
+    member's self-reported probability for its voted value; the winner
+    is the argmax of ``Σ eᵢ·[valueᵢ == v]`` and its probability is the
+    confidence-weighted share. A confident minority can overrule an
+    unsure majority — which is exactly the point: members that doubt
+    their own vote count less.
+
+    Assumption (documented, tested): member probabilities are at least
+    rank-calibrated — higher self-reported confidence must tend to mean
+    higher correctness — otherwise this strategy amplifies the most
+    overconfident member.
+    """
+    require_discrete_spec(ctx.spec, "confidence")
+    ballots = _ballots(votes)
+    if not ballots:
+        raise BackendError("confidence voting: no countable ballots")
+    effective = [v.weight * v.probability for v in ballots]
+    total_e = sum(effective)
+    if total_e <= 0:
+        raise BackendError(
+            "confidence voting: total confidence weight must be "
+            f"positive, got {total_e}")
+    scores: Dict[str, float] = {}
+    first_seen: Dict[str, int] = {}
+    for i, v in enumerate(ballots):
+        key = str(v.value)
+        scores[key] = scores.get(key, 0.0) + effective[i]
+        if key not in first_seen:
+            first_seen[key] = i
+    peak = max(scores.values())
+    tied = [k for k, s in scores.items() if s == peak]
+    winner = break_tie(tied, scores, first_seen)
+    share = scores[winner] / total_e
+    space = ctx.spec.value_space()
+    distribution = {opt: scores.get(opt, 0.0) / total_e for opt in space}
+    return finalize_result(
+        strategy="confidence",
+        spec=ctx.spec,
+        votes=votes,
+        weights={v.backend: v.weight for v in ballots},
+        value=winner,
+        probability=share,
+        distribution=distribution,
+        uncertainty=1.0 - share,
+        winner_share=share,
+        extra={"confidence_scores": dict(scores),
+               "effective_weights": {v.backend: effective[i]
+                                     for i, v in enumerate(ballots)}},
+        model="ensemble:confidence",
     )
 
 

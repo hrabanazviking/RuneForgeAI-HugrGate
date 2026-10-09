@@ -29,6 +29,7 @@ from hugrgate.ensemble.base import (
     shannon_entropy,
 )
 from hugrgate.ensemble.voting import (
+    confidence_weighted_voting,
     hard_voting,
     soft_voting,
     weighted_voting,
@@ -54,4 +55,5 @@ __all__ = [
     "soft_voting",
     "hard_voting",
     "weighted_voting",
+    "confidence_weighted_voting",
 ]
