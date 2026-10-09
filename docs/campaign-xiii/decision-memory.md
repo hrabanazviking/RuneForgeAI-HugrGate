@@ -173,3 +173,11 @@ it into an opaque agent.
   when unlabeled, serving backends, mean probability, first/last seen).
 - Tests: `tests/test_memory_contract_history.py` (8 tests, incl.
   propagation across all five privacy classes).
+
+### Slice 314 — Domain history profiles
+- `hugrgate/memory/domain_profiles.py`: `domain_for()` resolves
+  spec-metadata > record-metadata > `"default"`; `domain_profiles()`
+  aggregates per-domain `DomainProfile` (volume, acceptance rate,
+  outcome distribution, success rate, top-3 backends, spec-type mix,
+  mean probability, decay-weighted activity, first/last seen).
+- Tests: `tests/test_memory_domain_profiles.py` (9 tests).

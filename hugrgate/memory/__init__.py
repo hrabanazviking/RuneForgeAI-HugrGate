@@ -32,6 +32,12 @@ from hugrgate.memory.decay import (
     effective_count,
     half_life_for_horizon,
 )
+from hugrgate.memory.domain_profiles import (
+    DEFAULT_DOMAIN,
+    DomainProfile,
+    domain_for,
+    domain_profiles,
+)
 from hugrgate.memory.frequency import (
     FrequencyEntry,
     FrequencyTable,
@@ -67,10 +73,12 @@ from hugrgate.memory.similarity import (
 )
 
 __all__ = [
+    "DEFAULT_DOMAIN",
     "OUTCOME_KINDS",
     "BackendHistory",
     "ContractHistory",
     "DecisionHistory",
+    "DomainProfile",
     "Episode",
     "FrequencyEntry",
     "FrequencyTable",
@@ -95,6 +103,8 @@ __all__ = [
     "count_by",
     "decay_weight",
     "decayed_mean",
+    "domain_for",
+    "domain_profiles",
     "drop_backend",
     "drop_forbidden",
     "drop_unaccepted",
