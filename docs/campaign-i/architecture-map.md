@@ -78,6 +78,7 @@ flowchart TD
     abstain --> policy
     abstain --> result
     abstain --> spec
+    backend --> errors
     backend --> result
     backend --> spec
     backends_boosting --> backends_logreg
@@ -231,6 +232,7 @@ flowchart TD
 | `abstain` | `policy` | no |
 | `abstain` | `result` | no |
 | `abstain` | `spec` | no |
+| `backend` | `errors` | no |
 | `backend` | `result` | no |
 | `backend` | `spec` | no |
 | `backends.boosting` | `backends.logreg` | no |

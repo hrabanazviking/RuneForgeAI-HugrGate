@@ -34,8 +34,8 @@ class HugrGate:
         self.registry = registry or BackendRegistry()
         self.provenance = ProvenanceStore()
 
-    def register(self, backend: Backend) -> None:
-        self.registry.register(backend)
+    def register(self, backend: Backend, *, replace: bool = False) -> None:
+        self.registry.register(backend, replace=replace)
 
     def _select_backend(self, spec: DecisionSpec,
                         policy: DecisionPolicy) -> Backend:
