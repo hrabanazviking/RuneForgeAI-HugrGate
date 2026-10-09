@@ -18,6 +18,11 @@ from hugrgate.routing.architecture import (
     RoutingPlan,
     SerialPlanExecutor,
 )
+from hugrgate.routing.capability import (
+    CapabilityScore,
+    CapabilityScorer,
+    WEIGHTS as CAPABILITY_WEIGHTS,
+)
 from hugrgate.routing.rungs import (
     DynamicRungPlanner,
     RungBuilder,
@@ -31,6 +36,9 @@ from hugrgate.routing.synthesis import (
 )
 
 __all__ = [
+    "CAPABILITY_WEIGHTS",
+    "CapabilityScore",
+    "CapabilityScorer",
     "DynamicRungPlanner",
     "LadderRouterV2",
     "LadderSynthesizer",

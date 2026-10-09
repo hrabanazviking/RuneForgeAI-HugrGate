@@ -56,8 +56,8 @@ class RungBuilder:
         built-in allowlist/support/privacy filters. Later slices (hardware,
         availability, memory) plug in here.
     order: sort key preference — ``"cost"`` (then latency), ``"latency"``
-        (then cost), or ``"capability"`` (reserved; slice 054 wires the
-        real scorer in).
+        (then cost), or ``"capability"`` (slice-054 scorer, cost breaks
+        ties).
     max_rungs: cap on the constructed ladder length.
     """
 
@@ -90,8 +90,12 @@ class RungBuilder:
             key = lambda b: (b.estimated_cost(), b.estimated_latency())
         elif self.order == "latency":
             key = lambda b: (b.estimated_latency(), b.estimated_cost())
-        else:  # capability — scorer plugs in at slice 054; fall back to cost
-            key = lambda b: (b.estimated_cost(), b.estimated_latency())
+        else:  # capability — highest scored first, cost breaks ties
+            from hugrgate.routing.capability import CapabilityScorer
+            scorer = CapabilityScorer()
+            scores = {b.name: scorer.score(b, ctx).value
+                      for b in survivors}
+            key = lambda b: (-scores[b.name], b.estimated_cost())
         survivors.sort(key=lambda b: (b.name not in preferred, key(b)))
         return survivors
 

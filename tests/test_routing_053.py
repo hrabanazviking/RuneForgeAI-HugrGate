@@ -83,7 +83,7 @@ def test_score_capability_rewards_evidence():
 
 def test_qos_changes_ladder_order():
     reg = reg_of(SynBackend("slow-smart", cost=0.5, latency=800.0,
-                            accuracy=0.99),
+                            accuracy=0.99, calibrated=True),
                  SynBackend("fast-cheap", cost=0.001, latency=5.0))
     be = LadderSynthesizer(reg).plan(
         ctx(options=RoutingOptions(qos="best_effort")))

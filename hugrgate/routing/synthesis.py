@@ -8,9 +8,7 @@ and records why each rung earned its position. The same registry under a
 `best_effort` request and under a `critical` request yields different
 ladders — that is the point.
 
-The capability heuristic here is deliberately small; slice 054 promotes
-it into a full :class:`CapabilityScorer`, which the synthesizer then
-imports.
+Capability grading comes from slice 054's :class:`CapabilityScorer`.
 """
 
 from __future__ import annotations
@@ -20,6 +18,7 @@ from typing import Dict, List, Optional
 from hugrgate.backend import Backend
 from hugrgate.routing.architecture import (RouterContext, RungMode, RungNode,
                                             RungPlanner, RoutingPlan)
+from hugrgate.routing.capability import CapabilityScorer
 from hugrgate.routing.rungs import RungBuilder
 
 __all__ = [
@@ -47,26 +46,12 @@ QOS_WEIGHTS: Dict[str, tuple] = {
 
 
 def score_capability(backend: Backend, ctx: RouterContext) -> float:
-    """Heuristic capability score in [0,1] for this backend on this request.
+    """Capability score in [0,1] for this backend on this request.
 
-    Rewards: spec-type support (required — 0 without it), declared accuracy
-    or reliability claims in ``capabilities()``, and calibrated backends.
-    Slice 054 replaces this with a scored, reasoned model.
+    Thin wrapper over slice 054's :class:`CapabilityScorer`; kept so
+    earlier callers keep working.
     """
-    if not backend.supports(ctx.spec):
-        return 0.0
-    caps = backend.capabilities() or {}
-    score = 0.5  # supports the spec: baseline competence
-    for key in ("accuracy", "reliability", "quality"):
-        value = caps.get(key)
-        if isinstance(value, (int, float)):
-            score = max(score, min(1.0, float(value)))
-    cal = backend.calibration_info() or {}
-    if cal.get("calibrated"):
-        score = min(1.0, score + 0.1)
-    if caps.get("spec_types") and ctx.spec.type in caps["spec_types"]:
-        score = min(1.0, score + 0.05)
-    return round(score, 4)
+    return CapabilityScorer().score(backend, ctx).value
 
 
 class LadderSynthesizer(RungPlanner):
