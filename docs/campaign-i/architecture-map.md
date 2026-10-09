@@ -91,6 +91,7 @@ flowchart TD
         cluster_partition[cluster.partition]
         cluster_recovery[cluster.recovery]
         cluster_provenance_dist[cluster.provenance_dist]
+        cluster_trace[cluster.trace]
     end
     subgraph api[api]
         hugrgate[hugrgate]
@@ -202,6 +203,7 @@ flowchart TD
     cluster --> cluster_routing
     cluster --> cluster_rpc
     cluster --> cluster_static_config
+    cluster --> cluster_trace
     cluster --> cluster_transport
     cluster --> cluster_work_stealing
     cluster_auth --> cluster_node
@@ -246,6 +248,7 @@ flowchart TD
     cluster_node --> cluster_recovery
     cluster_node --> cluster_routing
     cluster_node --> cluster_rpc
+    cluster_node --> cluster_trace
     cluster_node --> cluster_work_stealing
     cluster_node --> core
     cluster_node --> errors
@@ -285,6 +288,7 @@ flowchart TD
     cluster_rpc --> cluster_discovery
     cluster_rpc --> cluster_privacy_boundary
     cluster_rpc --> cluster_protocol
+    cluster_rpc --> cluster_trace
     cluster_rpc -.-> cluster_work_stealing
     cluster_rpc --> errors
     cluster_rpc --> policy
@@ -293,6 +297,8 @@ flowchart TD
     cluster_rpc --> spec
     cluster_static_config --> cluster_discovery
     cluster_static_config --> errors
+    cluster_trace --> cluster_protocol
+    cluster_trace --> errors
     cluster_transport --> errors
     cluster_work_stealing --> cluster_privacy_boundary
     cluster_work_stealing --> errors
@@ -385,7 +391,7 @@ flowchart TD
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.isotonic`, `calibration.metrics`, `calibration.platt`, `calibration.profiles`, `calibration.temperature` |
 | service | `server`, `daemon`, `client`, `cli` |
-| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist` |
+| cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace` |
 | api | `hugrgate` |
 
 ## Internal dependency edges
@@ -498,6 +504,7 @@ flowchart TD
 | `cluster` | `cluster.routing` | no |
 | `cluster` | `cluster.rpc` | no |
 | `cluster` | `cluster.static_config` | no |
+| `cluster` | `cluster.trace` | no |
 | `cluster` | `cluster.transport` | no |
 | `cluster` | `cluster.work_stealing` | no |
 | `cluster.auth` | `cluster.node` | no |
@@ -542,6 +549,7 @@ flowchart TD
 | `cluster.node` | `cluster.recovery` | no |
 | `cluster.node` | `cluster.routing` | no |
 | `cluster.node` | `cluster.rpc` | no |
+| `cluster.node` | `cluster.trace` | no |
 | `cluster.node` | `cluster.work_stealing` | no |
 | `cluster.node` | `core` | no |
 | `cluster.node` | `errors` | no |
@@ -581,6 +589,7 @@ flowchart TD
 | `cluster.rpc` | `cluster.discovery` | no |
 | `cluster.rpc` | `cluster.privacy_boundary` | no |
 | `cluster.rpc` | `cluster.protocol` | no |
+| `cluster.rpc` | `cluster.trace` | no |
 | `cluster.rpc` | `cluster.work_stealing` | yes |
 | `cluster.rpc` | `errors` | no |
 | `cluster.rpc` | `policy` | no |
@@ -589,6 +598,8 @@ flowchart TD
 | `cluster.rpc` | `spec` | no |
 | `cluster.static_config` | `cluster.discovery` | no |
 | `cluster.static_config` | `errors` | no |
+| `cluster.trace` | `cluster.protocol` | no |
+| `cluster.trace` | `errors` | no |
 | `cluster.transport` | `errors` | no |
 | `cluster.work_stealing` | `cluster.privacy_boundary` | no |
 | `cluster.work_stealing` | `errors` | no |

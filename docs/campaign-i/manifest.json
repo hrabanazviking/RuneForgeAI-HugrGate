@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T13:43:59.736233+00:00",
-  "module_count": 68,
+  "generated_utc": "2026-10-09T13:47:15.598164+00:00",
+  "module_count": 69,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -544,7 +544,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 197,
+      "loc": 208,
       "path": "hugrgate/cluster/__init__.py",
       "public_defs": []
     },
@@ -730,7 +730,7 @@
         "time",
         "typing"
       ],
-      "loc": 609,
+      "loc": 680,
       "path": "hugrgate/cluster/node.py",
       "public_defs": [
         "NodeAuthenticator",
@@ -748,6 +748,7 @@
         "in_quorum",
         "handle_heartbeat",
         "handle_provenance_pull",
+        "handle_trace_span",
         "ping",
         "recover_peer",
         "dispatch",
@@ -924,7 +925,7 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 138,
+      "loc": 139,
       "path": "hugrgate/cluster/provenance_dist.py",
       "public_defs": [
         "attribute_record",
@@ -1019,7 +1020,7 @@
         "threading",
         "typing"
       ],
-      "loc": 452,
+      "loc": 483,
       "path": "hugrgate/cluster/rpc.py",
       "public_defs": [
         "error_envelope",
@@ -1033,6 +1034,7 @@
         "steal",
         "heartbeat",
         "pull_provenance",
+        "send_spans",
         "capabilities",
         "supports",
         "evaluate",
@@ -1061,6 +1063,39 @@
         "to_records",
         "from_file",
         "peers"
+      ]
+    },
+    "hugrgate.cluster.trace": {
+      "docstring": "Trace correlation. Slice 222.\n\nEvery cluster envelope already carries a ``trace_id``; this module\nturns it into real distributed tracing:\n\n- :class:`TraceContext` \u2014 ``(trace_id, span_id, parent_span_id,\n  node_id)``. ``root()`` starts a trace, ``child()`` nests a span.\n  The context rides the wire inside decide payloads (``\"trace\"`` key,\n  additive and backward compatible).\n- :class:`Span` \u2014 one finished unit of work: operation name, wall-\n  clock timestamps, ``ok`` / ``error`` / ``abstained`` status, and\n  free-form attributes. Strict ``to_dict`` / ``from_dict``.\n- :class:`TraceCollector` \u2014 the per-node span sink: ``start()`` a\n  span, ``finish()`` it, ``spans_for(trace_id)`` in time order, and\n  ``trace_tree(trace_id)`` assembling parent/child nesting across\n  nodes. Bounded; oldest spans evict first.\n- ``TRACE_SPAN`` \u2014 push spans to a peer (a central collector);\n  ``RPCClient.send_spans`` + ``node.handle_trace_span``.\n\nInstrumented: ``decide_remote`` (client span) \u2192 ``handle_decide``\n(server span, child of the caller's context).",
+      "imports": [
+        "__future__",
+        "dataclasses",
+        "hugrgate",
+        "threading",
+        "time",
+        "typing"
+      ],
+      "loc": 247,
+      "path": "hugrgate/cluster/trace.py",
+      "public_defs": [
+        "new_span_id",
+        "TraceContext",
+        "Span",
+        "TraceCollector",
+        "root",
+        "child",
+        "to_dict",
+        "from_dict",
+        "finish",
+        "duration_ms",
+        "to_dict",
+        "from_dict",
+        "start",
+        "record",
+        "spans_for",
+        "trace_tree",
+        "count",
+        "clear"
       ]
     },
     "hugrgate.cluster.transport": {
@@ -1646,6 +1681,7 @@
     "test_cluster_routing.py",
     "test_cluster_rpc.py",
     "test_cluster_static_config.py",
+    "test_cluster_trace.py",
     "test_cluster_transport.py",
     "test_cluster_work_stealing.py",
     "test_config.py",
@@ -1675,5 +1711,5 @@
     "test_thread_safety.py",
     "test_typecheck.py"
   ],
-  "total_loc": 12585
+  "total_loc": 12946
 }

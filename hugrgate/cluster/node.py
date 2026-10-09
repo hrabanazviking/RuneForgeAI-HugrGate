@@ -38,6 +38,12 @@ from hugrgate.cluster.provenance_dist import ProvenanceExchange
 from hugrgate.cluster.recovery import RecoveryManager
 from hugrgate.cluster.routing import DistributedRouter, PeerScores
 from hugrgate.cluster.rpc import RPCClient, error_envelope
+from hugrgate.cluster.trace import (
+    Span,
+    TraceCollector,
+    TraceContext,
+    new_span_id,
+)
 from hugrgate.cluster.work_stealing import (
     DEFAULT_STEAL_BATCH,
     MAX_STEAL_BATCH,
@@ -125,6 +131,7 @@ class ClusterNode:
             MessageType.STEAL_REQUEST: self.handle_steal_request,
             MessageType.HEARTBEAT: self.handle_heartbeat,
             MessageType.PROVENANCE_PULL: self.handle_provenance_pull,
+            MessageType.TRACE_SPAN: self.handle_trace_span,
             MessageType.POLICY_PUSH: self.handle_policy_push,
             MessageType.POLICY_PULL: self.handle_policy_pull,
         }
@@ -154,6 +161,8 @@ class ClusterNode:
         self.recovery = RecoveryManager()
         #: Distributed provenance (slice 221).
         self.provenance_exchange = ProvenanceExchange(self)
+        #: Trace correlation (slice 222).
+        self.traces = TraceCollector()
 
     # -- local facts --------------------------------------------------------
 
@@ -189,16 +198,30 @@ class ClusterNode:
                       policy: DecisionPolicy | None = None,
                       backend_name: str | None = None,
                       context: Mapping[str, Any] | None = None,
-                      trace_id: str | None = None) -> DecisionResult:
+                      trace_id: str | None = None,
+                      trace: TraceContext | None = None) -> DecisionResult:
         """Ask a peer to decide (trace-correlated, slice 222).
 
         Every outcome feeds the health monitor (slice 213): transport
         and backend failures count against the peer, successes heal it.
         Round-trip time feeds the latency tracker (slice 214).
+        ``trace`` propagates the caller's trace context; the client's
+        span is the parent of the server's.
         """
         if self.enforce_quorum and not self.in_quorum():
             raise BackendUnavailable(
                 "no quorum: refusing remote decision while partitioned")
+        if trace is not None:
+            trace_id = trace.trace_id
+        parent = trace or TraceContext.root(self.node_id, trace_id)
+        # The span records work on THIS node, whatever node the
+        # incoming context was created on.
+        ctx = TraceContext(trace_id=parent.trace_id, span_id=new_span_id(),
+                           parent_span_id=parent.span_id,
+                           node_id=self.node_id)
+        span = self.traces.start(
+            ctx, "cluster.decide_remote",
+            {"peer": peer.node_id[:12], "spec_type": spec.type})
         import time
 
         start = time.perf_counter()
@@ -206,12 +229,15 @@ class ClusterNode:
             result = self.rpc.decide(peer, spec, state, policy=policy,
                                      backend_name=backend_name,
                                      context=context,
-                                     trace_id=trace_id or new_trace_id())
-        except BackendError:
+                                     trace_id=trace_id or new_trace_id(),
+                                     trace=ctx)
+        except BackendError as e:
+            span.finish("error", {"error": e.message})
             self.health.record_failure(peer.node_id)
             self.recovery.note_failure(peer.node_id)
             raise
         rtt_ms = (time.perf_counter() - start) * 1000.0
+        span.finish("ok", {"backend": result.backend})
         self.health.record_success(peer.node_id)
         self.recovery.note_success(peer.node_id)
         self.latency.record(peer.node_id, rtt_ms)
@@ -260,6 +286,37 @@ class ClusterNode:
         return self._respond(message, MessageType.PROVENANCE_RESPONSE,
                              {"records": records,
                               "node_id": self.node_id})
+
+    def handle_trace_span(self, message: ClusterMessage) -> ClusterMessage:
+        """Accept spans pushed by a peer into the local collector."""
+        raw = message.payload.get("spans")
+        if not isinstance(raw, list):
+            return error_envelope(
+                SpecError("trace_span needs a 'spans' list"),
+                self.node_id, self.next_seq(), message.trace_id)
+        try:
+            spans = [Span.from_dict(item) for item in raw]
+        except SpecError as e:
+            return error_envelope(e, self.node_id, self.next_seq(),
+                                  message.trace_id)
+        for span in spans:
+            self.traces.record(span)
+        return self._respond(message, MessageType.TRACE_SPAN,
+                             {"received": len(spans)})
+
+    def _trace_context_from(self, message: ClusterMessage) -> TraceContext:
+        """Caller's trace context, or a fresh root on this trace id.
+
+        A malformed context never fails the decision — correlation is
+        best effort.
+        """
+        raw = message.payload.get("trace")
+        if isinstance(raw, dict):
+            try:
+                return TraceContext.from_dict(raw)
+            except SpecError:
+                pass
+        return TraceContext.root(self.node_id, message.trace_id)
 
     def ping(self, peer: PeerRecord,
              trace_id: str | None = None) -> dict[str, Any]:
@@ -493,16 +550,30 @@ class ClusterNode:
                     "privacy_class='strict' is local-only: refusing "
                     "remote decision"),
                 self.node_id, self.next_seq(), message.trace_id)
+        # Trace correlation (slice 222): our span is a child of the
+        # caller's context, attributed to THIS node.
+        incoming = self._trace_context_from(message)
+        ctx = TraceContext(trace_id=incoming.trace_id,
+                           span_id=new_span_id(),
+                           parent_span_id=incoming.span_id,
+                           node_id=self.node_id)
+        span = self.traces.start(ctx, "cluster.handle_decide",
+                                 {"spec_type": spec.type})
         try:
             result = self.gate.decide(
                 state, spec, policy,
                 backend_name=payload.get("backend_name"),
                 context=payload.get("context"))
         except Abstention as e:
+            span.finish("abstained", {"reason": e.reason})
             return self._respond(
                 message, MessageType.DECIDE_RESPONSE,
                 {"abstained": True, "reason": e.reason,
                  "message": e.message})
+        except Exception:
+            span.finish("error")
+            raise
+        span.finish("ok", {"backend": result.backend})
         result.metadata["served_by"] = self.node_id
         redacted = payload.get("redacted_fields")
         if redacted:

@@ -36,6 +36,7 @@ from hugrgate.cluster.protocol import (
     encode_message,
     new_trace_id,
 )
+from hugrgate.cluster.trace import Span, TraceContext
 from hugrgate.errors import (
     Abstention,
     BackendError,
@@ -220,8 +221,12 @@ class RPCClient:
                policy: DecisionPolicy | None = None,
                backend_name: str | None = None,
                context: Mapping[str, Any] | None = None,
-               trace_id: str | None = None) -> DecisionResult:
+               trace_id: str | None = None,
+               trace: TraceContext | None = None) -> DecisionResult:
         """Ask a peer to decide. Returns the peer's :class:`DecisionResult`.
+
+        ``trace`` (slice 222) propagates the caller's trace context;
+        the server records its span as a child of it.
 
         Raises :class:`PrivacyViolation` when the policy forbids remote
         inference, :class:`Abstention` when the peer abstains, and the
@@ -238,9 +243,11 @@ class RPCClient:
             "policy": policy_to_dict(effective),
             "backend_name": backend_name,
             "context": dict(context) if context else None,
+            "trace": trace.to_dict() if trace is not None else None,
         }
         message = self._prepare(MessageType.DECIDE_REQUEST, payload,
-                                trace_id)
+                                trace_id or (trace.trace_id if trace
+                                             else None))
         reply = self.send(peer, message)
         if reply.msg_type is not MessageType.DECIDE_RESPONSE:
             raise BackendError(
@@ -385,6 +392,30 @@ class RPCClient:
             raise BackendError(
                 f"peer {peer.node_id[:12]}… returned no provenance records")
         return records
+
+    def send_spans(self, peer: PeerRecord, spans: list[Span],
+                   trace_id: str | None = None) -> int:
+        """Push finished spans to a peer's trace collector (slice 222).
+
+        Returns the count the peer accepted.
+        """
+        payload_spans = []
+        for span in spans:
+            if not isinstance(span, Span):
+                raise SpecError(f"can only send Span, got {span!r}")
+            payload_spans.append(span.to_dict())
+        message = self._prepare(MessageType.TRACE_SPAN,
+                                {"spans": payload_spans}, trace_id)
+        reply = self.send(peer, message)
+        if reply.msg_type is not MessageType.TRACE_SPAN:
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… sent unexpected "
+                f"{reply.msg_type.value}")
+        received = reply.payload.get("received")
+        if not isinstance(received, int) or received < 0:
+            raise BackendError(
+                f"peer {peer.node_id[:12]}… returned a bad span receipt")
+        return received
 
 
 class RemoteBackend(Backend):

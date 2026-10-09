@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 68 · **public names:** 333
+**Modules:** 69 · **public names:** 343
 
 ## API stability policy
 
@@ -244,6 +244,7 @@ that this document never drifts from the code.
 | `DEFAULT_RECOVERY_BASE_DELAY_S` | constant | `1.0` |
 | `DEFAULT_RECOVERY_MAX_DELAY_S` | constant | `300.0` |
 | `DEFAULT_STALE_AFTER_S` | constant | `60.0` |
+| `DEFAULT_TRACE_MAX_SPANS` | constant | `10000` |
 | `KEY_BYTES` | constant | `32` |
 | `MAX_MESSAGE_BYTES` | constant | `4194304` |
 | `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
@@ -290,6 +291,8 @@ that this document never drifts from the code.
 | `StealJob` | class | `(spec: 'dict[str, Any]', state: 'dict[str, Any]', policy: 'dict[str, Any] | None' = None, context: 'dict[str, Any] | None' = None, enqueued_at: 'float' = <factory>) -> None` |
 | `StealableQueue` | class | `() -> 'None'` |
 | `TLSServer` | class | `(app: 'Any', host: 'str' = '127.0.0.1', port: 'int' = 0, certfile: 'str | os.PathLike[str]' = '', keyfile: 'str | os.PathLike[str]' = '') -> 'None'` |
+| `TraceCollector` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `TraceContext` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str') -> None` |
 | `attribute_record` | function | `(record: 'DecisionRecord', node_id: 'str') -> 'DecisionRecord'` |
 | `cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]') -> 'str'` |
 | `decode_message` | function | `(data: 'bytes | str') -> 'ClusterMessage'` |
@@ -301,6 +304,7 @@ that this document never drifts from the code.
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
 | `make_self_signed_cert` | function | `(cert_path: 'str | os.PathLike[str]', key_path: 'str | os.PathLike[str]', hostname: 'str' = 'localhost', days: 'int' = 365) -> 'None'` |
 | `merge_policies` | function | `(local: 'DecisionPolicy', remote: 'DecisionPolicy') -> 'DecisionPolicy'` |
+| `new_span_id` | function | `() -> 'str'` |
 | `new_trace_id` | function | `() -> 'str'` |
 | `trusted_context_for` | function | `(cert_path: 'str | os.PathLike[str]') -> 'ssl.SSLContext'` |
 | `verify_cert_fingerprint` | function | `(cert_path: 'str | os.PathLike[str]', expected: 'str') -> 'bool'` |
@@ -435,6 +439,7 @@ that this document never drifts from the code.
 | `DEFAULT_PROVENANCE_PULL_LIMIT` | constant | `100` |
 | `MAX_PROVENANCE_PULL_LIMIT` | constant | `1000` |
 | `ProvenanceExchange` | class | `(node: '_ExchangeNode') -> 'None'` |
+| `attribute_record` | function | `(record: 'DecisionRecord', node_id: 'str') -> 'DecisionRecord'` |
 
 ### `hugrgate.cluster.recovery`
 
@@ -474,6 +479,16 @@ that this document never drifts from the code.
 | `StaticPeerConfig` | class | `(peers: 'list[dict[str, Any]]' = <factory>, source_path: 'str' = '') -> None` |
 | `example_config` | function | `() -> 'dict[str, Any]'` |
 | `load_static_config` | function | `(path: 'str | os.PathLike[str]') -> 'StaticPeerConfig'` |
+
+### `hugrgate.cluster.trace`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_TRACE_MAX_SPANS` | constant | `10000` |
+| `Span` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str', operation: 'str', started_at: 'float' = <factory>, ended_at: 'float | None' = None, status: 'str' = 'ok', attributes: 'dict[str, Any]' = <factory>, _collector: 'Any' = None) -> None` |
+| `TraceCollector` | class | `(max_spans: 'int' = 10000) -> 'None'` |
+| `TraceContext` | class | `(trace_id: 'str', span_id: 'str', parent_span_id: 'str | None', node_id: 'str') -> None` |
+| `new_span_id` | function | `() -> 'str'` |
 
 ### `hugrgate.cluster.transport`
 
