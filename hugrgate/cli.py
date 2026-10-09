@@ -37,6 +37,7 @@ __all__ = [
     "cmd_models",
     "cmd_new",
     "cmd_openapi",
+    "cmd_plugins",
     "cmd_report",
     "cmd_serve",
     "load_policy",
@@ -467,6 +468,22 @@ def cmd_new(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_plugins(args: argparse.Namespace) -> int:
+    """List discovered backend plugins (slice 439)."""
+    from hugrgate.plugins import discover_plugins
+    loaded, failed = discover_plugins()
+    rows = [{"name": i.name,
+             "status": "ok",
+             "backend": i.backend.name if i.backend else "-"}
+            for i in loaded]
+    rows += [{"name": i.name, "status": "FAILED",
+              "backend": str(i.error) if i.error else "-"}
+             for i in failed]
+    _emit(args, {"plugins": rows}, (rows, ["name", "status",
+                                           "backend"]))
+    return 1 if failed else 0
+
+
 def cmd_inspect(args: argparse.Namespace) -> int:
     """Drop into the interactive inspector REPL (slice 436)."""
     from hugrgate.inspect import run_inspect
@@ -624,6 +641,10 @@ def build_parser() -> argparse.ArgumentParser:
                        help="print a shell completion script")
     p.add_argument("shell", choices=["bash", "zsh", "fish"])
     p.set_defaults(func=cmd_completion)
+
+    p = sub.add_parser("plugins",
+                       help="list discovered backend plugins")
+    p.set_defaults(func=cmd_plugins)
 
     p = sub.add_parser("new", help="scaffold a new HugrGate project")
     p.add_argument("name", help="project name (lowercase, valid package)")
