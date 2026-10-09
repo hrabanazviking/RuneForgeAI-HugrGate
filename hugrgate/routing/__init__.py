@@ -50,6 +50,9 @@ from hugrgate.routing.hardware import (
     HostProfile,
     hardware_compatible,
 )
+from hugrgate.routing.hedged import (
+    HedgedPlanExecutor,
+)
 from hugrgate.routing.latency import (
     LatencyAwarePlanner,
     LatencyTracker,
@@ -105,6 +108,7 @@ __all__ = [
     "EnergyLedger",
     "EnergyModel",
     "HardwareAwarePlanner",
+    "HedgedPlanExecutor",
     "HostProfile",
     "adjusted_gate",
     "budget_for",

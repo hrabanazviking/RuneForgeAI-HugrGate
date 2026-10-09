@@ -45,6 +45,7 @@ __all__ = [
     "RUNG_UNAVAILABLE",
     "RUNG_ERROR",
     "RUNG_ABSTAINED",
+    "RUNG_CANCELLED",
     "LadderRung",
     "LadderAuditEntry",
     "LadderRouter",
@@ -60,6 +61,7 @@ RUNG_SKIPPED_LATENCY = "skipped_latency_budget"
 RUNG_UNAVAILABLE = "backend_unavailable"
 RUNG_ERROR = "backend_error"
 RUNG_ABSTAINED = "backend_abstained"
+RUNG_CANCELLED = "cancelled"  # slice 065: hedge straggler dropped after win
 
 
 @dataclass
