@@ -46,6 +46,14 @@ class Backend(ABC):
     def warmup(self) -> None:
         pass
 
+    def close(self) -> None:
+        """Release resources held by this backend (slice 019).
+
+        Default is a no-op. Backends holding model weights, file
+        handles, or subprocesses override this; :meth:`HugrGate.close`
+        calls it best-effort on every registered backend.
+        """
+
     def batch(self, states: List[Mapping[str, Any]], spec: DecisionSpec,
               context: Optional[Mapping[str, Any]] = None
               ) -> List[DecisionResult]:

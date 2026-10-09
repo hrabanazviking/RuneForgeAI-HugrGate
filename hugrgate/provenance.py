@@ -131,10 +131,20 @@ class ProvenanceStore:
     Each stored record carries ``prev_hash`` / ``record_hash`` forming
     a hash chain over the canonical record content; ``verify_chain``
     detects any tampering with the stored list itself.
+
+    ``max_records`` bounds memory: when exceeded, the oldest records
+    are evicted, but the chain stays verifiable — ``_floor_hash``
+    checkpoints the hash of the last evicted record, and
+    ``verify_chain`` treats it as the valid starting link.
     """
 
-    def __init__(self):
+    def __init__(self, max_records: Optional[int] = None):
+        if max_records is not None and max_records < 1:
+            raise ValueError("max_records must be >= 1")
+        self._max_records = max_records
         self._records: List[DecisionRecord] = []
+        self._floor_hash = ""  # record_hash of the last evicted record
+        self._evicted = 0
         self._lock = threading.RLock()
 
     @staticmethod
@@ -151,11 +161,21 @@ class ProvenanceStore:
         stored = copy.deepcopy(record)
         with self._lock:
             stored.prev_hash = (self._records[-1].record_hash
-                                if self._records else "")
+                                if self._records else self._floor_hash)
             stored.record_hash = hashlib.sha256(
                 (stored.prev_hash + self._canonical(stored)).encode()
             ).hexdigest()
             self._records.append(stored)
+            while (self._max_records is not None
+                   and len(self._records) > self._max_records):
+                dropped = self._records.pop(0)
+                self._floor_hash = dropped.record_hash
+                self._evicted += 1
+
+    def evicted_count(self) -> int:
+        """How many oldest records were evicted by ``max_records``."""
+        with self._lock:
+            return self._evicted
 
     def by_hash(self, request_hash: str) -> Optional[DecisionRecord]:
         with self._lock:
@@ -178,10 +198,14 @@ class ProvenanceStore:
             return len(self._records)
 
     def verify_chain(self) -> bool:
-        """Recompute every link. True iff the stored history is intact."""
+        """Recompute every link. True iff the stored history is intact.
+
+        After ``max_records`` evictions the chain starts at the
+        checkpoint ``_floor_hash`` instead of the empty string.
+        """
         with self._lock:
             records = list(self._records)
-        prev = ""
+            prev = self._floor_hash
         for r in records:
             if r.prev_hash != prev:
                 return False

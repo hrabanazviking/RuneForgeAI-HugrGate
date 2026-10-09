@@ -146,6 +146,14 @@ class BatchingQueue:
     async def start(self) -> None:
         self._task = asyncio.create_task(self._worker())
 
+    async def __aenter__(self) -> "BatchingQueue":
+        await self.start()
+        return self
+
+    async def __aexit__(self, *exc: object) -> None:
+        await self.stop()
+        return None
+
     async def stop(self, drain_timeout: float = 10.0) -> None:
         """Stop accepting; drain what is queued, then halt the worker.
 
