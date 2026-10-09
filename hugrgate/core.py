@@ -24,6 +24,9 @@ from hugrgate.result import DecisionResult
 from hugrgate.spec import DecisionSpec
 from hugrgate.validation import validate_result, validate_state
 
+if TYPE_CHECKING:
+    from hugrgate.security.input_limits import InputLimits
+
 logger = get_logger(__name__)
 
 if TYPE_CHECKING:
@@ -264,7 +267,19 @@ class HugrGate:
                                      contract_id, start)
 
     def decide_batch(self, states: list, spec: SpecLike,
-                     policy: DecisionPolicy | None = None) -> list:
+                     policy: DecisionPolicy | None = None,
+                     limits: InputLimits | None = None) -> list:
+        """Decide a batch of states, enforcing batch-amplification limits.
+
+        Slice 492: ``states`` are checked with
+        :func:`hugrgate.security.input_limits.check_batch` *before*
+        any decision runs — an unbounded batch previously fanned out
+        without limit. Breaches raise :class:`InputTooLarge`;
+        ``limits`` overrides the default :class:`InputLimits`.
+        """
+        from hugrgate.security.input_limits import check_batch
+
+        check_batch(states, limits)
         return [self.decide(s, spec, policy) for s in states]
 
     async def adecide(self, state: Mapping[str, Any],
