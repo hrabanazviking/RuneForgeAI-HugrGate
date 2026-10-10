@@ -10,29 +10,29 @@
     "tortoise": {
       "true_latency_ms": 120.0,
       "declared_latency_ms": 100.0,
-      "measured_ema_ms": 120.196,
+      "measured_ema_ms": 120.143,
       "tracker_samples": 6,
       "declared_abs_error_ms": 20.0,
-      "measured_abs_error_ms": 0.196
+      "measured_abs_error_ms": 0.143
     },
     "hare": {
       "true_latency_ms": 15.0,
       "declared_latency_ms": 100.0,
-      "measured_ema_ms": 15.209,
+      "measured_ema_ms": 15.115,
       "tracker_samples": 6,
       "declared_abs_error_ms": 85.0,
-      "measured_abs_error_ms": 0.209
+      "measured_abs_error_ms": 0.115
     },
     "mid": {
       "true_latency_ms": 55.0,
       "declared_latency_ms": 100.0,
-      "measured_ema_ms": 55.436,
+      "measured_ema_ms": 55.131,
       "tracker_samples": 6,
       "declared_abs_error_ms": 45.0,
-      "measured_abs_error_ms": 0.436
+      "measured_abs_error_ms": 0.131
     }
   },
   "baseline_total_abs_error_ms": 150.0,
-  "measured_total_abs_error_ms": 0.841,
-  "error_reduction_factor": 178.36
+  "measured_total_abs_error_ms": 0.389,
+  "error_reduction_factor": 385.6
 }
