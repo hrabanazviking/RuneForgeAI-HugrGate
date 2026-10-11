@@ -8,11 +8,11 @@ import subprocess
 import sys
 
 
-def test_stress_benchmark_artifact():
+def test_stress_benchmark_artifact(tmp_path):
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(here)
     script = os.path.join(root, "benchmarks", "routing_stress_074.py")
-    out = os.path.join(root, "benchmarks", "routing_stress_074.json")
+    out = str(tmp_path / "routing_stress_074.json")
     proc = subprocess.run(
         [sys.executable, script, "--decisions", "30", "--out", out],
         capture_output=True, text=True, cwd=root, timeout=600)

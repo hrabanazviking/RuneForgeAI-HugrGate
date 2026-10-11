@@ -18,6 +18,7 @@ Run:  ``venv/bin/python examples/calibrated_triage.py``
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -45,6 +46,12 @@ from hugrgate.spec import DecisionSpec
 
 CLASSES = ["ignore", "log", "inspect", "escalate"]
 SOURCES = ["sensor", "user", "partner"]
+
+# Demo artifact root. Overridable via HUGRGATE_DEMO_DIR so automated runs
+# (e.g. the example-gallery test) can point the demo's scratch output at a
+# throwaway directory instead of dirtying the checked-in tree. Manual runs
+# keep the historical default, relative to the current working directory.
+DEMO_DIR = os.environ.get("HUGRGATE_DEMO_DIR", ".hugrgate-demo")
 
 
 def generate_events(n: int, rng: np.random.Generator,
@@ -94,8 +101,10 @@ def main() -> int:
     print("== HugrGate calibrated triage milestone (slice 30) ==\n")
 
     # Fresh demo state on every run (the store itself rejects overwrites).
+    # DEMO_DIR may point at a throwaway dir via HUGRGATE_DEMO_DIR; the
+    # rmtree below only ever removes that directory.
     import shutil
-    shutil.rmtree(".hugrgate-demo", ignore_errors=True)
+    shutil.rmtree(DEMO_DIR, ignore_errors=True)
 
     # 1. Data with prior shift: train heavy on "escalate", deploy natural.
     train_states, train_labels = generate_events(
@@ -147,7 +156,7 @@ def main() -> int:
         n_samples=len(val_states),
         notes="one-vs-rest Platt on prior-shifted validation set",
     )
-    store = CalibrationProfileStore(".hugrgate-demo/profiles")
+    store = CalibrationProfileStore(Path(DEMO_DIR) / "profiles")
     store.save(profile)
     calibrated = CalibratedBackend(backend, store.get("triage-platt"))
 

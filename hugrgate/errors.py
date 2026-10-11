@@ -67,6 +67,7 @@ __all__ = [
     "RecoveryError",
     "ResidencyError",
     "RetryBudgetExhausted",
+    "RoutingError",
     "SchedulerError",
     "SealError",
     "SecretDetected",
@@ -921,4 +922,18 @@ class ParameterError(AutotuneError):
     wrong-typed values are caller bugs — not recoverable by retry.
     """
     code = "parameter_error"
+    recoverable = False
+
+
+# --- Dawn-forge (Sif's Loom): routing errors -----------------------------------
+# A base for routing-component misuse: invalid constructor arguments,
+# out-of-range configuration values, and malformed observations handed
+# to routers and planners. Not recoverable: these are caller bugs —
+# the caller must fix the arguments, not retry the same ones.
+# Also a ValueError: invalid arguments stay catchable the Pythonic way,
+# so existing callers doing ``except ValueError`` keep working while the
+# HugrGate taxonomy carries the structured code/details.
+class RoutingError(HugrGateError, ValueError):
+    """A routing component received an invalid argument or value."""
+    code = "routing_error"
     recoverable = False

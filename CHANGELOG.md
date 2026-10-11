@@ -1,5 +1,19 @@
 # Changelog — HugrGate
 
+## Unreleased — Dawn-forge 2026-10-10: Sif's Loom, Wave A (slices 1–5 of 20)
+
+Post-Gjallarbrú coherence weave, first five slices (coordinator interrupted;
+waves B–C pending): tree hygiene — benchmark tests now write artifacts to
+`tmp_path` instead of dirtying the checked-in tree, and the triage demo honors
+`HUGRGATE_DEMO_DIR` so the example gallery never dirties the tree; error
+quality — `hugrgate/configgen.py` suggests close-match keys on unknown daemon
+config keys ("did you mean 'port'?"), and routing-component misuse now raises
+the taxonomy's new `RoutingError` (also a `ValueError`, so existing
+`except ValueError` callers keep working) instead of bare stdlib raises in
+`hugrgate/routing/latency.py`; plus regression tests for daemon SIGINT/SIGTERM
+graceful drain and demo-profile hygiene. 4 new test files; affected area
+43 passed.
+
 ## Unreleased — Gjallarbrú Campaign XIX: Autonomous Optimization (slices 451–475)
 
 Safe automatic tuning of routing, thresholds, calibration, and resource use:

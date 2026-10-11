@@ -22,6 +22,7 @@ The reproducible measurement artifact lives in
 from __future__ import annotations
 
 from hugrgate.backend import Backend
+from hugrgate.errors import RoutingError
 from hugrgate.routing.architecture import (
     RouterContext,
     RoutingPlan,
@@ -40,9 +41,11 @@ class LatencyTracker:
 
     def __init__(self, alpha: float = 0.3, min_samples: int = 3):
         if not 0.0 < alpha <= 1.0:
-            raise ValueError(f"alpha must be in (0,1], got {alpha}")
+            raise RoutingError(f"alpha must be in (0,1], got {alpha}",
+                               alpha=alpha)
         if min_samples < 1:
-            raise ValueError("min_samples must be >= 1")
+            raise RoutingError("min_samples must be >= 1",
+                               min_samples=min_samples)
         self.alpha = alpha
         self.min_samples = min_samples
         self._ema: dict[str, float] = {}
@@ -50,8 +53,9 @@ class LatencyTracker:
 
     def record(self, backend_name: str, latency_ms: float) -> None:
         if latency_ms < 0:
-            raise ValueError(f"latency_ms must be non-negative, "
-                             f"got {latency_ms}")
+            raise RoutingError(
+                f"latency_ms must be non-negative, got {latency_ms}",
+                backend_name=backend_name, latency_ms=latency_ms)
         n = self._n.get(backend_name, 0) + 1
         self._n[backend_name] = n
         if backend_name in self._ema:

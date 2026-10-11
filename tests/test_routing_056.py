@@ -128,11 +128,11 @@ def test_no_tracker_no_recording():
 
 # -- measurement artifact ------------------------------------------------------------
 
-def test_benchmark_artifact_is_real_and_beats_baseline():
+def test_benchmark_artifact_is_real_and_beats_baseline(tmp_path):
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(here)
     script = os.path.join(root, "benchmarks", "routing_latency_056.py")
-    out = os.path.join(root, "benchmarks", "routing_latency_056.json")
+    out = str(tmp_path / "routing_latency_056.json")
     proc = subprocess.run(
         [sys.executable, script, "--rounds", "6", "--out", out],
         capture_output=True, text=True, cwd=root, timeout=300)

@@ -175,11 +175,11 @@ def test_no_ledger_no_energy_tracking():
 
 # -- measurement artifact ------------------------------------------------------------------
 
-def test_benchmark_artifact_energy_savings_are_real():
+def test_benchmark_artifact_energy_savings_are_real(tmp_path):
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(here)
     script = os.path.join(root, "benchmarks", "routing_energy_058.py")
-    out = os.path.join(root, "benchmarks", "routing_energy_058.json")
+    out = str(tmp_path / "routing_energy_058.json")
     proc = subprocess.run(
         [sys.executable, script, "--rounds", "4", "--out", out],
         capture_output=True, text=True, cwd=root, timeout=300)

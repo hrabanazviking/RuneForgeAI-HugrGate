@@ -18,6 +18,7 @@ a config file to the daemon.
 
 from __future__ import annotations
 
+import difflib
 from pathlib import Path
 from typing import Any
 
@@ -75,8 +76,15 @@ def generate_daemon_config(**overrides: Any) -> str:
     data = dict(_DAEMON_DEFAULTS)
     unknown = set(overrides) - set(data)
     if unknown:
-        raise ConfigError(
-            f"unknown daemon config key(s): {sorted(unknown)}")
+        hints = [
+            f"unknown key {key!r}; did you mean {match!r}?"
+            for key in sorted(unknown)
+            for match in difflib.get_close_matches(key, data, n=1)
+        ]
+        message = f"unknown daemon config key(s): {sorted(unknown)}"
+        if hints:
+            message += ". " + " ".join(hints)
+        raise ConfigError(message)
     data.update(overrides)
     try:
         DaemonConfig.from_dict(data)

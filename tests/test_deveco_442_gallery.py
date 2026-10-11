@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+import os
 from pathlib import Path
 
 import pytest
@@ -29,12 +30,17 @@ def test_gallery_index_exists():
 
 
 @pytest.mark.parametrize("script", [p.name for p in EXAMPLES])
-def test_example_runs(script):
+def test_example_runs(script, tmp_path):
     path = (Path(__file__).resolve().parent.parent
             / "examples" / script)
+    # Route demo scratch output (e.g. calibrated_triage.py's
+    # .hugrgate-demo/ tree) to a throwaway dir so the gallery never
+    # dirties the checked-in tree (slice: tree-hygiene-demo-profile).
+    env = dict(os.environ)
+    env["HUGRGATE_DEMO_DIR"] = str(tmp_path / "hugrgate-demo")
     proc = subprocess.run(
         [sys.executable, str(path)],
         capture_output=True, text=True, timeout=120,
-        cwd=str(path.parent.parent))
+        cwd=str(path.parent.parent), env=env)
     assert proc.returncode == 0, (
         f"{script} exited {proc.returncode}:\n{proc.stderr[-2000:]}")
