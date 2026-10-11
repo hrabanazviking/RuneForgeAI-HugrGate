@@ -15,6 +15,7 @@ with :class:`hugrgate.zerocopy.SharedPayload`.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -24,6 +25,7 @@ from hugrgate.result import DecisionResult
 
 __all__ = [
     "COMPACT_VERSION",
+    "from_canonical_json",
     "policy_from_compact",
     "policy_from_dict",
     "policy_to_compact",
@@ -31,6 +33,7 @@ __all__ = [
     "result_from_compact",
     "result_from_dict",
     "result_to_compact",
+    "to_canonical_json",
 ]
 
 #: Version tag heading every compact payload.  Bump when the field order
@@ -240,3 +243,50 @@ def policy_from_compact(data: Sequence[Any]) -> DecisionPolicy:
         max_cost=max_cost,
         review_band=_as_pair(review_band, "review_band"),
     )
+
+
+# --- canonical JSON (slice D3) -----------------------------------------------
+
+#: Floats are rounded to this many decimal places before encoding, so that
+#: float noise (e.g. 1/3 versus the literal 0.333333) normalizes to
+#: identical bytes.
+_CANONICAL_FLOAT_DP = 6
+
+
+def _normalize_floats(value: Any) -> Any:
+    """Recursively round floats to 6 decimal places (slice D3).
+
+    Ints, strings, bools and None pass through untouched; dicts, lists and
+    tuples are rebuilt with normalized elements.  Anything else passes
+    through untouched so :func:`json.dumps` raises its natural TypeError.
+    """
+    if isinstance(value, float):
+        rounded = round(value, _CANONICAL_FLOAT_DP)
+        # Normalize -0.0 to 0.0 so it encodes as "0.0", not "-0.0".
+        return 0.0 if rounded == 0 else rounded
+    if isinstance(value, dict):
+        return {k: _normalize_floats(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_normalize_floats(v) for v in value]
+    return value
+
+
+def to_canonical_json(obj: Any) -> str:
+    """Serialize ``obj`` to canonical JSON bytes-as-str.
+
+    Sorted keys, compact separators (no whitespace), and floats rounded to
+    6 decimal places before encoding, so semantically identical values
+    (modulo float noise and key order) always produce byte-identical
+    output.  Non-JSON-native types raise TypeError from :func:`json.dumps`
+    (no custom encoders).
+    """
+    return json.dumps(
+        _normalize_floats(obj),
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def from_canonical_json(s: str) -> Any:
+    """Decode canonical JSON back to plain Python objects."""
+    return json.loads(s)

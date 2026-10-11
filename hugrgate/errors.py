@@ -29,6 +29,7 @@ __all__ = [
     "BackpressureError",
     "BenchmarkError",
     "BulkheadRejected",
+    "CacheConfigError",
     "CalibrationError",
     "ChaosError",
     "ClusterAuthError",
@@ -936,4 +937,17 @@ class ParameterError(AutotuneError):
 class RoutingError(HugrGateError, ValueError):
     """A routing component received an invalid argument or value."""
     code = "routing_error"
+    recoverable = False
+
+
+# --- Dusk-forge (Sif's Loom): cache config errors ------------------------------
+# A base for cache-component misuse: invalid constructor arguments such
+# as a non-positive TTL or a max_size below 1. Not recoverable: these are
+# caller bugs — the caller must fix the arguments, not retry.
+# Also a ValueError: invalid arguments stay catchable the Pythonic way,
+# so existing callers doing ``except ValueError`` keep working while the
+# HugrGate taxonomy carries the structured code/details.
+class CacheConfigError(PolicyError, ValueError):
+    """A cache received an invalid configuration value."""
+    code = "cache_config_error"
     recoverable = False

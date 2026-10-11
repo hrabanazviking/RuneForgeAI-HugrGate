@@ -823,6 +823,7 @@ flowchart TD
     bench --> policy
     bench --> result
     bench --> spec
+    cache --> errors
     cache --> log
     cache --> policy
     cache --> privacy
@@ -1674,6 +1675,8 @@ flowchart TD
     gauntlet_store_migrate --> errors
     gpusched --> errors
     gpusched --> log
+    health --> circuit
+    health --> fallback
     hotpaths --> errors
     hotpaths --> log
     hotpaths --> profiling
@@ -1845,6 +1848,7 @@ flowchart TD
     observability_privacy_metrics --> errors
     observability_privacy_metrics --> observability_metrics
     observability_privacy_metrics --> observability_trace
+    observability_prometheus --> circuit
     observability_prometheus --> errors
     observability_prometheus --> observability_metrics
     observability_replay --> errors
@@ -2036,6 +2040,7 @@ flowchart TD
     routing_hedged --> routing_architecture
     routing_hedged --> routing_qos
     routing_latency --> backend
+    routing_latency --> errors
     routing_latency --> routing_architecture
     routing_memory --> backend
     routing_memory --> routing_architecture
@@ -2581,6 +2586,7 @@ flowchart TD
 | `bench` | `policy` | no |
 | `bench` | `result` | no |
 | `bench` | `spec` | no |
+| `cache` | `errors` | no |
 | `cache` | `log` | no |
 | `cache` | `policy` | no |
 | `cache` | `privacy` | no |
@@ -3432,6 +3438,8 @@ flowchart TD
 | `gauntlet.store_migrate` | `errors` | no |
 | `gpusched` | `errors` | no |
 | `gpusched` | `log` | no |
+| `health` | `circuit` | no |
+| `health` | `fallback` | no |
 | `hotpaths` | `errors` | no |
 | `hotpaths` | `log` | no |
 | `hotpaths` | `profiling` | no |
@@ -3603,6 +3611,7 @@ flowchart TD
 | `observability.privacy_metrics` | `errors` | no |
 | `observability.privacy_metrics` | `observability.metrics` | no |
 | `observability.privacy_metrics` | `observability.trace` | no |
+| `observability.prometheus` | `circuit` | no |
 | `observability.prometheus` | `errors` | no |
 | `observability.prometheus` | `observability.metrics` | no |
 | `observability.replay` | `errors` | no |
@@ -3794,6 +3803,7 @@ flowchart TD
 | `routing.hedged` | `routing.architecture` | no |
 | `routing.hedged` | `routing.qos` | no |
 | `routing.latency` | `backend` | no |
+| `routing.latency` | `errors` | no |
 | `routing.latency` | `routing.architecture` | no |
 | `routing.memory` | `backend` | no |
 | `routing.memory` | `routing.architecture` | no |

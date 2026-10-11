@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 468 · **public names:** 2756
+**Modules:** 468 · **public names:** 2765
 
 ## API stability policy
 
@@ -341,7 +341,8 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `EventBus` | class | `(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', clock: 'Callable[[], float] | None' = None) -> 'None'` |
+| `DeadLetter` | class | `(topic: 'str', payload: 'dict', reason: 'str', dropped_at: 'float') -> None` |
+| `EventBus` | class | `(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', dead_letter_capacity: 'int' = 100, clock: 'Callable[[], float] | None' = None) -> 'None'` |
 | `Subscription` | class | `(token: 'int', pattern: 'str', priority: 'int') -> None` |
 | `matches` | function | `(pattern: 'str', topic: 'str') -> 'bool'` |
 
@@ -1430,7 +1431,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `HugrGateClient` | class | `(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True) -> 'None'` |
+| `HugrGateClient` | class | `(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True, max_attempts: 'int' = 1, retry_base_delay: 'float' = 0.1, retry_max_delay: 'float' = 2.0, retry_sleep: 'Callable[[float], None]' = <built-in function sleep>, retry_seed: 'int | None' = None) -> 'None'` |
 | `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
 | `policy_to_dict` | function | `(policy: 'DecisionPolicy') -> 'dict[str, Any]'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
@@ -2716,6 +2717,7 @@ that this document never drifts from the code.
 | `BackpressureError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BenchmarkError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `BulkheadRejected` | class | `(message: 'str' = '', **details: 'Any')` |
+| `CacheConfigError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `CalibrationError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ChaosError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ClusterAuthError` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -2754,6 +2756,7 @@ that this document never drifts from the code.
 | `RecoveryError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `ResidencyError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `RetryBudgetExhausted` | class | `(message: 'str' = '', **details: 'Any')` |
+| `RoutingError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SchedulerError` | class | `(message: 'str' = '', **details: 'Any')` |
 | `SealError` | class | `(message: 'str' = '', reason: 'str' = 'auth', **details: 'Any')` |
 | `SecretDetected` | class | `(message: 'str' = '', **details: 'Any')` |
@@ -3321,6 +3324,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `BackendStats` | class | `(latencies: 'deque[float]' = <factory>, errors: 'int' = 0, samples: 'int' = 0, consecutive_failures: 'int' = 0) -> None` |
 | `HealthMonitor` | class | `(window: 'int' = 100, quarantine_threshold: 'float' = 0.3, max_consecutive_failures: 'int' = 5, latency_target_ms: 'float' = 1000.0, min_samples: 'int' = 3)` |
+| `snapshot` | function | `(monitor: 'HealthMonitor', circuit_registry: 'CircuitRegistry', fallback_chain: 'FallbackChain') -> 'dict[str, Any]'` |
 
 ### `hugrgate.hotpaths`
 
@@ -3440,6 +3444,7 @@ that this document never drifts from the code.
 | `counterfactual_value` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', value: 'Any', *, min_similarity: 'float' = 0.5, min_n: 'int' = 5, max_candidates: 'int' = 2000) -> 'ValueCounterfactual'` |
 | `decay_weight` | function | `(age_seconds: 'float', half_life_seconds: 'float') -> 'float'` |
 | `decayed_mean` | function | `(values: 'Sequence[float]', ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'` |
+| `describe_quota` | function | `(quota: 'MemoryQuota') -> 'dict[str, dict[str, Any]]'` |
 | `domain_for` | function | `(episode: 'EpisodeLike') -> 'str'` |
 | `domain_profiles` | function | `(history: 'HistoryLike', *, half_life_seconds: 'float' = 86400.0, limit: 'int' = 5000, query: 'MemoryQuery | None' = None, now: 'float | None' = None) -> 'dict[str, DomainProfile]'` |
 | `drop_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
@@ -3655,6 +3660,7 @@ that this document never drifts from the code.
 | `QuotaStatus` | class | `(status: 'str', episodes: 'int', bytes: 'int', quota: 'MemoryQuota') -> None` |
 | `RetentionReport` | class | `(ttl_purged: 'int' = 0, count_evicted: 'int' = 0, bytes_evicted: 'int' = 0, bytes_before: 'int' = 0, bytes_after: 'int' = 0, episodes_before: 'int' = 0, episodes_after: 'int' = 0) -> None` |
 | `check_quota` | function | `(history: 'HistoryLike', quota: 'MemoryQuota') -> 'QuotaStatus'` |
+| `describe_quota` | function | `(quota: 'MemoryQuota') -> 'dict[str, dict[str, Any]]'` |
 | `enforce_quotas` | function | `(history: 'HistoryLike', quota: 'MemoryQuota', *, now: 'float | None' = None) -> 'RetentionReport'` |
 
 ### `hugrgate.memory.retrieval`
@@ -3851,7 +3857,7 @@ that this document never drifts from the code.
 |---|---|---|
 | `CONTENT_TYPE` | constant | `'text/plain; version=0.0.4; charset=utf-8'` |
 | `escape_label_value` | function | `(value: 'str') -> 'str'` |
-| `generate_latest` | function | `(registry: 'MetricRegistry') -> 'str'` |
+| `generate_latest` | function | `(registry: 'MetricRegistry', circuit_exporter: 'CircuitPrometheusExporter | None' = None) -> 'str'` |
 
 ### `hugrgate.observability.replay`
 
@@ -5036,6 +5042,7 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `COMPACT_VERSION` | constant | `1` |
+| `from_canonical_json` | function | `(s: 'str') -> 'Any'` |
 | `policy_from_compact` | function | `(data: 'Sequence[Any]') -> 'DecisionPolicy'` |
 | `policy_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionPolicy'` |
 | `policy_to_compact` | function | `(policy: 'DecisionPolicy') -> 'list'` |
@@ -5043,6 +5050,7 @@ that this document never drifts from the code.
 | `result_from_compact` | function | `(data: 'Sequence[Any]') -> 'DecisionResult'` |
 | `result_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionResult'` |
 | `result_to_compact` | function | `(result: 'DecisionResult') -> 'list'` |
+| `to_canonical_json` | function | `(obj: 'Any') -> 'str'` |
 
 ### `hugrgate.server`
 
@@ -5093,6 +5101,7 @@ that this document never drifts from the code.
 | `TimeoutBackend` | class | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5, explicit_deadline_ms: 'float | None' = None)` |
 | `deadline_ms_for` | function | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5) -> 'float'` |
 | `evaluate_with_timeout` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', deadline_ms: 'float', context: 'Mapping[str, Any] | None' = None) -> 'DecisionResult'` |
+| `explain_deadline` | function | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5) -> 'dict[str, Any]'` |
 | `run_with_deadline` | function | `(fn: 'Callable[[], Any]', deadline_s: 'float', name: 'str' = 'task') -> 'Any'` |
 
 ### `hugrgate.validation`

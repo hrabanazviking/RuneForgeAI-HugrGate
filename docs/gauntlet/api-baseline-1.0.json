@@ -725,9 +725,13 @@
     }
   },
   "hugrgate.agents.bus": {
+    "DeadLetter": {
+      "kind": "class",
+      "sig": "(topic: 'str', payload: 'dict', reason: 'str', dropped_at: 'float') -> None"
+    },
     "EventBus": {
       "kind": "class",
-      "sig": "(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', clock: 'Callable[[], float] | None' = None) -> 'None'"
+      "sig": "(*, dedup_window_s: 'float' = 60.0, max_pending: 'int' = 1024, backpressure: 'str' = 'raise', dead_letter_capacity: 'int' = 100, clock: 'Callable[[], float] | None' = None) -> 'None'"
     },
     "Subscription": {
       "kind": "class",
@@ -3012,7 +3016,7 @@
   "hugrgate.client": {
     "HugrGateClient": {
       "kind": "class",
-      "sig": "(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True) -> 'None'"
+      "sig": "(url: 'str | None' = None, socket_path: 'str | None' = None, gate: 'HugrGate | None' = None, extra_backends: 'list[Backend] | None' = None, timeout: 'float' = 10.0, fallback_inprocess: 'bool' = True, max_attempts: 'int' = 1, retry_base_delay: 'float' = 0.1, retry_max_delay: 'float' = 2.0, retry_sleep: 'Callable[[float], None]' = <built-in function sleep>, retry_seed: 'int | None' = None) -> 'None'"
     },
     "policy_from_dict": {
       "kind": "function",
@@ -6300,6 +6304,10 @@
       "kind": "class",
       "sig": "(message: 'str' = '', **details: 'Any')"
     },
+    "CacheConfigError": {
+      "kind": "class",
+      "sig": "(message: 'str' = '', **details: 'Any')"
+    },
     "CalibrationError": {
       "kind": "class",
       "sig": "(message: 'str' = '', **details: 'Any')"
@@ -6449,6 +6457,10 @@
       "sig": "(message: 'str' = '', **details: 'Any')"
     },
     "RetryBudgetExhausted": {
+      "kind": "class",
+      "sig": "(message: 'str' = '', **details: 'Any')"
+    },
+    "RoutingError": {
       "kind": "class",
       "sig": "(message: 'str' = '', **details: 'Any')"
     },
@@ -7890,6 +7902,10 @@
     "HealthMonitor": {
       "kind": "class",
       "sig": "(window: 'int' = 100, quarantine_threshold: 'float' = 0.3, max_consecutive_failures: 'int' = 5, latency_target_ms: 'float' = 1000.0, min_samples: 'int' = 3)"
+    },
+    "snapshot": {
+      "kind": "function",
+      "sig": "(monitor: 'HealthMonitor', circuit_registry: 'CircuitRegistry', fallback_chain: 'FallbackChain') -> 'dict[str, Any]'"
     }
   },
   "hugrgate.hotpaths": {
@@ -8240,6 +8256,10 @@
     "decayed_mean": {
       "kind": "function",
       "sig": "(values: 'Sequence[float]', ages_seconds: 'Sequence[float]', half_life_seconds: 'float') -> 'float'"
+    },
+    "describe_quota": {
+      "kind": "function",
+      "sig": "(quota: 'MemoryQuota') -> 'dict[str, dict[str, Any]]'"
     },
     "domain_for": {
       "kind": "function",
@@ -8705,6 +8725,10 @@
       "kind": "function",
       "sig": "(history: 'HistoryLike', quota: 'MemoryQuota') -> 'QuotaStatus'"
     },
+    "describe_quota": {
+      "kind": "function",
+      "sig": "(quota: 'MemoryQuota') -> 'dict[str, dict[str, Any]]'"
+    },
     "enforce_quotas": {
       "kind": "function",
       "sig": "(history: 'HistoryLike', quota: 'MemoryQuota', *, now: 'float | None' = None) -> 'RetentionReport'"
@@ -9058,7 +9082,7 @@
     },
     "generate_latest": {
       "kind": "function",
-      "sig": "(registry: 'MetricRegistry') -> 'str'"
+      "sig": "(registry: 'MetricRegistry', circuit_exporter: 'CircuitPrometheusExporter | None' = None) -> 'str'"
     }
   },
   "hugrgate.observability.replay": {
@@ -11780,6 +11804,10 @@
       "kind": "constant",
       "sig": ""
     },
+    "from_canonical_json": {
+      "kind": "function",
+      "sig": "(s: 'str') -> 'Any'"
+    },
     "policy_from_compact": {
       "kind": "function",
       "sig": "(data: 'Sequence[Any]') -> 'DecisionPolicy'"
@@ -11807,6 +11835,10 @@
     "result_to_compact": {
       "kind": "function",
       "sig": "(result: 'DecisionResult') -> 'list'"
+    },
+    "to_canonical_json": {
+      "kind": "function",
+      "sig": "(obj: 'Any') -> 'str'"
     }
   },
   "hugrgate.server": {
@@ -11917,6 +11949,10 @@
     "evaluate_with_timeout": {
       "kind": "function",
       "sig": "(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', deadline_ms: 'float', context: 'Mapping[str, Any] | None' = None) -> 'DecisionResult'"
+    },
+    "explain_deadline": {
+      "kind": "function",
+      "sig": "(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5) -> 'dict[str, Any]'"
     },
     "run_with_deadline": {
       "kind": "function",

@@ -63,6 +63,7 @@ class FallbackChain(Backend):
         self.policy = policy or DecisionPolicy()
         self.safe_default = safe_default
         self.circuits = circuits
+        self._last_outcome: dict[str, str] = {}
         if (self.policy.fallback_behavior == "safe_default"
                 and safe_default is None):
             raise PolicyError(
@@ -85,6 +86,10 @@ class FallbackChain(Backend):
         if self.circuits is None:
             return None
         return self.circuits.get(backend.name)
+
+    def _record_outcomes(self, trace: list[dict[str, Any]]) -> None:
+        for entry in trace:
+            self._last_outcome[entry["backend"]] = entry["outcome"]
 
     def evaluate(self, state: Mapping[str, Any], spec: DecisionSpec,
                  context: Mapping[str, Any] | None = None
@@ -113,6 +118,7 @@ class FallbackChain(Backend):
             if breaker is not None:
                 breaker.record_success()
             trace.append({"backend": backend.name, "outcome": "ok"})
+            self._record_outcomes(trace)
             result.fallback_used = index > 0 or any(
                 t["outcome"] != "ok" for t in trace)
             result.metadata.setdefault("fallback_trace", trace)
@@ -120,8 +126,30 @@ class FallbackChain(Backend):
             return result
         return self._exhausted(state, spec, trace)
 
+    def explain(self) -> str:
+        """Human-readable summary of the chain.
+
+        Reports the backend order, the circuit state of each backend
+        (``n/a`` when no :class:`~hugrgate.circuit.CircuitRegistry` was
+        supplied), and the last recorded outcome of each backend from
+        the most recent :meth:`evaluate` call (``never-attempted`` when
+        no evaluation has run yet). Pure read-only report.
+        """
+        lines = [f"{self.name} (order: {' -> '.join(b.name for b in self.backends)})"]
+        for backend in self.backends:
+            if self.circuits is None:
+                circuit = "n/a"
+            else:
+                # _breaker may materialize a default closed breaker, the
+                # same behaviour evaluate() has when consulting the registry.
+                circuit = self._breaker(backend).state
+            last = self._last_outcome.get(backend.name, "never-attempted")
+            lines.append(f"  {backend.name}: circuit={circuit} last={last}")
+        return "\n".join(lines)
+
     def _exhausted(self, state: Mapping[str, Any], spec: DecisionSpec,
                    trace: list[dict[str, Any]]) -> DecisionResult:
+        self._record_outcomes(trace)
         behavior = self.policy.fallback_behavior
         if behavior == "abstain":
             raise Abstention(

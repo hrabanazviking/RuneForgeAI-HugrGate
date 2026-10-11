@@ -110,7 +110,7 @@ def test_daemon_stop_signals_listeners_and_joins(gate_with_stub):
 
     servers = [FakeServer(), FakeServer()]
     threads = [FakeThread(), FakeThread()]
-    daemon._servers.extend(zip(servers, threads))
+    daemon._servers.extend(zip(servers, threads, strict=True))
 
     daemon.stop(timeout=6.0)
 
@@ -240,17 +240,17 @@ def test_sigterm_to_real_daemon_exits_cleanly():
                 if proc.poll() is not None:
                     err = proc.stderr.read().decode("utf-8", "replace")
                     raise AssertionError(
-                        f"daemon died during startup: {err[-2000:]}")
+                        f"daemon died during startup: {err[-2000:]}") from None
                 if time.time() > deadline:
                     raise AssertionError(
-                        "daemon did not start listening in 25s")
+                        "daemon did not start listening in 25s") from None
                 time.sleep(0.2)
         proc.send_signal(signal.SIGTERM)
         try:
             rc = proc.wait(timeout=25.0)
         except subprocess.TimeoutExpired:
             raise AssertionError(
-                "daemon hung after SIGTERM (shutdown path broken?)")
+                "daemon hung after SIGTERM (shutdown path broken?)") from None
         assert rc == 0, f"daemon exited with code {rc}, expected 0"
     finally:
         if proc.poll() is None:

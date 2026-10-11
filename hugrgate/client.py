@@ -8,11 +8,18 @@ The JSON serde helpers (:func:`policy_to_dict`,
 :func:`policy_from_dict`, :func:`result_from_dict`) live in
 :mod:`hugrgate.serde` and are re-exported here for backward
 compatibility.
+
+Slice 9: opt-in retry on transient HTTP faults — ``max_attempts`` (default
+1 preserves pre-slice-9 behavior exactly), decorrelated jitter between
+attempts, retrying transient httpx errors (5xx/429 statuses, timeouts,
+connection errors).
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import random
+import time
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import httpx
@@ -38,6 +45,22 @@ __all__ = [
 ]
 
 
+def _is_transient(exc: BaseException) -> bool:
+    """Whether ``exc`` is a transient fault worth retrying.
+
+    Transient = timeouts, connection errors, and HTTP statuses 429 or
+    5xx (the ``HTTPStatusError`` raised by ``response.raise_for_status()``).
+    Client bugs (4xx other than 429), malformed bodies, and local
+    programming errors are never retried.
+    """
+    if isinstance(exc, (httpx.TimeoutException, httpx.ConnectError)):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        status = exc.response.status_code
+        return status == 429 or 500 <= status < 600
+    return False
+
+
 class HugrGateClient:
     """Client for a HugrGate service, with in-process fallback.
 
@@ -55,13 +78,26 @@ class HugrGateClient:
                  gate: HugrGate | None = None,
                  extra_backends: list[Backend] | None = None,
                  timeout: float = 10.0,
-                 fallback_inprocess: bool = True) -> None:
+                 fallback_inprocess: bool = True,
+                 max_attempts: int = 1,
+                 retry_base_delay: float = 0.1,
+                 retry_max_delay: float = 2.0,
+                 retry_sleep: Callable[[float], None] = time.sleep,
+                 retry_seed: int | None = None) -> None:
         """Create a client.
 
         - ``gate``: decide directly against this in-process gate (no HTTP).
         - ``url`` / ``socket_path``: talk to a service; on connection
           failure fall back to an in-process gate when
           ``fallback_inprocess`` is true.
+        - ``max_attempts``: total POST attempts for transient faults
+          (default 1 — the pre-slice-9 behavior: no retry).
+        - ``retry_base_delay`` / ``retry_max_delay``: decorrelated-jitter
+          bounds (seconds) between attempts.
+        - ``retry_sleep``: sleep callable (default :func:`time.sleep`);
+          inject a recorder/fake in tests.
+        - ``retry_seed``: seed for the jitter RNG; makes delays
+          deterministic when given.
         """
         if gate is not None and (url or socket_path):
             raise ValueError("pass gate or url/socket_path, not both")
@@ -69,10 +105,21 @@ class HugrGateClient:
             raise ValueError("pass gate or extra_backends, not both")
         if url and socket_path:
             raise ValueError("pass url or socket_path, not both")
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be >= 1")
+        if retry_base_delay < 0:
+            raise ValueError("retry_base_delay must be >= 0")
+        if retry_max_delay < retry_base_delay:
+            raise ValueError("retry_max_delay must be >= retry_base_delay")
         self.url = (url or "http://127.0.0.1:8377").rstrip("/")
         self.socket_path = socket_path
         self.timeout = timeout
         self.fallback_inprocess = fallback_inprocess
+        self.max_attempts = max_attempts
+        self.retry_base_delay = retry_base_delay
+        self.retry_max_delay = retry_max_delay
+        self._retry_sleep = retry_sleep
+        self._retry_rng = random.Random(retry_seed)
         self._extra_backends = extra_backends or []
         self._gate: HugrGate | None = gate
         self._direct_gate = gate is not None
@@ -111,6 +158,12 @@ class HugrGateClient:
         return result
 
     # -- HTTP transport -----------------------------------------------------
+    def _next_retry_delay(self, prev: float) -> float:
+        """Decorrelated jitter (AWS Architecture Blog): min(cap,
+        uniform(base, prev * 3))."""
+        delay = self._retry_rng.uniform(self.retry_base_delay, prev * 3)
+        return min(self.retry_max_delay, delay)
+
     def _post_decide(self, payload: dict[str, Any]) -> dict[str, Any]:
         if self.socket_path:
             transport = httpx.HTTPTransport(uds=self.socket_path)
@@ -119,12 +172,24 @@ class HugrGateClient:
         else:
             client = self._http
         try:
-            response = client.post(f"{self.url}/decide", json=payload)
+            delay = self.retry_base_delay
+            attempt = 0
+            while True:
+                attempt += 1
+                try:
+                    response = client.post(f"{self.url}/decide",
+                                           json=payload)
+                    response.raise_for_status()
+                    return response.json()
+                except Exception as e:
+                    if (attempt >= self.max_attempts
+                            or not _is_transient(e)):
+                        raise
+                    delay = self._next_retry_delay(delay)
+                    self._retry_sleep(delay)
         finally:
             if self.socket_path:
                 client.close()
-        response.raise_for_status()
-        return response.json()
 
     def decide(self, state: Mapping[str, Any], spec: DecisionSpec,
                policy: DecisionPolicy | None = None,

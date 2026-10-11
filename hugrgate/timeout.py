@@ -30,6 +30,7 @@ __all__ = [
     "TimeoutBackend",
     "deadline_ms_for",
     "evaluate_with_timeout",
+    "explain_deadline",
     "run_with_deadline",
 ]
 
@@ -72,6 +73,35 @@ def deadline_ms_for(backend: Backend,
     if policy is not None and policy.maximum_latency_ms is not None:
         return min(policy.maximum_latency_ms, estimate)
     return estimate
+
+
+def explain_deadline(backend: Backend,
+                     policy: DecisionPolicy | None = None,
+                     headroom: float = 1.5) -> dict[str, Any]:
+    """Explain how the per-decision deadline was computed for a backend.
+
+    Exposes the same arithmetic as :func:`deadline_ms_for` as a
+    plain dictionary:
+
+    - ``estimate_ms``: the uncapped estimate,
+      ``max(backend.estimated_latency(), 0.1) * headroom``.
+    - ``cap_ms``: ``policy.maximum_latency_ms`` when the policy sets
+      one, else ``None``.
+    - ``headroom``: the headroom multiplier that was used.
+    - ``deadline_ms``: exactly :func:`deadline_ms_for`'s return value.
+    - ``capped``: ``True`` iff the cap actually bound, i.e. the cap is
+      not ``None`` and is strictly below the uncapped estimate.
+    """
+    estimate = max(backend.estimated_latency(), 0.1) * headroom
+    cap = (policy.maximum_latency_ms
+           if policy is not None else None)
+    return {
+        "estimate_ms": estimate,
+        "cap_ms": cap,
+        "headroom": headroom,
+        "deadline_ms": deadline_ms_for(backend, policy, headroom),
+        "capped": cap is not None and cap < estimate,
+    }
 
 
 def evaluate_with_timeout(backend: Backend, state: Mapping[str, Any],

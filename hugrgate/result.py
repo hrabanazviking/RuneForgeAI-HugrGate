@@ -66,6 +66,24 @@ class DecisionResult:
                         f"distribution[{self.value!r}]={mass} != "
                         f"probability={self.probability}")
 
+    def summarize(self) -> str:
+        """One human-readable summary line for this result.
+
+        Stable, simple format covering the chosen value (or abstention),
+        probability, backend, latency, and accepted/abstained status.
+        Handles value=None (abstention) without crashing.
+        """
+        if self.value is None:
+            value_part = "abstained (no value)"
+        else:
+            value_part = f"value={self.value!r}"
+        status = "accepted" if self.accepted else "rejected"
+        return (
+            f"decision {value_part} prob={self.probability:.2f} "
+            f"backend={self.backend!r} latency={self.latency_ms:.1f}ms "
+            f"{status}"
+        )
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "value": self.value,

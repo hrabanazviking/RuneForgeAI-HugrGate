@@ -15,6 +15,11 @@ stats, so a success **auto-recovers** the backend: the consecutive
 failure count resets and the score climbs back above the threshold.
 
 All methods are thread-safe.
+
+Slice 6 adds :func:`snapshot`, which merges the monitor's scores and
+quarantines with :class:`~hugrgate.circuit.CircuitRegistry` breaker
+states and :class:`~hugrgate.fallback.FallbackChain` backend health
+into a single per-backend dict.
 """
 
 from __future__ import annotations
@@ -22,10 +27,16 @@ from __future__ import annotations
 import threading
 from collections import deque
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:  # pragma: no cover - annotations only, no runtime cycle
+    from hugrgate.circuit import CircuitRegistry
+    from hugrgate.fallback import FallbackChain
 
 __all__ = [
     "BackendStats",
     "HealthMonitor",
+    "snapshot",
 ]
 
 
@@ -138,3 +149,45 @@ class HealthMonitor:
                 self._stats.clear()
             else:
                 self._stats.pop(backend_name, None)
+
+
+def snapshot(monitor: HealthMonitor,
+             circuit_registry: CircuitRegistry,
+             fallback_chain: FallbackChain) -> dict[str, Any]:
+    """Combine the three health sources into one per-backend snapshot.
+
+    For every backend known to *any* of the three sources — the
+    :class:`HealthMonitor`, the :class:`~hugrgate.circuit.CircuitRegistry`,
+    or the :class:`~hugrgate.fallback.FallbackChain` — the snapshot reports
+    the monitor's live score and quarantine state, the circuit breaker's
+    current state (``"closed"`` / ``"open"`` / ``"half-open"``), and the
+    backend's entry from ``FallbackChain.health()["chain"]``. All values are
+    read from the live objects; nothing is invented. Sources that know
+    nothing about a backend contribute ``None``.
+    """
+    circuits = circuit_registry.snapshot()  # name -> breaker snapshot
+    chain = fallback_chain.health().get("chain", [])
+    chain_health = {entry["backend"]: entry for entry in chain
+                    if isinstance(entry, dict) and "backend" in entry}
+
+    with monitor._lock:
+        known = list(monitor._stats.keys())
+    names: list[str] = []
+    for source in (known, circuits, chain_health):
+        for name in source:
+            if name not in names:
+                names.append(name)
+
+    backends: dict[str, dict[str, Any]] = {}
+    for name in sorted(names):
+        breaker = circuits.get(name)
+        backends[name] = {
+            "score": monitor.score(name),
+            "quarantined": monitor.is_quarantined(name),
+            "circuit": breaker["state"] if breaker is not None else None,
+            "fallback_health": chain_health.get(name),
+        }
+    return {
+        "backends": backends,
+        "quarantined": monitor.quarantined(),
+    }

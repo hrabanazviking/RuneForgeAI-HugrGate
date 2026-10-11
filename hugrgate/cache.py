@@ -34,6 +34,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from typing import Any
 
+from hugrgate.errors import CacheConfigError
 from hugrgate.log import get_logger
 from hugrgate.policy import DecisionPolicy
 from hugrgate.privacy import PrivacyGuard
@@ -161,9 +162,9 @@ class DecisionCache:
 
     def __init__(self, ttl_seconds: float = 300.0, max_size: int = 1000):
         if ttl_seconds <= 0:
-            raise ValueError("ttl_seconds must be positive")
+            raise CacheConfigError("ttl_seconds must be positive")
         if max_size < 1:
-            raise ValueError("max_size must be >= 1")
+            raise CacheConfigError("max_size must be >= 1")
         self.ttl_seconds = ttl_seconds
         self.max_size = max_size
         self._entries: OrderedDict[str, _Entry] = OrderedDict()

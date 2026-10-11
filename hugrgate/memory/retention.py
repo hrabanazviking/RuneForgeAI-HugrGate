@@ -14,7 +14,8 @@ this module bounds the episode store three ways.
 
 :func:`enforce_quotas` applies all three and returns a
 :class:`RetentionReport`. :func:`check_quota` is the non-mutating
-probe (``ok`` / ``warn`` / ``over``). When ``max_bytes`` is smaller
+probe (``ok`` / ``warn`` / ``over``). :func:`describe_quota` renders a
+quota as per-field limits with human-readable units. When ``max_bytes`` is smaller
 than the smallest retained episode — so nothing could ever be
 retained — :func:`enforce_quotas` raises :class:`MemoryQuotaExceeded`
 instead of silently enforcing total amnesia.
@@ -37,6 +38,7 @@ __all__ = [
     "QuotaStatus",
     "RetentionReport",
     "check_quota",
+    "describe_quota",
     "enforce_quotas",
 ]
 
@@ -119,6 +121,42 @@ def check_quota(history: HistoryLike, quota: MemoryQuota) -> QuotaStatus:
             and n_bytes > quota.warn_bytes)
     return QuotaStatus(status="over" if over else "warn" if warn else "ok",
                        episodes=episodes, bytes=n_bytes, quota=quota)
+
+
+def describe_quota(quota: MemoryQuota) -> dict[str, dict[str, Any]]:
+    """Describe every dimension of a :class:`MemoryQuota`.
+
+    Read-only introspection: pure field reading, no behavior change.
+
+    Scheme (documented, stable):
+    - Every quota dimension gets one entry keyed by the field name.
+    - A *set* limit is ``{"value": <limit>, "unit": <human unit>}``.
+    - An *unset* (``None``) dimension — unlimited — is
+      ``{"value": None, "unit": <human unit>, "unlimited": True}``,
+      so callers can distinguish "unbounded" from "absent".
+    - ``ttl_overrides`` is a dict of privacy-class -> seconds;
+      ``value`` holds the override dict itself (each entry may be
+      ``None`` = keep forever for that class), and ``unit`` is
+      ``"seconds per privacy class"``. A ``None`` override map is
+      unlimited like any other unset dimension.
+
+    Example::
+
+        {"max_episodes": {"value": 1000, "unit": "episodes"},
+         "max_bytes": {"value": None, "unit": "bytes", "unlimited": True}}
+    """
+    def _entry(value: Any, unit: str) -> dict[str, Any]:
+        if value is None:
+            return {"value": None, "unit": unit, "unlimited": True}
+        return {"value": value, "unit": unit}
+
+    return {
+        "max_episodes": _entry(quota.max_episodes, "episodes"),
+        "max_bytes": _entry(quota.max_bytes, "bytes"),
+        "warn_bytes": _entry(quota.warn_bytes, "bytes"),
+        "ttl_overrides": _entry(quota.ttl_overrides,
+                                "seconds per privacy class"),
+    }
 
 
 def enforce_quotas(history: HistoryLike, quota: MemoryQuota, *,

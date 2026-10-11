@@ -94,6 +94,7 @@ from hugrgate.memory.retention import (
     QuotaStatus,
     RetentionReport,
     check_quota,
+    describe_quota,
     enforce_quotas,
 )
 from hugrgate.memory.retrieval import RetrievalResult, recall, retrieve
@@ -163,6 +164,7 @@ __all__ = [
     "counterfactual_value",
     "decay_weight",
     "decayed_mean",
+    "describe_quota",
     "domain_for",
     "domain_profiles",
     "drop_backend",

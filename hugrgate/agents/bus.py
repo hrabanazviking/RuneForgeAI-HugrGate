@@ -17,7 +17,8 @@ Design:
 - Backpressure: ``max_pending`` bounds re-entrant publish depth
   (in-flight deliveries); policy ``"raise"`` surfaces
   :class:`BackpressureError`, ``"drop-oldest"`` sheds the incoming
-  signal and counts it.
+  signal, counts it, and records a :class:`DeadLetter` (bounded,
+  default 100 — see :meth:`EventBus.dead_letters`).
 - Handler exceptions never propagate to the publisher; they are
   collected on the delivery report.  A dead handler must not kill
   the nervous system.
@@ -33,6 +34,7 @@ from __future__ import annotations
 
 import threading
 import time
+from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -41,6 +43,7 @@ from hugrgate.agents.types import AgentDelivery, AgentSignal
 from hugrgate.errors import BackpressureError
 
 __all__ = [
+    "DeadLetter",
     "EventBus",
     "Subscription",
     "matches",
@@ -76,6 +79,20 @@ class Subscription:
     priority: int
 
 
+@dataclass(frozen=True)
+class DeadLetter:
+    """One signal shed by the ``"drop-oldest"`` backpressure policy.
+
+    ``payload`` is a snapshot of the dropped signal's payload mapping,
+    ``dropped_at`` its timestamp on the bus clock.
+    """
+
+    topic: str
+    payload: dict
+    reason: str
+    dropped_at: float
+
+
 class EventBus:
     """Synchronous in-process event bus for the agent nervous system."""
 
@@ -85,6 +102,7 @@ class EventBus:
         dedup_window_s: float = 60.0,
         max_pending: int = 1024,
         backpressure: str = "raise",
+        dead_letter_capacity: int = 100,
         clock: Callable[[], float] | None = None,
     ) -> None:
         if dedup_window_s < 0:
@@ -93,6 +111,8 @@ class EventBus:
             raise ValueError("max_pending must be >= 1")
         if backpressure not in ("raise", "drop-oldest"):
             raise ValueError("backpressure must be 'raise' or 'drop-oldest'")
+        if dead_letter_capacity < 1:
+            raise ValueError("dead_letter_capacity must be >= 1")
         self._dedup_window_s = dedup_window_s
         self._max_pending = max_pending
         self._backpressure = backpressure
@@ -102,6 +122,9 @@ class EventBus:
         self._next_token = 1
         self._dedup: dict[str, float] = {}
         self._depth = 0
+        self._dead_letters: deque[DeadLetter] = deque(
+            maxlen=dead_letter_capacity
+        )
         self._stats = {
             "published": 0,
             "delivered": 0,
@@ -155,6 +178,14 @@ class EventBus:
                         pending=self._depth,
                     )
                 self._stats["dropped_backpressure"] += 1
+                self._dead_letters.append(
+                    DeadLetter(
+                        topic=signal.topic,
+                        payload=dict(signal.payload),
+                        reason="backpressure",
+                        dropped_at=now,
+                    )
+                )
                 return AgentDelivery(signal=signal, dropped=1)
             self._depth += 1
             targets = sorted(
@@ -205,3 +236,13 @@ class EventBus:
             for k in self._stats:
                 self._stats[k] = 0
             self._dedup.clear()
+
+    def dead_letters(self) -> list[DeadLetter]:
+        """Signals shed by ``"drop-oldest"`` backpressure, oldest first.
+
+        Bounded by ``dead_letter_capacity``: once full, the oldest
+        dead letter is evicted to make room.  Returns a copy; mutating
+        the result does not affect the bus.
+        """
+        with self._lock:
+            return list(self._dead_letters)
