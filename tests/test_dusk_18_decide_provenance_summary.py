@@ -1,8 +1,9 @@
 """Slice 18 (dusk run, Sif's Loom Wave C) — decide provenance summary.
 
 ``cmd_decide`` prints a one-line provenance summary (decision id,
-backend, confidence) on the default (human) output only. Explicit
-``--format json/table/yaml`` machine outputs must stay unchanged.
+backend, confidence) to stderr on the default invocation. Stdout
+stays parseable for every format (the default output is JSON);
+explicit ``--format json/table/yaml`` invocations see no change.
 """
 
 from __future__ import annotations
@@ -43,15 +44,20 @@ def _expected_decision(spec_path, state_path):
 def test_default_output_has_provenance_summary(tmp_path, capsys):
     spec, state = _spec_state(tmp_path)
     assert main(["decide", "--spec", spec, "--state", state]) == 0
-    out = capsys.readouterr().out
-    match = _SUMMARY_RE.search(out)
+    captured = capsys.readouterr()
+    match = _SUMMARY_RE.search(captured.err)
     assert match, ("provenance summary line missing from default "
-                   f"output:\n{out}")
+                   f"stderr:\n{captured.err}")
     decision_id, result = _expected_decision(spec, state)
     assert match.group(1) == decision_id
     assert match.group(2) == result.backend
     assert float(match.group(3)) == pytest.approx(result.probability,
                                                   abs=1e-4)
+    # Stdout must stay pure JSON on the default invocation too —
+    # downstream consumers parse it.
+    assert "provenance:" not in captured.out
+    payload = json.loads(captured.out)
+    assert payload["abstained"] is False
 
 
 def test_explicit_json_format_unchanged(tmp_path, capsys):

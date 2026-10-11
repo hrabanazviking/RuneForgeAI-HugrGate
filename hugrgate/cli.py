@@ -114,12 +114,13 @@ def _emit(args: argparse.Namespace, payload: Any,
 
 
 def _provenance_summary_line(state, spec, result) -> str:
-    """One-line provenance summary for the default (human) output.
+    """One-line provenance summary for the default invocation.
 
     The decision id is the provenance record's request hash (see
     ``hugrgate.provenance.DecisionRecord``); the backend and
-    confidence come straight from the result. Explicit ``--format``
-    machine outputs never see this line.
+    confidence come straight from the result. It is printed to
+    stderr so stdout stays parseable for every format: humans see
+    it on the terminal, machine consumers are unaffected.
     """
     from hugrgate.provenance import DecisionRecord
     decision_id = DecisionRecord.from_decision(state, spec,
@@ -164,9 +165,11 @@ def cmd_decide(args: argparse.Namespace) -> int:
             "latency_ms"]))
     if getattr(args, "format", None) is None:
         # Slice 18: one-line provenance summary on the default
-        # (human) output only — explicit --format json/table/yaml
-        # machine outputs stay byte-identical.
-        print(_provenance_summary_line(state, spec, result))
+        # invocation only — to stderr, so stdout stays parseable
+        # (the default output is JSON; downstream consumers parse
+        # it). Explicit --format json/table/yaml see no change.
+        print(_provenance_summary_line(state, spec, result),
+              file=sys.stderr)
     return 0
 
 
