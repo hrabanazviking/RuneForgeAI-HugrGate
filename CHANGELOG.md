@@ -1,5 +1,32 @@
 # Changelog — HugrGate
 
+## Unreleased — Dusk-forge 2026-10-10: Sif's Loom, night-weft (slices 6–20 of 20)
+
+Post-Gjallarbrú coherence weave, remaining fifteen slices plus five new dusk
+slices (20 total this run; dawn's Wave A was slices 1–5). Integration glue:
+`health.snapshot()` merges monitor scores/quarantines, circuit states, and
+fallback health into one dict; circuit breakers export to Prometheus
+(`hugrgate_circuit_state` gauge + transition counter); the agent bus keeps a
+bounded dead-letter queue (default 100) exposed via `dead_letters()`;
+`HugrGateClient` gains opt-in retry with decorrelated jitter (`max_attempts`,
+default 1 preserves behavior); `FallbackChain.explain()` renders a human
+report. Determinism & operability: benchmark scripts emit canonical
+sorted-key/6dp JSON (reruns differ only in live-measured float leaves —
+PARTIAL, honest); log-schema coverage locked by a regression test;
+supervision escalation payloads carry `restart_times` + `last_error`;
+`explain_daemon_config()` attributes each key to file vs default;
+`X-Request-ID` echoed/generated on every server response and logged; memory
+recall/find accept `limit`/`offset`; autotune `ConfigStore.dry_run()` reports
+would-apply changes without mutating; `cmd_decide` prints a one-line
+provenance summary in default output. New self-explaining surfaces:
+`timeout.explain_deadline()`, `CacheConfigError` taxonomy (replacing bare
+ValueErrors in cache.py), `serde.to_canonical_json`/`from_canonical_json`,
+`DecisionResult.summarize()`, `memory.describe_quota()`. Repairs: the 6
+pre-existing gate failures found on the dawn tree are fixed (RoutingError +
+CacheConfigError registered in the error-taxonomy scanner, ruff fully clean,
+API inventory/arch map/gauntlet API baseline regenerated, taxonomy doc
+updated). 29 new test files this run; full suite green.
+
 ## Unreleased — Dawn-forge 2026-10-10: Sif's Loom, Wave A (slices 1–5 of 20)
 
 Post-Gjallarbrú coherence weave, first five slices (coordinator interrupted;

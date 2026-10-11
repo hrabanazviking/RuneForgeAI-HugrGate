@@ -90,8 +90,13 @@ def _emit(args: argparse.Namespace, payload: Any,
 
     ``table`` is ``(rows, columns)`` used when ``--format table`` is
     given; commands without a tabular form fall back to JSON.
+
+    Slice 18: ``--format`` defaults to ``None`` (unresolved) so callers
+    can tell "no --format given" (the default human output) apart
+    from an explicit ``--format json`` machine request; both resolve
+    to JSON rendering here.
     """
-    fmt = getattr(args, "format", "json")
+    fmt = getattr(args, "format", None) or "json"
     if fmt == "table" and table is not None:
         rows, columns = table
         print(_render_table(rows, columns))
@@ -103,6 +108,25 @@ def _emit(args: argparse.Namespace, payload: Any,
                              sort_keys=False).rstrip("\n"))
     else:
         _print_json(payload)
+
+
+# --- provenance summary (slice 18) -----------------------------------------
+
+
+def _provenance_summary_line(state, spec, result) -> str:
+    """One-line provenance summary for the default (human) output.
+
+    The decision id is the provenance record's request hash (see
+    ``hugrgate.provenance.DecisionRecord``); the backend and
+    confidence come straight from the result. Explicit ``--format``
+    machine outputs never see this line.
+    """
+    from hugrgate.provenance import DecisionRecord
+    decision_id = DecisionRecord.from_decision(state, spec,
+                                               result).request_hash
+    return (f"provenance: decision={decision_id} "
+            f"backend={result.backend} "
+            f"confidence={result.probability:.4f}")
 
 
 def cmd_decide(args: argparse.Namespace) -> int:
@@ -138,6 +162,11 @@ def cmd_decide(args: argparse.Namespace) -> int:
               "latency_ms")}],
            ["value", "probability", "backend", "model",
             "latency_ms"]))
+    if getattr(args, "format", None) is None:
+        # Slice 18: one-line provenance summary on the default
+        # (human) output only — explicit --format json/table/yaml
+        # machine outputs stay byte-identical.
+        print(_provenance_summary_line(state, spec, result))
     return 0
 
 
@@ -629,7 +658,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = _Parser(
         prog="hugrgate",
         description="HugrGate — local-first probabilistic decision runtime.")
-    parser.add_argument("--format", default="json",
+    parser.add_argument("--format", default=None,
                         choices=["json", "table", "yaml"],
                         help="output format (default: json)")
     sub = parser.add_subparsers(dest="command", required=True)

@@ -27,6 +27,7 @@ import yaml
 from hugrgate.errors import ConfigError, HugrGateError
 
 __all__ = [
+    "explain_daemon_config",
     "generate_daemon_config",
     "generate_policy",
     "generate_spec",
@@ -113,6 +114,35 @@ def load_daemon_config(path: str | Path) -> Any:
         return DaemonConfig.from_dict(doc)
     except (HugrGateError, ValueError, TypeError, KeyError) as e:
         raise ConfigError(f"invalid daemon config in {p}: {e}") from e
+
+
+def explain_daemon_config(path: str | Path) -> dict[str, dict[str, Any]]:
+    """Explain the effective value and source of every daemon config key.
+
+    Loads and validates ``path`` exactly like :func:`load_daemon_config`
+    (same errors on missing files, bad YAML, unknown keys, or
+    out-of-range values), then returns a mapping of every known key to
+    ``{"value": <effective value>, "source": "file" | "default"}``.
+
+    A key's source is ``"file"`` when the config file sets it and
+    ``"default"`` when the value comes from the daemon defaults.
+    """
+    p = Path(path)
+    try:
+        doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise ConfigError(f"config file not found: {p}") from None
+    except yaml.YAMLError as e:
+        raise ConfigError(f"config file {p} is not valid YAML: {e}") from e
+    if not isinstance(doc, dict):
+        raise ConfigError(f"config file {p} must contain a mapping")
+    cfg = load_daemon_config(p)
+    effective = cfg.to_dict()
+    return {
+        key: {"value": effective[key],
+              "source": "file" if key in doc else "default"}
+        for key in _DAEMON_DEFAULTS
+    }
 
 
 # --- spec ---------------------------------------------------------------------

@@ -93,6 +93,18 @@ EVENT_SCHEMAS: dict[str, dict[str, Any]] = {
     },
 }
 
+#: Log events explicitly exempt from schema coverage.  Mapping of
+#: event name -> human-readable reason the event is not schema'd
+#: (typically: deprecated/legacy emitters that cannot be changed).
+#: Empty by default — an entry here is a conscious, reviewed decision,
+#: asserted by ``tests/test_logschema_coverage.py`` (which also asserts
+#: that no exempt event is simultaneously schema'd, and that every
+#: reason is non-empty).  Not listed in ``__all__`` (the export contract
+#: in ``tests/test_observability_logschema.py`` is owned by slice 333);
+#: import it explicitly as ``from hugrgate.observability.logschema import
+#: EXEMPT_EVENTS``.
+EXEMPT_EVENTS: dict[str, str] = {}
+
 _MAX_FIELD_LEN = 4096
 
 

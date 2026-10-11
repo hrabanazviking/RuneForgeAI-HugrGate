@@ -991,6 +991,7 @@ flowchart TD
     cli -.-> plugins
     cli -.-> pool
     cli -.-> protocol
+    cli -.-> provenance
     cli -.-> scaffold
     cli -.-> server
     cli --> spec
@@ -2228,6 +2229,7 @@ flowchart TD
     server -.-> cluster_routes
     server --> core
     server --> errors
+    server --> log
     server --> protocol
     server --> result
     server --> serde
@@ -2754,6 +2756,7 @@ flowchart TD
 | `cli` | `plugins` | yes |
 | `cli` | `pool` | yes |
 | `cli` | `protocol` | yes |
+| `cli` | `provenance` | yes |
 | `cli` | `scaffold` | yes |
 | `cli` | `server` | yes |
 | `cli` | `spec` | no |
@@ -3991,6 +3994,7 @@ flowchart TD
 | `server` | `cluster.routes` | yes |
 | `server` | `core` | no |
 | `server` | `errors` | no |
+| `server` | `log` | no |
 | `server` | `protocol` | no |
 | `server` | `result` | no |
 | `server` | `serde` | no |

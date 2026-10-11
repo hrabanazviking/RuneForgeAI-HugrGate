@@ -72,6 +72,8 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
              min_score: float = 0.0,
              exclude_ids: set[str] | frozenset[str] = frozenset(),
              episodes: Sequence[EpisodeLike] | None = None,
+             limit: int | None = None,
+             offset: int = 0,
              now: float | None = None) -> list[RetrievalResult]:
     """Recall the top-``k`` precedents for ``query_features``.
 
@@ -80,6 +82,11 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
     filters weak hits. ``episodes`` scores a caller-supplied subset
     instead of scanning the whole history (used by conditioned
     retrieval); ``now`` is injectable for deterministic tests.
+
+    Slice 16: ``limit``/``offset`` paginate the ranked results after
+    ``k`` is applied — ``offset`` skips the first N ranked results and
+    ``limit`` caps how many follow. Defaults (``limit=None``,
+    ``offset=0``) preserve the pre-pagination behavior.
     """
     weights = {"alpha": alpha, "beta": beta, "gamma": gamma}
     for name, value in weights.items():
@@ -91,6 +98,10 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
         raise ValueError(f"k must be >= 0, got {k}")
     if not 0.0 <= min_score <= 1.0:
         raise ValueError(f"min_score must be in [0, 1], got {min_score}")
+    if limit is not None and limit < 0:
+        raise ValueError(f"limit must be >= 0, got {limit}")
+    if offset < 0:
+        raise ValueError(f"offset must be >= 0, got {offset}")
     current = time.time() if now is None else now
 
     if episodes is None:
@@ -111,7 +122,9 @@ def retrieve(history: HistoryLike, query_features: dict[str, float], *,
                 episode=hit.episode, score=score, similarity=hit.score,
                 recency=recency, outcome_bonus=bonus))
     results.sort(key=lambda r: r.score, reverse=True)
-    return results[:k]
+    ranked = results[:k]
+    end = None if limit is None else offset + limit
+    return ranked[offset:end]
 
 
 def recall(history: HistoryLike, *, k: int = 5,
@@ -122,9 +135,16 @@ def recall(history: HistoryLike, *, k: int = 5,
            accepted: bool | None = None,
            state_keys: list[str] | tuple[str, ...] | None = None,
            domain: str | None = None,
+           limit: int | None = None,
+           offset: int = 0,
            **retrieve_kwargs: Any) -> list[RetrievalResult]:
-    """Build query features from decision attributes and :func:`retrieve`."""
+    """Build query features from decision attributes and :func:`retrieve`.
+
+    Slice 16: ``limit``/``offset`` page through the ranked precedents
+    (see :func:`retrieve`); defaults preserve the old behavior.
+    """
     features = featurize_query(
         spec=spec, backend=backend, model=model, probability=probability,
         accepted=accepted, state_keys=state_keys, domain=domain)
-    return retrieve(history, features, k=k, **retrieve_kwargs)
+    return retrieve(history, features, k=k, limit=limit, offset=offset,
+                    **retrieve_kwargs)

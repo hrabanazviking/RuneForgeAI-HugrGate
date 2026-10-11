@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 468 · **public names:** 2765
+**Modules:** 468 · **public names:** 2766
 
 ## API stability policy
 
@@ -1772,6 +1772,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
+| `explain_daemon_config` | function | `(path: 'str | Path') -> 'dict[str, dict[str, Any]]'` |
 | `generate_daemon_config` | function | `(**overrides: 'Any') -> 'str'` |
 | `generate_policy` | function | `(**overrides: 'Any') -> 'str'` |
 | `generate_spec` | function | `(spec_type: 'str' = 'categorical', **fields: 'Any') -> 'str'` |
@@ -3461,12 +3462,12 @@ that this document never drifts from the code.
 | `import_jsonl` | function | `(history: 'HistoryLike', path: 'str | Path', *, skip_bad_lines: 'bool' = True) -> 'ImportReport'` |
 | `most_similar` | function | `(query_features: 'dict[str, float]', episodes: 'Sequence[EpisodeLike]', *, k: 'int' = 5, exclude_ids: 'set[str] | frozenset[str]' = frozenset()) -> 'list[SimilarityHit]'` |
 | `outcome_agrees` | function | `(truth: 'GroundTruth', outcome: 'Outcome') -> 'bool | None'` |
-| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
+| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, limit: 'int | None' = None, offset: 'int' = 0, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
 | `recency_features` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, similarity_threshold: 'float' = 0.5, half_life_seconds: 'float' = 86400.0, max_candidates: 'int' = 500, now: 'float | None' = None) -> 'RecencyFeatures'` |
 | `record_only_backend` | function | `(*backends: 'str') -> 'MemoryRule'` |
 | `redact_above` | function | `(privacy_class: 'str') -> 'MemoryRule'` |
 | `replay` | function | `(history: 'HistoryLike', decide: 'DecideFn', *, query: 'MemoryQuery | None' = None, limit: 'int' = 1000) -> 'ReplayReport'` |
-| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
+| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, limit: 'int | None' = None, offset: 'int' = 0, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
 | `retrieve_conditioned` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, outcome_kinds: 'set[str] | frozenset[str] | None' = frozenset({'success'}), include_unknown: 'bool' = False, require_truth_agreement: 'bool' = False, **retrieve_kwargs) -> 'list[RetrievalResult]'` |
 | `scan` | function | `(history: 'HistoryLike', *, outcome_flood_window_seconds: 'float' = 60.0, outcome_flood_threshold: 'int' = 100, duplicate_threshold: 'int' = 20, future_tolerance_seconds: 'float' = 3600.0, now: 'float | None' = None) -> 'AdversarialReport'` |
 | `wilson_interval` | function | `(successes: 'int', n: 'int', z: 'float' = 1.96) -> 'tuple[float, float]'` |
@@ -3668,8 +3669,8 @@ that this document never drifts from the code.
 | Name | Kind | Signature / value |
 |---|---|---|
 | `RetrievalResult` | class | `(episode: 'EpisodeLike', score: 'float', similarity: 'float', recency: 'float', outcome_bonus: 'float') -> None` |
-| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
-| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
+| `recall` | function | `(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, limit: 'int | None' = None, offset: 'int' = 0, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'` |
+| `retrieve` | function | `(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, limit: 'int | None' = None, offset: 'int' = 0, now: 'float | None' = None) -> 'list[RetrievalResult]'` |
 
 ### `hugrgate.memory.similarity`
 
@@ -5080,7 +5081,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `Supervisor` | class | `(*, check_interval_s: 'float' = 1.0, on_escalation: 'Callable[[str, str, WorkerRecord], None] | None' = None) -> 'None'` |
+| `Supervisor` | class | `(*, check_interval_s: 'float' = 1.0, on_escalation: 'Callable[[str, str, dict[str, Any]], None] | None' = None) -> 'None'` |
 | `WorkerContext` | class | `(name: 'str') -> 'None'` |
 | `WorkerRecord` | class | `(name: 'str', target: 'Callable[[WorkerContext], None]', heartbeat_timeout_s: 'float', max_restarts: 'int', restart_window_s: 'float', restarts: 'int' = 0, restart_times: 'list[float]' = <factory>, failures: 'int' = 0, escalated: 'bool' = False, last_error: 'str | None' = None, thread: 'threading.Thread | None' = None, ctx: 'WorkerContext | None' = None) -> None` |
 

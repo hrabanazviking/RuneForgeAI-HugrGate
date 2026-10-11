@@ -62,6 +62,17 @@ class SleepBackend(Backend):
         return self._declared
 
 
+def _round_floats(obj):
+    """Recursively round every float to 6 dp (slice 11: kill float noise)."""
+    if isinstance(obj, float):
+        return round(obj, 6)
+    if isinstance(obj, dict):
+        return {k: _round_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round_floats(v) for v in obj]
+    return obj
+
+
 def main() -> dict:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rounds", type=int, default=12)
@@ -121,9 +132,10 @@ def main() -> dict:
         "error_reduction_factor": (round(declared_err / measured_err, 2)
                                    if measured_err > 0 else None),
     }
+    artifact = _round_floats(artifact)
     with open(args.out, "w") as f:
-        json.dump(artifact, f, indent=2)
-    print(json.dumps(artifact, indent=2))
+        json.dump(artifact, f, indent=2, sort_keys=True)
+    print(json.dumps(artifact, indent=2, sort_keys=True))
     return artifact
 
 

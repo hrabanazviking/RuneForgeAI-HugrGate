@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import re
 import time
+import uuid
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -42,6 +43,7 @@ from hugrgate.errors import (
     ProtocolError,
     SpecError,
 )
+from hugrgate.log import get_logger
 from hugrgate.protocol import (
     PROTOCOL_VERSION,
     SUPPORTED_PROTOCOL_VERSIONS,
@@ -68,6 +70,11 @@ __all__ = [
     "register_model",
     "run",
 ]
+
+logger = get_logger(__name__)
+
+# Slice 15 (dusk, Wave C): request-ID propagation.
+REQUEST_ID_HEADER = "X-Request-ID"
 
 _WORD_RE = re.compile(r"[a-z0-9]+")
 
@@ -366,6 +373,25 @@ def create_app(gate: HugrGate | None = None,
     app = FastAPI(title="HugrGate", version=HUGRGATE_VERSION)
     app.state.gate = gate
     started_at = time.time()
+
+    # --- Request-ID propagation (slice 15, dusk Wave C) ----------------------
+    #
+    # Echo a client-supplied ``X-Request-ID`` back on the response; when
+    # the client sent none, mint a uuid4 hex and report that instead.
+    # The ID is stored on ``request.state`` for handlers and included
+    # in the per-request log line (the service's access-log emission
+    # point) so entries correlate across client, server, and logs.
+    # Per the log-privacy rule: method/path/status/id only, never body.
+    @app.middleware("http")
+    async def request_id_middleware(request: Request, call_next) -> Any:
+        request_id = request.headers.get(REQUEST_ID_HEADER) or uuid.uuid4().hex
+        request.state.request_id = request_id
+        response = await call_next(request)
+        response.headers[REQUEST_ID_HEADER] = request_id
+        logger.info("%s %s status=%d request_id=%s",
+                    request.method, request.url.path,
+                    response.status_code, request_id)
+        return response
 
     @app.get("/", tags=["meta"], summary="Service identity",
               description="Returns the service name, package version, and "

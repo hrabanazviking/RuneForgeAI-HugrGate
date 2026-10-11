@@ -3820,6 +3820,10 @@
     }
   },
   "hugrgate.configgen": {
+    "explain_daemon_config": {
+      "kind": "function",
+      "sig": "(path: 'str | Path') -> 'dict[str, dict[str, Any]]'"
+    },
     "generate_daemon_config": {
       "kind": "function",
       "sig": "(**overrides: 'Any') -> 'str'"
@@ -8327,7 +8331,7 @@
     },
     "recall": {
       "kind": "function",
-      "sig": "(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'"
+      "sig": "(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, limit: 'int | None' = None, offset: 'int' = 0, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'"
     },
     "recency_features": {
       "kind": "function",
@@ -8347,7 +8351,7 @@
     },
     "retrieve": {
       "kind": "function",
-      "sig": "(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'"
+      "sig": "(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, limit: 'int | None' = None, offset: 'int' = 0, now: 'float | None' = None) -> 'list[RetrievalResult]'"
     },
     "retrieve_conditioned": {
       "kind": "function",
@@ -8741,11 +8745,11 @@
     },
     "recall": {
       "kind": "function",
-      "sig": "(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'"
+      "sig": "(history: 'HistoryLike', *, k: 'int' = 5, spec: 'dict[str, Any] | None' = None, backend: 'str | None' = None, model: 'str | None' = None, probability: 'float | None' = None, accepted: 'bool | None' = None, state_keys: 'list[str] | tuple[str, ...] | None' = None, domain: 'str | None' = None, limit: 'int | None' = None, offset: 'int' = 0, **retrieve_kwargs: 'Any') -> 'list[RetrievalResult]'"
     },
     "retrieve": {
       "kind": "function",
-      "sig": "(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, now: 'float | None' = None) -> 'list[RetrievalResult]'"
+      "sig": "(history: 'HistoryLike', query_features: 'dict[str, float]', *, k: 'int' = 5, alpha: 'float' = 0.6, beta: 'float' = 0.3, gamma: 'float' = 0.1, half_life_seconds: 'float' = 86400.0, min_score: 'float' = 0.0, exclude_ids: 'set[str] | frozenset[str]' = frozenset(), episodes: 'Sequence[EpisodeLike] | None' = None, limit: 'int | None' = None, offset: 'int' = 0, now: 'float | None' = None) -> 'list[RetrievalResult]'"
     }
   },
   "hugrgate.memory.similarity": {
@@ -11904,7 +11908,7 @@
   "hugrgate.supervision": {
     "Supervisor": {
       "kind": "class",
-      "sig": "(*, check_interval_s: 'float' = 1.0, on_escalation: 'Callable[[str, str, WorkerRecord], None] | None' = None) -> 'None'"
+      "sig": "(*, check_interval_s: 'float' = 1.0, on_escalation: 'Callable[[str, str, dict[str, Any]], None] | None' = None) -> 'None'"
     },
     "WorkerContext": {
       "kind": "class",

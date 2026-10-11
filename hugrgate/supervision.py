@@ -12,7 +12,9 @@ threads alive:
   factory ``target``.
 - Restart budget: ``max_restarts`` restarts per ``restart_window_s``.
   Exhausting the budget *escalates*: the ``on_escalation`` callback
-  fires (name, reason, restart history) and the worker is marked
+  fires with an escalation payload carrying ``restart_times``
+  (the supervisor's restart-timestamp history) and ``last_error``
+  (the last failure's traceback), and the worker is marked
   failed — no more silent restarts.
 - :meth:`Supervisor.stop` halts the watchdog and joins workers.
 
@@ -97,12 +99,16 @@ class Supervisor:
     Parameters
     ----------
     check_interval_s: watchdog period.
-    on_escalation: ``(name, reason, record) -> None`` called when a
-        worker exhausts its restart budget.
+    on_escalation: ``(name, reason, payload) -> None`` called when a
+        worker exhausts its restart budget.  ``payload`` is a dict with
+        the worker ``name``, the ``reason``, ``restart_times`` (list of
+        restart timestamps in :func:`time.monotonic` seconds, pruned to
+        the restart window), ``restarts`` (restart count), and
+        ``last_error`` (the last failure's traceback, or None).
     """
 
     def __init__(self, *, check_interval_s: float = 1.0,
-                 on_escalation: Callable[[str, str, WorkerRecord], None]
+                 on_escalation: Callable[[str, str, dict[str, Any]], None]
                  | None = None) -> None:
         if check_interval_s <= 0:
             raise SupervisionError(
@@ -264,9 +270,19 @@ class Supervisor:
         if escalate:
             logger.error("supervisor: worker %s escalated (%s)",
                          record.name, reason)
+            # Enriched escalation payload: restart history plus the last
+            # failure, not just the worker name. Built after the worker
+            # is stopped so the snapshot is final.
+            payload = {
+                "name": record.name,
+                "reason": reason,
+                "restart_times": list(record.restart_times),
+                "restarts": record.restarts,
+                "last_error": record.last_error,
+            }
             if self._on_escalation is not None:
                 try:
-                    self._on_escalation(record.name, reason, record)
+                    self._on_escalation(record.name, reason, payload)
                 except Exception:
                     logger.exception("on_escalation handler raised")
             # Publish the flag only after the handler ran: `escalated`

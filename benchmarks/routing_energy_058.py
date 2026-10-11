@@ -62,6 +62,17 @@ class WattBackend(Backend):
         return {"power_watts": self._watts}
 
 
+def _round_floats(obj):
+    """Recursively round every float to 6 dp (slice 11: kill float noise)."""
+    if isinstance(obj, float):
+        return round(obj, 6)
+    if isinstance(obj, dict):
+        return {k: _round_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round_floats(v) for v in obj]
+    return obj
+
+
 def run(rounds, energy_aware):
     registry = BackendRegistry()
     hog = WattBackend("gpu-hog", watts=250.0, sleep_ms=80, prob=0.99)
@@ -117,9 +128,10 @@ def main() -> dict:
         "savings_factor": (round(baseline["spent_j"] / aware["spent_j"], 2)
                            if aware["spent_j"] > 0 else None),
     }
+    artifact = _round_floats(artifact)
     with open(args.out, "w") as f:
-        json.dump(artifact, f, indent=2)
-    print(json.dumps(artifact, indent=2))
+        json.dump(artifact, f, indent=2, sort_keys=True)
+    print(json.dumps(artifact, indent=2, sort_keys=True))
     return artifact
 
 

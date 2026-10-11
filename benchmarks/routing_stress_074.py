@@ -102,6 +102,17 @@ def bench(label, fn, decisions):
     }
 
 
+def _round_floats(obj):
+    """Recursively round every float to 6 dp (slice 11: kill float noise)."""
+    if isinstance(obj, float):
+        return round(obj, 6)
+    if isinstance(obj, dict):
+        return {k: _round_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_round_floats(v) for v in obj]
+    return obj
+
+
 def main() -> dict:
     ap = argparse.ArgumentParser()
     ap.add_argument("--decisions", type=int, default=200)
@@ -191,9 +202,10 @@ def main() -> dict:
         "results": results,
         "comparisons": comparisons,
     }
+    artifact = _round_floats(artifact)
     with open(args.out, "w") as f:
-        json.dump(artifact, f, indent=2)
-    print(json.dumps(artifact, indent=2))
+        json.dump(artifact, f, indent=2, sort_keys=True)
+    print(json.dumps(artifact, indent=2, sort_keys=True))
     return artifact
 
 

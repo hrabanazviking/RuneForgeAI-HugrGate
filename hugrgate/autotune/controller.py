@@ -200,6 +200,32 @@ class ConfigStore:
             self._values.update(coerced)
             return dict(coerced)
 
+    def dry_run(self, changes: Mapping[str, Any]) -> dict[str, Any]:
+        """Validate ``changes`` and report what *would* be applied.
+
+        Runs the exact same validation and coercion as :meth:`apply`
+        (unknown names, wrong types, and out-of-bounds values raise
+        :class:`ParameterError` and the store is left untouched), but
+        never writes to the store. Returns a would-apply report with,
+        for every parameter whose value would actually change, the
+        ``old`` -> ``new`` values.
+        """
+        with self._lock:
+            would_change: dict[str, dict[str, Any]] = {}
+            for name, value in changes.items():
+                param = self._params.get(name)
+                if param is None:
+                    raise ParameterError("unknown parameter", name=name)
+                new = param.coerce(value)
+                old = self._values[name]
+                if new != old:
+                    would_change[name] = {"old": old, "new": new}
+            return {
+                "would_change": would_change,
+                "change_count": len(would_change),
+                "mutated": False,
+            }
+
 
 @dataclass(frozen=True)
 class Proposal:

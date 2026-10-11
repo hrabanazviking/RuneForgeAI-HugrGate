@@ -324,14 +324,29 @@ class DecisionHistory:
         with self._lock:
             return copy.deepcopy(self._summaries)
 
-    def find(self, query: MemoryQuery) -> list[Episode]:
-        """Run a :class:`MemoryQuery`; return deep copies, never aliases."""
+    def find(self, query: MemoryQuery, *,
+             limit: int | None = None, offset: int = 0) -> list[Episode]:
+        """Run a :class:`MemoryQuery`; return deep copies, never aliases.
+
+        Slice 16: ``limit``/``offset`` paginate the query's matched,
+        sorted result (after any pagination in ``query`` itself).
+        Defaults (``limit=None``, ``offset=0``) return the query's full
+        result, exactly as before.
+        """
         if not isinstance(query, MemoryQuery):
             raise TypeError(
                 f"find needs a MemoryQuery, got {type(query).__name__}")
+        if limit is not None and limit < 0:
+            raise ValueError(f"limit must be >= 0, got {limit}")
+        if offset < 0:
+            raise ValueError(f"offset must be >= 0, got {offset}")
         with self._lock:
             snapshot = copy.deepcopy(self._episodes)
-        return query.apply(snapshot)
+        matched = query.apply(snapshot)
+        if limit is None and offset == 0:
+            return matched
+        end = None if limit is None else offset + limit
+        return matched[offset:end]
 
     def attach_outcome(self, episode_id: str, outcome: Outcome, *,
                        overwrite: bool = False) -> Episode:
