@@ -1,0 +1,814 @@
+{
+  "slice": "HG-T2",
+  "case_set": "benchmarks/hg_t2_cases.py",
+  "n_cases": 24,
+  "spec": {
+    "type": "categorical",
+    "options": [
+      "routine",
+      "attention",
+      "escalate"
+    ],
+    "metadata": {
+      "option_definitions": {
+        "routine": "normal or expected, no action needed",
+        "attention": "a real issue a human should review soon, but not urgent and nothing is actively failing or dangerous",
+        "escalate": "urgent: active failure, danger, or security breach needing immediate action"
+      }
+    }
+  },
+  "candidates": [
+    "gemma4viking4b:latest",
+    "b1olmoe:latest"
+  ],
+  "rules_only": {
+    "n": 24,
+    "accuracy": 0.6667,
+    "accuracy_clear": 1.0,
+    "accuracy_hard": 0.3333,
+    "median_latency_ms": 0.011,
+    "model_invocations": 0,
+    "rows": [
+      {
+        "id": "clear-01",
+        "kind": "clear",
+        "expected": "escalate",
+        "got": "escalate",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.037
+      },
+      {
+        "id": "clear-02",
+        "kind": "clear",
+        "expected": "escalate",
+        "got": "escalate",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.022
+      },
+      {
+        "id": "clear-03",
+        "kind": "clear",
+        "expected": "escalate",
+        "got": "escalate",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.016
+      },
+      {
+        "id": "clear-04",
+        "kind": "clear",
+        "expected": "escalate",
+        "got": "escalate",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.012
+      },
+      {
+        "id": "clear-05",
+        "kind": "clear",
+        "expected": "attention",
+        "got": "attention",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.012
+      },
+      {
+        "id": "clear-06",
+        "kind": "clear",
+        "expected": "attention",
+        "got": "attention",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.012
+      },
+      {
+        "id": "clear-07",
+        "kind": "clear",
+        "expected": "attention",
+        "got": "attention",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "clear-08",
+        "kind": "clear",
+        "expected": "attention",
+        "got": "attention",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "clear-09",
+        "kind": "clear",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "clear-10",
+        "kind": "clear",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "clear-11",
+        "kind": "clear",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.01
+      },
+      {
+        "id": "clear-12",
+        "kind": "clear",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.01
+      },
+      {
+        "id": "hard-01",
+        "kind": "hard",
+        "expected": "escalate",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.014
+      },
+      {
+        "id": "hard-02",
+        "kind": "hard",
+        "expected": "escalate",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "hard-03",
+        "kind": "hard",
+        "expected": "escalate",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "hard-04",
+        "kind": "hard",
+        "expected": "escalate",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.029
+      },
+      {
+        "id": "hard-05",
+        "kind": "hard",
+        "expected": "attention",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "hard-06",
+        "kind": "hard",
+        "expected": "attention",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "hard-07",
+        "kind": "hard",
+        "expected": "attention",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.01
+      },
+      {
+        "id": "hard-08",
+        "kind": "hard",
+        "expected": "attention",
+        "got": "routine",
+        "correct": false,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.01
+      },
+      {
+        "id": "hard-09",
+        "kind": "hard",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.009
+      },
+      {
+        "id": "hard-10",
+        "kind": "hard",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.011
+      },
+      {
+        "id": "hard-11",
+        "kind": "hard",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.014
+      },
+      {
+        "id": "hard-12",
+        "kind": "hard",
+        "expected": "routine",
+        "got": "routine",
+        "correct": true,
+        "route": null,
+        "model_used": false,
+        "latency_ms": 0.01
+      }
+    ]
+  },
+  "models": {
+    "gemma4viking4b:latest": {
+      "health": {
+        "status": "ok",
+        "model": "gemma4viking4b:latest",
+        "model_present": true,
+        "models": [
+          "b1olmoe:latest",
+          "igorls/gemma-4-12B-it-heretic-GGUF:Q4_K_M",
+          "jikepjikep_16HEX/gemma-4-12b-nightshift-heretic-uncensored-qat-q4:latest",
+          "gemma4viking4b:latest",
+          "igorls/gemma-4-E4B-it-heretic-GGUF:latest",
+          "gemma4viking:latest",
+          "heretic-8k:latest",
+          "tripolskypetr/gemma4-uncensored-aggressive:latest"
+        ]
+      },
+      "warmup_ms": 25310.9,
+      "n": 24,
+      "accuracy": 0.8333,
+      "accuracy_clear": 1.0,
+      "accuracy_hard": 0.6667,
+      "median_latency_ms": 491.912,
+      "model_invocations": 12,
+      "rows": [
+        {
+          "id": "clear-01",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.058
+        },
+        {
+          "id": "clear-02",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.038
+        },
+        {
+          "id": "clear-03",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.029
+        },
+        {
+          "id": "clear-04",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.028
+        },
+        {
+          "id": "clear-05",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.046
+        },
+        {
+          "id": "clear-06",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.03
+        },
+        {
+          "id": "clear-07",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.027
+        },
+        {
+          "id": "clear-08",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.028
+        },
+        {
+          "id": "clear-09",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.028
+        },
+        {
+          "id": "clear-10",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.028
+        },
+        {
+          "id": "clear-11",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.026
+        },
+        {
+          "id": "clear-12",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.025
+        },
+        {
+          "id": "hard-01",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1056.193
+        },
+        {
+          "id": "hard-02",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1035.546
+        },
+        {
+          "id": "hard-03",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1047.684
+        },
+        {
+          "id": "hard-04",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1049.937
+        },
+        {
+          "id": "hard-05",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "routine",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1034.299
+        },
+        {
+          "id": "hard-06",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "routine",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1009.099
+        },
+        {
+          "id": "hard-07",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "routine",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1023.237
+        },
+        {
+          "id": "hard-08",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "routine",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 995.368
+        },
+        {
+          "id": "hard-09",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1005.89
+        },
+        {
+          "id": "hard-10",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 983.766
+        },
+        {
+          "id": "hard-11",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1000.422
+        },
+        {
+          "id": "hard-12",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 999.77
+        }
+      ],
+      "model_median_latency_ms": 1016.2,
+      "status": "ok"
+    },
+    "b1olmoe:latest": {
+      "health": {
+        "status": "ok",
+        "model": "b1olmoe:latest",
+        "model_present": true,
+        "models": [
+          "b1olmoe:latest",
+          "igorls/gemma-4-12B-it-heretic-GGUF:Q4_K_M",
+          "jikepjikep_16HEX/gemma-4-12b-nightshift-heretic-uncensored-qat-q4:latest",
+          "gemma4viking4b:latest",
+          "igorls/gemma-4-E4B-it-heretic-GGUF:latest",
+          "gemma4viking:latest",
+          "heretic-8k:latest",
+          "tripolskypetr/gemma4-uncensored-aggressive:latest"
+        ]
+      },
+      "warmup_ms": 5585.8,
+      "n": 24,
+      "accuracy": 0.7083,
+      "accuracy_clear": 1.0,
+      "accuracy_hard": 0.4167,
+      "median_latency_ms": 458.065,
+      "model_invocations": 12,
+      "rows": [
+        {
+          "id": "clear-01",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.03
+        },
+        {
+          "id": "clear-02",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.016
+        },
+        {
+          "id": "clear-03",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.012
+        },
+        {
+          "id": "clear-04",
+          "kind": "clear",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.012
+        },
+        {
+          "id": "clear-05",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.013
+        },
+        {
+          "id": "clear-06",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.026
+        },
+        {
+          "id": "clear-07",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.013
+        },
+        {
+          "id": "clear-08",
+          "kind": "clear",
+          "expected": "attention",
+          "got": "attention",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.012
+        },
+        {
+          "id": "clear-09",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.012
+        },
+        {
+          "id": "clear-10",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.012
+        },
+        {
+          "id": "clear-11",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.011
+        },
+        {
+          "id": "clear-12",
+          "kind": "clear",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "rules",
+          "model_used": false,
+          "latency_ms": 0.011
+        },
+        {
+          "id": "hard-01",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1045.336
+        },
+        {
+          "id": "hard-02",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1000.028
+        },
+        {
+          "id": "hard-03",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1026.886
+        },
+        {
+          "id": "hard-04",
+          "kind": "hard",
+          "expected": "escalate",
+          "got": "escalate",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1016.096
+        },
+        {
+          "id": "hard-05",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "escalate",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1007.779
+        },
+        {
+          "id": "hard-06",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "escalate",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 997.341
+        },
+        {
+          "id": "hard-07",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "escalate",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1022.324
+        },
+        {
+          "id": "hard-08",
+          "kind": "hard",
+          "expected": "attention",
+          "got": "escalate",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 971.7
+        },
+        {
+          "id": "hard-09",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "routine",
+          "correct": true,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 998.16
+        },
+        {
+          "id": "hard-10",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "attention",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1032.918
+        },
+        {
+          "id": "hard-11",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "escalate",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 1020.202
+        },
+        {
+          "id": "hard-12",
+          "kind": "hard",
+          "expected": "routine",
+          "got": "attention",
+          "correct": false,
+          "route": "model",
+          "model_used": true,
+          "latency_ms": 916.101
+        }
+      ],
+      "model_median_latency_ms": 1011.9,
+      "status": "ok"
+    }
+  },
+  "pick": "gemma4viking4b:latest",
+  "pick_reason": "highest selective accuracy on the frozen case set, then lowest median model latency"
+}

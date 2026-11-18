@@ -157,10 +157,17 @@ class LLMBackend(Backend):
             question = f"Choose one of: {', '.join(allowed)}."
         else:
             question = (f"Choose the level, one of: {', '.join(allowed)}.")
+        definitions = ""
+        raw_defs = (spec.metadata or {}).get("option_definitions")
+        if isinstance(raw_defs, Mapping) and raw_defs:
+            definitions = "Definitions: " + "; ".join(
+                f"{k} = {raw_defs[k]}" for k in allowed
+                if k in raw_defs) + "\n"
         return (
             "You are a precise decision engine. Answer with exactly one "
             f"of the allowed tokens and nothing else.\n"
             f"Allowed: {', '.join(allowed)}\n"
+            f"{definitions}"
             f"State: {state_text}\n"
             f"Question: {question}\n"
             "Answer:")
