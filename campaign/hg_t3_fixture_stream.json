@@ -1,0 +1,39 @@
+{
+ "description": "HG-T3 recorded fixture stream of synthetic world events with expected triage table. Every event must receive exactly one verdict; shed is a verdict, never a silent drop.",
+ "events": [
+  {"source":"connector.alpha","kind":"connector.heartbeat","time":"2026-11-18T00:00:00Z","payload":{"status":"ok"}},
+  {"source":"sensor.hall","kind":"alarm.fire","time":"2026-11-18T00:00:05Z","payload":{"location":"rack row"}},
+  {"source":"auth.service","kind":"security.breach","time":"2026-11-18T00:00:09Z","payload":{"account":"ops"}},
+  {"source":"db.main","kind":"system.failure","time":"2026-11-18T00:00:12Z","payload":{"component":"database"}},
+  {"source":"net.core","kind":"network.outage","time":"2026-11-18T00:00:15Z","payload":{"link":"uplink"}},
+  {"source":"api.front","kind":"service.degraded","time":"2026-11-18T00:00:20Z","payload":{"message":"slow response"}},
+  {"source":"sensor.hall","kind":"temperature.warning","time":"2026-11-18T00:00:25Z","payload":{"message":"threshold exceeded"}},
+  {"source":"connector.alpha","kind":"telemetry.metric","time":"2026-11-18T00:00:30Z","payload":{"cpu":42}},
+  {"source":"connector.beta","kind":"mystery.event","time":"2026-11-18T00:00:35Z","payload":{"detail":"something happened"}},
+  {"source":"connector.alpha","kind":"telemetry.metric","time":"2026-11-18T00:00:40Z","payload":{"cpu":42}},
+  {"kind":"connector.heartbeat","time":"2026-11-18T00:00:45Z","payload":{"status":"ok"}},
+  {"source":"connector.alpha","kind":"connector.heartbeat","time":"not-a-time","payload":{"status":"ok"}},
+  {"source":"sensor.hall","kind":"alarm.smoke","time":"2026-11-18T00:00:55Z","payload_digest":"abc123digestonly"},
+  {"source":"api.front","kind":"service.error","time":"2026-11-18T00:01:00Z","payload":{"message":"disk problem"}},
+  {"source":"sensor.yard","kind":"sensor.flood","time":"2026-11-18T00:01:05Z","payload":{"zone":"basement"}},
+  {"source":"connector.beta","kind":"connector.ping","time":"2026-11-18T00:01:10Z","payload":{"status":"info"}}
+ ],
+ "expected": [
+  {"urgency":"low","route":"archive","escalate":false},
+  {"urgency":"critical","route":"escalate","escalate":true},
+  {"urgency":"critical","route":"escalate","escalate":true},
+  {"urgency":"high","route":"escalate","escalate":true},
+  {"urgency":"high","route":"escalate","escalate":true},
+  {"urgency":"medium","route":"notify","escalate":false},
+  {"urgency":"medium","route":"notify","escalate":false},
+  {"urgency":"low","route":"archive","escalate":false},
+  {"urgency":"medium","route":"review","escalate":false},
+  {"urgency":"none","route":"shed","escalate":false},
+  {"urgency":"none","route":"shed","escalate":false},
+  {"urgency":"none","route":"shed","escalate":false},
+  {"urgency":"critical","route":"escalate","escalate":true},
+  {"urgency":"high","route":"escalate","escalate":true},
+  {"urgency":"critical","route":"escalate","escalate":true},
+  {"urgency":"low","route":"archive","escalate":false}
+ ]
+}

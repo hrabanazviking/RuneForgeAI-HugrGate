@@ -54,6 +54,7 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
 from hugrgate.spec import DecisionSpec
+from hugrgate.triage_profile import TriageProfile
 
 __all__ = [
     "DEFAULT_HOST",
@@ -287,6 +288,16 @@ class DecisionServer:
             self._judgments += 1
         return result.to_dict()
 
+    def triage(self, body: Any) -> dict[str, Any]:
+        """HG-T3 triage: {events:[...]} -> per-event verdicts, none dropped."""
+        if isinstance(body, list): events=body
+        elif isinstance(body, Mapping): events=body.get('events')
+        else: raise _BadRequest('triage body must be an object or a list')
+        if not isinstance(events, list) or not events: raise _BadRequest("'events' must be a non-empty list")
+        verdicts=TriageProfile().triage_stream(events)
+        with self._lock: self._events += len(events)
+        return {'accepted': len(events), 'verdicts': verdicts, 'shed': sum(1 for v in verdicts if v['route']=='shed')}
+
     def intake_events(self, body: Any) -> dict[str, Any]:
         """Event batch intake. Per-event verdicts, nothing dropped."""
         if isinstance(body, list):
@@ -392,6 +403,8 @@ def _make_handler(server: DecisionServer):
         def do_POST(self) -> None:  # noqa: N802 - http.server API
             if self.path in ("/judge", "/decide"):
                 self._dispatch(lambda: (200, server.judge(self._body())))
+            elif self.path == "/triage":
+                self._dispatch(lambda: (200, server.triage(self._body())))
             elif self.path == "/events":
                 self._dispatch(
                     lambda: (200, server.intake_events(self._body())))

@@ -64,6 +64,39 @@ roles run sequentially by the keeper (no sub-agents this tick), recorded here.
   `ollama serve` was started as a plain process for the benchmark
   and stopped again at bank time. No service was created.
 
+## HG-T3 - Event-stream triage profile - GATE PASSED (device-verified 2026-11-18)
+- Built `hugrgate/triage_profile.py` (stdlib-only): `TriageProfile`
+  with input schema (source, kind, time, payload or payload_digest;
+  time must parse as ISO-8601 or epoch) and verdict schema
+  (urgency, route, escalate, basis, payload_digest, deterministic,
+  model_used). Ordered named rules, first match wins, winning rule
+  recorded in basis: critical/high signals -> escalate, medium ->
+  notify, low -> archive, no-signal -> medium review.
+- Deterministic-first: identical events give identical verdicts;
+  no model by default. An explicitly supplied model is consulted
+  only for the default-review case and its basis says
+  `model:<name>`; settled cases never consult it.
+- Nothing dropped silently: invalid-schema events and duplicate
+  payload digests in a stream receive route=`shed` verdicts with
+  schema:/duplicate: basis, counted like any other verdict.
+- Recorded fixture: `campaign/hg_t3_fixture_stream.json` - 16
+  synthetic world events with an expected table (urgency/route/
+  escalate). Fixture triaged end-to-end matching the table; 3 shed
+  verdicts (duplicate, missing source, unparseable time).
+- Decision server: POST /triage added to DecisionServer, returning
+  accepted/verdicts/shed counts over the same profile.
+- Gate tests: `tests/test_tviheimr_hg_t3_triage.py` - 7 tests
+  (fixture table, basis+digest on every verdict, shed accounting,
+  determinism, declared model-in-loop, digest stability/schema,
+  server end-to-end).
+- Device gate run (purplelongship, TMPDIR=~/forge-tmp): HG-T1+T2+T3
+  = 21 passed; widened set with health/registry/ladder/routing =
+  105 passed in 4.54s. Full-suite collection note from HG-T1/T2
+  stands unchanged (42 pre-existing collection errors from the
+  uninstalled optional FastAPI extra in this venue, not HG-T3).
+- Method note: roles run sequentially by the keeper (no sub-agents
+  this tick), recorded per campaign instructions.
+
 ## Remaining
-- HG-T3 … HG-T6 — not started.
+- HG-T4 … HG-T6 - not started.
 - "Ready for Tviheimr" gate — not reached.
