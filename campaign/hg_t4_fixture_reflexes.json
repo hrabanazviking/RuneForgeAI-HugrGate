@@ -1,0 +1,27 @@
+{
+ "description": "HG-T4 recorded fixture: declared Verdandi reflex set plus a synthetic event stream with the expected fires table. A reflex fires exactly on its declared pattern and no others; undeclared patterns cannot fire.",
+ "consumer": "verdandi",
+ "reflexes": [
+  {"name": "hall-fire", "action": "evacuate-hall", "pattern": {"source": "sensor.hall", "kind": "alarm.*"}},
+  {"name": "breach-response", "action": "lock-down", "pattern": {"kind": "security.breach"}},
+  {"name": "db-failure-page", "action": "page-oncall", "pattern": {"kind": "system.failure", "where": {"severity": ["critical", "high"]}}},
+  {"name": "low-battery-note", "action": "log-maintenance", "pattern": {"kind": "device.battery", "where": {"level": "low"}}}
+ ],
+ "events": [
+  {"source": "sensor.hall", "kind": "alarm.fire", "time": "2026-11-18T00:00:00Z", "payload": {"location": "rack row"}},
+  {"source": "sensor.yard", "kind": "alarm.fire", "time": "2026-11-18T00:00:05Z", "payload": {"location": "yard"}},
+  {"source": "auth.service", "kind": "security.breach", "time": "2026-11-18T00:00:09Z", "payload": {"account": "ops"}},
+  {"source": "auth.service", "kind": "security.login", "time": "2026-11-18T00:00:12Z", "payload": {"account": "ops"}},
+  {"source": "db.main", "kind": "system.failure", "time": "2026-11-18T00:00:15Z", "payload": {"severity": "critical"}},
+  {"source": "db.main", "kind": "system.failure", "time": "2026-11-18T00:00:20Z", "payload": {"severity": "low"}},
+  {"source": "sensor.hall", "kind": "alarm.smoke", "time": "2026-11-18T00:00:25Z", "payload": {"location": "rack row"}},
+  {"source": "tablet.x", "kind": "device.battery", "time": "2026-11-18T00:00:30Z", "payload": {"level": "low"}},
+  {"source": "tablet.x", "kind": "device.battery", "time": "2026-11-18T00:00:35Z", "payload": {"level": "ok"}},
+  {"source": "connector.beta", "kind": "unknown.thing", "time": "2026-11-18T00:00:40Z", "payload": {"detail": "undeclared"}},
+  {"source": "sensor.hall", "time": "2026-11-18T00:00:45Z", "payload": {}}
+ ],
+ "expected_fires": [
+  ["evacuate-hall"], [], ["lock-down"], [], ["page-oncall"], [],
+  ["evacuate-hall"], ["log-maintenance"], [], [], []
+ ]
+}

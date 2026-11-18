@@ -1,0 +1,13 @@
+{
+ "slice": "HG-T4",
+ "fixture_events": 11,
+ "reflexes": 4,
+ "rounds": 200,
+ "judgments": 2200,
+ "expected_table_match": true,
+ "latency_ms": {
+  "median": 0.008,
+  "p95": 0.009,
+  "max": 0.025
+ }
+}

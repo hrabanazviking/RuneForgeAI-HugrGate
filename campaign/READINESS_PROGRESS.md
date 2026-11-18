@@ -97,6 +97,52 @@ roles run sequentially by the keeper (no sub-agents this tick), recorded here.
 - Method note: roles run sequentially by the keeper (no sub-agents
   this tick), recorded per campaign instructions.
 
+## HG-T4 - Reflex API for Verdandi - GATE PASSED (device-verified 2026-11-18)
+- Built `hugrgate/reflex_api.py` (stdlib-only): `ReflexRegistry`
+  for one consumer (default verdandi). A consumer registers
+  reflexes (trigger pattern -> named action); HugrGate judges
+  events against them and returns fire/no-fire with basis.
+  HugrGate judges; the consumer acts and records.
+- Patterns are explicit: optional source match, optional kind
+  match (exact, or prefix when the value ends in '*'), optional
+  payload `where` conditions (value or list of allowed values).
+  At least one of source/kind is required - no catch-all reflexes.
+  Registration validation refuses duplicate names, empty actions,
+  bare wildcards, unknown pattern fields and malformed conditions.
+- Only declared reflexes can fire: an event matching no registered
+  pattern fires nothing, and an empty registry fires nothing.
+  Invalid events (missing source/kind) fire nothing - every
+  verdict is no-fire with a schema basis, never a silent drop.
+- Every judgment returns one verdict per registered reflex, in
+  registration order: fire, action, basis naming the matched or
+  first failed pattern part, payload digest, measured latency_ms.
+  Deterministic apart from latency.
+- Recorded fixture: `campaign/hg_t4_fixture_reflexes.json` - 4
+  declared reflexes, 11 synthetic events, expected fires table
+  (5 fires: events 0, 2, 4, 6, 7, one each; near-misses on source,
+  kind, and payload condition all no-fire; undeclared kinds and
+  an invalid event fire nothing). Fixture judged end-to-end
+  matching the table exactly.
+- Latency report banked: `campaign/hg_t4_latency_report.json`
+  (runner `benchmarks/hg_t4_reflex_bench.py`, 200 rounds x 11
+  events = 2,200 judgments, expected-table asserted first):
+  median 0.008 ms, p95 0.009 ms, max 0.025 ms per judgment.
+- Decision server: POST /reflexes (201; invalid declarations
+  refused 400), GET /reflexes, POST /reflex/judge added, backed
+  by a per-server ReflexRegistry.
+- Gate tests: `tests/test_tviheimr_hg_t4_reflex.py` - 8 tests
+  (exact fixture table, undeclared cannot fire, basis+digest+
+  latency on every verdict, invalid-event schema basis,
+  registration validation, determinism + unregister, latency
+  report recorded and sub-5ms median, server end-to-end).
+- Device gate run (purplelongship, TMPDIR=~/forge-tmp): HG-T1+T2+
+  T3+T4 = 29 passed; widened set with health/registry/ladder/
+  routing = 149 passed in 4.82s. Live plain-process HTTP smoke:
+  register x4 -> 201, list = 4, judge matches the expected table,
+  catch-all declaration refused 400, clean shutdown.
+- Method note: roles run sequentially by the keeper (no
+  sub-agents this tick), recorded per campaign instructions.
+
 ## Remaining
-- HG-T4 … HG-T6 - not started.
+- HG-T5 … HG-T6 - not started.
 - "Ready for Tviheimr" gate — not reached.

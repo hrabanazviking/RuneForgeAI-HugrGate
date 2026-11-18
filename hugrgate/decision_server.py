@@ -54,6 +54,7 @@ from hugrgate.policy import DecisionPolicy
 from hugrgate.result import DecisionResult
 from hugrgate.serde import policy_from_dict
 from hugrgate.spec import DecisionSpec
+from hugrgate.reflex_api import ReflexRegistry
 from hugrgate.triage_profile import TriageProfile
 
 __all__ = [
@@ -191,6 +192,8 @@ class DecisionServer:
         self._judgments = 0
         self._events = 0
         self._errors = 0
+        self._reflex_registry = ReflexRegistry()
+        self._reflex_judgments = 0
         self._lock = threading.Lock()
         self._httpd: ThreadingHTTPServer | None = None
         self._thread: threading.Thread | None = None
@@ -298,6 +301,33 @@ class DecisionServer:
         with self._lock: self._events += len(events)
         return {'accepted': len(events), 'verdicts': verdicts, 'shed': sum(1 for v in verdicts if v['route']=='shed')}
 
+    def register_reflex(self, body: Any) -> dict[str, Any]:
+        """HG-T4: declare a reflex {name, action, pattern, consumer?}."""
+        if not isinstance(body, Mapping):
+            raise _BadRequest('reflex body must be an object')
+        try:
+            entry = self._reflex_registry.register(body.get('name'), body.get('action'), body.get('pattern'), consumer=body.get('consumer'))
+        except ValueError as e:
+            raise _BadRequest(str(e)) from e
+        return {'registered': entry, 'reflexes': len(self._reflex_registry)}
+
+    def list_reflexes(self) -> dict[str, Any]:
+        return {'consumer': self._reflex_registry.consumer, 'reflexes': self._reflex_registry.list_reflexes()}
+
+    def judge_reflexes(self, body: Any) -> dict[str, Any]:
+        """HG-T4: judge one event or {events:[...]} against declared reflexes."""
+        if isinstance(body, Mapping) and isinstance(body.get('events'), list):
+            out = self._reflex_registry.judge_stream(body['events'])
+            with self._lock:
+                self._reflex_judgments += out['events']
+            return out
+        if isinstance(body, Mapping) and body.get('kind'):
+            res = self._reflex_registry.judge_one(body)
+            with self._lock:
+                self._reflex_judgments += 1
+            return res
+        raise _BadRequest("reflex judge needs an event or {'events': [...]}")
+
     def intake_events(self, body: Any) -> dict[str, Any]:
         """Event batch intake. Per-event verdicts, nothing dropped."""
         if isinstance(body, list):
@@ -388,6 +418,8 @@ def _make_handler(server: DecisionServer):
         def do_GET(self) -> None:  # noqa: N802 - http.server API
             if self.path == "/health":
                 self._dispatch(lambda: (200, server.health()))
+            elif self.path == "/reflexes":
+                self._dispatch(lambda: (200, server.list_reflexes()))
             elif self.path == "/backends":
                 def _backends():
                     infos = {}
@@ -405,6 +437,10 @@ def _make_handler(server: DecisionServer):
                 self._dispatch(lambda: (200, server.judge(self._body())))
             elif self.path == "/triage":
                 self._dispatch(lambda: (200, server.triage(self._body())))
+            elif self.path == "/reflexes":
+                self._dispatch(lambda: (201, server.register_reflex(self._body())))
+            elif self.path == "/reflex/judge":
+                self._dispatch(lambda: (200, server.judge_reflexes(self._body())))
             elif self.path == "/events":
                 self._dispatch(
                     lambda: (200, server.intake_events(self._body())))
