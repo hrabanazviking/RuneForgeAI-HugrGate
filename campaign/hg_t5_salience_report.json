@@ -1,0 +1,15 @@
+{
+ "slice": "HG-T5",
+ "judge_id": "hugrgate-salience-v1",
+ "fixture": "campaign/hg_t5_fixture_stream.json",
+ "events": 19,
+ "schema_valid_events": 16,
+ "schema_invalid_events": 3,
+ "table_matches": 16,
+ "expected_noise_events": 3,
+ "noise_rejected": 3,
+ "noise_rejection_rate": 1.0,
+ "expected_surface_events": 9,
+ "missed_genuine": 0,
+ "miss_rate": 0.0
+}

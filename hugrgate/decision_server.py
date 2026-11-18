@@ -56,6 +56,7 @@ from hugrgate.serde import policy_from_dict
 from hugrgate.spec import DecisionSpec
 from hugrgate.reflex_api import ReflexRegistry
 from hugrgate.triage_profile import TriageProfile
+from hugrgate.salience_profile import SalienceProfile
 
 __all__ = [
     "DEFAULT_HOST",
@@ -301,6 +302,19 @@ class DecisionServer:
         with self._lock: self._events += len(events)
         return {'accepted': len(events), 'verdicts': verdicts, 'shed': sum(1 for v in verdicts if v['route']=='shed')}
 
+    def judge_salience(self, body: Any) -> dict[str, Any]:
+        """HG-T5: Aurelia sensation events -> AU-T2-schema verdicts."""
+        if isinstance(body, list): events = body
+        elif isinstance(body, Mapping): events = body.get('events')
+        else: raise _BadRequest('salience body must be an object or a list')
+        if not isinstance(events, list) or not events: raise _BadRequest("'events' must be a non-empty list")
+        profile = SalienceProfile()
+        out = profile.judge_stream(events)
+        expected = body.get('expected') if isinstance(body, Mapping) else None
+        report = profile.evaluate(events, expected) if isinstance(expected, list) and len(expected) == len(events) else None
+        with self._lock: self._events += len(events)
+        return {'accepted': len(events), 'judge_id': profile.judge_id, 'verdicts': out['verdicts'], 'surfaced': out['surfaced'], 'settled': out['settled'], 'noise': out['noise'], 'schema_invalid': out['schema_invalid'], 'report': report}
+
     def register_reflex(self, body: Any) -> dict[str, Any]:
         """HG-T4: declare a reflex {name, action, pattern, consumer?}."""
         if not isinstance(body, Mapping):
@@ -439,6 +453,8 @@ def _make_handler(server: DecisionServer):
                 self._dispatch(lambda: (200, server.triage(self._body())))
             elif self.path == "/reflexes":
                 self._dispatch(lambda: (201, server.register_reflex(self._body())))
+            elif self.path == "/salience":
+                self._dispatch(lambda: (200, server.judge_salience(self._body())))
             elif self.path == "/reflex/judge":
                 self._dispatch(lambda: (200, server.judge_reflexes(self._body())))
             elif self.path == "/events":

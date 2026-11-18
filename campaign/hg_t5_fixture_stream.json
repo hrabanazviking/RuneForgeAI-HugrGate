@@ -1,0 +1,330 @@
+{
+ "slice": "HG-T5",
+ "schema": "Aurelia AU-T1 sensation event schema v1",
+ "source_note": "First 8 events are Aurelia AU-T2 recorded fixture stream verbatim (kind/intensity); all events carry AU-T1 fields with digests over the AU-T1 underlying record {section, channel, before, after, timestamp}. Last 3 are schema-invalid on purpose.",
+ "events": [
+  {
+   "schema_version": 1,
+   "kind": "mood.valence",
+   "intensity": 0.9,
+   "source": "state_engine",
+   "timestamp": 1000.0,
+   "digest": "0d38b6a58cd8f5cc60ee08639f0c200079c934cf8f77d3eb9d3f4b3dd8f8d3d7",
+   "before": 0.1,
+   "after": 1.0
+  },
+  {
+   "schema_version": 1,
+   "kind": "drive.rest",
+   "intensity": 0.6,
+   "source": "state_engine",
+   "timestamp": 1001.0,
+   "digest": "554470ee2f442a49683e2d65d8ad99abc50e4ecfe8817d164d59c1c6e797e736",
+   "before": 0.1,
+   "after": 0.7
+  },
+  {
+   "schema_version": 1,
+   "kind": "mood.arousal",
+   "intensity": 0.3,
+   "source": "state_engine",
+   "timestamp": 1002.0,
+   "digest": "af2f5e258c3fc6ad6704cdedb572c3f4a3c2a61d55eaf91d894f94bb5b715c1e",
+   "before": 0.1,
+   "after": 0.4
+  },
+  {
+   "schema_version": 1,
+   "kind": "body.tension",
+   "intensity": 0.1,
+   "source": "state_engine",
+   "timestamp": 1003.0,
+   "digest": "5f25db35f8d5dd52703565d6d0652281f4e42a4f34be8f9c601dd302fce4ec62",
+   "before": 0.1,
+   "after": 0.2
+  },
+  {
+   "schema_version": 1,
+   "kind": "drive.hunger",
+   "intensity": 0.02,
+   "source": "state_engine",
+   "timestamp": 1004.0,
+   "digest": "3e38a8137b5421021848890998e1102f721b779130e900b8b485ac7578464da9",
+   "before": 0.1,
+   "after": 0.12
+  },
+  {
+   "schema_version": 1,
+   "kind": "mood.valence",
+   "intensity": 0.5,
+   "source": "state_engine",
+   "timestamp": 1005.0,
+   "digest": "1c105c177d4007a8b4d8c73e5ae83961b3020043d2091e4e951d8ba75d447cb4",
+   "before": 0.1,
+   "after": 0.6
+  },
+  {
+   "schema_version": 1,
+   "kind": "body.temperature",
+   "intensity": 0.2,
+   "source": "state_engine",
+   "timestamp": 1006.0,
+   "digest": "e13f253dc89f42b1ed1842e3230726394718fb63bbcfc2fc094a32945eaafd5b",
+   "before": 0.1,
+   "after": 0.3
+  },
+  {
+   "schema_version": 1,
+   "kind": "drive.rest",
+   "intensity": 0.049,
+   "source": "state_engine",
+   "timestamp": 1007.0,
+   "digest": "aab6681868e430d8aa54f8a440c10d7c3f2faca94f0334a2b3015e21db02bf26",
+   "before": 0.1,
+   "after": 0.149
+  },
+  {
+   "schema_version": 1,
+   "kind": "sense.touch",
+   "intensity": 0.8,
+   "source": "state_engine",
+   "timestamp": 1008.0,
+   "digest": "3976023e8334370de7f35b44ffe1e3771046213ef308f491f807055cce4be1a7",
+   "before": 0.1,
+   "after": 0.9
+  },
+  {
+   "schema_version": 1,
+   "kind": "sense.sound",
+   "intensity": 0.05,
+   "source": "state_engine",
+   "timestamp": 1009.0,
+   "digest": "90c38e0296f8ed638943ac4d7ad5c2ce521fc2dc18457ad5457b9735178dca8c",
+   "before": 0.1,
+   "after": 0.15
+  },
+  {
+   "schema_version": 1,
+   "kind": "mood.valence",
+   "intensity": 0.199,
+   "source": "state_engine",
+   "timestamp": 1010.0,
+   "digest": "e32ae88a46cd0c9997f8f115f58cfc57d063ae69f2420117fb4bed890f849feb",
+   "before": 0.1,
+   "after": 0.299
+  },
+  {
+   "schema_version": 1,
+   "kind": "body.tension",
+   "intensity": 0.75,
+   "source": "state_engine",
+   "timestamp": 1011.0,
+   "digest": "09b3d0d250c4f8a8285b4f985e7243ebee6220310ec2c72e31d22b5994d05681",
+   "before": 0.1,
+   "after": 0.85
+  },
+  {
+   "schema_version": 1,
+   "kind": "drive.thirst",
+   "intensity": 0.0,
+   "source": "state_engine",
+   "timestamp": 1012.0,
+   "digest": "4210d62d313490184638ab9fa0685da3e3c7e493d0f40b068f89585f34c11d3b",
+   "before": 0.1,
+   "after": 0.1
+  },
+  {
+   "schema_version": 1,
+   "kind": "sense.sight",
+   "intensity": 0.35,
+   "source": "state_engine",
+   "timestamp": 1013.0,
+   "digest": "beeeb8c5a7783588919d374cf3eb9a8b6693ca4d7098615d397e7def6435e8e1",
+   "before": 0.1,
+   "after": 0.45
+  },
+  {
+   "schema_version": 1,
+   "kind": "mood.arousal",
+   "intensity": 0.95,
+   "source": "state_engine",
+   "timestamp": 1014.0,
+   "digest": "e0876f883c5d378ae362534229bf45f732cb958a16d1734c68ca22cfbb538e4e",
+   "before": 0.1,
+   "after": 1.05
+  },
+  {
+   "schema_version": 1,
+   "kind": "body.temperature",
+   "intensity": 0.15,
+   "source": "state_engine",
+   "timestamp": 1015.0,
+   "digest": "5be50f4979461b7582344f39a6f91c1329cc721e4ef07d9665faedb194e8abf8",
+   "before": 0.1,
+   "after": 0.25
+  },
+  {
+   "schema_version": 1,
+   "kind": "mood.valence",
+   "intensity": 0.4,
+   "source": "state_engine",
+   "timestamp": 1016.0,
+   "digest": "not-a-digest",
+   "before": 0.1,
+   "after": 0.5
+  },
+  {
+   "schema_version": 1,
+   "kind": "drive.rest",
+   "intensity": 1.5,
+   "source": "state_engine",
+   "timestamp": 1017.0,
+   "digest": "5041bf1f713df204784353e82f6a4a535931cb64f1f4b4a5aeaffcb720918b22",
+   "before": 0.0,
+   "after": 1.5
+  },
+  {
+   "schema_version": 99,
+   "kind": "",
+   "intensity": 0.4,
+   "source": "state_engine",
+   "timestamp": 1018.0,
+   "digest": "5e2b030a4a0f1582d78c0fd9924511cd6b1f2df9879e574f5ea1406c94052418"
+  }
+ ],
+ "expected": [
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 3,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 2,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 1,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "genuine",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 2,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 1,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 3,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "genuine",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "genuine",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 2,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 1,
+   "schema_valid": true
+  },
+  {
+   "salient": true,
+   "disposition": "surface",
+   "authenticity": "genuine",
+   "urgency": 3,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "genuine",
+   "urgency": 0,
+   "schema_valid": true
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": false
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": false
+  },
+  {
+   "salient": false,
+   "disposition": "settle",
+   "authenticity": "noise",
+   "urgency": 0,
+   "schema_valid": false
+  }
+ ]
+}

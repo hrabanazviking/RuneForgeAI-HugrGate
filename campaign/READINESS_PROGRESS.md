@@ -143,6 +143,55 @@ roles run sequentially by the keeper (no sub-agents this tick), recorded here.
 - Method note: roles run sequentially by the keeper (no
   sub-agents this tick), recorded per campaign instructions.
 
+## HG-T5 - Aurelia sensation-stream profile - GATE PASSED (device-verified 2026-11-18)
+- Built `hugrgate/salience_profile.py` (stdlib-only): `SalienceProfile`
+  consuming Aurelia's own AU-T1 sensation event schema v1 (kind,
+  intensity 0..1, source, timestamp, sha256 digest, schema_version=1,
+  optional before/after - her house defines it, this slice consumes
+  it) and emitting Aurelia AU-T2 verdict schema v1 field-for-field
+  (event_digest, salient, disposition surface/settle, authenticity
+  genuine/noise, urgency grade 0..3, basis, judge_id
+  `hugrgate-salience-v1`), so her JudgmentBinding accepts it
+  unchanged.
+- Salience table is Aurelia's own declared floors (noise 0.05,
+  salient 0.20, high 0.50, critical 0.80): >=0.80 genuine/surface/3;
+  0.50-0.80 genuine/surface/2; 0.20-0.50 genuine/surface/1;
+  0.05-0.20 genuine/settle/0; <0.05 noise/settle/0. Deterministic:
+  identical events give identical verdicts; no model in the loop.
+- Nothing dropped silently: schema-invalid events receive exactly
+  one settle/noise verdict whose basis starts `schema:` and names
+  every failure, flagged schema_valid=False.
+- Recorded fixture: `campaign/hg_t5_fixture_stream.json` - 19
+  events in AU-T1 form (first 8 are Aurelia's AU-T2 recorded stream
+  verbatim; digests over the AU-T1 underlying record), 16 valid +
+  3 schema-invalid on purpose, with her expected table.
+- Report banked: `campaign/hg_t5_salience_report.json` (runner
+  `benchmarks/hg_t5_report.py`): table matches 16/16 valid events;
+  noise rejection rate 1.0 (3/3 valid expected-noise settled);
+  miss rate 0.0 (0/9 expected-surface settled). Schema-invalid
+  events are excluded from both rates and counted separately -
+  input failures, not judgment misses.
+- Decision server: POST /salience added, returning verdicts plus
+  the evaluate report when an expected table is supplied.
+- Gate tests: `tests/test_tviheimr_hg_t5_salience.py` - 8 tests
+  (fixture table, AU-T2 schema compatibility, AU-T2 recorded stream
+  + AU-T1 digest recomputation, boundary floors, honest rates vs
+  banked report, schema verdicts not drops, determinism, server
+  end-to-end).
+- Device gate run (purplelongship, TMPDIR=~/forge-tmp): HG-T1..T5
+  = 37 passed; widened set with health/registry/ladder/routing =
+  157 passed in 4.88s. Live plain-process HTTP smoke: /health ok;
+  POST /salience -> accepted=19, surfaced=9, noise=6,
+  schema_invalid=3, noise_rejection 1.0, miss 0.0; clean shutdown.
+- LIVE AURELIA RE-PROOF (the re-proof AU-T2 owed): Aurelia's real
+  JudgmentBinding + JudgmentVerdict code (her readiness clone on
+  this device) driven by an adapter over this profile judged her
+  AU-T2 recorded stream 8/8 matching her expected table with no
+  degradation logged. HG-T5 therefore discharges the live-binding
+  swap her AU-T2 recorded as owed (her ledger update is hers).
+- Method note: roles run sequentially by the keeper (no
+  sub-agents this tick), recorded per campaign instructions.
+
 ## Remaining
-- HG-T5 … HG-T6 - not started.
+- HG-T6 - not started.
 - "Ready for Tviheimr" gate — not reached.
