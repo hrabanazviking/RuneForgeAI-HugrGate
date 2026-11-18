@@ -2382,7 +2382,7 @@
     },
     "CrashOnlyHarness": {
       "kind": "class",
-      "sig": "(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'"
+      "sig": "(directory: 'str | Path', python: 'str' = '/usr/bin/python3') -> 'None'"
     },
     "CrashReport": {
       "kind": "class",
@@ -2664,7 +2664,7 @@
   "hugrgate.chaos.crash": {
     "CrashOnlyHarness": {
       "kind": "class",
-      "sig": "(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'"
+      "sig": "(directory: 'str | Path', python: 'str' = '/usr/bin/python3') -> 'None'"
     },
     "CrashReport": {
       "kind": "class",
@@ -4525,6 +4525,36 @@
     "serve_forever": {
       "kind": "function",
       "sig": "(config: 'DaemonConfig | None' = None) -> 'None'"
+    }
+  },
+  "hugrgate.decision_server": {
+    "DEFAULT_HOST": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "DEFAULT_PORT": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "DecisionServer": {
+      "kind": "class",
+      "sig": "(host: 'str' = '127.0.0.1', port: 'int' = 8387, gate: 'HugrGate | None' = None, ledger_path: 'str | None' = None) -> 'None'"
+    },
+    "KeywordBackend": {
+      "kind": "class",
+      "sig": "()"
+    },
+    "UniformBackend": {
+      "kind": "class",
+      "sig": "()"
+    },
+    "build_gate": {
+      "kind": "function",
+      "sig": "() -> 'HugrGate'"
+    },
+    "main": {
+      "kind": "function",
+      "sig": "(argv: 'list[str] | None' = None) -> 'int'"
     }
   },
   "hugrgate.drift": {
@@ -7527,7 +7557,7 @@
     },
     "read_runtime_dependencies": {
       "kind": "function",
-      "sig": "(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
+      "sig": "(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
     },
     "render_min_requirements": {
       "kind": "function",
@@ -7535,7 +7565,7 @@
     },
     "scan_deprecated_api": {
       "kind": "function",
-      "sig": "(root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'tuple[tuple[str, int, str], ...]'"
+      "sig": "(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'tuple[tuple[str, int, str], ...]'"
     },
     "version_key": {
       "kind": "function",
@@ -7587,7 +7617,7 @@
     },
     "load_manifest": {
       "kind": "function",
-      "sig": "(path: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/release/freeze.toml')) -> 'FreezeManifest'"
+      "sig": "(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/release/freeze.toml')) -> 'FreezeManifest'"
     }
   },
   "hugrgate.gauntlet.fuzz": {
@@ -7805,7 +7835,7 @@
     },
     "validate_matrix": {
       "kind": "function",
-      "sig": "(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'MatrixReport'"
+      "sig": "(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'MatrixReport'"
     }
   },
   "hugrgate.gauntlet.racehunt": {
@@ -7930,6 +7960,24 @@
     "run_inspect": {
       "kind": "function",
       "sig": "(url: 'str | None' = None) -> 'int'"
+    }
+  },
+  "hugrgate.judgment_ledger": {
+    "JudgmentLedger": {
+      "kind": "class",
+      "sig": "(path)"
+    },
+    "LedgerError": {
+      "kind": "class",
+      "sig": ""
+    },
+    "canonical_digest": {
+      "kind": "function",
+      "sig": "(obj)"
+    },
+    "verdict_digest_of": {
+      "kind": "function",
+      "sig": "(verdict)"
     }
   },
   "hugrgate.ladder": {
@@ -8796,6 +8844,36 @@
     "run_million": {
       "kind": "function",
       "sig": "(n: 'int' = 1000000, *, seed: 'int' = 299, state_pool_size: 'int' = 1000, progress_every: 'int' = 100000, sample_every: 'int' = 100) -> 'MillionResult'"
+    }
+  },
+  "hugrgate.model_backend": {
+    "CONFIDENCE_THRESHOLD": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "MARGIN_THRESHOLD": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "OllamaEngine": {
+      "kind": "class",
+      "sig": "(model: 'str' = 'gemma4viking4b:latest', base_url: 'str' = 'http://127.0.0.1:11434', timeout_s: 'float' = 60.0)"
+    },
+    "SelectiveModelBackend": {
+      "kind": "class",
+      "sig": "(primary: 'Backend | None' = None, model_backend: 'LLMBackend | None' = None)"
+    },
+    "UNCALIBRATED_CONFIDENCE": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "build_model_backend": {
+      "kind": "function",
+      "sig": "(model: 'str' = 'gemma4viking4b:latest', base_url: 'str' = 'http://127.0.0.1:11434') -> 'LLMBackend'"
+    },
+    "needs_model": {
+      "kind": "function",
+      "sig": "(result: 'DecisionResult') -> 'bool'"
     }
   },
   "hugrgate.models": {
@@ -9751,6 +9829,20 @@
     "ProvenanceStore": {
       "kind": "class",
       "sig": "(max_records: 'int | None' = None)"
+    }
+  },
+  "hugrgate.reflex_api": {
+    "ReflexError": {
+      "kind": "class",
+      "sig": ""
+    },
+    "ReflexRegistry": {
+      "kind": "class",
+      "sig": "(consumer='verdandi')"
+    },
+    "payload_digest": {
+      "kind": "function",
+      "sig": "(payload)"
     }
   },
   "hugrgate.result": {
@@ -10893,6 +10985,48 @@
       "sig": "(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None"
     }
   },
+  "hugrgate.salience_profile": {
+    "CRITICAL_FLOOR": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "EVENT_SCHEMA_VERSION": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "HIGH_FLOOR": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "JUDGE_ID": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "NOISE_FLOOR": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "SALIENT_FLOOR": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "SalienceProfile": {
+      "kind": "class",
+      "sig": "()"
+    },
+    "VERDICT_SCHEMA_VERSION": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "record_digest": {
+      "kind": "function",
+      "sig": "(record)"
+    },
+    "salience_stream": {
+      "kind": "function",
+      "sig": "(events, profile=None)"
+    }
+  },
   "hugrgate.scaffold": {
     "SCAFFOLD_FILES": {
       "kind": "constant",
@@ -11848,7 +11982,7 @@
   "hugrgate.server": {
     "DecideRequest": {
       "kind": "class",
-      "sig": "(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, typing.Any] | None = None, policy: dict[str, typing.Any] | None = None, **extra_data: Any) -> None"
+      "sig": "(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, Any] | None = None, policy: dict[str, Any] | None = None, **extra_data: Any) -> None"
     },
     "ErrorBody": {
       "kind": "class",
@@ -11961,6 +12095,28 @@
     "run_with_deadline": {
       "kind": "function",
       "sig": "(fn: 'Callable[[], Any]', deadline_s: 'float', name: 'str' = 'task') -> 'Any'"
+    }
+  },
+  "hugrgate.triage_profile": {
+    "EVENT_FIELDS": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "TriageProfile": {
+      "kind": "class",
+      "sig": "(model=None, model_name=None)"
+    },
+    "VERDICT_FIELDS": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "payload_digest": {
+      "kind": "function",
+      "sig": "(payload)"
+    },
+    "triage_stream": {
+      "kind": "function",
+      "sig": "(events, profile=None)"
     }
   },
   "hugrgate.validation": {

@@ -1,6 +1,9 @@
 """HG-T5 gate tests - Aurelia sensation-stream salience profile.
 Gate: on Aurelia's recorded fixture stream, salience verdicts match her expected table; noise rejection rate and miss rate both reported honestly. Consumed event schema and emitted verdict schema are Aurelia's own (AU-T1 / AU-T2, her house defines them)."""
+
 from __future__ import annotations
+import pytest
+pytestmark = pytest.mark.integration
 import copy, json, re
 from pathlib import Path
 from hugrgate.decision_server import DecisionServer

@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 468 · **public names:** 2766
+**Modules:** 474 · **public names:** 2802
 
 ## API stability policy
 
@@ -899,28 +899,28 @@ that this document never drifts from the code.
 | `PlattCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
 | `SlidingWindowCalibrator` | class | `(factory: 'Callable[[], Calibrator]', window_size: 'int' = 500, refit_every: 'int' = 50, min_samples: 'int' = 20)` |
 | `TemperatureCalibrator` | class | `(max_iter: 'int' = 100, tol: 'float' = 1e-10)` |
-| `adversarial` | constant | `<module 'hugrgate.calibration.adversarial' from '/home/hatch` |
-| `aleatoric` | constant | `<module 'hugrgate.calibration.aleatoric' from '/home/hatch/w` |
-| `autoselect` | constant | `<module 'hugrgate.calibration.autoselect' from '/home/hatch/` |
-| `bench` | constant | `<module 'hugrgate.calibration.bench' from '/home/hatch/works` |
-| `conformal` | constant | `<module 'hugrgate.calibration.conformal' from '/home/hatch/w` |
+| `adversarial` | constant | `<module 'hugrgate.calibration.adversarial' from '/home/volma` |
+| `aleatoric` | constant | `<module 'hugrgate.calibration.aleatoric' from '/home/volmarr` |
+| `autoselect` | constant | `<module 'hugrgate.calibration.autoselect' from '/home/volmar` |
+| `bench` | constant | `<module 'hugrgate.calibration.bench' from '/home/volmarr/for` |
+| `conformal` | constant | `<module 'hugrgate.calibration.conformal' from '/home/volmarr` |
 | `conformal_regression` | constant | `<module 'hugrgate.calibration.conformal_regression' from '/h` |
-| `coverage` | constant | `<module 'hugrgate.calibration.coverage' from '/home/hatch/wo` |
-| `decomposition` | constant | `<module 'hugrgate.calibration.decomposition' from '/home/hat` |
-| `drift` | constant | `<module 'hugrgate.calibration.drift' from '/home/hatch/works` |
-| `epistemic` | constant | `<module 'hugrgate.calibration.epistemic' from '/home/hatch/w` |
-| `group` | constant | `<module 'hugrgate.calibration.group' from '/home/hatch/works` |
-| `imbalance` | constant | `<module 'hugrgate.calibration.imbalance' from '/home/hatch/w` |
-| `metrics` | constant | `<module 'hugrgate.calibration.metrics' from '/home/hatch/wor` |
-| `perclass` | constant | `<module 'hugrgate.calibration.perclass' from '/home/hatch/wo` |
-| `pipeline` | constant | `<module 'hugrgate.calibration.pipeline' from '/home/hatch/wo` |
-| `profiles` | constant | `<module 'hugrgate.calibration.profiles' from '/home/hatch/wo` |
-| `registry` | constant | `<module 'hugrgate.calibration.registry' from '/home/hatch/wo` |
-| `risk_coverage` | constant | `<module 'hugrgate.calibration.risk_coverage' from '/home/hat` |
-| `selective` | constant | `<module 'hugrgate.calibration.selective' from '/home/hatch/w` |
-| `sets` | constant | `<module 'hugrgate.calibration.sets' from '/home/hatch/worksp` |
-| `shift` | constant | `<module 'hugrgate.calibration.shift' from '/home/hatch/works` |
-| `viz` | constant | `<module 'hugrgate.calibration.viz' from '/home/hatch/workspa` |
+| `coverage` | constant | `<module 'hugrgate.calibration.coverage' from '/home/volmarr/` |
+| `decomposition` | constant | `<module 'hugrgate.calibration.decomposition' from '/home/vol` |
+| `drift` | constant | `<module 'hugrgate.calibration.drift' from '/home/volmarr/for` |
+| `epistemic` | constant | `<module 'hugrgate.calibration.epistemic' from '/home/volmarr` |
+| `group` | constant | `<module 'hugrgate.calibration.group' from '/home/volmarr/for` |
+| `imbalance` | constant | `<module 'hugrgate.calibration.imbalance' from '/home/volmarr` |
+| `metrics` | constant | `<module 'hugrgate.calibration.metrics' from '/home/volmarr/f` |
+| `perclass` | constant | `<module 'hugrgate.calibration.perclass' from '/home/volmarr/` |
+| `pipeline` | constant | `<module 'hugrgate.calibration.pipeline' from '/home/volmarr/` |
+| `profiles` | constant | `<module 'hugrgate.calibration.profiles' from '/home/volmarr/` |
+| `registry` | constant | `<module 'hugrgate.calibration.registry' from '/home/volmarr/` |
+| `risk_coverage` | constant | `<module 'hugrgate.calibration.risk_coverage' from '/home/vol` |
+| `selective` | constant | `<module 'hugrgate.calibration.selective' from '/home/volmarr` |
+| `sets` | constant | `<module 'hugrgate.calibration.sets' from '/home/volmarr/forg` |
+| `shift` | constant | `<module 'hugrgate.calibration.shift' from '/home/volmarr/for` |
+| `viz` | constant | `<module 'hugrgate.calibration.viz' from '/home/volmarr/forge` |
 
 ### `hugrgate.calibration._base`
 
@@ -1196,7 +1196,7 @@ that this document never drifts from the code.
 | `CPUStarvationSimulator` | class | `(share: 'float' = 1.0)` |
 | `CacheCorruptor` | class | `(cache: 'DecisionCache')` |
 | `ChaosExperiment` | class | `(name: 'str', hypothesis: 'str', faults: 'tuple[Fault, ...]' = (), probes: 'tuple[SteadyStateProbe, ...]' = (), blast_radius: 'BlastRadius' = <factory>, seed: 'int | None' = None) -> None` |
-| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
+| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/usr/bin/python3') -> 'None'` |
 | `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
 | `DegradationPlan` | class | `(name: 'str', description: 'str', triggers: 'tuple[str, ...]', steps: 'tuple[DegradationStep, ...]' = <factory>) -> None` |
 | `DegradationPlanRegistry` | class | `() -> 'None'` |
@@ -1280,7 +1280,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/home/hatch/workspace/RuneForgeAI-HugrGate/venv/bin/python') -> 'None'` |
+| `CrashOnlyHarness` | class | `(directory: 'str | Path', python: 'str' = '/usr/bin/python3') -> 'None'` |
 | `CrashReport` | class | `(pid: 'int', killed: 'bool', checkpoints_valid: 'int', recovered_counter: 'int | None', torn_tmp_files: 'int', duration_s: 'float') -> None` |
 | `worker_main` | function | `(directory: 'str', count: 'int') -> 'int'` |
 
@@ -1797,33 +1797,33 @@ that this document never drifts from the code.
 | `SCHEMA_VERSION` | constant | `'2.0'` |
 | `SUPPORTED_SCHEMA_VERSIONS` | constant | `('2.0')` |
 | `DecisionContract` | class | `(contract_id: 'str', name: 'str' = '', description: 'str' = '', metadata: 'dict[str, Any]' = <factory>) -> None` |
-| `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/hatch/wor` |
-| `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/hatch/w` |
-| `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/hatch/w` |
-| `context` | constant | `<module 'hugrgate.contracts.context' from '/home/hatch/works` |
+| `composite` | constant | `<module 'hugrgate.contracts.composite' from '/home/volmarr/f` |
+| `composition` | constant | `<module 'hugrgate.contracts.composition' from '/home/volmarr` |
+| `conditional` | constant | `<module 'hugrgate.contracts.conditional' from '/home/volmarr` |
+| `context` | constant | `<module 'hugrgate.contracts.context' from '/home/volmarr/for` |
 | `contract_from_dict` | function | `(d: 'Mapping[str, Any]') -> 'DecisionContract'` |
-| `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/hatch/workspac` |
-| `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/hatch/wo` |
-| `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/hatch/wor` |
-| `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/hatch` |
-| `explanations` | constant | `<module 'hugrgate.contracts.explanations' from '/home/hatch/` |
-| `features` | constant | `<module 'hugrgate.contracts.features' from '/home/hatch/work` |
-| `fuzz` | constant | `<module 'hugrgate.contracts.fuzz' from '/home/hatch/workspac` |
-| `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/hatch/wor` |
-| `inheritance` | constant | `<module 'hugrgate.contracts.inheritance' from '/home/hatch/w` |
+| `cost` | constant | `<module 'hugrgate.contracts.cost' from '/home/volmarr/forges` |
+| `crossfield` | constant | `<module 'hugrgate.contracts.crossfield' from '/home/volmarr/` |
+| `deadlines` | constant | `<module 'hugrgate.contracts.deadlines' from '/home/volmarr/f` |
+| `distributions` | constant | `<module 'hugrgate.contracts.distributions' from '/home/volma` |
+| `explanations` | constant | `<module 'hugrgate.contracts.explanations' from '/home/volmar` |
+| `features` | constant | `<module 'hugrgate.contracts.features' from '/home/volmarr/fo` |
+| `fuzz` | constant | `<module 'hugrgate.contracts.fuzz' from '/home/volmarr/forges` |
+| `hierarchy` | constant | `<module 'hugrgate.contracts.hierarchy' from '/home/volmarr/f` |
+| `inheritance` | constant | `<module 'hugrgate.contracts.inheritance' from '/home/volmarr` |
 | `is_supported_version` | function | `(version: 'object') -> 'bool'` |
-| `lint` | constant | `<module 'hugrgate.contracts.lint' from '/home/hatch/workspac` |
-| `migration` | constant | `<module 'hugrgate.contracts.migration' from '/home/hatch/wor` |
-| `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/hatch/wo` |
-| `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/hatch/w` |
-| `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/hatch/worksp` |
-| `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/hatch/works` |
+| `lint` | constant | `<module 'hugrgate.contracts.lint' from '/home/volmarr/forges` |
+| `migration` | constant | `<module 'hugrgate.contracts.migration' from '/home/volmarr/f` |
+| `multilabel` | constant | `<module 'hugrgate.contracts.multilabel' from '/home/volmarr/` |
+| `negotiation` | constant | `<module 'hugrgate.contracts.negotiation' from '/home/volmarr` |
+| `nested` | constant | `<module 'hugrgate.contracts.nested' from '/home/volmarr/forg` |
+| `ordinal` | constant | `<module 'hugrgate.contracts.ordinal' from '/home/volmarr/for` |
 | `register_kind` | function | `(cls: 'type[DecisionContract]') -> 'type[DecisionContract]'` |
-| `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/hatch/workspac` |
-| `schema` | constant | `<module 'hugrgate.contracts.schema' from '/home/hatch/worksp` |
-| `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/hatch/wor` |
-| `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/hatch/w` |
-| `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/hatch/works` |
+| `risk` | constant | `<module 'hugrgate.contracts.risk' from '/home/volmarr/forges` |
+| `schema` | constant | `<module 'hugrgate.contracts.schema' from '/home/volmarr/forg` |
+| `templates` | constant | `<module 'hugrgate.contracts.templates' from '/home/volmarr/f` |
+| `uncertainty` | constant | `<module 'hugrgate.contracts.uncertainty' from '/home/volmarr` |
+| `utility` | constant | `<module 'hugrgate.contracts.utility' from '/home/volmarr/for` |
 
 ### `hugrgate.contracts.composite`
 
@@ -2079,6 +2079,18 @@ that this document never drifts from the code.
 | `load_client_policies` | function | `(path: 'str') -> 'dict[str, DecisionPolicy]'` |
 | `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
 | `serve_forever` | function | `(config: 'DaemonConfig | None' = None) -> 'None'` |
+
+### `hugrgate.decision_server`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_HOST` | constant | `'127.0.0.1'` |
+| `DEFAULT_PORT` | constant | `8387` |
+| `DecisionServer` | class | `(host: 'str' = '127.0.0.1', port: 'int' = 8387, gate: 'HugrGate | None' = None, ledger_path: 'str | None' = None) -> 'None'` |
+| `KeywordBackend` | class | `()` |
+| `UniformBackend` | class | `()` |
+| `build_gate` | function | `() -> 'HugrGate'` |
+| `main` | function | `(argv: 'list[str] | None' = None) -> 'int'` |
 
 ### `hugrgate.drift`
 
@@ -3152,9 +3164,9 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproj` |
+| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject` |
 | `DEPRECATED_PATTERNS` | constant | `(('\\byaml\\.load\\s*\\(', 'yaml.load() without Loader (use ` |
-| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness')` |
 | `DepReport` | class | `(statuses: 'tuple[DepStatus, ...]') -> None` |
 | `DepRequirement` | class | `(name: 'str', minimum: 'str | None') -> None` |
 | `DepStatus` | class | `(name: 'str', minimum: 'str | None', installed: 'str | None', ok: 'bool', reason: 'str') -> None` |
@@ -3162,9 +3174,9 @@ that this document never drifts from the code.
 | `installed_version` | function | `(name: 'str') -> 'str | None'` |
 | `latest_audit` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'dict[str, dict[str, str | bool | None]]'` |
 | `parse_requirement` | function | `(spec: 'str') -> 'DepRequirement'` |
-| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
+| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
 | `render_min_requirements` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'str'` |
-| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'tuple[tuple[str, int, str], ...]'` |
+| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'tuple[tuple[str, int, str], ...]'` |
 | `version_key` | function | `(version: 'str') -> 'tuple[int, ...]'` |
 | `write_min_requirements` | function | `(path: 'str | Path') -> 'Path'` |
 
@@ -3179,14 +3191,14 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/releas` |
+| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness/release/f` |
 | `ChangeRequest` | class | `(kind: 'str', description: 'str', touches_public_api: 'bool' = False, adds_dependency: 'bool' = False, waiver_id: 'str | None' = None) -> None` |
 | `FreezeManifest` | class | `(version: 'str', frozen_at: 'str', allowed_kinds: 'frozenset[str]', waivers: 'tuple[Waiver, ...]' = ()) -> None` |
 | `FreezeVerdict` | class | `(verdict: 'VerdictKind', reasons: 'tuple[str, ...]' = ()) -> None` |
 | `Waiver` | class | `(id: 'str', change: 'str', reason: 'str', approved_by: 'str') -> None` |
 | `check_public_api_growth` | function | `(baseline: 'set[str] | frozenset[str]', current: 'set[str] | frozenset[str]') -> 'dict[str, Any]'` |
 | `evaluate` | function | `(change: 'ChangeRequest', manifest: 'FreezeManifest') -> 'FreezeVerdict'` |
-| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate/release/freeze.toml')) -> 'FreezeManifest'` |
+| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/release/freeze.toml')) -> 'FreezeManifest'` |
 
 ### `hugrgate.gauntlet.fuzz`
 
@@ -3267,12 +3279,12 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `REPO_ROOT` | constant | `PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness')` |
 | `SUPPORTED_MINORS` | constant | `((3, 10), (3, 11), (3, 12), (3, 13))` |
 | `MatrixReport` | class | `(requires_python: 'str', min_minor: 'tuple[int, int]', matrix: 'tuple[tuple[int, int], ...]', files_checked: 'int', syntax_failures: 'tuple[str, ...]') -> None` |
 | `check_syntax_compat` | function | `(root: 'str | Path', min_minor: 'tuple[int, int]') -> 'tuple[int, tuple[str, ...]]'` |
 | `read_requires_python` | function | `(pyproject: 'str | Path') -> 'str'` |
-| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/hatch/workspace/RuneForgeAI-HugrGate')) -> 'MatrixReport'` |
+| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'MatrixReport'` |
 
 ### `hugrgate.gauntlet.racehunt`
 
@@ -3340,6 +3352,15 @@ that this document never drifts from the code.
 |---|---|---|
 | `InspectSession` | class | `(url: 'str | None' = None) -> 'None'` |
 | `run_inspect` | function | `(url: 'str | None' = None) -> 'int'` |
+
+### `hugrgate.judgment_ledger`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `JudgmentLedger` | class | `(path)` |
+| `LedgerError` | class | — |
+| `canonical_digest` | function | `(obj)` |
+| `verdict_digest_of` | function | `(verdict)` |
 
 ### `hugrgate.ladder`
 
@@ -3696,6 +3717,18 @@ that this document never drifts from the code.
 | `InstantBackend` | class | `()` |
 | `MillionResult` | class | `(n: 'int', seed: 'int', state_pool_size: 'int', elapsed_s: 'float', decisions_per_s: 'float', latency_p50_us: 'float', latency_p95_us: 'float', latency_p99_us: 'float', latency_max_us: 'float', errors: 'int', rss_before_mb: 'float | None', rss_after_mb: 'float | None') -> None` |
 | `run_million` | function | `(n: 'int' = 1000000, *, seed: 'int' = 299, state_pool_size: 'int' = 1000, progress_every: 'int' = 100000, sample_every: 'int' = 100) -> 'MillionResult'` |
+
+### `hugrgate.model_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `CONFIDENCE_THRESHOLD` | constant | `0.55` |
+| `MARGIN_THRESHOLD` | constant | `0.2` |
+| `UNCALIBRATED_CONFIDENCE` | constant | `0.6` |
+| `OllamaEngine` | class | `(model: 'str' = 'gemma4viking4b:latest', base_url: 'str' = 'http://127.0.0.1:11434', timeout_s: 'float' = 60.0)` |
+| `SelectiveModelBackend` | class | `(primary: 'Backend | None' = None, model_backend: 'LLMBackend | None' = None)` |
+| `build_model_backend` | function | `(model: 'str' = 'gemma4viking4b:latest', base_url: 'str' = 'http://127.0.0.1:11434') -> 'LLMBackend'` |
+| `needs_model` | function | `(result: 'DecisionResult') -> 'bool'` |
 
 ### `hugrgate.models`
 
@@ -4187,6 +4220,14 @@ that this document never drifts from the code.
 |---|---|---|
 | `DecisionRecord` | class | `(request_hash: 'str', spec: 'dict[str, Any]', backend: 'str', model: 'str', model_version: 'str' = 'unknown', calibration_profile: 'str' = 'none', value: 'Any' = None, probability: 'float' = 0.0, policy_threshold: 'float' = 0.0, accepted: 'bool' = True, fallback_used: 'bool' = False, fallback_trace: 'list[str]' = <factory>, latency_ms: 'float' = 0.0, timestamp: 'float' = <factory>, metadata: 'dict[str, Any]' = <factory>, prev_hash: 'str' = '', record_hash: 'str' = '') -> None` |
 | `ProvenanceStore` | class | `(max_records: 'int | None' = None)` |
+
+### `hugrgate.reflex_api`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `ReflexRegistry` | class | `(consumer='verdandi')` |
+| `ReflexError` | class | — |
+| `payload_digest` | function | `(payload)` |
 
 ### `hugrgate.result`
 
@@ -4689,6 +4730,21 @@ that this document never drifts from the code.
 | `WarmupManager` | class | `(repeat: 'int' = 3, max_workers: 'int' = 4) -> 'None'` |
 | `WarmupResult` | class | `(name: 'str', model: 'str | None', success: 'bool', calls: 'int' = 0, latencies_s: 'list[float]' = <factory>, error: 'str | None' = None, warmed_at: 'float' = <factory>) -> None` |
 
+### `hugrgate.salience_profile`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `SalienceProfile` | class | `()` |
+| `salience_stream` | function | `(events, profile=None)` |
+| `record_digest` | function | `(record)` |
+| `JUDGE_ID` | constant | `'hugrgate-salience-v1'` |
+| `EVENT_SCHEMA_VERSION` | constant | `1` |
+| `VERDICT_SCHEMA_VERSION` | constant | `1` |
+| `NOISE_FLOOR` | constant | `0.05` |
+| `SALIENT_FLOOR` | constant | `0.2` |
+| `HIGH_FLOOR` | constant | `0.5` |
+| `CRITICAL_FLOOR` | constant | `0.8` |
+
 ### `hugrgate.scaffold`
 
 | Name | Kind | Signature / value |
@@ -5057,7 +5113,7 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DecideRequest` | class | `(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, typing.Any] | None = None, policy: dict[str, typing.Any] | None = None, **extra_data: Any) -> None` |
+| `DecideRequest` | class | `(*, protocol_version: str | None = None, spec: dict[str, typing.Any], state: dict[str, typing.Any], backend_name: str | None = None, context: dict[str, Any] | None = None, policy: dict[str, Any] | None = None, **extra_data: Any) -> None` |
 | `ErrorBody` | class | `(*, error: dict[str, typing.Any]) -> None` |
 | `KeywordBackend` | class | `()` |
 | `ModelInfo` | class | `(name: 'str', version: 'str' = '1.0', backend: 'str' = 'unknown', spec_types: 'list[str]' = <factory>, description: 'str' = '', trained_at: 'str | None' = None, metrics: 'dict[str, Any]' = <factory>) -> None` |
@@ -5104,6 +5160,16 @@ that this document never drifts from the code.
 | `evaluate_with_timeout` | function | `(backend: 'Backend', state: 'Mapping[str, Any]', spec: 'DecisionSpec', deadline_ms: 'float', context: 'Mapping[str, Any] | None' = None) -> 'DecisionResult'` |
 | `explain_deadline` | function | `(backend: 'Backend', policy: 'DecisionPolicy | None' = None, headroom: 'float' = 1.5) -> 'dict[str, Any]'` |
 | `run_with_deadline` | function | `(fn: 'Callable[[], Any]', deadline_s: 'float', name: 'str' = 'task') -> 'Any'` |
+
+### `hugrgate.triage_profile`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `TriageProfile` | class | `(model=None, model_name=None)` |
+| `payload_digest` | function | `(payload)` |
+| `triage_stream` | function | `(events, profile=None)` |
+| `EVENT_FIELDS` | constant | `('source', 'kind', 'time')` |
+| `VERDICT_FIELDS` | constant | `('urgency', 'route', 'escalate', 'basis')` |
 
 ### `hugrgate.validation`
 

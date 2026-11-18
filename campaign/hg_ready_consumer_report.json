@@ -1,0 +1,29 @@
+{
+  "consumer": "tviheimr-fixture-admission-harness",
+  "checks": {
+    "health_ok": true,
+    "triage_table": true,
+    "reflex_table": true,
+    "salience_table": true,
+    "judge_ok": true,
+    "ledger_complete": true,
+    "within_budgets": true,
+    "ledger_survives_restart": true
+  },
+  "latency_ms": {
+    "triage_ms": 193.558,
+    "reflex_ms": 760.528,
+    "salience_ms": 378.354,
+    "judge_ms": 18.134,
+    "ledger_ms": 4.933
+  },
+  "budget_ms_per_call": 500.0,
+  "budget_ms_per_verdict": 25.0,
+  "per_verdict_ms": {
+    "triage": 12.097375,
+    "reflex": 17.284727272727274,
+    "salience": 19.91336842105263
+  },
+  "ledger_entries": 80,
+  "all_passed": true
+}

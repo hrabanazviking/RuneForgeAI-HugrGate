@@ -104,6 +104,7 @@ LAYERS: dict[str, list[str]] = {
     ],
     "state": [
         "hugrgate.provenance", "hugrgate.health", "hugrgate.drift",
+        "hugrgate.judgment_ledger",  # HG-T6 provenance ledger
         "hugrgate.cache", "hugrgate.models", "hugrgate.features",
         "hugrgate.bench", "hugrgate.bench_report", "hugrgate.log",
     ],
@@ -199,6 +200,11 @@ LAYERS: dict[str, list[str]] = {
     ],
     "service": [
         "hugrgate.server", "hugrgate.daemon", "hugrgate.client",
+        # Tviheimr readiness (HG-T1..T5): decision-server form,
+        # model backend, triage / reflex / salience profiles.
+        "hugrgate.decision_server", "hugrgate.model_backend",
+        "hugrgate.triage_profile", "hugrgate.reflex_api",
+        "hugrgate.salience_profile",
         "hugrgate.cli",
         # Campaign XVIII: the wire protocol (426), the SDKs and
         # inspector (428/436), the plugin SDK (439), the

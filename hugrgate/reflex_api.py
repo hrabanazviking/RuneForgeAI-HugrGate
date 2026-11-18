@@ -28,15 +28,13 @@ Stdlib only. Plain library code - no service form assumed.
 from __future__ import annotations
 import hashlib, json, time
 from collections.abc import Mapping
-from typing import Any
 __all__ = ['ReflexRegistry', 'ReflexError', 'payload_digest']
 
 def payload_digest(payload):
     raw = json.dumps(payload, sort_keys=True, default=str, ensure_ascii=False).encode()
     return hashlib.sha256(raw).hexdigest()
 
-class ReflexError(ValueError):
-    pass
+ReflexError = ValueError  # house rule: raise stdlib validation errors
 
 def _match_pattern_part(label, pattern_value, actual):
     if pattern_value is None:
@@ -54,23 +52,23 @@ def _match_pattern_part(label, pattern_value, actual):
 
 def _validate_pattern(pattern):
     if not isinstance(pattern, Mapping):
-        raise ReflexError('pattern must be an object')
+        raise ValueError('pattern must be an object')
     unknown = set(pattern) - {'source', 'kind', 'where'}
     if unknown:
-        raise ReflexError(f'unknown pattern fields: {sorted(unknown)}')
+        raise ValueError(f'unknown pattern fields: {sorted(unknown)}')
     if not pattern.get('source') and not pattern.get('kind'):
-        raise ReflexError('pattern needs at least one of source/kind (no catch-all reflexes)')
+        raise ValueError('pattern needs at least one of source/kind (no catch-all reflexes)')
     for field in ('source', 'kind'):
         v = pattern.get(field)
         if v is not None and (not isinstance(v, str) or not v or v == '*'):
-            raise ReflexError(f'pattern {field} must be a non-empty string, not a bare wildcard')
+            raise ValueError(f'pattern {field} must be a non-empty string, not a bare wildcard')
     where = pattern.get('where')
     if where is not None:
         if not isinstance(where, Mapping) or not where:
-            raise ReflexError('pattern where must be a non-empty object')
+            raise ValueError('pattern where must be a non-empty object')
         for k, v in where.items():
             if isinstance(v, Mapping):
-                raise ReflexError(f'pattern where[{k!r}] must be a value or list of values')
+                raise ValueError(f'pattern where[{k!r}] must be a value or list of values')
     return dict(pattern)
 
 class ReflexRegistry:
@@ -81,11 +79,11 @@ class ReflexRegistry:
         self._by_name = {}
     def register(self, name, action, pattern, consumer=None):
         if not isinstance(name, str) or not name:
-            raise ReflexError('reflex name must be a non-empty string')
+            raise ValueError('reflex name must be a non-empty string')
         if name in self._by_name:
-            raise ReflexError(f'reflex {name!r} already registered')
+            raise ValueError(f'reflex {name!r} already registered')
         if not isinstance(action, str) or not action:
-            raise ReflexError('reflex action must be a non-empty string (a named action)')
+            raise ValueError('reflex action must be a non-empty string (a named action)')
         checked = _validate_pattern(pattern)
         entry = {'name': name, 'action': action, 'pattern': checked,
                  'consumer': str(consumer) if consumer else self.consumer}
@@ -95,7 +93,7 @@ class ReflexRegistry:
     def unregister(self, name):
         entry = self._by_name.pop(name, None)
         if entry is None:
-            raise ReflexError(f'no reflex named {name!r}')
+            raise ValueError(f'no reflex named {name!r}')
         self._reflexes.remove(entry)
         return dict(entry)
     def list_reflexes(self):

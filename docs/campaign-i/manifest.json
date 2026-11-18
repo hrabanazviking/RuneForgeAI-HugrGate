@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-09T20:42:43.673591+00:00",
-  "module_count": 468,
+  "generated_utc": "2026-11-18T07:02:37.580790+00:00",
+  "module_count": 474,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -676,7 +676,7 @@
       ]
     },
     "hugrgate.agents.bus": {
-      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the event bus.\n\nSlice 376 (shared substrate).  The bus is the spinal cord: every\nreactive trigger, state propagation, and inter-component signal in\nslices 377-400 travels as an :class:`AgentSignal` over\n:class:`EventBus`.\n\nDesign:\n\n- Topic patterns: exact (``\"agent.escalated\"``), prefix\n  (``\"agent.*\"``), or catch-all (``\"*\"``).  Handlers run in\n  subscription-priority order, highest first; ties break by\n  subscription order (deterministic).\n- Dedup: a signal carrying ``dedup_key`` is delivered at most once\n  per ``dedup_window_s`` \u2014 alert-storm protection inherited from the\n  observability :class:`AlertManager` philosophy.\n- Backpressure: ``max_pending`` bounds re-entrant publish depth\n  (in-flight deliveries); policy ``\"raise\"`` surfaces\n  :class:`BackpressureError`, ``\"drop-oldest\"`` sheds the incoming\n  signal and counts it.\n- Handler exceptions never propagate to the publisher; they are\n  collected on the delivery report.  A dead handler must not kill\n  the nervous system.\n- Thread-safe: a single re-entrant lock guards subscriptions,\n  dedup state, and stats.\n\nThe bus intentionally does *not* persist \u2014 durability belongs to\ndecision memory (:mod:`hugrgate.memory`), which subscribers can\nwrite to through the memory-write gate (slice 380).",
+      "docstring": "Agent Nervous System (Campaign XVI) \u2014 the event bus.\n\nSlice 376 (shared substrate).  The bus is the spinal cord: every\nreactive trigger, state propagation, and inter-component signal in\nslices 377-400 travels as an :class:`AgentSignal` over\n:class:`EventBus`.\n\nDesign:\n\n- Topic patterns: exact (``\"agent.escalated\"``), prefix\n  (``\"agent.*\"``), or catch-all (``\"*\"``).  Handlers run in\n  subscription-priority order, highest first; ties break by\n  subscription order (deterministic).\n- Dedup: a signal carrying ``dedup_key`` is delivered at most once\n  per ``dedup_window_s`` \u2014 alert-storm protection inherited from the\n  observability :class:`AlertManager` philosophy.\n- Backpressure: ``max_pending`` bounds re-entrant publish depth\n  (in-flight deliveries); policy ``\"raise\"`` surfaces\n  :class:`BackpressureError`, ``\"drop-oldest\"`` sheds the incoming\n  signal, counts it, and records a :class:`DeadLetter` (bounded,\n  default 100 \u2014 see :meth:`EventBus.dead_letters`).\n- Handler exceptions never propagate to the publisher; they are\n  collected on the delivery report.  A dead handler must not kill\n  the nervous system.\n- Thread-safe: a single re-entrant lock guards subscriptions,\n  dedup state, and stats.\n\nThe bus intentionally does *not* persist \u2014 durability belongs to\ndecision memory (:mod:`hugrgate.memory`), which subscribers can\nwrite to through the memory-write gate (slice 380).",
       "imports": [
         "__future__",
         "collections",
@@ -686,18 +686,20 @@
         "time",
         "typing"
       ],
-      "loc": 207,
+      "loc": 248,
       "path": "hugrgate/agents/bus.py",
       "public_defs": [
         "matches",
         "Subscription",
+        "DeadLetter",
         "EventBus",
         "subscribe",
         "unsubscribe",
         "subscription_count",
         "publish",
         "stats",
-        "reset_stats"
+        "reset_stats",
+        "dead_letters"
       ]
     },
     "hugrgate.agents.contract": {
@@ -1390,7 +1392,7 @@
         "typing",
         "uuid"
       ],
-      "loc": 469,
+      "loc": 495,
       "path": "hugrgate/autotune/controller.py",
       "public_defs": [
         "Mode",
@@ -1412,6 +1414,7 @@
         "snapshot",
         "restore",
         "apply",
+        "dry_run",
         "delta",
         "to_dict",
         "current",
@@ -1990,7 +1993,7 @@
         "dataclasses",
         "hugrgate"
       ],
-      "loc": 237,
+      "loc": 244,
       "path": "hugrgate/backends/llm.py",
       "public_defs": [
         "LLMChoice",
@@ -2174,7 +2177,7 @@
         "time",
         "typing"
       ],
-      "loc": 325,
+      "loc": 326,
       "path": "hugrgate/cache.py",
       "public_defs": [
         "cache_key",
@@ -3385,7 +3388,7 @@
         "typing",
         "yaml"
       ],
-      "loc": 783,
+      "loc": 815,
       "path": "hugrgate/cli.py",
       "public_defs": [
         "cmd_decide",
@@ -3412,15 +3415,17 @@
       ]
     },
     "hugrgate.client": {
-      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.",
+      "docstring": "HugrGate Python SDK \u2014 client for the HTTP service. Slice 43.\n\n:class:`HugrGateClient` mirrors the in-process :class:`HugrGate` ``decide``\ninterface over HTTP, with automatic fallback to an in-process gate when\nthe service is unreachable.\n\nThe JSON serde helpers (:func:`policy_to_dict`,\n:func:`policy_from_dict`, :func:`result_from_dict`) live in\n:mod:`hugrgate.serde` and are re-exported here for backward\ncompatibility.\n\nSlice 9: opt-in retry on transient HTTP faults \u2014 ``max_attempts`` (default\n1 preserves pre-slice-9 behavior exactly), decorrelated jitter between\nattempts, retrying transient httpx errors (5xx/429 statuses, timeouts,\nconnection errors).",
       "imports": [
         "__future__",
         "collections",
         "httpx",
         "hugrgate",
+        "random",
+        "time",
         "typing"
       ],
-      "loc": 245,
+      "loc": 310,
       "path": "hugrgate/client.py",
       "public_defs": [
         "HugrGateClient",
@@ -4166,16 +4171,18 @@
       "docstring": "Configuration generator. Slice 437.\n\nGenerates annotated, *valid* configuration files:\n\n- ``hugrgate init`` \u2014 a starter working directory: ``hugrgate.yaml``\n  (daemon config), ``spec.yaml``, ``policy.yaml``,\n  ``state.example.yaml``.\n- ``hugrgate gen daemon|spec|policy`` \u2014 one file at a time, with\n  flag-driven customization.\n\nEvery generated file round-trips through the real validators\n(:class:`DaemonConfig`, :class:`DecisionSpec`,\n:func:`policy_from_dict`), so the generator can never emit a file\nHugrGate itself rejects. :func:`load_daemon_config` closes the\nloop for hand-edited files, and ``hugrgate serve --config`` applies\na config file to the daemon.",
       "imports": [
         "__future__",
+        "difflib",
         "hugrgate",
         "pathlib",
         "typing",
         "yaml"
       ],
-      "loc": 229,
+      "loc": 267,
       "path": "hugrgate/configgen.py",
       "public_defs": [
         "generate_daemon_config",
         "load_daemon_config",
+        "explain_daemon_config",
         "generate_spec",
         "generate_policy",
         "write_new",
@@ -4893,6 +4900,57 @@
         "start",
         "stop",
         "join"
+      ]
+    },
+    "hugrgate.decision_server": {
+      "docstring": "HugrGate decision server \u2014 Tviheimr readiness slice HG-T1.\n\nA long-running, localhost, plain-process server shape for HugrGate:\n\n- ``POST /judge``  \u2014 request/response judgment: ``{state, spec, policy?}``\n  in, decision-result JSON out. This is the Tviheimr-facing name for the\n  same judgment the in-process runtime makes; ``POST /decide`` is kept\n  as an alias so existing clients keep working.\n- ``POST /events`` \u2014 event-intake endpoint: ``{events: [{...}, ...]}``\n  (or a bare list). Each event is judged against a caller-supplied\n  ``spec`` (per-batch or per-event) or a default categorical triage\n  spec, and the per-event verdicts are returned in order. Nothing is\n  dropped silently: a malformed event yields a per-event error entry,\n  never a vanished event.\n- ``GET /health`` \u2014 liveness/readiness probe with counters.\n- ``GET /backends`` \u2014 registered backend names + capabilities.\n\nStructured logging: every request emits one JSON log record (via\n:mod:`hugrgate.log`'s ``JsonFormatter`` conventions) carrying\nrequest_id, method, path, status, and latency_ms \u2014 metadata only,\nnever payload, per the package privacy rule.\n\nStdlib only (``http.server``): the decision-server form must run\nanywhere HugrGate runs, including hosts where the optional FastAPI\n``server`` extra is not installed. It delegates judgment to the\nin-process :class:`~hugrgate.core.HugrGate` runtime with two honest\ndeterministic built-in backends (uniform + keyword overlap, mirroring\n:mod:`hugrgate.server`'s baselines).\n\nRuns as a plain process under its operator's control. Any resident /\nboot-enabled service form is the owner's separate explicit decision \u2014\nnever assumed here. Startup and shutdown are clean and boring:\n``serve()`` handles SIGINT/SIGTERM, ``stop()`` drains and closes.",
+      "imports": [
+        "__future__",
+        "argparse",
+        "collections",
+        "http",
+        "hugrgate",
+        "json",
+        "math",
+        "re",
+        "signal",
+        "sys",
+        "threading",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "loc": 535,
+      "path": "hugrgate/decision_server.py",
+      "public_defs": [
+        "UniformBackend",
+        "KeywordBackend",
+        "build_gate",
+        "DecisionServer",
+        "main",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "address",
+        "start",
+        "stop",
+        "serve",
+        "ledger_status",
+        "health",
+        "judge",
+        "triage",
+        "judge_salience",
+        "register_reflex",
+        "list_reflexes",
+        "judge_reflexes",
+        "intake_events",
+        "Handler",
+        "log_message",
+        "do_GET",
+        "do_POST"
       ]
     },
     "hugrgate.drift": {
@@ -5998,7 +6056,7 @@
         "__future__",
         "typing"
       ],
-      "loc": 924,
+      "loc": 953,
       "path": "hugrgate/errors.py",
       "public_defs": [
         "HugrGateError",
@@ -6094,6 +6152,8 @@
         "RollbackError",
         "ReproducibilityError",
         "ParameterError",
+        "RoutingError",
+        "CacheConfigError",
         "to_dict",
         "from_dict",
         "to_dict",
@@ -6762,13 +6822,14 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 171,
+      "loc": 199,
       "path": "hugrgate/fallback.py",
       "public_defs": [
         "FallbackChain",
         "capabilities",
         "supports",
         "evaluate",
+        "explain",
         "health"
       ]
     },
@@ -7271,18 +7332,21 @@
       ]
     },
     "hugrgate.health": {
-      "docstring": "Backend health scoring \u2014 latency, errors, quarantine. Slice 17.\n\n:class:`HealthMonitor` tracks per-backend observations over a bounded\nwindow and derives a ``score()`` in [0, 1]:\n\n    score = (1 - error_rate) * latency_factor\n\nwhere ``latency_factor = min(1, latency_target_ms / p50_latency_ms)`` \u2014\na backend at or under its latency target keeps a factor of 1.\n\nBackends are **quarantined** when their score drops below\n``quarantine_threshold`` (or consecutive failures reach\n``max_consecutive_failures``). Quarantine is computed live from the\nstats, so a success **auto-recovers** the backend: the consecutive\nfailure count resets and the score climbs back above the threshold.\n\nAll methods are thread-safe.",
+      "docstring": "Backend health scoring \u2014 latency, errors, quarantine. Slice 17.\n\n:class:`HealthMonitor` tracks per-backend observations over a bounded\nwindow and derives a ``score()`` in [0, 1]:\n\n    score = (1 - error_rate) * latency_factor\n\nwhere ``latency_factor = min(1, latency_target_ms / p50_latency_ms)`` \u2014\na backend at or under its latency target keeps a factor of 1.\n\nBackends are **quarantined** when their score drops below\n``quarantine_threshold`` (or consecutive failures reach\n``max_consecutive_failures``). Quarantine is computed live from the\nstats, so a success **auto-recovers** the backend: the consecutive\nfailure count resets and the score climbs back above the threshold.\n\nAll methods are thread-safe.\n\nSlice 6 adds :func:`snapshot`, which merges the monitor's scores and\nquarantines with :class:`~hugrgate.circuit.CircuitRegistry` breaker\nstates and :class:`~hugrgate.fallback.FallbackChain` backend health\ninto a single per-backend dict.",
       "imports": [
         "__future__",
         "collections",
         "dataclasses",
-        "threading"
+        "hugrgate",
+        "threading",
+        "typing"
       ],
-      "loc": 140,
+      "loc": 193,
       "path": "hugrgate/health.py",
       "public_defs": [
         "BackendStats",
         "HealthMonitor",
+        "snapshot",
         "record",
         "stats",
         "score",
@@ -7343,6 +7407,31 @@
         "do_quit",
         "handle_line",
         "run"
+      ]
+    },
+    "hugrgate.judgment_ledger": {
+      "docstring": "Judgment provenance ledger - Tviheimr readiness slice HG-T6.\n\nRoadmap: every judgment - rules, classifier, or model - is recorded\nwith its basis, inputs digest, and latency, in an append-only local\nledger a caller can audit.\n\nDesign rules, enforced in code:\n- Append-only JSONL file. Entries are never rewritten or deleted by\n  this module; each entry carries seq, timestamp, kind, slice, basis,\n  inputs_digest (sha256 of the canonical input), the full verdict,\n  verdict_digest, latency_ms, and a hash chain (prev_hash ->\n  record_hash, same integrity model as hugrgate.provenance) so any\n  tampering with a stored line breaks verify().\n- No verdict without an entry: record() writes, flushes and fsyncs\n  BEFORE returning the entry, and the decision server records every\n  verdict synchronously before the response is built.\n- Survives restart: opening an existing ledger re-reads and verifies\n  it, and new entries continue seq and the hash chain from the last\n  stored entry. A corrupt or tampered file is refused at open\n  (LedgerError) rather than silently extended.\n- Audit: entries(), by_verdict_digest(), by_inputs_digest(),\n  trace(verdict) -> the entry that recorded exactly that verdict,\n  verify() re-reads the file from disk and re-checks the chain.\nStdlib only. Plain local file - no service form assumed.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hashlib",
+        "json",
+        "os",
+        "threading",
+        "time"
+      ],
+      "loc": 125,
+      "path": "hugrgate/judgment_ledger.py",
+      "public_defs": [
+        "canonical_digest",
+        "verdict_digest_of",
+        "JudgmentLedger",
+        "record",
+        "entries",
+        "by_verdict_digest",
+        "by_inputs_digest",
+        "trace",
+        "verify"
       ]
     },
     "hugrgate.ladder": {
@@ -7438,7 +7527,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 191,
+      "loc": 193,
       "path": "hugrgate/memory/__init__.py",
       "public_defs": []
     },
@@ -7747,7 +7836,7 @@
         "typing",
         "uuid"
       ],
-      "loc": 437,
+      "loc": 452,
       "path": "hugrgate/memory/history.py",
       "public_defs": [
         "Episode",
@@ -7896,7 +7985,7 @@
       ]
     },
     "hugrgate.memory.retention": {
-      "docstring": "Memory retention controls. Slice 316.\n\nThe Campaign XII worker flagged unbounded ``ProvenanceStore`` growth\n(+1.3 GB RSS over 1M decisions). Memory must not repeat that mistake:\nthis module bounds the episode store three ways.\n\n- **TTL per privacy class** \u2014 reuses\n  :data:`hugrgate.privacy_retention.RETENTION_DEFAULTS` (``forbidden``\n  = 0: purged on the next sweep, exactly like provenance retention);\n- **episode count quota** \u2014 oldest-first eviction;\n- **byte quota** \u2014 oldest-first eviction against\n  :meth:`DecisionHistory.estimate_bytes\n  <hugrgate.memory.history.DecisionHistory.estimate_bytes>`.\n\n:func:`enforce_quotas` applies all three and returns a\n:class:`RetentionReport`. :func:`check_quota` is the non-mutating\nprobe (``ok`` / ``warn`` / ``over``). When ``max_bytes`` is smaller\nthan the smallest retained episode \u2014 so nothing could ever be\nretained \u2014 :func:`enforce_quotas` raises :class:`MemoryQuotaExceeded`\ninstead of silently enforcing total amnesia.",
+      "docstring": "Memory retention controls. Slice 316.\n\nThe Campaign XII worker flagged unbounded ``ProvenanceStore`` growth\n(+1.3 GB RSS over 1M decisions). Memory must not repeat that mistake:\nthis module bounds the episode store three ways.\n\n- **TTL per privacy class** \u2014 reuses\n  :data:`hugrgate.privacy_retention.RETENTION_DEFAULTS` (``forbidden``\n  = 0: purged on the next sweep, exactly like provenance retention);\n- **episode count quota** \u2014 oldest-first eviction;\n- **byte quota** \u2014 oldest-first eviction against\n  :meth:`DecisionHistory.estimate_bytes\n  <hugrgate.memory.history.DecisionHistory.estimate_bytes>`.\n\n:func:`enforce_quotas` applies all three and returns a\n:class:`RetentionReport`. :func:`check_quota` is the non-mutating\nprobe (``ok`` / ``warn`` / ``over``). :func:`describe_quota` renders a\nquota as per-field limits with human-readable units. When ``max_bytes`` is smaller\nthan the smallest retained episode \u2014 so nothing could ever be\nretained \u2014 :func:`enforce_quotas` raises :class:`MemoryQuotaExceeded`\ninstead of silently enforcing total amnesia.",
       "imports": [
         "__future__",
         "dataclasses",
@@ -7905,13 +7994,14 @@
         "time",
         "typing"
       ],
-      "loc": 188,
+      "loc": 226,
       "path": "hugrgate/memory/retention.py",
       "public_defs": [
         "MemoryQuota",
         "QuotaStatus",
         "RetentionReport",
         "check_quota",
+        "describe_quota",
         "enforce_quotas",
         "max_age_for",
         "to_dict",
@@ -7929,7 +8019,7 @@
         "time",
         "typing"
       ],
-      "loc": 130,
+      "loc": 150,
       "path": "hugrgate/memory/retrieval.py",
       "public_defs": [
         "RetrievalResult",
@@ -8008,6 +8098,33 @@
         "evaluate",
         "to_dict",
         "pct"
+      ]
+    },
+    "hugrgate.model_backend": {
+      "docstring": "Small-fast-model judgment backend \u2014 Tviheimr readiness slice HG-T2.\n\nRoadmap: a local-model backend for the judgments rules/classifiers\ncannot settle, using a small fast model served locally through an\nOllama-shaped endpoint. The model pick is by benchmark (latency +\njudgment accuracy on a fixed case set), recorded with numbers in\n``campaign/hg_t2_benchmark_report.json`` (see\n``benchmarks/hg_t2_benchmark.py``).\n\nDesign rules, all enforced in code:\n\n- **Rules first.** :class:`SelectiveModelBackend` runs the deterministic\n  primary backend (keyword classifier by default) on every judgment.\n- **Model only where it earns its cost.** The model is consulted ONLY\n  when the primary result is low-confidence (probability below\n  ``CONFIDENCE_THRESHOLD`` or top-two margin below\n  ``MARGIN_THRESHOLD``) \u2014 exactly the cases the benchmark case set\n  shows the rules cannot settle. Confident rules verdicts never pay\n  model latency.\n- **Model failure never breaks judgment.** If the endpoint is down,\n  times out, or emits an out-of-spec value, the primary verdict is\n  returned with ``model_error`` recorded in its metadata.\n- **Honest confidence.** Ollama's generate endpoint returns no\n  calibrated probability, so :class:`OllamaEngine` reports the fixed,\n  documented ``UNCALIBRATED_CONFIDENCE`` and the backend metadata\n  says ``confidence_calibrated: False``. No invented precision.\n\nStdlib only (urllib), like the HG-T1 decision server: this must run\nanywhere HugrGate runs. Plain process / library code \u2014 no service\nform is assumed or created.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hugrgate",
+        "json",
+        "typing",
+        "urllib"
+      ],
+      "loc": 234,
+      "path": "hugrgate/model_backend.py",
+      "public_defs": [
+        "OllamaEngine",
+        "needs_model",
+        "SelectiveModelBackend",
+        "build_model_backend",
+        "list_models",
+        "health",
+        "generate",
+        "capabilities",
+        "supports",
+        "evaluate",
+        "health",
+        "estimated_latency"
       ]
     },
     "hugrgate.models": {
@@ -8348,7 +8465,7 @@
         "logging",
         "typing"
       ],
-      "loc": 208,
+      "loc": 220,
       "path": "hugrgate/observability/logschema.py",
       "public_defs": [
         "validate_event",
@@ -8451,16 +8568,19 @@
       ]
     },
     "hugrgate.observability.prometheus": {
-      "docstring": "Prometheus text exposition for the metric registry. Slice 334.\n\nRenders :class:`hugrgate.observability.metrics.MetricRegistry` in the\nPrometheus text format (version 0.0.4), so any Prometheus server can\nscrape HugrGate without a client library:\n\n- counters render as ``<name>_total`` (unless already suffixed);\n- gauges render as-is;\n- histograms render cumulative ``<name>_bucket{le=\"...\"}`` series plus\n  an implicit ``+Inf`` bucket, ``<name>_sum``, and ``<name>_count``;\n- label values are escaped per spec (``\\\\``, ``\\n``, ``\\\"``).\n\nThe renderer reads only :meth:`MetricRegistry.snapshot`, never\ninstrument internals, so the exposition contract is decoupled from the\nregistry implementation.",
+      "docstring": "Prometheus text exposition for the metric registry. Slice 334.\n\nRenders :class:`hugrgate.observability.metrics.MetricRegistry` in the\nPrometheus text format (version 0.0.4), so any Prometheus server can\nscrape HugrGate without a client library:\n\n- counters render as ``<name>_total`` (unless already suffixed);\n- gauges render as-is;\n- histograms render cumulative ``<name>_bucket{le=\"...\"}`` series plus\n  an implicit ``+Inf`` bucket, ``<name>_sum``, and ``<name>_count``;\n- label values are escaped per spec (``\\\\``, ``\\n``, ``\\\"``).\n\nThe renderer reads only :meth:`MetricRegistry.snapshot`, never\ninstrument internals, so the exposition contract is decoupled from the\nregistry implementation.\n\nSlice 7 (circuit export) adds :class:`CircuitPrometheusExporter`, which\npolls a :class:`hugrgate.circuit.CircuitRegistry` and renders two\nmetrics: the ``hugrgate_circuit_state`` gauge (labels: ``backend``) and\nthe ``hugrgate_circuit_transitions_total`` counter (labels: ``backend``,\n``to_state``). Transition counts are derived by diffing each scrape\nagainst the previous one \u2014 :mod:`hugrgate.circuit` carries no transition\ncounter \u2014 so a fresh exporter counts only transitions it observes, and\nthe *first* time a backend is seen its state is recorded as a baseline\nwith no transition counted. Wire an exporter into the exposition via the\n``circuit_exporter`` keyword of :func:`generate_latest`; the caller must\nreuse one exporter instance across scrapes for the counter to\naccumulate.",
       "imports": [
         "__future__",
-        "hugrgate"
+        "hugrgate",
+        "threading"
       ],
-      "loc": 100,
+      "loc": 225,
       "path": "hugrgate/observability/prometheus.py",
       "public_defs": [
         "escape_label_value",
-        "generate_latest"
+        "CircuitPrometheusExporter",
+        "generate_latest",
+        "render"
       ]
     },
     "hugrgate.observability.replay": {
@@ -9375,6 +9495,27 @@
         "verify_chain"
       ]
     },
+    "hugrgate.reflex_api": {
+      "docstring": "Reflex API for Verdandi - Tviheimr readiness slice HG-T4.\n\nThe declared-reflex surface: a consumer (Verdandi) registers reflexes\n(trigger pattern -> named action), HugrGate judges incoming events\nagainst them and returns fire/no-fire with basis, at decision-runtime\nlatency. HugrGate judges; the consumer acts and records.\n\nDesign rules, enforced in code:\n- Only DECLARED reflexes can fire. An event matching no registered\n  pattern fires nothing; there is no implicit or default reflex.\n- Patterns are explicit: optional source match, optional kind match\n  (exact, or prefix when the pattern value ends in '*'), and optional\n  payload conditions (payload key -> expected value or list of\n  allowed values). At least one of source/kind is required, so a\n  reflex can never be an undeclared catch-all.\n- Registration is validated: duplicate names, empty actions, empty\n  patterns and malformed conditions are refused with ValueError.\n- Every judgment returns one verdict per registered reflex, in\n  registration order: fire (bool), action, basis naming the matched\n  or first failed pattern part, the event payload digest, and the\n  measured latency_ms of the judgment. Deterministic: identical\n  events against an identical registry give identical fire/no-fire\n  and basis (latency excepted).\n- Invalid events fire nothing: every verdict is no-fire with a\n  schema basis, never a silent drop.\nStdlib only. Plain library code - no service form assumed.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hashlib",
+        "json",
+        "time"
+      ],
+      "loc": 152,
+      "path": "hugrgate/reflex_api.py",
+      "public_defs": [
+        "payload_digest",
+        "ReflexRegistry",
+        "register",
+        "unregister",
+        "list_reflexes",
+        "judge_one",
+        "judge_stream"
+      ]
+    },
     "hugrgate.result": {
       "docstring": "DecisionResult \u2014 typed value + probability distribution. Slice 4.",
       "imports": [
@@ -9383,10 +9524,11 @@
         "hugrgate",
         "typing"
       ],
-      "loc": 82,
+      "loc": 100,
       "path": "hugrgate/result.py",
       "public_defs": [
         "DecisionResult",
+        "summarize",
         "to_dict"
       ]
     },
@@ -9715,7 +9857,7 @@
         "__future__",
         "hugrgate"
       ],
-      "loc": 121,
+      "loc": 125,
       "path": "hugrgate/routing/latency.py",
       "public_defs": [
         "LatencyTracker",
@@ -10567,6 +10709,28 @@
         "warmup_backend"
       ]
     },
+    "hugrgate.salience_profile": {
+      "docstring": "Aurelia sensation-stream salience profile - Tviheimr slice HG-T5.\n\nRoadmap: a judgment profile for sensation events: salience, genuine\nstate change vs noise, urgency. Tuned with Aurelia's own event schema\n(her house defines it; this slice consumes it).\n\nConsumed schema: Aurelia AU-T1 sensation event schema v1 (her house:\nfemale_motivation/readiness/sensation_events.py): kind, intensity\n(0..1), source, timestamp, digest (sha256 hex of the underlying\nrecord), schema_version=1, optional before/after.\nEmitted verdict: Aurelia AU-T2 verdict schema v1, field for field, so\nher JudgmentBinding accepts it unchanged: schema_version,\nevent_digest, salient, disposition (surface/settle), authenticity\n(genuine/noise), urgency (0..3), basis, judge_id.\nExpected salience table (Aurelia's own, by intensity):\n  >= 0.80: salient, genuine, urgency 3, surface\n  0.50-0.80: salient, genuine, urgency 2, surface\n  0.20-0.50: salient, genuine, urgency 1, surface\n  0.05-0.20: not salient, genuine, urgency 0, settle\n  < 0.05: not salient, noise, urgency 0, settle\nDesign rules: deterministic (identical events -> identical verdicts,\nno model in the loop); nothing dropped silently - a schema-invalid\nevent still gets exactly one settle/noise verdict whose basis starts\n'schema:' and names every failure; every verdict carries its basis.\nStdlib only. Plain library code - no service form assumed.",
+      "imports": [
+        "__future__",
+        "collections",
+        "hashlib",
+        "json",
+        "math",
+        "re"
+      ],
+      "loc": 114,
+      "path": "hugrgate/salience_profile.py",
+      "public_defs": [
+        "record_digest",
+        "SalienceProfile",
+        "salience_stream",
+        "validate_event",
+        "judge_one",
+        "judge_stream",
+        "evaluate"
+      ]
+    },
     "hugrgate.scaffold": {
       "docstring": "Project scaffolder. Slice 438.\n\n``hugrgate new NAME`` creates a complete, working HugrGate project:\n\n    myproj/\n        pyproject.toml        # hugrgate dependency, pytest config\n        README.md             # run instructions\n        .gitignore\n        spec.yaml             # starter DecisionSpec\n        policy.yaml           # starter DecisionPolicy\n        state.example.yaml    # example decision state\n        src/myproj/__init__.py\n        src/myproj/main.py    # decide() via the SDK v2 in-process gate\n        tests/test_smoke.py   # a smoke test that actually passes\n\nThe scaffolded project's own test suite is executed by this\nslice's tests to prove the scaffold works out of the box.",
       "imports": [
@@ -11252,9 +11416,10 @@
         "__future__",
         "collections",
         "hugrgate",
+        "json",
         "typing"
       ],
-      "loc": 242,
+      "loc": 292,
       "path": "hugrgate/serde.py",
       "public_defs": [
         "policy_to_dict",
@@ -11263,7 +11428,9 @@
         "result_to_compact",
         "result_from_compact",
         "policy_to_compact",
-        "policy_from_compact"
+        "policy_from_compact",
+        "to_canonical_json",
+        "from_canonical_json"
       ]
     },
     "hugrgate.server": {
@@ -11279,10 +11446,11 @@
         "re",
         "time",
         "typing",
+        "uuid",
         "uvicorn",
         "warnings"
       ],
-      "loc": 554,
+      "loc": 580,
       "path": "hugrgate/server.py",
       "public_defs": [
         "UniformBackend",
@@ -11303,6 +11471,7 @@
         "capabilities",
         "supports",
         "evaluate",
+        "request_id_middleware",
         "root",
         "health",
         "backends",
@@ -11329,7 +11498,7 @@
       ]
     },
     "hugrgate.supervision": {
-      "docstring": "Worker supervision \u2014 heartbeats, restarts, escalation. Slice 295.\n\nLong-running gate workers (schedulers, reapers, pool maintainers) must\nnot die silently.  :class:`Supervisor` keeps a set of named worker\nthreads alive:\n\n- Each worker runs ``target(ctx)`` where ``ctx`` is a\n  :class:`WorkerContext` offering ``heartbeat()`` and ``should_stop``.\n- A watchdog thread checks every ``check_interval_s``: a worker whose\n  last heartbeat is older than ``heartbeat_timeout_s`` \u2014 or whose\n  thread died (exception or silent return) \u2014 is restarted via its\n  factory ``target``.\n- Restart budget: ``max_restarts`` restarts per ``restart_window_s``.\n  Exhausting the budget *escalates*: the ``on_escalation`` callback\n  fires (name, reason, restart history) and the worker is marked\n  failed \u2014 no more silent restarts.\n- :meth:`Supervisor.stop` halts the watchdog and joins workers.\n\nWorker *failures* are handled by restart/escalation, never by\nexceptions; :class:`SupervisionError` is reserved for supervisor\nmisuse (unknown worker, double start, operating while stopped).",
+      "docstring": "Worker supervision \u2014 heartbeats, restarts, escalation. Slice 295.\n\nLong-running gate workers (schedulers, reapers, pool maintainers) must\nnot die silently.  :class:`Supervisor` keeps a set of named worker\nthreads alive:\n\n- Each worker runs ``target(ctx)`` where ``ctx`` is a\n  :class:`WorkerContext` offering ``heartbeat()`` and ``should_stop``.\n- A watchdog thread checks every ``check_interval_s``: a worker whose\n  last heartbeat is older than ``heartbeat_timeout_s`` \u2014 or whose\n  thread died (exception or silent return) \u2014 is restarted via its\n  factory ``target``.\n- Restart budget: ``max_restarts`` restarts per ``restart_window_s``.\n  Exhausting the budget *escalates*: the ``on_escalation`` callback\n  fires with an escalation payload carrying ``restart_times``\n  (the supervisor's restart-timestamp history) and ``last_error``\n  (the last failure's traceback), and the worker is marked\n  failed \u2014 no more silent restarts.\n- :meth:`Supervisor.stop` halts the watchdog and joins workers.\n\nWorker *failures* are handled by restart/escalation, never by\nexceptions; :class:`SupervisionError` is reserved for supervisor\nmisuse (unknown worker, double start, operating while stopped).",
       "imports": [
         "__future__",
         "collections",
@@ -11340,7 +11509,7 @@
         "traceback",
         "typing"
       ],
-      "loc": 302,
+      "loc": 318,
       "path": "hugrgate/supervision.py",
       "public_defs": [
         "WorkerContext",
@@ -11390,11 +11559,12 @@
         "threading",
         "typing"
       ],
-      "loc": 139,
+      "loc": 169,
       "path": "hugrgate/timeout.py",
       "public_defs": [
         "run_with_deadline",
         "deadline_ms_for",
+        "explain_deadline",
         "evaluate_with_timeout",
         "TimeoutBackend",
         "target",
@@ -11404,6 +11574,28 @@
         "estimated_latency",
         "health",
         "evaluate"
+      ]
+    },
+    "hugrgate.triage_profile": {
+      "docstring": "Event-stream triage profile - Tviheimr readiness slice HG-T3.\n\nRoadmap: a triage profile for connector event streams: input schema\n(source, kind, time, payload digest), verdict schema (urgency, route,\nescalate yes/no, basis). Deterministic-first: identical events give\nidentical verdicts unless a model judgment is explicitly in the loop,\nin which case the basis says so.\n\nDesign rules, enforced in code:\n- Every event in a stream gets exactly one verdict, in order. Nothing\n  is dropped silently: invalid events and duplicate events receive a\n  shed verdict (route='shed'), logged like any other verdict.\n- Rules are an ordered, named table; first match wins and the winning\n  rule id is recorded in basis, so every verdict carries its basis.\n- No model is used by default. If a caller explicitly passes a model\n  callable, it is consulted only for the default-review case and the\n  basis records 'model:<name>' - never silently.\nStdlib only. Plain library code - no service form assumed.",
+      "imports": [
+        "__future__",
+        "collections",
+        "datetime",
+        "hashlib",
+        "json"
+      ],
+      "loc": 104,
+      "path": "hugrgate/triage_profile.py",
+      "public_defs": [
+        "payload_digest",
+        "TriageProfile",
+        "triage_stream",
+        "validate",
+        "digest_of",
+        "triage_one",
+        "triage_stream",
+        "hit"
       ]
     },
     "hugrgate.validation": {
@@ -11519,6 +11711,7 @@
     "test_agents_398_simulator.py",
     "test_agents_399_benchmark.py",
     "test_agents_400_release.py",
+    "test_agents_bus_dead_letters.py",
     "test_api_inventory.py",
     "test_arch_map.py",
     "test_async_readiness.py",
@@ -11547,7 +11740,10 @@
     "test_autotune_473_adversarial.py",
     "test_autotune_474_benchmark.py",
     "test_autotune_475_release.py",
+    "test_autotune_dryrun_dusk_c17.py",
     "test_backend_registry.py",
+    "test_benchmark_determinism_dusk_s11.py",
+    "test_cache_config_errors_dusk_d2.py",
     "test_calib_adversarial.py",
     "test_calib_aleatoric.py",
     "test_calib_autoselect.py",
@@ -11622,6 +11818,8 @@
     "test_cluster_transport.py",
     "test_cluster_work_stealing.py",
     "test_config.py",
+    "test_configgen_didyoumean.py",
+    "test_configgen_dusk_s14_explain.py",
     "test_contracts_026.py",
     "test_contracts_027.py",
     "test_contracts_028.py",
@@ -11648,7 +11846,9 @@
     "test_contracts_049.py",
     "test_contracts_050.py",
     "test_coverage_attack.py",
+    "test_daemon_shutdown_regression.py",
     "test_dead_code.py",
+    "test_demo_profile_hygiene.py",
     "test_dependency_rules.py",
     "test_determinism_contract.py",
     "test_deterministic.py",
@@ -11677,6 +11877,7 @@
     "test_deveco_448_windows.py",
     "test_deveco_449_macos.py",
     "test_deveco_450_release_gate.py",
+    "test_dusk_18_decide_provenance_summary.py",
     "test_edge_affinity.py",
     "test_edge_bench.py",
     "test_edge_bootstrap.py",
@@ -11745,6 +11946,7 @@
     "test_evlab_373_gates.py",
     "test_evlab_374_report.py",
     "test_evlab_375_release.py",
+    "test_fallback_explain.py",
     "test_foundation.py",
     "test_gauntlet_476_freeze.py",
     "test_gauntlet_477_install.py",
@@ -11771,6 +11973,8 @@
     "test_gauntlet_498_rcbuild.py",
     "test_gauntlet_499_handoff.py",
     "test_gauntlet_500_release.py",
+    "test_health_quarantine_recovery.py",
+    "test_health_snapshot.py",
     "test_import_cycles.py",
     "test_ladder.py",
     "test_localrt_151_interface.py",
@@ -11798,6 +12002,7 @@
     "test_localrt_173_conformance.py",
     "test_localrt_174_bench_matrix.py",
     "test_logging.py",
+    "test_logschema_coverage.py",
     "test_memory_access.py",
     "test_memory_adversarial.py",
     "test_memory_assisted_calibration.py",
@@ -11817,9 +12022,11 @@
     "test_memory_outcomes.py",
     "test_memory_policies.py",
     "test_memory_query.py",
+    "test_memory_recall_pagination.py",
     "test_memory_recency.py",
     "test_memory_replay.py",
     "test_memory_retention.py",
+    "test_memory_retention_describe.py",
     "test_memory_retrieval.py",
     "test_memory_similarity.py",
     "test_ml_calibration.py",
@@ -11833,6 +12040,7 @@
     "test_observability_metrics.py",
     "test_observability_otel.py",
     "test_observability_prometheus.py",
+    "test_observability_prometheus_circuit.py",
     "test_observability_spans.py",
     "test_observability_trace.py",
     "test_package_boundaries.py",
@@ -11891,6 +12099,7 @@
     "test_repo_truth.py",
     "test_resource_lifecycle.py",
     "test_result_invariants.py",
+    "test_result_summarize.py",
     "test_routing_051.py",
     "test_routing_052.py",
     "test_routing_053.py",
@@ -11915,6 +12124,7 @@
     "test_routing_072.py",
     "test_routing_073.py",
     "test_routing_074.py",
+    "test_routing_latency_errors.py",
     "test_sec_401_threat_model.py",
     "test_sec_402_attack_surface.py",
     "test_sec_403_depscan.py",
@@ -11939,13 +12149,24 @@
     "test_sec_422_fuzzing.py",
     "test_sec_423_secscan.py",
     "test_sec_424_gauntlet.py",
+    "test_serde_d3_canonical_json.py",
     "test_serialization_contracts.py",
+    "test_server_request_id_dusk_c15.py",
     "test_service.py",
+    "test_slice_009_client_retry.py",
     "test_state_validation.py",
     "test_static_analysis.py",
+    "test_supervision_escalation_payload_dusk.py",
     "test_taxonomy.py",
     "test_thread_safety.py",
+    "test_timeout_deadline_explain.py",
+    "test_tviheimr_hg_t1_decision_server.py",
+    "test_tviheimr_hg_t2_model_backend.py",
+    "test_tviheimr_hg_t3_triage.py",
+    "test_tviheimr_hg_t4_reflex.py",
+    "test_tviheimr_hg_t5_salience.py",
+    "test_tviheimr_hg_t6_ledger.py",
     "test_typecheck.py"
   ],
-  "total_loc": 100514
+  "total_loc": 102454
 }

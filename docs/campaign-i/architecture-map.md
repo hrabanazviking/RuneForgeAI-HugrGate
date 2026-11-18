@@ -136,6 +136,7 @@ flowchart TD
         provenance[provenance]
         health[health]
         drift[drift]
+        judgment_ledger[judgment_ledger]
         cache[cache]
         models[models]
         features[features]
@@ -269,6 +270,11 @@ flowchart TD
         server[server]
         daemon[daemon]
         client[client]
+        decision_server[decision_server]
+        model_backend[model_backend]
+        triage_profile[triage_profile]
+        reflex_api[reflex_api]
+        salience_profile[salience_profile]
         cli[cli]
         protocol[protocol]
         sdk[sdk]
@@ -1311,6 +1317,18 @@ flowchart TD
     daemon --> serde
     daemon -.-> server
     daemon -.-> spec
+    decision_server --> backend
+    decision_server --> core
+    decision_server --> errors
+    decision_server --> judgment_ledger
+    decision_server -.-> log
+    decision_server --> policy
+    decision_server --> reflex_api
+    decision_server --> result
+    decision_server --> salience_profile
+    decision_server --> serde
+    decision_server --> spec
+    decision_server --> triage_profile
     edge --> edge_affinity
     edge --> edge_bench
     edge --> edge_bootstrap
@@ -1798,6 +1816,12 @@ flowchart TD
     millionbench --> policy
     millionbench --> result
     millionbench --> spec
+    model_backend --> backend
+    model_backend --> backends_llm
+    model_backend --> decision_server
+    model_backend --> errors
+    model_backend --> result
+    model_backend --> spec
     models --> errors
     multiproc --> errors
     multiproc --> log
@@ -2270,13 +2294,13 @@ flowchart TD
 | runtime | `core`, `abstain`, `threshold`, `negotiate`, `fallback`, `timeout`, `circuit`, `privacy`, `ladder` |
 | privacy-fortress | `privacy_audit`, `privacy_crypto`, `privacy_deletion`, `privacy_dryrun`, `privacy_exfil`, `privacy_explain`, `privacy_flow`, `privacy_jurisdiction`, `privacy_keys`, `privacy_labels`, `privacy_localonly`, `privacy_minimize`, `privacy_payload`, `privacy_pii`, `privacy_provenance`, `privacy_redact`, `privacy_retention`, `privacy_secrets`, `privacy_tokens`, `privacy_trust` |
 | routing | `routing`, `routing.architecture`, `routing.rungs`, `routing.synthesis`, `routing.capability`, `routing.confidence`, `routing.latency`, `routing.cost`, `routing.energy`, `routing.memory`, `routing.privacy`, `routing.hardware`, `routing.availability`, `routing.qos`, `routing.parallel`, `routing.hedged`, `routing.early_exit`, `routing.fallback`, `routing.dag`, `routing.explain`, `routing.replay`, `routing.simulate`, `routing.dsl`, `routing.fuzz` |
-| state | `provenance`, `health`, `drift`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
+| state | `provenance`, `health`, `drift`, `judgment_ledger`, `cache`, `models`, `features`, `bench`, `bench_report`, `log` |
 | memory | `memory`, `memory.access`, `memory.adversarial`, `memory.assisted_calibration`, `memory.assisted_routing`, `memory.backend_history`, `memory.benchmarks`, `memory.compaction`, `memory.conditioned`, `memory.contract_history`, `memory.counterfactuals`, `memory.decay`, `memory.domain_profiles`, `memory.frequency`, `memory.groundtruth`, `memory.history`, `memory.io`, `memory.outcomes`, `memory.policies`, `memory.query`, `memory.recency`, `memory.replay`, `memory.retention`, `memory.retrieval`, `memory.similarity`, `memory.types` |
 | backends | `backends.rules`, `backends.logreg`, `backends.forest`, `backends.boosting`, `backends.embedding`, `backends.llm`, `backends.nli` |
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | autotune | `autotune`, `autotune.adversarial`, `autotune.benchmark`, `autotune.constraints`, `autotune.controller`, `autotune.limits`, `autotune.modes`, `autotune.objectives`, `autotune.provenance`, `autotune.release`, `autotune.repro`, `autotune.rollback`, `autotune.tuners`, `autotune.tuners._base`, `autotune.tuners.backends`, `autotune.tuners.batching`, `autotune.tuners.cache`, `autotune.tuners.calibration_select`, `autotune.tuners.cost`, `autotune.tuners.energy`, `autotune.tuners.gates`, `autotune.tuners.hardware`, `autotune.tuners.latency`, `autotune.tuners.privacy`, `autotune.tuners.thresholds`, `autotune.tuners.weights` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
-| service | `server`, `daemon`, `client`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
+| service | `server`, `daemon`, `client`, `decision_server`, `model_backend`, `triage_profile`, `reflex_api`, `salience_profile`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
@@ -3076,6 +3100,18 @@ flowchart TD
 | `daemon` | `serde` | no |
 | `daemon` | `server` | yes |
 | `daemon` | `spec` | yes |
+| `decision_server` | `backend` | no |
+| `decision_server` | `core` | no |
+| `decision_server` | `errors` | no |
+| `decision_server` | `judgment_ledger` | no |
+| `decision_server` | `log` | yes |
+| `decision_server` | `policy` | no |
+| `decision_server` | `reflex_api` | no |
+| `decision_server` | `result` | no |
+| `decision_server` | `salience_profile` | no |
+| `decision_server` | `serde` | no |
+| `decision_server` | `spec` | no |
+| `decision_server` | `triage_profile` | no |
 | `edge` | `edge.affinity` | no |
 | `edge` | `edge.bench` | no |
 | `edge` | `edge.bootstrap` | no |
@@ -3563,6 +3599,12 @@ flowchart TD
 | `millionbench` | `policy` | no |
 | `millionbench` | `result` | no |
 | `millionbench` | `spec` | no |
+| `model_backend` | `backend` | no |
+| `model_backend` | `backends.llm` | no |
+| `model_backend` | `decision_server` | no |
+| `model_backend` | `errors` | no |
+| `model_backend` | `result` | no |
+| `model_backend` | `spec` | no |
 | `models` | `errors` | no |
 | `multiproc` | `errors` | no |
 | `multiproc` | `log` | no |

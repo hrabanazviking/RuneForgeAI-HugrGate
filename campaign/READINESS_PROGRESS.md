@@ -192,6 +192,74 @@ roles run sequentially by the keeper (no sub-agents this tick), recorded here.
 - Method note: roles run sequentially by the keeper (no
   sub-agents this tick), recorded per campaign instructions.
 
+## HG-T6 - Judgment provenance ledger - GATE PASSED (device-verified 2026-11-18)
+- Built `hugrgate/judgment_ledger.py` (stdlib-only): append-only
+  JSONL `JudgmentLedger` - every entry carries seq, timestamp,
+  kind, slice, basis, inputs_digest (sha256 of canonical input),
+  the full verdict, verdict_digest, latency_ms, model_used, and a
+  hash chain (prev_hash -> record_hash, the house integrity model
+  of hugrgate.provenance). record() writes + flushes + fsyncs
+  before returning; opening an existing ledger re-reads and
+  verifies it and continues seq/chain - a tampered or corrupt
+  file is refused at open, never silently extended. Audit:
+  entries(), trace(verdict), by_verdict_digest(),
+  by_inputs_digest(), verify() re-read from disk.
+- Decision server integration: DecisionServer(ledger_path=...)
+  (CLI `--ledger`) records EVERY verdict synchronously before
+  the response is built - judge, /events, /triage, /reflex/judge
+  and /salience - so no verdict exists without an entry.
+  GET /ledger reports entries + verified + head hash; /health
+  carries ledger_entries.
+- Gate tests: `tests/test_tviheimr_hg_t6_ledger.py` - 7 tests
+  (record/trace round-trip, no-basis-no-entry, restart survival
+  with chain continuation, tamper detected + refused, all
+  HG-T3/T4/T5 fixture verdicts traced, server records every
+  verdict end-to-end over real HTTP, no-ledger server unchanged).
+- Device gate run (purplelongship, TMPDIR=~/forge-tmp): HG-T6 = 7
+  passed; HG-T1..T6 = 44 passed.
+- House-registry completion (the full-suite clause made these
+  visible; all were failing only on this branch, all fixed):
+  the six campaign modules registered in tools/gen_arch_map.py
+  LAYERS + regenerated architecture map; audit manifest +
+  API inventory regenerated (tools/audit_repo.py); gauntlet API
+  baseline regenerated for the added public API; taxonomy doc
+  gained the six HG test modules (integration); hg_t2_cases
+  registered in test_dependency_rules' _LOCAL_MODULES (the house
+  pattern for sys.path first-party modules); campaign modules
+  brought under the house raise-site rule (stdlib ValueError /
+  RuntimeError at raise sites; ReflexError/LedgerError kept as
+  aliases) and unused imports removed. The 9 branch-only meta
+  failures (arch_map x3, dead_code, dependency_rules, errors,
+  gauntlet_486, repo_truth, taxonomy) now pass, and
+  test_api_inventory - failing even on main - passes again.
+- Method note: roles run sequentially by the keeper (no
+  sub-agents this tick), recorded per campaign instructions.
+
+## "Ready for Tviheimr" gate - PASSED (device-verified 2026-11-18)
+- HG-T1..HG-T6 all banked with gate evidence (this ledger).
+- Full existing suite on purplelongship: 5,904 passed, 23 failed,
+  5 skipped. Failure-for-failure comparison against a pristine
+  main clone in the same venue: ZERO campaign-only failures -
+  every remaining failure also fails on main here (uninstalled
+  optional extras: ml/server; no-GPU host; sbom-from-installed;
+  pre-existing environment failures), and one main failure
+  (test_api_inventory) now passes. No regression, no softening.
+- Tviheimr-side fixture consumer banked:
+  `campaign/tviheimr_fixture_consumer.py` + report
+  `campaign/hg_ready_consumer_report.json`. It starts the
+  decision server as a plain process with the ledger on,
+  registers the HG-T4 reflexes, and calls /triage, /reflex/judge,
+  /salience and /judge against the recorded fixtures: all 8
+  checks pass - fixture tables exact (triage, reflex,
+  salience), judge ok, ledger complete (80 entries for 80
+  verdicts) and verified, ledger survives restart. Latencies
+  (localhost HTTP, ledger fsync included): judge 18.134 ms;
+  per-verdict triage 12.1 ms, reflex 17.3 ms,
+  salience 19.9 ms - all inside the recorded budgets
+  (500 ms single call, 25 ms per ledgered verdict).
+- HugrGate is ready for Tviheimr by the roadmap's own gate.
+  This keeper's work is complete; the keeper is to be disabled.
+
 ## Remaining
-- HG-T6 - not started.
-- "Ready for Tviheimr" gate — not reached.
+- None. Roadmap complete: HG-T1..HG-T6 banked, "Ready for
+  Tviheimr" gate passed.

@@ -19,9 +19,8 @@ Stdlib only. Plain library code - no service form assumed.
 """
 from __future__ import annotations
 import hashlib, json
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from datetime import datetime
-from typing import Any
 __all__=['TriageProfile','payload_digest','triage_stream','EVENT_FIELDS','VERDICT_FIELDS']
 EVENT_FIELDS=('source','kind','time')
 VERDICT_FIELDS=('urgency','route','escalate','basis')
