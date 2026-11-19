@@ -272,6 +272,7 @@ flowchart TD
         client[client]
         decision_server[decision_server]
         model_backend[model_backend]
+        flm_backend[flm_backend]
         triage_profile[triage_profile]
         reflex_api[reflex_api]
         salience_profile[salience_profile]
@@ -1663,6 +1664,9 @@ flowchart TD
     flame --> hugrgate
     flame --> errors
     flame --> log
+    flm_backend --> backends_llm
+    flm_backend --> errors
+    flm_backend --> model_backend
     gauntlet_calibration_audit --> calibration_metrics
     gauntlet_exhaustion --> errors
     gauntlet_fuzz --> errors
@@ -2300,7 +2304,7 @@ flowchart TD
 | calibration | `calibration`, `calibration._base`, `calibration.adversarial`, `calibration.aleatoric`, `calibration.autoselect`, `calibration.bayes`, `calibration.bench`, `calibration.conformal`, `calibration.conformal_regression`, `calibration.coverage`, `calibration.decomposition`, `calibration.drift`, `calibration.ensemble`, `calibration.epistemic`, `calibration.group`, `calibration.imbalance`, `calibration.isotonic`, `calibration.metrics`, `calibration.online`, `calibration.perclass`, `calibration.pipeline`, `calibration.platt`, `calibration.profiles`, `calibration.registry`, `calibration.risk_coverage`, `calibration.selective`, `calibration.sets`, `calibration.shift`, `calibration.temperature`, `calibration.viz`, `calibration.window` |
 | autotune | `autotune`, `autotune.adversarial`, `autotune.benchmark`, `autotune.constraints`, `autotune.controller`, `autotune.limits`, `autotune.modes`, `autotune.objectives`, `autotune.provenance`, `autotune.release`, `autotune.repro`, `autotune.rollback`, `autotune.tuners`, `autotune.tuners._base`, `autotune.tuners.backends`, `autotune.tuners.batching`, `autotune.tuners.cache`, `autotune.tuners.calibration_select`, `autotune.tuners.cost`, `autotune.tuners.energy`, `autotune.tuners.gates`, `autotune.tuners.hardware`, `autotune.tuners.latency`, `autotune.tuners.privacy`, `autotune.tuners.thresholds`, `autotune.tuners.weights` |
 | ensemble | `ensemble`, `ensemble.base`, `ensemble.api`, `ensemble.voting`, `ensemble.averaging`, `ensemble.stacking`, `ensemble.blending`, `ensemble.moe`, `ensemble.diversity`, `ensemble.disagreement`, `ensemble.consensus`, `ensemble.correlation`, `ensemble.reliability`, `ensemble.membership`, `ensemble.calibration`, `ensemble.provenance`, `ensemble.explanations`, `ensemble.cache`, `ensemble.batch`, `ensemble.adversarial`, `ensemble.benchmarks`, `ensemble.release` |
-| service | `server`, `daemon`, `client`, `decision_server`, `model_backend`, `triage_profile`, `reflex_api`, `salience_profile`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
+| service | `server`, `daemon`, `client`, `decision_server`, `model_backend`, `flm_backend`, `triage_profile`, `reflex_api`, `salience_profile`, `cli`, `protocol`, `sdk`, `inspect`, `plugins`, `conformance`, `compat`, `configgen`, `scaffold`, `loaders` |
 | adaptive | `adaptive`, `adaptive.telemetry`, `adaptive.feedback`, `adaptive.delayed`, `adaptive.router_features`, `adaptive.bandit`, `adaptive.offline`, `adaptive.cost_quality`, `adaptive.latency_quality`, `adaptive.energy_quality`, `adaptive.privacy_objective`, `adaptive.multiobjective`, `adaptive.competence`, `adaptive.domain_competence`, `adaptive.contract_competence`, `adaptive.coldstart`, `adaptive.exploration`, `adaptive.safe_exploration`, `adaptive.shadow`, `adaptive.counterfactual`, `adaptive.rollback`, `adaptive.versioning`, `adaptive.explanations`, `adaptive.drift_detect`, `adaptive.benchmark` |
 | cluster | `cluster`, `cluster.protocol`, `cluster.identity`, `cluster.capabilities`, `cluster.discovery`, `cluster.static_config`, `cluster.lan`, `cluster.rpc`, `cluster.node`, `cluster.routes`, `cluster.auth`, `cluster.transport`, `cluster.policy_sync`, `cluster.privacy_boundary`, `cluster.routing`, `cluster.node_health`, `cluster.node_latency`, `cluster.node_cost`, `cluster.work_stealing`, `cluster.distributed_batch`, `cluster.backpressure`, `cluster.partition`, `cluster.recovery`, `cluster.provenance_dist`, `cluster.trace`, `cluster.chaos`, `cluster.bench_support`, `cluster.bench`, `cluster.release_gate` |
 | api | `hugrgate` |
@@ -3446,6 +3450,9 @@ flowchart TD
 | `flame` | `hugrgate` | no |
 | `flame` | `errors` | no |
 | `flame` | `log` | no |
+| `flm_backend` | `backends.llm` | no |
+| `flm_backend` | `errors` | no |
+| `flm_backend` | `model_backend` | no |
 | `gauntlet.calibration_audit` | `calibration.metrics` | no |
 | `gauntlet.exhaustion` | `errors` | no |
 | `gauntlet.fuzz` | `errors` | no |

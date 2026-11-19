@@ -202,7 +202,9 @@ LAYERS: dict[str, list[str]] = {
         "hugrgate.server", "hugrgate.daemon", "hugrgate.client",
         # Tviheimr readiness (HG-T1..T5): decision-server form,
         # model backend, triage / reflex / salience profiles.
+        # NPU Phase 2: the FastFlowLM engine beside the model backend.
         "hugrgate.decision_server", "hugrgate.model_backend",
+        "hugrgate.flm_backend",
         "hugrgate.triage_profile", "hugrgate.reflex_api",
         "hugrgate.salience_profile",
         "hugrgate.cli",
