@@ -106,3 +106,7 @@ No verified hardware multiplier or production latency gain is established. A cla
 - [ ] **Acceptance**: simple query retains direct answer speed and zero new model calls; difficult query yields stronger grounded synthesis under budget; abstention keeps unverified facts out; short-term TTL leaves no raw content in durable logs; archives remain byte-for-byte identical; no source DB duplication or per-character configs; feature flag off leaves current clients working; model availability failure degrades safely.
 
 **Roadmap commits document intent. No HugrGate/Yggdrasil code or live Bifröst service has been deployed by adding this file.**
+
+## Optional real-time Verðandi metacognition (new owner decision 2026-11-19)
+
+The [Verdandi draft PR #3](https://github.com/hrabanazviking/Verdandi/pull/3) provides a separate fast present-tense observation layer and declared/owner-granted reflex reaction mechanism. Yggdrasil 2.0 should be activated only for complex *selected* metacognitive observations, not on every UDS nerve event. HugrGate's typed decision output can select a specific World/Mímir review and bounded Gufo model escalation when justified. The live Bifröst archive remains immutable, medium focus reversible, and short-term content never preserved in Verdandi's standard permanent feed. See [HugrGate/Verdandi design](VERDANDI_FAST_JUDGMENT_METACOGNITION_2026-11-19.md). No G14 deployment is implied.
