@@ -53,3 +53,7 @@ All private authorized Janitor AI and SillyTavern characters continue to have un
 7. Actual Z13 model calls and G14 decision scheduling are benchmarked for correctness and overhead; use deterministic rules when sufficient.
 
 **Delivery:** review existing HugrGate decision/episode-memory code, write Bifröst adapter contracts, add isolated synthetic tests, benchmark, then request owner-approved deployment. This plan is not implementation evidence.
+
+## Newer Yggdrasil 2.0 esoteric cognitive dispatch (2026-11-19)
+
+The owner further proposes **Yggdrasil 2.0 as an optional Second-Brain functions-of-mind layer**. [HugrGate's full integration plan](YGGDRASIL_2_COGNITIVE_ROUTING_INTEGRATION_2026-11-19.md) now defines deterministic-first `cognition_needed`, `realm_subset`, epistemic mode and gap/verification decisions across Nine Worlds, Urðr/Verðandi/Skuld and Mímir, with optional private Z13 Gufo inference. HugrGate is the optional cognitive decision mechanism, not a mandatory world or new knowledge database. Reject automatic model calls when rules/Skry already suffice; preserve all long-term immutability, short-term TTL, source provenance, whole-brain read-only client access and explicit owner archival approval. This extension supersedes the historical Yggdrasil blanket OpenRouter mandate, without implying any deployed feature or audited speedup.
