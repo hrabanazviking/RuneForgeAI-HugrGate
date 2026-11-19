@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-11-18T07:02:37.580790+00:00",
-  "module_count": 474,
+  "generated_utc": "2026-11-19T14:29:12.143184+00:00",
+  "module_count": 475,
   "modules": {
     "hugrgate.__init__": {
       "docstring": "HugrGate \u2014 local-first, model-agnostic probabilistic decision runtime.\n\nDeterministic where possible. Probabilistic where useful.\nGenerative only where necessary.",
@@ -6900,6 +6900,26 @@
         "render_svg"
       ]
     },
+    "hugrgate.flm_backend": {
+      "docstring": "FastFlowLM (NPU) judgment engine \u2014 HugrGate NPU Phase 2.\n\nRoadmap: the same selective small-fast-model judgment path as\nHG-T2 (:mod:`hugrgate.model_backend`), with the model served on the\nXDNA2 NPU by FastFlowLM (``flm serve``) instead of a GPU Ollama\nendpoint. FastFlowLM is the only NPU LLM runtime proven on the\ndeployment host (purpleraider: qwen3:0.6b at 81.96 tok/s, 2026-11-12);\nit is a tool we *use* through its OpenAI-shaped HTTP API, never a\ncodebase we build on (its accelerated kernels are proprietary\nbinaries). The benchmark that re-earns the judge pick on the frozen\nHG-T2 case set lives in ``benchmarks/hg_npu_benchmark.py``; its\nreport is ``campaign/hg_npu_benchmark_report.json``.\n\nDesign rules, inherited from HG-T2 and enforced in code:\n\n- **Rules first, unchanged.** This module adds one engine behind the\n  existing :class:`SelectiveModelBackend`; the rules layer and the\n  selective thresholds are exactly as HG-T2 left them.\n- **Model failure never breaks judgment.** Any transport failure\n  raises :class:`BackendUnavailable` / :class:`BackendError`, and\n  the selective backend returns the rules verdict with\n  ``model_error`` recorded \u2014 the NPU can vanish mid-call and the\n  gate degrades to rules-only, never to silence.\n- **Honest confidence.** ``flm serve`` returns per-token\n  ``logprobs`` on request. When the first generated token carries a\n  logprob, :class:`FlmEngine` reports that token's real probability\n  (``exp(logprob)``) as the choice confidence \u2014 a genuine model\n  probability for the token actually emitted, though not a\n  calibrated distribution over the choice set. When logprobs are\n  absent, it falls back to the documented\n  ``UNCALIBRATED_CONFIDENCE`` of :mod:`hugrgate.model_backend`.\n  No invented precision either way.\n\nStdlib only (urllib), like HG-T1/HG-T2: this must run anywhere\nHugrGate runs. Plain library code \u2014 the resident service form is\nthe owner's explicit commission, authored outside this module\n(``tools/hugrgate_resident.py``).",
+      "imports": [
+        "__future__",
+        "hugrgate",
+        "json",
+        "math",
+        "typing",
+        "urllib"
+      ],
+      "loc": 168,
+      "path": "hugrgate/flm_backend.py",
+      "public_defs": [
+        "FlmEngine",
+        "build_flm_backend",
+        "list_models",
+        "health",
+        "generate"
+      ]
+    },
     "hugrgate.gauntlet.__init__": {
       "docstring": "Campaign XX gauntlet utilities \u2014 HugrGate 1.0 release hardening.\n\nEach module in this subpackage is one slice of the 1.0 Gauntlet\n(slices 476-500): release gates, platform/dependency matrices,\nadversarial harnesses, and audit tooling. None of these names are\nre-exported from the ``hugrgate`` package root; the root surface\nstays frozen per slice 476.",
       "imports": [
@@ -8110,7 +8130,7 @@
         "typing",
         "urllib"
       ],
-      "loc": 234,
+      "loc": 238,
       "path": "hugrgate/model_backend.py",
       "public_defs": [
         "OllamaEngine",
@@ -11975,6 +11995,7 @@
     "test_gauntlet_500_release.py",
     "test_health_quarantine_recovery.py",
     "test_health_snapshot.py",
+    "test_hugrgate_npu_flm_backend.py",
     "test_import_cycles.py",
     "test_ladder.py",
     "test_localrt_151_interface.py",
@@ -12168,5 +12189,5 @@
     "test_tviheimr_hg_t6_ledger.py",
     "test_typecheck.py"
   ],
-  "total_loc": 102454
+  "total_loc": 102626
 }

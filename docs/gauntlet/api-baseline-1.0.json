@@ -7469,6 +7469,24 @@
       "sig": "(stacks: 'FoldedStacks', svg: 'str', directory: 'str | Path', label: 'str') -> 'dict[str, Path]'"
     }
   },
+  "hugrgate.flm_backend": {
+    "DEFAULT_FLM_BASE_URL": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "DEFAULT_FLM_MODEL": {
+      "kind": "constant",
+      "sig": ""
+    },
+    "FlmEngine": {
+      "kind": "class",
+      "sig": "(model: 'str' = 'qwen3:0.6b', base_url: 'str' = 'http://127.0.0.1:52625', timeout_s: 'float' = 60.0)"
+    },
+    "build_flm_backend": {
+      "kind": "function",
+      "sig": "(model: 'str' = 'qwen3:0.6b', base_url: 'str' = 'http://127.0.0.1:52625') -> 'LLMBackend'"
+    }
+  },
   "hugrgate.gauntlet": {},
   "hugrgate.gauntlet.api_audit": {
     "ApiDiff": {
@@ -7557,7 +7575,7 @@
     },
     "read_runtime_dependencies": {
       "kind": "function",
-      "sig": "(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
+      "sig": "(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm/pyproject.toml')) -> 'tuple[DepRequirement, ...]'"
     },
     "render_min_requirements": {
       "kind": "function",
@@ -7565,7 +7583,7 @@
     },
     "scan_deprecated_api": {
       "kind": "function",
-      "sig": "(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'tuple[tuple[str, int, str], ...]'"
+      "sig": "(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm')) -> 'tuple[tuple[str, int, str], ...]'"
     },
     "version_key": {
       "kind": "function",
@@ -7617,7 +7635,7 @@
     },
     "load_manifest": {
       "kind": "function",
-      "sig": "(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/release/freeze.toml')) -> 'FreezeManifest'"
+      "sig": "(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm/release/freeze.toml')) -> 'FreezeManifest'"
     }
   },
   "hugrgate.gauntlet.fuzz": {
@@ -7835,7 +7853,7 @@
     },
     "validate_matrix": {
       "kind": "function",
-      "sig": "(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'MatrixReport'"
+      "sig": "(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm')) -> 'MatrixReport'"
     }
   },
   "hugrgate.gauntlet.racehunt": {
