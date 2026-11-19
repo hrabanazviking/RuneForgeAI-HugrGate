@@ -214,8 +214,12 @@ class SelectiveModelBackend(Backend):
 
     def health(self) -> dict[str, Any]:
         engine = self.model_backend.engine
-        model_health = (engine.health()  # type: ignore[attr-defined]
-                        if isinstance(engine, OllamaEngine)
+        # Any engine carrying its own health probe (OllamaEngine,
+        # FlmEngine) reports through it; others stay honestly
+        # "unknown" rather than inheriting a fabricated status.
+        engine_health = getattr(engine, "health", None)
+        model_health = (engine_health()  # type: ignore[attr-defined]
+                        if callable(engine_health)
                         else {"status": "unknown"})
         return {"status": "ok", "backend": self.name,
                 "primary": self.primary.health(),

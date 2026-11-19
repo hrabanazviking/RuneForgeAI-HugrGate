@@ -5,7 +5,7 @@ explicit `__all__` contracts. Re-running on an unchanged tree
 yields byte-identical output; `tests/test_api_inventory.py` enforces
 that this document never drifts from the code.
 
-**Modules:** 474 · **public names:** 2802
+**Modules:** 475 · **public names:** 2806
 
 ## API stability policy
 
@@ -3135,6 +3135,15 @@ that this document never drifts from the code.
 | `baseline_metadata` | function | `(label: 'str') -> 'dict[str, Any]'` |
 | `write_baseline` | function | `(stacks: 'FoldedStacks', svg: 'str', directory: 'str | Path', label: 'str') -> 'dict[str, Path]'` |
 
+### `hugrgate.flm_backend`
+
+| Name | Kind | Signature / value |
+|---|---|---|
+| `DEFAULT_FLM_BASE_URL` | constant | `'http://127.0.0.1:52625'` |
+| `DEFAULT_FLM_MODEL` | constant | `'qwen3:0.6b'` |
+| `FlmEngine` | class | `(model: 'str' = 'qwen3:0.6b', base_url: 'str' = 'http://127.0.0.1:52625', timeout_s: 'float' = 60.0)` |
+| `build_flm_backend` | function | `(model: 'str' = 'qwen3:0.6b', base_url: 'str' = 'http://127.0.0.1:52625') -> 'LLMBackend'` |
+
 ### `hugrgate.gauntlet`
 
 | Name | Kind | Signature / value |
@@ -3164,9 +3173,9 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject` |
+| `DEFAULT_PYPROJECT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-flm/pyproject.toml'` |
 | `DEPRECATED_PATTERNS` | constant | `(('\\byaml\\.load\\s*\\(', 'yaml.load() without Loader (use ` |
-| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-flm')` |
 | `DepReport` | class | `(statuses: 'tuple[DepStatus, ...]') -> None` |
 | `DepRequirement` | class | `(name: 'str', minimum: 'str | None') -> None` |
 | `DepStatus` | class | `(name: 'str', minimum: 'str | None', installed: 'str | None', ok: 'bool', reason: 'str') -> None` |
@@ -3174,9 +3183,9 @@ that this document never drifts from the code.
 | `installed_version` | function | `(name: 'str') -> 'str | None'` |
 | `latest_audit` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'dict[str, dict[str, str | bool | None]]'` |
 | `parse_requirement` | function | `(spec: 'str') -> 'DepRequirement'` |
-| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
+| `read_runtime_dependencies` | function | `(pyproject: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm/pyproject.toml')) -> 'tuple[DepRequirement, ...]'` |
 | `render_min_requirements` | function | `(deps: 'tuple[DepRequirement, ...] | None' = None) -> 'str'` |
-| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'tuple[tuple[str, int, str], ...]'` |
+| `scan_deprecated_api` | function | `(root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm')) -> 'tuple[tuple[str, int, str], ...]'` |
 | `version_key` | function | `(version: 'str') -> 'tuple[int, ...]'` |
 | `write_min_requirements` | function | `(path: 'str | Path') -> 'Path'` |
 
@@ -3191,14 +3200,14 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness/release/f` |
+| `DEFAULT_MANIFEST_PATH` | constant | `PosixPath('/home/volmarr/forges/hugrgate-flm/release/freeze.` |
 | `ChangeRequest` | class | `(kind: 'str', description: 'str', touches_public_api: 'bool' = False, adds_dependency: 'bool' = False, waiver_id: 'str | None' = None) -> None` |
 | `FreezeManifest` | class | `(version: 'str', frozen_at: 'str', allowed_kinds: 'frozenset[str]', waivers: 'tuple[Waiver, ...]' = ()) -> None` |
 | `FreezeVerdict` | class | `(verdict: 'VerdictKind', reasons: 'tuple[str, ...]' = ()) -> None` |
 | `Waiver` | class | `(id: 'str', change: 'str', reason: 'str', approved_by: 'str') -> None` |
 | `check_public_api_growth` | function | `(baseline: 'set[str] | frozenset[str]', current: 'set[str] | frozenset[str]') -> 'dict[str, Any]'` |
 | `evaluate` | function | `(change: 'ChangeRequest', manifest: 'FreezeManifest') -> 'FreezeVerdict'` |
-| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness/release/freeze.toml')) -> 'FreezeManifest'` |
+| `load_manifest` | function | `(path: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm/release/freeze.toml')) -> 'FreezeManifest'` |
 
 ### `hugrgate.gauntlet.fuzz`
 
@@ -3279,12 +3288,12 @@ that this document never drifts from the code.
 
 | Name | Kind | Signature / value |
 |---|---|---|
-| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-readiness')` |
+| `REPO_ROOT` | constant | `PosixPath('/home/volmarr/forges/hugrgate-flm')` |
 | `SUPPORTED_MINORS` | constant | `((3, 10), (3, 11), (3, 12), (3, 13))` |
 | `MatrixReport` | class | `(requires_python: 'str', min_minor: 'tuple[int, int]', matrix: 'tuple[tuple[int, int], ...]', files_checked: 'int', syntax_failures: 'tuple[str, ...]') -> None` |
 | `check_syntax_compat` | function | `(root: 'str | Path', min_minor: 'tuple[int, int]') -> 'tuple[int, tuple[str, ...]]'` |
 | `read_requires_python` | function | `(pyproject: 'str | Path') -> 'str'` |
-| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-readiness')) -> 'MatrixReport'` |
+| `validate_matrix` | function | `(repo_root: 'str | Path' = PosixPath('/home/volmarr/forges/hugrgate-flm')) -> 'MatrixReport'` |
 
 ### `hugrgate.gauntlet.racehunt`
 
