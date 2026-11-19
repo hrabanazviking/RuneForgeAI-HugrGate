@@ -22,7 +22,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=%h/hugrgate-resident
-ExecStart=/usr/bin/python3 %h/hugrgate-resident/tools/hugrgate_resident.py --judge-model qwen3:0.6b --ledger %h/hugrgate-resident/ledger.jsonl
+ExecStart=/usr/bin/python3 %h/hugrgate-resident/tools/hugrgate_resident.py --judge-model gemma4-it:e2b --ledger %h/hugrgate-resident/ledger.jsonl
 Restart=on-failure
 RestartSec=5s
 TimeoutStopSec=30s
