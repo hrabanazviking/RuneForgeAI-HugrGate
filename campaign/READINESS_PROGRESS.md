@@ -263,3 +263,11 @@ roles run sequentially by the keeper (no sub-agents this tick), recorded here.
 ## Remaining
 - None. Roadmap complete: HG-T1..HG-T6 banked, "Ready for
   Tviheimr" gate passed.
+
+## Correction 2026-11-20 - HG-T4 pattern language completed for its declared consumer (mock-ruling fix)
+- Found during the Aurelia/Verdandi live re-proofs (Volmarr's 2026-11-20 mock ruling): HG-T4's pattern language could not express Verdandi's own declared reflex conditions, so VD-T2's live binding had no real server protocol to speak. Two gaps, both fixed in hugrgate/reflex_api.py:
+  1. `where` values may now be numeric comparison objects ({gte/lte/gt/lt: number}), strictly validated; matching evaluates them against numeric payload fields with a per-op failure basis.
+  2. A pattern with a non-empty `where` but no source/kind is now a valid declared pattern (an empty pattern is still refused; a bare '*' is still refused) - consumers whose reflexes key on a measured field alone (Verdandi's threat-brace, noisy-shed, stalled-wake) can now be declared server-side.
+- Event validity and all pinned HG-T4 behaviours unchanged: invalid events still fire nothing, with schema bases; the recorded fixture table is still exact.
+- Gate: tests/test_tviheimr_hg_t4_reflex.py 11 passed (3 new tests); HG-T1/T2/T3/T5/T6 readiness files 36 passed. No regression.
+- This fix is what Verdandi's VD-T2 live re-proof (same day) runs against; see Verdandi's campaign ledger.

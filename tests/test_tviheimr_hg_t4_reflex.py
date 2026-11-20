@@ -79,3 +79,29 @@ def test_server_reflex_endpoints_end_to_end():
     assert len(srv.list_reflexes()['reflexes']) == 4
     out = srv.judge_reflexes({'events': FIXTURE['events']})
     assert [r['fires'] for r in out['results']] == FIXTURE['expected_fires']
+
+
+def test_where_comparison_conditions_judge_numeric_fields():
+    reg = ReflexRegistry(consumer='verdandi')
+    reg.register('spike-notify', 'notify', {'source': 'wyrd', 'where': {'salience': {'gte': 0.8}}})
+    assert reg.judge_one({'source': 'wyrd', 'kind': 'nerve.note', 'payload': {'salience': 0.95}})['fires'] == ['notify']
+    res = reg.judge_one({'source': 'wyrd', 'kind': 'nerve.note', 'payload': {'salience': 0.3}})
+    assert res['fires'] == [] and 'fails gte' in res['verdicts'][0]['basis']
+    res = reg.judge_one({'source': 'wyrd', 'kind': 'nerve.note', 'payload': {'salience': 'high'}})
+    assert res['fires'] == [] and 'not a number' in res['verdicts'][0]['basis']
+    res = reg.judge_one({'source': 'wyrd', 'kind': 'nerve.note', 'payload': {}})
+    assert res['fires'] == [] and 'has no' in res['verdicts'][0]['basis']
+
+def test_where_only_pattern_is_declared_not_catchall():
+    reg = ReflexRegistry(consumer='verdandi')
+    reg.register('noisy-shed', 'shed', {'where': {'noise': {'gte': 0.9}}})
+    assert reg.judge_one({'source': 'chatter', 'kind': 'nerve.note', 'payload': {'noise': 0.97}})['fires'] == ['shed']
+    assert reg.judge_one({'source': 'chatter', 'kind': 'nerve.note', 'payload': {'noise': 0.4}})['fires'] == []
+    with pytest.raises(ReflexError):
+        reg.register('bad', 'act', {'where': {}})
+
+def test_comparison_objects_are_validated():
+    reg = ReflexRegistry()
+    for bad in ({'gte': 'high'}, {'approx': 1.0}, {}, {'gte': True}):
+        with pytest.raises(ReflexError):
+            reg.register('bad', 'act', {'kind': 'x.y', 'where': {'level': bad}})

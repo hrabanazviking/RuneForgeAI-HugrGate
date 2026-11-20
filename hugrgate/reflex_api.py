@@ -10,9 +10,14 @@ Design rules, enforced in code:
   pattern fires nothing; there is no implicit or default reflex.
 - Patterns are explicit: optional source match, optional kind match
   (exact, or prefix when the pattern value ends in '*'), and optional
-  payload conditions (payload key -> expected value or list of
-  allowed values). At least one of source/kind is required, so a
-  reflex can never be an undeclared catch-all.
+  payload conditions (payload key -> expected value, list of
+  allowed values, or a numeric comparison object such as
+  {'gte': 0.9}). At least one of source/kind/where is required and
+  an empty pattern is refused, so a reflex can never be an
+  undeclared catch-all. (Where-only patterns serve consumers whose
+  reflexes key on a measured field alone - e.g. Verdandi's
+  noise-shed at noise >= 0.9; the declared condition still gates
+  every fire.)
 - Registration is validated: duplicate names, empty actions, empty
   patterns and malformed conditions are refused with ValueError.
 - Every judgment returns one verdict per registered reflex, in
@@ -50,26 +55,64 @@ def _match_pattern_part(label, pattern_value, actual):
         return None
     return f'{label}: {text!r} != {pattern_value!r}'
 
+_COMPARISON_OPS = ('gte', 'lte', 'gt', 'lt')
+
+def _is_number(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+def _validate_comparison(k, v):
+    if not v:
+        raise ValueError(f'pattern where[{k!r}] comparison must be a non-empty object')
+    unknown = set(v) - set(_COMPARISON_OPS)
+    if unknown:
+        raise ValueError(f'pattern where[{k!r}] unknown comparison ops: {sorted(unknown)}')
+    for op, operand in v.items():
+        if not _is_number(operand):
+            raise ValueError(f'pattern where[{k!r}] comparison {op} needs a number, got {operand!r}')
+    return dict(v)
+
+def _comparison_failure(key, comparison, actual):
+    if not _is_number(actual):
+        return f'where: payload {key!r}={actual!r} is not a number'
+    for op in _COMPARISON_OPS:
+        if op not in comparison:
+            continue
+        operand = comparison[op]
+        ok = {'gte': actual >= operand, 'lte': actual <= operand,
+              'gt': actual > operand, 'lt': actual < operand}[op]
+        if not ok:
+            return f'where: payload {key!r}={actual!r} fails {op} {operand!r}'
+    return None
+
 def _validate_pattern(pattern):
     if not isinstance(pattern, Mapping):
         raise ValueError('pattern must be an object')
     unknown = set(pattern) - {'source', 'kind', 'where'}
     if unknown:
         raise ValueError(f'unknown pattern fields: {sorted(unknown)}')
-    if not pattern.get('source') and not pattern.get('kind'):
-        raise ValueError('pattern needs at least one of source/kind (no catch-all reflexes)')
+    where = pattern.get('where')
+    checked_where = None
+    if where is not None:
+        if not isinstance(where, Mapping) or not where:
+            raise ValueError('pattern where must be a non-empty object')
+        checked_where = {}
+        for k, v in where.items():
+            if isinstance(v, Mapping):
+                checked_where[k] = _validate_comparison(k, v)
+            elif isinstance(v, list):
+                checked_where[k] = list(v)
+            else:
+                checked_where[k] = v
+    if not pattern.get('source') and not pattern.get('kind') and not checked_where:
+        raise ValueError('pattern needs at least one of source/kind/where (no catch-all reflexes)')
     for field in ('source', 'kind'):
         v = pattern.get(field)
         if v is not None and (not isinstance(v, str) or not v or v == '*'):
             raise ValueError(f'pattern {field} must be a non-empty string, not a bare wildcard')
-    where = pattern.get('where')
-    if where is not None:
-        if not isinstance(where, Mapping) or not where:
-            raise ValueError('pattern where must be a non-empty object')
-        for k, v in where.items():
-            if isinstance(v, Mapping):
-                raise ValueError(f'pattern where[{k!r}] must be a value or list of values')
-    return dict(pattern)
+    checked = dict(pattern)
+    if checked_where is not None:
+        checked['where'] = checked_where
+    return checked
 
 class ReflexRegistry:
     """Declared reflexes for one consumer. HugrGate judges only."""
@@ -110,9 +153,14 @@ class ReflexRegistry:
         payload = event.get('payload') if isinstance(event.get('payload'), Mapping) else {}
         for key in sorted(where):
             expected = where[key]
-            allowed = expected if isinstance(expected, list) else [expected]
             if key not in payload:
                 return f'where: payload has no {key!r}'
+            if isinstance(expected, Mapping):
+                fail = _comparison_failure(key, expected, payload[key])
+                if fail:
+                    return fail
+                continue
+            allowed = expected if isinstance(expected, list) else [expected]
             if payload[key] not in allowed:
                 return f'where: payload {key!r}={payload[key]!r} not in {allowed!r}'
         return None
